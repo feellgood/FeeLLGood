@@ -5,12 +5,12 @@ void dialog(Fem &fem, vector<Seq> &seq)
 {
 cout << "\n\t ******************************\n";
 cout <<   "\t *         feeLLGood          *\n";
-cout <<   "\t *        v. juin 2014        *\n";
+cout <<   "\t *        version 2017        *\n";
 cout <<   "\t *      cnrs Grenoble-INP     *\n";
 cout <<   "\t ******************************\n";
 
 int n1,n2,restore, SEQ;
-double tf, theta;
+double theta; // removed unused variable tf  *ct*
 pair <string,int>  p;
 map <pair<string,int>,double>  &param=fem.param;
 

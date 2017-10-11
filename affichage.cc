@@ -5,7 +5,7 @@ void affichage(Fem &fem)
 //cout << "process: " << getpid() <<"\n\n";
 
 pair <string,int> p;
-map  <pair<string,int>,double> &param = fem.param;
+//map  <pair<string,int>,double> &param = fem.param; // unused *ct*
 
 //p= make_pair("dt",-1);
 //cout << "dt : " << param[p] << endl;

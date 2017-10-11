@@ -24,6 +24,7 @@
 #include "gmm/gmm_kernel.h"  // ct gmm_kernel.h plutôt que gmm.h , qui appelle des fichiers de getfem
 #include "gmm/gmm_precond_diagonal.h" //ct
 
+// scalFMM includes
 
 #include "Utils/FTic.hpp"
 #include "Utils/FParameters.hpp"

@@ -14,7 +14,7 @@ template <class CellClass, class ContainerClass, class LeafClass, class OctreeCl
           class KernelClass, class FmmClass, typename... Args>
 int init(Fem &fem, OctreeClass* &tree, KernelClass* &kernels, Args... kernelPreArgs)
 {
-//boost::timer time; // inutile, pas utilisé. ct
+//boost::timer time; // pas utilisé. *ct*
 
     FTic counter;
     const int NbLevels = 8; 
@@ -27,7 +27,7 @@ int init(Fem &fem, OctreeClass* &tree, KernelClass* &kernels, Args... kernelPreA
     const double boxWidth=2.01;
 
 //const FPoint centerOfBox(0., 0., 0.);
-    const FPoint<double> centerOfBox(0., 0., 0.);// manque le typename du template FPoint ct
+    const FPoint<double> centerOfBox(0., 0., 0.);// manque le typename du template FPoint *ct*
 
     // -----------------------------------------------------
     tree=new OctreeClass(NbLevels, SizeSubLevels, boxWidth, centerOfBox);
@@ -277,7 +277,8 @@ double norm = fem.fmm_normalizer;
     tree->forEachLeaf([&](LeafClass* leaf){
         const FReal*const potentials = leaf->getTargets()->getPotentials();
         const int nbParticlesInLeaf  = leaf->getTargets()->getNbParticles();
-        const FVector<int>& indexes  = leaf->getTargets()->getIndexes();
+        //const FVector<int>& indexes  = leaf->getTargets()->getIndexes(); // *ct*
+	const FVector<long long>& indexes  = leaf->getTargets()->getIndexes(); // int -> long long *ct*
 
         for(int idxPart = 0 ; idxPart < nbParticlesInLeaf ; ++idxPart){
 	    const int indexPartOrig = indexes[idxPart];
