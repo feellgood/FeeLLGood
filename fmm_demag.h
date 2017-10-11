@@ -210,7 +210,7 @@ for (int f=0; f<FAC; f++){
       double nod[3][N], gauss[3][NPI];
       for (int i=0; i<N; i++) {
 	      int i_= fac.ind[i];
-	      Node &node = fem.node[i_];
+	      //Node &node = fem.node[i_]; // inutilisé *ct*
 	      nod[0][i] = fem.node[i_].x;
 	      nod[1][i] = fem.node[i_].y;
 	      nod[2][i] = fem.node[i_].z;
@@ -241,7 +241,8 @@ fflush(NULL);
 
     tree->forEachLeaf([&](LeafClass* leaf){
 	const int nbParticlesInLeaf = leaf->getSrc()->getNbParticles();
-	const FVector<int>& indexes = leaf->getSrc()->getIndexes();
+	//const FVector<int>& indexes = leaf->getSrc()->getIndexes(); // *ct*
+	const FVector<long long>& indexes = leaf->getSrc()->getIndexes(); // pas int mais long long  *ct*
 	FReal* const physicalValues = leaf->getSrc()->getPhysicalValues();
 	memset(physicalValues, 0, nbParticlesInLeaf*sizeof(FReal));
 

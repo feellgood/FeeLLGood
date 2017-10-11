@@ -31,11 +31,6 @@ else
 /* direction de propagation de la paroi */
 direction(fem);
 
-//const int NOD = fem.NOD; // pas utilisé *ct*
-const int FAC = fem.FAC;
-const int TET = fem.TET;
-const int SRC = fem.SRC;  // = FAC*Fac::NPI+TET*Tet::NPI
-
 fmm::init< CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem, tree, kernels);
 
 double dt0=fem.dt;
@@ -111,8 +106,8 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
 		    	flag++; dt*= 0.5; fem.dt=dt; continue;}
 
             double dumax = dt*fem.vmax;
-            cout << boost::format("\t dumax = %2.2e,  vmax = %2.2e") % dumax % fem.vmax<< endl;
-
+            //cout << boost::format("\t dumax = %2.2e,  vmax = %2.2e") % dumax % fem.vmax<< endl;// *ct*
+		cout << "\t dumax = " << dumax << ",  vmax = "<< fem.vmax << endl;
             if (dumax < DUMIN) break; 
 /*
             if (dumax > DUMAX) { 
