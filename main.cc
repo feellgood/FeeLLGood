@@ -97,8 +97,10 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
         while (t < fem.tf) {
             cout << "\n ------------------------------\n";
             if (flag) cout << "    t  : same (" << flag << ")" << endl;
-            else cout << boost::format("nt = %d,  t = %2.8g") % nt % t << endl;
-            cout << "dt = " << dt << endl << endl;
+		else cout << "nt = " << nt << ", t = " << t << endl; // *ct*
+            //else cout << boost::format("nt = %d,  t = %2.8g") % nt % t << endl;
+		            
+		cout << "dt = " << dt << endl << endl;
             if (dt < DTMIN) {
                 reset(fem);
                 break;
