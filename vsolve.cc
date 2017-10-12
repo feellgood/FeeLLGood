@@ -1,5 +1,9 @@
 #include "fem.h"
 
+#include "gmm/gmm_iter.h"
+#include "gmm/gmm_solver_bicgstab.h"
+#include "gmm/gmm_solver_gmres.h"
+
 int vsolve(Fem &fem, long nt)
 {
 time_t timeStart;
@@ -109,7 +113,7 @@ if (!(bicg_iter.converged())) {
     return 1;
     }
     else {time(&timeEnd);
-        IF_VERBOSE(fem) cout << "%5t v-solve in " <<//boost::format("%5t v-solve in ") 
+        IF_VERBOSE(fem) cout << "%5t v-solve in " //boost::format("%5t v-solve in ") 
 	<< gmr_iter.get_iteration() << " (gmres) ............. " << difftime(timeEnd,timeStart) << " s" << endl;
         }
     }
