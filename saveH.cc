@@ -49,8 +49,6 @@ for (int t=0; t<TET; t++){
 	    double y = gauss[1][npi]/scale;
 	    double z = gauss[2][npi]/scale;
 	
-	double r = sqrt(x*x + y*y + z*z);
-      //  if (r<1)
 	
 	fout << boost::format
 	(" %8d %3d %+20.10f %+20.10f %+20.10f %+20.10e %+20.10e %+20.10e")
