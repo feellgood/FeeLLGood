@@ -12,7 +12,7 @@ ofstream fout(str, ios::out);
 if (!fout){
    cerr << "pb ouverture fichier " << str << "en ecriture" << endl;
    exit(1);}
-fout << boost::format("#time : %+20.10e ") % fem.t << endl;
+fout << "#time : "<< fem.t << endl;
 
 const int    TET   = fem.TET;
 const double scale = fem.scale;
@@ -47,9 +47,9 @@ for (int t=0; t<TET; t++){
 	    double z = gauss[2][npi]/scale;
 	
 	
-	fout << boost::format
-	(" %8d %3d %+20.10f %+20.10f %+20.10f %+20.10e %+20.10e %+20.10e")
-	   % t % npi % x % y % z % Hdx[npi] % Hdy[npi] % Hdz[npi] << endl;
+	fout << t << " " << npi << " " << x << " " << y << " " << z;
+	fout << " "<< Hdx[npi] << " " << Hdy[npi] << " " << Hdz[npi] << endl;
+	// " %8d %3d %+20.10f %+20.10f %+20.10f %+20.10e %+20.10e %+20.10e"
 	}
 }
 
