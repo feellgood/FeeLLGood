@@ -4,14 +4,11 @@
 void saveH(Fem &fem, int nt)
 {
 string str;
-ostringstream ostr; 
-ostr.str("");
-ostr << fem.simname  << boost::format("_%d_B%6f_iter%d.hdm") % fem.SEQ % fem.Bext % nt;
+str = fem.simname + "_" + to_string(fem.SEQ) + "_B" + to_string(fem.Bext) + "_iter" + to_string(nt) + ".hdm";
 
-str = ostr.str();
-cout << " " << str << endl;
-cout <<" -------------------" << endl << endl;
-ofstream fout(str.c_str(), ios::out);
+cout << " " << str << endl <<" -------------------" << endl << endl;
+
+ofstream fout(str, ios::out);
 if (!fout){
    cerr << "pb ouverture fichier " << str << "en ecriture" << endl;
    exit(1);}
