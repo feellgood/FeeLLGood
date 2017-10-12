@@ -7,13 +7,15 @@
 
 bool recentrage(Fem &fem, double thres) // abs(thres) < 1
 {
-boost::timer time;
+time_t timeStart;
+time(&timeStart);
+
 double mz =u_moy(fem, 2);
 thres=min(abs(thres), 1.);
 if (fabs(mz)<thres) return false;
 
-IF_VERBOSE(fem) cout << boost::format("%5t centering %30T.") <<flush;
-time.restart();
+//IF_VERBOSE(fem) cout << boost::format("%5t centering %30T.") <<flush;// *ct*
+IF_VERBOSE(fem) cout << "%5t centering %30T." << flush;
 
 const int NOD = fem.NOD;
 const int NPS=1;
@@ -30,24 +32,24 @@ queryPt[1]=fem.cy;
 queryPt[2]=fem.cz-fem.lz/2.;
 fem.kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 ns=nnIdx[0]; 
-double u0L=fem.node[ns].u[0];
-double u1L=fem.node[ns].u[1];
+//double u0L=fem.node[ns].u[0];
+//double u1L=fem.node[ns].u[1];
 double u2L=fem.node[ns].u[2];
 
 // centre
 queryPt[2]=fem.cz;
 fem.kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 ns=nnIdx[0]; 
-double u0C=fem.node[ns].u[0];
-double u1C=fem.node[ns].u[1];
-double u2C=fem.node[ns].u[2];
+//double u0C=fem.node[ns].u[0];
+//double u1C=fem.node[ns].u[1];
+//double u2C=fem.node[ns].u[2];
 
 // bord droit
 queryPt[2]=fem.cz+fem.lz/2.;
 fem.kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 ns=nnIdx[0]; 
-double u0R=fem.node[ns].u[0];
-double u1R=fem.node[ns].u[1];
+//double u0R=fem.node[ns].u[0];
+//double u1R=fem.node[ns].u[1];
 double u2R=fem.node[ns].u[2];
 
 if (u2L*u2R>0) {
@@ -101,6 +103,8 @@ delete queryPt;
 delete [] nnIdx;
 delete [] dists;
 
-IF_VERBOSE(fem) cout << time.elapsed() <<endl;
+time_t timeEnd;
+time(&timeEnd);
+IF_VERBOSE(fem) cout << "elapsed time = "<< difftime(timeEnd,timeStart) << "s" <<endl;
 return true;
 }
