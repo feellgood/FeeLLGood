@@ -2,7 +2,8 @@
 
 int vsolve(Fem &fem, long nt)
 {
-boost::timer time;
+time_t timeStart;
+
 const int  VERBOSE = 0;
 const int NOD = fem.NOD;
 const int TET = fem.TET;
@@ -20,14 +21,14 @@ write_vector Lw(2*NOD);
 /* bcarvello, 2017: doesn't this belong in evolution.cc ? */
 fem.DW_vz += fem.DW_dir*v_moy(fem, 2)*fem.lz/2.;
 IF_VERBOSE(fem){
-cout << boost::format("%5t average velocity %30T.") <<flush;
+cout << "%5t average velocity %30T." <<flush;//boost::format("%5t average velocity %30T.") <<flush;
 cout << fem.DW_vz << endl;
 
 //cout << " matrix size " << 2*NOD << endl;
-cout << boost::format("%5t assembling %30T.");
+cout << "%5t assembling %30T."; //boost::format("%5t assembling %30T.");
 }
 
-time.restart();
+time(&timeStart);
 
 for (int t=0; t<TET; t++){
     Tet &tet = fem.tet[t];
@@ -49,7 +50,10 @@ for (int t=0; t<FAC; t++){
     assemblage(fem, fac, Kp, Lp, Kw, Lw);
     }
 
-IF_VERBOSE(fem) cout << time.elapsed() << endl;
+time_t timeEnd;
+time(&timeEnd);
+
+IF_VERBOSE(fem) { cout << "elapsed time = " << difftime(timeEnd,timeStart) << "s" << endl; }
 
 read_matrix Kr(2*NOD,2*NOD);    gmm::copy(Kw, Kr);
 read_vector Lr(2*NOD);          gmm::copy(Lw, Lr);
@@ -62,7 +66,7 @@ gmr_iter.set_maxiter(MAXITER);
 bicg_iter.set_noisy(VERBOSE);
 gmr_iter.set_noisy(VERBOSE);
 
-time.restart();
+time(&timeStart);
 
 //   gmm::identity_matrix Precond; 
 //   gmm::diagonal_precond <read_matrix> Precond(Kr);
@@ -71,50 +75,48 @@ time.restart();
 //   gmm::ilutp_precond < read_matrix > Precond(Kr,10,1e-30);
 
 if (!nt) {
-    IF_VERBOSE(fem){
-    cout << boost::format("%5t computing prc %30T.");
-    fflush(NULL);
-    }
+    IF_VERBOSE(fem) { cout << "%5t computing prc %30T.";fflush(NULL); }
+
     fem.prc = new gmm::diagonal_precond <read_matrix> (Kr);
 //    fem.prc = new gmm::ilutp_precond < read_matrix > (Kr,1,1e-30);
-    IF_VERBOSE(fem) cout << time.elapsed() << endl;
+	time(&timeEnd);    
+	IF_VERBOSE(fem) { cout << "elapsed time = " << difftime(timeEnd,timeStart) << "s" << endl; }
     }
 else if (!(nt % REFRESH_PRC)) {
     delete fem.prc;
-    IF_VERBOSE(fem){
-    cout << boost::format("%5t computing prc %30T.");
-    fflush(NULL);
-    }
+    IF_VERBOSE(fem) { cout << "%5t computing prc %30T.";fflush(NULL); }
     fem.prc = new gmm::diagonal_precond <read_matrix> (Kr);
 //    fem.prc = new gmm::ilutp_precond < read_matrix > (Kr,1,1e-30);
-    IF_VERBOSE(fem) cout << time.elapsed() << endl;
+ 	time(&timeEnd);    
+	IF_VERBOSE(fem) { cout << "elapsed time = " << difftime(timeEnd,timeStart) << "s" << endl; }
     } 
 
-time.restart();
+time(&timeStart);
 gmm::bicgstab(Kr, Xw, Lr, *fem.prc, bicg_iter);
 
 if (!(bicg_iter.converged())) {
-    IF_VERBOSE(fem) cout << boost::format("%5t  bicg FAILED in %d %30T. ") % bicg_iter.get_iteration() 
-         << time.elapsed() << endl;
+    time(&timeEnd);
+	IF_VERBOSE(fem) //cout << boost::format("%5t  bicg FAILED in %d %30T. ") % bicg_iter.get_iteration() 
+         cout << "%5t  bicg FAILED in " << bicg_iter.get_iteration() << " %30T. " << difftime(timeEnd,timeStart) << " s" << endl;
     gmm::diagonal_precond <read_matrix>  gmr_prc (Kr);
-    time.restart();
+    time(&timeStart);
     gmm::clear(Xw);
     gmm::gmres(Kr, Xw, Lr, gmr_prc, 50, gmr_iter);
     if (!(gmr_iter.converged())) {
-    IF_VERBOSE(fem) cout << boost::format("%5t gmres FAILED in ")
-         << gmr_iter.get_iteration() << " !! ......... "
-         << time.elapsed() << endl;
+	time(&timeEnd);
+    IF_VERBOSE(fem) cout << "%5t gmres FAILED in "//boost::format("%5t gmres FAILED in ")
+         << gmr_iter.get_iteration() << " !! ......... " << difftime(timeEnd,timeStart) << " s" << endl;
     return 1;
     }
-    else {
-        IF_VERBOSE(fem) cout << boost::format("%5t v-solve in ") << gmr_iter.get_iteration() 
-             << " (gmres) ............. " << time.elapsed() << endl;
+    else {time(&timeEnd);
+        IF_VERBOSE(fem) cout << "%5t v-solve in " <<//boost::format("%5t v-solve in ") 
+	<< gmr_iter.get_iteration() << " (gmres) ............. " << difftime(timeEnd,timeStart) << " s" << endl;
         }
     }
-else {
-    IF_VERBOSE(fem) cout << boost::format("%5t v-solve in ") << bicg_iter.get_iteration()
-         << " (bicg,prc-" << (nt % REFRESH_PRC) << ")" 
-         << " .......... " << time.elapsed() << endl;
+else {time(&timeEnd);
+    IF_VERBOSE(fem) cout << "%5t v-solve in " //boost::format("%5t v-solve in ") 
+<< bicg_iter.get_iteration() << " (bicg,prc-" << (nt % REFRESH_PRC) << ") .......... " 
+<< difftime(timeEnd,timeStart) << " s" << endl;
     }
 
 read_vector Xr(2*NOD);    gmm::copy(Xw, Xr);
@@ -140,7 +142,6 @@ for (int i=0; i<NOD; i++) {
     }
 
 fem.vmax = sqrt(v2max);
-//printf("vmax = %g \n", fem.vmax);
 
 return 0;
 }
