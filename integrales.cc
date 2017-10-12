@@ -86,8 +86,8 @@ double Vz=fem.DW_vz;
 
 /*-------------------------------------------------------*/
 for (int npi=0; npi<NPI; npi++){
-    double w, ai, dai_dx, dai_dy, dai_dz, aj, daj_dx, daj_dy, daj_dz;
-    double Dai_Daj, Dai_Du0, Dai_Du1, Dai_Du2, ku;
+    double w, ai, dai_dx, dai_dy, dai_dz, daj_dx, daj_dy, daj_dz;
+    double Dai_Daj, Dai_Du0, Dai_Du1, Dai_Du2;
     w = tet.weight[npi];
     double uk0_u = uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi]; 
     double uk1_u = uk10*u[0][npi] + uk11*u[1][npi] + uk12*u[2][npi]; 
@@ -194,7 +194,7 @@ for (int npi=0; npi<NPI; npi++){
         AE(2*N+i,0*N+i)+= -u_nod[1][i]* ai *w;
 
         for (int j=0; j<N; j++){
-            aj = tet.a[j][npi];
+            //aj = tet.a[j][npi];
             daj_dx= tet.dadx[j][npi];  daj_dy= tet.dady[j][npi];  daj_dz= tet.dadz[j][npi];
             Dai_Daj = dai_dx*daj_dx + dai_dy*daj_dy + dai_dz*daj_dz;
 
@@ -217,13 +217,12 @@ const int reg = fac.reg;
 
 pair <string,int> p;
 map <pair<string,int>,double> &param = fem.param;
-triple &Hext=fem.Hext;
-
+//triple &Hext=fem.Hext;
 //cout << "Hext " << Hext[0] << "\t" << Hext[1] << "\t" << Hext[2] << endl;
 //cout << "fem.Hext " << fem.Hext[0] << "\t" << fem.Hext[1] << "\t" << fem.Hext[2] << endl;
 
-p=make_pair("theta",-1);    double s = param[p];   	//cout << ", theta= " << s;
-p=make_pair("alpha",reg);   double alpha = param[p];  	//cout << ", alpha= " << alpha;
+p=make_pair("theta",-1);    //double s = param[p];   	cout << ", theta= " << s;
+p=make_pair("alpha",reg);   //double alpha = param[p];  	cout << ", alpha= " << alpha;
 
 p=make_pair("Js",reg);      double J = abs(param[p])+EPSILON;//cout << ", Js=" << J;
 p=make_pair("Ks",reg);      double K = param[p];   	//cout << ", Ks=" << K;
@@ -232,7 +231,6 @@ p=make_pair("a1",reg);      double uk00 = param[p];  	//cout << ", a1=" << k0;
 p=make_pair("a2",reg);      double uk01 = param[p];  	//cout << ", a2=" << k1;
 p=make_pair("a3",reg);      double uk02 = param[p];  	//cout << ", a3=" << k2;
 
-                            double dt = fem.dt;
 
 /*-------------------- INTERPOLATION --------------------*/
 double u_nod[3][N], u[3][NPI];

@@ -7,8 +7,6 @@ MESSAGE(STATUS "CXX ${CMAKE_CXX_COMPILER_ID}")
 
 SET(ANN_INCLUDE_DIR /home/nanospin/Documents/ann_1.1.2/include/ANN)
 
-SET(ANN_LINK_DIR /home/nanospin/Documents/ann_1.1.2/include/ANN)
-
 SET(GMM_INCLUDE_DIR /home/nanospin/Documents/gmm-5.2/include/gmm)
 
 SET(SCALFMM_INCLUDE_DIR /home/nanospin/Documents/ScalFMM_1.5/Src)
@@ -16,8 +14,6 @@ SET(SCALFMM_INCLUDE_DIR /home/nanospin/Documents/ScalFMM_1.5/Src)
 INCLUDE_DIRECTORIES(${ANN_INCLUDE_DIR} ${GMM_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR})
 
 SET(INCLUDE ${ANN_INCLUDE_DIR} ${GMM_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR})
-
-LINK_DIRECTORIES(${ANN_LINK_DIR})
 
 set( CMAKE_CXX_FLAGS "-DORD2 -DNDEBUG -DNSTAT -Wall -frounding-math -std=c++11 -O3 -fopenmp -ffast-math -msse4.2 -mfpmath=sse" CACHE STRING "C++ compiler flags used during builds." FORCE )
 
@@ -38,7 +34,11 @@ SET( HEADERS ${ANN_INCLUDE_DIR}/ANN.h ${GMM_INCLUDE_DIR}/gmm.h ${SCALFMM_INCLUDE
 
 ADD_EXECUTABLE(feellgood_exe ${SOURCES} ${HEADERS})
 SET( SCALFMM "libscalfmm.a")
-SET( ANN "libann.a")
+
+#SET(ANN_LINK_DIR /home/nanospin/Documents/ann_1.1.2/lib)
+SET( ANN "/home/nanospin/Documents/ann_1.1.2/lib/libANN.a")
+
+#LINK_DIRECTORIES(${ANN_LINK_DIR})
 
 TARGET_LINK_LIBRARIES(feellgood_exe init_distrib ${SCALFMM} ${ANN})
 
