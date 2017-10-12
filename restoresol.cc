@@ -25,20 +25,17 @@ if (filename){
     str = *filename;
     }
 
-ifstream fin(str.c_str(), ios::in);
+ifstream fin(str, std::ifstream::in); //  *ct*
 if (!fin){
     IF_VERBOSE(fem) cerr << "pb ouverture fichier: " << str << "en lecture" << endl;
     SYSTEM_ERROR;}
 
 getline(fin, str); // 1eme ligne
 
-typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-boost::char_separator<char> sep("=;:| \"");
+unsigned long idx = str.find(":");
+idx +=2;
 
-tokenizer tokens(str, sep);
-tokenizer::iterator tok_iter = tokens.begin();
-advance(tok_iter, 1);
-fem.t=str2num<double>(*tok_iter);
+fem.t = stod(str.substr(idx));
 
 IF_VERBOSE(fem) cout << "fichier solution: " << str << " a l'instant : " << fem.t << endl;
 
@@ -57,7 +54,8 @@ for (int i=0; i<NOD; i++){
 
     double d2=sq(node.x-node_.x) + sq(node.y-node_.y) + sq(node.z-node_.z);
 
-    if (d2 > sq(fem.diam * 1e-9)) {
+    if (d2 > sq(fem.diam * 1e-9)) // attention scaling écrit en dur ... 
+	{
         IF_VERBOSE(fem){
         cerr << "WARNING difference dans la position des noeuds"<< endl;
         cerr << i  << "\t" << node.x  << "\t" << node.y  << "\t" << node.z << endl;
