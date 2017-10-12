@@ -16,13 +16,14 @@ DW_z  = fem.DW_z;
 DW_vz = fem.DW_vz;
 
 if ((nt%n1)==0) {
-    fout << boost::format("%8d %+20.10e %+20.10e %+20.10e")
-                           % nt % t % dt % dumax;
-    fout << boost::format("%+20.10e %+20.10e %+20.10e")
-                           % u_moy(fem,0) % u_moy(fem,1) % u_moy(fem,2);
-    fout << boost::format("%+20.10e %+20.10e %+20.10e %+20.10e %+20.10e %+20.10e %+20.10e")
-                           % Ee % Ea % Ed % Ez % Etot % DW_z % DW_vz<< endl;
-    }
+   // fout << boost::format("%8d %+20.10e %+20.10e %+20.10e") % nt % t % dt % dumax;
+   // fout << boost::format("%+20.10e %+20.10e %+20.10e") % u_moy(fem,0) % u_moy(fem,1) % u_moy(fem,2);
+   // fout << boost::format("%+20.10e %+20.10e %+20.10e %+20.10e %+20.10e %+20.10e %+20.10e")% Ee % Ea % Ed % Ez % Etot % DW_z % DW_vz<< endl;
+fout << nt <<"\t" << t <<"\t" << dt <<"\t" << dumax <<"\t";
+fout << u_moy(fem,0) <<"\t" << u_moy(fem,1) <<"\t" << u_moy(fem,2) <<"\t";
+fout << Ee <<"\t" << Ea <<"\t" << Ed <<"\t" << Ez <<"\t" << Etot <<"\t" << DW_z <<"\t" << DW_vz <<"\t" << endl;
+
+}
 
 if ((nt%n2)==0) {
 //    savecfg_gnuplot(fem,nt);
