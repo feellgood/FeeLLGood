@@ -3,7 +3,7 @@
 
 void lecture(Fem &fem, double scale, Regions *regions)  // regions may be NULL
 {
-int REG, NOD, ELEM, tags, reg, TYP;
+int NOD, ELEM, tags, reg, TYP;
 double value;
 string trash, symb;
 pair <string,int> p;

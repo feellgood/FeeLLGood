@@ -8,8 +8,8 @@ const int TET = fem.TET;
 /********************* FACES *******************/
 for (int f=0; f<FAC; f++){
    Fac &fac = fem.fac[f];
-   const int N = Fac::N;
-   const int NPI = Fac::NPI;
+   
+const int NPI = Fac::NPI;
 
 // NPI 4
    double u[NPI]   = {   1/3.,   1/5.,   3/5.,   1/5.};

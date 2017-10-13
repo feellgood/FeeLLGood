@@ -37,7 +37,7 @@ for (int t=0; t<TET; t++) {
     p=make_pair("c1",reg);      double uk20 = param[p];  	//cout << ", a1=" << k0;
     p=make_pair("c2",reg);      double uk21 = param[p];  	//cout << ", a2=" << k1;
     p=make_pair("c3",reg);      double uk22 = param[p];  	//cout << ", a3=" << k2;
-    p = make_pair("alpha", reg);double alpha = fem.param[p];    
+    //p = make_pair("alpha", reg);double alpha = fem.param[p];    
    
    /*-------------------- INTERPOLATION --------------------*/
     double u_nod[3][N], u[3][NPI];
