@@ -11,7 +11,7 @@ map <pair<string,int>,double> &param = fem.param;
 triple &Hext=fem.Hext;
 
 fem.Etot = 0.0;
-double E[5];  tiny::init<double, 5>(E, 0.);
+double E[5] = {0.0,0.0,0.0,0.0,0.0};
 
 double uz_drift=2.*fem.DW_z/fem.lz*fem.DW_dir;
 

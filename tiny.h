@@ -4,18 +4,6 @@
 using namespace std;
 
 namespace tiny{
-template <typename T, int N> inline void init(T X[N], T v) {
-   for (int i=0; i<N; i++) {
-       X[i]=v;
-       }
-   }
-
-template <typename T, int M, int N> inline void init(T A[M][N], T v) {
-   for (int i=0; i<M; i++)
-   for (int j=0; j<N; j++) {
-       A[i][j]=v;
-       }
-   }
 
 template <typename T, int M, int N> inline void print(T A[M][N]) {
    for (int i=0; i<M; i++)
