@@ -7,9 +7,10 @@ This git repository is for devs, the code is being modified without any warranty
 
 ### Dependencies :
 * C++ 11 and STL
-* ANN
+* ANN 1.1.2 [ANN][]
 * GMM
 * ScalFMM
 * GSL (optional)
 
 [here]: http://feellgood.neel.cnrs.fr/
+[ANN]: https://www.cs.umd.edu/~mount/ANN/
