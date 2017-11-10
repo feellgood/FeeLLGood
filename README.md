@@ -14,6 +14,6 @@ This git repository is for devs, the code is being modified without any warranty
 
 [here]: http://feellgood.neel.cnrs.fr/
 [ANN]: https://www.cs.umd.edu/~mount/ANN/
-[GMM]: http://www.getfem.org/gmm.html/
+[GMM]: http://www.getfem.org/gmm/
 [ScalFMM]: https://gitlab.inria.fr/solverstack/ScalFMM/
 [GSL]: https://www.gnu.org/software/gsl/
