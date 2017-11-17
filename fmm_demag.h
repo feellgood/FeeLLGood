@@ -1,3 +1,7 @@
+/** \file fmm_demag.h
+this header is the interface to scalfmm. Its purpose is to prepare an octree for the application of the fast multipole algorithm
+*/
+
 #include "tiny.h"
 
 #ifndef IF_VERBOSE  // same goes for SYSTEM_ERROR

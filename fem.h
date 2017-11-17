@@ -1,3 +1,9 @@
+/** \file fem.h
+\brief principal header, contains the structs node fac tet , and fem <br>
+This file is called by almost all source files in feellgood project <br>
+It does also contains the definition of many constants for the solver, and for scalfmm 
+*/
+
 #include <iomanip>
 #include <iostream>
 #include <fstream>
@@ -69,10 +75,10 @@ const pair<string,int> VERBOSE_KEY {"verbose", -1};
 #define SYSTEM_ERROR {exit(1);}
 #endif
 
-const int D = 3;         // dimension
-const double invD = 1./(double)D;
-const size_t NCLASSES=100;
-const double HMAX=1e6;
+const int D = 3;         /**< dimension, required by ANN for kdTree */
+const double invD = 1./(double)D;/**< convenient const value */
+const size_t NCLASSES=100;/**< number of BIN for statistics */
+const double HMAX=1e6;/**< maximum field value ?? (to check) */
 
 /* for statics 
 const double EPSILON = 1e-40;
@@ -91,8 +97,8 @@ const double TAUR    = 100.*DTMAX;
 /*
 */
 
-const double mu0 = 4.*M_PI*1e-7;
-const double nu0 = 1./mu0;
+const double mu0 = 4.*M_PI*1e-7;/**< \f$ \mu_0 = 4 \pi 10^{-7} \f$ */
+const double nu0 = 1./mu0;/**< \f$ \nu_0 = 1/\mu_0 \f$ */
 
 static const int P = 9;
 // pb avec ce template : il doit prendre deux arguments //ct
@@ -108,146 +114,250 @@ typedef FRotationKernel<double, CellClass, ContainerClass, P >          KernelCl
 
 typedef FFmmAlgorithmThreadTsm<OctreeClass, CellClass, ContainerClass, KernelClass, LeafClass > FmmClass;
 
-typedef gmm::wsvector <double>   write_vector;
-typedef gmm::rsvector <double>   read_vector;
+typedef gmm::wsvector <double>   write_vector;/**< convenient macro */
+typedef gmm::rsvector <double>   read_vector;/**< convenient macro */
 
-typedef gmm::row_matrix	<write_vector>   write_matrix;
-typedef gmm::row_matrix	<read_vector>    read_matrix;
+typedef gmm::row_matrix	<write_vector>   write_matrix;/**< convenient macro */
+typedef gmm::row_matrix	<read_vector>    read_matrix;/**< convenient macro */
 
-typedef double triple[3];
+typedef double triple[3];/**< a 3D point */
 
+/** \struct Node
+Node is containing physical point of coordinates \f$ (x,y,z) \f$, magnetization value at p. 
+Many other values for the computation of the scalar potential \f$ \phi \f$
+*/
 struct Node {
-    double x, y, z;
-    triple u0,v0,u,v;
-    triple ep, eq;
-    double phi0, phi;
-    double phiv0, phiv;
+    double x;/**< Physical position x of the node */
+double y;/**< Physical position y  of the node */
+double z;/**< Physical position z  of the node */
+    triple u0;/**< magnetization initial value ? */
+triple v0;/**< no idea */
+triple u;/**< magnetization value */
+triple v;/**< no idea */
+    triple ep;/**< no idea */
+triple eq;/**< no idea */
+    double phi0;/**< scalar potential initial value ? */
+double phi;/**< scalar potential value */
+    double phiv0;/**< no idea */
+double phiv;/**< no idea */
     };
 
-
+/** \struct Fac
+Face is a struct containing the index references to nodes, it has a triangular shape and should not be degenerated 
+*/
 struct Fac{
-    static const int N = 3, NPI = 4;
-    int reg;
-    double surf, Ms;
-    double nx, ny, nz;                // normale ext
-    int ind[N];
-    double weight[NPI];
-    double a[N][NPI];          // fct chapeaux
-    };
-    
-struct Tet{
-    static const int N = 4, NPI = 5;
-    int reg;
-    double vol;
-    int ind[N];
-    double weight[NPI];
-    double a[N][NPI];
-    double dadx[N][NPI], dady[N][NPI], dadz[N][NPI];
-    };
-    
-struct Seq{
-    double Bini, Bfin, dB;
-    triple a;
+	static const int N = 3; /**< number of sommits */
+	static const int NPI = 4; /**< number of weights  */
+	int reg;/**< .msh region number */
+	double surf; /**< surface of the face */
+	double Ms; /**< magnetization at saturation of the face */    
+	double nx;/**< x component of the normal vector */
+	double ny;/**< y component of the normal vector */
+	double nz;/**< z component of the normal vector */
+	int ind[N];/**< indices table */
+	double weight[NPI];/**< weights table */
+	double a[N][NPI];          /**< hat functions table */
     };
 
+/** \struct Tet
+Tet is a tetrahedron, containing the index references to nodes, must not be flat 
+   */ 
+struct Tet{
+    static const int N = 4;/**< number of sommits */
+static const int NPI = 5;/**< number of weights  */
+    int reg;/**< .msh region number */
+    double vol;/**< volume of the tetrahedron */
+    int ind[N];/**< indices to the nodes */
+    double weight[NPI];/**< weights */
+    double a[N][NPI];/**< hat functions */
+    double dadx[N][NPI], dady[N][NPI], dadz[N][NPI];/**< variations along all directions */
+    };
+
+/** \struct Seq
+Seq describe a sequence of field from \f$ B_{ini} \f$ to \f$ B_{fin} \f$ by steps \f$ dB \f$
+*/    
+struct Seq{
+    double Bini;/**< starting value */
+double Bfin;/**< ending value */
+double dB;/**< step field */
+    triple a;/**< direction (should be normalized) */
+    };
+
+/** \struct Stat
+used to build some statistics, with GSL library
+*/
 struct Stat{
 #ifdef STAT
-    gsl_histogram* h;
+    gsl_histogram* h;/**< pointer to GSL histogram */
 #else
-    void* h;  // placeholder, we don't include GSL
+    void* h;  /**< placeholder, we don't include GSL */
 #endif
-    double M; // M := alpha/tauR*|log(dt/tauR)|
-    double R; // R :=    dt/tauR*|log(dt/tauR)|
-    double r; // r := 0.5*dt/tauR*|log(dt/tauR)|
+    double M; /**< M defined by \f$ M = \alpha/ \tau_R |log(dt/ \tau_R)| \f$ */
+    double R; /**< R defined by \f$ R = dt/\tau_R*|log(dt/\tau_R)| \f$ */
+    double r; /**< r defined by \f$ r = 0.5*dt/\tau_R*|log(dt/\tau_R)| \f$ */
     };
 
+/** \struct Fem
+massive container to grab altogether all parameters of a simulation, including mesh geometry, containers for the mesh
+*/
 struct Fem{
-    string  simname, pbname;     // nom simul, fichier pro
-    int REG, NOD, FAC, TET, SRC, SEQ;
-    double cx,cy,cz, lx,ly,lz, diam, surf, vol;
-    double scale, fmm_normalizer;
-    double as[3], locmax;
-    double t, tf, dt, vmax;
-    double E0[4], E[4]; //0-exchange 1-anisotropy 2-demagnetizing 3-applied
-    double DW_vz0, DW_vz, DW_dir, DW_z; /* vitesse de chgt de referentiel et deplacement selon Oz */
-    double Etot0, Etot, evol, phy;
-    vector <Node> node;
-    vector <Fac>  fac;
-    vector <Tet>  tet; 
-    double Bext;
-    triple Hext;
-    gmm::diagonal_precond <read_matrix>  *prc;
+	string  simname;/**< simulation name */
+	string pbname;     /**< file pro */
+	int REG; /**< number of regions in the msh (to check) */
+	int NOD;/**< number of nodes in the corresponding container */
+	int FAC;/**< number of faces in the corresponding container */
+	int TET;/**< number of tetrahedron in the corresponding container */
+	int SRC;/**< number of sources for scalfmm */
+	int SEQ;/**< number of sequences ? (to check) */
+	double cx;/**< x axis of what? */
+	double cy;/**< y axis of what? */
+	double cz;/**< z axis of what? */
+	double lx;/**< length along x axis (to check) */
+	double ly;/**< length along y axis (to check) */
+	double lz;/**< length along z axis (to check) */
+	double diam;/**< diameter of the mesh (if a wire) */
+	double surf;/**< total surface */
+	double vol;/**< total volume of the mesh */
+    double scale;/**< scaling factor from gmsh files to feellgood */
+double fmm_normalizer;/**< no idea; probably normalizing constant for the computation of the demag field */
+    double as[3];/**< no idea */
+double locmax;/**< no idea */
+    double t;/**< physical current time of the simulation */
+double tf;/**< end time of the simulation */
+double dt;/**< step time of the simulation */
+double vmax;/**< maximum speed of what ? */
+
+double E0[4];/**< table to store initial energy values <br> 
+index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
+
+double E[4]; /**< table to store energy values at time t <br>
+index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
+
+double DW_vz0;/**< initial speed of the domain wall (to check) */
+double DW_vz;/**< speed of the domain wall along z */
+double DW_dir;/**< direction of the domain wall (to check) */
+double DW_z; /**< domain wall displacement along Oz */
+
+double Etot0;/**< initial total energy (to check) */
+double Etot;/**< total energy */
+double evol;/**< no idea */
+double phy;/**< no idea */
+    vector <Node> node; /**< node container */
+    vector <Fac>  fac; /**< face container */
+    vector <Tet>  tet; /**< tetrahedron container */
+    double Bext;/**< amplitude of the applied field (to check) */
+    triple Hext;/**< external applied field direction (should be normalized) */
+    gmm::diagonal_precond <read_matrix>  *prc;/**< diagonal preconditionner */
     //gmm::ilutp_precond < read_matrix > *prc;
-    map <pair<string,int>,double> param;
-    Stat stat;
+    map <pair<string,int>,double> param;/**< a map to store different parameters of a simulation, such as suppression of the charges on some surfaces or not, the material parameter values as \f$ Ms \f$ or \f$ \alpha \f$  */
+    
+Stat stat;/**< to build some histograms  */
 
-    ANNkd_tree* kdtree;
-    ANNpointArray pts;
+    ANNkd_tree* kdtree;/**< a kdtree to find efficiently the closest set of nodes to a physical point in the mesh  */
+    ANNpointArray pts;/**< container for the building of the kdtree */
     };
 
+/** \struct Regions
+contains two maps of the volume regions and surfaces numbers
+*/
 struct Regions{
-    map <int,int> surfaces;
-    map <int,int> volumes;
+    map <int,int> surfaces;/**< map for the surfaces region generated by gmsh */
+    map <int,int> volumes;/**< map for the volumes region generated by gmsh */
     };
 
-double cputime();
-void extract_comment(istream &flux);
+double cputime();/**< convenient function to compute the duration of a simulation */
+void extract_comment(istream &flux);/**< parser */
+
+/** 
+\return square of a number \f$ x^2 \f$
+*/
 inline double sq(double x) {return x*x;}
 
-void dialog(Fem& fem, vector<Seq> &seq);
-void lecture(Fem &fem, double scale, Regions *regions);
-void alloc_nodal(Fem &fem);
+void dialog(Fem& fem, vector<Seq> &seq);/**< some text send to terminal to see what step in the sequence the sover is computing */
 
-void femutil(Fem &fem);
-void femutil_node(Fem &fem);
-void femutil_tet(Fem &fem);
-void femutil_fac(Fem &fem);
-void femutil_facMs(Fem &fem);
+void lecture(Fem &fem, double scale, Regions *regions);/**< reading file function */
 
-void chapeaux(Fem &fem);
-void affichage(Fem &fem);
-void direction(Fem &fem);
+void alloc_nodal(Fem &fem);/**< allocating function of what ? */
 
-void restoresol(Fem& fem, string *filename);
-void init_distrib(Fem &fem);
+void femutil(Fem &fem);/**< utilitary function to affect fem struct */
+
+void femutil_node(Fem &fem);/**< read the nodes from a .msh file to the node container in fem struct */
+void femutil_tet(Fem &fem);/**< read the tetrahedron from a .msh file to the tetrahedron container in fem struct */
+
+void femutil_fac(Fem &fem);/**< read the faces from a .msh file to the face container in fem struct */
+void femutil_facMs(Fem &fem);/**< no idea */
+
+void chapeaux(Fem &fem);/**< computes the hat functions for all containers */ 
+void affichage(Fem &fem);/**< printing function? (to check) */
+void direction(Fem &fem);/**< no idea */
+
+void restoresol(Fem& fem, string *filename);/**< read a solution from a file (tsv formated) and initialize fem struct  */
+
+void init_distrib(Fem &fem);/**< computes an analytical initial magnetization distribution as a starting point for the simulation */
 
 // void dirichlet(Fem &fem);
 // void periodic(Fem &fem);
 
-void normalize(triple &a);
-double u_moy(Fem &fem, int d);
-double v_moy(Fem &fem, int d);
+void normalize(triple &a);/**< in place normalizing function of vector a */
+double u_moy(Fem &fem, int d);/**< computes the average magnetization */
+double v_moy(Fem &fem, int d);/**< computes what ? */
 
-void energy(Fem &fem);
-bool recentrage(Fem &fem, double thres);
+void energy(Fem &fem);/**< computes energies */
+bool recentrage(Fem &fem, double thres);/**< recentering algorithm for the study of the motion of an object, for example a domain wall. Mesh must be adequate. */
 
-void saver(Fem &fem, ofstream &fout, int nt);
-void savecfg_vtk(Fem &fem, int nt, string *filename);
-void savesol(Fem &fem, int nt, string *filename);
-void savestat(Fem &fem, int nt);
-void saveH(Fem &fem, int nt);
+void saver(Fem &fem, ofstream &fout, int nt);/**< saving function for a solution */
+void savecfg_vtk(Fem &fem, int nt, string *filename);/**< text file (vtk) writing function for a solution */
+void savesol(Fem &fem, int nt, string *filename);/**< text file (tsv) writing function for a solution */
+void savestat(Fem &fem, int nt);/**< file writing function for the statistics (if any) */
+void saveH(Fem &fem, int nt);/**< save the field values */
 
-int  vsolve(Fem &fem, long nt);
-void base_projection(Fem &fem);
+int  vsolve(Fem &fem, long nt);/**< solver */
+void base_projection(Fem &fem);/**< computes the projection of the llg operators on the elements */
 
+/**
+computes the contribution of the tetrahedron to the integrals
+*/
 void integrales(Fem &fem, Tet &tet, gmm::dense_matrix <double> &AE, vector <double> &BE);
+
+/**
+computes the contribution of the surface to the integrals
+*/
 void integrales(Fem &fem, Fac &fac, gmm::dense_matrix <double> &AE, vector <double> &BE);
 
+/**
+projections on the tetrahedrons
+*/
 void projection(Fem &fem, Tet &elt,
            gmm::dense_matrix <double> &A,  vector <double> &B,
            gmm::dense_matrix <double> &Ap, vector <double> &Bp);
 
+/**
+projection on the faces
+*/
 void projection(Fem &fem, Fac &elt,
            gmm::dense_matrix <double> &A,  vector <double> &B,
            gmm::dense_matrix <double> &Ap, vector <double> &Bp);
 
+/**
+matrix assembly with all the contributions of the tetrahedrons
+*/
 void assemblage(Fem &fem, Tet &elt,
            gmm::dense_matrix <double> &Ke, vector <double> &Le,
            write_matrix &K, write_vector &L);
 
+/**
+matrix assembly with all the contributions of the faces
+*/
 void assemblage(Fem &fem, Fac &elt,
            gmm::dense_matrix <double> &Ke, vector <double> &Le,
            write_matrix &K, write_vector &L);
 
+/**
+time evolution solver
+*/
 void evolution(Fem& fem);
+
+/**
+reset the fem struct to restart another simulation (to check)
+*/
 void reset(Fem& fem);
