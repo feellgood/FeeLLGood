@@ -7,6 +7,10 @@ contains a namespace to perform simple printing and algebra simple operations on
 
 using namespace std;
 
+
+/**
+\namespace tiny to grab altogether the templates to compute some linear algebra
+*/
 namespace tiny{
 
 /** printing function
@@ -30,7 +34,7 @@ template <typename T, int N> inline double sp(T X[N], T Y[N]) {
    
 
 /** in place addition += 
-\return return in Y \f$ Y += X \f$
+\return return in Y \f$ Y \mathrel{+}= X \f$
 */
 template <typename T, int N> inline void add(T X[N], T Y[N]) {
    for (int i=0; i<N; i++) 

@@ -1,8 +1,15 @@
 #include "fem.h"
 #include <set>
 
+
+/**
+kind of functor within a struct to perform comparison between faces, it is lexicographical order
+*/
 struct less_than
 {
+/**
+operator() for the comparison of two faces with lexicographical order
+*/
   bool operator()(Fac f1, Fac f2) const
   {
   if (f1.ind[0]<f2.ind[0]) return true;
@@ -55,6 +62,7 @@ fem.as[0] = lx/fem.diam;
 fem.as[1] = ly/fem.diam;
 fem.as[2] = lz/fem.diam;
 }
+
 
 void femutil_tet(Fem &fem)
 {

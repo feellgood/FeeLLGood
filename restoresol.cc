@@ -1,10 +1,12 @@
 #include "fem.h"
 
+/** convenient error handler */
 class BadConversion : public std::runtime_error {
  public:
-   BadConversion(const std::string& s)
-     : std::runtime_error(s)
-     { }
+/**
+do nothing constructor (to empty buffer for gmm?)
+*/
+   BadConversion(const std::string& s) : std::runtime_error(s) { }
  };
 
 template <typename T> 

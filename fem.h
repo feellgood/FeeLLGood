@@ -68,11 +68,11 @@ using namespace std;
 #include <cerrno>
 #include <system_error>
 const pair<string,int> VERBOSE_KEY {"verbose", -1};
-#define IF_VERBOSE(fem) if ((fem).param[VERBOSE_KEY] != 0)
-#define SYSTEM_ERROR {throw system_error(errno,generic_category());}
+#define IF_VERBOSE(fem) if ((fem).param[VERBOSE_KEY] != 0) /**< macro for the definition of a verbose mode if feellgood compiled as a library */
+#define SYSTEM_ERROR {throw system_error(errno,generic_category());}/**< macro for error handling if feellgood compiled as a library */
 #else
-#define IF_VERBOSE(fem)
-#define SYSTEM_ERROR {exit(1);}
+#define IF_VERBOSE(fem) /**< macro for the definition of a verbose mode if feellgood compiled as an executable  */
+#define SYSTEM_ERROR {exit(1);} /**< macro to exit executable on some errors */
 #endif
 
 const int D = 3;         /**< dimension, required by ANN for kdTree */
@@ -88,31 +88,45 @@ const double DTMAX   = 1.e-5;
 */
 
 /* for dynamics */
+
+/** \f$ \epsilon \f$ is smallest possible value (for what value ? to check) */
 const double EPSILON = 1e-40;
+
+/** min for du step */
 const double DUMIN   = 1e-9;	//1e-6
+
+/** max for du step */
 const double DUMAX   = 0.02;	// 0.02
+
+/** minimum step time for time integrator */
 const double DTMIN   = 1e-14;
+
+/** maximum step time for time integrator */
 const double DTMAX   = 1e-7;	// 1e-7
+
+/** no idea */
 const double TAUR    = 100.*DTMAX;
-/*
-*/
+
 
 const double mu0 = 4.*M_PI*1e-7;/**< \f$ \mu_0 = 4 \pi 10^{-7} \f$ */
 const double nu0 = 1./mu0;/**< \f$ \nu_0 = 1/\mu_0 \f$ */
 
-static const int P = 9;
-// pb avec ce template : il doit prendre deux arguments //ct
+static const int P = 9;/**< constant parameter for some scalfmm templates */
+
+// pb avec ces templates : ils prennent un argument de plus en 1.5.0 //ct
 //typedef FTypedRotationCell<P>            CellClass; ct
-typedef FTypedRotationCell<double,P>            CellClass; //ct
+typedef FTypedRotationCell<double,P>            CellClass; /**< convenient typedef for the definition of cell type in scalfmm  */
 
 //typedef FP2PParticleContainerIndexed<>         ContainerClass; //ct
-typedef FP2PParticleContainerIndexed<double>         ContainerClass; //ct
+typedef FP2PParticleContainerIndexed<double>         ContainerClass; /**< convenient typedef for the definition of container for scalfmm */
 
-typedef FTypedLeaf<double, ContainerClass >                      LeafClass;
-typedef FOctree<double, CellClass, ContainerClass , LeafClass >  OctreeClass;
-typedef FRotationKernel<double, CellClass, ContainerClass, P >          KernelClass;
+typedef FTypedLeaf<double, ContainerClass >                      LeafClass;/**< convenient typedef for the definition of leaf for scalfmm  */
 
-typedef FFmmAlgorithmThreadTsm<OctreeClass, CellClass, ContainerClass, KernelClass, LeafClass > FmmClass;
+typedef FOctree<double, CellClass, ContainerClass , LeafClass >  OctreeClass;/**< convenient typedef for the definition of the octree for scalfmm */
+
+typedef FRotationKernel<double, CellClass, ContainerClass, P >          KernelClass;/**< convenient typedef for the kernel for scalfmm */
+
+typedef FFmmAlgorithmThreadTsm<OctreeClass, CellClass, ContainerClass, KernelClass, LeafClass > FmmClass;/**< convenient typedef for handling altogether the differents scalfmm object templates used in feellgood  */
 
 typedef gmm::wsvector <double>   write_vector;/**< convenient macro */
 typedef gmm::rsvector <double>   read_vector;/**< convenient macro */
@@ -163,15 +177,17 @@ struct Fac{
 Tet is a tetrahedron, containing the index references to nodes, must not be flat 
    */ 
 struct Tet{
-    static const int N = 4;/**< number of sommits */
+static const int N = 4;/**< number of sommits */
 static const int NPI = 5;/**< number of weights  */
-    int reg;/**< .msh region number */
-    double vol;/**< volume of the tetrahedron */
-    int ind[N];/**< indices to the nodes */
-    double weight[NPI];/**< weights */
-    double a[N][NPI];/**< hat functions */
-    double dadx[N][NPI], dady[N][NPI], dadz[N][NPI];/**< variations along all directions */
-    };
+int reg;/**< .msh region number */
+double vol;/**< volume of the tetrahedron */
+int ind[N];/**< indices to the nodes */
+double weight[NPI];/**< weights */
+double a[N][NPI];/**< hat functions */
+double dadx[N][NPI];/**< variations of hat function along x directions */
+double dady[N][NPI];/**< variations of hat function along y directions */
+double dadz[N][NPI];/**< variations of hat function along z directions */
+};
 
 /** \struct Seq
 Seq describe a sequence of field from \f$ B_{ini} \f$ to \f$ B_{fin} \f$ by steps \f$ dB \f$

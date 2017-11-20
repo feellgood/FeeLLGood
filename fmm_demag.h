@@ -11,11 +11,20 @@ this header is the interface to scalfmm. Its purpose is to prepare an octree for
 #ifndef FMM_DEMAG_H
 #define FMM_DEMAG_H
 
+/** double redefinition for the parametrization of some sczlfmm templates */
 #define FReal double // pour FReal  *ct*
 
+
+/**
+\namespace fmm to grab altogether the templates and functions using scalfmm for the computation of the demag field 
+*/
 namespace fmm{
 template <class CellClass, class ContainerClass, class LeafClass, class OctreeClass,
           class KernelClass, class FmmClass, typename... Args>
+
+/**
+initialization function for the building of an octree and a kernel passed to scalfmm to compute the demag field
+*/
 int init(Fem &fem, OctreeClass* &tree, KernelClass* &kernels, Args... kernelPreArgs)
 {
 //boost::timer time; // pas utilisé. *ct*
@@ -121,12 +130,19 @@ for (int f=0; f<FAC; f++){        // sources de surface
 return 0;
 }
 
-
+/**
+computes potential using fem struct
+*/
 template <int Hv> double potential(Fem &fem, Fac &fac, int i);
 
+
+/**
+computes the demag field
+*/
 template <int Hv, class CellClass, class ContainerClass, class LeafClass, class OctreeClass,
           class KernelClass, class FmmClass, typename... Args>
-void demag(Fem &fem, OctreeClass *tree, KernelClass *kernels, Args... kernelPreArgs){
+void demag(Fem &fem, OctreeClass *tree, KernelClass *kernels, Args... kernelPreArgs)
+{
         // changed return type to void, because nothing is returned (bcarvello, 2017)
 
 FTic counter;
@@ -299,7 +315,7 @@ delete [] corr;
 }
 
 template <int Hv>
-double potential(Fem &fem, Fac &fac, int i)
+double potential(Fem &fem, Fac &fac, int i) // pourquoi c'est un template??? Hv n'est pas utilisé 
 {
   double nx,ny,nz,Ms;
   nx=fac.nx;  ny=fac.ny;  nz=fac.nz; Ms=fac.Ms;
