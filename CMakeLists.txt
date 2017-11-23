@@ -23,7 +23,7 @@ set( CMAKE_CXX_FLAGS_RELEASE "-DORD2 -DNDEBUG -DNSTAT -Wall -frounding-math -std
 
 # file(GLOB sources . *.cc)
 
-SET( SOURCES main.cc init_distrib.cc cputime.cc extract_comment.cc dialog.cc affichage.cc normalize.cc
+SET( SOURCES main.cc init_distrib.cc cputime.cc extract_comment.cc dialog.cc affichage.cc
 	saveH.cc lecture.cc femutil.cc chapeaux.cc restoresol.cc direction.cc
 	recentrage.cc u_moy.cc v_moy.cc energy.cc saver.cc savesol.cc savecfg_vtk.cc
 	vsolve.cc base_projection.cc integrales.cc projection.cc assemblage.cc

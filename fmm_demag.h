@@ -1,5 +1,5 @@
 /** \file fmm_demag.h
-this header is the interface to scalfmm. Its purpose is to prepare an octree for the application of the fast multipole algorithm
+this header is the interface to scalfmm. Its purpose is to prepare an octree for the application of the fast multipole algorithm, and to compute the demag field.
 */
 
 #include "tiny.h"
@@ -11,7 +11,7 @@ this header is the interface to scalfmm. Its purpose is to prepare an octree for
 #ifndef FMM_DEMAG_H
 #define FMM_DEMAG_H
 
-/** double redefinition for the parametrization of some sczlfmm templates */
+/** double redefinition for the parametrization of some scalfmm templates */
 #define FReal double // pour FReal  *ct*
 
 
@@ -315,7 +315,7 @@ delete [] corr;
 }
 
 template <int Hv>
-double potential(Fem &fem, Fac &fac, int i) // pourquoi c'est un template??? Hv n'est pas utilisé 
+double potential(Fem &fem, Fac &fac, int i) // pourquoi c'est un template??? Hv est utilisé comme un booleen 
 {
   double nx,ny,nz,Ms;
   nx=fac.nx;  ny=fac.ny;  nz=fac.nz; Ms=fac.Ms;

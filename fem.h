@@ -141,20 +141,20 @@ Node is containing physical point of coordinates \f$ (x,y,z) \f$, magnetization 
 Many other values for the computation of the scalar potential \f$ \phi \f$
 */
 struct Node {
-    double x;/**< Physical position x of the node */
+double x;/**< Physical position x of the node */
 double y;/**< Physical position y  of the node */
 double z;/**< Physical position z  of the node */
-    triple u0;/**< magnetization initial value ? */
+triple u0;/**< magnetization initial value ? */
 triple v0;/**< no idea */
 triple u;/**< magnetization value */
 triple v;/**< no idea */
-    triple ep;/**< no idea */
+triple ep;/**< no idea */
 triple eq;/**< no idea */
-    double phi0;/**< scalar potential initial value ? */
+double phi0;/**< scalar potential initial value ? */
 double phi;/**< scalar potential value */
-    double phiv0;/**< no idea */
+double phiv0;/**< no idea */
 double phiv;/**< no idea */
-    };
+};
 
 /** \struct Fac
 Face is a struct containing the index references to nodes, it has a triangular shape and should not be degenerated 
@@ -190,14 +190,14 @@ double dadz[N][NPI];/**< variations of hat function along z directions */
 };
 
 /** \struct Seq
-Seq describe a sequence of field from \f$ B_{ini} \f$ to \f$ B_{fin} \f$ by steps \f$ dB \f$
+Seq describe a sequence of field from \f$ B_{ini} \f$ to \f$ B_{fin} \f$ by steps \f$ dB \f$ with orientation \f$ \vec{a} \f$, should be a unit vecor.
 */    
 struct Seq{
-    double Bini;/**< starting value */
+double Bini;/**< starting value */
 double Bfin;/**< ending value */
 double dB;/**< step field */
-    triple a;/**< direction (should be normalized) */
-    };
+triple a;/**< direction (should be normalized) */
+};
 
 /** \struct Stat
 used to build some statistics, with GSL library
@@ -234,33 +234,33 @@ struct Fem{
 	double diam;/**< diameter of the mesh (if a wire) */
 	double surf;/**< total surface */
 	double vol;/**< total volume of the mesh */
-    double scale;/**< scaling factor from gmsh files to feellgood */
-double fmm_normalizer;/**< no idea; probably normalizing constant for the computation of the demag field */
-    double as[3];/**< no idea */
-double locmax;/**< no idea */
-    double t;/**< physical current time of the simulation */
-double tf;/**< end time of the simulation */
-double dt;/**< step time of the simulation */
-double vmax;/**< maximum speed of what ? */
+	double scale;/**< scaling factor from gmsh files to feellgood */
+	double fmm_normalizer;/**< no idea; probably normalizing constant for the computation of the demag field */
+	double as[3];/**< no idea */
+	double locmax;/**< no idea */
+	double t;/**< physical current time of the simulation */
+	double tf;/**< end time of the simulation */
+	double dt;/**< step time of the simulation */
+	double vmax;/**< maximum speed of what ? */
 
-double E0[4];/**< table to store initial energy values <br> 
+	double E0[4];/**< table to store initial energy values <br> 
 index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
 
-double E[4]; /**< table to store energy values at time t <br>
+	double E[4]; /**< table to store energy values at time t <br>
 index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
 
-double DW_vz0;/**< initial speed of the domain wall (to check) */
-double DW_vz;/**< speed of the domain wall along z */
-double DW_dir;/**< direction of the domain wall (to check) */
-double DW_z; /**< domain wall displacement along Oz */
-
-double Etot0;/**< initial total energy (to check) */
-double Etot;/**< total energy */
-double evol;/**< no idea */
-double phy;/**< no idea */
-    vector <Node> node; /**< node container */
-    vector <Fac>  fac; /**< face container */
-    vector <Tet>  tet; /**< tetrahedron container */
+	double DW_vz0;/**< initial speed of the domain wall (to check) */
+	double DW_vz;/**< speed of the domain wall along z */
+	double DW_dir;/**< direction of the domain wall (to check) */
+	double DW_z; /**< domain wall displacement along Oz */
+	
+	double Etot0;/**< initial total energy (to check) */
+	double Etot;/**< total energy */
+	double evol;/**< no idea */
+	double phy;/**< no idea */
+	vector <Node> node; /**< node container */
+	vector <Fac>  fac; /**< face container */
+	vector <Tet>  tet; /**< tetrahedron container */
     double Bext;/**< amplitude of the applied field (to check) */
     triple Hext;/**< external applied field direction (should be normalized) */
     gmm::diagonal_precond <read_matrix>  *prc;/**< diagonal preconditionner */
@@ -287,9 +287,13 @@ void extract_comment(istream &flux);/**< parser */
 /** 
 \return square of a number \f$ x^2 \f$
 */
-inline double sq(double x) {return x*x;}
+inline double sq(double x /**< [in] */ ) 
+{return x*x;}
 
-void dialog(Fem& fem, vector<Seq> &seq);/**< some text send to terminal to see what step in the sequence the sover is computing */
+
+/**
+function to dialog with user with terminal to fill fem structure, interacting with the user through cin. It also prints information about the simulation on the run, and to see what step in the sequence of field the solver is computing */
+void dialog(Fem& fem /**< [in,out] */, vector<Seq> &seq/**< [out] field sequence */);
 
 void lecture(Fem &fem, double scale, Regions *regions);/**< reading file function */
 
@@ -297,24 +301,49 @@ void alloc_nodal(Fem &fem);/**< allocating function of what ? */
 
 void femutil(Fem &fem);/**< utilitary function to affect fem struct */
 
-void femutil_node(Fem &fem);/**< read the nodes from a .msh file to the node container in fem struct */
-void femutil_tet(Fem &fem);/**< read the tetrahedron from a .msh file to the tetrahedron container in fem struct */
+/** read the nodes from a .msh file to the node container in fem struct */
+void femutil_node(Fem &fem /**< [in,out] */);
 
-void femutil_fac(Fem &fem);/**< read the faces from a .msh file to the face container in fem struct */
-void femutil_facMs(Fem &fem);/**< no idea */
+/** read the tetrahedron from a .msh file to the tetrahedron container in fem struct */
+void femutil_tet(Fem &fem /**< [in,out] */);
 
-void chapeaux(Fem &fem);/**< computes the hat functions for all containers */ 
-void affichage(Fem &fem);/**< printing function? (to check) */
-void direction(Fem &fem);/**< no idea */
+/**
+ read the faces from a .msh file to the face container in fem struct 
+*/
+void femutil_fac(Fem &fem /**< [in,out] */);
 
-void restoresol(Fem& fem, string *filename);/**< read a solution from a file (tsv formated) and initialize fem struct  */
+/** no idea */
+void femutil_facMs(Fem &fem /**< [in,out] */);
+
+/**
+computes the hat functions for all containers
+*/
+void chapeaux(Fem &fem /**< [in,out] */ ); 
+
+/**
+printing function? (to check)
+*/
+void affichage(Fem &fem /**< [in,out] */ );
+
+/** no idea */
+void direction(Fem &fem /**< [in,out] */ );
+
+/**
+read a solution from a file (tsv formated) and initialize fem struct 
+*/
+void restoresol(Fem& fem /**< [out] */ , string *filename /**< [in] */ );
 
 void init_distrib(Fem &fem);/**< computes an analytical initial magnetization distribution as a starting point for the simulation */
 
 // void dirichlet(Fem &fem);
 // void periodic(Fem &fem);
 
-void normalize(triple &a);/**< in place normalizing function of vector a */
+inline void normalize(triple &a)/**< in place normalizing function of vector a */
+{
+double norme=sqrt(sq(a[0])+sq(a[1])+sq(a[2]));
+a[0]/= norme;a[1]/= norme;a[2]/= norme;
+}
+
 double u_moy(Fem &fem, int d);/**< computes the average magnetization */
 double v_moy(Fem &fem, int d);/**< computes what ? */
 
