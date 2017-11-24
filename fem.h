@@ -335,10 +335,11 @@ void restoresol(Fem& fem /**< [out] */ , string *filename /**< [in] */ );
 
 void init_distrib(Fem &fem);/**< computes an analytical initial magnetization distribution as a starting point for the simulation */
 
-// void dirichlet(Fem &fem);
-// void periodic(Fem &fem);
 
-inline void normalize(triple &a)/**< in place normalizing function of vector a */
+/**
+in place normalizing function of vector
+a */
+inline void normalize(triple &a /**< [in,out] */)
 {
 double norme=sqrt(sq(a[0])+sq(a[1])+sq(a[2]));
 a[0]/= norme;a[1]/= norme;a[2]/= norme;
@@ -370,32 +371,54 @@ computes the contribution of the surface to the integrals
 void integrales(Fem &fem, Fac &fac, gmm::dense_matrix <double> &AE, vector <double> &BE);
 
 /**
-projections on the tetrahedrons
+template function to compute projection of an element <br>
+template parameter T is either tetra of face
 */
-void projection(Fem &fem, Tet &elt,
+template <class T>
+void projection(Fem &fem, T &elt,
            gmm::dense_matrix <double> &A,  vector <double> &B,
-           gmm::dense_matrix <double> &Ap, vector <double> &Bp);
+           gmm::dense_matrix <double> &Ap, vector <double> &Bp)
+{
+const int N = T::N;
+gmm::dense_matrix <double> P(2*N,3*N), PA(2*N,3*N);
+for (int i=0; i<N; i++){
+    Node &node = fem.node[elt.ind[i]];
+    P(i,i)  = node.ep[0];  P(i,N+i)  = node.ep[1];  P(i,2*N+i)  = node.ep[2];
+    P(N+i,i)= node.eq[0];  P(N+i,N+i)= node.eq[1];  P(N+i,2*N+i)= node.eq[2];
+    }
+
+mult(P,A,PA);
+mult(PA, gmm::transposed(P), Ap);
+
+mult(P,B,Bp);
+}
 
 /**
-projection on the faces
+template function to perform the
+matrix assembly with all the contributions of the tetrahedrons/faces <br>
+template parameter is either tetra or face
 */
-void projection(Fem &fem, Fac &elt,
-           gmm::dense_matrix <double> &A,  vector <double> &B,
-           gmm::dense_matrix <double> &Ap, vector <double> &Bp);
-
-/**
-matrix assembly with all the contributions of the tetrahedrons
-*/
-void assemblage(Fem &fem, Tet &elt,
+template <class T>
+void assemblage(Fem &fem, T &elt,
            gmm::dense_matrix <double> &Ke, vector <double> &Le,
-           write_matrix &K, write_vector &L);
+           write_matrix &K, write_vector &L)
+{
+const int NOD = fem.NOD;
+const int N = T::N;
 
-/**
-matrix assembly with all the contributions of the faces
-*/
-void assemblage(Fem &fem, Fac &elt,
-           gmm::dense_matrix <double> &Ke, vector <double> &Le,
-           write_matrix &K, write_vector &L);
+for (int i=0; i < N; i++){
+    int i_= elt.ind[i];             
+    for (int j=0; j < N; j++){
+        int j_= elt.ind[j];
+        K(NOD+i_,j_)+= Ke(i,j);      K(NOD+i_, NOD+j_)+= Ke(  i,N+j);
+        K(    i_,j_)+= Ke(N+i,j);    K(    i_, NOD+j_)+= Ke(N+i,N+j);
+	    }
+    L[NOD+i_]+= Le[  i];
+    L[    i_]+= Le[N+i];
+    }
+//std::cout<<"temps assemblage: "<<diff_t<<endl;
+}
+
 
 /**
 time evolution solver

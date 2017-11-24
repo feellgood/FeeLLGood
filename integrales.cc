@@ -41,6 +41,11 @@ p=make_pair("c3",reg);      double uk22 = param[p];  	//cout << ", a3=" << k2;
 p=make_pair("UzDW",reg);      double Uz   = param[p];
 p=make_pair("betaDW",reg);    double beta = param[p];
 
+/* ces constantes permettent de factoriser beaucoup d'expressions  */
+double Abis = 2.0*A/J;
+double Kbis = 2.0*K/J;
+double K3bis = 2.0*K3/J;
+
 double dt = fem.dt;
 
 /*-------------------- INTERPOLATION --------------------*/
@@ -86,9 +91,10 @@ double Vz=fem.DW_vz;
 
 /*-------------------------------------------------------*/
 for (int npi=0; npi<NPI; npi++){
-    double w, ai, dai_dx, dai_dy, dai_dz, daj_dx, daj_dy, daj_dz;
+    double ai, ai_w, dai_dx, dai_dy, dai_dz, daj_dx, daj_dy, daj_dz;
     double Dai_Daj, Dai_Du0, Dai_Du1, Dai_Du2;
-    w = tet.weight[npi];
+    
+	double w = tet.weight[npi];
     double uk0_u = uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi]; 
     double uk1_u = uk10*u[0][npi] + uk11*u[1][npi] + uk12*u[2][npi]; 
     double uk2_u = uk20*u[0][npi] + uk21*u[1][npi] + uk22*u[2][npi]; 
@@ -104,12 +110,10 @@ for (int npi=0; npi<NPI; npi++){
     double uHext= u[0][npi]*Hext[0]  + u[1][npi]*Hext[1]  + u[2][npi]*Hext[2];
     double uHdu = u[0][npi]*Hdx[npi] + u[1][npi]*Hdy[npi] + u[2][npi]*Hdz[npi];
 
-    double uHau = 2*K/J* uk0_u*uk0_u;
-    double uHa3u = -2*K3/J*(uk0_u*(1-uk0_u*uk0_u)*uk0_u +
-                                uk1_u*(1-uk1_u*uk1_u)*uk1_u +
-                                uk2_u*(1-uk2_u*uk2_u)*uk2_u);
+    double uHau = Kbis* uk0_u*uk0_u;
+    double uHa3u = -K3bis*(uk0_u*(1-uk0_u*uk0_u)*uk0_u + uk1_u*(1-uk1_u*uk1_u)*uk1_u + uk2_u*(1-uk2_u*uk2_u)*uk2_u);
 
-    double uHeff = -2*A/J*Du2 +uHext +uHdu +uHau +uHa3u;
+    double uHeff = -Abis*Du2 +uHext +uHdu +uHau +uHa3u;
 
     double alfa=alpha; // seulement pour l'ordre 1 en temps
     double R=0.;
@@ -134,9 +138,9 @@ for (int npi=0; npi<NPI; npi++){
 #endif
 
     triple Ht; // derivee de Hr
-    Ht[0]= Hvx[npi] + 2*K/J* uk0_v*uk00-2*K3/J* uk0_v*(1-3*uk0_u*uk0_u)*uk00;   
-    Ht[1]= Hvy[npi] + 2*K/J* uk0_v*uk01-2*K3/J* uk1_v*(1-3*uk1_u*uk1_u)*uk01;   
-    Ht[2]= Hvz[npi] + 2*K/J* uk0_v*uk02-2*K3/J* uk2_v*(1-3*uk2_u*uk2_u)*uk02;  
+    Ht[0]= Hvx[npi] + (Kbis* uk0_v - K3bis* uk0_v*(1-3*uk0_u*uk0_u) )*uk00;   
+    Ht[1]= Hvy[npi] + (Kbis* uk0_v - K3bis* uk1_v*(1-3*uk1_u*uk1_u) )*uk01;   
+    Ht[2]= Hvz[npi] + (Kbis* uk0_v - K3bis* uk2_v*(1-3*uk2_u*uk2_u) )*uk02;  
 
     for (int i=0; i<N; i++){
         ai = tet.a[i][npi];
@@ -145,62 +149,57 @@ for (int npi=0; npi<NPI; npi++){
         Dai_Du1 = dai_dx * dudx[1][npi] + dai_dy * dudy[1][npi] + dai_dz * dudz[1][npi];
         Dai_Du2 = dai_dx * dudx[2][npi] + dai_dy * dudy[2][npi] + dai_dz * dudz[2][npi];
 
-        BE[i]    += (-2*A/J* Dai_Du0 + 2*K/J* uk0_u*uk00*ai +
-                     -2*K3/J* uk0_u*(1-uk0_u*uk0_u)*uk00*ai -2*K3/J* uk1_u*(1-uk1_u*uk1_u)*uk10*ai -2*K3/J* uk2_u*(1-uk2_u*uk2_u)*uk20*ai +
-                     +Hdx[npi]*ai + Hext[0]*ai) *w;
-        BE[N+i]  += (-2*A/J* Dai_Du1 + 2*K/J* uk0_u*uk01*ai + 
-                     -2*K3/J* uk0_u*(1-uk0_u*uk0_u)*uk01*ai -2*K3/J* uk1_u*(1-uk1_u*uk1_u)*uk11*ai -2*K3/J* uk2_u*(1-uk2_u*uk2_u)*uk21*ai +
-                     +Hdy[npi]*ai + Hext[1]*ai) *w;
-        BE[2*N+i]+= (-2*A/J* Dai_Du2 + 2*K/J* uk0_u*uk02*ai +
-                     -2*K3/J* uk0_u*(1-uk0_u*uk0_u)*uk02*ai -2*K3/J* uk1_u*(1-uk1_u*uk1_u)*uk12*ai -2*K3/J* uk2_u*(1-uk2_u*uk2_u)*uk22*ai +
-                     +Hdz[npi]*ai + Hext[2]*ai) *w;
+        BE[i]    += (-Abis* Dai_Du0 + ( Kbis* uk0_u*uk00 -K3bis*( uk0_u*(1-uk0_u*uk0_u)*uk00 + uk1_u*(1-uk1_u*uk1_u)*uk10 + uk2_u*(1-uk2_u*uk2_u)*uk20 ) + Hdx[npi] + Hext[0] )*ai) *w;
+        BE[N+i]  += (-Abis* Dai_Du1 + ( Kbis* uk0_u*uk01 -K3bis*( uk0_u*(1-uk0_u*uk0_u)*uk01 + uk1_u*(1-uk1_u*uk1_u)*uk11 + uk2_u*(1-uk2_u*uk2_u)*uk21 ) + Hdy[npi] + Hext[1] )*ai) *w;
+        BE[2*N+i]+= (-Abis* Dai_Du2 + ( Kbis* uk0_u*uk02 -K3bis*( uk0_u*(1-uk0_u*uk0_u)*uk02 + uk1_u*(1-uk1_u*uk1_u)*uk12 + uk2_u*(1-uk2_u*uk2_u)*uk22 ) + Hdz[npi] + Hext[2] )*ai ) *w;
 
+	ai_w = ai*w;
 /* changement de referentiel */
-        BE[i]    += +Vz*(u[1][npi]*dudz[2][npi]-u[2][npi]*dudz[1][npi]+alpha*dudz[0][npi]) *ai*w;
-        BE[N+i]  += +Vz*(u[2][npi]*dudz[0][npi]-u[0][npi]*dudz[2][npi]+alpha*dudz[1][npi]) *ai*w;
-        BE[2*N+i]+= +Vz*(u[0][npi]*dudz[1][npi]-u[1][npi]*dudz[0][npi]+alpha*dudz[2][npi]) *ai*w;
+        BE[i]    += +Vz*(u[1][npi]*dudz[2][npi]-u[2][npi]*dudz[1][npi]+alpha*dudz[0][npi]) *ai_w;
+        BE[N+i]  += +Vz*(u[2][npi]*dudz[0][npi]-u[0][npi]*dudz[2][npi]+alpha*dudz[1][npi]) *ai_w;
+        BE[2*N+i]+= +Vz*(u[0][npi]*dudz[1][npi]-u[1][npi]*dudz[0][npi]+alpha*dudz[2][npi]) *ai_w;
 
 /* second membre pour les termes de courant polarise en spin pour une paroi */
-	BE[i]    += -Uz*(u[1][npi]*dudz[2][npi]-u[2][npi]*dudz[1][npi]+beta*dudz[0][npi]) *ai*w;
-	BE[N+i]  += -Uz*(u[2][npi]*dudz[0][npi]-u[0][npi]*dudz[2][npi]+beta*dudz[1][npi]) *ai*w;
-	BE[2*N+i]+= -Uz*(u[0][npi]*dudz[1][npi]-u[1][npi]*dudz[0][npi]+beta*dudz[2][npi]) *ai*w;
+	BE[i]    += -Uz*(u[1][npi]*dudz[2][npi]-u[2][npi]*dudz[1][npi]+beta*dudz[0][npi]) *ai_w;
+	BE[N+i]  += -Uz*(u[2][npi]*dudz[0][npi]-u[0][npi]*dudz[2][npi]+beta*dudz[1][npi]) *ai_w;
+	BE[2*N+i]+= -Uz*(u[0][npi]*dudz[1][npi]-u[1][npi]*dudz[0][npi]+beta*dudz[2][npi]) *ai_w;
 
 
 #ifdef ORD2
-        BE[    i]+= Ht[0] *ai *w *s*dt; // ordre 2 en temps
-        BE[  N+i]+= Ht[1] *ai *w *s*dt;
-        BE[2*N+i]+= Ht[2] *ai *w *s*dt;
+        BE[    i]+= Ht[0] *ai_w *s*dt; // ordre 2 en temps
+        BE[  N+i]+= Ht[1] *ai_w *s*dt;
+        BE[2*N+i]+= Ht[2] *ai_w *s*dt;
 
 /* changement de referentiel */
-        BE[i]    += +Vz*(u[1][npi]*dvdz[2][npi]-u[2][npi]*dvdz[1][npi]+v[1][npi]*dudz[2][npi]-v[2][npi]*dudz[1][npi]+alpha*dvdz[0][npi]) *ai *w *s*dt;
-        BE[N+i]  += +Vz*(u[2][npi]*dvdz[0][npi]-u[0][npi]*dvdz[2][npi]+v[2][npi]*dudz[0][npi]-v[0][npi]*dudz[2][npi]+alpha*dvdz[1][npi]) *ai *w *s*dt;
-        BE[2*N+i]+= +Vz*(u[0][npi]*dvdz[1][npi]-u[1][npi]*dvdz[0][npi]+v[0][npi]*dudz[1][npi]-v[1][npi]*dudz[0][npi]+alpha*dvdz[2][npi]) *ai *w *s*dt;
+        BE[i]    += +Vz*(u[1][npi]*dvdz[2][npi]-u[2][npi]*dvdz[1][npi]+v[1][npi]*dudz[2][npi]-v[2][npi]*dudz[1][npi]+alpha*dvdz[0][npi]) *ai_w *s*dt;
+        BE[N+i]  += +Vz*(u[2][npi]*dvdz[0][npi]-u[0][npi]*dvdz[2][npi]+v[2][npi]*dudz[0][npi]-v[0][npi]*dudz[2][npi]+alpha*dvdz[1][npi]) *ai_w *s*dt;
+        BE[2*N+i]+= +Vz*(u[0][npi]*dvdz[1][npi]-u[1][npi]*dvdz[0][npi]+v[0][npi]*dudz[1][npi]-v[1][npi]*dudz[0][npi]+alpha*dvdz[2][npi]) *ai_w *s*dt;
 
 /* second membre pour les termes de courant polarise en spin pour une paroi  pour ordre 2 en temps*/
-	BE[i]    += -Uz*(u[1][npi]*dvdz[2][npi]-u[2][npi]*dvdz[1][npi]+v[1][npi]*dudz[2][npi]-v[2][npi]*dudz[1][npi]+beta*dvdz[0][npi]) *ai *w *s*dt;
-	BE[N+i]  += -Uz*(u[2][npi]*dvdz[0][npi]-u[0][npi]*dvdz[2][npi]+v[2][npi]*dudz[0][npi]-v[0][npi]*dudz[2][npi]+beta*dvdz[1][npi]) *ai *w *s*dt;
-	BE[2*N+i]+= -Uz*(u[0][npi]*dvdz[1][npi]-u[1][npi]*dvdz[0][npi]+v[0][npi]*dudz[1][npi]-v[1][npi]*dudz[0][npi]+beta*dvdz[2][npi]) *ai *w *s*dt;
+	BE[i]    += -Uz*(u[1][npi]*dvdz[2][npi]-u[2][npi]*dvdz[1][npi]+v[1][npi]*dudz[2][npi]-v[2][npi]*dudz[1][npi]+beta*dvdz[0][npi]) *ai_w *s*dt;
+	BE[N+i]  += -Uz*(u[2][npi]*dvdz[0][npi]-u[0][npi]*dvdz[2][npi]+v[2][npi]*dudz[0][npi]-v[0][npi]*dudz[2][npi]+beta*dvdz[1][npi]) *ai_w *s*dt;
+	BE[2*N+i]+= -Uz*(u[0][npi]*dvdz[1][npi]-u[1][npi]*dvdz[0][npi]+v[0][npi]*dudz[1][npi]-v[1][npi]*dudz[0][npi]+beta*dvdz[2][npi]) *ai_w *s*dt;
 #endif
 
-        AE(    i,    i)+=  alfa* ai *w;  //lumping
-        AE(  N+i,  N+i)+=  alfa* ai *w;
-        AE(2*N+i,2*N+i)+=  alfa* ai *w;
+        AE(    i,    i)+=  alfa* ai_w;  //lumping
+        AE(  N+i,  N+i)+=  alfa* ai_w;
+        AE(2*N+i,2*N+i)+=  alfa* ai_w;
 
-        AE(0*N+i,2*N+i)+= +u_nod[1][i]* ai *w; //lumping
-        AE(0*N+i,1*N+i)+= -u_nod[2][i]* ai *w;
-        AE(1*N+i,0*N+i)+= +u_nod[2][i]* ai *w;
-        AE(1*N+i,2*N+i)+= -u_nod[0][i]* ai *w;
-        AE(2*N+i,1*N+i)+= +u_nod[0][i]* ai *w;
-        AE(2*N+i,0*N+i)+= -u_nod[1][i]* ai *w;
+        AE(0*N+i,2*N+i)+= +u_nod[1][i]* ai_w; //lumping
+        AE(0*N+i,1*N+i)+= -u_nod[2][i]* ai_w;
+        AE(1*N+i,0*N+i)+= +u_nod[2][i]* ai_w;
+        AE(1*N+i,2*N+i)+= -u_nod[0][i]* ai_w;
+        AE(2*N+i,1*N+i)+= +u_nod[0][i]* ai_w;
+        AE(2*N+i,0*N+i)+= -u_nod[1][i]* ai_w;
 
         for (int j=0; j<N; j++){
             //aj = tet.a[j][npi];
             daj_dx= tet.dadx[j][npi];  daj_dy= tet.dady[j][npi];  daj_dz= tet.dadz[j][npi];
             Dai_Daj = dai_dx*daj_dx + dai_dy*daj_dy + dai_dz*daj_dz;
 
-            AE(i,j)        +=  s*dt*(1.+R)* 2*A/J* Dai_Daj *w;
-            AE(N+i,N+j)    +=  s*dt*(1.+R)* 2*A/J* Dai_Daj *w;
-            AE(2*N+i,2*N+j)+=  s*dt*(1.+R)* 2*A/J* Dai_Daj *w;
+            AE(i,j)        +=  s*dt*(1.+R)* Abis* Dai_Daj *w;
+            AE(N+i,N+j)    +=  s*dt*(1.+R)* Abis* Dai_Daj *w;
+            AE(2*N+i,2*N+j)+=  s*dt*(1.+R)* Abis* Dai_Daj *w;
 	    }
 	}
     }
@@ -231,7 +230,7 @@ p=make_pair("a1",reg);      double uk00 = param[p];  	//cout << ", a1=" << k0;
 p=make_pair("a2",reg);      double uk01 = param[p];  	//cout << ", a2=" << k1;
 p=make_pair("a3",reg);      double uk02 = param[p];  	//cout << ", a3=" << k2;
 
-
+double Kbis = 2.0*K/J;
 /*-------------------- INTERPOLATION --------------------*/
 double u_nod[3][N], u[3][NPI];
 
@@ -247,16 +246,15 @@ tiny::mult<double, 3, N, NPI> (u_nod, fac.a, u);
 /*-------------------------------------------------------*/
 
 for (int npi=0; npi<NPI; npi++){
-    double w, ai;
-    w = fac.weight[npi];
-    double uk0_u = uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi]; 
+    double Kbis_ai;
+    double w_uk0_u = fac.weight[npi]*(uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi]); 
 
     for (int i=0; i<N; i++){
-        ai = fac.a[i][npi];
+        Kbis_ai = Kbis*fac.a[i][npi];
 
-        BE[i]    += (2*K/J* uk0_u*uk00*ai) *w;
-        BE[N+i]  += (2*K/J* uk0_u*uk01*ai) *w;
-        BE[2*N+i]+= (2*K/J* uk0_u*uk02*ai) *w;
+        BE[i]    += (Kbis_ai* w_uk0_u*uk00);
+        BE[N+i]  += (Kbis_ai* w_uk0_u*uk01);
+        BE[2*N+i]+= (Kbis_ai* w_uk0_u*uk02);
 	}
     }
 

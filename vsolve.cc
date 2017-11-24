@@ -38,20 +38,18 @@ for (int t=0; t<TET; t++){
     Tet &tet = fem.tet[t];
     gmm::dense_matrix <double> K(3*Tet::N,3*Tet::N), Kp(2*Tet::N,2*Tet::N);
     vector <double> L(3*Tet::N), Lp(2*Tet::N);
-//    gmm::clear(K), gmm::clear(Kp);
     integrales(fem, tet, K, L);     
-    projection(fem, tet, K, L, Kp, Lp);
-    assemblage(fem, tet, Kp, Lp, Kw, Lw);
-    }
+    projection<Tet>(fem, tet, K, L, Kp, Lp);
+    assemblage<Tet>(fem, tet, Kp, Lp, Kw, Lw);    
+}
 
 for (int t=0; t<FAC; t++){
     Fac &fac = fem.fac[t];
     gmm::dense_matrix <double> K(3*Fac::N,3*Fac::N), Kp(2*Fac::N,2*Fac::N);
     vector <double> L(3*Fac::N), Lp(2*Fac::N);
-//    gmm::clear(K), gmm::clear(Kp);
     integrales(fem, fac, K, L);     
-    projection(fem, fac, K, L, Kp, Lp);
-    assemblage(fem, fac, Kp, Lp, Kw, Lw);
+    projection<Fac>(fem, fac, K, L, Kp, Lp);
+    assemblage<Fac>(fem, fac, Kp, Lp, Kw, Lw);
     }
 
 time_t timeEnd;
@@ -128,9 +126,9 @@ read_vector Xr(2*NOD);    gmm::copy(Xw, Xr);
 double v2max = 0.0;
 
 for (int i=0; i<NOD; i++) {
-    double vp,vq,v2;
-    vp = Xr[i]; vq = Xr[NOD+i];
-    v2 = vp*vp + vq*vq;
+	double vp = Xr[i];
+	double vq = Xr[NOD+i];
+	double v2 = vp*vp + vq*vq;
     if (v2>v2max)
         v2max = v2;
 
