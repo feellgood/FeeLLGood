@@ -1,0 +1,55 @@
+/**
+* \mainpage
+
+FeeLLGood is a micromagnetic solver using finite element method (FEM) to solve Landau Lifschitz Gilbert equation in a magnetic material.
+
+\f$ \frac{\partial \mathbf{m}}{\partial t} = - |\gamma_0| \mathbf{m} \times \mathbf{H}_{eff} + \alpha \mathbf{m} \times \frac{\partial \mathbf{m}}{\partial t}   \f$ <br>
+With \f$ \gamma_0 \f$ the electron gyromagnetic ratio and \f$ \alpha \f$ the Gilbert phenomenological damping parameter.
+This non-linear partial derivative equation is solved using finite element method, using a weak formulation. The effective field \f$ \mathbf{H}_{eff} \f$ is : <br>
+
+\f$ \mathbf{H}_{eff} = \frac{2 A}{\mu_0 M_s} \nabla^2 \mathbf{m} - \frac{1}{\mu_0 M_s} \frac{\partial E_{an}}{\partial \mathbf{m} } + \mathbf{H}_a + \mathbf{H}_d  \f$
+
+\f$ A \f$ is the exchange energy constant, \f$ M_s \f$ is the magnetization at saturation of the considered material. \f$ E_{an} \f$ is the anisotropy energy contribution. \f$ \mathbf{H}_a \f$
+is the external applied field.
+The demagnetization field \f$ \mathbf{H}_d = -\frac{1}{4 \pi} \int_V \nabla \cdot \mathbf{m} \frac{\mathbf{r}}{r^3} dV \f$ is computed using fast multipole algorithm, implemented in the external library scalfmm.
+Material parameters are given to feellgood solver through the mesh file.
+
+## Installation & configuration
+
+Installation of feellgood recquires the library ANN, the scalfmm, and GMM++.
+To compile and link feellgood, a CMakeLists.txt is provided.
+
+### how to compile
+C++ 11 for feellgood source, C++ 14 for scalfmm, C++ 11 for GMM++ and ANN
+Some options are given to the compiler, to create a macro within feellgood source code:
+
+* - -DORD1 : first order integration scheme (debug mode)
+* - -DORD2 : second order integration scheme (default & release modes)
+* - -DNDEBUG
+* - -DNSTAT : some statistics (histogram), requires GSL
+
+These other options should not be modified: <br>
+* - -fopenmp for multiThreading with Open MP
+* - -std=c++11
+* - -frounding-math
+* - -ffast-math
+* - -msse4.2
+* - -mfpmath=sse
+* - -O2 or -O3 for optimizations
+
+
+### about the mesh
+The mesh must be tetrahedrons in .msh format, the software gmsh can build such a mesh file.
+At the end of the .msh file, a section is to be added to describe your material in adequation with the numbering system region of gmsh. \f$ M_s \f$, \f$ \alpha \f$, and other parameters such as anisotropy constants are provided here.
+
+### output files
+The outputs are text files, tab separated value. It is composed of columns for \f$ (x,y,z) \f$ positions, \f$ (m_x,m_y,m_z) \f$, potential \f$ \phi \f$ <br>
+It is also possible to have some outputs formatted in vtk file format, usefull to visualize datas in paraview.
+
+### scalfmm settings for feellgood
+feellgood uses double precision to compute demagnetizing field through scalfmm. It is directly set through a template parameter for most scalfmm calls.
+
+By default, scalfmm is set to use Advance Vector Extensions (AVX) assembler instruction sets to fasten some computations. It should be set to OFF in scalfmm_config.h to use the SSE 4.2 assembler instruction sets, parameter USEsse4.2 set to ON in scalfmm_config.h file. <br>
+
+
+*/
