@@ -1,9 +1,23 @@
 PROJECT (FEELLGOOD)
 cmake_minimum_required(VERSION 2.8)
 
+#===========================================================================
+# Version Number
+#===========================================================================
+
+# FEELLGOOD version number.
+set(FEELLGOOD_MAJOR_VERSION 0)
+set(FEELLGOOD_MINOR_VERSION 0)
+set(FEELLGOOD_PATCH_VERSION 0)
+set(FEELLGOOD_VERSION  "${FEELLGOOD_MAJOR_VERSION}.${FEELLGOOD_MINOR_VERSION}.${FEELLGOOD_PATCH_VERSION}" )
+
 ENABLE_LANGUAGE(CXX)
 
 MESSAGE(STATUS "CXX ${CMAKE_CXX_COMPILER_ID}")
+
+#===========================================================================
+# Path
+#===========================================================================
 
 SET(ANN_INCLUDE_DIR /home/nanospin/Documents/ann_1.1.2/include/ANN)
 
@@ -15,6 +29,9 @@ INCLUDE_DIRECTORIES(${ANN_INCLUDE_DIR} ${GMM_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR}
 
 SET(INCLUDE ${ANN_INCLUDE_DIR} ${GMM_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR})
 
+#===========================================================================
+# Compiler options
+#===========================================================================
 # we should use AVX instead of SSE4.2, with option -mavx
 
 set( CMAKE_CXX_FLAGS "-DORD2 -DNDEBUG -DNSTAT -Wall -frounding-math -std=c++11 -O3 -fopenmp -ffast-math -msse4.2 -mfpmath=sse" CACHE STRING "C++ compiler flags used during default builds." FORCE )

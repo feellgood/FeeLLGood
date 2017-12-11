@@ -218,7 +218,7 @@ massive container to grab altogether all parameters of a simulation, including m
 */
 struct Fem{
 	string  simname;/**< simulation name */
-	string pbname;     /**< file pro */
+	string pbname;     /**< mesh file, gmsh file format */
 	int REG; /**< number of regions in the msh (to check) */
 	int NOD;/**< number of nodes in the corresponding container */
 	int FAC;/**< number of faces in the corresponding container */
@@ -287,8 +287,7 @@ void extract_comment(istream &flux);/**< parser */
 /** 
 \return square of a number \f$ x^2 \f$
 */
-inline double sq(double x /**< [in] */ ) 
-{return x*x;}
+inline double sq(double x /**< [in] */ ) {return x*x;}
 
 
 /**

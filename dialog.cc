@@ -16,9 +16,11 @@ map <pair<string,int>,double>  &param=fem.param;
 
 cout << "\t process\t\t" << getpid() << endl;
 
+cout << "\t nom simul ? "<<endl;
 extract_comment(cin);   cin >> fem.simname;
 cout << "\t nom simul\t\t"<< fem.simname << endl;
 
+cout << "\t fichier mesh ?"<< endl;
 extract_comment(cin);   cin >> fem.pbname;
 cout << "\t nom fichier pro\t" << fem.pbname << endl;
 

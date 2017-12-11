@@ -32,11 +32,3 @@ while (1)
       }
 }
 
-/*
-main() {
-string s;
-getcomment(cin);
-cin >> s;
-cout << s << endl;
-}
-*/
