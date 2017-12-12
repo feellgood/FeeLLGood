@@ -2,9 +2,9 @@
 #include "tiny.h"
 
 /**
- * Calcul des matrices elementaires sur un element
- * Schema en theta pr ech
- **/
+  Calcul des matrices elementaires sur un element
+  Schema en theta pr ech
+ */
 
 void integrales(Fem &fem, Tet &tet, gmm::dense_matrix <double> &AE, vector <double> &BE)
 {
@@ -24,6 +24,8 @@ p=make_pair("theta",-1);    double s = param[p];   	//cout << ", theta= " << s;
 p=make_pair("alpha",reg);   double alpha = param[p];  	//cout << ", alpha= " << alpha;
 p=make_pair("Ae",reg);      double A = param[p];    	//cout << ", Ae= " << A ;
 p=make_pair("Js",reg);      double J = param[p]+EPSILON;//cout <<", Js=" << J;
+
+
 p=make_pair("Ka",reg);      double K = param[p];   	//cout << ", Ka=" << K;
 p=make_pair("Ka3",reg);     double K3 = param[p];   	//cout << ", Ka3=" << K3;
 
