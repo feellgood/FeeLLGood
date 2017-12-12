@@ -123,9 +123,16 @@ for (int npi=0; npi<NPI; npi++){
 #endif
 
 #ifdef ORD2
-    double r = 0.1;	     			fem.stat.r = r;
-    double M = 2.*alpha*r/dt;  			fem.stat.M = M;
-           R = dt/TAUR*abs(log(dt/TAUR));    	fem.stat.R = R;
+    double r = 0.1;	     			
+
+    double M = 2.*alpha*r/dt;  			
+R = dt/TAUR*abs(log(dt/TAUR));    	
+
+#ifdef STAT
+fem.stat.r = r;
+fem.stat.M = M;
+fem.stat.R = R;
+#endif
 
     if (uHeff>0.){ 
        if (uHeff>M) alfa=alpha+dt/2.*M;

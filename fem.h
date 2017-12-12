@@ -26,6 +26,8 @@ It does also contains the definition of many constants for the solver, and for s
 #include <gsl/gsl_histogram.h>
 #endif
 
+#include "feellgoodSettings.h"
+
 #include "ANN.h" // ct "ANN/ANN.h"		// ANN declarations
 #include "gmm/gmm_kernel.h"  // ct gmm_kernel.h plutôt que gmm.h , qui appelle des fichiers de getfem
 #include "gmm/gmm_precond_diagonal.h" //ct
@@ -79,37 +81,6 @@ const int D = 3;         /**< dimension, required by ANN for kdTree */
 const double invD = 1./(double)D;/**< convenient const value */
 const size_t NCLASSES=100;/**< number of BIN for statistics */
 const double HMAX=1e6;/**< maximum field value ?? (to check) */
-
-/* for statics 
-const double EPSILON = 1e-40;
-const double DUMAX   = 0.1;
-const double DTMIN   = 1e-14;
-const double DTMAX   = 1.e-5;
-*/
-
-/* for dynamics */
-
-/** \f$ \epsilon \f$ is smallest possible value (for what value ? to check) */
-const double EPSILON = 1e-40;
-
-/** min for du step */
-const double DUMIN   = 1e-9;	//1e-6
-
-/** max for du step */
-const double DUMAX   = 0.02;	// 0.02
-
-/** minimum step time for time integrator */
-const double DTMIN   = 1e-14;
-
-/** maximum step time for time integrator */
-const double DTMAX   = 1e-7;	// 1e-7
-
-/** no idea */
-const double TAUR    = 100.*DTMAX;
-
-
-const double mu0 = 4.*M_PI*1e-7;/**< \f$ \mu_0 = 4 \pi 10^{-7} \f$ */
-const double nu0 = 1./mu0;/**< \f$ \nu_0 = 1/\mu_0 \f$ */
 
 static const int P = 9;/**< constant parameter for some scalfmm templates */
 
@@ -266,11 +237,13 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
     gmm::diagonal_precond <read_matrix>  *prc;/**< diagonal preconditionner */
     //gmm::ilutp_precond < read_matrix > *prc;
     map <pair<string,int>,double> param;/**< a map to store different parameters of a simulation, such as suppression of the charges on some surfaces or not, the material parameter values as \f$ Ms \f$ or \f$ \alpha \f$  */
-    
-Stat stat;/**< to build some histograms  */
+
+#ifdef STAT
+    Stat stat;/**< to build some histograms  */
+#endif
 
     ANNkd_tree* kdtree;/**< a kdtree to find efficiently the closest set of nodes to a physical point in the mesh  */
-    ANNpointArray pts;/**< container for the building of the kdtree */
+    ANNpointArray pts;/**< container for the building of the kdtree (handled by ANN library) */
     };
 
 /** \struct Regions
