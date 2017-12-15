@@ -1,10 +1,10 @@
-#include "fem.h"
+#include "linear_algebra.h"
 
 /*----------------------------------------------------------------------*/
 /* Construction de la base de projection du plan tangent  	    	*/
 /*----------------------------------------------------------------------*/
 
-void base_projection(Fem &fem) 
+void LinAlgebra::base_projection(Fem &fem) 
 {
 const int NOD = fem.NOD;
     

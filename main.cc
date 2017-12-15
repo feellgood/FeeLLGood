@@ -1,10 +1,14 @@
-#include "fem.h"
+// #include "fem.h"
+
+#include "linear_algebra.h"
 #include "fmm_demag.h"
 
 int main()
 {
 Settings mySettings = Settings();
+LinAlgebra linAlg = LinAlgebra();
 Fem fem;
+
 OctreeClass *tree    = nullptr;
 KernelClass *kernels = nullptr; 
 
@@ -102,7 +106,7 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
                 break;
                 }
 
-            int err=vsolve(fem,mySettings, nt);  
+            int err = linAlg.vsolve(fem,mySettings, nt);  
             if (err) { cout << "err : " << err << endl;
 		    	flag++; dt*= 0.5; mySettings.dt=dt; continue;}
 

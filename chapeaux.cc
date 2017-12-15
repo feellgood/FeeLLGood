@@ -1,4 +1,4 @@
-#include "fem.h"
+#include "linear_algebra.h"
 
 void chapeaux(Fem &fem)
 {

@@ -42,7 +42,7 @@ set( CMAKE_CXX_FLAGS_RELEASE "-DORD2 -DNDEBUG -DNSTAT -Wall -frounding-math -std
 
 # file(GLOB sources . *.cc)
 
-SET( SOURCES feellgoodSettings.h main.cc init_distrib.cc cputime.cc dialog.cc affichage.cc
+SET( SOURCES feellgoodSettings.h linear_algebra.h main.cc init_distrib.cc cputime.cc dialog.cc affichage.cc
 	saveH.cc lecture.cc femutil.cc chapeaux.cc restoresol.cc direction.cc
 	recentrage.cc u_moy.cc v_moy.cc energy.cc saver.cc savesol.cc savecfg_vtk.cc
 	vsolve.cc base_projection.cc integrales.cc evolution.cc reset.cc tiny.h)

@@ -1,4 +1,4 @@
-#include "fem.h"
+#include "linear_algebra.h"
 #include "tiny.h"
 
 /**
@@ -6,7 +6,7 @@
   Schema en theta pr ech
  */
 
-void integrales(Fem &fem,Settings &settings, Tet &tet, gmm::dense_matrix <double> &AE, vector <double> &BE)
+void LinAlgebra::integrales(Fem &fem,Settings &settings, Tet &tet, gmm::dense_matrix <double> &AE, vector <double> &BE)
 {
 const int N   = Tet::N;
 const int NPI = Tet::NPI;
@@ -217,7 +217,7 @@ fem.stat.R = R;
 //cout << "temps integrales: "<< diff_t << endl;
 }
 
-void integrales(Fem &fem,Settings &settings, Fac &fac, gmm::dense_matrix <double> &AE, vector <double> &BE)
+void LinAlgebra::integrales(Fem &fem,Settings &settings, Fac &fac, gmm::dense_matrix <double> &AE, vector <double> &BE)
 {
 const int N   = Fac::N;
 const int NPI = Fac::NPI;

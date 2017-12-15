@@ -1,10 +1,10 @@
-#include "fem.h"
+#include "linear_algebra.h"
 
 #include "gmm/gmm_iter.h"
 #include "gmm/gmm_solver_bicgstab.h"
 #include "gmm/gmm_solver_gmres.h"
 
-int vsolve(Fem &fem,Settings &settings, long nt)
+int LinAlgebra::vsolve(Fem &fem,Settings &settings, long nt)
 {
 time_t timeStart;
 
@@ -79,22 +79,22 @@ time(&timeStart);
 if (!nt) {
     IF_VERBOSE(fem) { cout << "%5t computing prc %30T.";fflush(NULL); }
 
-    fem.prc = new gmm::diagonal_precond <read_matrix> (Kr);
-//    fem.prc = new gmm::ilutp_precond < read_matrix > (Kr,1,1e-30);
+    prc = new gmm::diagonal_precond <read_matrix> (Kr); // prc est public dans linAlgebra
+//    prc = new gmm::ilutp_precond < read_matrix > (Kr,1,1e-30);
 	time(&timeEnd);    
 	IF_VERBOSE(fem) { cout << "elapsed time = " << difftime(timeEnd,timeStart) << "s" << endl; }
     }
 else if (!(nt % REFRESH_PRC)) {
-    delete fem.prc;
+    delete prc;
     IF_VERBOSE(fem) { cout << "%5t computing prc %30T.";fflush(NULL); }
-    fem.prc = new gmm::diagonal_precond <read_matrix> (Kr);
-//    fem.prc = new gmm::ilutp_precond < read_matrix > (Kr,1,1e-30);
+    prc = new gmm::diagonal_precond <read_matrix> (Kr);
+//    prc = new gmm::ilutp_precond < read_matrix > (Kr,1,1e-30);
  	time(&timeEnd);    
 	IF_VERBOSE(fem) { cout << "elapsed time = " << difftime(timeEnd,timeStart) << "s" << endl; }
     } 
 
 time(&timeStart);
-gmm::bicgstab(Kr, Xw, Lr, *fem.prc, bicg_iter);
+gmm::bicgstab(Kr, Xw, Lr, *prc, bicg_iter);
 
 if (!(bicg_iter.converged())) {
     time(&timeEnd);

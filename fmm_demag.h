@@ -4,12 +4,62 @@ this header is the interface to scalfmm. Its purpose is to prepare an octree for
 
 #include "tiny.h"
 
+// scalFMM includes
+
+#include "Utils/FTic.hpp"
+#include "Utils/FParameters.hpp"
+
+#include "Components/FTypedLeaf.hpp"
+#include "Components/FParticleType.hpp"
+
+#include "Containers/FOctree.hpp"
+#include "Containers/FVector.hpp"
+
+#include "Core/FFmmAlgorithmThreadTsm.hpp"
+
+/*
+#include "Kernels/Spherical/FSphericalKernel.hpp"
+#include "Kernels/Spherical/FSphericalCell.hpp"
+*/
+
+#include "Kernels/P2P/FP2PParticleContainerIndexed.hpp"
+
+#include "Kernels/Rotation/FRotationKernel.hpp"
+#include "Kernels/Rotation/FRotationCell.hpp"
+
+/*
+#include "Kernels/Chebyshev/FChebCell.hpp"
+#include "Kernels/Chebyshev/FChebMatrixKernel.hpp"
+#include "Kernels/Chebyshev/FChebKernel.hpp"
+#include "Kernels/Chebyshev/FChebSymKernel.hpp"
+*/
+
+#ifndef FMM_DEMAG_H
+#define FMM_DEMAG_H
+
+static const int P = 9;/**< constant parameter for some scalfmm templates */
+
+// pb avec ces templates : ils prennent un argument de plus en 1.5.0 //ct
+//typedef FTypedRotationCell<P>            CellClass; ct
+typedef FTypedRotationCell<double,P>            CellClass; /**< convenient typedef for the definition of cell type in scalfmm  */
+
+//typedef FP2PParticleContainerIndexed<>         ContainerClass; //ct
+typedef FP2PParticleContainerIndexed<double>         ContainerClass; /**< convenient typedef for the definition of container for scalfmm */
+
+typedef FTypedLeaf<double, ContainerClass >                      LeafClass;/**< convenient typedef for the definition of leaf for scalfmm  */
+
+typedef FOctree<double, CellClass, ContainerClass , LeafClass >  OctreeClass;/**< convenient typedef for the definition of the octree for scalfmm */
+
+typedef FRotationKernel<double, CellClass, ContainerClass, P >          KernelClass;/**< convenient typedef for the kernel for scalfmm */
+
+typedef FFmmAlgorithmThreadTsm<OctreeClass, CellClass, ContainerClass, KernelClass, LeafClass > FmmClass;/**< convenient typedef for handling altogether the differents scalfmm object templates used in feellgood  */
+
+
 #ifndef IF_VERBOSE  // same goes for SYSTEM_ERROR
 #error "fem.h" must be #included before "fmm_demag.h"
 #endif
 
-#ifndef FMM_DEMAG_H
-#define FMM_DEMAG_H
+
 
 /** double redefinition for the parametrization of some scalfmm templates */
 #define FReal double // pour FReal  *ct*
