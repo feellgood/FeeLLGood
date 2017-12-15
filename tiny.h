@@ -25,11 +25,11 @@ template <typename T, int M, int N> inline void print(T A[M][N]) {
 
 /** scalar product of two vectors
 */
-template <typename T, int N> inline double sp(T X[N], T Y[N]) {
+template <typename T, int N> inline T sp(T X[N], T Y[N]) {
    T v=T(0);
    for (int i=0; i<N; i++) 
        v+= X[i]*Y[i];
-   return v;    // FIXME: the return type should be T, right?
+   return v;
    }
    
 

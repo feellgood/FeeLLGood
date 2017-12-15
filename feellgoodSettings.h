@@ -8,8 +8,8 @@
 #include <cmath>
 #include <string>
 
-#ifndef fellgoodSettings_h
-#define fellgoodSettings_h
+#ifndef feellgoodSettings_h
+#define feellgoodSettings_h
 
 
 typedef double triple[3];/**< a 3D point */
@@ -74,7 +74,7 @@ const double mu0 = 4.*M_PI*1e-7;/**< \f$ \mu_0 = 4 \pi 10^{-7} \f$ */
 const double nu0 = 1./mu0;/**< \f$ \nu_0 = 1/\mu_0 \f$ */
 
 /** \class Settings
-container class to store many setting parameters, such as file names, parameters for the solver, output file format.
+container class to store many setting parameters, such as file names, parameters for the solver, output file format. It also handles text user interation through terminal, and some parsing functions. 
 */
 class Settings{
 	public:

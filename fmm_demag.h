@@ -32,7 +32,7 @@ int init(Fem &fem, OctreeClass* &tree, KernelClass* &kernels, Args... kernelPreA
     FTic counter;
     const int NbLevels = 8; 
     const int SizeSubLevels = 6;
-    const unsigned int NbThreads  =  omp_get_max_threads();
+    const unsigned int NbThreads  =  omp_get_max_threads(); // open mp function
 
     omp_set_num_threads(NbThreads);
     IF_VERBOSE(fem) std::cout << "\n>> Using " << omp_get_max_threads() << " threads.\n" << std::endl;
@@ -313,7 +313,7 @@ delete [] corr;
 }
 
 template <int Hv>
-double potential(Fem &fem, Fac &fac, int i) // pourquoi c'est un template??? Hv est utilisé comme un booleen 
+double potential(Fem &fem, Fac &fac, int i) // template, mais Hv est utilisé comme un booleen 
 {
   double nx,ny,nz,Ms;
   nx=fac.nx;  ny=fac.ny;  nz=fac.nz; Ms=fac.Ms;

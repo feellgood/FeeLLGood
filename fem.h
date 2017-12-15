@@ -22,9 +22,11 @@ It does also contains the definition of many constants for the solver, and for s
 
 /* only pull GSL if needed */
 #ifdef STAT
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_histogram.h>
-#endif
+	#include <gsl/gsl_rng.h>
+	#include <gsl/gsl_histogram.h>
+	const size_t NCLASSES=100;/**< number of BIN for statistics */
+	const double HMAX=1e6;/**< maximum value */
+#endif //endif STAT
 
 #include "feellgoodSettings.h"
 
@@ -79,8 +81,8 @@ const pair<string,int> VERBOSE_KEY {"verbose", -1};
 
 const int D = 3;         /**< dimension, required by ANN for kdTree */
 const double invD = 1./(double)D;/**< convenient const value */
-const size_t NCLASSES=100;/**< number of BIN for statistics */
-const double HMAX=1e6;/**< maximum field value ?? (to check) */
+
+
 
 static const int P = 9;/**< constant parameter for some scalfmm templates */
 
@@ -181,7 +183,7 @@ massive container to grab altogether all parameters of a simulation, including m
 */
 struct Fem{
 	
-	int REG; /**< number of regions in the msh (to check) */
+	int REG; /**< number of regions in the msh file */
 	int NOD;/**< number of nodes in the corresponding container */
 	int FAC;/**< number of faces in the corresponding container */
 	int TET;/**< number of tetrahedron in the corresponding container */
@@ -251,11 +253,9 @@ double cputime();/**< convenient function to compute the duration of a simulatio
 
 /**
 function to dialog with user with terminal to fill fem structure, interacting with the user through cin. It also prints information about the simulation on the run, and to see what step in the sequence of field the solver is computing */
-void dialog(Fem& fem /**< [in,out] */, vector<Seq> &seq/**< [out] field sequence */);
+//void dialog(Fem& fem /**< [in,out] */, vector<Seq> &seq/**< [out] field sequence */);
 
 void lecture(Fem &fem,Settings &mySets, double scale, Regions *regions);/**< reading file function */
-
-void alloc_nodal(Fem &fem);/**< allocating function of what ? */
 
 void femutil(Fem &fem,Settings &settings);/**< utilitary function to affect fem struct */
 
@@ -265,9 +265,7 @@ void femutil_node(Fem &fem /**< [in,out] */);
 /** read the tetrahedron from a .msh file to the tetrahedron container in fem struct */
 void femutil_tet(Fem &fem /**< [in,out] */);
 
-/**
- read the faces from a .msh file to the face container in fem struct 
-*/
+/** read the faces from a .msh file to the face container in fem struct */
 void femutil_fac(Fem &fem /**< [in,out] */,Settings &settings /**< [in,out] */);
 
 /** no idea */
@@ -289,7 +287,9 @@ void direction(Fem &fem /**< [in,out] */ );
 /**
 read a solution from a file (tsv formated) and initialize fem struct 
 */
-void restoresol(Fem& fem /**< [in,out] */ ,double scaling /**< [in] scaling factor for physical coordinates */, string *filename /**< [in] */ );
+void restoresol(Fem& fem /**< [in,out] */ ,
+	double scaling /**< [in] scaling factor for physical coordinates */,
+	string *filename /**< [in] */ );
 
 void init_distrib(Fem &fem);/**< computes an analytical initial magnetization distribution as a starting point for the simulation */
 
@@ -300,7 +300,9 @@ double u_moy(Fem &fem, int d);/**< computes the average magnetization */
 double v_moy(Fem &fem, int d);/**< computes what ? */
 
 void energy(Fem &fem,Settings &settings);/**< computes energies */
-bool recentrage(Fem &fem, double thres);/**< recentering algorithm for the study of the motion of an object, for example a domain wall. Mesh must be adequate. */
+
+/** recentering algorithm for the study of the motion of an object, for example a domain wall. Mesh must be adequate. */
+bool recentrage(Fem &fem, double thres/**< [in] translation parameter */);
 
 void saver(Fem &fem, Settings &settings, ofstream &fout, int nt);/**< saving function for a solution */
 void savecfg_vtk(Fem &fem,string baseName,double s, int nt, string *filename);/**< text file (vtk) writing function for a solution */
