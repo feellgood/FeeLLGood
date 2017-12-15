@@ -6,14 +6,14 @@
   Schema en theta pr ech
  */
 
-void integrales(Fem &fem, Tet &tet, gmm::dense_matrix <double> &AE, vector <double> &BE)
+void integrales(Fem &fem,Settings &settings, Tet &tet, gmm::dense_matrix <double> &AE, vector <double> &BE)
 {
 const int N   = Tet::N;
 const int NPI = Tet::NPI;
 const int reg = tet.reg;
 
 pair <string,int> p;
-map <pair<string,int>,double> &param = fem.param;
+map <pair<string,int>,double> &param = settings.param;
 triple &Hext=fem.Hext;
 
 //cout << "Hext " << Hext[0] << "\t" << Hext[1] << "\t" << Hext[2] << endl;
@@ -48,7 +48,7 @@ double Abis = 2.0*A/J;
 double Kbis = 2.0*K/J;
 double K3bis = 2.0*K3/J;
 
-double dt = fem.dt;
+double dt = settings.dt;
 
 /*-------------------- INTERPOLATION --------------------*/
 double u_nod[3][N], u[3][NPI];
@@ -217,14 +217,14 @@ fem.stat.R = R;
 //cout << "temps integrales: "<< diff_t << endl;
 }
 
-void integrales(Fem &fem, Fac &fac, gmm::dense_matrix <double> &AE, vector <double> &BE)
+void integrales(Fem &fem,Settings &settings, Fac &fac, gmm::dense_matrix <double> &AE, vector <double> &BE)
 {
 const int N   = Fac::N;
 const int NPI = Fac::NPI;
 const int reg = fac.reg;
 
 pair <string,int> p;
-map <pair<string,int>,double> &param = fem.param;
+map <pair<string,int>,double> &param = settings.param;
 //triple &Hext=fem.Hext;
 //cout << "Hext " << Hext[0] << "\t" << Hext[1] << "\t" << Hext[2] << endl;
 //cout << "fem.Hext " << fem.Hext[0] << "\t" << fem.Hext[1] << "\t" << fem.Hext[2] << endl;

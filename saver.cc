@@ -1,13 +1,13 @@
 #include "fem.h"
 
-void saver(Fem &fem, ofstream &fout, int nt)
+void saver(Fem &fem, Settings &settings, ofstream &fout, int nt)
 {
 pair <string,int> p;
-p=make_pair("save_energies",-1);   int n1 = int(fem.param[p]);
-p=make_pair("take_photo",-1);      int n2 = int(fem.param[p]);
+p=make_pair("save_energies",-1);   int n1 = int(settings.param[p]);
+p=make_pair("take_photo",-1);      int n2 = int(settings.param[p]);
 
 double t  = fem.t;
-double dt = fem.dt;
+double dt = settings.dt;
 double dumax = dt * fem.vmax;
 double Ee, Ea, Ed, Ez, Etot, DW_z, DW_vz;
 Ee = fem.E[0]; Ea = fem.E[1]; Ed = fem.E[2]; Ez = fem.E[3]; 
@@ -28,8 +28,8 @@ fout << Ee <<"\t" << Ea <<"\t" << Ed <<"\t" << Ez <<"\t" << Etot <<"\t" << DW_z 
 if ((nt%n2)==0) {
 //    savecfg_gnuplot(fem,nt);
 //    savecfg_tecplot(fem,nt);
-    savecfg_vtk(fem,nt,nullptr);
-    savesol(fem,nt,nullptr);
+    savecfg_vtk(fem,settings.getSimName(),settings.getScale(),nt,nullptr);
+    savesol(fem,settings.getSimName(),settings.getScale(),nt,nullptr);
 
 #ifdef STAT
     savestat(fem,nt);

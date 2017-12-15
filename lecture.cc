@@ -1,15 +1,15 @@
 #include "fem.h"
 #define DEBUG 0
 
-void lecture(Fem &fem, double scale, Regions *regions)  // regions may be NULL
+void lecture(Fem &fem,Settings &mySets, double scale, Regions *regions)  // regions may be NULL
 {
 int NOD, ELEM, tags, reg, TYP;
 double value;
 string trash, symb;
 pair <string,int> p;
 
-string str = fem.pbname;
-ifstream msh(str.c_str());   // ouverture du fichier probleme en lecture
+string str = mySets.getPbName();
+ifstream msh(str);   // ouverture du fichier probleme en lecture
 if (!msh){
     IF_VERBOSE(fem) cerr << "Impossible d'ouvrir le fichier " << str << endl;
     SYSTEM_ERROR;}
@@ -43,7 +43,7 @@ if (scale == 0.0){
     exit(1);
 #endif
     }
-fem.scale = scale;
+mySets.setScale( scale );
 
 msh >> NOD;        // lecture des noeuds
 fem.NOD = NOD; 
@@ -145,7 +145,7 @@ while(msh >> symb){  // lecture des parametres
     msh >> reg >> value;
 //cout << symb << '\t' << reg << '\t' << value << endl;
     p = make_pair(symb,reg);
-    fem.param[p] = value;
+    mySets.param[p] = value;
     if (msh.fail()){
     #ifdef LIBRARY
         throw runtime_error("error while reading parameters");

@@ -1,12 +1,12 @@
 #include "fem.h"
 
-void savecfg_vtk(Fem &fem, int nt, string *filename)  // filename may be NULL
+void savecfg_vtk(Fem &fem,string baseName,double s, int nt, string *filename)  // filename may be NULL
 {
 string str;
 
 if (filename) { str = *filename; }
 else{
-    str = fem.simname + "_" + to_string(fem.SEQ) + "_B" + to_string(fem.Bext) + "_iter" + to_string(nt) + ".vtk";
+    str = baseName + "_" + to_string(fem.SEQ) + "_B" + to_string(fem.Bext) + "_iter" + to_string(nt) + ".vtk";
  //<< boost::format("_%d_B%6f_iter%d.vtk") % fem.SEQ % fem.Bext % nt;
     }
 
@@ -17,7 +17,7 @@ if (!fout){
     IF_VERBOSE(fem) cerr << "pb ouverture fichier : " << str << "en ecriture" << endl;
     SYSTEM_ERROR;}
 
-str = fem.simname + " time : " + to_string(fem.t);  
+str = baseName + " time : " + to_string(fem.t);  
 // << boost::format(" time : %+20.10e") % fem.t;
 
 const int NOD = fem.NOD;

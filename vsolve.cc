@@ -4,7 +4,7 @@
 #include "gmm/gmm_solver_bicgstab.h"
 #include "gmm/gmm_solver_gmres.h"
 
-int vsolve(Fem &fem, long nt)
+int vsolve(Fem &fem,Settings &settings, long nt)
 {
 time_t timeStart;
 
@@ -38,7 +38,7 @@ for (int t=0; t<TET; t++){
     Tet &tet = fem.tet[t];
     gmm::dense_matrix <double> K(3*Tet::N,3*Tet::N), Kp(2*Tet::N,2*Tet::N);
     vector <double> L(3*Tet::N), Lp(2*Tet::N);
-    integrales(fem, tet, K, L);     
+    integrales(fem,settings, tet, K, L);     
     projection<Tet>(fem, tet, K, L, Kp, Lp);
     assemblage<Tet>(fem, tet, Kp, Lp, Kw, Lw);    
 }
@@ -47,7 +47,7 @@ for (int t=0; t<FAC; t++){
     Fac &fac = fem.fac[t];
     gmm::dense_matrix <double> K(3*Fac::N,3*Fac::N), Kp(2*Fac::N,2*Fac::N);
     vector <double> L(3*Fac::N), Lp(2*Fac::N);
-    integrales(fem, fac, K, L);     
+    integrales(fem,settings, fac, K, L);     
     projection<Fac>(fem, fac, K, L, Kp, Lp);
     assemblage<Fac>(fem, fac, Kp, Lp, Kw, Lw);
     }
@@ -136,7 +136,7 @@ for (int i=0; i<NOD; i++) {
     double u2 = 0.0;
     for (int d=0; d<3; d++) {
         node.v[d]  = vp*node.ep[d] + vq*node.eq[d];
-        node.u[d] = node.u0[d] + fem.dt * node.v[d];
+        node.u[d] = node.u0[d] + settings.dt * node.v[d];
         u2+= sq (node.u[d]);
         }
     for (int d=0; d<3; d++)

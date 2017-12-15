@@ -141,10 +141,8 @@ computes the demag field
 */
 template <int Hv, class CellClass, class ContainerClass, class LeafClass, class OctreeClass,
           class KernelClass, class FmmClass, typename... Args>
-void demag(Fem &fem, OctreeClass *tree, KernelClass *kernels, Args... kernelPreArgs)
+void demag(Fem &fem,Settings &settings, OctreeClass *tree, KernelClass *kernels, Args... kernelPreArgs)
 {
-        // changed return type to void, because nothing is returned (bcarvello, 2017)
-
 FTic counter;
 FmmClass algo(tree, kernels);
 
@@ -171,7 +169,7 @@ for (int t=0; t<TET; t++){
     const int N   = Tet::N;
     const int NPI = Tet::NPI;
     pair <string,int> p = make_pair("Js",tet.reg);
-    double Ms = nu0 * fem.param[p];
+    double Ms = nu0 * settings.param[p];
 
    /*---------------- INTERPOLATION ---------------*/
     double u_nod[3][N];

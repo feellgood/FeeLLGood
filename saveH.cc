@@ -1,10 +1,9 @@
 #include "fem.h"
 #include "tiny.h"
 
-void saveH(Fem &fem, int nt)
+void saveH(Fem &fem,string baseName,double scale, int nt)
 {
-string str;
-str = fem.simname + "_" + to_string(fem.SEQ) + "_B" + to_string(fem.Bext) + "_iter" + to_string(nt) + ".hdm";
+string str = baseName + "_" + to_string(fem.SEQ) + "_B" + to_string(fem.Bext) + "_iter" + to_string(nt) + ".hdm";
 
 cout << " " << str << endl <<" -------------------" << endl << endl;
 
@@ -15,7 +14,6 @@ if (!fout){
 fout << "#time : "<< fem.t << endl;
 
 const int    TET   = fem.TET;
-const double scale = fem.scale;
 
 for (int t=0; t<TET; t++){
     Tet &tet = fem.tet[t];

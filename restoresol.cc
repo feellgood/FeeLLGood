@@ -19,7 +19,7 @@ inline T str2num(const std::string& s)
    return x;
  }
 
-void restoresol(Fem& fem, string *filename)  // filename may be NULL
+void restoresol(Fem& fem,double scaling, string *filename)  // filename may be NULL
 {
 string str("sol.in");
 
@@ -50,9 +50,9 @@ for (int i=0; i<NOD; i++){
     fin >> i_ >> node_.x >> node_.y >> node_.z;
     fin >> node.u[0] >> node.u[1] >> node.u[2] >> node.phi;
 
-    node_.x*=fem.scale;
-    node_.y*=fem.scale;
-    node_.z*=fem.scale;
+    node_.x *= scaling;
+    node_.y *= scaling;
+    node_.z *= scaling;
 
     double d2=sq(node.x-node_.x) + sq(node.y-node_.y) + sq(node.z-node_.z);
 

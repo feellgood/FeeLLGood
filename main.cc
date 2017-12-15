@@ -3,6 +3,7 @@
 
 int main()
 {
+Settings mySettings = Settings();
 Fem fem;
 OctreeClass *tree    = nullptr;
 KernelClass *kernels = nullptr; 
@@ -14,17 +15,17 @@ gsl_histogram_set_ranges_uniform (fem.stat.h, -HMAX, HMAX);
 
 vector<Seq> seq;
 
-dialog(fem, seq);
-lecture(fem, 0.0, nullptr);
-femutil(fem);
+mySettings.dialog(seq);
+lecture(fem,mySettings, 0.0, nullptr);
+femutil(fem,mySettings);
 chapeaux(fem);
 affichage(fem);
 
 fem.t=0.;
 pair <string,int> p; p= make_pair("restore",-1);
-int restore = int(fem.param[p]);
+int restore = int(mySettings.param[p]);
 if (restore)
-    restoresol(fem, nullptr);
+    restoresol(fem,mySettings.getScale(), nullptr);
 else
     init_distrib(fem);
 
@@ -33,7 +34,7 @@ direction(fem);
 
 fmm::init< CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem, tree, kernels);
 
-double dt0=fem.dt;
+double dt0= mySettings.dt;
 
 int nseq=0;
 for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
@@ -56,7 +57,7 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
 
 	cout << "Bext : " << Bext*a[0] << "\t" << Bext*a[1] << "\t" << Bext*a[2] << endl;
 
-        string str = fem.simname +"_"+ to_string(fem.SEQ) + "_B" + to_string(fem.Bext) + ".evol";// +++ *ct*	
+        string str = mySettings.getSimName() +"_"+ to_string(fem.SEQ) + "_B" + to_string(fem.Bext) + ".evol";// +++ *ct*	
 	/*	
 	ostringstream ostr;
         ostr.str(""); ostr << fem.simname << boost::format("_%d_B%6f.evol") % fem.SEQ % fem.Bext; 
@@ -67,13 +68,13 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
             cerr << "erreur ouverture fichier" << endl; exit(1);
             }
 
-        fmm::demag<0, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem, tree, kernels);
+        fmm::demag<0, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree, kernels);
 
 #ifdef ORD2
-        fmm::demag<1, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem, tree, kernels);
+        fmm::demag<1, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree, kernels);
 #endif
 	    fem.DW_z  = 0.0;
-        energy(fem); 
+        energy(fem,mySettings); 
 
 	    evolution(fem);
 
@@ -85,11 +86,11 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
 	    fem.DW_z  = 0.0;
 
 	    int nt = 0;
-	    saver(fem,fout,nt);
+	    saver(fem,mySettings,fout,nt);
 
         double start_cpu = cputime();
 
-        while (t < fem.tf) {
+        while (t < mySettings.tf) {
             cout << "\n ------------------------------\n";
             if (flag) cout << "    t  : same (" << flag << ")" << endl;
 		else cout << "nt = " << nt << ", t = " << t << endl; // *ct*
@@ -101,9 +102,9 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
                 break;
                 }
 
-            int err=vsolve(fem, nt);  
+            int err=vsolve(fem,mySettings, nt);  
             if (err) { cout << "err : " << err << endl;
-		    	flag++; dt*= 0.5; fem.dt=dt; continue;}
+		    	flag++; dt*= 0.5; mySettings.dt=dt; continue;}
 
             double dumax = dt*fem.vmax;
             //cout << boost::format("\t dumax = %2.2e,  vmax = %2.2e") % dumax % fem.vmax<< endl;// *ct*
@@ -115,16 +116,16 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
 */
 
             if (dumax > DUMAX) { 
-			flag++; dt*= 0.5; fem.dt=dt; continue;}
+			flag++; dt*= 0.5; mySettings.dt=dt; continue;}
           
         fmm::demag<0, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> 
-		(fem, tree, kernels); // Hd(u)
+		(fem,mySettings, tree, kernels); // Hd(u)
 #ifdef ORD2
         fmm::demag<1, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> 
-		(fem, tree, kernels); // Hd(v)
+		(fem,mySettings, tree, kernels); // Hd(v)
 #endif
 
-            energy(fem);
+            energy(fem,mySettings);
 
          /*   cout << boost::format("\t energy %+2.3e") % fem.Etot << endl;
               cout << boost::format("\t   (dE/dt %+2.2e, av2 %+2.2e)")
@@ -145,16 +146,16 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
             evolution(fem); t+=dt; fem.t=t; nt++; flag=0;
 	    recentrage(fem, 0.1);
 
-            saver(fem,fout,nt);
+            saver(fem,mySettings,fout,nt);
 
             dt = min(1.1*dt, DTMAX); 
-	    fem.dt=dt;
+	    mySettings.dt=dt;
             }//endwhile
 
         if (dt < DTMIN) cout << " aborted:  dt < DTMIN";
-        saver(fem,fout,nt);
-        savecfg_vtk(fem,nt,nullptr);
-        savesol(fem,nt,nullptr);
+        saver(fem,mySettings,fout,nt);
+        savecfg_vtk(fem,mySettings.getSimName(),mySettings.getScale(),nt,nullptr);
+        savesol(fem,mySettings.getSimName(),mySettings.getScale(),nt,nullptr);
 
         double end_cpu = cputime();
         double dureecpu = end_cpu - start_cpu;
@@ -164,7 +165,7 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
 
 //      initialisation du temps pour l'iteration en champ suivante
         fem.t=0.;
-        fem.dt=dt0;
+        mySettings.dt=dt0;
         }//endfor Bext
 
     }//endfor it

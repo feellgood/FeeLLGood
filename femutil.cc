@@ -121,12 +121,12 @@ fem.vol = voltot;
 
 }
 
-void femutil_facMs(Fem &fem)
+void femutil_facMs(Fem &fem,Settings &settings /**< [in,out] */)
 {
 const int FAC = fem.FAC;
 const int TET = fem.TET;
 pair <string,int> p;
-map <pair<string,int>,double> &param = fem.param;
+map <pair<string,int>,double> &param = settings.param;
 
 // decomposition des tetraedres en elements de surface
 set<Fac, less_than> sf;
@@ -269,12 +269,12 @@ for (int f=0; f<FAC; f++){
 fem.surf = surftot;
 }
 
-void femutil(Fem &fem)
+void femutil(Fem &fem,Settings &settings)
 {
 femutil_node(fem);
 femutil_tet(fem);
 femutil_fac(fem);
-femutil_facMs(fem);
+femutil_facMs(fem,settings);
 cout << "surface  : " << fem.surf << endl;
 cout << "volume   : " << fem.vol << endl;
 }

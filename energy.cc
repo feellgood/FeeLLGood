@@ -1,13 +1,13 @@
 #include "fem.h"
 #include "tiny.h"
 
-void energy(Fem &fem)
+void energy(Fem &fem,Settings &settings)
 {
 const int TET = fem.TET;
 const int FAC = fem.FAC;
 
 pair <string,int> p;
-map <pair<string,int>,double> &param = fem.param;
+map <pair<string,int>,double> &param = settings.param;
 triple &Hext=fem.Hext;
 
 fem.Etot = 0.0;
@@ -22,8 +22,8 @@ for (int t=0; t<TET; t++) {
 	
     Tet &tet = fem.tet[t];
     const int reg = tet.reg;
-    p = make_pair("Ae", reg);   double Ae = fem.param[p];
-    p = make_pair("Js", reg);   double Js = fem.param[p];  double Ms = nu0 * fem.param[p];
+    p = make_pair("Ae", reg);   double Ae = settings.param[p];
+    p = make_pair("Js", reg);   double Js = settings.param[p];  double Ms = nu0 * settings.param[p];
 
     p=make_pair("Ka",reg);      double K = param[p];		//cout << ", Ka=" << K;
     p=make_pair("Ka3",reg);     double K3 = param[p];   	//cout << ", Ka3=" << K3;

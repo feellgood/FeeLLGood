@@ -105,7 +105,7 @@ typedef gmm::rsvector <double>   read_vector;/**< convenient macro */
 typedef gmm::row_matrix	<write_vector>   write_matrix;/**< convenient macro */
 typedef gmm::row_matrix	<read_vector>    read_matrix;/**< convenient macro */
 
-typedef double triple[3];/**< a 3D point */
+
 
 /** \struct Node
 Node is containing physical point of coordinates \f$ (x,y,z) \f$, magnetization value at p. 
@@ -160,15 +160,7 @@ double dady[N][NPI];/**< variations of hat function along y directions */
 double dadz[N][NPI];/**< variations of hat function along z directions */
 };
 
-/** \struct Seq
-Seq describe a sequence of field from \f$ B_{ini} \f$ to \f$ B_{fin} \f$ by steps \f$ dB \f$ with orientation \f$ \vec{a} \f$, should be a unit vecor.
-*/    
-struct Seq{
-double Bini;/**< starting value */
-double Bfin;/**< ending value */
-double dB;/**< step field */
-triple a;/**< direction (should be normalized) */
-};
+
 
 /** \struct Stat
 used to build some statistics, with GSL library
@@ -188,14 +180,13 @@ struct Stat{
 massive container to grab altogether all parameters of a simulation, including mesh geometry, containers for the mesh
 */
 struct Fem{
-	string  simname;/**< simulation name */
-	string pbname;     /**< mesh file, gmsh file format */
+	
 	int REG; /**< number of regions in the msh (to check) */
 	int NOD;/**< number of nodes in the corresponding container */
 	int FAC;/**< number of faces in the corresponding container */
 	int TET;/**< number of tetrahedron in the corresponding container */
 	int SRC;/**< number of sources for scalfmm */
-	int SEQ;/**< number of sequences ? (to check) */
+	int SEQ;/**< number of sequences, usefull to define a vector applied field eventually varying in time */
 	double cx;/**< x axis of what? */
 	double cy;/**< y axis of what? */
 	double cz;/**< z axis of what? */
@@ -205,13 +196,12 @@ struct Fem{
 	double diam;/**< diameter of the mesh (if a wire) */
 	double surf;/**< total surface */
 	double vol;/**< total volume of the mesh */
-	double scale;/**< scaling factor from gmsh files to feellgood */
+	
 	double fmm_normalizer;/**< no idea; probably normalizing constant for the computation of the demag field */
 	double as[3];/**< no idea */
 	double locmax;/**< no idea */
 	double t;/**< physical current time of the simulation */
-	double tf;/**< end time of the simulation */
-	double dt;/**< step time of the simulation */
+	
 	double vmax;/**< maximum speed of what ? */
 
 	double E0[4];/**< table to store initial energy values <br> 
@@ -236,7 +226,7 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
     triple Hext;/**< external applied field direction (should be normalized) */
     gmm::diagonal_precond <read_matrix>  *prc;/**< diagonal preconditionner */
     //gmm::ilutp_precond < read_matrix > *prc;
-    map <pair<string,int>,double> param;/**< a map to store different parameters of a simulation, such as suppression of the charges on some surfaces or not, the material parameter values as \f$ Ms \f$ or \f$ \alpha \f$  */
+    //map <pair<string,int>,double> param;
 
 #ifdef STAT
     Stat stat;/**< to build some histograms  */
@@ -255,23 +245,19 @@ struct Regions{
     };
 
 double cputime();/**< convenient function to compute the duration of a simulation */
-void extract_comment(istream &flux);/**< parser */
 
-/** 
-\return square of a number \f$ x^2 \f$
-*/
-inline double sq(double x /**< [in] */ ) {return x*x;}
+
 
 
 /**
 function to dialog with user with terminal to fill fem structure, interacting with the user through cin. It also prints information about the simulation on the run, and to see what step in the sequence of field the solver is computing */
 void dialog(Fem& fem /**< [in,out] */, vector<Seq> &seq/**< [out] field sequence */);
 
-void lecture(Fem &fem, double scale, Regions *regions);/**< reading file function */
+void lecture(Fem &fem,Settings &mySets, double scale, Regions *regions);/**< reading file function */
 
 void alloc_nodal(Fem &fem);/**< allocating function of what ? */
 
-void femutil(Fem &fem);/**< utilitary function to affect fem struct */
+void femutil(Fem &fem,Settings &settings);/**< utilitary function to affect fem struct */
 
 /** read the nodes from a .msh file to the node container in fem struct */
 void femutil_node(Fem &fem /**< [in,out] */);
@@ -282,10 +268,10 @@ void femutil_tet(Fem &fem /**< [in,out] */);
 /**
  read the faces from a .msh file to the face container in fem struct 
 */
-void femutil_fac(Fem &fem /**< [in,out] */);
+void femutil_fac(Fem &fem /**< [in,out] */,Settings &settings /**< [in,out] */);
 
 /** no idea */
-void femutil_facMs(Fem &fem /**< [in,out] */);
+void femutil_facMs(Fem &fem /**< [in,out] */,Settings &settings /**< [in,out] */);
 
 /**
 computes the hat functions for all containers
@@ -303,44 +289,37 @@ void direction(Fem &fem /**< [in,out] */ );
 /**
 read a solution from a file (tsv formated) and initialize fem struct 
 */
-void restoresol(Fem& fem /**< [out] */ , string *filename /**< [in] */ );
+void restoresol(Fem& fem /**< [in,out] */ ,double scaling /**< [in] scaling factor for physical coordinates */, string *filename /**< [in] */ );
 
 void init_distrib(Fem &fem);/**< computes an analytical initial magnetization distribution as a starting point for the simulation */
 
 
-/**
-in place normalizing function of vector
-a */
-inline void normalize(triple &a /**< [in,out] */)
-{
-double norme=sqrt(sq(a[0])+sq(a[1])+sq(a[2]));
-a[0]/= norme;a[1]/= norme;a[2]/= norme;
-}
+
 
 double u_moy(Fem &fem, int d);/**< computes the average magnetization */
 double v_moy(Fem &fem, int d);/**< computes what ? */
 
-void energy(Fem &fem);/**< computes energies */
+void energy(Fem &fem,Settings &settings);/**< computes energies */
 bool recentrage(Fem &fem, double thres);/**< recentering algorithm for the study of the motion of an object, for example a domain wall. Mesh must be adequate. */
 
-void saver(Fem &fem, ofstream &fout, int nt);/**< saving function for a solution */
-void savecfg_vtk(Fem &fem, int nt, string *filename);/**< text file (vtk) writing function for a solution */
-void savesol(Fem &fem, int nt, string *filename);/**< text file (tsv) writing function for a solution */
+void saver(Fem &fem, Settings &settings, ofstream &fout, int nt);/**< saving function for a solution */
+void savecfg_vtk(Fem &fem,string baseName,double s, int nt, string *filename);/**< text file (vtk) writing function for a solution */
+void savesol(Fem &fem,string baseName,double s, int nt, string *filename);/**< text file (tsv) writing function for a solution */
 void savestat(Fem &fem, int nt);/**< file writing function for the statistics (if any) */
-void saveH(Fem &fem, int nt);/**< save the field values */
+void saveH(Fem &fem,string baseName,double scale, int nt);/**< save the field values */
 
-int  vsolve(Fem &fem, long nt);/**< solver */
+int  vsolve(Fem &fem,Settings &settings, long nt);/**< solver */
 void base_projection(Fem &fem);/**< computes the projection of the llg operators on the elements */
 
 /**
 computes the contribution of the tetrahedron to the integrals
 */
-void integrales(Fem &fem, Tet &tet, gmm::dense_matrix <double> &AE, vector <double> &BE);
+void integrales(Fem &fem,Settings &settings, Tet &tet, gmm::dense_matrix <double> &AE, vector <double> &BE);
 
 /**
 computes the contribution of the surface to the integrals
 */
-void integrales(Fem &fem, Fac &fac, gmm::dense_matrix <double> &AE, vector <double> &BE);
+void integrales(Fem &fem,Settings &settings, Fac &fac, gmm::dense_matrix <double> &AE, vector <double> &BE);
 
 /**
 template function to compute projection of an element <br>
