@@ -6,14 +6,14 @@
 #ifndef linear_algebra_h
 #define linear_algebra_h
 
-typedef gmm::wsvector <double>   write_vector;/**< convenient macro */
-typedef gmm::rsvector <double>   read_vector;/**< convenient macro */
+typedef gmm::wsvector <double>   write_vector;/**< convenient typedef : a write sparse vector in GMM is a stl::map, complexity for both read and write an element is \f$ \log(N) \f$ */
+typedef gmm::rsvector <double>   read_vector;/**< convenient typedef : a read sparse vector */
 
 typedef gmm::row_matrix	<write_vector>   write_matrix;/**< convenient macro */
 typedef gmm::row_matrix	<read_vector>    read_matrix;/**< convenient macro */
 
 /** \class linAlgebra
-convenient class to grab altogether some part of the calculations involved using gmm for the solver at each timestep
+convenient class to grab altogether some part of the calculations involved using gmm solver at each timestep
 */
 class LinAlgebra
 {

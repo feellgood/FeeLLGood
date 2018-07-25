@@ -5,9 +5,6 @@ contains a namespace to perform simple printing and algebra simple operations on
 #include <iostream>
 #include <complex>
 
-using namespace std;
-
-
 /**
 \namespace tiny to grab altogether the templates to compute some linear algebra
 */
@@ -18,9 +15,9 @@ namespace tiny{
 template <typename T, int M, int N> inline void print(T A[M][N]) {
    for (int i=0; i<M; i++)
    for (int j=0; j<N; j++) {
-       cout << A[i][j];
+       std::cout << A[i][j];
        }
-   cout << endl;
+   std::cout << std::endl;
    }
 
 /** scalar product of two vectors

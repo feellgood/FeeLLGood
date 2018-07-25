@@ -174,7 +174,6 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
     double Bext;/**< amplitude of the applied field (to check) */
     triple Hext;/**< external applied field direction (should be normalized) */
     
-    //map <pair<string,int>,double> param;
 
 #ifdef STAT
 	Stat stat;/**< to build some histograms  */
@@ -241,7 +240,7 @@ void restoresol(Fem& fem /**< [in,out] */ ,
 void init_distrib(Fem &fem);/**< computes an analytical initial magnetization distribution as a starting point for the simulation */
 
 double u_moy(Fem &fem, int d);/**< computes the average magnetization */
-double v_moy(Fem &fem, int d);/**< computes what ? */
+double v_moy(Fem &fem, int d);/**< computes the average speed of a domain wall */
 
 void energy(Fem &fem,Settings &settings);/**< computes energies */
 
@@ -255,7 +254,7 @@ void saveH(Fem &fem,string baseName,double scale, int nt);/**< save the field va
 
 
 /**
-time evolution : one step
+time evolution : one step in time
 */
 void evolution(Fem& fem);
 

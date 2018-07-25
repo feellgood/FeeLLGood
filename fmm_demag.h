@@ -218,8 +218,7 @@ for (int t=0; t<TET; t++){
     Tet &tet = fem.tet[t];
     const int N   = Tet::N;
     const int NPI = Tet::NPI;
-    pair <string,int> p = make_pair("Js",tet.reg);
-    double Ms = nu0 * settings.param[p];
+    double Ms = nu0 * settings.param[ make_pair("Js",tet.reg) ];
 
    /*---------------- INTERPOLATION ---------------*/
     double u_nod[3][N];

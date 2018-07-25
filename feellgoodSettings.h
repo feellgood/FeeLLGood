@@ -65,7 +65,7 @@ const double DTMIN   = 1e-14;
 /** maximum step time for time integrator */
 const double DTMAX   = 1e-7;	// 1e-7
 
-/** no idea */
+/** reduced /f$ /tau /f$ */
 const double TAUR    = 100.*DTMAX;
 
 /* physical constants */

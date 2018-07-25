@@ -12,36 +12,30 @@ const int N   = Tet::N;
 const int NPI = Tet::NPI;
 const int reg = tet.reg;
 
-pair <string,int> p;
 map <pair<string,int>,double> &param = settings.param;
 triple &Hext=fem.Hext;
 
-//cout << "Hext " << Hext[0] << "\t" << Hext[1] << "\t" << Hext[2] << endl;
-//cout << "fem.Hext " << fem.Hext[0] << "\t" << fem.Hext[1] << "\t" << fem.Hext[2] << endl;
+double s = param[ make_pair("theta",-1) ];   	//cout << ", theta= " << s;
+double alpha = param[ make_pair("alpha",reg) ];  	//cout << ", alpha= " << alpha;
+double A = param[ make_pair("Ae",reg) ];    	//cout << ", Ae= " << A ;
+double J = param[ make_pair("Js",reg) ]+EPSILON;//cout <<", Js=" << J;
 
-p=make_pair("theta",-1);    double s = param[p];   	//cout << ", theta= " << s;
+double K = param[make_pair("Ka",reg)];   	//cout << ", Ka=" << K;
+double K3 = param[make_pair("Ka3",reg)];   	//cout << ", Ka3=" << K3;
 
-p=make_pair("alpha",reg);   double alpha = param[p];  	//cout << ", alpha= " << alpha;
-p=make_pair("Ae",reg);      double A = param[p];    	//cout << ", Ae= " << A ;
-p=make_pair("Js",reg);      double J = param[p]+EPSILON;//cout <<", Js=" << J;
-
-
-p=make_pair("Ka",reg);      double K = param[p];   	//cout << ", Ka=" << K;
-p=make_pair("Ka3",reg);     double K3 = param[p];   	//cout << ", Ka3=" << K3;
-
-p=make_pair("a1",reg);      double uk00 = param[p];  	//cout << ", a1=" << k0;
-p=make_pair("a2",reg);      double uk01 = param[p];  	//cout << ", a2=" << k1;
-p=make_pair("a3",reg);      double uk02 = param[p];  	//cout << ", a3=" << k2;
-p=make_pair("b1",reg);      double uk10 = param[p];  	//cout << ", a1=" << k0;
-p=make_pair("b2",reg);      double uk11 = param[p];  	//cout << ", a2=" << k1;
-p=make_pair("b3",reg);      double uk12 = param[p];  	//cout << ", a3=" << k2;
-p=make_pair("c1",reg);      double uk20 = param[p];  	//cout << ", a1=" << k0;
-p=make_pair("c2",reg);      double uk21 = param[p];  	//cout << ", a2=" << k1;
-p=make_pair("c3",reg);      double uk22 = param[p];  	//cout << ", a3=" << k2;
+double uk00 = param[make_pair("a1",reg)];  	//cout << ", a1=" << k0;
+double uk01 = param[make_pair("a2",reg)];  	//cout << ", a2=" << k1;
+double uk02 = param[make_pair("a3",reg)];  	//cout << ", a3=" << k2;
+double uk10 = param[make_pair("b1",reg)];  	//cout << ", a1=" << k0;
+double uk11 = param[make_pair("b2",reg)];  	//cout << ", a2=" << k1;
+double uk12 = param[make_pair("b3",reg)];  	//cout << ", a3=" << k2;
+double uk20 = param[make_pair("c1",reg)];  	//cout << ", a1=" << k0;
+double uk21 = param[make_pair("c2",reg)];  	//cout << ", a2=" << k1;
+double uk22 = param[make_pair("c3",reg)];  	//cout << ", a3=" << k2;
 
 /* deplacement de paroi par courant polarise en spin*/
-p=make_pair("UzDW",reg);      double Uz   = param[p];
-p=make_pair("betaDW",reg);    double beta = param[p];
+double Uz   = param[make_pair("UzDW",reg)];
+double beta = param[make_pair("betaDW",reg)];
 
 /* ces constantes permettent de factoriser beaucoup d'expressions  */
 double Abis = 2.0*A/J;
@@ -212,9 +206,6 @@ fem.stat.R = R;
 	    }
 	}
     }
-
-//cout << AE << endl;
-//cout << "temps integrales: "<< diff_t << endl;
 }
 
 void LinAlgebra::integrales(Fem &fem,Settings &settings, Fac &fac, gmm::dense_matrix <double> &AE, vector <double> &BE)
@@ -223,31 +214,26 @@ const int N   = Fac::N;
 const int NPI = Fac::NPI;
 const int reg = fac.reg;
 
-pair <string,int> p;
 map <pair<string,int>,double> &param = settings.param;
-//triple &Hext=fem.Hext;
-//cout << "Hext " << Hext[0] << "\t" << Hext[1] << "\t" << Hext[2] << endl;
-//cout << "fem.Hext " << fem.Hext[0] << "\t" << fem.Hext[1] << "\t" << fem.Hext[2] << endl;
 
-p=make_pair("theta",-1);    //double s = param[p];   	cout << ", theta= " << s;
-p=make_pair("alpha",reg);   //double alpha = param[p];  	cout << ", alpha= " << alpha;
+double Js = abs(param[make_pair("Js",reg)])+EPSILON;//cout << ", Js=" << Js;
+double Ks = param[make_pair("Ks",reg)];   	//cout << ", Ks=" << Ks;
 
-p=make_pair("Js",reg);      double J = abs(param[p])+EPSILON;//cout << ", Js=" << J;
-p=make_pair("Ks",reg);      double K = param[p];   	//cout << ", Ks=" << K;
+double uk00 = param[make_pair("a1",reg)];  	//cout << ", a1=" << k0;
+double uk01 = param[make_pair("a2",reg)];  	//cout << ", a2=" << k1;
+double uk02 = param[make_pair("a3",reg)];  	//cout << ", a3=" << k2;
 
-p=make_pair("a1",reg);      double uk00 = param[p];  	//cout << ", a1=" << k0;
-p=make_pair("a2",reg);      double uk01 = param[p];  	//cout << ", a2=" << k1;
-p=make_pair("a3",reg);      double uk02 = param[p];  	//cout << ", a3=" << k2;
-
-double Kbis = 2.0*K/J;
+double Kbis = 2.0*Ks/Js;
 /*-------------------- INTERPOLATION --------------------*/
 double u_nod[3][N], u[3][NPI];
 
 for (int i=0; i<N; i++){
     int i_= fac.ind[i];
     Node &node = fem.node[i_];
-    for (int d=0; d<3; d++)
-        u_nod[d][i]   = node.u0[d];
+    
+    u_nod[0][i]   = node.u0[0];
+    u_nod[1][i]   = node.u0[1];
+    u_nod[2][i]   = node.u0[2];
     }
 
 tiny::mult<double, 3, N, NPI> (u_nod, fac.a, u);
@@ -266,7 +252,4 @@ for (int npi=0; npi<NPI; npi++){
         BE[2*N+i]+= (Kbis_ai* w_uk0_u*uk02);
 	}
     }
-
-//cout << AE << endl;
-//cout << "temps integrales: "<< diff_t << endl;
 }
