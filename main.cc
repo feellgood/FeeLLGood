@@ -23,11 +23,13 @@ mySettings.dialog(seq);
 lecture(fem,mySettings, 0.0, nullptr);
 femutil(fem,mySettings);
 chapeaux(fem);
-affichage(fem);
+fem.affichage();
 
 fem.t=0.;
-pair <string,int> p; p= make_pair("restore",-1);
+
+pair <string,int> p = make_pair("restore",-1);
 int restore = int(mySettings.param[p]);
+
 if (restore)
     restoresol(fem,mySettings.getScale(), nullptr);
 else
@@ -158,13 +160,15 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
 
         if (dt < DTMIN) cout << " aborted:  dt < DTMIN";
         saver(fem,mySettings,fout,nt);
-        savecfg_vtk(fem,mySettings.getSimName(),mySettings.getScale(),nt,nullptr);
+        
+	if (mySettings.withVtk) savecfg_vtk(fem,mySettings.getSimName(),mySettings.getScale(),nt,nullptr);
+
         savesol(fem,mySettings.getSimName(),mySettings.getScale(),nt,nullptr);
 
         double end_cpu = cputime();
-        double dureecpu = end_cpu - start_cpu;
+        //double dureecpu = end_cpu - start_cpu;
         cout << "\n  * iterations: " << nt;
-        cout << "\n  * duree cpu: " << dureecpu << " s"<< endl << endl;
+        cout << "\n  * duree cpu: " << difftime(end_cpu,start_cpu) << " s"<< endl << endl;
         fout.close();
 
 //      initialisation du temps pour l'iteration en champ suivante

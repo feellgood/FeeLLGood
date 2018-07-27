@@ -52,6 +52,9 @@ using namespace std;
 	#define SYSTEM_ERROR {exit(1);} /**< macro to exit executable on some errors */
 #endif
 
+const bool U = true;
+const bool V = false;
+
 const int D = 3;         /**< dimension, required by ANN for kdTree */
 const double invD = 1./(double)D;/**< convenient const value */
 
@@ -182,7 +185,14 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
 
     ANNkd_tree* kdtree;/**< a kdtree to find efficiently the closest set of nodes to a physical point in the mesh  */
     ANNpointArray pts;/**< container for the building of the kdtree (handled by ANN library) */
-    };
+    
+
+/**
+printing function? (to check)
+*/
+void affichage(void);
+
+	}; // end struct fem definition
 
 /** \struct Regions
 contains two maps of the volume regions and surfaces numbers
@@ -222,10 +232,7 @@ computes the hat functions for all containers
 */
 void chapeaux(Fem &fem /**< [in,out] */ ); 
 
-/**
-printing function? (to check)
-*/
-void affichage(Fem &fem /**< [in,out] */ );
+
 
 /** no idea */
 void direction(Fem &fem /**< [in,out] */ );
