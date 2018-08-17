@@ -1,6 +1,8 @@
 #include "linear_algebra.h"
 #include "tiny.h"
 
+using namespace std;
+
 /**
   Calcul des matrices elementaires sur un element
   Schema en theta pr ech

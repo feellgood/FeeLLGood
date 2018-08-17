@@ -7,18 +7,18 @@
  * I don't know how to cleanly reset "fem.DW_vz".
  */
 
-void reset(Fem &fem)
+void Fem::reset(void)
 {
-const int NOD = fem.NOD;
+//const int NOD = fem.NOD;
 
 for (int i=0; i<NOD; i++) {
-    Node &node = fem.node[i];
-    for (int d=0; d<3; d++) {
-        node.u[d] = node.u0[d];
-        node.v[d] = node.v0[d];
+    //Node &node = fem.node[i];
+    for (int d=0; d<D; d++) {
+        node[i].u[d] = node[i].u0[d];
+        node[i].v[d] = node[i].v0[d];
     }
-    node.phi  = node.phi0;
-    node.phiv = node.phiv0;
+    node[i].phi  = node[i].phi0;
+    node[i].phiv = node[i].phiv0;
 }
 
 }

@@ -1,5 +1,7 @@
 #include "linear_algebra.h"
 
+using namespace std;
+
 void chapeaux(Fem &fem)
 {
 const int FAC = fem.FAC;

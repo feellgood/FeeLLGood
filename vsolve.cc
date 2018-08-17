@@ -5,6 +5,8 @@
 #include "gmm/gmm_solver_bicgstab.h"
 #include "gmm/gmm_solver_gmres.h"
 
+using namespace std;
+
 int LinAlgebra::vsolve(Fem &fem,Settings &settings, long nt)
 {
 time_t timeStart;

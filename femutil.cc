@@ -1,6 +1,7 @@
 #include "fem.h"
 #include <set>
 
+using namespace std;
 
 /**
 kind of functor within a struct to perform comparison between faces, it is lexicographical order

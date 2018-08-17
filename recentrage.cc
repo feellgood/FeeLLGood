@@ -5,6 +5,8 @@
 /*   recentrage de la paroi selon Oz       */
 /*-----------------------------------------*/
 
+using namespace std;
+
 bool recentrage(Fem &fem, double thres) // abs(thres) < 1
 {
 time_t timeStart;

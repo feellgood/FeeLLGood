@@ -181,7 +181,7 @@ return 0;
 }
 
 /**
-computes potential using fem struct
+computes correction on potential on facettes using fem struct
 */
 template <int Hv> double potential(Fem &fem, Fac &fac, int i);
 
@@ -198,7 +198,7 @@ FmmClass algo(tree, kernels);
 
 const bool analytic_corr = true;
 
-IF_VERBOSE(fem) cout << "\t magnetostatics ..................... ";
+IF_VERBOSE(fem) std::cout << "\t magnetostatics ..................... ";
 
 const int NOD = fem.NOD;
 const int FAC = fem.FAC;
@@ -218,7 +218,7 @@ for (int t=0; t<TET; t++){
     Tet &tet = fem.tet[t];
     const int N   = Tet::N;
     const int NPI = Tet::NPI;
-    double Ms = nu0 * settings.param[ make_pair("Js",tet.reg) ];
+    double Ms = nu0 * settings.param[ std::make_pair("Js",tet.reg) ];
 
    /*---------------- INTERPOLATION ---------------*/
     double u_nod[3][N];

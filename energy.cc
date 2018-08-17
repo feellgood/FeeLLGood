@@ -1,6 +1,8 @@
 #include "fem.h"
 #include "tiny.h"
 
+using namespace std;
+
 void energy(Fem &fem,Settings &settings)
 {
 const int TET = fem.TET;

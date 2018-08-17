@@ -1,6 +1,8 @@
 #include "fem.h"
 #include "tiny.h"
 
+using namespace std;
+
 void saver(Fem &fem, Settings &settings, ofstream &fout, int nt)
 {
 pair <string,int> p;

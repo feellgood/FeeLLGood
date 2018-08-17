@@ -1,5 +1,7 @@
 #include "fem.h"
 
+using namespace std;
+
 void savesol(Fem &fem,string baseName,double s, int nt, string *filename)
 {
 string str;

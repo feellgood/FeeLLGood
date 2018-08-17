@@ -1,6 +1,8 @@
 #include "fem.h"
 #define DEBUG 0
 
+using namespace std;
+
 void lecture(Fem &fem,Settings &mySets, double scale, Regions *regions)  // regions may be NULL
 {
 int NOD, ELEM, tags, reg, TYP;

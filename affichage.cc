@@ -1,5 +1,7 @@
 #include "fem.h"
 
+using namespace std;
+
 void Fem::affichage(void)
 {
 //cout << "process: " << getpid() <<"\n\n";

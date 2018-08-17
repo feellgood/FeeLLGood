@@ -1,5 +1,7 @@
 #include "fem.h"
 
+using namespace std;
+
 void savecfg_vtk(Fem &fem,string baseName,double s, int nt, string *filename)  // filename may be NULL
 {
 string str;

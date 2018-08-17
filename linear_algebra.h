@@ -25,12 +25,12 @@ public:
 /**
 computes the contribution of the tetrahedron to the integrals
 */
-void integrales(Fem &fem,Settings &settings, Tet &tet, gmm::dense_matrix <double> &AE, vector <double> &BE);
+void integrales(Fem &fem,Settings &settings, Tet &tet, gmm::dense_matrix <double> &AE, std::vector <double> &BE);
 
 /**
 computes the contribution of the surface to the integrals
 */
-void integrales(Fem &fem,Settings &settings, Fac &fac, gmm::dense_matrix <double> &AE, vector <double> &BE);
+void integrales(Fem &fem,Settings &settings, Fac &fac, gmm::dense_matrix <double> &AE, std::vector <double> &BE);
 
 int  vsolve(Fem &fem,Settings &settings, long nt);/**< solver */
 void base_projection(Fem &fem);/**< computes the projection of the llg operators on the elements */
@@ -42,8 +42,8 @@ template parameter T is either tetra of face
 */
 template <class T>
 void projection(Fem &fem, T &elt,
-           gmm::dense_matrix <double> &A,  vector <double> &B,
-           gmm::dense_matrix <double> &Ap, vector <double> &Bp)
+           gmm::dense_matrix <double> &A,  std::vector <double> &B,
+           gmm::dense_matrix <double> &Ap, std::vector <double> &Bp)
 {
 const int N = T::N;
 gmm::dense_matrix <double> P(2*N,3*N), PA(2*N,3*N);
@@ -66,7 +66,7 @@ template parameter T is either tetra or face
 */
 template <class T>
 void assemblage(Fem &fem, T &elt,
-           gmm::dense_matrix <double> &Ke, vector <double> &Le,
+           gmm::dense_matrix <double> &Ke, std::vector <double> &Le,
            write_matrix &K, write_vector &L)
 {
 const int NOD = fem.NOD;

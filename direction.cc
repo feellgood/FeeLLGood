@@ -1,5 +1,7 @@
 #include "fem.h"
 
+using namespace std;
+
 void direction(Fem& fem){
 //IF_VERBOSE(fem) cerr << "direction " << endl;
 const int NPS=1;

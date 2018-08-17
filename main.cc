@@ -3,6 +3,8 @@
 #include "linear_algebra.h"
 #include "fmm_demag.h"
 
+using namespace std;
+
 int main()
 {
 Settings mySettings = Settings();
@@ -104,7 +106,7 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
 		            
 		cout << "dt = " << dt << endl << endl;
             if (dt < DTMIN) {
-                reset(fem);
+                fem.reset();
                 break;
                 }
 

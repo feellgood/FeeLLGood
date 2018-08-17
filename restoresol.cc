@@ -1,5 +1,7 @@
 #include "fem.h"
 
+using namespace std;
+
 /** convenient error handler */
 class BadConversion : public std::runtime_error {
  public:
