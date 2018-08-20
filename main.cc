@@ -8,8 +8,9 @@ using namespace std;
 int main()
 {
 Settings mySettings = Settings();
-LinAlgebra linAlg = LinAlgebra();
+
 Fem fem;
+LinAlgebra linAlg = LinAlgebra(fem,mySettings);
 
 OctreeClass *tree    = nullptr;
 KernelClass *kernels = nullptr; 
@@ -24,7 +25,7 @@ vector<Seq> seq;
 mySettings.dialog(seq);
 lecture(fem,mySettings, 0.0, nullptr);
 femutil(fem,mySettings);
-chapeaux(fem);
+fem.chapeaux();
 fem.affichage();
 
 fem.t=0.;
@@ -84,7 +85,7 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
 	    fem.DW_z  = 0.0;
         energy(fem,mySettings); 
 
-	    evolution(fem);
+	    fem.evolution();
 
 	    int flag  = 0;
 	    double dt = dt0;
@@ -110,7 +111,7 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
                 break;
                 }
 
-            int err = linAlg.vsolve(fem,mySettings, nt);  
+            int err = linAlg.vsolve(nt);  
             if (err) { cout << "err : " << err << endl;
 		    	flag++; dt*= 0.5; mySettings.dt=dt; continue;}
 
@@ -151,7 +152,7 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
 	    fem.DW_vz0 = fem.DW_vz; 
             fem.DW_z  += fem.DW_vz*dt;
 
-            evolution(fem); t+=dt; fem.t=t; nt++; flag=0;
+            fem.evolution(); t+=dt; fem.t=t; nt++; flag=0;
 	    recentrage(fem, 0.1);
 
             saver(fem,mySettings,fout,nt);

@@ -7,7 +7,8 @@
 
 using namespace std;
 
-int LinAlgebra::vsolve(Fem &fem,Settings &settings, long nt)
+//Fem &fem,Settings &settings, 
+int LinAlgebra::vsolve(long nt)
 {
 time_t timeStart;
 
@@ -19,7 +20,7 @@ const int FAC = fem.FAC;
 const int MAXITER = 500;
 const int REFRESH_PRC = 20;
 
-base_projection(fem);   // definit plan tangent
+base_projection();   // definit plan tangent
 
 write_matrix Kw(2*NOD, 2*NOD);
 write_vector Lw(2*NOD);
@@ -38,21 +39,21 @@ cout << "%5t assembling %30T."; //boost::format("%5t assembling %30T.");
 time(&timeStart);
 
 for (int t=0; t<TET; t++){
-    Tet &tet = fem.tet[t];
-    gmm::dense_matrix <double> K(3*Tet::N,3*Tet::N), Kp(2*Tet::N,2*Tet::N);
-    vector <double> L(3*Tet::N), Lp(2*Tet::N);
-    integrales(fem,settings, tet, K, L);     
-    projection<Tet,Tet::N>(fem, tet, K, L, Kp, Lp);
-    assemblage<Tet,Tet::N>(fem, tet, Kp, Lp, Kw, Lw);    
+    Tetra::Tet &tet = fem.tet[t];
+    gmm::dense_matrix <double> K(3*Tetra::N,3*Tetra::N), Kp(2*Tetra::N,2*Tetra::N);
+    vector <double> L(3*Tetra::N), Lp(2*Tetra::N);
+    integrales(tet, K, L);     
+    projection<Tetra::Tet,Tetra::N>(tet, K, L, Kp, Lp);
+    assemblage<Tetra::Tet,Tetra::N>(tet, Kp, Lp, Kw, Lw);    
 }
 
 for (int t=0; t<FAC; t++){
     Facette::Fac &fac = fem.fac[t];
     gmm::dense_matrix <double> K(3*Facette::N,3*Facette::N), Kp(2*Facette::N,2*Facette::N);
     vector <double> L(3*Facette::N), Lp(2*Facette::N);
-    integrales(fem,settings, fac, K, L);     
-    projection<Facette::Fac,Facette::N>(fem, fac, K, L, Kp, Lp);
-    assemblage<Facette::Fac,Facette::N>(fem, fac, Kp, Lp, Kw, Lw);
+    integrales(fac, K, L);     
+    projection<Facette::Fac,Facette::N>(fac, K, L, Kp, Lp);
+    assemblage<Facette::Fac,Facette::N>(fac, Kp, Lp, Kw, Lw);
     }
 
 time_t timeEnd;

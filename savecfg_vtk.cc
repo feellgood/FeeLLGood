@@ -24,7 +24,6 @@ str = baseName + " time : " + to_string(fem.t);
 
 const int NOD = fem.NOD;
 const int TET = fem.TET;
-const int N   = Tet::N;
 
 fout << "# vtk DataFile Version 2.0" << endl;
 fout << str << endl;
@@ -43,9 +42,9 @@ fout << x << "\t" << y << "\t" << z << endl;    //fout << boost::format("%+20.10
 fout << "CELLS " << setw(8) << TET << "\t" << setw(8) << (5*TET) << endl;
 
 for (int t=0; t<TET; t++){
-    Tet &tet = fem.tet[t];
-    fout << setw(8) << N;
-    for (int i=0; i<N; i++)
+    Tetra::Tet &tet = fem.tet[t];
+    fout << setw(8) << Tetra::N;
+    for (int i=0; i<Tetra::N; i++)
         fout << setw(8) << tet.ind[i];
     fout << endl;
     }

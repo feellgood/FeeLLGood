@@ -18,39 +18,43 @@ convenient class to grab altogether some part of the calculations involved using
 class LinAlgebra
 {
 public:
-	inline LinAlgebra() {}
+	inline LinAlgebra(Fem &f, Settings &s) {fem = f; settings = s;}
 	gmm::diagonal_precond <read_matrix>  *prc;/**< diagonal preconditionner */
 	//gmm::ilutp_precond < read_matrix > *prc;
 
 /**
 computes the contribution of the tetrahedron to the integrals
 */
-void integrales(Fem &fem,Settings &settings, Tet &tet, gmm::dense_matrix <double> &AE, std::vector <double> &BE);
+
+//Fem &fem,Settings &settings,
+void integrales(Tetra::Tet &tet, gmm::dense_matrix <double> &AE, std::vector <double> &BE);
 
 /**
 computes the contribution of the surface to the integrals
 */
-void integrales(Fem &fem,Settings &settings, Facette::Fac &fac, gmm::dense_matrix <double> &AE, std::vector <double> &BE);
+void integrales(Facette::Fac &fac, gmm::dense_matrix <double> &AE, std::vector <double> &BE);
 
-int  vsolve(Fem &fem,Settings &settings, long nt);/**< solver */
-void base_projection(Fem &fem);/**< computes the projection of the llg operators on the elements */
+int  vsolve(long nt);/**< solver */
+void base_projection(void);/**< computes the vector basis projection on the elements */
 
 private:
+	Fem fem;
+	Settings settings;
 /**
 template function to compute projection of an element <br>
 template parameter T is either tetra of face
 */
-template <class T,const int N>
-void projection(Fem &fem, T &elt,
+template <class T,const int N> // carefull! N is tetra::N or Facette::N (depends on T)
+void projection(T &elt,
            gmm::dense_matrix <double> &A,  std::vector <double> &B,
            gmm::dense_matrix <double> &Ap, std::vector <double> &Bp)
 {
 //const int N = T::N;
 gmm::dense_matrix <double> P(2*N,3*N), PA(2*N,3*N);
 for (int i=0; i<N; i++){
-    Node &node = fem.node[elt.ind[i]];
-    P(i,i)  = node.ep[0];  P(i,N+i)  = node.ep[1];  P(i,2*N+i)  = node.ep[2];
-    P(N+i,i)= node.eq[0];  P(N+i,N+i)= node.eq[1];  P(N+i,2*N+i)= node.eq[2];
+    Node &n = fem.node[elt.ind[i]];
+    P(i,i)  = n.ep[0];  P(i,N+i)  = n.ep[1];  P(i,2*N+i)  = n.ep[2];
+    P(N+i,i)= n.eq[0];  P(N+i,N+i)= n.eq[1];  P(N+i,2*N+i)= n.eq[2];
     }
 
 mult(P,A,PA);
@@ -65,7 +69,7 @@ matrix assembly with all the contributions of the tetrahedrons/faces <br>
 template parameter T is either tetra or face
 */
 template <class T,const int N>
-void assemblage(Fem &fem, T &elt,
+void assemblage(T &elt,
            gmm::dense_matrix <double> &Ke, std::vector <double> &Le,
            write_matrix &K, write_vector &L)
 {

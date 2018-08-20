@@ -77,10 +77,12 @@ double phiv;/**< no idea */
 
 namespace Facette
 {
-//static 
 const int N = 3; /**< number of sommits */
-	//static 
 const int NPI = 4; /**< number of weights  */
+
+const double u[NPI]   = {   1/3.,   1/5.,   3/5.,   1/5.};
+const double v[NPI]   = {   1/3.,   1/5.,   1/5.,   3/5.};
+const double pds[NPI] = {-27/96., 25/96., 25/96., 25/96.};
 
 /** \struct Fac
 Face is a struct containing the index references to nodes, it has a triangular shape and should not be degenerated 
@@ -98,22 +100,37 @@ struct Fac{
 	double a[N][NPI];          /**< hat functions table */
     };
 }
+
+namespace Tetra
+{
+const int N = 4;/**< number of sommits */
+const int NPI = 5;/**< number of weights  */
+
+const double A=1./4.;
+const double B=1./6.;
+const double C=1./2.;
+const double D=-2./15.;
+const double E=3./40.;
+const double u[NPI]   = {A,B,B,B,C};
+const double v[NPI]   = {A,B,B,C,B};
+const double w[NPI]   = {A,B,C,B,B};
+const double pds[NPI] = {D,E,E,E,E}; 
+
 /** \struct Tet
 Tet is a tetrahedron, containing the index references to nodes, must not be flat 
    */ 
 struct Tet{
-static const int N = 4;/**< number of sommits */
-static const int NPI = 5;/**< number of weights  */
-int reg;/**< .msh region number */
-double vol;/**< volume of the tetrahedron */
-int ind[N];/**< indices to the nodes */
-double weight[NPI];/**< weights */
-double a[N][NPI];/**< hat functions */
-double dadx[N][NPI];/**< variations of hat function along x directions */
-double dady[N][NPI];/**< variations of hat function along y directions */
-double dadz[N][NPI];/**< variations of hat function along z directions */
-};
 
+	int reg;/**< .msh region number */
+	double vol;/**< volume of the tetrahedron */
+	int ind[N];/**< indices to the nodes */
+	double weight[NPI];/**< weights */
+	double a[N][NPI];/**< hat functions */
+	double dadx[N][NPI];/**< variations of hat function along x directions */
+	double dady[N][NPI];/**< variations of hat function along y directions */
+	double dadz[N][NPI];/**< variations of hat function along z directions */
+	};
+}
 
 
 /** \struct Stat
@@ -152,7 +169,7 @@ struct Fem{
 	double vol;/**< total volume of the mesh */
 	
 	double fmm_normalizer;/**< no idea; probably normalizing constant for the computation of the demag field */
-	double as[3];/**< no idea */
+	double as[D];/**< normalized length by diameter along all 3 axis */
 	double locmax;/**< no idea */
 	double t;/**< physical current time of the simulation */
 	
@@ -175,7 +192,7 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
 	double phy;/**< no idea */
 	std::vector <Node> node; /**< node container */
 	std::vector <Facette::Fac>  fac; /**< face container */
-	std::vector <Tet>  tet; /**< tetrahedron container */
+	std::vector <Tetra::Tet>  tet; /**< tetrahedron container */
     double Bext;/**< amplitude of the applied field (to check) */
     triple Hext;/**< external applied field direction (should be normalized) */
     
@@ -199,7 +216,17 @@ reset the fem struct to restart another step time simulation
 */
 void reset(void);
 
-	}; // end struct fem definition
+/**
+time evolution : one step in time
+*/
+void evolution(void);
+
+/**
+computes the hat functions for all containers
+*/
+void chapeaux(void); 
+
+}; // end struct fem definition
 
 /** \struct Regions
 contains two maps of the volume regions and surfaces numbers
@@ -234,10 +261,7 @@ void femutil_fac(Fem &fem /**< [in,out] */,Settings &settings /**< [in,out] */);
 /** no idea */
 void femutil_facMs(Fem &fem /**< [in,out] */,Settings &settings /**< [in,out] */);
 
-/**
-computes the hat functions for all containers
-*/
-void chapeaux(Fem &fem /**< [in,out] */ ); 
+
 
 
 
@@ -253,8 +277,8 @@ void restoresol(Fem& fem /**< [in,out] */ ,
 
 void init_distrib(Fem &fem);/**< computes an analytical initial magnetization distribution as a starting point for the simulation */
 
-double u_moy(Fem &fem, int d);/**< computes the average magnetization */
-double v_moy(Fem &fem, int d);/**< computes the average speed of a domain wall */
+//double u_moy(Fem &fem, int d);/**< computes the average magnetization */
+//double v_moy(Fem &fem, int d);/**< computes the average speed of a domain wall */
 
 void energy(Fem &fem,Settings &settings);/**< computes energies */
 
@@ -267,10 +291,7 @@ void savesol(Fem &fem,std::string baseName,double s, int nt, std::string *filena
 void saveH(Fem &fem,std::string baseName,double scale, int nt);/**< save the field values */
 
 
-/**
-time evolution : one step in time
-*/
-void evolution(Fem& fem);
+
 
 
 

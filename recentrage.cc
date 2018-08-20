@@ -12,7 +12,7 @@ bool recentrage(Fem &fem, double thres) // abs(thres) < 1
 time_t timeStart;
 time(&timeStart);
 
-double mz =moy<U>(fem,2);  //u_moy(fem, 2);
+double mz =moy<U>(fem,2);
 thres=min(abs(thres), 1.);
 if (fabs(mz)<thres) return false;
 

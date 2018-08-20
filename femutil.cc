@@ -95,7 +95,7 @@ const int TET = fem.TET;
 double voltot = 0.;
 
 for (int t=0; t<TET; t++){
-   Tet &tet = fem.tet[t];
+   Tetra::Tet &tet = fem.tet[t];
    int i0,i1,i2,i3;
    i0=tet.ind[0];   i1=tet.ind[1];   i2=tet.ind[2];   i3=tet.ind[3];
    
@@ -133,7 +133,7 @@ map <pair<string,int>,double> &param = settings.param;
 set<Facette::Fac, less_than> sf;
 IF_VERBOSE(fem) cout << "Nb de Tet " << TET << endl;
 for (int t=0; t<TET; t++){
-    Tet &tet = fem.tet[t];
+    Tetra::Tet &tet = fem.tet[t];
     int ia,ib,ic,id;
     ia=tet.ind[0];  ib=tet.ind[1];  ic=tet.ind[2];  id=tet.ind[3];
 //    cout << "tet " << t <<"/"<<TET<< endl;

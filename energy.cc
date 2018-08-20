@@ -19,10 +19,8 @@ double uz_drift=2.*fem.DW_z/fem.lz*fem.DW_dir;
 
 /* Contribution des tetraedres */
 for (int t=0; t<TET; t++) {
-	const int N   = Tet::N;
-	const int NPI = Tet::NPI;
 	
-    Tet &tet = fem.tet[t];
+    Tetra::Tet &tet = fem.tet[t];
     const int reg = tet.reg;
     p = make_pair("Ae", reg);   double Ae = settings.param[p];
     p = make_pair("Js", reg);   double Js = settings.param[p];  double Ms = nu0 * settings.param[p];
@@ -42,12 +40,12 @@ for (int t=0; t<TET; t++) {
     //p = make_pair("alpha", reg);double alpha = fem.param[p];    
    
    /*-------------------- INTERPOLATION --------------------*/
-    double u_nod[3][N], u[3][NPI];
-    double dudx[3][NPI], dudy[3][NPI], dudz[3][NPI];
-    double q[NPI],  phi[NPI];
-    double phi_nod[N], negphi_nod[N], Hdx[NPI], Hdy[NPI], Hdz[NPI];
+    double u_nod[3][Tetra::N], u[3][Tetra::NPI];
+    double dudx[3][Tetra::NPI], dudy[3][Tetra::NPI], dudz[3][Tetra::NPI];
+    double q[Tetra::NPI],  phi[Tetra::NPI];
+    double phi_nod[Tetra::N], negphi_nod[Tetra::N], Hdx[Tetra::NPI], Hdy[Tetra::NPI], Hdz[Tetra::NPI];
 
-    for (int i=0; i<N; i++){
+    for (int i=0; i<Tetra::N; i++){
         int i_= tet.ind[i];
         Node &node = fem.node[i_];
         for (int d=0; d<3; d++) {
@@ -57,28 +55,28 @@ for (int t=0; t<TET; t++) {
         negphi_nod[i] = -node.phi;
         }
 
-	tiny::transposed_mult<double, N, NPI> (phi_nod, tet.a, phi);
+	tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (phi_nod, tet.a, phi);
 
-	tiny::mult<double, 3, N, NPI> (u_nod, tet.a, u);
-	tiny::mult<double, 3, N, NPI> (u_nod, tet.dadx, dudx);
-	tiny::mult<double, 3, N, NPI> (u_nod, tet.dady, dudy);
-	tiny::mult<double, 3, N, NPI> (u_nod, tet.dadz, dudz);
+	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, tet.a, u);
+	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, tet.dadx, dudx);
+	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, tet.dady, dudy);
+	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, tet.dadz, dudz);
 
-    for (int npi=0; npi<NPI; npi++){
+    for (int npi=0; npi<Tetra::NPI; npi++){
         double div_u = dudx[0][npi] + dudy[1][npi] + dudz[2][npi];
         q[npi] = -Ms * div_u;
         }
 
-	tiny::transposed_mult<double, N, NPI> (negphi_nod, tet.dadx, Hdx);
-	tiny::transposed_mult<double, N, NPI> (negphi_nod, tet.dady, Hdy);
-	tiny::transposed_mult<double, N, NPI> (negphi_nod, tet.dadz, Hdz);
+	tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphi_nod, tet.dadx, Hdx);
+	tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphi_nod, tet.dady, Hdy);
+	tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphi_nod, tet.dadz, Hdz);
 
    /*-------------------------------------------------------*/
 	    
-    double dens[5][NPI];
+    double dens[5][Tetra::NPI];
     double Eelem[5];
 
-    for (int npi=0; npi<NPI; npi++) {
+    for (int npi=0; npi<Tetra::NPI; npi++) {
 
         // cosinus directeurs
         double al0=uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi];
@@ -101,7 +99,7 @@ for (int t=0; t<TET; t++) {
 
         dens[4][npi] = 0.;
         }
-    tiny::mult<double, 5, NPI> (dens, tet.weight, Eelem);
+    tiny::mult<double, 5, Tetra::NPI> (dens, tet.weight, Eelem);
     tiny::add<double, 5> (Eelem, E);
     }
 

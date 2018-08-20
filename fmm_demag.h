@@ -121,19 +121,17 @@ for (int i=0; i<NOD; i++, idxPart++){       // cibles (noeuds)
     }
 
 for (int t=0; t<TET; t++){       // sources de volume
-    Tet &tet = fem.tet[t];
-    const int N = Tet::N;
-    const int NPI = Tet::NPI;
-    double nod[3][N], gauss[3][NPI];
-    for (int i=0; i<N; i++){
+    Tetra::Tet &tet = fem.tet[t];
+    double nod[3][Tetra::N], gauss[3][Tetra::NPI];
+    for (int i=0; i<Tetra::N; i++){
         int i_= tet.ind[i];
         nod[0][i] = fem.node[i_].x;
         nod[1][i] = fem.node[i_].y;
 	nod[2][i] = fem.node[i_].z;
 	}
-    tiny::mult<double, 3, N, NPI> (nod, tet.a, gauss);
+    tiny::mult<double, 3, Tetra::N, Tetra::NPI> (nod, tet.a, gauss);
 
-    for (int j=0; j<NPI; j++, idxPart++){
+    for (int j=0; j<Tetra::NPI; j++, idxPart++){
         double xSource = (gauss[0][j]-fem.cx) * norm;
         double ySource = (gauss[1][j]-fem.cy) * norm;
 	double zSource = (gauss[2][j]-fem.cz) * norm;
@@ -215,28 +213,26 @@ int nsrc = 0;
 
 /*********************** TETRAS *********************/
 for (int t=0; t<TET; t++){
-    Tet &tet = fem.tet[t];
-    const int N   = Tet::N;
-    const int NPI = Tet::NPI;
+    Tetra::Tet &tet = fem.tet[t];
     double Ms = nu0 * settings.param[ std::make_pair("Js",tet.reg) ];
 
    /*---------------- INTERPOLATION ---------------*/
-    double u_nod[3][N];
-    double dudx[3][NPI], dudy[3][NPI], dudz[3][NPI];
+    double u_nod[3][Tetra::N];
+    double dudx[3][Tetra::NPI], dudy[3][Tetra::NPI], dudz[3][Tetra::NPI];
 
-    for (int i=0; i<N; i++) {
+    for (int i=0; i<Tetra::N; i++) {
         int i_= tet.ind[i];
         Node &node = fem.node[i_];
         for (int d=0; d<3; d++)
             u_nod[d][i] = (Hv? node.v[d]: node.u[d]);
         }
 
-	tiny::mult<double, 3, N, NPI> (u_nod, tet.dadx, dudx);
-	tiny::mult<double, 3, N, NPI> (u_nod, tet.dady, dudy);
-	tiny::mult<double, 3, N, NPI> (u_nod, tet.dadz, dudz);
+	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, tet.dadx, dudx);
+	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, tet.dady, dudy);
+	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, tet.dadz, dudz);
    /*-----------------------------------------------*/
 
-    for (int j=0; j<NPI; j++, nsrc++){
+    for (int j=0; j<Tetra::NPI; j++, nsrc++){
         double div_u = dudx[0][j] + dudy[1][j] + dudz[2][j];
         double q = -Ms * div_u * tet.weight[j];
 

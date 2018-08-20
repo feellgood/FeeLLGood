@@ -105,7 +105,7 @@ while(msh >> symb){
             break;
 	    }
         case 4:{
-            Tet tet;
+            Tetra::Tet tet;
             tet.reg = reg; 
 	    
             msh >> tet.ind[0] >> tet.ind[1] >> tet.ind[2] >> tet.ind[3];
@@ -132,7 +132,7 @@ if (msh.fail()){
 
 fem.FAC = fem.fac.size();
 fem.TET = fem.tet.size();
-fem.SRC = fem.FAC * Facette::NPI + fem.TET * Tet::NPI;
+fem.SRC = fem.FAC * Facette::NPI + fem.TET * Tetra::NPI;
 
 while(msh >> symb){
     if (symb == "$Parameters")

@@ -2,62 +2,52 @@
 
 using namespace std;
 
-void chapeaux(Fem &fem)
+void Fem::chapeaux(void)
 {
-const int FAC = fem.FAC;
-const int TET = fem.TET;
+//const int FAC = fem.FAC;
+//const int TET = fem.TET;
 
 /********************* FACES *******************/
-for (int f=0; f<FAC; f++){
-   Facette::Fac &fac = fem.fac[f];
+for (int i_f=0; i_f<FAC; i_f++){
+   Facette::Fac &f = fac[i_f];
    
 //const int NPI = Fac::NPI;// NPI = 4
 
-   double u[Facette::NPI]   = {   1/3.,   1/5.,   3/5.,   1/5.};
-   double v[Facette::NPI]   = {   1/3.,   1/5.,   1/5.,   3/5.};
-   double pds[Facette::NPI] = {-27/96., 25/96., 25/96., 25/96.};
+   //double u[Facette::NPI]   = {   1/3.,   1/5.,   3/5.,   1/5.};
+   //double v[Facette::NPI]   = {   1/3.,   1/5.,   1/5.,   3/5.};
+   //double pds[Facette::NPI] = {-27/96., 25/96., 25/96., 25/96.};
   
-   double detJ = 2*fac.surf;
+   double detJ = 2*f.surf;
 
    for (int j=0; j<Facette::NPI; j++){
-       fac.a[0][j] = 1.-u[j]-v[j];
-       fac.a[1][j] = u[j];
-       fac.a[2][j] = v[j];
-       fac.weight[j]    = detJ * pds[j];
+       f.a[0][j] = 1.-Facette::u[j]-Facette::v[j];
+       f.a[1][j] = Facette::u[j];
+       f.a[2][j] = Facette::v[j];
+       f.weight[j]    = detJ * Facette::pds[j];
        }
    }
 
 /****************** TETRAS *****************/
-for (int t=0; t<TET; t++){
-    Tet &tet = fem.tet[t];
-    const int N = Tet::N;
-    const int NPI  = Tet::NPI;
-
-// NPI 5
-    double A,B,C,D,E;
-    A=1./4.;  B=1./6.;  C=1./2.;  D=-2./15.;  E=3./40.;
-    double u[NPI]   = {A,B,B,B,C};
-    double v[NPI]   = {A,B,B,C,B};
-    double w[NPI]   = {A,B,C,B,B};
-    double pds[NPI] = {D,E,E,E,E}; 
+for (int i_t=0; i_t<TET; i_t++){
+    Tetra::Tet &t = tet[i_t];
     
-    gmm::dense_matrix <double> nod(3,N); 
-    for (int i=0; i<N; i++){
-        int i_= tet.ind[i];
+gmm::dense_matrix <double> nod(3,Tetra::N); 
+    for (int i=0; i<Tetra::N; i++){
+        int i_= t.ind[i];
 //	cout << "t:" << t <<",  nod:" << i_ << endl;
-        nod(0,i) = fem.node[i_].x;
-        nod(1,i) = fem.node[i_].y;
-        nod(2,i) = fem.node[i_].z;
+        nod(0,i) = node[i_].x;
+        nod(1,i) = node[i_].y;
+        nod(2,i) = node[i_].z;
         }
 // cout << nod <<endl;
 
-    for (int j=0; j<NPI; j++){
-        vector <double> a(N);
-        gmm::dense_matrix <double> da(N,3), dadu(N,3), J(3,3);
-        a[0] = 1.-u[j]-v[j]-w[j];
-        a[1] = u[j];
-        a[2] = v[j];
-        a[3] = w[j];
+    for (int j=0; j<Tetra::NPI; j++){
+        vector <double> a(Tetra::N);
+        gmm::dense_matrix <double> da(Tetra::N,3), dadu(Tetra::N,3), J(3,3);
+        a[0] = 1.-Tetra::u[j]-Tetra::v[j]-Tetra::w[j];
+        a[1] = Tetra::u[j];
+        a[2] = Tetra::v[j];
+        a[3] = Tetra::w[j];
 
         dadu(0,0)= -1;   dadu(0,1)= -1;   dadu(0,2)= -1;
         dadu(1,0)= +1;   dadu(1,1)=  0;   dadu(1,2)=  0;
@@ -71,10 +61,10 @@ for (int t=0; t<TET; t++){
         if (fabs(detJ) < EPSILON){
 #ifdef LIBRARY
             ostringstream what;
-            what << "Singular jacobian in tetrahedron " << t;
+            what << "Singular jacobian in tetrahedron " << i_t;
             throw runtime_error(what.str());
 #else
-            cerr << "jacobienne singuliere ds le tetraedre " << t << endl;
+            cerr << "jacobienne singuliere ds le tetraedre " << i_t << endl;
             exit(1);
 #endif
             }
@@ -82,13 +72,13 @@ for (int t=0; t<TET; t++){
         lu_inverse(J);
         mult(dadu, J, da);
 
-        for (int i=0; i<N; i++){
-            tet.a[i][j]   = a[i];
-            tet.dadx[i][j]= da(i,0);
-            tet.dady[i][j]= da(i,1);
-            tet.dadz[i][j]= da(i,2);
+        for (int i=0; i<Tetra::N; i++){
+            t.a[i][j]   = a[i];
+            t.dadx[i][j]= da(i,0);
+            t.dady[i][j]= da(i,1);
+            t.dadz[i][j]= da(i,2);
             }
-        tet.weight[j]    = detJ * pds[j];
+        t.weight[j]    = detJ * Tetra::pds[j];
     }
 }
 
