@@ -143,19 +143,19 @@ for (int t=0; t<TET; t++){       // sources de volume
     }
 
 for (int f=0; f<FAC; f++){        // sources de surface
-    Fac &fac = fem.fac[f];
-    const int N = Fac::N;
-    const int NPI = Fac::NPI;
-    double nod[3][N], gauss[3][NPI];
-    for (int i=0; i<N; i++){
+    Facette::Fac &fac = fem.fac[f];
+    //const int N = Fac::N;
+    //const int NPI = Fac::NPI;
+    double nod[3][Facette::N], gauss[3][Facette::NPI];
+    for (int i=0; i<Facette::N; i++){
         int i_= fac.ind[i];
         nod[0][i] = fem.node[i_].x;
         nod[1][i] = fem.node[i_].y;
 	nod[2][i] = fem.node[i_].z;
 	}
-    tiny::mult<double, 3, N, NPI> (nod, fac.a, gauss);
+    tiny::mult<double, 3, Facette::N, Facette::NPI> (nod, fac.a, gauss);
 
-    for (int j=0; j<NPI; j++, idxPart++){
+    for (int j=0; j<Facette::NPI; j++, idxPart++){
         double xSource = (gauss[0][j]-fem.cx) * norm;
         double ySource = (gauss[1][j]-fem.cy) * norm;
 	double zSource = (gauss[2][j]-fem.cz) * norm;
@@ -183,7 +183,7 @@ return 0;
 /**
 computes correction on potential on facettes using fem struct
 */
-template <int Hv> double potential(Fem &fem, Fac &fac, int i);
+template <int Hv> double potential(Fem &fem, Facette::Fac &fac, int i);
 
 
 /**
@@ -247,26 +247,26 @@ for (int t=0; t<TET; t++){
 
 /************************ FACES **************************/
 for (int f=0; f<FAC; f++){
-    Fac &fac = fem.fac[f];
-    const int N    = Fac::N;
-    const int NPI  = Fac::NPI;
+    Facette::Fac &fac = fem.fac[f];
+    //const int N    = Fac::N;
+    //const int NPI  = Fac::NPI;
     double Ms = fac.Ms;
     double nx,ny,nz;
     nx=fac.nx; ny=fac.ny; nz=fac.nz;
 
     /** calc u gauss **/  
-    double u_nod[3][N], u[3][NPI];
-        for (int i=0; i<N; i++){
+    double u_nod[3][Facette::N], u[3][Facette::NPI];
+        for (int i=0; i<Facette::N; i++){
         int i_= fac.ind[i];
         Node &node = fem.node[i_];
         for (int d=0; d<3; d++)
             u_nod[d][i] = (Hv? node.v[d]: node.u[d]);
         }
 
-    tiny::mult<double, 3, N, NPI> (u_nod, fac.a, u);
+    tiny::mult<double, 3, Facette::N, Facette::NPI> (u_nod, fac.a, u);
 
     /** calc sigma, fill distrib.alpha **/
-    for (int j=0; j<NPI; j++, nsrc++){
+    for (int j=0; j<Facette::NPI; j++, nsrc++){
         double un = u[0][j]*nx + u[1][j]*ny + u[2][j]*nz;
         double s = Ms * un * fac.weight[j];
         srcDen[nsrc] =  s; 
@@ -274,23 +274,23 @@ for (int f=0; f<FAC; f++){
 
     if (analytic_corr) {
       /** calc coord gauss **/
-      double nod[3][N], gauss[3][NPI];
-      for (int i=0; i<N; i++) {
+      double nod[3][Facette::N], gauss[3][Facette::NPI];
+      for (int i=0; i<Facette::N; i++) {
 	      int i_= fac.ind[i];
 	      //Node &node = fem.node[i_]; // inutilisé *ct*
 	      nod[0][i] = fem.node[i_].x;
 	      nod[1][i] = fem.node[i_].y;
 	      nod[2][i] = fem.node[i_].z;
           }
-      tiny::mult<double, 3, N, NPI> (nod, fac.a, gauss);
+      tiny::mult<double, 3, Facette::N, Facette::NPI> (nod, fac.a, gauss);
 
       /** calc corr node by node **/
-      for (int i=0; i<N; i++) {
+      for (int i=0; i<Facette::N; i++) {
 	      int i_= fac.ind[i];
 	      Node &node = fem.node[i_];
 	      double x,y,z;
 	      x=node.x;  y=node.y;  z=node.z;
-	      for (int j=0; j<NPI; j++) {
+	      for (int j=0; j<Facette::NPI; j++) {
 	          double xg,yg,zg;
 	          xg=gauss[0][j];  yg=gauss[1][j];  zg=gauss[2][j];
 	          double rij = sqrt( sq(x-xg) + sq(y-yg) + sq(z-zg) );
@@ -362,7 +362,7 @@ delete [] corr;
 }
 
 template <int Hv>
-double potential(Fem &fem, Fac &fac, int i) // template, mais Hv est utilisé comme un booleen 
+double potential(Fem &fem, Facette::Fac &fac, int i) // template, mais Hv est utilisé comme un booleen 
 {
   double nx,ny,nz,Ms;
   nx=fac.nx;  ny=fac.ny;  nz=fac.nz; Ms=fac.Ms;

@@ -109,10 +109,10 @@ for (int t=0; t<TET; t++) {
 
 	
 for (int t=0; t<FAC; t++) {
-	const int N   = Fac::N;
-	const int NPI = Fac::NPI;
+	//const int N   = Fac::N;
+	//const int NPI = Fac::NPI;
 	
-	Fac &fac = fem.fac[t];
+	Facette::Fac &fac = fem.fac[t];
 	const int reg = fac.reg;
     double Ms = fac.Ms;
     double nx,ny,nz;
@@ -124,11 +124,11 @@ for (int t=0; t<FAC; t++) {
 	p=make_pair("a3",reg);      double uk02 = param[p];  	//cout << ", a3=" << k2;    
 		
 	/*-------------------- INTERPOLATION --------------------*/
-	double u_nod[3][N], u[3][NPI];
-    double phi_nod[N];
-    double q[NPI],  phi[NPI];
+	double u_nod[3][Facette::N], u[3][Facette::NPI];
+    double phi_nod[Facette::N];
+    double q[Facette::NPI],  phi[Facette::NPI];
 		
-	for (int i=0; i<N; i++){
+	for (int i=0; i<Facette::N; i++){
 		int i_= fac.ind[i];
 			Node &node = fem.node[i_];
 			for (int d=0; d<3; d++) {
@@ -137,31 +137,31 @@ for (int t=0; t<FAC; t++) {
         phi_nod[i] =  node.phi;
         }
 
-	tiny::transposed_mult<double, N, NPI> (phi_nod, fac.a, phi);
+	tiny::transposed_mult<double, Facette::N, Facette::NPI> (phi_nod, fac.a, phi);
 		
-	tiny::mult<double, 3, N, NPI> (u_nod, fac.a, u);
+	tiny::mult<double, 3, Facette::N, Facette::NPI> (u_nod, fac.a, u);
 	
-    for (int npi=0; npi<NPI; npi++){
+    for (int npi=0; npi<Facette::NPI; npi++){
         double un = u[0][npi]*nx + u[1][npi]*ny + u[2][npi]*nz;
         q[npi] = Ms * un;
         }
 	
 	/*-------------------------------------------------------*/	    
-	double dens[NPI];
+	double dens[Facette::NPI];
 	double Eelem;
 		
-	for (int npi=0; npi<NPI; npi++) {
+	for (int npi=0; npi<Facette::NPI; npi++) {
 		// cosinus directeurs
 		double al0=uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi];
 		dens[npi] = -K  * sq(al0);      // uniaxe
 		}
-	Eelem=tiny::sp<double, NPI> (dens, fac.weight);
+	Eelem=tiny::sp<double, Facette::NPI> (dens, fac.weight);
 	E[1]+=Eelem;
 
-	for (int npi=0; npi<NPI; npi++) {
+	for (int npi=0; npi<Facette::NPI; npi++) {
 		dens[npi] = 0.5*mu0*q[npi]*phi[npi];
 		}
-	Eelem=tiny::sp<double, NPI> (dens, fac.weight);
+	Eelem=tiny::sp<double, Facette::NPI> (dens, fac.weight);
 	E[2]+=Eelem;
     }
 	

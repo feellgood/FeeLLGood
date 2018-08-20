@@ -210,10 +210,10 @@ fem.stat.R = R;
     }
 }
 
-void LinAlgebra::integrales(Fem &fem,Settings &settings, Fac &fac, gmm::dense_matrix <double> &AE, vector <double> &BE)
+void LinAlgebra::integrales(Fem &fem,Settings &settings, Facette::Fac &fac, gmm::dense_matrix <double> &AE, vector <double> &BE)
 {
-const int N   = Fac::N;
-const int NPI = Fac::NPI;
+//const int N   = Fac::N;
+//const int NPI = Fac::NPI;
 const int reg = fac.reg;
 
 map <pair<string,int>,double> &param = settings.param;
@@ -227,9 +227,9 @@ double uk02 = param[make_pair("a3",reg)];  	//cout << ", a3=" << k2;
 
 double Kbis = 2.0*Ks/Js;
 /*-------------------- INTERPOLATION --------------------*/
-double u_nod[3][N], u[3][NPI];
+double u_nod[3][Facette::N], u[3][Facette::NPI];
 
-for (int i=0; i<N; i++){
+for (int i=0; i<Facette::N; i++){
     int i_= fac.ind[i];
     Node &node = fem.node[i_];
     
@@ -238,20 +238,20 @@ for (int i=0; i<N; i++){
     u_nod[2][i]   = node.u0[2];
     }
 
-tiny::mult<double, 3, N, NPI> (u_nod, fac.a, u);
+tiny::mult<double, 3, Facette::N, Facette::NPI> (u_nod, fac.a, u);
 
 /*-------------------------------------------------------*/
 
-for (int npi=0; npi<NPI; npi++){
+for (int npi=0; npi<Facette::NPI; npi++){
     double Kbis_ai;
     double w_uk0_u = fac.weight[npi]*(uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi]); 
 
-    for (int i=0; i<N; i++){
+    for (int i=0; i<Facette::N; i++){
         Kbis_ai = Kbis*fac.a[i][npi];
 
         BE[i]    += (Kbis_ai* w_uk0_u*uk00);
-        BE[N+i]  += (Kbis_ai* w_uk0_u*uk01);
-        BE[2*N+i]+= (Kbis_ai* w_uk0_u*uk02);
+        BE[Facette::N+i]  += (Kbis_ai* w_uk0_u*uk01);
+        BE[2*Facette::N+i]+= (Kbis_ai* w_uk0_u*uk02);
 	}
     }
 }

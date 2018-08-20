@@ -11,7 +11,7 @@ struct less_than
 /**
 operator() for the comparison of two faces with lexicographical order
 */
-  bool operator()(Fac f1, Fac f2) const
+  bool operator()(Facette::Fac f1, Facette::Fac f2) const
   {
   if (f1.ind[0]<f2.ind[0]) return true;
   else
@@ -130,7 +130,7 @@ pair <string,int> p;
 map <pair<string,int>,double> &param = settings.param;
 
 // decomposition des tetraedres en elements de surface
-set<Fac, less_than> sf;
+set<Facette::Fac, less_than> sf;
 IF_VERBOSE(fem) cout << "Nb de Tet " << TET << endl;
 for (int t=0; t<TET; t++){
     Tet &tet = fem.tet[t];
@@ -138,28 +138,28 @@ for (int t=0; t<TET; t++){
     ia=tet.ind[0];  ib=tet.ind[1];  ic=tet.ind[2];  id=tet.ind[3];
 //    cout << "tet " << t <<"/"<<TET<< endl;
     {
-    Fac fac; fac.reg=tet.reg; 
+    Facette::Fac fac; fac.reg=tet.reg; 
     fac.ind[0]=ia; fac.ind[1]=ic; fac.ind[2]=ib;
     sf.insert(fac);
 //    cout << fac.ind[0] << " " << fac.ind[1] << " " << fac.ind[2] << endl;
     }
  
     {
-    Fac fac; fac.reg=tet.reg;
+    Facette::Fac fac; fac.reg=tet.reg;
     fac.ind[0]=ib; fac.ind[1]=ic; fac.ind[2]=id;
     sf.insert(fac);
 //    cout << fac.ind[0] << " " << fac.ind[1] << " " << fac.ind[2] << endl;
     }
 
     {
-    Fac fac; fac.reg=tet.reg; 
+    Facette::Fac fac; fac.reg=tet.reg; 
     fac.ind[0]=ia; fac.ind[1]=id; fac.ind[2]=ic;
     sf.insert(fac);
 //    cout << fac.ind[0] << " " << fac.ind[1] << " " << fac.ind[2] << endl;
     }
 
     {
-    Fac fac; fac.reg=tet.reg; 
+    Facette::Fac fac; fac.reg=tet.reg; 
     fac.ind[0]=ia; fac.ind[1]=ib; fac.ind[2]=id;
     sf.insert(fac); 
 //    cout << fac.ind[0] << " " << fac.ind[1] << " " << fac.ind[2] << endl;
@@ -188,7 +188,7 @@ for (int f=0; f<FAC; f++){
         done = progress;
     }
 
-    Fac &fac = fem.fac[f];
+    Facette::Fac &fac = fem.fac[f];
     fac.Ms = 0.;
     p = make_pair("Js", fac.reg);
     double Js = param[p];
@@ -196,10 +196,10 @@ for (int f=0; f<FAC; f++){
 
     int i0 = fac.ind[0],  i1 = fac.ind[1],  i2 = fac.ind[2];
 
-    set< Fac, less_than >::iterator it=sf.end();
+    set< Facette::Fac, less_than >::iterator it=sf.end();
     for (int perm=0; perm<2; perm++) {
         for (int nrot=0; nrot<3; nrot++) {
-            Fac fc;
+            Facette::Fac fc;
 
             fc.ind[(0+nrot)%3]=i0; fc.ind[(1+nrot)%3]=i1; fc.ind[(2+nrot)%3]=i2;
             it=sf.find(fc);
@@ -207,7 +207,7 @@ for (int f=0; f<FAC; f++){
         }
       
         if (it!=sf.end()) { // found
-           Fac fc = *it;
+           Facette::Fac fc = *it;
            int i0=fac.ind[0], i1=fac.ind[1], i2=fac.ind[2];
 //           cout << "fac " << i0 << " " << i1 << " " << i2 <<endl;
            i0=fc.ind[0], i1=fc.ind[1], i2=fc.ind[2];
@@ -248,7 +248,7 @@ const int FAC = fem.FAC;
 // calcul des surfaces
 double surftot = 0.;
 for (int f=0; f<FAC; f++){
-    Fac &fac = fem.fac[f];
+    Facette::Fac &fac = fem.fac[f];
     int i0,i1,i2;
     i0 = fac.ind[0];    i1 = fac.ind[1];    i2 = fac.ind[2];
     

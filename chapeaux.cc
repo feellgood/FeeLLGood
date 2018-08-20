@@ -9,18 +9,17 @@ const int TET = fem.TET;
 
 /********************* FACES *******************/
 for (int f=0; f<FAC; f++){
-   Fac &fac = fem.fac[f];
+   Facette::Fac &fac = fem.fac[f];
    
-const int NPI = Fac::NPI;
+//const int NPI = Fac::NPI;// NPI = 4
 
-// NPI 4
-   double u[NPI]   = {   1/3.,   1/5.,   3/5.,   1/5.};
-   double v[NPI]   = {   1/3.,   1/5.,   1/5.,   3/5.};
-   double pds[NPI] = {-27/96., 25/96., 25/96., 25/96.};
+   double u[Facette::NPI]   = {   1/3.,   1/5.,   3/5.,   1/5.};
+   double v[Facette::NPI]   = {   1/3.,   1/5.,   1/5.,   3/5.};
+   double pds[Facette::NPI] = {-27/96., 25/96., 25/96., 25/96.};
   
    double detJ = 2*fac.surf;
 
-   for (int j=0; j<NPI; j++){
+   for (int j=0; j<Facette::NPI; j++){
        fac.a[0][j] = 1.-u[j]-v[j];
        fac.a[1][j] = u[j];
        fac.a[2][j] = v[j];

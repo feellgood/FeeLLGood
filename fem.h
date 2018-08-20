@@ -74,12 +74,19 @@ double phiv0;/**< initial or reset value, used to store previous value for time 
 double phiv;/**< no idea */
 };
 
+
+namespace Facette
+{
+//static 
+const int N = 3; /**< number of sommits */
+	//static 
+const int NPI = 4; /**< number of weights  */
+
 /** \struct Fac
 Face is a struct containing the index references to nodes, it has a triangular shape and should not be degenerated 
 */
 struct Fac{
-	static const int N = 3; /**< number of sommits */
-	static const int NPI = 4; /**< number of weights  */
+	
 	int reg;/**< .msh region number */
 	double surf; /**< surface of the face */
 	double Ms; /**< magnetization at saturation of the face */    
@@ -90,7 +97,7 @@ struct Fac{
 	double weight[NPI];/**< weights table */
 	double a[N][NPI];          /**< hat functions table */
     };
-
+}
 /** \struct Tet
 Tet is a tetrahedron, containing the index references to nodes, must not be flat 
    */ 
@@ -167,7 +174,7 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
 	double evol;/**< no idea */
 	double phy;/**< no idea */
 	std::vector <Node> node; /**< node container */
-	std::vector <Fac>  fac; /**< face container */
+	std::vector <Facette::Fac>  fac; /**< face container */
 	std::vector <Tet>  tet; /**< tetrahedron container */
     double Bext;/**< amplitude of the applied field (to check) */
     triple Hext;/**< external applied field direction (should be normalized) */

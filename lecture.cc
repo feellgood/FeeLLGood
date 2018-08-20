@@ -93,7 +93,7 @@ while(msh >> symb){
         msh >> trash;
     switch (TYP){
         case 2:{
-            Fac fac;
+            Facette::Fac fac;
             fac.reg = reg;
 	    
             msh >> fac.ind[0] >> fac.ind[1] >> fac.ind[2];
@@ -132,7 +132,7 @@ if (msh.fail()){
 
 fem.FAC = fem.fac.size();
 fem.TET = fem.tet.size();
-fem.SRC = fem.FAC * Fac::NPI + fem.TET * Tet::NPI;
+fem.SRC = fem.FAC * Facette::NPI + fem.TET * Tet::NPI;
 
 while(msh >> symb){
     if (symb == "$Parameters")
