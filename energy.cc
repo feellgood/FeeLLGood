@@ -9,7 +9,7 @@ const int TET = fem.TET;
 const int FAC = fem.FAC;
 
 pair <string,int> p;
-map <pair<string,int>,double> &param = settings.param;
+//map <pair<string,int>,double> &param = settings.param;
 triple &Hext=fem.Hext;
 
 fem.Etot = 0.0;
@@ -25,18 +25,18 @@ for (int t=0; t<TET; t++) {
     p = make_pair("Ae", reg);   double Ae = settings.param[p];
     p = make_pair("Js", reg);   double Js = settings.param[p];  double Ms = nu0 * settings.param[p];
 
-    p=make_pair("Ka",reg);      double K = param[p];		//cout << ", Ka=" << K;
-    p=make_pair("Ka3",reg);     double K3 = param[p];   	//cout << ", Ka3=" << K3;
+    p=make_pair("Ka",reg);      double K = settings.param[p];		//cout << ", Ka=" << K;
+    p=make_pair("Ka3",reg);     double K3 = settings.param[p];   	//cout << ", Ka3=" << K3;
 
-    p=make_pair("a1",reg);      double uk00 = param[p];  	//cout << ", a1=" << k0;
-    p=make_pair("a2",reg);      double uk01 = param[p];  	//cout << ", a2=" << k1;
-    p=make_pair("a3",reg);      double uk02 = param[p];  	//cout << ", a3=" << k2;
-    p=make_pair("b1",reg);      double uk10 = param[p];  	//cout << ", a1=" << k0;
-    p=make_pair("b2",reg);      double uk11 = param[p];  	//cout << ", a2=" << k1;
-    p=make_pair("b3",reg);      double uk12 = param[p];  	//cout << ", a3=" << k2;
-    p=make_pair("c1",reg);      double uk20 = param[p];  	//cout << ", a1=" << k0;
-    p=make_pair("c2",reg);      double uk21 = param[p];  	//cout << ", a2=" << k1;
-    p=make_pair("c3",reg);      double uk22 = param[p];  	//cout << ", a3=" << k2;
+    p=make_pair("a1",reg);      double uk00 = settings.param[p];  	//cout << ", a1=" << k0;
+    p=make_pair("a2",reg);      double uk01 = settings.param[p];  	//cout << ", a2=" << k1;
+    p=make_pair("a3",reg);      double uk02 = settings.param[p];  	//cout << ", a3=" << k2;
+    p=make_pair("b1",reg);      double uk10 = settings.param[p];  	//cout << ", a1=" << k0;
+    p=make_pair("b2",reg);      double uk11 = settings.param[p];  	//cout << ", a2=" << k1;
+    p=make_pair("b3",reg);      double uk12 = settings.param[p];  	//cout << ", a3=" << k2;
+    p=make_pair("c1",reg);      double uk20 = settings.param[p];  	//cout << ", a1=" << k0;
+    p=make_pair("c2",reg);      double uk21 = settings.param[p];  	//cout << ", a2=" << k1;
+    p=make_pair("c3",reg);      double uk22 = settings.param[p];  	//cout << ", a3=" << k2;
     //p = make_pair("alpha", reg);double alpha = fem.param[p];    
    
    /*-------------------- INTERPOLATION --------------------*/
@@ -116,10 +116,10 @@ for (int t=0; t<FAC; t++) {
     double nx,ny,nz;
     nx=fac.nx; ny=fac.ny; nz=fac.nz;
 
-	p=make_pair("Ks",reg);      double K = param[p];	//cout << ", Ks=" << K;
-	p=make_pair("a1",reg);      double uk00 = param[p];  	//cout << ", a1=" << k0;
-	p=make_pair("a2",reg);      double uk01 = param[p];  	//cout << ", a2=" << k1;
-	p=make_pair("a3",reg);      double uk02 = param[p];  	//cout << ", a3=" << k2;    
+	p=make_pair("Ks",reg);      double K = settings.param[p];	//cout << ", Ks=" << K;
+	p=make_pair("a1",reg);      double uk00 = settings.param[p];  	//cout << ", a1=" << k0;
+	p=make_pair("a2",reg);      double uk01 = settings.param[p];  	//cout << ", a2=" << k1;
+	p=make_pair("a3",reg);      double uk02 = settings.param[p];  	//cout << ", a3=" << k2;    
 		
 	/*-------------------- INTERPOLATION --------------------*/
 	double u_nod[3][Facette::N], u[3][Facette::NPI];
@@ -139,10 +139,7 @@ for (int t=0; t<FAC; t++) {
 		
 	tiny::mult<double, 3, Facette::N, Facette::NPI> (u_nod, fac.a, u);
 	
-    for (int npi=0; npi<Facette::NPI; npi++){
-        double un = u[0][npi]*nx + u[1][npi]*ny + u[2][npi]*nz;
-        q[npi] = Ms * un;
-        }
+    for (int npi=0; npi<Facette::NPI; npi++) { q[npi] = Ms * (u[0][npi]*nx + u[1][npi]*ny + u[2][npi]*nz); }
 	
 	/*-------------------------------------------------------*/	    
 	double dens[Facette::NPI];

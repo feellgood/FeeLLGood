@@ -34,6 +34,8 @@ It does also contains the definition of many constants for the solver, and for s
 #include "ANN.h" // ct "ANN/ANN.h"		// ANN declarations
 
 
+#include "gmm/gmm_kernel.h" // pour dense_matrix dans namespace Tetra
+
 /* macros for messages and errors */
 #ifdef LIBRARY
 	#include <stdexcept>  // for runtime_error
@@ -115,6 +117,8 @@ const double u[NPI]   = {A,B,B,B,C};
 const double v[NPI]   = {A,B,B,C,B};
 const double w[NPI]   = {A,B,C,B,B};
 const double pds[NPI] = {D,E,E,E,E}; 
+
+void init_dadu(gmm::dense_matrix <double> &X); // ça pourrait faire partie d'un constructeur si Tetra devient une classe
 
 /** \struct Tet
 Tet is a tetrahedron, containing the index references to nodes, must not be flat 
@@ -206,6 +210,9 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
     ANNpointArray pts;/**< container for the building of the kdtree (handled by ANN library) */
     
 
+
+
+
 /**
 print some informations of fem container
 */
@@ -225,6 +232,12 @@ void evolution(void);
 computes the hat functions for all containers
 */
 void chapeaux(void); 
+
+/**
+computes an analytical initial magnetization distribution as a starting point for the simulation
+*/
+inline void init_distrib(void)
+	{ std::for_each( node.begin(),node.end(), [](Node &n) { n.u[0]=1./sqrt(2.);n.u[1] = 0.;n.u[2] = 1./sqrt(2.);n.phi  = 0.;} ); }
 
 }; // end struct fem definition
 
@@ -275,7 +288,6 @@ void restoresol(Fem& fem /**< [in,out] */ ,
 	double scaling /**< [in] scaling factor for physical coordinates */,
 	std::string *filename /**< [in] */ );
 
-void init_distrib(Fem &fem);/**< computes an analytical initial magnetization distribution as a starting point for the simulation */
 
 //double u_moy(Fem &fem, int d);/**< computes the average magnetization */
 //double v_moy(Fem &fem, int d);/**< computes the average speed of a domain wall */

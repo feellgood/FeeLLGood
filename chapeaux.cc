@@ -2,21 +2,25 @@
 
 using namespace std;
 
+void Tetra::init_dadu(gmm::dense_matrix <double> &X) // ça pourrait faire partie d'un constructeur si Tetra devient une classe
+	{
+	X(0,0)= -1.0;   X(0,1)= -1.0;   X(0,2)= -1.0;
+        X(1,0)= +1.0;   X(1,1)=  0.0;   X(1,2)=  0.0;
+        X(2,0)=  0.0;   X(2,1)= +1.0;   X(2,2)=  0.0;
+        X(3,0)=  0.0;   X(3,1)=  0.0;   X(3,2)= +1.0;
+	}
+
+
 void Fem::chapeaux(void)
 {
-//const int FAC = fem.FAC;
-//const int TET = fem.TET;
+gmm::dense_matrix <double> dadu(Tetra::N,3);
+
+Tetra::init_dadu(dadu);
 
 /********************* FACES *******************/
 for (int i_f=0; i_f<FAC; i_f++){
    Facette::Fac &f = fac[i_f];
    
-//const int NPI = Fac::NPI;// NPI = 4
-
-   //double u[Facette::NPI]   = {   1/3.,   1/5.,   3/5.,   1/5.};
-   //double v[Facette::NPI]   = {   1/3.,   1/5.,   1/5.,   3/5.};
-   //double pds[Facette::NPI] = {-27/96., 25/96., 25/96., 25/96.};
-  
    double detJ = 2*f.surf;
 
    for (int j=0; j<Facette::NPI; j++){
@@ -43,17 +47,12 @@ gmm::dense_matrix <double> nod(3,Tetra::N);
 
     for (int j=0; j<Tetra::NPI; j++){
         vector <double> a(Tetra::N);
-        gmm::dense_matrix <double> da(Tetra::N,3), dadu(Tetra::N,3), J(3,3);
+        gmm::dense_matrix <double> da(Tetra::N,3), J(3,3);
         a[0] = 1.-Tetra::u[j]-Tetra::v[j]-Tetra::w[j];
         a[1] = Tetra::u[j];
         a[2] = Tetra::v[j];
         a[3] = Tetra::w[j];
 
-        dadu(0,0)= -1;   dadu(0,1)= -1;   dadu(0,2)= -1;
-        dadu(1,0)= +1;   dadu(1,1)=  0;   dadu(1,2)=  0;
-        dadu(2,0)=  0;   dadu(2,1)= +1;   dadu(2,2)=  0;
-        dadu(3,0)=  0;   dadu(3,1)=  0;   dadu(3,2)= +1;
-	
         mult(nod, dadu, J);
         double detJ = lu_det(J);
 //	cout << "tet: " << t << "   jac:" << detJ <<endl;

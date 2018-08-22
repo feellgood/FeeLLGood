@@ -36,7 +36,7 @@ int restore = int(mySettings.param[p]);
 if (restore)
     restoresol(fem,mySettings.getScale(), nullptr);
 else
-    init_distrib(fem);
+    fem.init_distrib();
 
 /* direction de propagation de la paroi */
 direction(fem);
