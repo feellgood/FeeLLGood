@@ -3,9 +3,9 @@
 
 using namespace std;
 
-void lecture(Fem &fem,Settings &mySets, double scale, Regions *regions)  // regions may be NULL
+void Fem::lecture(Settings &mySets, double scale, Regions *regions)  // regions may be NULL
 {
-int NOD, ELEM, tags, reg, TYP;
+int ELEM, tags, reg, TYP;
 double value;
 string trash, symb;
 pair <string,int> p;
@@ -48,16 +48,15 @@ if (scale == 0.0){
 mySets.setScale( scale );
 
 msh >> NOD;        // lecture des noeuds
-fem.NOD = NOD; 
 
-fem.node.resize(NOD);
+node.resize(NOD);
 for (int i=0; i<NOD; i++){
     double x,y,z;
     msh >> trash >> x >> y >> z;
 
-    fem.node[i].x = x * scale;
-    fem.node[i].y = y * scale;
-    fem.node[i].z = z * scale;
+    node[i].x = x * scale;
+    node[i].y = y * scale;
+    node[i].z = z * scale;
     }
 
 if (msh.fail()){
@@ -93,26 +92,26 @@ while(msh >> symb){
         msh >> trash;
     switch (TYP){
         case 2:{
-            Facette::Fac fac;
-            fac.reg = reg;
+            Facette::Fac f;
+            f.reg = reg;
 	    
-            msh >> fac.ind[0] >> fac.ind[1] >> fac.ind[2];
+            msh >> f.ind[0] >> f.ind[1] >> f.ind[2];
 	    for (int i=0; i<3; i++)
-	        fac.ind[i]--;           // passage convention Matlab/msh a C++
+	        f.ind[i]--;           // passage convention Matlab/msh a C++
 		
-            fem.fac.push_back(fac);
+            fac.push_back(f);
             if (regions) ++regions->surfaces[reg];
             break;
 	    }
         case 4:{
-            Tetra::Tet tet;
-            tet.reg = reg; 
+            Tetra::Tet te;
+            te.reg = reg; 
 	    
-            msh >> tet.ind[0] >> tet.ind[1] >> tet.ind[2] >> tet.ind[3];
+            msh >> te.ind[0] >> te.ind[1] >> te.ind[2] >> te.ind[3];
 	    for (int i=0; i<4; i++)
-	    	tet.ind[i]--;           // passage convention Matlab/msh a C++
+	    	te.ind[i]--;           // passage convention Matlab/msh a C++
 		
-            fem.tet.push_back(tet);
+            tet.push_back(te);
             if (regions) ++regions->volumes[reg];
             break;
 	    }
@@ -130,9 +129,9 @@ if (msh.fail()){
 #endif
     }
 
-fem.FAC = fem.fac.size();
-fem.TET = fem.tet.size();
-fem.SRC = fem.FAC * Facette::NPI + fem.TET * Tetra::NPI;
+FAC = fac.size();
+TET = tet.size();
+SRC = FAC * Facette::NPI + TET * Tetra::NPI;
 
 while(msh >> symb){
     if (symb == "$Parameters")

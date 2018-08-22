@@ -4,52 +4,48 @@
 using namespace std;
 
 
-void femutil_node(Fem &fem)
+void Fem::femutil_node(void)
 {
-const int NOD = fem.NOD;
-
-fem.pts= annAllocPts(NOD, 3);
+pts= annAllocPts(NOD, 3);
 
 // calcul du diametre et du centrage
-double xmin, xmax, ymin, ymax, zmin, zmax, lx,ly,lz;
+double xmin, xmax, ymin, ymax, zmin, zmax;
 xmin = ymin = zmin = +HUGE;
 xmax = ymax = zmax = -HUGE;
 
 for (int i=0; i<NOD; i++){
     double xi,yi,zi;
-    xi = fem.node[i].x;      yi = fem.node[i].y;    zi = fem.node[i].z;
-    fem.pts[i][0]=xi;	     fem.pts[i][1]=yi;	    fem.pts[i][2]=zi;
+    xi = node[i].x;      yi = node[i].y;    zi = node[i].z;
+    pts[i][0]=xi;	     pts[i][1]=yi;	    pts[i][2]=zi;
     if (xi<xmin) xmin=xi;    if (xi>xmax) xmax=xi;
     if (yi<ymin) ymin=yi;    if (yi>ymax) ymax=yi;
     if (zi<zmin) zmin=zi;    if (zi>zmax) zmax=zi;
     }
 
 // allocation de l'arbre de recherche
-fem.kdtree = new ANNkd_tree(fem.pts, NOD, 3);
-if (!fem.kdtree) SYSTEM_ERROR;
+kdtree = new ANNkd_tree(pts, NOD, 3);
+if (!kdtree) SYSTEM_ERROR;
 
-lx=xmax-xmin; fem.lx=lx;
-ly=ymax-ymin; fem.ly=ly;
-lz=zmax-zmin; fem.lz=lz;
+lx=xmax-xmin;
+ly=ymax-ymin;
+lz=zmax-zmin;
 
-fem.diam = lx;
-if (fem.diam<ly) fem.diam=ly;
-if (fem.diam<lz) fem.diam=lz;
+diam = lx;
+if (diam<ly) diam=ly;
+if (diam<lz) diam=lz;
 
-fem.cx = 0.5*(xmax+xmin);
-fem.cy = 0.5*(ymax+ymin);
-fem.cz = 0.5*(zmax+zmin);
+cx = 0.5*(xmax+xmin);
+cy = 0.5*(ymax+ymin);
+cz = 0.5*(zmax+zmin);
 
-fem.as[0] = lx/fem.diam;
-fem.as[1] = ly/fem.diam;
-fem.as[2] = lz/fem.diam;
+as[0] = lx/diam;
+as[1] = ly/diam;
+as[2] = lz/diam;
 }
 
 
-void femutil_tet(Fem &fem)
+void Fem::femutil_tet(void)
 {
-const int TET = fem.TET;
-
 /*
                         v
                       .
@@ -75,74 +71,71 @@ const int TET = fem.TET;
 // calcul des volumes et reorientation des tetraedres si necessaire
 double voltot = 0.;
 
-for (int t=0; t<TET; t++){
-   Tetra::Tet &tet = fem.tet[t];
+for (int i_t=0; i_t<TET; i_t++){
+   Tetra::Tet &te = tet[i_t];
    int i0,i1,i2,i3;
-   i0=tet.ind[0];   i1=tet.ind[1];   i2=tet.ind[2];   i3=tet.ind[3];
+   i0=te.ind[0];   i1=te.ind[1];   i2=te.ind[2];   i3=te.ind[3];
    
    double x0,y0,z0, x1,y1,z1, x2,y2,z2, x3,y3,z3;
-   x0 = fem.node[i0].x;   y0 = fem.node[i0].y;   z0 = fem.node[i0].z;
-   x1 = fem.node[i1].x;   y1 = fem.node[i1].y;   z1 = fem.node[i1].z;
-   x2 = fem.node[i2].x;   y2 = fem.node[i2].y;   z2 = fem.node[i2].z;
-   x3 = fem.node[i3].x;   y3 = fem.node[i3].y;   z3 = fem.node[i3].z;
+   x0 = node[i0].x;   y0 = node[i0].y;   z0 = node[i0].z;
+   x1 = node[i1].x;   y1 = node[i1].y;   z1 = node[i1].z;
+   x2 = node[i2].x;   y2 = node[i2].y;   z2 = node[i2].z;
+   x3 = node[i3].x;   y3 = node[i3].y;   z3 = node[i3].z;
 
-   double vecx,vecy,vecz,vol;
+   double vecx,vecy,vecz,i_vol;
    vecx = (y1-y0)*(z2-z0)-(y2-y0)*(z1-z0);
    vecy = (z1-z0)*(x2-x0)-(z2-z0)*(x1-x0);
    vecz = (x1-x0)*(y2-y0)-(x2-x0)*(y1-y0);
 //   vol  = 1./6.* fabs(vecx*(x3-x0) + vecy*(y3-y0) + vecz*(z3-z0));
-   vol  = 1./6.* (vecx*(x3-x0) + vecy*(y3-y0) + vecz*(z3-z0));
-   if (vol<0.) {
-      tet.ind[3]=i2; tet.ind[2]=i3;
-      vol=-vol;
-      IF_VERBOSE() cout << "ill-oriented tetrahedron: " << t << " now corrected!"<< endl;
+   i_vol  = 1./6.* (vecx*(x3-x0) + vecy*(y3-y0) + vecz*(z3-z0));
+   if (i_vol<0.) {
+      te.ind[3]=i2; te.ind[2]=i3;
+      i_vol=-i_vol;
+      IF_VERBOSE() cout << "ill-oriented tetrahedron: " << i_t << " now corrected!"<< endl;
       }
-   tet.vol = vol;
-   voltot+= vol;}
-fem.vol = voltot;
-
+   te.vol = i_vol;
+   voltot+= i_vol;}
+vol = voltot;
 }
 
-void femutil_facMs(Fem &fem,Settings &settings /**< [in,out] */)
+void Fem::femutil_facMs(Settings &settings /**< [in] */)
 {
-const int FAC = fem.FAC;
-const int TET = fem.TET;
 pair <string,int> p;
 map <pair<string,int>,double> &param = settings.param;
 
 // decomposition des tetraedres en elements de surface
 set<Facette::Fac, Facette::less_than> sf;
 IF_VERBOSE() cout << "Nb de Tet " << TET << endl;
-for (int t=0; t<TET; t++){
-    Tetra::Tet &tet = fem.tet[t];
+for (int i_t=0; i_t<TET; i_t++){
+    Tetra::Tet &te = tet[i_t];
     int ia,ib,ic,id;
-    ia=tet.ind[0];  ib=tet.ind[1];  ic=tet.ind[2];  id=tet.ind[3];
+    ia=te.ind[0];  ib=te.ind[1];  ic=te.ind[2];  id=te.ind[3];
 //    cout << "tet " << t <<"/"<<TET<< endl;
     {
-    Facette::Fac fac; fac.reg=tet.reg; 
-    fac.ind[0]=ia; fac.ind[1]=ic; fac.ind[2]=ib;
-    sf.insert(fac);
+    Facette::Fac f; f.reg=te.reg; 
+    f.ind[0]=ia; f.ind[1]=ic; f.ind[2]=ib;
+    sf.insert(f);
 //    cout << fac.ind[0] << " " << fac.ind[1] << " " << fac.ind[2] << endl;
     }
  
     {
-    Facette::Fac fac; fac.reg=tet.reg;
-    fac.ind[0]=ib; fac.ind[1]=ic; fac.ind[2]=id;
-    sf.insert(fac);
+    Facette::Fac f; f.reg=te.reg;
+    f.ind[0]=ib; f.ind[1]=ic; f.ind[2]=id;
+    sf.insert(f);
 //    cout << fac.ind[0] << " " << fac.ind[1] << " " << fac.ind[2] << endl;
     }
 
     {
-    Facette::Fac fac; fac.reg=tet.reg; 
-    fac.ind[0]=ia; fac.ind[1]=id; fac.ind[2]=ic;
-    sf.insert(fac);
+    Facette::Fac f; f.reg=te.reg; 
+    f.ind[0]=ia; f.ind[1]=id; f.ind[2]=ic;
+    sf.insert(f);
 //    cout << fac.ind[0] << " " << fac.ind[1] << " " << fac.ind[2] << endl;
     }
 
     {
-    Facette::Fac fac; fac.reg=tet.reg; 
-    fac.ind[0]=ia; fac.ind[1]=ib; fac.ind[2]=id;
-    sf.insert(fac); 
+    Facette::Fac f; f.reg=te.reg; 
+    f.ind[0]=ia; f.ind[1]=ib; f.ind[2]=id;
+    sf.insert(f); 
 //    cout << fac.ind[0] << " " << fac.ind[1] << " " << fac.ind[2] << endl;
     }
 }
@@ -162,20 +155,20 @@ cout << "===============================================================" << end
 
 // calcul des normales aux faces
 int done = 0;
-for (int f=0; f<FAC; f++){
-    int progress = 100*double(f)/FAC;
+for (int i_f=0; i_f<FAC; i_f++){
+    int progress = 100*double(i_f)/FAC;
     if (progress>done && !(progress%5)) {
         IF_VERBOSE() cout << progress << "--"; fflush(NULL);
         done = progress;
     }
 
-    Facette::Fac &fac = fem.fac[f];
-    fac.Ms = 0.;
-    p = make_pair("Js", fac.reg);
+    Facette::Fac &fa = fac[i_f];
+    fa.Ms = 0.;
+    p = make_pair("Js", fa.reg);
     double Js = param[p];
     if (Js<0.) continue;  // elimination des facettes a Js<0
 
-    int i0 = fac.ind[0],  i1 = fac.ind[1],  i2 = fac.ind[2];
+    int i0 = fa.ind[0],  i1 = fa.ind[1],  i2 = fa.ind[2];
 
     set< Facette::Fac, Facette::less_than >::iterator it=sf.end();
     for (int perm=0; perm<2; perm++) {
@@ -189,14 +182,14 @@ for (int f=0; f<FAC; f++){
       
         if (it!=sf.end()) { // found
            Facette::Fac fc = *it;
-           int i0=fac.ind[0], i1=fac.ind[1], i2=fac.ind[2];
+           int i0=fa.ind[0], i1=fa.ind[1], i2=fa.ind[2];
 //           cout << "fac " << i0 << " " << i1 << " " << i2 <<endl;
            i0=fc.ind[0], i1=fc.ind[1], i2=fc.ind[2];
 //           cout << "fc  " << i0 << " " << i1 << " " << i2 <<endl;
 
-           double x0 = fem.node[i0].x,  y0 = fem.node[i0].y,  z0 = fem.node[i0].z;
-           double x1 = fem.node[i1].x,  y1 = fem.node[i1].y,  z1 = fem.node[i1].z;
-           double x2 = fem.node[i2].x,  y2 = fem.node[i2].y,  z2 = fem.node[i2].z;
+           double x0 = node[i0].x,  y0 = node[i0].y,  z0 = node[i0].z;
+           double x1 = node[i1].x,  y1 = node[i1].y,  z1 = node[i1].z;
+           double x2 = node[i2].x,  y2 = node[i2].y,  z2 = node[i2].z;
 
            double nx   = (y1-y0)*(z2-z0)-(y2-y0)*(z1-z0);
            double ny   = (z1-z0)*(x2-x0)-(z2-z0)*(x1-x0);
@@ -205,11 +198,11 @@ for (int f=0; f<FAC; f++){
            p = make_pair("Js", fc.reg);
            double Ms = nu0*param[p];
 //           cout << "Ms : " << Ms << " " << fac.Ms << endl;
-           if (nx*fac.nx+ny*fac.ny+nz*fac.nz > 0) {
-               fac.Ms = fac.Ms + Ms;   // la face trouvee a la meme orientation que la face traitee
+           if (nx*fa.nx+ny*fa.ny+nz*fa.nz > 0) {
+               fa.Ms = fa.Ms + Ms;   // la face trouvee a la meme orientation que la face traitee
            }
            else {
-               fac.Ms = fac.Ms - Ms;   // la face trouvee a une orientation opposee
+               fa.Ms = fa.Ms - Ms;   // la face trouvee a une orientation opposee
            }
 
 //           double xbar=(x0+x1+x2)/3, ybar=(y0+y1+y2)/3., zbar=(z0+z1+z2)/3.;
@@ -222,42 +215,38 @@ for (int f=0; f<FAC; f++){
 IF_VERBOSE() cout << "100" << endl;
 }
 
-void femutil_fac(Fem &fem)
+void Fem::femutil_fac(void)
 {
-const int FAC = fem.FAC;
-
 // calcul des surfaces
 double surftot = 0.;
 for (int f=0; f<FAC; f++){
-    Facette::Fac &fac = fem.fac[f];
+    Facette::Fac &fa = fac[f];
     int i0,i1,i2;
-    i0 = fac.ind[0];    i1 = fac.ind[1];    i2 = fac.ind[2];
+    i0 = fa.ind[0];    i1 = fa.ind[1];    i2 = fa.ind[2];
     
     double x0,y0,z0, x1,y1,z1, x2,y2,z2;
-    x0 = fem.node[i0].x;   y0 = fem.node[i0].y;   z0 = fem.node[i0].z;
-    x1 = fem.node[i1].x;   y1 = fem.node[i1].y;   z1 = fem.node[i1].z;
-    x2 = fem.node[i2].x;   y2 = fem.node[i2].y;   z2 = fem.node[i2].z;
+    x0 = node[i0].x;   y0 = node[i0].y;   z0 = node[i0].z;
+    x1 = node[i1].x;   y1 = node[i1].y;   z1 = node[i1].z;
+    x2 = node[i2].x;   y2 = node[i2].y;   z2 = node[i2].z;
      
-    double vecx,vecy,vecz,norm,surf;
-    vecx = (y1-y0)*(z2-z0)-(y2-y0)*(z1-z0);
-    vecy = (z1-z0)*(x2-x0)-(z2-z0)*(x1-x0);
-    vecz = (x1-x0)*(y2-y0)-(x2-x0)*(y1-y0);
-    norm = sqrt(vecx*vecx + vecy*vecy + vecz*vecz);
-    fac.nx = vecx/norm,  fac.ny = vecy/norm,  fac.nz = vecz/norm;
-    surf = 0.5* norm;
-    fac.surf = surf;
-    surftot+= surf;
+    double vecx = (y1-y0)*(z2-z0)-(y2-y0)*(z1-z0);
+    double vecy = (z1-z0)*(x2-x0)-(z2-z0)*(x1-x0);
+    double vecz = (x1-x0)*(y2-y0)-(x2-x0)*(y1-y0);
+    double norm = sqrt(vecx*vecx + vecy*vecy + vecz*vecz);
+    fa.nx = vecx/norm,  fa.ny = vecy/norm,  fa.nz = vecz/norm;
+    fa.surf = 0.5*norm;
+    surftot+= fa.surf;
     }
-fem.surf = surftot;
+surf = surftot;
 }
 
-void femutil(Fem &fem,Settings &settings)
+void Fem::femutil(Settings &settings)
 {
-femutil_node(fem);
-femutil_tet(fem);
-femutil_fac(fem);
-femutil_facMs(fem,settings);
-cout << "surface  : " << fem.surf << endl;
-cout << "volume   : " << fem.vol << endl;
+femutil_node();
+femutil_tet();
+femutil_fac();
+femutil_facMs(settings);
+cout << "surface  : " << surf << std::endl;
+cout << "volume   : " << vol << std::endl;
 }
 

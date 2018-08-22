@@ -3,25 +3,21 @@
 
 using namespace std;
 
-void energy(Fem &fem,Settings &settings)
+void Fem::energy(Settings &settings)
 {
-const int TET = fem.TET;
-const int FAC = fem.FAC;
-
 pair <string,int> p;
 //map <pair<string,int>,double> &param = settings.param;
-triple &Hext=fem.Hext;
 
-fem.Etot = 0.0;
-double E[5] = {0.0,0.0,0.0,0.0,0.0};
+Etot = 0.0;
+double _E[5] = {0.0,0.0,0.0,0.0,0.0};
 
-double uz_drift=2.*fem.DW_z/fem.lz*fem.DW_dir;
+double uz_drift=2.*DW_z/lz*DW_dir;
 
 /* Contribution des tetraedres */
-for (int t=0; t<TET; t++) {
+for (int i_t=0; i_t<TET; i_t++) {
 	
-    Tetra::Tet &tet = fem.tet[t];
-    const int reg = tet.reg;
+    Tetra::Tet &te = tet[i_t];
+    const int reg = te.reg;
     p = make_pair("Ae", reg);   double Ae = settings.param[p];
     p = make_pair("Js", reg);   double Js = settings.param[p];  double Ms = nu0 * settings.param[p];
 
@@ -46,30 +42,30 @@ for (int t=0; t<TET; t++) {
     double phi_nod[Tetra::N], negphi_nod[Tetra::N], Hdx[Tetra::NPI], Hdy[Tetra::NPI], Hdz[Tetra::NPI];
 
     for (int i=0; i<Tetra::N; i++){
-        int i_= tet.ind[i];
-        Node &node = fem.node[i_];
+        int i_= te.ind[i];
+        Node &n = node[i_];
         for (int d=0; d<3; d++) {
-            u_nod[d][i] = node.u[d];
+            u_nod[d][i] = n.u[d];
             }
-           phi_nod[i] =  node.phi;
-        negphi_nod[i] = -node.phi;
+           phi_nod[i] =  n.phi;
+        negphi_nod[i] = -n.phi;
         }
 
-	tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (phi_nod, tet.a, phi);
+	tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (phi_nod, te.a, phi);
 
-	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, tet.a, u);
-	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, tet.dadx, dudx);
-	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, tet.dady, dudy);
-	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, tet.dadz, dudz);
+	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, te.a, u);
+	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, te.dadx, dudx);
+	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, te.dady, dudy);
+	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, te.dadz, dudz);
 
     for (int npi=0; npi<Tetra::NPI; npi++){
         double div_u = dudx[0][npi] + dudy[1][npi] + dudz[2][npi];
         q[npi] = -Ms * div_u;
         }
 
-	tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphi_nod, tet.dadx, Hdx);
-	tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphi_nod, tet.dady, Hdy);
-	tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphi_nod, tet.dadz, Hdz);
+	tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphi_nod, te.dadx, Hdx);
+	tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphi_nod, te.dady, Hdy);
+	tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphi_nod, te.dadz, Hdz);
 
    /*-------------------------------------------------------*/
 	    
@@ -99,22 +95,19 @@ for (int t=0; t<TET; t++) {
 
         dens[4][npi] = 0.;
         }
-    tiny::mult<double, 5, Tetra::NPI> (dens, tet.weight, Eelem);
-    tiny::add<double, 5> (Eelem, E);
+    tiny::mult<double, 5, Tetra::NPI> (dens, te.weight, Eelem);
+    tiny::add<double, 5> (Eelem, _E);
     }
 
 /* Contribution des triangles a l'energie d'anisotropie */
 
 	
-for (int t=0; t<FAC; t++) {
-	//const int N   = Fac::N;
-	//const int NPI = Fac::NPI;
-	
-	Facette::Fac &fac = fem.fac[t];
-	const int reg = fac.reg;
-    double Ms = fac.Ms;
+for (int i_t=0; i_t<FAC; i_t++) {
+	Facette::Fac &fa = fac[i_t];
+const int reg = fa.reg;
+    double Ms = fa.Ms;
     double nx,ny,nz;
-    nx=fac.nx; ny=fac.ny; nz=fac.nz;
+    nx=fa.nx; ny=fa.ny; nz=fa.nz;
 
 	p=make_pair("Ks",reg);      double K = settings.param[p];	//cout << ", Ks=" << K;
 	p=make_pair("a1",reg);      double uk00 = settings.param[p];  	//cout << ", a1=" << k0;
@@ -127,17 +120,17 @@ for (int t=0; t<FAC; t++) {
     double q[Facette::NPI],  phi[Facette::NPI];
 		
 	for (int i=0; i<Facette::N; i++){
-		int i_= fac.ind[i];
-			Node &node = fem.node[i_];
+		int i_= fa.ind[i];
+			Node &n = node[i_];
 			for (int d=0; d<3; d++) {
-				u_nod[d][i] = node.u[d];
+				u_nod[d][i] = n.u[d];
             }
-        phi_nod[i] =  node.phi;
+        phi_nod[i] =  n.phi;
         }
 
-	tiny::transposed_mult<double, Facette::N, Facette::NPI> (phi_nod, fac.a, phi);
+	tiny::transposed_mult<double, Facette::N, Facette::NPI> (phi_nod, fa.a, phi);
 		
-	tiny::mult<double, 3, Facette::N, Facette::NPI> (u_nod, fac.a, u);
+	tiny::mult<double, 3, Facette::N, Facette::NPI> (u_nod, fa.a, u);
 	
     for (int npi=0; npi<Facette::NPI; npi++) { q[npi] = Ms * (u[0][npi]*nx + u[1][npi]*ny + u[2][npi]*nz); }
 	
@@ -150,21 +143,21 @@ for (int t=0; t<FAC; t++) {
 		double al0=uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi];
 		dens[npi] = -K  * sq(al0);      // uniaxe
 		}
-	Eelem=tiny::sp<double, Facette::NPI> (dens, fac.weight);
-	E[1]+=Eelem;
+	Eelem=tiny::sp<double, Facette::NPI> (dens, fa.weight);
+	_E[1]+=Eelem;
 
 	for (int npi=0; npi<Facette::NPI; npi++) {
 		dens[npi] = 0.5*mu0*q[npi]*phi[npi];
 		}
-	Eelem=tiny::sp<double, Facette::NPI> (dens, fac.weight);
-	E[2]+=Eelem;
+	Eelem=tiny::sp<double, Facette::NPI> (dens, fa.weight);
+	_E[2]+=Eelem;
     }
 	
 for (int e=0; e<4; e++){
-	fem.E[e] = E[e];
-	fem.Etot+= E[e];
+	E[e] = _E[e];
+	Etot+= _E[e];
     }
 
-fem.evol = fem.Etot-fem.Etot0;
-fem.phy = 0;
+evol = Etot-Etot0;
+phy = 0;
 }

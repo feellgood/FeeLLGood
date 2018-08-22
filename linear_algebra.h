@@ -1,3 +1,9 @@
+/** \file linear_algebra.h
+\brief secondary header, it grabs altogether the linear algebra by the solver to apply fem method  <br>
+It encapsulates the calls to GMM , the assemblage and projection of the matrix for all elements <br>
+two templates projection and assemblage template class parameter is either Facette::Fac or Tetra::Tet 
+*/
+
 #include "gmm/gmm_kernel.h"  // ct gmm_kernel.h plutôt que gmm.h , qui appelle des fichiers de getfem
 #include "gmm/gmm_precond_diagonal.h" //ct
 
@@ -9,28 +15,26 @@
 typedef gmm::wsvector <double>   write_vector;/**< convenient typedef : a write sparse vector in GMM is a stl::map, complexity for both read and write an element is \f$ \log(N) \f$ */
 typedef gmm::rsvector <double>   read_vector;/**< convenient typedef : a read sparse vector */
 
-typedef gmm::row_matrix	<write_vector>   write_matrix;/**< convenient macro */
-typedef gmm::row_matrix	<read_vector>    read_matrix;/**< convenient macro */
+typedef gmm::row_matrix	<write_vector>   write_matrix;/**< convenient typedef for row matrix in write mode */
+typedef gmm::row_matrix	<read_vector>    read_matrix;/**< convenient typedef for row matrix in read mode */
 
-/** \class linAlgebra
+/** \class LinAlgebra
 convenient class to grab altogether some part of the calculations involved using gmm solver at each timestep
 */
 class LinAlgebra
 {
 public:
+	/** constructor */	
 	inline LinAlgebra(Fem &f, Settings &s) {fem = f; settings = s;}
 	gmm::diagonal_precond <read_matrix>  *prc;/**< diagonal preconditionner */
-	//gmm::ilutp_precond < read_matrix > *prc;
 
 /**
-computes the contribution of the tetrahedron to the integrals
+computes the integral contribution of the tetrahedron
 */
-
-//Fem &fem,Settings &settings,
 void integrales(Tetra::Tet &tet, gmm::dense_matrix <double> &AE, std::vector <double> &BE);
 
 /**
-computes the contribution of the surface to the integrals
+computes the integral contribution of the surface
 */
 void integrales(Facette::Fac &fac, gmm::dense_matrix <double> &AE, std::vector <double> &BE);
 
@@ -38,8 +42,8 @@ int  vsolve(long nt);/**< solver */
 void base_projection(void);/**< computes the vector basis projection on the elements */
 
 private:
-	Fem fem;
-	Settings settings;
+	Fem fem;/**< access to some part of struct fem */
+	Settings settings;/**< copy of the settings */
 /**
 template function to compute projection of an element <br>
 template parameter T is either tetra of face

@@ -23,8 +23,8 @@ gsl_histogram_set_ranges_uniform (fem.stat.h, -HMAX, HMAX);
 vector<Seq> seq;
 
 mySettings.dialog(seq);
-lecture(fem,mySettings, 0.0, nullptr);
-femutil(fem,mySettings);
+fem.lecture(mySettings, 0.0, nullptr);
+fem.femutil(mySettings);
 fem.chapeaux();
 fem.affichage();
 
@@ -39,7 +39,7 @@ else
     fem.init_distrib();
 
 /* direction de propagation de la paroi */
-direction(fem);
+fem.direction();
 
 fmm::init< CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem, tree, kernels);
 
@@ -83,8 +83,7 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
         fmm::demag<1, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree, kernels);
 #endif
 	    fem.DW_z  = 0.0;
-        energy(fem,mySettings); 
-
+            fem.energy(mySettings); 
 	    fem.evolution();
 
 	    int flag  = 0;
@@ -134,7 +133,7 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
 		(fem,mySettings, tree, kernels); // Hd(v)
 #endif
 
-            energy(fem,mySettings);
+            fem.energy(mySettings);
 
          /*   cout << boost::format("\t energy %+2.3e") % fem.Etot << endl;
               cout << boost::format("\t   (dE/dt %+2.2e, av2 %+2.2e)")
