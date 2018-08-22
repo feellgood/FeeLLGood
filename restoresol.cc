@@ -1,5 +1,7 @@
 #include "fem.h"
 
+#include "pt3D.h"
+
 using namespace std;
 
 /** convenient error handler */
@@ -49,21 +51,20 @@ for (int i=0; i<NOD; i++){
     Node &n = node[i];
     Node node_;
     int i_;
-    fin >> i_ >> node_.x >> node_.y >> node_.z;
+    fin >> i_ >>  node_.p;//node_.x >> node_.y >> node_.z;
     fin >> n.u[0] >> n.u[1] >> n.u[2] >> n.phi;
 
-    node_.x *= scaling;
-    node_.y *= scaling;
-    node_.z *= scaling;
+    //node_.x *= scaling;node_.y *= scaling;node_.z *= scaling;
+node_.p *= scaling;
 
-    double d2=sq(n.x-node_.x) + sq(n.y-node_.y) + sq(n.z-node_.z);
+    double d2=sq(n.p.x()-node_.p.x()) + sq(n.p.y()-node_.p.y()) + sq(n.p.z()-node_.p.z());
 
     if (d2 > sq(diam * 1e-9)) // attention scaling écrit en dur ... 
 	{
         IF_VERBOSE(){
         cerr << "WARNING difference dans la position des noeuds"<< endl;
-        cerr << i  << "\t" << n.x  << "\t" << n.y  << "\t" << n.z << endl;
-        cerr << i_ << "\t" << node_.x << "\t" << node_.y << "\t" << node_.z << endl;
+        cerr << i  << "\t" << n.p << endl;
+        cerr << i_ << "\t" << node_.p << endl;
         }
 //        exit(1);
         }

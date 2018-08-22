@@ -1,5 +1,4 @@
 #include "fem.h"
-#include "tiny.h"
 
 using namespace std;
 
@@ -27,9 +26,9 @@ for (int t=0; t<TET; t++){
     for (int i=0; i<Tetra::N; i++){
         int i_= tet.ind[i];
 	    Node &node = fem.node[i_];
-	    nod[0][i] = node.x;
-	    nod[1][i] = node.y;
-	    nod[2][i] = node.z;
+	    nod[0][i] = node.p.x();
+	    nod[1][i] = node.p.y();
+	    nod[2][i] = node.p.z();
 		negphi_nod[i] = -node.phi;
 	    }
 

@@ -33,9 +33,9 @@ fout << "POINTS "<< NOD << " float" << endl;
 
 for (int i=0; i<NOD; i++){
     Node &node = fem.node[i];
-    double x   = node.x;
-    double y   = node.y;
-    double z   = node.z+fem.DW_z;
+    double x   = node.p.x();
+    double y   = node.p.y();
+    double z   = node.p.z() + fem.DW_z;
 fout << x << "\t" << y << "\t" << z << endl;    //fout << boost::format("%+20.10e %+20.10e %+20.10e") % x % y % z << endl;
     }
 

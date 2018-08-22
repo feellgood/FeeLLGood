@@ -39,9 +39,9 @@ gmm::dense_matrix <double> nod(3,Tetra::N);
     for (int i=0; i<Tetra::N; i++){
         int i_= t.ind[i];
 //	cout << "t:" << t <<",  nod:" << i_ << endl;
-        nod(0,i) = node[i_].x;
-        nod(1,i) = node[i_].y;
-        nod(2,i) = node[i_].z;
+        nod(0,i) = node[i_].p.x();
+        nod(1,i) = node[i_].p.y();
+        nod(2,i) = node[i_].p.z();
         }
 // cout << nod <<endl;
 

@@ -1,5 +1,4 @@
 #include "fem.h"
-#include "tiny.h"
 
 using namespace std;
 
@@ -32,7 +31,7 @@ for (int i_t=0; i_t<TET; i_t++) {
     p=make_pair("b3",reg);      double uk12 = settings.param[p];  	//cout << ", a3=" << k2;
     p=make_pair("c1",reg);      double uk20 = settings.param[p];  	//cout << ", a1=" << k0;
     p=make_pair("c2",reg);      double uk21 = settings.param[p];  	//cout << ", a2=" << k1;
-    p=make_pair("c3",reg);      double uk22 = settings.param[p];  	//cout << ", a3=" << k2;
+    p=make_pair("c3",reg);      double uk22 = settings.param[p];  	//cout << ", a3=" << k2;	
     //p = make_pair("alpha", reg);double alpha = fem.param[p];    
    
    /*-------------------- INTERPOLATION --------------------*/

@@ -15,7 +15,7 @@ xmax = ymax = zmax = -HUGE;
 
 for (int i=0; i<NOD; i++){
     double xi,yi,zi;
-    xi = node[i].x;      yi = node[i].y;    zi = node[i].z;
+    xi = node[i].p.x();      yi = node[i].p.y();    zi = node[i].p.z();
     pts[i][0]=xi;	     pts[i][1]=yi;	    pts[i][2]=zi;
     if (xi<xmin) xmin=xi;    if (xi>xmax) xmax=xi;
     if (yi<ymin) ymin=yi;    if (yi>ymax) ymax=yi;
@@ -77,10 +77,10 @@ for (int i_t=0; i_t<TET; i_t++){
    i0=te.ind[0];   i1=te.ind[1];   i2=te.ind[2];   i3=te.ind[3];
    
    double x0,y0,z0, x1,y1,z1, x2,y2,z2, x3,y3,z3;
-   x0 = node[i0].x;   y0 = node[i0].y;   z0 = node[i0].z;
-   x1 = node[i1].x;   y1 = node[i1].y;   z1 = node[i1].z;
-   x2 = node[i2].x;   y2 = node[i2].y;   z2 = node[i2].z;
-   x3 = node[i3].x;   y3 = node[i3].y;   z3 = node[i3].z;
+   x0 = node[i0].p.x();   y0 = node[i0].p.y();   z0 = node[i0].p.z();
+   x1 = node[i1].p.x();   y1 = node[i1].p.y();   z1 = node[i1].p.z();
+   x2 = node[i2].p.x();   y2 = node[i2].p.y();   z2 = node[i2].p.z();
+   x3 = node[i3].p.x();   y3 = node[i3].p.y();   z3 = node[i3].p.z();
 
    double vecx,vecy,vecz,i_vol;
    vecx = (y1-y0)*(z2-z0)-(y2-y0)*(z1-z0);
@@ -187,18 +187,23 @@ for (int i_f=0; i_f<FAC; i_f++){
            i0=fc.ind[0], i1=fc.ind[1], i2=fc.ind[2];
 //           cout << "fc  " << i0 << " " << i1 << " " << i2 <<endl;
 
-           double x0 = node[i0].x,  y0 = node[i0].y,  z0 = node[i0].z;
-           double x1 = node[i1].x,  y1 = node[i1].y,  z1 = node[i1].z;
-           double x2 = node[i2].x,  y2 = node[i2].y,  z2 = node[i2].z;
+	Pt::pt3D p0 = node[i0].p; 
+	Pt::pt3D p1 = node[i1].p;
+	Pt::pt3D p2 = node[i2].p;
+        Pt::pt3D n = (p1-p0)*(p2-p0);
+	
+	//double x0 = node[i0].x,  y0 = node[i0].y,  z0 = node[i0].z;
+        //double x1 = node[i1].x,  y1 = node[i1].y,  z1 = node[i1].z;
+        //double x2 = node[i2].x,  y2 = node[i2].y,  z2 = node[i2].z;
 
-           double nx   = (y1-y0)*(z2-z0)-(y2-y0)*(z1-z0);
-           double ny   = (z1-z0)*(x2-x0)-(z2-z0)*(x1-x0);
-           double nz   = (x1-x0)*(y2-y0)-(x2-x0)*(y1-y0);
+        //double nx   = (y1-y0)*(z2-z0)-(y2-y0)*(z1-z0);
+        //double ny   = (z1-z0)*(x2-x0)-(z2-z0)*(x1-x0);
+        //double nz   = (x1-x0)*(y2-y0)-(x2-x0)*(y1-y0);
 
            p = make_pair("Js", fc.reg);
            double Ms = nu0*param[p];
 //           cout << "Ms : " << Ms << " " << fac.Ms << endl;
-           if (nx*fa.nx+ny*fa.ny+nz*fa.nz > 0) {
+           if (n.x()*fa.nx+n.y()*fa.ny+n.z()*fa.nz > 0) {
                fa.Ms = fa.Ms + Ms;   // la face trouvee a la meme orientation que la face traitee
            }
            else {
@@ -224,16 +229,23 @@ for (int f=0; f<FAC; f++){
     int i0,i1,i2;
     i0 = fa.ind[0];    i1 = fa.ind[1];    i2 = fa.ind[2];
     
-    double x0,y0,z0, x1,y1,z1, x2,y2,z2;
-    x0 = node[i0].x;   y0 = node[i0].y;   z0 = node[i0].z;
-    x1 = node[i1].x;   y1 = node[i1].y;   z1 = node[i1].z;
-    x2 = node[i2].x;   y2 = node[i2].y;   z2 = node[i2].z;
-     
-    double vecx = (y1-y0)*(z2-z0)-(y2-y0)*(z1-z0);
-    double vecy = (z1-z0)*(x2-x0)-(z2-z0)*(x1-x0);
-    double vecz = (x1-x0)*(y2-y0)-(x2-x0)*(y1-y0);
-    double norm = sqrt(vecx*vecx + vecy*vecy + vecz*vecz);
-    fa.nx = vecx/norm,  fa.ny = vecy/norm,  fa.nz = vecz/norm;
+	    
+	//double x0,y0,z0, x1,y1,z1, x2,y2,z2;
+    //x0 = node[i0].x;   y0 = node[i0].y;   z0 = node[i0].z;
+    //x1 = node[i1].x;   y1 = node[i1].y;   z1 = node[i1].z;
+    //x2 = node[i2].x;   y2 = node[i2].y;   z2 = node[i2].z;
+
+	Pt::pt3D p0 = node[i0].p;
+     	Pt::pt3D p1 = node[i1].p;
+	Pt::pt3D p2 = node[i2].p;
+
+	Pt::pt3D vec = (p1-p0)*(p2-p0);
+
+    //double vecx = (y1-y0)*(z2-z0)-(y2-y0)*(z1-z0);
+    //double vecy = (z1-z0)*(x2-x0)-(z2-z0)*(x1-x0);
+    //double vecz = (x1-x0)*(y2-y0)-(x2-x0)*(y1-y0);
+    double norm = vec.norm();//sqrt(vecx*vecx + vecy*vecy + vecz*vecz);
+    fa.nx = vec.x()/norm,  fa.ny = vec.y()/norm,  fa.nz = vec.z()/norm;
     fa.surf = 0.5*norm;
     surftot+= fa.surf;
     }

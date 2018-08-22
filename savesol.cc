@@ -24,9 +24,9 @@ const int    NOD   = fem.NOD;
 
 for (int i=0; i<NOD; i++){
     Node &node = fem.node[i];
-    double x   = node.x / s;
-    double y   = node.y / s;
-    double z   = node.z / s;
+    double x   = node.p.x() / s;
+    double y   = node.p.y() / s;
+    double z   = node.p.z() / s;
     double u1  = node.u[0];
     double u2  = node.u[1];
     double u3  = node.u[2];

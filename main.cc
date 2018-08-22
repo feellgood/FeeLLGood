@@ -1,5 +1,3 @@
-// #include "fem.h"
-
 #include "linear_algebra.h"
 #include "fmm_demag.h"
 
@@ -152,7 +150,9 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
             fem.DW_z  += fem.DW_vz*dt;
 
             fem.evolution(); t+=dt; fem.t=t; nt++; flag=0;
-	    recentrage(fem, 0.1);
+
+	double mz = fem.moy<U>(2);	    
+	fem.recentrage( 0.1,mz);
 
             saver(fem,mySettings,fout,nt);
 

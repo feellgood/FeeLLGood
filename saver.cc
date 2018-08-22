@@ -1,5 +1,4 @@
 #include "fem.h"
-#include "tiny.h"
 
 using namespace std;
 
@@ -23,7 +22,7 @@ if ((nt%n1)==0) {
    // fout << boost::format("%+20.10e %+20.10e %+20.10e") % u_moy(fem,0) % u_moy(fem,1) % u_moy(fem,2);
    // fout << boost::format("%+20.10e %+20.10e %+20.10e %+20.10e %+20.10e %+20.10e %+20.10e")% Ee % Ea % Ed % Ez % Etot % DW_z % DW_vz<< endl;
 fout << nt <<"\t" << t <<"\t" << dt <<"\t" << dumax <<"\t";
-fout << moy<U>(fem,0) <<"\t" << moy<U>(fem,1) <<"\t" << moy<U>(fem,2) <<"\t";
+fout << fem.moy<U>(0) <<"\t" << fem.moy<U>(1) <<"\t" << fem.moy<U>(2) <<"\t";
 fout << Ee <<"\t" << Ea <<"\t" << Ed <<"\t" << Ez <<"\t" << Etot <<"\t" << DW_z <<"\t" << DW_vz <<"\t" << endl;
 
 }

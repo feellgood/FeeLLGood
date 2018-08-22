@@ -1,4 +1,7 @@
 #include "fem.h"
+
+#include "pt3D.h"
+
 #define DEBUG 0
 
 using namespace std;
@@ -51,12 +54,10 @@ msh >> NOD;        // lecture des noeuds
 
 node.resize(NOD);
 for (int i=0; i<NOD; i++){
-    double x,y,z;
-    msh >> trash >> x >> y >> z;
-
-    node[i].x = x * scale;
-    node[i].y = y * scale;
-    node[i].z = z * scale;
+    Pt::pt3D p;
+    msh >> trash >> p;
+	node[i].p = p*scale;
+    //node[i].x = x * scale; node[i].y = y * scale; node[i].z = z * scale;
     }
 
 if (msh.fail()){

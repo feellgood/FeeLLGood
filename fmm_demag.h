@@ -2,8 +2,6 @@
 this header is the interface to scalfmm. Its purpose is to prepare an octree for the application of the fast multipole algorithm, and to compute the demag field.
 */
 
-#include "tiny.h"
-
 // scalFMM includes
 
 #include "Utils/FTic.hpp"
@@ -113,9 +111,9 @@ const int TET = fem.TET;
 
 int idxPart=0;
 for (int i=0; i<NOD; i++, idxPart++){       // cibles (noeuds)
-    double xTarget = (fem.node[i].x-fem.cx) * norm;
-    double yTarget = (fem.node[i].y-fem.cy) * norm;
-    double zTarget = (fem.node[i].z-fem.cz) * norm;
+    double xTarget = (fem.node[i].p.x()-fem.cx) * norm;
+    double yTarget = (fem.node[i].p.y()-fem.cy) * norm;
+    double zTarget = (fem.node[i].p.z()-fem.cz) * norm;
     FPoint<double> particlePosition(xTarget, yTarget, zTarget);// manque le typename du template FPoint ct
     tree->insert(particlePosition, FParticleType::FParticleTypeTarget, idxPart, 0.0);//ct
     }
@@ -125,9 +123,9 @@ for (int t=0; t<TET; t++){       // sources de volume
     double nod[3][Tetra::N], gauss[3][Tetra::NPI];
     for (int i=0; i<Tetra::N; i++){
         int i_= tet.ind[i];
-        nod[0][i] = fem.node[i_].x;
-        nod[1][i] = fem.node[i_].y;
-	nod[2][i] = fem.node[i_].z;
+        nod[0][i] = fem.node[i_].p.x();
+        nod[1][i] = fem.node[i_].p.y();
+	nod[2][i] = fem.node[i_].p.z();
 	}
     tiny::mult<double, 3, Tetra::N, Tetra::NPI> (nod, tet.a, gauss);
 
@@ -142,14 +140,12 @@ for (int t=0; t<TET; t++){       // sources de volume
 
 for (int f=0; f<FAC; f++){        // sources de surface
     Facette::Fac &fac = fem.fac[f];
-    //const int N = Fac::N;
-    //const int NPI = Fac::NPI;
     double nod[3][Facette::N], gauss[3][Facette::NPI];
     for (int i=0; i<Facette::N; i++){
         int i_= fac.ind[i];
-        nod[0][i] = fem.node[i_].x;
-        nod[1][i] = fem.node[i_].y;
-	nod[2][i] = fem.node[i_].z;
+        nod[0][i] = fem.node[i_].p.x();
+        nod[1][i] = fem.node[i_].p.y();
+	nod[2][i] = fem.node[i_].p.z();
 	}
     tiny::mult<double, 3, Facette::N, Facette::NPI> (nod, fac.a, gauss);
 
@@ -274,19 +270,22 @@ for (int f=0; f<FAC; f++){
       for (int i=0; i<Facette::N; i++) {
 	      int i_= fac.ind[i];
 	      //Node &node = fem.node[i_]; // inutilisé *ct*
-	      nod[0][i] = fem.node[i_].x;
-	      nod[1][i] = fem.node[i_].y;
-	      nod[2][i] = fem.node[i_].z;
+	      nod[0][i] = fem.node[i_].p.x();
+	      nod[1][i] = fem.node[i_].p.y();
+	      nod[2][i] = fem.node[i_].p.z();
           }
       tiny::mult<double, 3, Facette::N, Facette::NPI> (nod, fac.a, gauss);
 
       /** calc corr node by node **/
       for (int i=0; i<Facette::N; i++) {
 	      int i_= fac.ind[i];
-	      Node &node = fem.node[i_];
-	      double x,y,z;
-	      x=node.x;  y=node.y;  z=node.z;
-	      for (int j=0; j<Facette::NPI; j++) {
+	      
+		//Node &node = fem.node[i_];
+		Pt::pt3D p_i_ = fem.node[i_].p;	      
+		double x,y,z;
+	      //x=node.p.x();  y=node.p.y();  z=node.p.z();
+		x=p_i_.x(); y=p_i_.y(); z=p_i_.z();	      
+		for (int j=0; j<Facette::NPI; j++) {
 	          double xg,yg,zg;
 	          xg=gauss[0][j];  yg=gauss[1][j];  zg=gauss[2][j];
 	          double rij = sqrt( sq(x-xg) + sq(y-yg) + sq(z-zg) );
@@ -369,18 +368,23 @@ double potential(Fem &fem, Facette::Fac &fac, int i) // template, mais Hv est ut
  int i_,ii_,iii_;
  i_=fac.ind[i];  ii_=fac.ind[ii];  iii_=fac.ind[iii];
 
- double x1,x2,x3, y1,y2,y3, z1,z2,z3;
- Node &node1 = fem.node[i_];
- Node &node2 = fem.node[ii_];
- Node &node3 = fem.node[iii_];
- x1=node1.x;  x2=node2.x;  x3=node3.x;
- y1=node1.y;  y2=node2.y;  y3=node3.y;
- z1=node1.z;  z2=node2.z;  z3=node3.z;
+ //double x1,x2,x3, y1,y2,y3, z1,z2,z3;
+Node &node1 = fem.node[i_];
+Node &node2 = fem.node[ii_];
+Node &node3 = fem.node[iii_];
+ //x1=node1.x;  x2=node2.x;  x3=node3.x;
+ //y1=node1.y;  y2=node2.y;  y3=node3.y;
+ //z1=node1.z;  z2=node2.z;  z3=node3.z;
 
- double b,t,h;
- b = sqrt( sq(x2-x1) + sq(y2-y1) + sq(z2-z1) );
- t = (x2-x1)*(x3-x1) + (y2-y1)*(y3-y1) + (z2-z1)*(z3-z1);
- h = 2.*fac.surf;
+Pt::pt3D p1p2 = node2.p - node1.p;
+Pt::pt3D p1p3 = node3.p - node1.p;
+
+//double b = sqrt( sq(x2-x1) + sq(y2-y1) + sq(z2-z1) );
+double b = p1p2.norm();
+
+//double t = (x2-x1)*(x3-x1) + (y2-y1)*(y3-y1) + (z2-z1)*(z3-z1);
+double t = Pt::pScal(p1p2,p1p3);
+double h = 2.*fac.surf;
  t/=b;  h/=b;
  double a = t/h;  double c = (t-b)/h;
 

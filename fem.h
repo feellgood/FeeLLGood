@@ -33,8 +33,11 @@ It does also contains the definition of many constants for the solver, and for s
 
 #include "ANN.h" // ct "ANN/ANN.h"		// ANN declarations
 
-
 #include "gmm/gmm_kernel.h" // pour dense_matrix dans namespace Tetra
+
+#include "tiny.h"
+
+#include "pt3D.h"
 
 /* macros for messages and errors */
 #ifdef LIBRARY
@@ -61,9 +64,11 @@ Node is containing physical point of coordinates \f$ p = (x,y,z) \f$, magnetizat
 Many other values for the computation of the scalar potential \f$ \phi \f$
 */
 struct Node {
-double x;/**< Physical position x of the node */
-double y;/**< Physical position y  of the node */
-double z;/**< Physical position z  of the node */
+//double x;/**< Physical position x of the node */
+//double y;/**< Physical position y  of the node */
+//double z;/**< Physical position z  of the node */
+Pt::pt3D p;
+
 triple u0;/**< magnetization initial or reset value, used to store previous value for time evolution */
 triple v0;/**< initial or reset value, used to store previous value for time evolution */
 triple u;/**< magnetization value */
@@ -325,17 +330,40 @@ void direction(void);
 /**< computes energies stored in E table */
 void energy(Settings &settings);
 
+/** recentering algorithm for the study of the motion of an object, for example a domain wall. Mesh must be adequate. */
+bool recentrage(double thres/**< [in] translation parameter */,double mz /**<[in] average magnetization along z */);
+
+/** 
+template to compute average of either u or v on the whole set of tetetrahedron
+*/
+template <int UorV>
+double moy(int d)
+{
+double sum = 0.;
+for (int i_t=0; i_t<TET; i_t++){
+    Tetra::Tet &te = tet[i_t];
+    double val_nod[Tetra::N], val[Tetra::NPI];
+    for (int ie=0; ie<Tetra::N; ie++) 
+	{
+        int i = te.ind[ie];
+        Node &n = node[i];
+	if(UorV)        
+		val_nod[ie] = n.u[d];
+	else val_nod[ie] = n.v[d]; 
+        }
+   tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (val_nod, te.a, val);
+   sum += tiny::sp<double, Tetra::NPI> (val, te.weight);
+   }
+
+return sum/vol;
+}
+
+
 }; // end struct fem definition
 
 
 
 double cputime();/**< convenient function to compute the duration of a simulation */
-
-
-
-
-/** recentering algorithm for the study of the motion of an object, for example a domain wall. Mesh must be adequate. */
-bool recentrage(Fem &fem, double thres/**< [in] translation parameter */);
 
 void saver(Fem &fem, Settings &settings, std::ofstream &fout, int nt);/**< saving function for a solution */
 void savecfg_vtk(Fem &fem,std::string baseName,double s, int nt, std::string *filename);/**< text file (vtk) writing function for a solution */

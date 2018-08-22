@@ -1,5 +1,4 @@
 #include "linear_algebra.h"
-#include "tiny.h"
 
 #include "gmm/gmm_iter.h"
 #include "gmm/gmm_solver_bicgstab.h"
@@ -7,7 +6,6 @@
 
 using namespace std;
 
-//Fem &fem,Settings &settings, 
 int LinAlgebra::vsolve(long nt)
 {
 time_t timeStart;
@@ -27,7 +25,7 @@ write_vector Lw(2*NOD);
 
 /* changement de referentiel */
 /* bcarvello, 2017: doesn't this belong in evolution.cc ? */
-fem.DW_vz += fem.DW_dir*moy<V>(fem, 2)*fem.lz/2.;
+fem.DW_vz += fem.DW_dir*fem.moy<V>(2)*fem.lz/2.;
 IF_VERBOSE(){
 cout << "%5t average velocity %30T." <<flush;//boost::format("%5t average velocity %30T.") <<flush;
 cout << fem.DW_vz << endl;

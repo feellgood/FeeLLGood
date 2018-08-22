@@ -1,5 +1,4 @@
 #include "linear_algebra.h"
-#include "tiny.h"
 
 using namespace std;
 

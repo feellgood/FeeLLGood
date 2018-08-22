@@ -1,5 +1,4 @@
 #include "fem.h"
-#include "tiny.h"
 
 /*-----------------------------------------*/
 /*   recentrage de la paroi selon Oz       */
@@ -7,18 +6,16 @@
 
 using namespace std;
 
-bool recentrage(Fem &fem, double thres) // abs(thres) < 1
+bool Fem::recentrage(double thres,double mz) // abs(thres) < 1
 {
 time_t timeStart;
 time(&timeStart);
 
-double mz =moy<U>(fem,2);
 thres=min(abs(thres), 1.);
 if (fabs(mz)<thres) return false;
 
 IF_VERBOSE() cout << "%5t centering %30T." << flush;// cout << boost::format("%5t centering %30T.") <<flush;// *ct*
 
-const int NOD = fem.NOD;
 const int NPS=1;
 int ns;
 
@@ -26,32 +23,32 @@ ANNidxArray nnIdx = new ANNidx[NPS];    if(!nnIdx) SYSTEM_ERROR;
 ANNdistArray dists = new ANNdist[NPS];  if(!dists) SYSTEM_ERROR;
 ANNpoint queryPt= annAllocPt(3);
 
-queryPt[0]=fem.cx;
-queryPt[1]=fem.cy;
+queryPt[0]=cx;
+queryPt[1]=cy;
 
 // bord gauche
-queryPt[2]=fem.cz-fem.lz/2.;
-fem.kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
+queryPt[2]=cz-lz/2.;
+kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 ns=nnIdx[0]; 
 //double u0L=fem.node[ns].u[0];
 //double u1L=fem.node[ns].u[1];
-double u2L=fem.node[ns].u[2];
+double u2L=node[ns].u[2];
 
 // centre
-queryPt[2]=fem.cz;
-fem.kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
+queryPt[2]=cz;
+kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 ns=nnIdx[0]; 
 //double u0C=fem.node[ns].u[0];
 //double u1C=fem.node[ns].u[1];
 //double u2C=fem.node[ns].u[2];
 
 // bord droit
-queryPt[2]=fem.cz+fem.lz/2.;
-fem.kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
+queryPt[2]=cz+lz/2.;
+kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 ns=nnIdx[0]; 
 //double u0R=fem.node[ns].u[0];
 //double u1R=fem.node[ns].u[1];
-double u2R=fem.node[ns].u[2];
+double u2R=node[ns].u[2];
 
 if (u2L*u2R>0) {
 #ifdef LIBRARY
@@ -63,7 +60,7 @@ if (u2L*u2R>0) {
    }
 
 assert(u2L*u2R<0);
-double Dz= mz*fem.lz/2.*u2L;  // decalage avec signe OK
+double Dz= mz*lz/2.*u2L;  // decalage avec signe OK
 
 /* cas ou Dz>0				cas ou Dz<0
 
@@ -77,21 +74,21 @@ ou					ou
 
 
 for (int i=0; i<NOD; i++){    
-    Node &tgt_node = fem.node[i];
-    double x=tgt_node.x;
-    double y=tgt_node.y;
-    double z=tgt_node.z+Dz;
+    Node &tgt_node = node[i];
+    double x=tgt_node.p.x();
+    double y=tgt_node.p.y();
+    double z=tgt_node.p.z()+Dz;
 
-    if (z-fem.cz>+fem.lz/2.) z=fem.cz+fem.lz/2.;
-    if (z-fem.cz<-fem.lz/2.) z=fem.cz-fem.lz/2.;
+    if (z-cz>+lz/2.) z=cz+lz/2.;
+    if (z-cz<-lz/2.) z=cz-lz/2.;
 
     queryPt[0]=x;
     queryPt[1]=y;
     queryPt[2]=z;
-    fem.kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
+    kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 
     int ns=nnIdx[0]; 
-    Node &src_node = fem.node[ns];
+    Node &src_node = node[ns];
     tgt_node.u0[0] = src_node.u[0];     
     tgt_node.u0[1] = src_node.u[1];
     tgt_node.u0[2] = src_node.u[2];

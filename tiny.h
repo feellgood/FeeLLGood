@@ -75,30 +75,3 @@ template <typename T, int M, int N, int P> inline void mult(T A[M][N], T B[N][P]
        }
    }
 }
-
-/** 
-template to compute average of either u or v on the whole set of nodes
-*/
-template <int UorV>
-double moy(Fem &fem, int d)
-{
-const int TET = fem.TET;
-
-double sum = 0.;
-for (int t=0; t<TET; t++){
-    Tetra::Tet &tet = fem.tet[t];
-    double val_nod[Tetra::N], val[Tetra::NPI];
-    for (int ie=0; ie<Tetra::N; ie++) {
-        int i = tet.ind[ie];
-        Node &node = fem.node[i];
-	if(UorV)        
-		val_nod[ie] = node.u[d];
-	else val_nod[ie] = node.v[d]; 
-        }
-   tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (val_nod, tet.a, val);
-   sum += tiny::sp<double, Tetra::NPI> (val, tet.weight);
-   }
-
-return sum/fem.vol;
-}
-
