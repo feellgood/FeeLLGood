@@ -13,7 +13,7 @@ pair <string,int> p;
 string str = mySets.getPbName();
 ifstream msh(str);   // ouverture du fichier probleme en lecture
 if (!msh){
-    IF_VERBOSE(fem) cerr << "Impossible d'ouvrir le fichier " << str << endl;
+    IF_VERBOSE() cerr << "Impossible d'ouvrir le fichier " << str << endl;
     SYSTEM_ERROR;}
 
 while(msh >> symb){

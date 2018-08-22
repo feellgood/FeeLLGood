@@ -85,7 +85,7 @@ int init(Fem &fem, OctreeClass* &tree, KernelClass* &kernels, Args... kernelPreA
     const unsigned int NbThreads  =  omp_get_max_threads(); // open mp function
 
     omp_set_num_threads(NbThreads);
-    IF_VERBOSE(fem) std::cout << "\n>> Using " << omp_get_max_threads() << " threads.\n" << std::endl;
+    IF_VERBOSE() std::cout << "\n>> Using " << omp_get_max_threads() << " threads.\n" << std::endl;
 
     const double boxWidth=2.01;
 
@@ -105,7 +105,7 @@ const int NOD = fem.NOD;
 const int FAC = fem.FAC;
 const int TET = fem.TET;
 
-    IF_VERBOSE(fem){
+    IF_VERBOSE(){
     std::cout << "Creating & Inserting particles ..." << std::endl;
     std::cout << "\tHeight : " << NbLevels << " \t sub-height : " << SizeSubLevels << std::endl;
     }
@@ -162,7 +162,7 @@ for (int f=0; f<FAC; f++){        // sources de surface
 	}
     }
     counter.tac();
-    IF_VERBOSE(fem){
+    IF_VERBOSE(){
     std::cout << "Done  " << "(@Creating and Inserting Particles = " << counter.elapsed() << "s)." << std::endl;
 
     std::cout << "Create kernel ..." << std::endl;
@@ -173,7 +173,7 @@ for (int f=0; f<FAC; f++){        // sources de surface
     if (!kernels) SYSTEM_ERROR;
 
     counter.tac();
-    IF_VERBOSE(fem) std::cout << "Done  " << " in " << counter.elapsed() << "s)." << std::endl;
+    IF_VERBOSE() std::cout << "Done  " << " in " << counter.elapsed() << "s)." << std::endl;
 
 return 0;
 }
@@ -196,7 +196,7 @@ FmmClass algo(tree, kernels);
 
 const bool analytic_corr = true;
 
-IF_VERBOSE(fem) std::cout << "\t magnetostatics ..................... ";
+IF_VERBOSE() std::cout << "\t magnetostatics ..................... ";
 
 const int NOD = fem.NOD;
 const int FAC = fem.FAC;
@@ -333,7 +333,7 @@ fflush(NULL);
 counter.tic();
 algo.execute();
  counter.tac();
-IF_VERBOSE(fem) std::cout << "Done  " << "(@Algorithm = " << counter.elapsed() << "s)." << std::endl;
+IF_VERBOSE() std::cout << "Done  " << "(@Algorithm = " << counter.elapsed() << "s)." << std::endl;
 
 double norm = fem.fmm_normalizer;
 

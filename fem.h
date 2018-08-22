@@ -45,7 +45,7 @@ It does also contains the definition of many constants for the solver, and for s
 	#define IF_VERBOSE(fem) if ((fem).param[VERBOSE_KEY] != 0) /**< macro for the definition of a verbose mode if feellgood compiled as a library */
 	#define SYSTEM_ERROR {throw system_error(errno,generic_category());}/**< macro for error handling if feellgood compiled as a library */
 #else
-	#define IF_VERBOSE(fem) /**< macro for the definition of a verbose mode if feellgood compiled as an executable  */
+	#define IF_VERBOSE() /**< macro for the definition of a verbose mode if feellgood compiled as an executable  */
 	#define SYSTEM_ERROR {exit(1);} /**< macro to exit executable on some errors */
 #endif
 
@@ -101,6 +101,24 @@ struct Fac{
 	double weight[NPI];/**< weights table */
 	double a[N][NPI];          /**< hat functions table */
     };
+
+/**
+operator() for the comparison of two faces with lexicographical order
+*/
+struct less_than
+{
+bool operator()(Fac f1, Fac f2) const
+  {
+  if (f1.ind[0]<f2.ind[0]) return true;
+  else
+     if ((f1.ind[0]==f2.ind[0]) && (f1.ind[1]<f2.ind[1])) return true;
+     else
+        if ((f1.ind[0]==f2.ind[0]) && (f1.ind[1]==f2.ind[1]) && (f1.ind[2]<f2.ind[2])) return true;
+
+  return false;
+  }
+};
+
 }
 
 namespace Tetra
@@ -239,6 +257,13 @@ computes an analytical initial magnetization distribution as a starting point fo
 inline void init_distrib(void)
 	{ std::for_each( node.begin(),node.end(), [](Node &n) { n.u[0]=1./sqrt(2.);n.u[1] = 0.;n.u[2] = 1./sqrt(2.);n.phi  = 0.;} ); }
 
+/**
+read a solution from a file (tsv formated) and initialize fem struct to restart computation from that distribution
+*/
+void restoresol(double scaling /**< [in] scaling factor for physical coordinates */,
+	std::string *filename /**< [in] */ );
+
+
 }; // end struct fem definition
 
 /** \struct Regions
@@ -281,12 +306,7 @@ void femutil_facMs(Fem &fem /**< [in,out] */,Settings &settings /**< [in,out] */
 /** no idea */
 void direction(Fem &fem /**< [in,out] */ );
 
-/**
-read a solution from a file (tsv formated) and initialize fem struct to restart computation from that distribution
-*/
-void restoresol(Fem& fem /**< [in,out] */ ,
-	double scaling /**< [in] scaling factor for physical coordinates */,
-	std::string *filename /**< [in] */ );
+
 
 
 //double u_moy(Fem &fem, int d);/**< computes the average magnetization */

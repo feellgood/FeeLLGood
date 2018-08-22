@@ -34,7 +34,7 @@ pair <string,int> p = make_pair("restore",-1);
 int restore = int(mySettings.param[p]);
 
 if (restore)
-    restoresol(fem,mySettings.getScale(), nullptr);
+    fem.restoresol(mySettings.getScale(), nullptr);
 else
     fem.init_distrib();
 

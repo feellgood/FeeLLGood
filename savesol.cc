@@ -11,11 +11,11 @@ else{
     str = baseName + "_" + to_string(fem.SEQ) +"_B" + to_string(fem.Bext) + "_iter" + to_string(nt) + ".sol";
  //<< boost::format("_%d_B%6f_iter%d.sol") % fem.SEQ % fem.Bext % nt;
     }
-IF_VERBOSE(fem) cout << " " << str << endl;
+IF_VERBOSE() cout << " " << str << endl;
 
 ofstream fout(str, ios::out);
 if (!fout){
-   IF_VERBOSE(fem) cerr << "pb ouverture fichier " << str << "en ecriture" << endl;
+   IF_VERBOSE() cerr << "pb ouverture fichier " << str << "en ecriture" << endl;
    SYSTEM_ERROR;}
 //fout << boost::format("#time : %+20.10e ") % fem.t << endl;
 fout << "#time : " << fem.t <<endl;

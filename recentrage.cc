@@ -16,8 +16,7 @@ double mz =moy<U>(fem,2);
 thres=min(abs(thres), 1.);
 if (fabs(mz)<thres) return false;
 
-//IF_VERBOSE(fem) cout << boost::format("%5t centering %30T.") <<flush;// *ct*
-IF_VERBOSE(fem) cout << "%5t centering %30T." << flush;
+IF_VERBOSE() cout << "%5t centering %30T." << flush;// cout << boost::format("%5t centering %30T.") <<flush;// *ct*
 
 const int NOD = fem.NOD;
 const int NPS=1;
@@ -107,6 +106,6 @@ delete [] dists;
 
 time_t timeEnd;
 time(&timeEnd);
-IF_VERBOSE(fem) cout << "elapsed time = "<< difftime(timeEnd,timeStart) << "s" <<endl;
+IF_VERBOSE() cout << "elapsed time = "<< difftime(timeEnd,timeStart) << "s" <<endl;
 return true;
 }

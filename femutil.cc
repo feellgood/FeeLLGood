@@ -3,25 +3,6 @@
 
 using namespace std;
 
-/**
-kind of functor within a struct to perform comparison between faces, it is lexicographical order
-*/
-struct less_than
-{
-/**
-operator() for the comparison of two faces with lexicographical order
-*/
-  bool operator()(Facette::Fac f1, Facette::Fac f2) const
-  {
-  if (f1.ind[0]<f2.ind[0]) return true;
-  else
-     if ((f1.ind[0]==f2.ind[0]) && (f1.ind[1]<f2.ind[1])) return true;
-     else
-        if ((f1.ind[0]==f2.ind[0]) && (f1.ind[1]==f2.ind[1]) && (f1.ind[2]<f2.ind[2])) return true;
-
-  return false;
-  }
-};
 
 void femutil_node(Fem &fem)
 {
@@ -114,7 +95,7 @@ for (int t=0; t<TET; t++){
    if (vol<0.) {
       tet.ind[3]=i2; tet.ind[2]=i3;
       vol=-vol;
-      IF_VERBOSE(fem) cout << "ill-oriented tetrahedron: " << t << " now corrected!"<< endl;
+      IF_VERBOSE() cout << "ill-oriented tetrahedron: " << t << " now corrected!"<< endl;
       }
    tet.vol = vol;
    voltot+= vol;}
@@ -130,8 +111,8 @@ pair <string,int> p;
 map <pair<string,int>,double> &param = settings.param;
 
 // decomposition des tetraedres en elements de surface
-set<Facette::Fac, less_than> sf;
-IF_VERBOSE(fem) cout << "Nb de Tet " << TET << endl;
+set<Facette::Fac, Facette::less_than> sf;
+IF_VERBOSE() cout << "Nb de Tet " << TET << endl;
 for (int t=0; t<TET; t++){
     Tetra::Tet &tet = fem.tet[t];
     int ia,ib,ic,id;
@@ -184,7 +165,7 @@ int done = 0;
 for (int f=0; f<FAC; f++){
     int progress = 100*double(f)/FAC;
     if (progress>done && !(progress%5)) {
-        IF_VERBOSE(fem) cout << progress << "--"; fflush(NULL);
+        IF_VERBOSE() cout << progress << "--"; fflush(NULL);
         done = progress;
     }
 
@@ -196,7 +177,7 @@ for (int f=0; f<FAC; f++){
 
     int i0 = fac.ind[0],  i1 = fac.ind[1],  i2 = fac.ind[2];
 
-    set< Facette::Fac, less_than >::iterator it=sf.end();
+    set< Facette::Fac, Facette::less_than >::iterator it=sf.end();
     for (int perm=0; perm<2; perm++) {
         for (int nrot=0; nrot<3; nrot++) {
             Facette::Fac fc;
@@ -238,7 +219,7 @@ for (int f=0; f<FAC; f++){
     int tmp=i1; i1=i2; i2=tmp;
     }//fin perm
 }
-IF_VERBOSE(fem) cout << "100" << endl;
+IF_VERBOSE() cout << "100" << endl;
 }
 
 void femutil_fac(Fem &fem)
