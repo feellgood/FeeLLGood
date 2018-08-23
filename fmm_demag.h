@@ -111,9 +111,9 @@ const int TET = fem.TET;
 
 int idxPart=0;
 for (int i=0; i<NOD; i++, idxPart++){       // cibles (noeuds)
-    double xTarget = (fem.node[i].p.x()-fem.cx) * norm;
-    double yTarget = (fem.node[i].p.y()-fem.cy) * norm;
-    double zTarget = (fem.node[i].p.z()-fem.cz) * norm;
+    double xTarget = (fem.node[i].p.x()-fem.c.x()) * norm;
+    double yTarget = (fem.node[i].p.y()-fem.c.y()) * norm;
+    double zTarget = (fem.node[i].p.z()-fem.c.z()) * norm;
     FPoint<double> particlePosition(xTarget, yTarget, zTarget);// manque le typename du template FPoint ct
     tree->insert(particlePosition, FParticleType::FParticleTypeTarget, idxPart, 0.0);//ct
     }
@@ -130,9 +130,9 @@ for (int t=0; t<TET; t++){       // sources de volume
     tiny::mult<double, 3, Tetra::N, Tetra::NPI> (nod, tet.a, gauss);
 
     for (int j=0; j<Tetra::NPI; j++, idxPart++){
-        double xSource = (gauss[0][j]-fem.cx) * norm;
-        double ySource = (gauss[1][j]-fem.cy) * norm;
-	double zSource = (gauss[2][j]-fem.cz) * norm;
+        double xSource = (gauss[0][j]-fem.c.x()) * norm;
+        double ySource = (gauss[1][j]-fem.c.y()) * norm;
+	double zSource = (gauss[2][j]-fem.c.z()) * norm;
         FPoint<double> particlePosition(xSource, ySource, zSource);// manque le typename du template FPoint ct
         tree->insert(particlePosition, FParticleType::FParticleTypeSource, idxPart, 0.0);//ct
 	}
@@ -150,9 +150,9 @@ for (int f=0; f<FAC; f++){        // sources de surface
     tiny::mult<double, 3, Facette::N, Facette::NPI> (nod, fac.a, gauss);
 
     for (int j=0; j<Facette::NPI; j++, idxPart++){
-        double xSource = (gauss[0][j]-fem.cx) * norm;
-        double ySource = (gauss[1][j]-fem.cy) * norm;
-	double zSource = (gauss[2][j]-fem.cz) * norm;
+        double xSource = (gauss[0][j]-fem.c.x()) * norm;
+        double ySource = (gauss[1][j]-fem.c.y()) * norm;
+	double zSource = (gauss[2][j]-fem.c.z()) * norm;
         FPoint<double> particlePosition(xSource, ySource, zSource);// manque le typename du template FPoint ct
         tree->insert(particlePosition, FParticleType::FParticleTypeSource, idxPart, 0.0);//ct
 	}
@@ -243,8 +243,7 @@ for (int f=0; f<FAC; f++){
     //const int N    = Fac::N;
     //const int NPI  = Fac::NPI;
     double Ms = fac.Ms;
-    double nx,ny,nz;
-    nx=fac.nx; ny=fac.ny; nz=fac.nz;
+    Pt::pt3D n = fac.n;//nx=fac.nx; ny=fac.ny; nz=fac.nz;
 
     /** calc u gauss **/  
     double u_nod[3][Facette::N], u[3][Facette::NPI];
@@ -259,7 +258,7 @@ for (int f=0; f<FAC; f++){
 
     /** calc sigma, fill distrib.alpha **/
     for (int j=0; j<Facette::NPI; j++, nsrc++){
-        double un = u[0][j]*nx + u[1][j]*ny + u[2][j]*nz;
+        double un = u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z();
         double s = Ms * un * fac.weight[j];
         srcDen[nsrc] =  s; 
         }
@@ -289,7 +288,7 @@ for (int f=0; f<FAC; f++){
 	          double xg,yg,zg;
 	          xg=gauss[0][j];  yg=gauss[1][j];  zg=gauss[2][j];
 	          double rij = sqrt( sq(x-xg) + sq(y-yg) + sq(z-zg) );
-	          double sj = Ms* ( u[0][j]*nx + u[1][j]*ny + u[2][j]*nz );
+	          double sj = Ms* ( u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z() );
 	          corr[i_]-= sj/rij * fac.weight[j];
 	          }
 	      corr[i_]+= potential<Hv>(fem, fac, i);
@@ -360,7 +359,7 @@ template <int Hv>
 double potential(Fem &fem, Facette::Fac &fac, int i) // template, mais Hv est utilisé comme un booleen 
 {
   double nx,ny,nz,Ms;
-  nx=fac.nx;  ny=fac.ny;  nz=fac.nz; Ms=fac.Ms;
+  nx=fac.n.x();  ny=fac.n.y();  nz=fac.n.z(); Ms=fac.Ms;
 
  int ii  = (i+1)%3;
  int iii = (i+2)%3;

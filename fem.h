@@ -64,10 +64,7 @@ Node is containing physical point of coordinates \f$ p = (x,y,z) \f$, magnetizat
 Many other values for the computation of the scalar potential \f$ \phi \f$
 */
 struct Node {
-//double x;/**< Physical position x of the node */
-//double y;/**< Physical position y  of the node */
-//double z;/**< Physical position z  of the node */
-Pt::pt3D p;
+Pt::pt3D p;/**< Physical position p=(x,y,z)  of the node */
 
 triple u0;/**< magnetization initial or reset value, used to store previous value for time evolution */
 triple v0;/**< initial or reset value, used to store previous value for time evolution */
@@ -99,9 +96,10 @@ struct Fac{
 	int reg;/**< .msh region number */
 	double surf; /**< surface of the face */
 	double Ms; /**< magnetization at saturation of the face */    
-	double nx;/**< x component of the normal vector */
-	double ny;/**< y component of the normal vector */
-	double nz;/**< z component of the normal vector */
+	Pt::pt3D n;/**< normal vector n=(x,y,z) */	
+	//double nx;/**< x component of the normal vector */
+	//double ny;/**< y component of the normal vector */
+	//double nz;/**< z component of the normal vector */
 	int ind[N];/**< indices table */
 	double weight[NPI];/**< weights table */
 	double a[N][NPI];          /**< hat functions table */
@@ -191,12 +189,8 @@ struct Fem{
 	int TET;/**< number of tetrahedron in the corresponding container */
 	int SRC;/**< number of sources for scalfmm */
 	int SEQ;/**< number of sequences, usefull to define a vector applied field eventually varying in time */
-	double cx;/**< x center position */
-	double cy;/**< y center position */
-	double cz;/**< z center position */
-	double lx;/**< length along x axis */
-	double ly;/**< length along y axis */
-	double lz;/**< length along z axis */
+	Pt::pt3D c;/**< center position */	
+	Pt::pt3D l;/**< lengths along x,y,z axis */	
 	double diam;/**< diameter of the mesh (if a wire) */
 	double surf;/**< total surface */
 	double vol;/**< total volume of the mesh */
@@ -286,7 +280,7 @@ struct Regions{
 /** reading file function */
 void lecture(Settings &mySets, double scale, Regions *regions);
 
-/** initialize pts,kdtree,lx,ly,lz,cx,cy,cz,diam,as[] in fem struct */
+/** initialize pts,kdtree,l,c,diam,as[] in fem struct */
 void femutil_node(void);
 
 /**

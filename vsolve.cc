@@ -25,7 +25,7 @@ write_vector Lw(2*NOD);
 
 /* changement de referentiel */
 /* bcarvello, 2017: doesn't this belong in evolution.cc ? */
-fem.DW_vz += fem.DW_dir*fem.moy<V>(2)*fem.lz/2.;
+fem.DW_vz += fem.DW_dir*fem.moy<V>(Pt::IDX_Z)*fem.l.z()/2.;
 IF_VERBOSE(){
 cout << "%5t average velocity %30T." <<flush;//boost::format("%5t average velocity %30T.") <<flush;
 cout << fem.DW_vz << endl;

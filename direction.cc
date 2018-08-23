@@ -12,9 +12,9 @@ ANNdistArray dists = new ANNdist[NPS];  if(!dists) SYSTEM_ERROR;
 ANNpoint queryPt= annAllocPt(3);
 
 /* bord gauche */
-queryPt[0]=cx;
-queryPt[1]=cy;
-queryPt[2]=cz-lz/2.;
+queryPt[0]=c.x();
+queryPt[1]=c.y();
+queryPt[2]=c.z()-l.z()/2.;
 
 kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 int ns=nnIdx[0];
@@ -24,9 +24,9 @@ double u2L= node[ns].u[2];
 IF_VERBOSE() cout << "z : " << queryPt[2] << " u2 : "<< u2L << endl;
 
 /* bord droit */
-queryPt[0]=cx;
-queryPt[1]=cy;
-queryPt[2]=cz+lz/2.;
+queryPt[0]=c.x();
+queryPt[1]=c.y();
+queryPt[2]=c.z()+l.z()/2.;
 
 kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 ns=nnIdx[0];

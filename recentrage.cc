@@ -23,11 +23,11 @@ ANNidxArray nnIdx = new ANNidx[NPS];    if(!nnIdx) SYSTEM_ERROR;
 ANNdistArray dists = new ANNdist[NPS];  if(!dists) SYSTEM_ERROR;
 ANNpoint queryPt= annAllocPt(3);
 
-queryPt[0]=cx;
-queryPt[1]=cy;
+queryPt[0]=c.x();
+queryPt[1]=c.y();
 
 // bord gauche
-queryPt[2]=cz-lz/2.;
+queryPt[2]=c.z()-l.z()/2.;
 kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 ns=nnIdx[0]; 
 //double u0L=fem.node[ns].u[0];
@@ -35,7 +35,7 @@ ns=nnIdx[0];
 double u2L=node[ns].u[2];
 
 // centre
-queryPt[2]=cz;
+queryPt[2]=c.z();
 kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 ns=nnIdx[0]; 
 //double u0C=fem.node[ns].u[0];
@@ -43,7 +43,7 @@ ns=nnIdx[0];
 //double u2C=fem.node[ns].u[2];
 
 // bord droit
-queryPt[2]=cz+lz/2.;
+queryPt[2]=c.z()+l.z()/2.;
 kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 ns=nnIdx[0]; 
 //double u0R=fem.node[ns].u[0];
@@ -60,7 +60,7 @@ if (u2L*u2R>0) {
    }
 
 assert(u2L*u2R<0);
-double Dz= mz*lz/2.*u2L;  // decalage avec signe OK
+double Dz= mz*l.z()/2.*u2L;  // decalage avec signe OK
 
 /* cas ou Dz>0				cas ou Dz<0
 
@@ -79,8 +79,8 @@ for (int i=0; i<NOD; i++){
     double y=tgt_node.p.y();
     double z=tgt_node.p.z()+Dz;
 
-    if (z-cz>+lz/2.) z=cz+lz/2.;
-    if (z-cz<-lz/2.) z=cz-lz/2.;
+    if (z-c.z() > +l.z()/2.) z=c.z()+l.z()/2.;
+    if (z-c.z() < -l.z()/2.) z=c.z()-l.z()/2.;
 
     queryPt[0]=x;
     queryPt[1]=y;

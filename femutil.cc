@@ -26,21 +26,18 @@ for (int i=0; i<NOD; i++){
 kdtree = new ANNkd_tree(pts, NOD, 3);
 if (!kdtree) SYSTEM_ERROR;
 
-lx=xmax-xmin;
-ly=ymax-ymin;
-lz=zmax-zmin;
+l = Pt::pt3D(xmax-xmin,ymax-ymin,zmax-zmin);//lx=xmax-xmin;ly=ymax-ymin;lz=zmax-zmin;
 
-diam = lx;
-if (diam<ly) diam=ly;
-if (diam<lz) diam=lz;
+diam = l.x();
+if (diam<l.y()) diam=l.y();
+if (diam<l.z()) diam=l.z();
 
-cx = 0.5*(xmax+xmin);
-cy = 0.5*(ymax+ymin);
-cz = 0.5*(zmax+zmin);
+c = Pt::pt3D(0.5*(xmax+xmin),0.5*(ymax+ymin),0.5*(ymax+ymin));
+//cx = 0.5*(xmax+xmin);cy = 0.5*(ymax+ymin);cz = 0.5*(zmax+zmin);
 
-as[0] = lx/diam;
-as[1] = ly/diam;
-as[2] = lz/diam;
+as[0] = l.x()/diam;
+as[1] = l.y()/diam;
+as[2] = l.z()/diam;
 }
 
 
@@ -203,9 +200,10 @@ for (int i_f=0; i_f<FAC; i_f++){
            p = make_pair("Js", fc.reg);
            double Ms = nu0*param[p];
 //           cout << "Ms : " << Ms << " " << fac.Ms << endl;
-           if (n.x()*fa.nx+n.y()*fa.ny+n.z()*fa.nz > 0) {
-               fa.Ms = fa.Ms + Ms;   // la face trouvee a la meme orientation que la face traitee
-           }
+           //if (n.x()*fa.n.x()+n.y()*fa.n.y()+n.z()*fa.n.z() > 0) 
+	if (Pt::pScal(n,fa.n) > 0) {
+         	fa.Ms = fa.Ms + Ms;   // la face trouvee a la meme orientation que la face traitee
+           	}
            else {
                fa.Ms = fa.Ms - Ms;   // la face trouvee a une orientation opposee
            }
@@ -245,7 +243,7 @@ for (int f=0; f<FAC; f++){
     //double vecy = (z1-z0)*(x2-x0)-(z2-z0)*(x1-x0);
     //double vecz = (x1-x0)*(y2-y0)-(x2-x0)*(y1-y0);
     double norm = vec.norm();//sqrt(vecx*vecx + vecy*vecy + vecz*vecz);
-    fa.nx = vec.x()/norm,  fa.ny = vec.y()/norm,  fa.nz = vec.z()/norm;
+    fa.n = vec/norm;//fa.nx = vec.x()/norm,  fa.ny = vec.y()/norm,  fa.nz = vec.z()/norm;
     fa.surf = 0.5*norm;
     surftot+= fa.surf;
     }
