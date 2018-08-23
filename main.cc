@@ -151,7 +151,7 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
 
             fem.evolution(); t+=dt; fem.t=t; nt++; flag=0;
 
-	double mz = fem.moy<U>(2);	    
+	double mz = fem.moy<U>(Pt::IDX_Z);	    
 	fem.recentrage( 0.1,mz);
 
             saver(fem,mySettings,fout,nt);

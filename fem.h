@@ -36,8 +36,9 @@ It does also contains the definition of many constants for the solver, and for s
 #include "gmm/gmm_kernel.h" // pour dense_matrix dans namespace Tetra
 
 #include "tiny.h"
-
 #include "pt3D.h"
+#include "tetra.h"
+#include "facette.h"
 
 /* macros for messages and errors */
 #ifdef LIBRARY
@@ -77,92 +78,6 @@ double phi;/**< scalar potential value */
 double phiv0;/**< initial or reset value, used to store previous value for time evolution */
 double phiv;/**< no idea */
 };
-
-
-namespace Facette
-{
-const int N = 3; /**< number of sommits */
-const int NPI = 4; /**< number of weights  */
-
-const double u[NPI]   = {   1/3.,   1/5.,   3/5.,   1/5.};/**< some constants to build hat functions */
-const double v[NPI]   = {   1/3.,   1/5.,   1/5.,   3/5.};/**< some constants  to build hat functions */
-const double pds[NPI] = {-27/96., 25/96., 25/96., 25/96.};/**< some constant weights  to build hat functions */
-
-/** \struct Fac
-Face is a struct containing the index references to nodes, it has a triangular shape and should not be degenerated 
-*/
-struct Fac{
-	
-	int reg;/**< .msh region number */
-	double surf; /**< surface of the face */
-	double Ms; /**< magnetization at saturation of the face */    
-	Pt::pt3D n;/**< normal vector n=(x,y,z) */	
-	//double nx;/**< x component of the normal vector */
-	//double ny;/**< y component of the normal vector */
-	//double nz;/**< z component of the normal vector */
-	int ind[N];/**< indices table */
-	double weight[NPI];/**< weights table */
-	double a[N][NPI];          /**< hat functions table */
-    };
-
-/**
-operator less_than for the orientation of the facette, lexicographic order
-*/
-struct less_than
-{
-/**
-operator() for the comparison of two faces with lexicographical order
-*/
-bool operator()(Fac f1, Fac f2) const
-  {
-  if (f1.ind[0]<f2.ind[0]) return true;
-  else
-     if ((f1.ind[0]==f2.ind[0]) && (f1.ind[1]<f2.ind[1])) return true;
-     else
-        if ((f1.ind[0]==f2.ind[0]) && (f1.ind[1]==f2.ind[1]) && (f1.ind[2]<f2.ind[2])) return true;
-
-  return false;
-  }
-};
-
-}
-
-namespace Tetra
-{
-const int N = 4;/**< number of sommits */
-const int NPI = 5;/**< number of weights  */
-
-const double A=1./4.;/**< some constant to build hat functions */
-const double B=1./6.;/**< some constant to build hat functions */
-const double C=1./2.;/**< some constant to build hat functions */
-const double D=-2./15.;/**< some constant to build hat functions */
-const double E=3./40.;/**< some constant to build hat functions */
-const double u[NPI]   = {A,B,B,B,C};/**< some constants to build hat functions */
-const double v[NPI]   = {A,B,B,C,B};/**< some constants to build hat functions */
-const double w[NPI]   = {A,B,C,B,B};/**< some constants to build hat functions */
-const double pds[NPI] = {D,E,E,E,E};/**< some constant weights to build hat functions */
-
-/**
-initialisation of a constant matrix
-*/
-void init_dadu(gmm::dense_matrix <double> &X); // ça pourrait faire partie d'un constructeur si Tetra devient une classe
-
-/** \struct Tet
-Tet is a tetrahedron, containing the index references to nodes, must not be flat 
-   */ 
-struct Tet{
-
-	int reg;/**< .msh region number */
-	double vol;/**< volume of the tetrahedron */
-	int ind[N];/**< indices to the nodes */
-	double weight[NPI];/**< weights */
-	double a[N][NPI];/**< hat functions */
-	double dadx[N][NPI];/**< variations of hat function along x directions */
-	double dady[N][NPI];/**< variations of hat function along y directions */
-	double dadz[N][NPI];/**< variations of hat function along z directions */
-	};
-}
-
 
 /** \struct Stat
 used to build some statistics, with GSL library
