@@ -41,8 +41,8 @@ for (int t=0; t<TET; t++){
     gmm::dense_matrix <double> K(3*Tetra::N,3*Tetra::N), Kp(2*Tetra::N,2*Tetra::N);
     vector <double> L(3*Tetra::N), Lp(2*Tetra::N);
     tet.integrales(settings,fem.node,fem.Hext,fem.DW_vz,K, L);     
-    projection<Tetra::Tet,Tetra::N>(tet, K, L, Kp, Lp);
-    assemblage<Tetra::Tet,Tetra::N>(tet, Kp, Lp, Kw, Lw);    
+    projection<Tetra::Tet>(tet, K, L, Kp, Lp);
+    assemblage<Tetra::Tet>(tet, Kp, Lp, Kw, Lw);    
 	}
 
 for (int t=0; t<FAC; t++){
@@ -50,8 +50,8 @@ for (int t=0; t<FAC; t++){
     gmm::dense_matrix <double> K(3*Facette::N,3*Facette::N), Kp(2*Facette::N,2*Facette::N);
     vector <double> L(3*Facette::N), Lp(2*Facette::N);
     fac.integrales(settings,fem.node, L);     
-    projection<Facette::Fac,Facette::N>(fac, K, L, Kp, Lp);
-    assemblage<Facette::Fac,Facette::N>(fac, Kp, Lp, Kw, Lw);
+    projection<Facette::Fac>(fac, K, L, Kp, Lp);
+    assemblage<Facette::Fac>(fac, Kp, Lp, Kw, Lw);
     }
 
 time_t timeEnd;

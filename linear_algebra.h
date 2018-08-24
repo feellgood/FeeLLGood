@@ -38,12 +38,12 @@ private:
 template function to compute projection of an element <br>
 template parameter T is either tetra of face
 */
-template <class T,const int N> // carefull! N is tetra::N or Facette::N (depends on T)
+template <class T>
 void projection(T &elt,
            gmm::dense_matrix <double> &A,  std::vector <double> &B,
            gmm::dense_matrix <double> &Ap, std::vector <double> &Bp)
 {
-//const int N = T::N;
+const int N = elt.getN();
 gmm::dense_matrix <double> P(2*N,3*N), PA(2*N,3*N);
 for (int i=0; i<N; i++){
     Node &n = fem.node[elt.ind[i]];
@@ -62,13 +62,13 @@ template function to perform the
 matrix assembly with all the contributions of the tetrahedrons/faces <br>
 template parameter T is either tetra or face
 */
-template <class T,const int N>
+template <class T>
 void assemblage(T &elt,
            gmm::dense_matrix <double> &Ke, std::vector <double> &Le,
            write_matrix &K, write_vector &L)
 {
 const int NOD = fem.NOD;
-//const int N = T::N;
+const int N = elt.getN();
 
 for (int i=0; i < N; i++){
     int i_= elt.ind[i];             

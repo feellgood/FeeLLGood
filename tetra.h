@@ -53,7 +53,12 @@ class Tet{
 		/**
 		computes the integral contribution of the tetrahedron
 		*/		
-		void integrales(Settings &mySets,std::vector <Node> &myNode,triple Hext,double Vz,gmm::dense_matrix <double> &AE, std::vector <double> &BE);	
+		void integrales(Settings &mySets,std::vector <Node> &myNode,triple Hext,double Vz,gmm::dense_matrix <double> &AE, std::vector <double> &BE);
+
+		/**
+		convenient getter for N, usefull for templates projection and assemblage
+		*/
+		inline int getN(void) {return N;}		
 	};
 }
 
