@@ -92,7 +92,7 @@ class Settings{
 	inline std::string getSimName() {return simName;}/**< getter for output file name */
 
 	inline void setScale(double s) {_scale = s;} /**< setter for geometrical scaling factor for physical coordinates of the mesh  */	
-	inline const double getScale(void) const {return _scale;}/**< getter for geometrical scaling factor for physical coordinates of the mesh */ 
+	inline double getScale(void) {return _scale;}/**< getter for geometrical scaling factor for physical coordinates of the mesh */ 
 
 	bool withTsv;/**< boolean flag to mention if you want output in txt tsv file format  */
 	bool withVtk;/**< boolean flag to mention if you want output in txt vtk file format (readable by paraview) */

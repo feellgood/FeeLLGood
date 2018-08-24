@@ -163,7 +163,7 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
         if (dt < DTMIN) cout << " aborted:  dt < DTMIN";
         saver(fem,mySettings,fout,nt);
         
-	if (mySettings.withVtk) savecfg_vtk(fem,mySettings.getSimName(),mySettings.getScale(),nt,nullptr);
+	if (mySettings.withVtk) savecfg_vtk(fem,mySettings.getSimName(),nt,nullptr);
 
         savesol(fem,mySettings.getSimName(),mySettings.getScale(),nt,nullptr);
 

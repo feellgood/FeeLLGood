@@ -2,15 +2,6 @@
 
 using namespace std;
 
-void Tetra::init_dadu(gmm::dense_matrix <double> &X) // ça pourrait faire partie d'un constructeur si Tetra devient une classe
-	{
-	X(0,0)= -1.0;   X(0,1)= -1.0;   X(0,2)= -1.0;
-        X(1,0)= +1.0;   X(1,1)=  0.0;   X(1,2)=  0.0;
-        X(2,0)=  0.0;   X(2,1)= +1.0;   X(2,2)=  0.0;
-        X(3,0)=  0.0;   X(3,1)=  0.0;   X(3,2)= +1.0;
-	}
-
-
 void Fem::chapeaux(void)
 {
 gmm::dense_matrix <double> dadu(Tetra::N,3);

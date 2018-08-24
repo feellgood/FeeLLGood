@@ -33,12 +33,12 @@ It does also contains the definition of many constants for the solver, and for s
 
 #include "ANN.h" // ct "ANN/ANN.h"		// ANN declarations
 
-#include "gmm/gmm_kernel.h" // pour dense_matrix dans namespace Tetra
-
 #include "tiny.h"
 #include "pt3D.h"
 #include "tetra.h"
 #include "facette.h"
+
+#include "node.h"
 
 /* macros for messages and errors */
 #ifdef LIBRARY
@@ -60,24 +60,7 @@ const int D = 3;         /**< dimension, required by ANN for kdTree */
 const double invD = 1./(double)D;/**< convenient const value */
 
 
-/** \struct Node
-Node is containing physical point of coordinates \f$ p = (x,y,z) \f$, magnetization value at \f$ m(p,t) \f$. 
-Many other values for the computation of the scalar potential \f$ \phi \f$
-*/
-struct Node {
-Pt::pt3D p;/**< Physical position p=(x,y,z)  of the node */
 
-triple u0;/**< magnetization initial or reset value, used to store previous value for time evolution */
-triple v0;/**< initial or reset value, used to store previous value for time evolution */
-triple u;/**< magnetization value */
-triple v;/**< no idea */
-triple ep;/**< base vector */
-triple eq;/**< second base vector */
-double phi0;/**< scalar potential initial or reset value, used to store previous value for time evolution */
-double phi;/**< scalar potential value */
-double phiv0;/**< initial or reset value, used to store previous value for time evolution */
-double phiv;/**< no idea */
-};
 
 /** \struct Stat
 used to build some statistics, with GSL library
@@ -275,7 +258,7 @@ return sum/vol;
 double cputime();/**< convenient function to compute the duration of a simulation */
 
 void saver(Fem &fem, Settings &settings, std::ofstream &fout, int nt);/**< saving function for a solution */
-void savecfg_vtk(Fem &fem,std::string baseName,double s, int nt, std::string *filename);/**< text file (vtk) writing function for a solution */
+void savecfg_vtk(Fem &fem,std::string baseName, int nt, std::string *filename);/**< text file (vtk) writing function for a solution */
 void savesol(Fem &fem,std::string baseName,double s, int nt, std::string *filename);/**< text file (tsv) writing function for a solution */
 void saveH(Fem &fem,std::string baseName,double scale, int nt);/**< save the field values */
 

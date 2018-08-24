@@ -29,11 +29,6 @@ public:
 	gmm::diagonal_precond <read_matrix>  *prc;/**< diagonal preconditionner */
 
 /**
-computes the integral contribution of the tetrahedron
-*/
-void integrales(Tetra::Tet &tet, gmm::dense_matrix <double> &AE, std::vector <double> &BE);
-
-/**
 computes the integral contribution of the surface
 */
 void integrales(Facette::Fac &fac, gmm::dense_matrix <double> &AE, std::vector <double> &BE);

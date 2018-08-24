@@ -34,15 +34,16 @@ SET(INCLUDE ${ANN_INCLUDE_DIR} ${GMM_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR})
 #===========================================================================
 # we should use AVX instead of SSE4.2, with option -mavx
 
-set( CMAKE_CXX_FLAGS "-DORD2 -DNDEBUG -DNSTAT -Wall -frounding-math -std=c++11 -O3 -fopenmp -ffast-math -msse4.2 -mfpmath=sse" CACHE STRING "C++ compiler flags used during default builds." FORCE )
+set( CMAKE_CXX_FLAGS "-DORD2 -DNDEBUG -DNSTAT -Wall -Wextra -frounding-math -std=c++11 -O3 -fopenmp -ffast-math -msse4.2 -mfpmath=sse" CACHE STRING "C++ compiler flags used during default builds." FORCE )
 
-set( CMAKE_CXX_FLAGS_DEBUG "-DORD1 -DNDEBUG -DNSTAT -Wall -frounding-math -std=c++11 -O2 -fopenmp -ffast-math -msse4.2 -mfpmath=sse" CACHE STRING "C++ compiler flags used during debug builds." FORCE )
+set( CMAKE_CXX_FLAGS_DEBUG "-DORD1 -DNDEBUG -DNSTAT -Wall -Wextra -frounding-math -std=c++11 -O2 -fopenmp -ffast-math -msse4.2 -mfpmath=sse" CACHE STRING "C++ compiler flags used during debug builds." FORCE )
 
-set( CMAKE_CXX_FLAGS_RELEASE "-DORD2 -DNDEBUG -DNSTAT -Wall -frounding-math -std=c++11 -O3 -fopenmp -ffast-math -msse4.2 -mfpmath=sse" CACHE STRING "C++ compiler flags used during release builds." FORCE )
+set( CMAKE_CXX_FLAGS_RELEASE "-DORD2 -DNDEBUG -DNSTAT -Wall -Wextra -frounding-math -std=c++11 -O3 -fopenmp -ffast-math -msse4.2 -mfpmath=sse" CACHE STRING "C++ compiler flags used during release builds." FORCE )
 
 # file(GLOB sources . *.cc)
 
-SET( SOURCES pt3D.h tetra.h facette.h feellgoodSettings.h linear_algebra.h main.cc cputime.cc dialog.cc affichage.cc
+SET( SOURCES pt3D.h tetra.h tetra.cpp facette.h feellgoodSettings.h node.h
+	linear_algebra.h main.cc cputime.cc dialog.cc affichage.cc
 	saveH.cc lecture.cc femutil.cc chapeaux.cc restoresol.cc direction.cc
 	recentrage.cc energy.cc saver.cc savesol.cc savecfg_vtk.cc
 	vsolve.cc base_projection.cc integrales.cc evolution.cc reset.cc tiny.h)

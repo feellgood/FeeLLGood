@@ -30,7 +30,7 @@ fout << Ee <<"\t" << Ea <<"\t" << Ed <<"\t" << Ez <<"\t" << Etot <<"\t" << DW_z 
 if ((nt%n2)==0) {
 //    savecfg_gnuplot(fem,nt);
 //    savecfg_tecplot(fem,nt);
-    if (settings.withVtk) savecfg_vtk(fem,settings.getSimName(),settings.getScale(),nt,nullptr);
+    if (settings.withVtk) savecfg_vtk(fem,settings.getSimName(),nt,nullptr);
     savesol(fem,settings.getSimName(),settings.getScale(),nt,nullptr);
 
 #ifdef STAT
