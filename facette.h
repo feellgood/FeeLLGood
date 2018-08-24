@@ -3,8 +3,12 @@
 
 /** \file facette.h
   \brief contains namespace Facette
-  header containing Fac struct, and some constants and a less_than operator to redo orientation of triangular faces
+  header containing Fac class, and some constants and a less_than operator to redo orientation of triangular faces
  */
+
+#include "feellgoodSettings.h"
+
+#include "node.h"
 
 /** \namespace Facette
  to grab altogether some constants for struct Fac
@@ -18,22 +22,26 @@ const double u[NPI]   = {   1/3.,   1/5.,   3/5.,   1/5.};/**< some constants to
 const double v[NPI]   = {   1/3.,   1/5.,   1/5.,   3/5.};/**< some constants  to build hat functions */
 const double pds[NPI] = {-27/96., 25/96., 25/96., 25/96.};/**< some constant weights  to build hat functions */
 
-/** \struct Fac
-Face is a struct containing the index references to nodes, it has a triangular shape and should not be degenerated 
+
+
+
+/** \class Fac
+Face is a class containing the index references to nodes, it has a triangular shape and should not be degenerated 
 */
-struct Fac{
-	
-	int reg;/**< .msh region number */
-	double surf; /**< surface of the face */
-	double Ms; /**< magnetization at saturation of the face */    
-	Pt::pt3D n;/**< normal vector n=(x,y,z) */	
-	//double nx;/**< x component of the normal vector */
-	//double ny;/**< y component of the normal vector */
-	//double nz;/**< z component of the normal vector */
-	int ind[N];/**< indices table */
-	double weight[NPI];/**< weights table */
-	double a[N][NPI];          /**< hat functions table */
-    };
+class Fac{
+	public:
+		inline Fac() {reg = 0;} /**< default constructor */
+		int reg;/**< .msh region number */
+		double surf; /**< surface of the face */
+		double Ms; /**< magnetization at saturation of the face */    
+		Pt::pt3D n;/**< normal vector n=(x,y,z) */	
+		int ind[N];/**< indices table */
+		double weight[NPI];/**< weights table */
+		double a[N][NPI];          /**< hat functions table */
+    
+		/** computes the integral contribution of the triangular face */
+		void integrales(Settings &mySets,std::vector <Node> &myNode, std::vector <double> &BE);
+	};
 
 /**
 operator less_than for the orientation of the facette, lexicographic order

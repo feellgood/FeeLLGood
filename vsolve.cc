@@ -43,13 +43,13 @@ for (int t=0; t<TET; t++){
     tet.integrales(settings,fem.node,fem.Hext,fem.DW_vz,K, L);     
     projection<Tetra::Tet,Tetra::N>(tet, K, L, Kp, Lp);
     assemblage<Tetra::Tet,Tetra::N>(tet, Kp, Lp, Kw, Lw);    
-}
+	}
 
 for (int t=0; t<FAC; t++){
     Facette::Fac &fac = fem.fac[t];
     gmm::dense_matrix <double> K(3*Facette::N,3*Facette::N), Kp(2*Facette::N,2*Facette::N);
     vector <double> L(3*Facette::N), Lp(2*Facette::N);
-    integrales(fac, K, L);     
+    fac.integrales(settings,fem.node, L);     
     projection<Facette::Fac,Facette::N>(fac, K, L, Kp, Lp);
     assemblage<Facette::Fac,Facette::N>(fac, Kp, Lp, Kw, Lw);
     }

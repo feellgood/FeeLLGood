@@ -42,11 +42,11 @@ set( CMAKE_CXX_FLAGS_RELEASE "-DORD2 -DNDEBUG -DNSTAT -Wall -Wextra -std=c++11 -
 
 # file(GLOB sources . *.cc)
 
-SET( SOURCES pt3D.h tetra.h tetra.cpp facette.h feellgoodSettings.h node.h
+SET( SOURCES pt3D.h tetra.h tetra.cpp facette.h facette.cpp feellgoodSettings.h node.h
 	linear_algebra.h main.cc cputime.cc dialog.cc affichage.cc
 	saveH.cc lecture.cc femutil.cc chapeaux.cc restoresol.cc direction.cc
 	recentrage.cc energy.cc saver.cc savesol.cc savecfg_vtk.cc
-	vsolve.cc base_projection.cc integrales.cc evolution.cc reset.cc tiny.h)
+	vsolve.cc base_projection.cc evolution.cc reset.cc tiny.h)
 
 SET( HEADERS ${ANN_INCLUDE_DIR}/ANN.h ${GMM_INCLUDE_DIR}/gmm.h ${SCALFMM_INCLUDE_DIR}/Kernels/Rotation/FRotationKernel.hpp)
 

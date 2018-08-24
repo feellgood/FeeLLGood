@@ -1,5 +1,5 @@
 /** \file fem.h
-\brief principal header, contains the structs node fac tet , and fem <br>
+\brief principal header, contains the struct fem <br>
 This file is called by almost all source files in feellgood project <br>
 It does also contains the definition of many constants for the solver, and for scalfmm 
 */

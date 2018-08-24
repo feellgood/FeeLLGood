@@ -3,7 +3,7 @@
 
 /** \file tetra.h
   \brief namespace Tetra
-  header containing Tet struct, and some constants
+  header containing Tet class, some constants, and integrales
  */
 
 #include "gmm/gmm_kernel.h" // pour dense_matrix dans namespace Tetra
@@ -35,7 +35,7 @@ initialisation of a constant matrix
 */
 void init_dadu(gmm::dense_matrix <double> &X); // ça pourrait faire partie d'un constructeur si Tetra devient une classe
 
-/** \struct Tet
+/** \class Tet
 Tet is a tetrahedron, containing the index references to nodes, must not be flat 
    */ 
 class Tet{

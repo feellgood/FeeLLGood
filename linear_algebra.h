@@ -28,11 +28,6 @@ public:
 	inline LinAlgebra(Fem &f, Settings &s) {fem = f; settings = s;}
 	gmm::diagonal_precond <read_matrix>  *prc;/**< diagonal preconditionner */
 
-/**
-computes the integral contribution of the surface
-*/
-void integrales(Facette::Fac &fac, gmm::dense_matrix <double> &AE, std::vector <double> &BE);
-
 int  vsolve(long nt);/**< solver */
 void base_projection(void);/**< computes the vector basis projection on the elements */
 
