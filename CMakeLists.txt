@@ -30,9 +30,29 @@ INCLUDE_DIRECTORIES(${ANN_INCLUDE_DIR} ${GMM_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR}
 SET(INCLUDE ${ANN_INCLUDE_DIR} ${GMM_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR})
 
 #===========================================================================
+# these parameters are used to build a config.h file 
+#===========================================================================
+
+set(git_cmd "git")
+set(git_arg "show-ref")
+set(git_arg1 "--heads")
+set(git_arg2 "--hash")
+
+execute_process(COMMAND ${git_cmd} ${git_arg} ${git_arg1} ${git_arg2} RESULT_VARIABLE git_result OUTPUT_VARIABLE git_var)
+
+string(REPLACE "\n" "" SHAstr "\"${git_var}\"") 
+MESSAGE(STATUS "executable built with SHA1=${SHAstr}")
+
+
+set(VERBOSE_MODE true)
+set(DATA_IN "\"myMesh/\"")
+
+
+#===========================================================================
 # Compiler options
 #===========================================================================
 # we should use AVX instead of SSE4.2, with option -mavx
+# also -mtune=native and -march=native
 
 set( CMAKE_CXX_FLAGS "-DORD2 -DNDEBUG -DNSTAT -Wall -Wextra -std=c++11 -O3 -fopenmp -ffast-math -msse4.2 -mfpmath=sse" CACHE STRING "C++ compiler flags used during default builds." FORCE )
 
@@ -40,9 +60,7 @@ set( CMAKE_CXX_FLAGS_DEBUG "-DORD1 -DNDEBUG -DNSTAT -Wall -Wextra -std=c++11 -O2
 
 set( CMAKE_CXX_FLAGS_RELEASE "-DORD2 -DNDEBUG -DNSTAT -Wall -Wextra -std=c++11 -O3 -fopenmp -ffast-math -msse4.2 -mfpmath=sse" CACHE STRING "C++ compiler flags used during release builds." FORCE )
 
-# file(GLOB sources . *.cc)
-
-SET( SOURCES pt3D.h tetra.h tetra.cpp facette.h facette.cpp feellgoodSettings.h node.h
+SET( SOURCES config.h pt3D.h tetra.h tetra.cpp facette.h facette.cpp feellgoodSettings.h node.h
 	linear_algebra.h main.cc cputime.cc dialog.cc affichage.cc
 	saveH.cc lecture.cc femutil.cc chapeaux.cc restoresol.cc direction.cc
 	recentrage.cc energy.cc saver.cc savesol.cc savecfg_vtk.cc
@@ -50,6 +68,8 @@ SET( SOURCES pt3D.h tetra.h tetra.cpp facette.h facette.cpp feellgoodSettings.h 
 
 SET( HEADERS ${ANN_INCLUDE_DIR}/ANN.h ${GMM_INCLUDE_DIR}/gmm.h ${SCALFMM_INCLUDE_DIR}/Kernels/Rotation/FRotationKernel.hpp)
 
+
+configure_file(config.h.in ./config.h)
 
 ADD_EXECUTABLE(feellgood_exe ${SOURCES} ${HEADERS})
 SET( SCALFMM "libscalfmm.a")

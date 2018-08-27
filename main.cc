@@ -13,6 +13,9 @@ LinAlgebra linAlg = LinAlgebra(fem,mySettings);
 OctreeClass *tree    = nullptr;
 KernelClass *kernels = nullptr; 
 
+cout << "Hello! \n This is feeLLGood SHA1=" + string(SHAnumber) << endl;
+
+
 #ifdef STAT
 fem.stat.h = gsl_histogram_alloc (NCLASSES);
 gsl_histogram_set_ranges_uniform (fem.stat.h, -HMAX, HMAX);
@@ -92,7 +95,7 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
 	    fem.DW_z  = 0.0;
 
 	    int nt = 0;
-	    saver(fem,mySettings,fout,nt);
+	    fem.saver(mySettings,fout,nt);
 
         double start_cpu = cputime();
 
@@ -154,18 +157,18 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
 	double mz = fem.moy<U>(Pt::IDX_Z);	    
 	fem.recentrage( 0.1,mz);
 
-            saver(fem,mySettings,fout,nt);
+            fem.saver(mySettings,fout,nt);
 
             dt = min(1.1*dt, DTMAX); 
 	    mySettings.dt=dt;
             }//endwhile
 
         if (dt < DTMIN) cout << " aborted:  dt < DTMIN";
-        saver(fem,mySettings,fout,nt);
+        fem.saver(mySettings,fout,nt);
         
-	if (mySettings.withVtk) savecfg_vtk(fem,mySettings.getSimName(),nt,nullptr);
+	if (mySettings.withVtk) fem.savecfg_vtk(mySettings.getSimName(),nt,nullptr);
 
-        savesol(fem,mySettings.getSimName(),mySettings.getScale(),nt,nullptr);
+        fem.savesol(mySettings.getSimName(),mySettings.getScale(),nt,nullptr);
 
         double end_cpu = cputime();
         //double dureecpu = end_cpu - start_cpu;

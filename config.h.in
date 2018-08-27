@@ -1,0 +1,9 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+
+#define SHAnumber @SHAstr@
+#define VERBOSE @VERBOSE_MODE@
+#define RPATH_DATA @DATA_IN@
+
+#endif //CONFIG_H

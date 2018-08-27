@@ -2,13 +2,13 @@
 
 using namespace std;
 
-void savecfg_vtk(Fem &fem,string baseName, int nt, string *filename)  // filename may be NULL
+void Fem::savecfg_vtk(string baseName, int nt, string *filename)  // filename may be NULL
 {
 string str;
 
 if (filename) { str = *filename; }
 else{
-    str = baseName + "_" + to_string(fem.SEQ) + "_B" + to_string(fem.Bext) + "_iter" + to_string(nt) + ".vtk";
+    str = baseName + "_" + to_string(SEQ) + "_B" + to_string(Bext) + "_iter" + to_string(nt) + ".vtk";
  //<< boost::format("_%d_B%6f_iter%d.vtk") % fem.SEQ % fem.Bext % nt;
     }
 
@@ -19,11 +19,8 @@ if (!fout){
     IF_VERBOSE() cerr << "pb ouverture fichier : " << str << "en ecriture" << endl;
     SYSTEM_ERROR;}
 
-str = baseName + " time : " + to_string(fem.t);  
+str = baseName + " time : " + to_string(t);  
 // << boost::format(" time : %+20.10e") % fem.t;
-
-const int NOD = fem.NOD;
-const int TET = fem.TET;
 
 fout << "# vtk DataFile Version 2.0" << endl;
 fout << str << endl;
@@ -32,20 +29,17 @@ fout << "DATASET UNSTRUCTURED_GRID" << endl;
 fout << "POINTS "<< NOD << " float" << endl;
 
 for (int i=0; i<NOD; i++){
-    Node &node = fem.node[i];
-    double x   = node.p.x();
-    double y   = node.p.y();
-    double z   = node.p.z() + fem.DW_z;
+    double x   = node[i].p.x();
+    double y   = node[i].p.y();
+    double z   = node[i].p.z() + DW_z;
 fout << x << "\t" << y << "\t" << z << endl;    //fout << boost::format("%+20.10e %+20.10e %+20.10e") % x % y % z << endl;
     }
 
 fout << "CELLS " << setw(8) << TET << "\t" << setw(8) << (5*TET) << endl;
 
 for (int t=0; t<TET; t++){
-    Tetra::Tet &tet = fem.tet[t];
     fout << setw(8) << Tetra::N;
-    for (int i=0; i<Tetra::N; i++)
-        fout << setw(8) << tet.ind[i];
+    for (int i=0; i<Tetra::N; i++) { fout << setw(8) << tet[t].ind[i]; }
     fout << endl;
     }
 
@@ -61,20 +55,14 @@ fout <<"SCALARS phi float 1" << endl;
 
 fout << "LOOKUP_TABLE my_table" << endl;
 
-for (int i=0; i<NOD; i++){
-    Node &node = fem.node[i];
-    double phi = node.phi;
-    //fout << boost::format("%+20.10e") % phi << endl;
-fout << phi << endl;    
-}
+for (int i=0; i<NOD; i++) { fout << node[i].phi << endl; }
 
 fout << "VECTORS u float" << endl;
 
 for (int i=0; i<NOD; i++){
-    Node &node = fem.node[i];
-    double u1  = node.u[0];
-    double u2  = node.u[1];
-    double u3  = node.u[2];
+    double u1  = node[i].u[0];
+    double u2  = node[i].u[1];
+    double u3  = node[i].u[2];
     //fout << boost::format("%+20.10e %+20.10e %+20.10e") % u1 % u2 % u3 << endl;
 fout << u1 << "\t" << u2 << "\t" << u3 << endl;
     }

@@ -28,6 +28,7 @@ It does also contains the definition of many constants for the solver, and for s
 	const double HMAX=1e6;/**< maximum value */
 #endif //endif STAT
 
+#include "config.h"
 #include "feellgoodSettings.h"
 
 
@@ -49,7 +50,7 @@ It does also contains the definition of many constants for the solver, and for s
 	#define IF_VERBOSE(fem) if ((fem).param[VERBOSE_KEY] != 0) /**< macro for the definition of a verbose mode if feellgood compiled as a library */
 	#define SYSTEM_ERROR {throw system_error(errno,generic_category());}/**< macro for error handling if feellgood compiled as a library */
 #else
-	#define IF_VERBOSE() /**< macro for the definition of a verbose mode if feellgood compiled as an executable  */
+	#define IF_VERBOSE() if(VERBOSE)/**< macro for the definition of a verbose mode if feellgood compiled as an executable  */
 	#define SYSTEM_ERROR {exit(1);} /**< macro to exit executable on some errors */
 #endif
 
@@ -225,6 +226,19 @@ void energy(Settings &settings);
 /** recentering algorithm for the study of the motion of an object, for example a domain wall. Mesh must be adequate. */
 bool recentrage(double thres/**< [in] translation parameter */,double mz /**<[in] average magnetization along z */);
 
+/** saving function for a solution */
+void saver(Settings &settings, std::ofstream &fout, int nt);
+
+/** text file (vtk) writing function for a solution */
+void savecfg_vtk(std::string baseName, int nt, std::string *filename);
+
+/** text file (tsv) writing function for a solution */
+void savesol(std::string baseName,double s, int nt, std::string *filename);
+
+/** save the field values */
+void saveH(std::string baseName,double scale, int nt);
+
+
 /** 
 template to compute average of either u or v on the whole set of tetetrahedron
 */
@@ -257,10 +271,6 @@ return sum/vol;
 
 double cputime();/**< convenient function to compute the duration of a simulation */
 
-void saver(Fem &fem, Settings &settings, std::ofstream &fout, int nt);/**< saving function for a solution */
-void savecfg_vtk(Fem &fem,std::string baseName, int nt, std::string *filename);/**< text file (vtk) writing function for a solution */
-void savesol(Fem &fem,std::string baseName,double s, int nt, std::string *filename);/**< text file (tsv) writing function for a solution */
-void saveH(Fem &fem,std::string baseName,double scale, int nt);/**< save the field values */
 
 
 

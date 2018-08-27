@@ -10,7 +10,6 @@ int LinAlgebra::vsolve(long nt)
 {
 time_t timeStart;
 
-const int  VERBOSE = 0;
 const int NOD = fem.NOD;
 const int TET = fem.TET;
 const int FAC = fem.FAC;
