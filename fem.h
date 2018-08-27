@@ -114,7 +114,7 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
 	
 	double Etot0;/**< initial total energy (to check) */
 	double Etot;/**< total energy */
-	double evol;/**< no idea */
+	double evol;/**< increment dE for dt */
 	double phy;/**< no idea */
 	std::vector <Node> node; /**< node container */
 	std::vector <Facette::Fac>  fac; /**< face container */
@@ -125,7 +125,7 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
 
 #ifdef STAT
 	Stat stat;/**< to build some histograms  */
-	void savestat(Fem &fem, int nt);/**< file writing function for the statistics (if any) */
+	//void savestat(Fem &fem, int nt);/**< file writing function for the statistics (if any) */
 #endif
 
     ANNkd_tree* kdtree;/**< a kdtree to find efficiently the closest set of nodes to a physical point in the mesh  */

@@ -11,7 +11,7 @@
 
 using namespace Tetra;
 
-void Tet::integrales(Settings &mySets,std::vector <Node> &myNode,triple Hext,double Vz,gmm::dense_matrix <double> &AE, std::vector <double> &BE)
+void Tet::integrales(Settings &mySets,std::vector <Node> const& myNode,triple Hext,double Vz,gmm::dense_matrix <double> &AE, std::vector <double> &BE)
 {
 std::map < std::pair<std::string,int>,double> &param = mySets.param;
 
@@ -54,7 +54,7 @@ double dvdx[3][NPI], dvdy[3][NPI], dvdz[3][NPI];
 double negphiv0_nod[N], Hvx[NPI], Hvy[NPI], Hvz[NPI];
 
 for (int i=0; i<N; i++){
-    Node &node = myNode[ ind[i] ];
+    Node const& node = myNode[ ind[i] ];
     for (int d=0; d<3; d++){
         u_nod[d][i]  = node.u0[d];
         v_nod[d][i]  = node.v0[d];

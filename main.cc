@@ -31,8 +31,7 @@ fem.affichage();
 
 fem.t=0.;
 
-pair <string,int> p = make_pair("restore",-1);
-int restore = int(mySettings.param[p]);
+int restore = int(mySettings.param[ make_pair("restore",-1) ]);
 
 if (restore)
     fem.restoresol(mySettings.getScale(), nullptr);
@@ -68,11 +67,6 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
 	cout << "Bext : " << Bext*a[0] << "\t" << Bext*a[1] << "\t" << Bext*a[2] << endl;
 
         string str = mySettings.getSimName() +"_"+ to_string(fem.SEQ) + "_B" + to_string(fem.Bext) + ".evol";// +++ *ct*	
-	/*	
-	ostringstream ostr;
-        ostr.str(""); ostr << fem.simname << boost::format("_%d_B%6f.evol") % fem.SEQ % fem.Bext; 
-        str = ostr.str(); ofstream fout(str.c_str());
-        */ // --- *ct*
 	ofstream fout(str);
 	if (!fout) {
             cerr << "erreur ouverture fichier" << endl; exit(1);
@@ -171,7 +165,6 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
         fem.savesol(mySettings.getSimName(),mySettings.getScale(),nt,nullptr);
 
         double end_cpu = cputime();
-        //double dureecpu = end_cpu - start_cpu;
         cout << "\n  * iterations: " << nt;
         cout << "\n  * duree cpu: " << difftime(end_cpu,start_cpu) << " s"<< endl << endl;
         fout.close();
