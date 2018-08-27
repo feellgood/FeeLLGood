@@ -220,7 +220,7 @@ void femutil(Settings &settings);
 /** find direction of motion of DW */
 void direction(void);
 
-/**< computes energies stored in E table */
+/** computes energies stored in E table */
 void energy(Settings &settings);
 
 /** recentering algorithm for the study of the motion of an object, for example a domain wall. Mesh must be adequate. */

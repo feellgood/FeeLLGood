@@ -73,18 +73,24 @@ for (int i_t=0; i_t<TET; i_t++){
    int i0,i1,i2,i3;
    i0=te.ind[0];   i1=te.ind[1];   i2=te.ind[2];   i3=te.ind[3];
    
-   double x0,y0,z0, x1,y1,z1, x2,y2,z2, x3,y3,z3;
-   x0 = node[i0].p.x();   y0 = node[i0].p.y();   z0 = node[i0].p.z();
-   x1 = node[i1].p.x();   y1 = node[i1].p.y();   z1 = node[i1].p.z();
-   x2 = node[i2].p.x();   y2 = node[i2].p.y();   z2 = node[i2].p.z();
-   x3 = node[i3].p.x();   y3 = node[i3].p.y();   z3 = node[i3].p.z();
+//   double x0,y0,z0, x1,y1,z1, x2,y2,z2, x3,y3,z3;
+//   x0 = node[i0].p.x();   y0 = node[i0].p.y();   z0 = node[i0].p.z();
+//   x1 = node[i1].p.x();   y1 = node[i1].p.y();   z1 = node[i1].p.z();
+//   x2 = node[i2].p.x();   y2 = node[i2].p.y();   z2 = node[i2].p.z();
+//   x3 = node[i3].p.x();   y3 = node[i3].p.y();   z3 = node[i3].p.z();
 
-   double vecx,vecy,vecz,i_vol;
-   vecx = (y1-y0)*(z2-z0)-(y2-y0)*(z1-z0);
-   vecy = (z1-z0)*(x2-x0)-(z2-z0)*(x1-x0);
-   vecz = (x1-x0)*(y2-y0)-(x2-x0)*(y1-y0);
-//   vol  = 1./6.* fabs(vecx*(x3-x0) + vecy*(y3-y0) + vecz*(z3-z0));
-   i_vol  = 1./6.* (vecx*(x3-x0) + vecy*(y3-y0) + vecz*(z3-z0));
+//   double vecx,vecy,vecz;
+//   vecx = (y1-y0)*(z2-z0)-(y2-y0)*(z1-z0);
+//   vecy = (z1-z0)*(x2-x0)-(z2-z0)*(x1-x0);
+//   vecz = (x1-x0)*(y2-y0)-(x2-x0)*(y1-y0);
+
+	Pt::pt3D p0 = node[i0].p;
+	Pt::pt3D p1 = node[i1].p;
+	Pt::pt3D p2 = node[i2].p;
+	Pt::pt3D p3 = node[i3].p;
+	Pt::pt3D vec = (p1-p0)*(p2-p0);
+
+   double i_vol  = 1./6.* pScal(vec,p3-p0);//(vecx*(x3-x0) + vecy*(y3-y0) + vecz*(z3-z0));
    if (i_vol<0.) {
       te.ind[3]=i2; te.ind[2]=i3;
       i_vol=-i_vol;

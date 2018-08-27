@@ -19,7 +19,7 @@ Pt::pt3D p;/**< Physical position p=(x,y,z)  of the node */
 triple u0;/**< magnetization initial or reset value, used to store previous value for time evolution */
 triple v0;/**< initial or reset value, used to store previous value for time evolution */
 triple u;/**< magnetization value */
-triple v;/**< no idea */
+triple v;/**< magnetization speed */
 triple ep;/**< base vector */
 triple eq;/**< second base vector */
 double phi0;/**< scalar potential initial or reset value, used to store previous value for time evolution */
