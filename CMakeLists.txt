@@ -35,7 +35,7 @@ SET(INCLUDE ${ANN_INCLUDE_DIR} ${GMM_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR})
 
 set(git_cmd "git")
 set(git_arg "show-ref")
-set(git_arg1 "--heads")
+set(git_arg1 "HEAD")
 set(git_arg2 "--hash")
 
 execute_process(COMMAND ${git_cmd} ${git_arg} ${git_arg1} ${git_arg2} RESULT_VARIABLE git_result OUTPUT_VARIABLE git_var)
