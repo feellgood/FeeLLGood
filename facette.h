@@ -31,6 +31,9 @@ Face is a class containing the index references to nodes, it has a triangular sh
 class Fac{
 	public:
 		inline Fac() {reg = 0;} /**< default constructor */
+		/** constructor from a region number and three indices */		
+		inline Fac(int r,int i0,int i1,int i2) {reg = r; ind[0]=i0;ind[1]=i1;ind[2]=i2;}
+		
 		int reg;/**< .msh region number */
 		double surf; /**< surface of the face */
 		double Ms; /**< magnetization at saturation of the face */    
@@ -40,12 +43,17 @@ class Fac{
 		double a[N][NPI];          /**< hat functions table */
     
 		/** computes the integral contribution of the triangular face */
-		void integrales(Settings &mySets,std::vector <Node> &myNode, std::vector <double> &BE);
+		void integrales(Settings &mySets,std::vector <Node> const& myNode, std::vector <double> &BE);
 		
 		/**
 		convenient getter for N, usefull for templates projection and assemblage
 		*/		
 		inline int getN(void) {return N;}	
+
+		/**
+		computes normal vector n and surface surf		
+		*/		
+		void calc_surf(std::vector<Node> const& myNode);	
 	};
 
 /**

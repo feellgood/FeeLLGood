@@ -41,19 +41,6 @@ It does also contains the definition of many constants for the solver, and for s
 
 #include "node.h"
 
-/* macros for messages and errors */
-#ifdef LIBRARY
-	#include <stdexcept>  // for runtime_error
-	#include <cerrno>
-	#include <system_error>
-	const pair<string,int> VERBOSE_KEY {"verbose", -1};
-	#define IF_VERBOSE(fem) if ((fem).param[VERBOSE_KEY] != 0) /**< macro for the definition of a verbose mode if feellgood compiled as a library */
-	#define SYSTEM_ERROR {throw system_error(errno,generic_category());}/**< macro for error handling if feellgood compiled as a library */
-#else
-	#define IF_VERBOSE() if(VERBOSE)/**< macro for the definition of a verbose mode if feellgood compiled as an executable  */
-	#define SYSTEM_ERROR {exit(1);} /**< macro to exit executable on some errors */
-#endif
-
 const bool U = true;/**< used as a template parameter */
 const bool V = false;/**< used as a template parameter */
 
@@ -81,7 +68,6 @@ struct Stat{
 massive container to grab altogether all parameters of a simulation, including mesh geometry, containers for the mesh
 */
 struct Fem{
-	
 	int REG; /**< number of regions in the msh file */
 	int NOD;/**< number of nodes in the corresponding container */
 	int FAC;/**< number of faces in the corresponding container */
@@ -90,16 +76,17 @@ struct Fem{
 	int SEQ;/**< number of sequences, usefull to define a vector applied field eventually varying in time */
 	Pt::pt3D c;/**< center position */	
 	Pt::pt3D l;/**< lengths along x,y,z axis */	
+	
 	double diam;/**< diameter of the mesh (if a wire) */
 	double surf;/**< total surface */
 	double vol;/**< total volume of the mesh */
 	
 	double fmm_normalizer;/**< no idea; probably normalizing constant for the computation of the demag field */
-	double as[D];/**< normalized length by diameter along all 3 axis */
+	
 	double locmax;/**< no idea */
 	double t;/**< physical current time of the simulation */
 	
-	double vmax;/**< maximum speed of what ? */
+	double vmax;/**< maximum speed of magnetization */
 
 	double E0[4];/**< table to store initial energy values <br> 
 index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
@@ -179,10 +166,15 @@ struct Regions{
 /** reading file function */
 void lecture(Settings &mySets, double scale, Regions *regions);
 
-/** initialize pts,kdtree,l,c,diam,as[] in fem struct */
+/** initialize pts,kdtree,l,c,diam in fem struct */
 void femutil_node(void);
 
-/**
+
+/** decomposition of the tetrahedrons in surface elements; calculation of the normal vectors to the face */
+void femutil_facMs(Settings &settings /**< [in] */);
+
+
+/** utilitary function to call all femutil_xxxxx functions <br>
 calculation of the volumes and reorientation of the tetrahedrons if needed in fem struct with the following convention :
 
                         v
@@ -204,17 +196,7 @@ calculation of the volumes and reorientation of the tetrahedrons if needed in fe
                      `\.
                         ` w
 
-*/
-void femutil_tet(void);
-
-/** calculation of all elementary surfaces and total surface in the face container in fem struct */
-void femutil_fac(void);
-
-/** decomposition of the tetrahedrons in surface elements; calculation of the normal vectors to the face */
-void femutil_facMs(Settings &settings /**< [in] */);
-
-
-/** utilitary function to call all femutil_xxxxx functions */
+ and calculation of all elementary surfaces and total surface in the face container in fem struct */
 void femutil(Settings &settings);
 
 /** find direction of motion of DW */

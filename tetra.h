@@ -36,8 +36,29 @@ initialisation of a constant matrix
 void init_dadu(gmm::dense_matrix <double> &X); // ça pourrait faire partie d'un constructeur si Tetra devient une classe
 
 /** \class Tet
-Tet is a tetrahedron, containing the index references to nodes, must not be flat 
-   */ 
+Tet is a tetrahedron, containing the index references to nodes, must not be flat <br>
+indices convention is<br>
+```
+                        v
+                      .
+                    ,/
+                   /
+                2(ic)                                 2
+              ,/|`\                                 ,/|`\
+            ,/  |  `\                             ,/  |  `\
+          ,/    '.   `\                         ,6    '.   `5
+        ,/       |     `\                     ,/       8     `\
+      ,/         |       `\                 ,/         |       `\
+     0(ia)-------'.--------1(ib) --> u     0--------4--'.--------1
+      `\.         |      ,/                 `\.         |      ,/
+         `\.      |    ,/                      `\.      |    ,9
+            `\.   '. ,/                           `7.   '. ,/
+               `\. |/                                `\. |/
+                  `3(id)                                `3
+                     `\.
+                        ` w
+```
+*/
 class Tet{
 	public:
 		inline Tet() {reg = 0;} /**< default constructor */
@@ -59,6 +80,11 @@ class Tet{
 		convenient getter for N, usefull for templates projection and assemblage
 		*/
 		inline int getN(void) {return N;}
+		
+		/**
+		computes volume		
+		*/
+		void calc_vol(std::vector<Node> const& myNode);	
 	};
 }
 

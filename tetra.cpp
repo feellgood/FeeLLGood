@@ -1,7 +1,9 @@
 /**
-  Elementary matrix Calculationon a tetrahedron element 
+  Elementary matrix Calculation for a tetrahedron element 
   Theta Scheme for ech
  */ 
+
+#include "config.h" //pour macro if_verbose
 
 #include "tetra.h"
 
@@ -125,7 +127,7 @@ R = dt/TAUR*abs(log(dt/TAUR));
 
 #ifdef STAT
 fem.stat.r = r;
-fem.stat.M = M;
+fem.stat.M = M;void calc_vol(std::vector<Node> const& myNode)
 fem.stat.R = R;
 #endif
 
@@ -207,11 +209,36 @@ fem.stat.R = R;
     }
 }
 
-void Tetra::init_dadu(gmm::dense_matrix <double> &X) // ça pourrait faire partie d'un constructeur si Tetra devient une classe
+void Tet::calc_vol(std::vector<Node> const& myNode)
+{
+int i0,i1,i2,i3;
+i0=ind[0];   i1=ind[1];   i2=ind[2];   i3=ind[3];
+   
+Pt::pt3D p0 = myNode[i0].p;
+Pt::pt3D p1 = myNode[i1].p;
+Pt::pt3D p2 = myNode[i2].p;
+Pt::pt3D p3 = myNode[i3].p;
+Pt::pt3D vec = (p1-p0)*(p2-p0);
+
+double i_vol  = 1./6.* pScal(vec,p3-p0);
+   if (i_vol<0.) {
+      ind[3]=i2; ind[2]=i3;
+      i_vol=-i_vol;
+      IF_VERBOSE() std::cout << "ill-oriented tetrahedron, now corrected!"<< std::endl;
+      }
+vol = i_vol;
+}
+
+
+
+void Tetra::init_dadu(gmm::dense_matrix <double> &X)
 	{
 	X(0,0)= -1.0;   X(0,1)= -1.0;   X(0,2)= -1.0;
         X(1,0)= +1.0;   X(1,1)=  0.0;   X(1,2)=  0.0;
         X(2,0)=  0.0;   X(2,1)= +1.0;   X(2,2)=  0.0;
         X(3,0)=  0.0;   X(3,1)=  0.0;   X(3,2)= +1.0;
 	}
+
+
+
 
