@@ -48,39 +48,18 @@ map <pair<string,int>,double> &param = settings.param;
 // decomposition des tetraedres en elements de surface
 set<Facette::Fac, Facette::less_than> sf;
 IF_VERBOSE() cout << "Nb de Tet " << TET << endl;
-for (int i_t=0; i_t<TET; i_t++){
-    Tetra::Tet &te = tet[i_t];
-    int ia,ib,ic,id;
-    ia=te.ind[0];  ib=te.ind[1];  ic=te.ind[2];  id=te.ind[3];
-//    cout << "tet " << t <<"/"<<TET<< endl;
-    {
-    Facette::Fac f = Facette::Fac(te.reg,ia,ic,ib);
-	// f.reg=te.reg; f.ind[0]=ia; f.ind[1]=ic; f.ind[2]=ib;
-    sf.insert(f);
-//    cout << fac.ind[0] << " " << fac.ind[1] << " " << fac.ind[2] << endl;
-    }
- 
-    {
-    Facette::Fac f = Facette::Fac(te.reg,ib,ic,id);
-	//f.reg=te.reg; f.ind[0]=ib; f.ind[1]=ic; f.ind[2]=id;
-    sf.insert(f);
-//    cout << fac.ind[0] << " " << fac.ind[1] << " " << fac.ind[2] << endl;
-    }
 
-    {
-    Facette::Fac f = Facette::Fac(te.reg,ia,id,ic);
-	//f.reg=te.reg;     f.ind[0]=ia; f.ind[1]=id; f.ind[2]=ic;
-    sf.insert(f);
-//    cout << fac.ind[0] << " " << fac.ind[1] << " " << fac.ind[2] << endl;
-    }
+std::for_each(tet.begin(),tet.end(),
+[&sf](Tetra::Tet const& te) //subtil, le capture oblige à passer une ref du set sf
+	{
+	int ia,ib,ic,id;
+    	ia=te.ind[0];  ib=te.ind[1];  ic=te.ind[2];  id=te.ind[3];
+	sf.insert( Facette::Fac(te.reg,ia,ic,ib) );
+    	sf.insert( Facette::Fac(te.reg,ib,ic,id) );
+    	sf.insert( Facette::Fac(te.reg,ia,id,ic) );
+    	sf.insert( Facette::Fac(te.reg,ia,ib,id) ); 
+	});//fin for_each
 
-    {
-    Facette::Fac f = Facette::Fac(te.reg,ia,ib,id);
-	//f.reg=te.reg;     f.ind[0]=ia; f.ind[1]=ib; f.ind[2]=id;
-    sf.insert(f); 
-//    cout << fac.ind[0] << " " << fac.ind[1] << " " << fac.ind[2] << endl;
-    }
-}
 
 // calcul des normales aux faces
 int done = 0;
