@@ -10,28 +10,30 @@ void Fem::femutil_node(void)
 {
 pts= annAllocPts(NOD, 3);
 
-// calcul du diametre et du centrage
-double xmin, xmax, ymin, ymax, zmin, zmax;
-xmin = ymin = zmin = +HUGE;
-xmax = ymax = zmax = -HUGE;
-
-for (int i=0; i<NOD; i++)
-	{
-	Pt::pt3D const& p_i = node[i].p;
-    	double xi,yi,zi;
-    	pts[i][0] = xi = p_i.x();
-    	pts[i][1] = yi = p_i.y();
-    	pts[i][2] = zi = p_i.z();
-   	if (xi<xmin) xmin=xi;    if (xi>xmax) xmax=xi;
-    	if (yi<ymin) ymin=yi;    if (yi>ymax) ymax=yi;
-    	if (zi<zmin) zmin=zi;    if (zi>zmax) zmax=zi;
-    	}
+int i=0;
+std::for_each(node.begin(),node.end(),
+[this,&i](Node const& n) 
+	{ this->pts[i][0] = n.p.x();this->pts[i][1] = n.p.y();this->pts[i][2] = n.p.z();i++; } 
+);// end for_each
 
 // allocation de l'arbre de recherche
 kdtree = new ANNkd_tree(pts, NOD, 3);
 if (!kdtree) SYSTEM_ERROR;
 
-l = Pt::pt3D(xmax-xmin,ymax-ymin,zmax-zmin);//lx=xmax-xmin;ly=ymax-ymin;lz=zmax-zmin;
+auto extrema = std::minmax_element(node.begin(),node.end(),[](Node const& n1,Node const& n2) {return !(n2.p.x()<n1.p.x())?n1.p.x():n2.p.x(); } );
+double xmin = extrema.first->p.x();
+double xmax = extrema.second->p.x();
+
+extrema = std::minmax_element(node.begin(),node.end(),[](Node const& n1,Node const& n2) {return !(n2.p.y()<n1.p.y())?n1.p.y():n2.p.y(); } );
+double ymin = extrema.first->p.y();
+double ymax = extrema.second->p.y();
+
+extrema = std::minmax_element(node.begin(),node.end(),[](Node const& n1,Node const& n2) {return !(n2.p.z()<n1.p.z())?n1.p.z():n2.p.z(); } );
+double zmin = extrema.first->p.z();
+double zmax = extrema.second->p.z();
+
+// calcul du diametre et du centrage
+l = Pt::pt3D(xmax-xmin,ymax-ymin,zmax-zmin);
 
 diam = l.x();
 if (diam<l.y()) diam=l.y();
@@ -89,26 +91,20 @@ for (int i_f=0; i_f<FAC; i_f++){
         }
       
         if (it!=sf.end()) { // found
-           Facette::Fac fc = *it;
-           int i0=fa.ind[0], i1=fa.ind[1], i2=fa.ind[2];
-//           cout << "fac " << i0 << " " << i1 << " " << i2 <<endl;
-           i0=fc.ind[0], i1=fc.ind[1], i2=fc.ind[2];
-//           cout << "fc  " << i0 << " " << i1 << " " << i2 <<endl;
+           int i0 = it->ind[0];
+	   int i1 = it->ind[1];
+	   int i2 = it->ind[2];
 
-	Pt::pt3D p0 = node[i0].p; 
-	Pt::pt3D p1 = node[i1].p;
-	Pt::pt3D p2 = node[i2].p;
-        Pt::pt3D n = (p1-p0)*(p2-p0);
+	   Pt::pt3D p0 = node[i0].p; 
+	   Pt::pt3D p1 = node[i1].p;
+	   Pt::pt3D p2 = node[i2].p;
+           Pt::pt3D n = (p1-p0)*(p2-p0);
 	
-   p = make_pair("Js", fc.reg);
+	   p = make_pair("Js", it->reg);
            double Ms = nu0*param[p];
 //           cout << "Ms : " << Ms << " " << fac.Ms << endl;
-        if (Pt::pScal(n,fa.n) > 0) {
-         	fa.Ms = fa.Ms + Ms;   // la face trouvee a la meme orientation que la face traitee
-           	}
-           else {
-               fa.Ms = fa.Ms - Ms;   // la face trouvee a une orientation opposee
-           }
+        if (Pt::pScal(n,fa.n) > 0) { fa.Ms += Ms; }  // la face trouvee a la meme orientation que la face traitee
+        else { fa.Ms -= Ms; }  // la face trouvee a une orientation opposee
         }
     int tmp=i1; i1=i2; i2=tmp;
     }//fin perm
