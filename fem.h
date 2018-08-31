@@ -128,9 +128,12 @@ print some informations of fem container
 void affichage(void);
 
 /**
-reset the fem struct to restart another step time simulation
+reset the nodes struct to restart another step time simulation
+Undo the action of one or many "vsolve" runs in case of failure.
+Demagnetizing field and energies don't need to be reset, because they won't be updated if failure is detected.
+I don't know how to cleanly reset "fem.DW_vz". BC
 */
-void reset(void);
+inline void reset(void) { std::for_each(node.begin(),node.end(),[](Node &n) {n.reset();}); }
 
 /**
 time evolution : one step in time

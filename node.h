@@ -26,6 +26,14 @@ double phi0;/**< scalar potential initial or reset value, used to store previous
 double phi;/**< scalar potential value */
 double phiv0;/**< initial or reset value, used to store previous value for time evolution */
 double phiv;/**< no idea */
+
+/**
+reset the node magnetization, speed, phi, and phiv
+*/
+inline void reset(void) {
+	u[0] = u0[0]; u[1] = u0[1]; u[2] = u0[2]; 
+	v[0] = v0[0]; v[1] = v0[1]; v[2] = v0[2]; 
+	phi = phi0; phiv = phiv0;}
 };
 
 #endif /* node_h */
