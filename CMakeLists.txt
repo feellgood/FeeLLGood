@@ -35,10 +35,11 @@ SET(INCLUDE ${ANN_INCLUDE_DIR} ${GMM_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR})
 
 set(git_cmd "git")
 set(git_arg "show-ref")
-set(git_arg1 "HEAD")
-set(git_arg2 "--hash")
+set(git_arg1 "--head")
+set(git_arg2 "HEAD")
+set(git_arg3 "--hash")
 
-execute_process(COMMAND ${git_cmd} ${git_arg} ${git_arg1} ${git_arg2} RESULT_VARIABLE git_result OUTPUT_VARIABLE git_var)
+execute_process(COMMAND ${git_cmd} ${git_arg} ${git_arg1} ${git_arg2} ${git_arg3} RESULT_VARIABLE git_result OUTPUT_VARIABLE git_var)
 
 string(REPLACE "\n" "" SHAstr "\"${git_var}\"") 
 MESSAGE(STATUS "executable built with SHA1=${SHAstr}")
