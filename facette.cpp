@@ -22,9 +22,9 @@ double u_nod[3][N], u[3][NPI];
 for (int i=0; i<N; i++){
     Node const& node = myNode[ ind[i] ];
     
-    u_nod[0][i]   = node.u0[0];
-    u_nod[1][i]   = node.u0[1];
-    u_nod[2][i]   = node.u0[2];
+    u_nod[0][i]   = node.u0.x();
+    u_nod[1][i]   = node.u0.y();
+    u_nod[2][i]   = node.u0.z();
     }
 
 tiny::mult<double, 3, N, NPI> (u_nod, a, u);

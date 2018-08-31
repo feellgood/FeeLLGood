@@ -6,7 +6,7 @@
 #include "config.h" //pour macro if_verbose
 
 #include "tetra.h"
-
+#include "pt3D.h"
 #include "tiny.h"
 
 
@@ -57,10 +57,9 @@ double negphiv0_nod[N], Hvx[NPI], Hvy[NPI], Hvz[NPI];
 
 for (int i=0; i<N; i++){
     Node const& node = myNode[ ind[i] ];
-    for (int d=0; d<3; d++){
-        u_nod[d][i]  = node.u0[d];
-        v_nod[d][i]  = node.v0[d];
-        }
+    u_nod[Pt::IDX_X][i]  = node.u0.x(); u_nod[Pt::IDX_Y][i] = node.u0.y(); u_nod[Pt::IDX_Z][i]  = node.u0.z();
+    v_nod[Pt::IDX_X][i]  = node.v0.x(); v_nod[Pt::IDX_Y][i] = node.v0.y(); v_nod[Pt::IDX_Z][i]  = node.v0.z();			
+//for (int d=0; d<3; d++) { u_nod[d][i]  = node.u0[d]; v_nod[d][i]  = node.v0[d]; }
     negphi0_nod[i]  = -node.phi0;
     negphiv0_nod[i] = -node.phiv0;
     }

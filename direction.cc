@@ -20,7 +20,7 @@ kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 int ns=nnIdx[0];
 //IF_VERBOSE() cerr << "ns : " << ns << endl;
 
-double u2L= node[ns].u[2];
+double u2L= node[ns].u.z();
 IF_VERBOSE() cout << "z : " << queryPt[2] << " u2 : "<< u2L << endl;
 
 /* bord droit */
@@ -30,7 +30,7 @@ queryPt[2]=c.z()+l.z()/2.;
 
 kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 ns=nnIdx[0];
-double u2R= node[ns].u[2];
+double u2R= node[ns].u.z();
 IF_VERBOSE() cout << "z : " << queryPt[2] << " u2 : "<< u2R << endl;
 
 if (u2L*u2R>0.){

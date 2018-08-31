@@ -32,7 +32,7 @@ kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 ns=nnIdx[0]; 
 //double u0L=fem.node[ns].u[0];
 //double u1L=fem.node[ns].u[1];
-double u2L=node[ns].u[2];
+double u2L=node[ns].u.z();
 
 // centre
 queryPt[2]=c.z();
@@ -48,7 +48,7 @@ kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 ns=nnIdx[0]; 
 //double u0R=fem.node[ns].u[0];
 //double u1R=fem.node[ns].u[1];
-double u2R=node[ns].u[2];
+double u2R=node[ns].u.z();
 
 if (u2L*u2R>0) {
 #ifdef LIBRARY
@@ -88,13 +88,8 @@ for (int i=0; i<NOD; i++){
     kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 
     int ns=nnIdx[0]; 
-    Node &src_node = node[ns];
-    tgt_node.u0[0] = src_node.u[0];     
-    tgt_node.u0[1] = src_node.u[1];
-    tgt_node.u0[2] = src_node.u[2];
-    tgt_node.v[0]  = 0.;     
-    tgt_node.v[1]  = 0.;
-    tgt_node.v[2]  = 0.;
+    tgt_node.u0 = node[ns].u;     
+    tgt_node.v  = Pt::pt3D(0.,0.,0.);     
     }
 
 delete queryPt;

@@ -138,7 +138,12 @@ inline void reset(void) { std::for_each(node.begin(),node.end(),[](Node &n) {n.r
 /**
 time evolution : one step in time
 */
-void evolution(void);
+inline void evolution(void)
+{
+std::for_each(node.begin(), node.end(), [](Node &n){ n.evolution();} );
+for (int e=0; e<4; e++) { E0[e] = E[e]; }
+Etot0 = Etot;
+}
 
 /**
 computes the hat functions for all containers
@@ -149,7 +154,7 @@ void chapeaux(void);
 computes an analytical initial magnetization distribution as a starting point for the simulation
 */
 inline void init_distrib(void)
-	{ std::for_each( node.begin(),node.end(), [](Node &n) { n.u[0]=1./sqrt(2.);n.u[1] = 0.;n.u[2] = 1./sqrt(2.);n.phi  = 0.;} ); }
+	{ std::for_each( node.begin(),node.end(), [](Node &n) { n.u.x(1./sqrt(2.)); n.u.y(0.); n.u.z(1./sqrt(2.)); n.phi  = 0.;} ); }
 
 /**
 read a solution from a file (tsv formated) and initialize fem struct to restart computation from that distribution
@@ -239,8 +244,8 @@ for (int i_t=0; i_t<TET; i_t++){
         int i = te.ind[ie];
         Node &n = node[i];
 	if(UorV)        
-		val_nod[ie] = n.u[d];
-	else val_nod[ie] = n.v[d]; 
+		val_nod[ie] = n.u(d);
+	else val_nod[ie] = n.v(d); 
         }
    tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (val_nod, te.a, val);
    sum += tiny::sp<double, Tetra::NPI> (val, te.weight);

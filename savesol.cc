@@ -25,15 +25,10 @@ for (int i=0; i<NOD; i++){
     double x   = n.p.x() / s;
     double y   = n.p.y() / s;
     double z   = n.p.z() / s;
-    double u1  = n.u[0];
-    double u2  = n.u[1];
-    double u3  = n.u[2];
-    double phi = n.phi;
  
 //   fout << boost::format("%8d %+20.10f %+20.10f %+20.10f %+20.10f %+20.10f %+20.10f %+20.10e") 
 //                   % i % x % y % z % u1 % u2 % u3 % phi << endl;}
-	fout << i << "\t" << x << "\t" << y << "\t" << z << "\t";
-	fout << u1 << "\t" << u2 << "\t" << u3 << "\t" << phi << endl;
+	fout << i << "\t" << x << "\t" << y << "\t" << z << "\t" << n.u << "\t" << n.phi << endl; //carefull! << overloaded
 	}
 
 fout.close();

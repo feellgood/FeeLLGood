@@ -219,9 +219,11 @@ for (int t=0; t<TET; t++){
     for (int i=0; i<Tetra::N; i++) {
         int i_= tet.ind[i];
         Node &node = fem.node[i_];
-        for (int d=0; d<3; d++)
-            u_nod[d][i] = (Hv? node.v[d]: node.u[d]);
-        }
+        //for (int d=0; d<3; d++) u_nod[d][i] = (Hv? node.v[d]: node.u[d]);
+	u_nod[Pt::IDX_X][i] = (Hv? node.v.x(): node.u.x());
+	u_nod[Pt::IDX_Y][i] = (Hv? node.v.y(): node.u.y());
+	u_nod[Pt::IDX_Z][i] = (Hv? node.v.z(): node.u.z());        
+	}
 
 	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, tet.dadx, dudx);
 	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, tet.dady, dudy);
@@ -250,8 +252,10 @@ for (int f=0; f<FAC; f++){
         for (int i=0; i<Facette::N; i++){
         int i_= fac.ind[i];
         Node &node = fem.node[i_];
-        for (int d=0; d<3; d++)
-            u_nod[d][i] = (Hv? node.v[d]: node.u[d]);
+        //for (int d=0; d<3; d++) u_nod[d][i] = (Hv? node.v[d]: node.u[d]);
+	u_nod[Pt::IDX_X][i] = (Hv? node.v.x(): node.u.x());
+	u_nod[Pt::IDX_Y][i] = (Hv? node.v.y(): node.u.y());
+	u_nod[Pt::IDX_Z][i] = (Hv? node.v.z(): node.u.z());
         }
 
     tiny::mult<double, 3, Facette::N, Facette::NPI> (u_nod, fac.a, u);
@@ -358,8 +362,8 @@ delete [] corr;
 template <int Hv>
 double potential(Fem &fem, Facette::Fac &fac, int i) // template, mais Hv est utilisé comme un booleen 
 {
-  double nx,ny,nz,Ms;
-  nx=fac.n.x();  ny=fac.n.y();  nz=fac.n.z(); Ms=fac.Ms;
+  double Ms = fac.Ms;
+  Pt::pt3D n = fac.n;
 
  int ii  = (i+1)%3;
  int iii = (i+2)%3;
@@ -389,14 +393,14 @@ double h = 2.*fac.surf;
 
 double s1, s2, s3;
 if (Hv) {
-	s1 = node1.v[0]*nx + node1.v[1]*ny + node1.v[2]*nz;
-	s2 = node2.v[0]*nx + node2.v[1]*ny + node2.v[2]*nz;
-	s3 = node3.v[0]*nx + node3.v[1]*ny + node3.v[2]*nz;
+	s1 = Pt::pScal(node1.v,n);//node1.v[0]*nx + node1.v[1]*ny + node1.v[2]*nz;
+	s2 = Pt::pScal(node2.v,n);//node2.v[0]*nx + node2.v[1]*ny + node2.v[2]*nz;
+	s3 = Pt::pScal(node3.v,n);//node3.v[0]*nx + node3.v[1]*ny + node3.v[2]*nz;
    }
 else {
-	s1 = node1.u[0]*nx + node1.u[1]*ny + node1.u[2]*nz;
-	s2 = node2.u[0]*nx + node2.u[1]*ny + node2.u[2]*nz;
-	s3 = node3.u[0]*nx + node3.u[1]*ny + node3.u[2]*nz;
+	s1 = Pt::pScal(node1.u,n);//node1.u[0]*nx + node1.u[1]*ny + node1.u[2]*nz;
+	s2 = Pt::pScal(node1.u,n);//node2.u[0]*nx + node2.u[1]*ny + node2.u[2]*nz;
+	s3 = Pt::pScal(node1.u,n);//node3.u[0]*nx + node3.u[1]*ny + node3.u[2]*nz;
    }
 
  double l = s1;

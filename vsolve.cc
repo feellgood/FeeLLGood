@@ -23,13 +23,11 @@ write_matrix Kw(2*NOD, 2*NOD);
 write_vector Lw(2*NOD);
 
 /* changement de referentiel */
-/* bcarvello, 2017: doesn't this belong in evolution.cc ? */
 fem.DW_vz += fem.DW_dir*fem.moy<V>(Pt::IDX_Z)*fem.l.z()/2.;
+
 IF_VERBOSE(){
 cout << "%5t average velocity %30T." <<flush;//boost::format("%5t average velocity %30T.") <<flush;
-cout << fem.DW_vz << endl;
-
-//cout << " matrix size " << 2*NOD << endl;
+cout << fem.DW_vz << endl << " matrix size " << 2*NOD << endl;
 cout << "%5t assembling %30T."; //boost::format("%5t assembling %30T.");
 }
 
@@ -132,17 +130,13 @@ for (int i=0; i<NOD; i++) {
 	double v2 = vp*vp + vq*vq;
     if (v2>v2max)
         v2max = v2;
-
-    Node &node = fem.node[i];
-    double u2 = 0.0;
-    for (int d=0; d<3; d++) {
-        node.v[d]  = vp*node.ep[d] + vq*node.eq[d];
-        node.u[d] = node.u0[d] + settings.dt * node.v[d];
-        u2+= sq (node.u[d]);
-        }
-    for (int d=0; d<3; d++)
-        node.u[d]/= sqrt(u2);
-    }
+	
+	fem.node[i].make_evol(vp,vq,settings.dt);
+    	//Node &node = fem.node[i];
+	//node.v = vp*node.ep + vq*node.eq;
+	//node.u = node.u0 + settings.dt * node.v;
+	//node.u.normalize();    
+	}
 
 fem.vmax = sqrt(v2max);
 

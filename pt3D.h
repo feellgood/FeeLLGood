@@ -329,9 +329,20 @@ inline pt3D operator/(pt3D const & a,double const& b) { return pt3D(a.x()/b,a.y(
 inline double pScal(pt3D const& a,pt3D const& b) { return( a.x()*b.x() + a.y()*b.y() + a.z()*b.z() ); }
 
 /**
+algebra : returns square of the R^3 norm
+ */
+inline double norme2(pt3D const & p) {return( p.x()*p.x() + p.y()*p.y() + p.z()*p.z() );}
+
+/**
  * algebra : returns R^3 norm
  */
-inline double norme(pt3D const & p) {return sqrt(p.x()*p.x() + p.y()*p.y() + p.z()*p.z());}
+inline double norme(pt3D const & p) {return sqrt(norme2(p));}
+
+
+/**
+returns a random vector with each componant inferior to 1
+*/
+inline pt3D rand(void) {return pt3D(std::rand() / (RAND_MAX+1.), std::rand() / (RAND_MAX+1.), std::rand() / (RAND_MAX+1.));}
 
 /** 
  geometry : returns iso-barycenter

@@ -47,8 +47,8 @@ const int N = elt.getN();
 gmm::dense_matrix <double> P(2*N,3*N), PA(2*N,3*N);
 for (int i=0; i<N; i++){
     Node &n = fem.node[elt.ind[i]];
-    P(i,i)  = n.ep[0];  P(i,N+i)  = n.ep[1];  P(i,2*N+i)  = n.ep[2];
-    P(N+i,i)= n.eq[0];  P(N+i,N+i)= n.eq[1];  P(N+i,2*N+i)= n.eq[2];
+    P(i,i)  = n.ep.x();  P(i,N+i)  = n.ep.y();  P(i,2*N+i)  = n.ep.z();
+    P(N+i,i)= n.eq.x();  P(N+i,N+i)= n.eq.y();  P(N+i,2*N+i)= n.eq.z();
     }
 
 mult(P,A,PA);

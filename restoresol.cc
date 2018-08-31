@@ -51,8 +51,8 @@ for (int i=0; i<NOD; i++){
     Node &n = node[i];
     Node node_;
     int i_;
-    fin >> i_ >>  node_.p;//node_.x >> node_.y >> node_.z;
-    fin >> n.u[0] >> n.u[1] >> n.u[2] >> n.phi;
+    fin >> i_ >>  node_.p;// carefull! >> is overloaded for class pt3D
+    fin >> n.u >> n.phi;
 
     //node_.x *= scaling;node_.y *= scaling;node_.z *= scaling;
 node_.p *= scaling;
@@ -63,8 +63,7 @@ node_.p *= scaling;
 	{
         IF_VERBOSE(){
         cerr << "WARNING difference dans la position des noeuds"<< endl;
-        cerr << i  << "\t" << n.p << endl;
-        cerr << i_ << "\t" << node_.p << endl;
+        cerr << i  << "\t" << n.p << endl << i_ << "\t" << node_.p << endl;
         }
 //        exit(1);
         }

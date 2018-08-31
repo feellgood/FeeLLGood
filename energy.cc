@@ -44,7 +44,8 @@ for (int i_t=0; i_t<TET; i_t++) {
 	{
         int i_= te.ind[i];
         Node &n = node[i_];
-        for (int d=0; d<3; d++) { u_nod[d][i] = n.u[d]; }
+        //for (int d=0; d<3; d++) { u_nod[d][i] = n.u[d]; }
+	u_nod[Pt::IDX_X][i] = n.u.x(); u_nod[Pt::IDX_Y][i] = n.u.y(); u_nod[Pt::IDX_Z][i] = n.u.z();
            phi_nod[i] =  n.phi;
         negphi_nod[i] = -n.phi;
         }
@@ -120,8 +121,9 @@ const int reg = fa.reg;
 		{
 		int i_= fa.ind[i];
 		Node &n = node[i_];
-		for (int d=0; d<3; d++) { u_nod[d][i] = n.u[d]; }
-	        phi_nod[i] =  n.phi;
+		//for (int d=0; d<3; d++) { u_nod[d][i] = n.u[d]; }
+		u_nod[Pt::IDX_X][i] = n.u.x(); u_nod[Pt::IDX_Y][i] = n.u.y(); u_nod[Pt::IDX_Z][i] = n.u.z();	        
+		phi_nod[i] =  n.phi;
 	        }
 
 	tiny::transposed_mult<double, Facette::N, Facette::NPI> (phi_nod, fa.a, phi);

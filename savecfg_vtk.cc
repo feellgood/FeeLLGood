@@ -60,10 +60,7 @@ for (int i=0; i<NOD; i++) { fout << node[i].phi << endl; }
 fout << "VECTORS u float" << endl;
 
 for (int i=0; i<NOD; i++){
-    double u1  = node[i].u[0];
-    double u2  = node[i].u[1];
-    double u3  = node[i].u[2];
     //fout << boost::format("%+20.10e %+20.10e %+20.10e") % u1 % u2 % u3 << endl;
-fout << u1 << "\t" << u2 << "\t" << u3 << endl;
+fout << node[i].u << endl;
     }
 }    
