@@ -123,20 +123,16 @@ else {time(&timeEnd);
 read_vector Xr(2*NOD);    gmm::copy(Xw, Xr);
 
 double v2max = 0.0;
+double dt = settings.dt;
 
 for (int i=0; i<NOD; i++) {
 	double vp = Xr[i];
 	double vq = Xr[NOD+i];
 	double v2 = vp*vp + vq*vq;
-    if (v2>v2max)
-        v2max = v2;
+        if (v2>v2max) { v2max = v2; }
 	
-	fem.node[i].make_evol(vp,vq,settings.dt);
-    	//Node &node = fem.node[i];
-	//node.v = vp*node.ep + vq*node.eq;
-	//node.u = node.u0 + settings.dt * node.v;
-	//node.u.normalize();    
-	}
+	fem.node[i].make_evol(vp,vq,dt);
+    	}
 
 fem.vmax = sqrt(v2max);
 

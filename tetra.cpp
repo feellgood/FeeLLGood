@@ -13,6 +13,16 @@
 
 using namespace Tetra;
 
+void Tet::getU(double u[DIM][NPI],std::vector <Node> const& myNode)
+{
+for(int k=0;k<NPI;k++)
+	{ 
+	u[0][k]= myNode[ind[0]].u0.x()*a[0][k] + myNode[ind[1]].u0.x()*a[1][k] + myNode[ind[2]].u0.x()*a[2][k] + myNode[ind[3]].u0.x()*a[3][k]; 
+	u[1][k]= myNode[ind[0]].u0.y()*a[0][k] + myNode[ind[1]].u0.y()*a[1][k] + myNode[ind[2]].u0.y()*a[2][k] + myNode[ind[3]].u0.y()*a[3][k];
+	u[2][k]= myNode[ind[0]].u0.z()*a[0][k] + myNode[ind[1]].u0.z()*a[1][k] + myNode[ind[2]].u0.z()*a[2][k] + myNode[ind[3]].u0.z()*a[3][k];
+	}
+}
+
 void Tet::integrales(Settings &mySets,std::vector <Node> const& myNode,triple Hext,double Vz,gmm::dense_matrix <double> &AE, std::vector <double> &BE)
 {
 std::map < std::pair<std::string,int>,double> &param = mySets.param;
@@ -64,7 +74,7 @@ for (int i=0; i<N; i++){
     negphiv0_nod[i] = -node.phiv0;
     }
 
-tiny::mult<double, 3, N, NPI> (u_nod, a, u);
+getU(u,myNode);//tiny::mult<double, 3, N, NPI> (u_nod, a, u);
 tiny::mult<double, 3, N, NPI> (u_nod, dadx, dudx);
 tiny::mult<double, 3, N, NPI> (u_nod, dady, dudy);
 tiny::mult<double, 3, N, NPI> (u_nod, dadz, dudz);

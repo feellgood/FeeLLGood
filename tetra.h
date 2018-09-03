@@ -17,6 +17,8 @@
  */
 namespace Tetra
 {
+const int DIM = 3;/**< space dimension */
+
 const int N = 4;/**< number of sommits */
 const int NPI = 5;/**< number of weights  */
 
@@ -71,6 +73,12 @@ class Tet{
 		double dady[N][NPI];/**< variations of hat function along y directions */
 		double dadz[N][NPI];/**< variations of hat function along z directions */
 	
+
+		/**
+		build matrix u = unod*a; with unod = {node[ind].u0}_N and a from tetrahedron directly from vector<node>, without copying		
+		*/		
+		void getU(double u[DIM][NPI],std::vector <Node> const& myNode);
+		
 		/**
 		computes the integral contribution of the tetrahedron
 		*/		
