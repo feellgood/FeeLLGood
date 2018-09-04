@@ -29,9 +29,8 @@ Some options are given to the compiler, to create a macro within feellgood sourc
 * - -DNSTAT : some statistics (histogram), requires GSL
 
 These other options should not be modified: <br>
-* - -fopenmp for multiThreading with Open MP
+* - -fopenmp for multiThreading with Open MP : usefull for scalfmm
 * - -std=c++11
-* - -frounding-math
 * - -ffast-math
 * - -msse4.2
 * - -mfpmath=sse

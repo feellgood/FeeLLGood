@@ -75,10 +75,46 @@ class Tet{
 	
 
 		/**
-		build matrix u = unod*a; with unod = {node[ind].u0}_N and a from tetrahedron directly from vector<node>, without copying		
+		computes matrix u = unod*a; with unod = {node[ind].u0}_N and a from tetrahedron directly from vector<node>, without any copy		
 		*/		
-		void getU(double u[DIM][NPI],std::vector <Node> const& myNode);
+		void calc_u(double u[DIM][NPI],std::vector <Node> const& myNode);
 		
+		/**
+		computes dudx = unod * dadx with unod = {node[ind].u0}_N		
+		*/
+		void calc_dudx(double dudx[DIM][NPI],std::vector <Node> const& myNode);
+
+		/**
+		computes dudy = unod * dady with unod = {node[ind].u0}_N		
+		*/
+		void calc_dudy(double dudy[DIM][NPI],std::vector <Node> const& myNode);
+
+		/**
+		computes dudz = unod * dadz with unod = {node[ind].u0}_N		
+		*/
+		void calc_dudz(double dudz[DIM][NPI],std::vector <Node> const& myNode);
+
+		/**
+		computes matrix v = vnod*a; with vnod = {node[ind].v0}_N and a from tetrahedron directly from vector<node>, without any copy		
+		*/
+		void calc_v(double v[DIM][NPI],std::vector <Node> const& myNode);
+
+
+		/**
+		computes dvdx = vnod * dadx with vnod = {node[ind].v0}_N		
+		*/
+		void calc_dvdx(double dvdx[DIM][NPI],std::vector <Node> const& myNode);
+
+		/**
+		computes dvdy = vnod * dady with vnod = {node[ind].v0}_N		
+		*/
+		void calc_dvdy(double dvdy[DIM][NPI],std::vector <Node> const& myNode);
+
+		/**
+		computes dvdz = vnod * dadz with vnod = {node[ind].v0}_N		
+		*/
+		void calc_dvdz(double dvdz[DIM][NPI],std::vector <Node> const& myNode);
+
 		/**
 		computes the integral contribution of the tetrahedron
 		*/		
