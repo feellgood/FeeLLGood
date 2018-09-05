@@ -65,7 +65,7 @@ SET( SOURCES config.h pt3D.h tetra.h tetra.cpp facette.h facette.cpp feellgoodSe
 	linear_algebra.h main.cc cputime.cc dialog.cc affichage.cc
 	saveH.cc lecture.cc femutil.cc chapeaux.cc restoresol.cc direction.cc
 	recentrage.cc energy.cc saver.cc savesol.cc savecfg_vtk.cc
-	vsolve.cc base_projection.cc tiny.h)
+	vsolve.cc tiny.h)
 
 SET( HEADERS ${ANN_INCLUDE_DIR}/ANN.h ${GMM_INCLUDE_DIR}/gmm.h ${SCALFMM_INCLUDE_DIR}/Kernels/Rotation/FRotationKernel.hpp)
 

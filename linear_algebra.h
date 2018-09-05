@@ -26,10 +26,14 @@ class LinAlgebra
 public:
 	/** constructor */	
 	inline LinAlgebra(Fem &f, Settings &s) {fem = f; settings = s;}
+	
 	gmm::diagonal_precond <read_matrix>  *prc;/**< diagonal preconditionner */
 
-int  vsolve(long nt);/**< solver */
-void base_projection(void);/**< computes the vector basis projection on the elements */
+	int  vsolve(long nt);/**< solver */
+
+/** computes the local vector basis {ep,eq} in the tangeant plane for projection on the elements */
+inline void base_projection(void)
+	{ std::for_each(fem.node.begin(),fem.node.end(),[](Node &n) { n.buildBase_epeq();}); }
 
 private:
 	Fem fem;/**< access to some part of struct fem */

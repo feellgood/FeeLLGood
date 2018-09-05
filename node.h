@@ -42,6 +42,23 @@ inline void make_evol(double vp,double vq,double dt) {
 	u = u0 + dt*v;
 	u.normalize();}
 
-};
+/**
+local vector base {ep,eq} in the magnetization tangent plane is built here
+*/
+inline void buildBase_epeq()
+{
+if ( Pt::norme2( u0 ) > 0)
+	{         
+        ep = Pt::rand()*u0;
+	ep.normalize();        
+	eq = u0*ep;        
+	}
+    else{ ep = Pt::pt3D(0.,0.,0.); eq = Pt::pt3D(0.,0.,0.);} 
+}
+
+
+};//end struct node
+
+
 
 #endif /* node_h */
