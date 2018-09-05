@@ -6,7 +6,7 @@
 
 using namespace std;
 
-int LinAlgebra::vsolve(long nt)
+int LinAlgebra::vsolve(double dt,long nt)
 {
 time_t timeStart;
 
@@ -37,7 +37,7 @@ for (int t=0; t<TET; t++){
     Tetra::Tet &tet = fem.tet[t];
     gmm::dense_matrix <double> K(3*Tetra::N,3*Tetra::N), Kp(2*Tetra::N,2*Tetra::N);
     vector <double> L(3*Tetra::N), Lp(2*Tetra::N);
-    tet.integrales(settings,fem.node,fem.Hext,fem.DW_vz,K, L);     
+    tet.integrales(settings.paramTetra,fem.node,fem.Hext,fem.DW_vz,dt,K, L);     
     projection<Tetra::Tet>(tet, K, L, Kp, Lp);
     assemblage<Tetra::Tet>(tet, Kp, Lp, Kw, Lw);    
 	}
@@ -46,7 +46,7 @@ for (int t=0; t<FAC; t++){
     Facette::Fac &fac = fem.fac[t];
     gmm::dense_matrix <double> K(3*Facette::N,3*Facette::N), Kp(2*Facette::N,2*Facette::N);
     vector <double> L(3*Facette::N), Lp(2*Facette::N);
-    fac.integrales(settings,fem.node, L);     
+    fac.integrales(settings.paramFacette,fem.node, L);     
     projection<Facette::Fac>(fac, K, L, Kp, Lp);
     assemblage<Facette::Fac>(fac, Kp, Lp, Kw, Lw);
     }
@@ -123,7 +123,6 @@ else {time(&timeEnd);
 read_vector Xr(2*NOD);    gmm::copy(Xw, Xr);
 
 double v2max = 0.0;
-double dt = settings.dt;
 
 for (int i=0; i<NOD; i++) {
 	double vp = Xr[i];

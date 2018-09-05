@@ -6,7 +6,7 @@
   header containing Fac class, and some constants and a less_than operator to redo orientation of triangular faces
  */
 
-#include "feellgoodSettings.h"
+#include "config.h"
 
 #include "node.h"
 
@@ -22,7 +22,16 @@ const double u[NPI]   = {   1/3.,   1/5.,   3/5.,   1/5.};/**< some constants to
 const double v[NPI]   = {   1/3.,   1/5.,   1/5.,   3/5.};/**< some constants  to build hat functions */
 const double pds[NPI] = {-27/96., 25/96., 25/96., 25/96.};/**< some constant weights  to build hat functions */
 
-
+/** \class prm
+region number and material constants
+*/
+struct prm
+	{
+	int reg;/**< region number */	
+	double Js;/**< surface exchange */
+	double Ks;/**< uniaxial surface anisotropy constant */	
+	double uk0[DIM]; /**< anisotropy axis */	
+	};
 
 
 /** \class Fac
@@ -35,6 +44,7 @@ class Fac{
 		inline Fac(int r,int i0,int i1,int i2) {reg = r; ind[0]=i0;ind[1]=i1;ind[2]=i2;}
 		
 		int reg;/**< .msh region number */
+		int idxPrm;/**< index of the material parameters of the facette */		
 		double surf; /**< surface of the face */
 		double Ms; /**< magnetization at saturation of the face */    
 		Pt::pt3D n;/**< normal vector n=(x,y,z) */	
@@ -43,7 +53,7 @@ class Fac{
 		double a[N][NPI];          /**< hat functions table */
     
 		/** computes the integral contribution of the triangular face */
-		void integrales(Settings &mySets,std::vector <Node> const& myNode, std::vector <double> &BE);
+		void integrales(std::vector<Facette::prm> const& params,std::vector <Node> const& myNode, std::vector <double> &BE);
 		
 		/**
 		convenient getter for N, usefull for templates projection and assemblage

@@ -105,7 +105,7 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
                 break;
                 }
 
-            int err = linAlg.vsolve(nt);  
+            int err = linAlg.vsolve(dt,nt);  
             if (err) { cout << "err : " << err << endl;
 		    	flag++; dt*= 0.5; mySettings.dt=dt; continue;}
 

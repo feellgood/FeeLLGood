@@ -29,7 +29,7 @@ public:
 	
 	gmm::diagonal_precond <read_matrix>  *prc;/**< diagonal preconditionner */
 
-	int  vsolve(long nt);/**< solver */
+	int  vsolve(double dt,long nt);/**< solver */
 
 /** computes the local vector basis {ep,eq} in the tangeant plane for projection on the elements */
 inline void base_projection(void)

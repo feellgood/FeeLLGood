@@ -94,8 +94,9 @@ for(int k=0;k<NPI;k++)
 	}
 }
 
-void Tet::integrales(Settings &mySets,std::vector <Node> const& myNode,triple Hext,double Vz,gmm::dense_matrix <double> &AE, std::vector <double> &BE)
+void Tet::integrales(std::vector<Tetra::prm> const& params,std::vector <Node> const& myNode,double Hext[DIM],double Vz,double dt,gmm::dense_matrix <double> &AE, std::vector <double> &BE)
 {
+/*
 std::map < std::pair<std::string,int>,double> &param = mySets.param;
 
 double s = param[ std::make_pair("theta",-1) ];   	//cout << ", theta= " << s;
@@ -116,16 +117,36 @@ double uk20 = param[std::make_pair("c1",reg)];  	//cout << ", a1=" << k0;
 double uk21 = param[std::make_pair("c2",reg)];  	//cout << ", a2=" << k1;
 double uk22 = param[std::make_pair("c3",reg)];  	//cout << ", a3=" << k2;
 
-/* deplacement de paroi par courant polarise en spin*/
-double Uz   = param[std::make_pair("UzDW",reg)];
+double Uz   = param[std::make_pair("UzDW",reg)];//deplacement de paroi par courant polarise en spin
 double beta = param[std::make_pair("betaDW",reg)];
+
+*/
+
+double alpha = params[idxPrm].alpha;
+double A = params[idxPrm].A;
+double J = params[idxPrm].J;
+
+double K = params[idxPrm].K;
+double K3 = params[idxPrm].K3;
+
+double uk00 = params[idxPrm].uk[0][0];
+double uk01 = params[idxPrm].uk[0][1];
+double uk02 = params[idxPrm].uk[0][2];
+double uk10 = params[idxPrm].uk[1][0];
+double uk11 = params[idxPrm].uk[1][1];
+double uk12 = params[idxPrm].uk[1][2];
+double uk20 = params[idxPrm].uk[2][0];
+double uk21 = params[idxPrm].uk[2][1];
+double uk22 = params[idxPrm].uk[2][2];
+
+double Uz = params[idxPrm].Uz;
+double beta = params[idxPrm].beta;
 
 /* ces constantes permettent de factoriser beaucoup d'expressions  */
 double Abis = 2.0*A/J;
 double Kbis = 2.0*K/J;
 double K3bis = 2.0*K3/J;
-
-double dt = mySets.dt;
+double s_dt = theta*dt;//theta du theta schema, defini dans config.h
 
 /*-------------------- INTERPOLATION --------------------*/
 double u_nod[3][N]; 
@@ -260,19 +281,19 @@ fem.stat.R = R;
 
 
 #ifdef ORD2
-        BE[    i]+= Ht[0] *ai_w *s*dt; // ordre 2 en temps
-        BE[  N+i]+= Ht[1] *ai_w *s*dt;
-        BE[2*N+i]+= Ht[2] *ai_w *s*dt;
+        BE[    i]+= Ht[0] *ai_w*s_dt; // ordre 2 en temps
+        BE[  N+i]+= Ht[1] *ai_w*s_dt;
+        BE[2*N+i]+= Ht[2] *ai_w*s_dt;
 
 /* changement de referentiel */
-        BE[i]    += +Vz*(u[1][npi]*dvdz[2][npi]-u[2][npi]*dvdz[1][npi]+v[1][npi]*dudz[2][npi]-v[2][npi]*dudz[1][npi]+alpha*dvdz[0][npi]) *ai_w *s*dt;
-        BE[N+i]  += +Vz*(u[2][npi]*dvdz[0][npi]-u[0][npi]*dvdz[2][npi]+v[2][npi]*dudz[0][npi]-v[0][npi]*dudz[2][npi]+alpha*dvdz[1][npi]) *ai_w *s*dt;
-        BE[2*N+i]+= +Vz*(u[0][npi]*dvdz[1][npi]-u[1][npi]*dvdz[0][npi]+v[0][npi]*dudz[1][npi]-v[1][npi]*dudz[0][npi]+alpha*dvdz[2][npi]) *ai_w *s*dt;
+        BE[i]    += +Vz*(u[1][npi]*dvdz[2][npi]-u[2][npi]*dvdz[1][npi]+v[1][npi]*dudz[2][npi]-v[2][npi]*dudz[1][npi]+alpha*dvdz[0][npi]) *ai_w*s_dt;
+        BE[N+i]  += +Vz*(u[2][npi]*dvdz[0][npi]-u[0][npi]*dvdz[2][npi]+v[2][npi]*dudz[0][npi]-v[0][npi]*dudz[2][npi]+alpha*dvdz[1][npi]) *ai_w*s_dt;
+        BE[2*N+i]+= +Vz*(u[0][npi]*dvdz[1][npi]-u[1][npi]*dvdz[0][npi]+v[0][npi]*dudz[1][npi]-v[1][npi]*dudz[0][npi]+alpha*dvdz[2][npi]) *ai_w*s_dt;
 
 /* second membre pour les termes de courant polarise en spin pour une paroi  pour ordre 2 en temps*/
-	BE[i]    += -Uz*(u[1][npi]*dvdz[2][npi]-u[2][npi]*dvdz[1][npi]+v[1][npi]*dudz[2][npi]-v[2][npi]*dudz[1][npi]+beta*dvdz[0][npi]) *ai_w *s*dt;
-	BE[N+i]  += -Uz*(u[2][npi]*dvdz[0][npi]-u[0][npi]*dvdz[2][npi]+v[2][npi]*dudz[0][npi]-v[0][npi]*dudz[2][npi]+beta*dvdz[1][npi]) *ai_w *s*dt;
-	BE[2*N+i]+= -Uz*(u[0][npi]*dvdz[1][npi]-u[1][npi]*dvdz[0][npi]+v[0][npi]*dudz[1][npi]-v[1][npi]*dudz[0][npi]+beta*dvdz[2][npi]) *ai_w *s*dt;
+	BE[i]    += -Uz*(u[1][npi]*dvdz[2][npi]-u[2][npi]*dvdz[1][npi]+v[1][npi]*dudz[2][npi]-v[2][npi]*dudz[1][npi]+beta*dvdz[0][npi]) *ai_w*s_dt;
+	BE[N+i]  += -Uz*(u[2][npi]*dvdz[0][npi]-u[0][npi]*dvdz[2][npi]+v[2][npi]*dudz[0][npi]-v[0][npi]*dudz[2][npi]+beta*dvdz[1][npi]) *ai_w*s_dt;
+	BE[2*N+i]+= -Uz*(u[0][npi]*dvdz[1][npi]-u[1][npi]*dvdz[0][npi]+v[0][npi]*dudz[1][npi]-v[1][npi]*dudz[0][npi]+beta*dvdz[2][npi]) *ai_w*s_dt;
 #endif
 
         AE(    i,    i)+=  alfa* ai_w;  //lumping
@@ -291,9 +312,9 @@ fem.stat.R = R;
             daj_dx= dadx[j][npi];  daj_dy= dady[j][npi];  daj_dz= dadz[j][npi];
             Dai_Daj = dai_dx*daj_dx + dai_dy*daj_dy + dai_dz*daj_dz;
 
-            AE(i,j)        +=  s*dt*(1.+R)* Abis* Dai_Daj *w;
-            AE(N+i,N+j)    +=  s*dt*(1.+R)* Abis* Dai_Daj *w;
-            AE(2*N+i,2*N+j)+=  s*dt*(1.+R)* Abis* Dai_Daj *w;
+            AE(i,j)        +=  s_dt*(1.+R)* Abis* Dai_Daj *w;
+            AE(N+i,N+j)    +=  s_dt*(1.+R)* Abis* Dai_Daj *w;
+            AE(2*N+i,2*N+j)+=  s_dt*(1.+R)* Abis* Dai_Daj *w;
 	    }
 	}
     }
