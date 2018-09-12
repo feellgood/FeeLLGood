@@ -106,7 +106,7 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
 	std::vector <Node> node; /**< node container */
 	std::vector <Facette::Fac>  fac; /**< face container */
 	std::vector <Tetra::Tet>  tet; /**< tetrahedron container */
-    double Bext;/**< amplitude of the applied field (to check) */
+    double Bext;/**< amplitude of the applied field */
     triple Hext;/**< external applied field direction (should be normalized) */
     
 

@@ -23,7 +23,7 @@ struct Seq{
 double Bini;/**< starting value */
 double Bfin;/**< ending value */
 double dB;/**< step field */
-triple a;/**< direction (should be normalized) */
+triple a;/**< field direction componants */
 };
 
 
@@ -33,13 +33,14 @@ container class to store many setting parameters, such as file names, parameters
 */
 class Settings{
 	public:
-	inline Settings() { withTsv=true; withVtk = false;} /**< default constructor */
+	inline Settings() { withTsv=true; withVtk = false; theta=0.5;} /**< default constructor */
 	
-	void helloDialog();/**< kinda hello world! :-) */
+	void helloDialog();/**< kinda hello world! */
 	void printToTerminal(std::vector<Seq> &seq);/**< some prints sent to terminal  */	
 	void dialog(std::vector<Seq> &seq);/**< text interaction with user from terminal to fix some parameters of the simulation to run */
 	
-
+	void read(std::vector<Seq> &seq);/**< read settings from a .json file */
+	
 	inline void setPbName(std::string str) {pbName = str;} /**< setter for .msh file name  */
 	inline std::string getPbName() {return pbName;}/**< getter for problem file name */
 
@@ -57,8 +58,11 @@ class Settings{
 	std::map < std::pair<std::string,int>,double>  param;/**< map for association of parameters to keys, it stores different parameters of a simulation, such as suppression of the charges on some surfaces or not, the material parameter values as \f$ Ms \f$ or \f$ \alpha \f$ */
 	int n1;/**< energy saved every n1 iterations */
 	int n2;/**< magnetic configuration saved every n2 iterations */
-	int restore;/**< usefull to run a simulation from a previous calculation  */
+	bool restore;/**< usefull to run a simulation from a previous calculation  */
 
+	/** for time integration \f$ \theta \f$ scheme  */
+	double theta;
+	
 	/** this vector contains the material parameters for all regions for all the tetrahedrons */
 	std::vector<Tetra::prm> paramTetra;
 

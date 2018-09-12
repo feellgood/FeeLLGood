@@ -5,6 +5,9 @@
 #include <cctype>
 #include <unistd.h> // for getpid()
 
+#include<boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
 #include "feellgoodSettings.h"
 
 using namespace std;
@@ -21,6 +24,8 @@ cout << "\t process\t\t" << getpid() << endl;
 
 void Settings::printToTerminal(std::vector<Seq> &seq)
 {
+cout << "\t name simul : "<< simName << endl;
+cout << "\t name mesh file : " << pbName << endl;
 cout << "\t temps final\t\t" << tf << endl;
 cout << "\t pas de temps init\t" << dt << endl;
 cout << endl;
@@ -108,4 +113,43 @@ for (int nseq=0; nseq<SEQ; nseq++)
 
 cout << "\t theta\t\t\t" << theta << endl;
 printToTerminal(seq);
+}
+
+void Settings::read(std::vector<Seq> &seq)
+{
+	boost::property_tree::ptree root;
+	boost::property_tree::read_json("settings.json",root);
+	
+	simName = root.get<string>("output_filename");
+	pbName = root.get<string>("mesh_filename");
+	tf = root.get<double>("final_time",0);
+	dt = root.get<double>("initial_time_step",0);
+	theta = root.get<double>("theta",0);
+	n1 = root.get<int>("save_energies",0);
+	n2 = root.get<int>("take_photo",0);
+	restore = root.get<bool>("restore",0);
+	
+	int i=0;
+	double trucs[6];
+	for (boost::property_tree::ptree::value_type &s : root.get_child("field_sequence"))
+		{
+		int j=0;
+		for(boost::property_tree::ptree::value_type &cell : s.second)
+			{
+			trucs[j] = cell.second.get_value<double>();
+			j++;
+			}
+		Seq field;
+		field.Bini = trucs[0];
+		field.Bfin = trucs[1];
+		field.dB = trucs[2];
+		field.a[0] = trucs[3];
+		field.a[1] = trucs[4];
+		field.a[2] = trucs[5];
+		
+	seq.push_back(field);
+		i++;	
+		}
+	
+	cout << " reading parameters and settings from json file :\n" << endl;
 }

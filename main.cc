@@ -23,6 +23,10 @@ gsl_histogram_set_ranges_uniform (fem.stat.h, -HMAX, HMAX);
 
 vector<Seq> seq;
 
+mySettings.read(seq);
+
+mySettings.printToTerminal(seq);
+
 mySettings.dialog(seq);
 fem.lecture(mySettings, 0.0, nullptr);
 fem.femutil(mySettings);
@@ -50,7 +54,7 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
     double &Bini=it->Bini;
     double &Bfin=it->Bfin;
     double &dB=it->dB;
-    triple &a=it->a;
+    triple &a = it->a;
     nseq++;
     fem.SEQ=nseq;
 
@@ -68,9 +72,7 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
 
         string str = mySettings.getSimName() +"_"+ to_string(fem.SEQ) + "_B" + to_string(fem.Bext) + ".evol";// +++ *ct*	
 	ofstream fout(str);
-	if (!fout) {
-            cerr << "erreur ouverture fichier" << endl; exit(1);
-            }
+	if (!fout) { cerr << "erreur ouverture fichier" << endl; exit(1); }
 
         fmm::demag<0, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree, kernels);
 

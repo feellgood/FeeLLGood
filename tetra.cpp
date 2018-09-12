@@ -94,7 +94,7 @@ for(int k=0;k<NPI;k++)
 	}
 }
 
-void Tet::integrales(std::vector<Tetra::prm> const& params,std::vector <Node> const& myNode,double Hext[DIM],double Vz,double dt,gmm::dense_matrix <double> &AE, std::vector <double> &BE)
+void Tet::integrales(std::vector<Tetra::prm> const& params,std::vector <Node> const& myNode,double Hext[DIM],double Vz,double theta,double dt,gmm::dense_matrix <double> &AE, std::vector <double> &BE)
 {
 /*
 std::map < std::pair<std::string,int>,double> &param = mySets.param;
