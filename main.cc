@@ -139,10 +139,7 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
 //            double dissip = 1. - fem.evol/dt/fem.phy;
 //            cout << boost::format("\t dissipation %+3.1f") %(dissip*100) <<'%'<< endl;
             if (fem.evol > 0.0)
-                {
-		cout << "Warning energy increases! : " << fem.evol << endl;
-//                flag++; dt*= 0.5; fem.dt=dt; continue;
-                }
+                { cout << "Warning energy increases! : " << fem.evol << endl; }
 
 /* mise a jour de la vitesse du dernier referentiel et deplacement de paroi */
 	    fem.DW_vz0 = fem.DW_vz; 

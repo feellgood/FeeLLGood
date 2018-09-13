@@ -39,7 +39,7 @@ class Settings{
 	void printToTerminal(std::vector<Seq> &seq);/**< some prints sent to terminal  */	
 	void dialog(std::vector<Seq> &seq);/**< text interaction with user from terminal to fix some parameters of the simulation to run */
 	
-	void read(std::vector<Seq> &seq);/**< read settings from a .json file */
+	void read(std::vector<Seq> &seq);/**< read settings from a json file */
 	
 	inline void setPbName(std::string str) {pbName = str;} /**< setter for .msh file name  */
 	inline std::string getPbName() {return pbName;}/**< getter for problem file name */

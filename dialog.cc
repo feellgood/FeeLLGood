@@ -129,7 +129,6 @@ void Settings::read(std::vector<Seq> &seq)
 	n2 = root.get<int>("take_photo",0);
 	restore = root.get<bool>("restore",0);
 	
-	int i=0;
 	double trucs[6];
 	for (boost::property_tree::ptree::value_type &s : root.get_child("field_sequence"))
 		{
@@ -146,9 +145,8 @@ void Settings::read(std::vector<Seq> &seq)
 		field.a[0] = trucs[3];
 		field.a[1] = trucs[4];
 		field.a[2] = trucs[5];
-		
-	seq.push_back(field);
-		i++;	
+		normalize(field.a);
+		seq.push_back(field);
 		}
 	
 	cout << " reading parameters and settings from json file :\n" << endl;
