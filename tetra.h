@@ -65,6 +65,9 @@ struct prm
 	double Uz;/**< for spin polarized current */
 	double beta;/**< non adiabatic constant \f$ \beta \f$ for spin polarization current */	
 	
+	/**
+	 print the struct parameters
+	 */
 	inline void infos()
 		{
 		std::cout<< "region number = " << reg <<std::endl;
