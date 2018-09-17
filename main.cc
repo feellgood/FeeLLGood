@@ -1,10 +1,16 @@
+#include <iostream>
+
 #include "linear_algebra.h"
 #include "fmm_demag.h"
 
+
+
 using namespace std;
 
-int main()
+int main(int argc,char* argv[])
 {
+	
+	
 Settings mySettings = Settings();
 
 Fem fem;
@@ -23,7 +29,19 @@ gsl_histogram_set_ranges_uniform (fem.stat.h, -HMAX, HMAX);
 
 vector<Seq> seq;
 
-mySettings.read(seq);
+string fileJson;
+if(argc<2)
+	{
+	fileJson = "settings.json";
+	cout << "using default settings in " << fileJson << " JSON file." <<endl; 
+	}
+else 
+	{
+	fileJson = argv[1]; // argv[0] is "./feellgood_exe"
+	cout << "using loaded settings in " << fileJson << " JSON file." <<endl;	
+	}
+
+mySettings.read(fileJson,seq);
 
 mySettings.printToTerminal(seq);
 

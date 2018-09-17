@@ -64,6 +64,15 @@ struct prm
 	double uk[DIM][DIM]; /**< anisotropy tensor 3*3 */	
 	double Uz;/**< for spin polarized current */
 	double beta;/**< non adiabatic constant \f$ \beta \f$ for spin polarization current */	
+	
+	inline void infos()
+		{
+		std::cout<< "region number = " << reg <<std::endl;
+		std::cout<< "alpha = " << alpha <<std::endl;
+		std::cout<< "A = " << A <<std::endl;
+		std::cout<< "J = " << J <<std::endl;
+		std::cout<< "K = " << K <<std::endl;
+		};	
 	};
 
 /**

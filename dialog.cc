@@ -5,6 +5,8 @@
 #include <cctype>
 #include <unistd.h> // for getpid()
 
+#include <exception>
+
 #include<boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
@@ -115,10 +117,12 @@ cout << "\t theta\t\t\t" << theta << endl;
 printToTerminal(seq);
 }
 
-void Settings::read(std::vector<Seq> &seq)
+void Settings::read(std::string fileJson,std::vector<Seq> &seq)
 {
 	boost::property_tree::ptree root;
-	boost::property_tree::read_json("settings.json",root);
+	boost::property_tree::read_json(fileJson,root);
+	
+	cout << "parsing parameters and settings from json file :\n" << endl;
 	
 	simName = root.get<string>("output_filename");
 	pbName = root.get<string>("mesh_filename");
@@ -148,6 +152,77 @@ void Settings::read(std::vector<Seq> &seq)
 		normalize(field.a);
 		seq.push_back(field);
 		}
+cout << "volumic regions..." << endl;
+
+boost::property_tree::ptree sub_tree;
+
+try {
+sub_tree = root.get_child("blabla");
+}
+catch (exception &e)
+{
+	cout << e.what() << endl;
+	}
+
+
+try {
+sub_tree = root.get_child("volume_regions");
+}
+catch (exception &e)
+{
+	cout << e.what() << endl;
+	}
 	
-	cout << " reading parameters and settings from json file :\n" << endl;
+
+
+	for (boost::property_tree::ptree::value_type &s : sub_tree)
+		{
+		string name_reg = s.first;
+		if (!name_reg.empty())
+			{
+			Tetra::prm p;
+			p.reg = stoi(name_reg);
+			for (boost::property_tree::ptree::value_type &sub_k : sub_tree.get_child(name_reg))
+				{
+				if (sub_k.first == "Ae") {p.A = sub_k.second.get_value<double>();}
+				if (sub_k.first == "alpha") {p.alpha = sub_k.second.get_value<double>();}
+				if (sub_k.first == "Ka")
+					{
+					p.K = sub_k.second.get_value<double>();
+					if (p.K == 0) cout<< "Ka is zero, flag NO_ANISOTROPY to true" <<endl; 	
+					}	
+				
+				if (sub_k.first == "Js") {p.J = sub_k.second.get_value<double>();}
+				}
+			
+			p.infos();	
+			}
+		cout << s.first << endl;
+		}
+		
+cout << "surfacic regions..." << endl;
+
+try {
+sub_tree = root.get_child("surface_regions");
+}
+catch (exception &e)
+{
+	cout << e.what() << endl;
+	}
+
+for (boost::property_tree::ptree::value_type &s : sub_tree)
+		{
+		string name_reg = s.first;
+		if (!name_reg.empty())
+			{
+				
+			for (boost::property_tree::ptree::value_type &sub_k : sub_tree.get_child(name_reg))
+				{
+				string variable_s = sub_k.first;
+				string toto = sub_k.second.data();
+				cout << "key=" << variable_s << "\tvalue=" << toto  <<endl;
+				}
+			}
+		cout << s.first << endl;
+		}		
 }
