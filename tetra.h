@@ -74,7 +74,14 @@ struct prm
 		std::cout<< "alpha = " << alpha <<std::endl;
 		std::cout<< "A = " << A <<std::endl;
 		std::cout<< "J = " << J <<std::endl;
-		std::cout<< "K = " << K <<std::endl;
+		
+		if(K!=0)
+			{std::cout<< "K = " << K <<std::endl;
+			std::cout<< "a = [ [ " << uk[0][0] << "," << uk[0][1] <<"," << uk[0][2] << "]" << std::endl;
+			std::cout<< "      [ " << uk[1][0] << "," << uk[1][1] <<"," << uk[1][2] << "]" << std::endl;
+			std::cout<< "      [ " << uk[2][0] << "," << uk[2][1] <<"," << uk[2][2] << "] ]" << std::endl;
+			}
+		else std::cout << "no anisotropy" << std::endl;
 		};	
 	};
 

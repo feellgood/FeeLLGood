@@ -189,15 +189,28 @@ catch (exception &e)
 				if (sub_k.first == "Ka")
 					{
 					p.K = sub_k.second.get_value<double>();
-					if (p.K == 0) cout<< "Ka is zero, flag NO_ANISOTROPY to true" <<endl; 	
-					}	
+					if (p.K == 0) { cout<< "Ka is zero, flag NO_ANISOTROPY to true" <<endl;}
+					}
+				if ((sub_k.first == "a")&&(p.K != 0))
+					{int i=0;
+					for(boost::property_tree::ptree::value_type &row : sub_k.second)
+						{
+						int j=0;
+						for(boost::property_tree::ptree::value_type &coeff : row.second)
+							{
+							p.uk[i][j] = coeff.second.get_value<double>();	
+							j++;
+							}
+						i++;	
+						}
+					}
+						
 				
 				if (sub_k.first == "Js") {p.J = sub_k.second.get_value<double>();}
 				}
 			
 			p.infos();	
 			}
-		cout << s.first << endl;
 		}
 		
 cout << "surfacic regions..." << endl;
