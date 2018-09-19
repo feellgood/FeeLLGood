@@ -1,12 +1,14 @@
 {
-"output_filename" : "tommy_the_cat.bof",
-"mesh_filename" : "lalala.msh",
+"output directory" : "",
+"output file basename" : "tommy_the_cat",
+"mesh filename" : "wire_d70_L1000.msh",
 "final_time" : 1e-6,
 "initial_time_step" : 1e-9,
 "theta" : 0.5,
 "save_energies" : 3,
 "take_photo" : 5,
 "restore" : false,
+
 "field_sequence" :
 	[
 	[0.0,1.0,0.2,1.0,0.0,0.0],
@@ -22,18 +24,15 @@
 		"Ka" : 0.0,
 		"a" : [[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,1.0]],		
 		"alpha" : 0.05		
-		},
-	"301" : 
-		{
-		"Ae" : 1e-11,
-		"Js" : 1.0,
-		"Ka" : -1.0,
-		"a" : [[1.0,-1.0,0.0],[-1.0,1.0,0.0],[0.0,0.0,1.0]],		
-		"alpha" : 0.05		
 		}
 	},
 "surface_regions" :
 	{
-	"200" : {"Js" : -1}	
+	"200" : 
+		{
+		"Js" : -1,
+		"Ks" : 0.0,
+		"uk" : [0.0,0.0,1.0]
+		}	
 	}
 }

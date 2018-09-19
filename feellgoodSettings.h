@@ -66,9 +66,25 @@ class Settings{
 	/** this vector contains the material parameters for all regions for all the tetrahedrons */
 	std::vector<Tetra::prm> paramTetra;
 
+	inline int findTetraRegionIdx(int r) 
+	{ 
+	std::vector<Tetra::prm>::iterator result = std::find_if(paramTetra.begin(),paramTetra.end(),[r](Tetra::prm const& p){return(p.reg == r); }  ); 
+	if (result == paramTetra.end()) return -1;
+	else {return std::distance(paramTetra.begin(),result);}	
+	};
+	
 	/** this vector contains the material parameters for all regions for all the facettes */
 	std::vector<Facette::prm> paramFacette;
 
+	std::string r_path_output_dir;
+	
+	inline int findFacetteRegionIdx(int r) 
+	{ 
+	std::vector<Facette::prm>::iterator result = std::find_if(paramFacette.begin(),paramFacette.end(),[r](Facette::prm const& p){return(p.reg == r); }  ); 
+	if (result == paramFacette.end()) return -1;
+	else {return std::distance(paramFacette.begin(),result);}	
+	};
+	
 	private:
 	
 	void extract_comment(std::istream &flux);/**< parser */

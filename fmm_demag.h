@@ -85,7 +85,7 @@ int init(Fem &fem, OctreeClass* &tree, KernelClass* &kernels, Args... kernelPreA
     omp_set_num_threads(NbThreads);
     IF_VERBOSE() std::cout << "\n>> Using " << omp_get_max_threads() << " threads.\n" << std::endl;
 
-    const double boxWidth=2.01;
+    const double boxWidth=2.01;//2.01 ct
 
 //const FPoint centerOfBox(0., 0., 0.);
     const FPoint<double> centerOfBox(0., 0., 0.);// manque le typename du template FPoint *ct*
@@ -95,9 +95,8 @@ int init(Fem &fem, OctreeClass* &tree, KernelClass* &kernels, Args... kernelPreA
     if (!tree) SYSTEM_ERROR;
     // -----------------------------------------------------
 
-// systeme pour nfft dans [-1, 1]
-fem.fmm_normalizer = 2./fem.diam*0.999999;
-double norm=fem.fmm_normalizer;
+fem.fmm_normalizer = 2./fem.diam*0.999999; // pourquoi 2 ?
+double norm= fem.fmm_normalizer;
 
 const int NOD = fem.NOD;
 const int FAC = fem.FAC;
@@ -118,6 +117,8 @@ for (int i=0; i<NOD; i++, idxPart++){       // cibles (noeuds)
     tree->insert(particlePosition, FParticleType::FParticleTypeTarget, idxPart, 0.0);//ct
     }
 
+    std::cout << "Physical nodes inserted." << std::endl;
+    
 for (int t=0; t<TET; t++){       // sources de volume
     Tetra::Tet &tet = fem.tet[t];
     double nod[3][Tetra::N], gauss[3][Tetra::NPI];
@@ -125,14 +126,14 @@ for (int t=0; t<TET; t++){       // sources de volume
         int i_= tet.ind[i];
         nod[0][i] = fem.node[i_].p.x();
         nod[1][i] = fem.node[i_].p.y();
-	nod[2][i] = fem.node[i_].p.z();
+		nod[2][i] = fem.node[i_].p.z();
 	}
     tiny::mult<double, 3, Tetra::N, Tetra::NPI> (nod, tet.a, gauss);
 
     for (int j=0; j<Tetra::NPI; j++, idxPart++){
         double xSource = (gauss[0][j]-fem.c.x()) * norm;
         double ySource = (gauss[1][j]-fem.c.y()) * norm;
-	double zSource = (gauss[2][j]-fem.c.z()) * norm;
+		double zSource = (gauss[2][j]-fem.c.z()) * norm;
         FPoint<double> particlePosition(xSource, ySource, zSource);// manque le typename du template FPoint ct
         tree->insert(particlePosition, FParticleType::FParticleTypeSource, idxPart, 0.0);//ct
 	}
@@ -145,14 +146,14 @@ for (int f=0; f<FAC; f++){        // sources de surface
         int i_= fac.ind[i];
         nod[0][i] = fem.node[i_].p.x();
         nod[1][i] = fem.node[i_].p.y();
-	nod[2][i] = fem.node[i_].p.z();
+		nod[2][i] = fem.node[i_].p.z();
 	}
     tiny::mult<double, 3, Facette::N, Facette::NPI> (nod, fac.a, gauss);
 
     for (int j=0; j<Facette::NPI; j++, idxPart++){
         double xSource = (gauss[0][j]-fem.c.x()) * norm;
         double ySource = (gauss[1][j]-fem.c.y()) * norm;
-	double zSource = (gauss[2][j]-fem.c.z()) * norm;
+		double zSource = (gauss[2][j]-fem.c.z()) * norm;
         FPoint<double> particlePosition(xSource, ySource, zSource);// manque le typename du template FPoint ct
         tree->insert(particlePosition, FParticleType::FParticleTypeSource, idxPart, 0.0);//ct
 	}

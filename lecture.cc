@@ -6,7 +6,7 @@
 
 using namespace std;
 
-void Fem::lecture(Settings &mySets, double scale, Regions *regions)  // regions may be NULL
+void Fem::lecture(Settings &mySets, double scale)//, Regions *regions)  // regions may be NULL
 {
 int ELEM, tags, reg, TYP;
 double value;
@@ -54,11 +54,10 @@ msh >> NOD;        // lecture des noeuds
 
 node.resize(NOD);
 for (int i=0; i<NOD; i++){
-    Pt::pt3D p;
-    msh >> trash >> p;
-	node[i].p = p*scale;
-    //node[i].x = x * scale; node[i].y = y * scale; node[i].z = z * scale;
-    }
+    msh >> trash >> node[i].p;
+	node[i].p *= scale;
+	//cout <<"scale=" << scale <<";" << trash << ";" << node[i].p << endl;
+	}
 
 if (msh.fail()){
 #ifdef LIBRARY
@@ -95,25 +94,25 @@ while(msh >> symb){
         case 2:{
             Facette::Fac f;
             f.reg = reg;
-	    
+			f.idxPrm = mySets.findFacetteRegionIdx(reg);
             msh >> f.ind[0] >> f.ind[1] >> f.ind[2];
 	    for (int i=0; i<3; i++)
 	        f.ind[i]--;           // passage convention Matlab/msh a C++
 		
             fac.push_back(f);
-            if (regions) ++regions->surfaces[reg];
+            //if (regions) ++regions->surfaces[reg];
             break;
 	    }
         case 4:{
             Tetra::Tet te;
             te.reg = reg; 
-	    
+			te.idxPrm = mySets.findTetraRegionIdx(reg);
             msh >> te.ind[0] >> te.ind[1] >> te.ind[2] >> te.ind[3];
 	    for (int i=0; i<4; i++)
 	    	te.ind[i]--;           // passage convention Matlab/msh a C++
 		
             tet.push_back(te);
-            if (regions) ++regions->volumes[reg];
+            //if (regions) ++regions->volumes[reg];
             break;
 	    }
         default:

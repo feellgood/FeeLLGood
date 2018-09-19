@@ -70,7 +70,7 @@ struct prm
 	 */
 	inline void infos()
 		{
-		std::cout<< "region number = " << reg <<std::endl;
+		std::cout<< "volume region number = " << reg <<std::endl;
 		std::cout<< "alpha = " << alpha <<std::endl;
 		std::cout<< "A = " << A <<std::endl;
 		std::cout<< "J = " << J <<std::endl;
@@ -116,7 +116,7 @@ indices convention is<br>
 */
 class Tet{
 	public:
-		inline Tet() {reg = 0;} /**< default constructor */
+		inline Tet() {reg = 0;idxPrm=-1;} /**< default constructor */
 		int reg;/**< .msh region number */
 		int idxPrm;/**< index of the material parameters of the tetrahedron */		
 		double vol;/**< volume of the tetrahedron */
@@ -127,7 +127,7 @@ class Tet{
 		double dady[N][NPI];/**< variations of hat function along y directions */
 		double dadz[N][NPI];/**< variations of hat function along z directions */
 	
-
+		inline void infos(){std::cout<< reg << ":" << idxPrm <<std::endl;};
 		/**
 		computes matrix u = unod*a; with unod = {node[ind].u0}_N and a from tetrahedron directly from vector<node>, without any copy		
 		*/		

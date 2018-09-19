@@ -39,7 +39,7 @@ diam = l.x();
 if (diam<l.y()) diam=l.y();
 if (diam<l.z()) diam=l.z();
 
-c = Pt::pt3D(0.5*(xmax+xmin),0.5*(ymax+ymin),0.5*(ymax+ymin));
+c = Pt::pt3D(0.5*(xmax+xmin),0.5*(ymax+ymin),0.5*(zmax+zmin));
 }
 
 void Fem::femutil_facMs(Settings &settings /**< [in] */)

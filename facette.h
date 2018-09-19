@@ -30,7 +30,23 @@ struct prm
 	int reg;/**< region number */	
 	double Js;/**< surface exchange */
 	double Ks;/**< uniaxial surface anisotropy constant */	
-	double uk0[DIM]; /**< anisotropy axis */	
+	double uk[DIM]; /**< anisotropy axis */	
+	
+	/**
+	 print the struct parameters
+	 */
+	inline void infos()
+		{
+		std::cout<< "surface region number = " << reg <<std::endl;
+		std::cout<< "Js = " << Js <<std::endl;
+		
+		if(Ks!=0)
+			{std::cout<< "Ks = " << Ks <<std::endl;
+			std::cout<< "a = [ " << uk[0] << "," << uk[1] <<"," << uk[2] << "]" << std::endl;
+			}
+		else std::cout << "no surface anisotropy" << std::endl;
+		};	
+		
 	};
 
 

@@ -29,12 +29,12 @@ for (int i_t=0; i_t<TET; i_t++){
 gmm::dense_matrix <double> nod(3,Tetra::N); 
     for (int i=0; i<Tetra::N; i++){
         int i_= t.ind[i];
-//	cout << "t:" << t <<",  nod:" << i_ << endl;
+//cout << "nod:" << i_ << ":" << node[i_].p << endl;
         nod(0,i) = node[i_].p.x();
         nod(1,i) = node[i_].p.y();
         nod(2,i) = node[i_].p.z();
         }
-// cout << nod <<endl;
+//cout <<"nod:" << nod <<endl;
 
     for (int j=0; j<Tetra::NPI; j++){
         vector <double> a(Tetra::N);
@@ -46,7 +46,7 @@ gmm::dense_matrix <double> nod(3,Tetra::N);
 
         mult(nod, dadu, J);
         double detJ = lu_det(J);
-//	cout << "tet: " << t << "   jac:" << detJ <<endl;
+	//cout << "tet i: " << i_t << "   jac:" << detJ <<endl;
 	
         if (fabs(detJ) < EPSILON){
 #ifdef LIBRARY
@@ -55,6 +55,7 @@ gmm::dense_matrix <double> nod(3,Tetra::N);
             throw runtime_error(what.str());
 #else
             cerr << "jacobienne singuliere ds le tetraedre " << i_t << endl;
+			t.infos();
             exit(1);
 #endif
             }

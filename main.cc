@@ -9,17 +9,14 @@ using namespace std;
 
 int main(int argc,char* argv[])
 {
-	
-	
 Settings mySettings = Settings();
-
 Fem fem;
 LinAlgebra linAlg = LinAlgebra(fem,mySettings);
 
 OctreeClass *tree    = nullptr;
 KernelClass *kernels = nullptr; 
 
-cout << "Hello! \n This is feeLLGood SHA1=" + string(SHAnumber) << endl;
+cout << "Hello! This is feeLLGood SHA1= " + string(SHAnumber) << endl;
 
 
 #ifdef STAT
@@ -45,17 +42,19 @@ mySettings.read(fileJson,seq);
 
 mySettings.printToTerminal(seq);
 
-mySettings.dialog(seq);
-fem.lecture(mySettings, 0.0, nullptr);
+//mySettings.dialog(seq); // deprecated
+fem.lecture(mySettings, 0.0);//, nullptr);
+
+for(unsigned int i=0;i<mySettings.paramTetra.size();i++) {mySettings.paramTetra[i].infos();}
+for(unsigned int i=0;i<mySettings.paramFacette.size();i++) {mySettings.paramFacette[i].infos();}
+
 fem.femutil(mySettings);
 fem.chapeaux();
 fem.affichage();
 
 fem.t=0.;
 
-int restore = int(mySettings.param[ make_pair("restore",-1) ]);
-
-if (restore)
+if (mySettings.restore)
     fem.restoresol(mySettings.getScale(), nullptr);
 else
     fem.init_distrib();

@@ -20,9 +20,9 @@ double uk02 = param[std::make_pair("a3",reg)];  	//cout << ", a3=" << k2;
 double Js = params[idxPrm].Js;
 double Ks = params[idxPrm].Ks;
 
-double uk00 = params[idxPrm].uk0[0];
-double uk01 = params[idxPrm].uk0[1];
-double uk02 = params[idxPrm].uk0[2];
+double uk00 = params[idxPrm].uk[0];
+double uk01 = params[idxPrm].uk[1];
+double uk02 = params[idxPrm].uk[2];
 
 double Kbis = 2.0*Ks/Js;
 /*-------------------- INTERPOLATION --------------------*/

@@ -124,8 +124,9 @@ void Settings::read(std::string fileJson,std::vector<Seq> &seq)
 	
 	cout << "parsing parameters and settings from json file :\n" << endl;
 	
-	simName = root.get<string>("output_filename");
-	pbName = root.get<string>("mesh_filename");
+	r_path_output_dir = root.get<string>("output directory");
+	simName = root.get<string>("output file basename");
+	pbName = root.get<string>("mesh filename");
 	tf = root.get<double>("final_time",0);
 	dt = root.get<double>("initial_time_step",0);
 	theta = root.get<double>("theta",0);
@@ -186,12 +187,13 @@ catch (exception &e)
 				{
 				if (sub_k.first == "Ae") {p.A = sub_k.second.get_value<double>();}
 				if (sub_k.first == "alpha") {p.alpha = sub_k.second.get_value<double>();}
+				
 				if (sub_k.first == "Ka")
 					{
 					p.K = sub_k.second.get_value<double>();
 					if (p.K == 0) { cout<< "Ka is zero, flag NO_ANISOTROPY to true" <<endl;}
 					}
-				if ((sub_k.first == "a")&&(p.K != 0))
+				if (sub_k.first == "a")
 					{int i=0;
 					for(boost::property_tree::ptree::value_type &row : sub_k.second)
 						{
@@ -208,8 +210,8 @@ catch (exception &e)
 				
 				if (sub_k.first == "Js") {p.J = sub_k.second.get_value<double>();}
 				}
-			
-			p.infos();	
+			paramTetra.push_back(p);
+			//p.infos();	
 			}
 		}
 		
@@ -228,14 +230,29 @@ for (boost::property_tree::ptree::value_type &s : sub_tree)
 		string name_reg = s.first;
 		if (!name_reg.empty())
 			{
-				
+			Facette::prm p;
+			p.reg = stoi(name_reg);
 			for (boost::property_tree::ptree::value_type &sub_k : sub_tree.get_child(name_reg))
 				{
-				string variable_s = sub_k.first;
-				string toto = sub_k.second.data();
-				cout << "key=" << variable_s << "\tvalue=" << toto  <<endl;
+				
+				if (sub_k.first == "Ks")
+					{
+					p.Ks = sub_k.second.get_value<double>();
+					if (p.Ks == 0) { cout<< "Ks is zero, flag NO_SURF_ANISOTROPY to true" <<endl;}
+					}
+				if (sub_k.first == "uk")
+					{int i=0;
+					for(boost::property_tree::ptree::value_type &row : sub_k.second)
+						{
+						p.uk[i] = row.second.get_value<double>();
+						i++;	
+						}
+					}
+			
+				if (sub_k.first == "Js") {p.Js = sub_k.second.get_value<double>();}	
 				}
+			paramFacette.push_back(p);
+			//p.infos();	
 			}
-		cout << s.first << endl;
 		}		
 }
