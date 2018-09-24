@@ -1,8 +1,8 @@
 #include "linear_algebra.h"
 
-#include "gmm/gmm_iter.h"
-#include "gmm/gmm_solver_bicgstab.h"
-#include "gmm/gmm_solver_gmres.h"
+#include "gmm_iter.h"
+#include "gmm_solver_bicgstab.h"
+#include "gmm_solver_gmres.h"
 
 using namespace std;
 

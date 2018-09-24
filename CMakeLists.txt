@@ -2,10 +2,9 @@ PROJECT (FEELLGOOD)
 cmake_minimum_required(VERSION 2.8)
 
 #===========================================================================
-# Version Number
+# FEELLGOOD version number.
 #===========================================================================
 
-# FEELLGOOD version number.
 set(FEELLGOOD_MAJOR_VERSION 0)
 set(FEELLGOOD_MINOR_VERSION 0)
 set(FEELLGOOD_PATCH_VERSION 0)
@@ -23,11 +22,11 @@ SET(ANN_INCLUDE_DIR ../ann_1.1.2/include/ANN)
 
 SET(GMM_INCLUDE_DIR ../gmm-5.2/include/gmm)
 
-SET(SCALFMM_INCLUDE_DIR ../ScalFMM_1.5/Src)
+SET(SCALFMM_INCLUDE_DIR ../SCALFMM-1.4-148/Src)
 
-INCLUDE_DIRECTORIES(${ANN_INCLUDE_DIR} ${GMM_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR})
+SET(SCALFMM_CFG /usr/local/include/Utils)
 
-SET(INCLUDE ${ANN_INCLUDE_DIR} ${GMM_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${ANN_INCLUDE_DIR} ${GMM_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR} ${SCALFMM_CFG})
 
 #===========================================================================
 # these parameters are used to build a config.h file 
@@ -70,13 +69,13 @@ SET( HEADERS ${ANN_INCLUDE_DIR}/ANN.h ${GMM_INCLUDE_DIR}/gmm.h ${SCALFMM_INCLUDE
 
 configure_file(config.h.in ./config.h)
 
-ADD_EXECUTABLE(feellgood_exe ${SOURCES} ${HEADERS})
+ADD_EXECUTABLE(feellgood ${SOURCES} ${HEADERS})
 SET( SCALFMM "libscalfmm.a")
 
-#SET(ANN_LINK_DIR ../ann_1.1.2/lib)
-SET( ANN "../ann_1.1.2/lib/libANN.a")
+SET( ANN "/home/christophe/Documents/ann_1.1.2/lib/libANN.a")
 
-#LINK_DIRECTORIES(${ANN_LINK_DIR}) init_distrib =
+TARGET_LINK_LIBRARIES(feellgood ${SCALFMM} ${ANN})
 
-TARGET_LINK_LIBRARIES(feellgood_exe ${SCALFMM} ${ANN})
+install(TARGETS feellgood
+	RUNTIME DESTINATION /usr/local/bin )
 

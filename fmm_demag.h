@@ -37,18 +37,22 @@ this header is the interface to scalfmm. Its purpose is to prepare an octree for
 
 static const int P = 9;/**< constant parameter for some scalfmm templates */
 
+/** double redefinition for the parametrization of some scalfmm templates */
+#define FReal double
+
+
 // pb avec ces templates : ils prennent un argument de plus en 1.5.0 //ct
 //typedef FTypedRotationCell<P>            CellClass; ct
-typedef FTypedRotationCell<double,P>            CellClass; /**< convenient typedef for the definition of cell type in scalfmm  */
+typedef FTypedRotationCell<FReal, P>            CellClass; /**< convenient typedef for the definition of cell type in scalfmm  */
 
 //typedef FP2PParticleContainerIndexed<>         ContainerClass; //ct
-typedef FP2PParticleContainerIndexed<double>         ContainerClass; /**< convenient typedef for the definition of container for scalfmm */
+typedef FP2PParticleContainerIndexed<FReal>         ContainerClass; /**< convenient typedef for the definition of container for scalfmm */
 
-typedef FTypedLeaf<double, ContainerClass >                      LeafClass;/**< convenient typedef for the definition of leaf for scalfmm  */
+typedef FTypedLeaf<FReal, ContainerClass >                      LeafClass;/**< convenient typedef for the definition of leaf for scalfmm  */
 
-typedef FOctree<double, CellClass, ContainerClass , LeafClass >  OctreeClass;/**< convenient typedef for the definition of the octree for scalfmm */
+typedef FOctree< FReal, CellClass, ContainerClass , LeafClass >  OctreeClass;/**< convenient typedef for the definition of the octree for scalfmm */
 
-typedef FRotationKernel<double, CellClass, ContainerClass, P >          KernelClass;/**< convenient typedef for the kernel for scalfmm */
+typedef FRotationKernel< FReal, CellClass, ContainerClass, P >          KernelClass;/**< convenient typedef for the kernel for scalfmm */
 
 typedef FFmmAlgorithmThreadTsm<OctreeClass, CellClass, ContainerClass, KernelClass, LeafClass > FmmClass;/**< convenient typedef for handling altogether the differents scalfmm object templates used in feellgood  */
 
@@ -56,12 +60,6 @@ typedef FFmmAlgorithmThreadTsm<OctreeClass, CellClass, ContainerClass, KernelCla
 #ifndef IF_VERBOSE  // same goes for SYSTEM_ERROR
 #error "fem.h" must be #included before "fmm_demag.h"
 #endif
-
-
-
-/** double redefinition for the parametrization of some scalfmm templates */
-#define FReal double // pour FReal  *ct*
-
 
 /**
 \namespace fmm to grab altogether the templates and functions using scalfmm for the computation of the demag field 
@@ -88,7 +86,7 @@ int init(Fem &fem, OctreeClass* &tree, KernelClass* &kernels, Args... kernelPreA
     const double boxWidth=2.01;//2.01 ct
 
 //const FPoint centerOfBox(0., 0., 0.);
-    const FPoint<double> centerOfBox(0., 0., 0.);// manque le typename du template FPoint *ct*
+    const FPoint<FReal> centerOfBox(0., 0., 0.);// manque le typename du template FPoint *ct*
 
     // -----------------------------------------------------
     tree=new OctreeClass(NbLevels, SizeSubLevels, boxWidth, centerOfBox);
@@ -113,8 +111,9 @@ for (int i=0; i<NOD; i++, idxPart++){       // cibles (noeuds)
     double xTarget = (fem.node[i].p.x()-fem.c.x()) * norm;
     double yTarget = (fem.node[i].p.y()-fem.c.y()) * norm;
     double zTarget = (fem.node[i].p.z()-fem.c.z()) * norm;
-    FPoint<double> particlePosition(xTarget, yTarget, zTarget);// manque le typename du template FPoint ct
-    tree->insert(particlePosition, FParticleType::FParticleTypeTarget, idxPart, 0.0);//ct
+    const FPoint<FReal> particlePosition(xTarget, yTarget, zTarget);// manque le typename du template FPoint ct
+    //tree->insert(particlePosition, FParticleType::FParticleTypeTarget, idxPart, 0.0);//ct
+	tree->insert(particlePosition, 1, idxPart, 0.0);//ct 1 pour target
     }
 
     std::cout << "Physical nodes inserted." << std::endl;
@@ -134,8 +133,9 @@ for (int t=0; t<TET; t++){       // sources de volume
         double xSource = (gauss[0][j]-fem.c.x()) * norm;
         double ySource = (gauss[1][j]-fem.c.y()) * norm;
 		double zSource = (gauss[2][j]-fem.c.z()) * norm;
-        FPoint<double> particlePosition(xSource, ySource, zSource);// manque le typename du template FPoint ct
-        tree->insert(particlePosition, FParticleType::FParticleTypeSource, idxPart, 0.0);//ct
+        const FPoint<FReal> particlePosition(xSource, ySource, zSource);// manque le typename du template FPoint ct
+        //tree->insert(particlePosition, FParticleType::FParticleTypeSource, idxPart, 0.0);//ct
+	tree->insert(particlePosition, 0, idxPart, 0.0);//ct 0 pour source
 	}
     }
 
@@ -154,8 +154,9 @@ for (int f=0; f<FAC; f++){        // sources de surface
         double xSource = (gauss[0][j]-fem.c.x()) * norm;
         double ySource = (gauss[1][j]-fem.c.y()) * norm;
 		double zSource = (gauss[2][j]-fem.c.z()) * norm;
-        FPoint<double> particlePosition(xSource, ySource, zSource);// manque le typename du template FPoint ct
-        tree->insert(particlePosition, FParticleType::FParticleTypeSource, idxPart, 0.0);//ct
+        const FPoint<FReal> particlePosition(xSource, ySource, zSource);// manque le typename du template FPoint ct
+        //tree->insert(particlePosition, FParticleType::FParticleTypeSource, idxPart, 0.0);//ct
+	tree->insert(particlePosition, 0, idxPart, 0.0);//ct 0 pour source
 	}
     }
     counter.tac();

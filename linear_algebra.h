@@ -4,8 +4,8 @@ It encapsulates the calls to GMM , the assemblage and projection of the matrix f
 two templates projection and assemblage template class parameter is either Facette::Fac or Tetra::Tet 
 */
 
-#include "gmm/gmm_kernel.h"  // ct gmm_kernel.h plutôt que gmm.h , qui appelle des fichiers de getfem
-#include "gmm/gmm_precond_diagonal.h" //ct
+#include "gmm_kernel.h"  // ct gmm_kernel.h plutôt que gmm.h , qui appelle des fichiers de getfem
+#include "gmm_precond_diagonal.h" //ct
 
 #include "fem.h"
 

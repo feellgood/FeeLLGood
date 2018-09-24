@@ -6,7 +6,7 @@
   header containing Tet class, some constants, and integrales
  */
 
-#include "gmm/gmm_kernel.h" // pour dense_matrix dans namespace Tetra
+#include "gmm_kernel.h" // pour dense_matrix dans namespace Tetra
 
 //#include "feellgoodSettings.h"
 
