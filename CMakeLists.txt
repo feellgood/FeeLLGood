@@ -19,11 +19,11 @@ MESSAGE(STATUS "CXX ${CMAKE_CXX_COMPILER_ID}")
 # Path
 #===========================================================================
 
-SET(ANN_INCLUDE_DIR /home/nanospin/Documents/ann_1.1.2/include/ANN)
+SET(ANN_INCLUDE_DIR ../ann_1.1.2/include/ANN)
 
-SET(GMM_INCLUDE_DIR /home/nanospin/Documents/gmm-5.2/include/gmm)
+SET(GMM_INCLUDE_DIR ../gmm-5.2/include/gmm)
 
-SET(SCALFMM_INCLUDE_DIR /home/nanospin/Documents/ScalFMM_1.5/Src)
+SET(SCALFMM_INCLUDE_DIR ../ScalFMM_1.5/Src)
 
 INCLUDE_DIRECTORIES(${ANN_INCLUDE_DIR} ${GMM_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR})
 
@@ -46,7 +46,6 @@ MESSAGE(STATUS "executable built with SHA1=${SHAstr}")
 
 
 set(VERBOSE_MODE true)
-set(DATA_IN "\"myMesh/\"")
 
 
 #===========================================================================
@@ -74,10 +73,10 @@ configure_file(config.h.in ./config.h)
 ADD_EXECUTABLE(feellgood_exe ${SOURCES} ${HEADERS})
 SET( SCALFMM "libscalfmm.a")
 
-#SET(ANN_LINK_DIR /home/nanospin/Documents/ann_1.1.2/lib)
-SET( ANN "/home/nanospin/Documents/ann_1.1.2/lib/libANN.a")
+#SET(ANN_LINK_DIR ../ann_1.1.2/lib)
+SET( ANN "../ann_1.1.2/lib/libANN.a")
 
-#LINK_DIRECTORIES(${ANN_LINK_DIR}) init_distrib = quoi ça ???
+#LINK_DIRECTORIES(${ANN_LINK_DIR}) init_distrib =
 
 TARGET_LINK_LIBRARIES(feellgood_exe ${SCALFMM} ${ANN})
 
