@@ -66,7 +66,8 @@ class Settings{
 	/** this vector contains the material parameters for all regions for all the tetrahedrons */
 	std::vector<Tetra::prm> paramTetra;
 
-	inline int findTetraRegionIdx(int r) 
+	/** \return index of the region in volume region container  */
+	inline int findTetraRegionIdx(int r /**< [in] */) 
 	{ 
 	std::vector<Tetra::prm>::iterator result = std::find_if(paramTetra.begin(),paramTetra.end(),[r](Tetra::prm const& p){return(p.reg == r); }  ); 
 	if (result == paramTetra.end()) return -1;
@@ -76,9 +77,11 @@ class Settings{
 	/** this vector contains the material parameters for all regions for all the facettes */
 	std::vector<Facette::prm> paramFacette;
 
+	/** relative path for output files (to be implemented) */
 	std::string r_path_output_dir;
 	
-	inline int findFacetteRegionIdx(int r) 
+	/** \return index of the region in surface region container  */
+	inline int findFacetteRegionIdx(int r /**< [in] */) 
 	{ 
 	std::vector<Facette::prm>::iterator result = std::find_if(paramFacette.begin(),paramFacette.end(),[r](Facette::prm const& p){return(p.reg == r); }  ); 
 	if (result == paramFacette.end()) return -1;

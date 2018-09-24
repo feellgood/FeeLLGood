@@ -127,6 +127,7 @@ class Tet{
 		double dady[N][NPI];/**< variations of hat function along y directions */
 		double dadz[N][NPI];/**< variations of hat function along z directions */
 	
+		/** basic region infos */		
 		inline void infos(){std::cout<< reg << ":" << idxPrm <<std::endl;};
 		/**
 		computes matrix u = unod*a; with unod = {node[ind].u0}_N and a from tetrahedron directly from vector<node>, without any copy		
