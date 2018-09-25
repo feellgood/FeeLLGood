@@ -18,15 +18,19 @@ MESSAGE(STATUS "CXX ${CMAKE_CXX_COMPILER_ID}")
 # Path
 #===========================================================================
 
-SET(ANN_INCLUDE_DIR ../ann_1.1.2/include/ANN)
+SET(ANN_INCLUDE_DIR ../ann_1.1.2/include/ANN )
 
-SET(GMM_INCLUDE_DIR ../gmm-5.2/include/gmm)
+SET(ANN_LIB_DIR ../ann_1.1.2/lib )
 
-SET(SCALFMM_INCLUDE_DIR ../SCALFMM-1.4-148/Src)
+SET(GMM_INCLUDE_DIR ../gmm-5.2/include/gmm )
 
-SET(SCALFMM_CFG /usr/local/include/Utils)
+SET(SCALFMM_INCLUDE_DIR ../SCALFMM-1.4-148/Src )
+
+SET(SCALFMM_CFG /usr/local/include/Utils )
 
 INCLUDE_DIRECTORIES(${ANN_INCLUDE_DIR} ${GMM_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR} ${SCALFMM_CFG})
+
+LINK_DIRECTORIES(${ANN_LIB_DIR})
 
 #===========================================================================
 # these parameters are used to build a config.h file 
@@ -50,7 +54,7 @@ set(VERBOSE_MODE true)
 #===========================================================================
 # Compiler options
 #===========================================================================
-# we should use AVX instead of SSE4.2, with option -mavx
+# we could use AVX when possible instead of SSE4.2, with option -mavx
 # also -mtune=native and -march=native
 
 set( CMAKE_CXX_FLAGS "-DORD2 -DNDEBUG -DNSTAT -Wall -Wextra -std=c++11 -O3 -fopenmp -ffast-math -msse4.2 -mfpmath=sse" CACHE STRING "C++ compiler flags used during default builds." FORCE )
@@ -70,12 +74,8 @@ SET( HEADERS ${ANN_INCLUDE_DIR}/ANN.h ${GMM_INCLUDE_DIR}/gmm.h ${SCALFMM_INCLUDE
 configure_file(config.h.in ./config.h)
 
 ADD_EXECUTABLE(feellgood ${SOURCES} ${HEADERS})
-SET( SCALFMM "libscalfmm.a")
 
-SET( ANN "/home/christophe/Documents/ann_1.1.2/lib/libANN.a")
+TARGET_LINK_LIBRARIES(feellgood scalfmm ANN)
 
-TARGET_LINK_LIBRARIES(feellgood ${SCALFMM} ${ANN})
-
-install(TARGETS feellgood
-	RUNTIME DESTINATION /usr/local/bin )
+install(TARGETS feellgood RUNTIME DESTINATION /usr/local/bin )
 
