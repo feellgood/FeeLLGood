@@ -49,7 +49,7 @@ map <pair<string,int>,double> &param = settings.param;
 
 // decomposition des tetraedres en elements de surface
 set<Facette::Fac, Facette::less_than> sf;
-IF_VERBOSE() cout << "Nb de Tet " << TET << endl;
+if(VERBOSE) { cout << "Nb de Tet " << TET << endl; }
 
 std::for_each(tet.begin(),tet.end(),
 [&sf](Tetra::Tet const& te) //subtil, le capture oblige à passer une ref du set sf
@@ -68,7 +68,7 @@ int done = 0;
 for (int i_f=0; i_f<FAC; i_f++){
     int progress = 100*double(i_f)/FAC;
     if (progress>done && !(progress%5)) {
-        IF_VERBOSE() cout << progress << "--"; fflush(NULL);
+        if(VERBOSE) { cout << progress << "--"; fflush(NULL); }
         done = progress;
     }
 
@@ -109,7 +109,7 @@ for (int i_f=0; i_f<FAC; i_f++){
     int tmp=i1; i1=i2; i2=tmp;
     }//fin perm
 }
-IF_VERBOSE() cout << "100" << endl;
+if(VERBOSE) { cout << "100" << endl; }
 }
 
 void Fem::femutil(Settings &settings)

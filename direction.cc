@@ -21,7 +21,7 @@ int ns=nnIdx[0];
 //IF_VERBOSE() cerr << "ns : " << ns << endl;
 
 double u2L= node[ns].u.z();
-IF_VERBOSE() cout << "z : " << queryPt[2] << " u2 : "<< u2L << endl;
+if(VERBOSE) { cout << "z : " << queryPt[2] << " u2 : "<< u2L << endl; }
 
 /* bord droit */
 queryPt[0]=c.x();
@@ -31,14 +31,11 @@ queryPt[2]=c.z()+l.z()/2.;
 kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 ns=nnIdx[0];
 double u2R= node[ns].u.z();
-IF_VERBOSE() cout << "z : " << queryPt[2] << " u2 : "<< u2R << endl;
+if(VERBOSE) { cout << "z : " << queryPt[2] << " u2 : "<< u2R << endl; }
 
-if (u2L*u2R>0.){
-   IF_VERBOSE() cout << "Warning apparently no DW!" << endl;
-   }
+if ((u2L*u2R>0.)&&VERBOSE){ cout << "Warning apparently no DW!" << endl; }
 
 DW_dir=(u2L>0? 1.: -1.); /* sens de deplacement de la paroi +Oz ou -Oz */
-IF_VERBOSE(){cout << "DW dir   : " << DW_dir << endl;//cerr << "fin direction " << endl;
-	}
+if(VERBOSE) {cout << "DW dir   : " << DW_dir << endl; }
 }
 

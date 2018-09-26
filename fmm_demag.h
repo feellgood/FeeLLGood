@@ -15,22 +15,11 @@ this header is the interface to scalfmm. Its purpose is to prepare an octree for
 
 #include "Core/FFmmAlgorithmThreadTsm.hpp"
 
-/*
-#include "Kernels/Spherical/FSphericalKernel.hpp"
-#include "Kernels/Spherical/FSphericalCell.hpp"
-*/
 
 #include "Kernels/P2P/FP2PParticleContainerIndexed.hpp"
-
 #include "Kernels/Rotation/FRotationKernel.hpp"
 #include "Kernels/Rotation/FRotationCell.hpp"
 
-/*
-#include "Kernels/Chebyshev/FChebCell.hpp"
-#include "Kernels/Chebyshev/FChebMatrixKernel.hpp"
-#include "Kernels/Chebyshev/FChebKernel.hpp"
-#include "Kernels/Chebyshev/FChebSymKernel.hpp"
-*/
 
 #ifndef FMM_DEMAG_H
 #define FMM_DEMAG_H
@@ -39,6 +28,9 @@ static const int P = 9;/**< constant parameter for some scalfmm templates */
 
 /** double redefinition for the parametrization of some scalfmm templates */
 #define FReal double
+
+#define typeSource 0
+#define typeTarget 1
 
 
 // pb avec ces templates : ils prennent un argument de plus en 1.5.0 //ct
@@ -57,7 +49,7 @@ typedef FRotationKernel< FReal, CellClass, ContainerClass, P >          KernelCl
 typedef FFmmAlgorithmThreadTsm<OctreeClass, CellClass, ContainerClass, KernelClass, LeafClass > FmmClass;/**< convenient typedef for handling altogether the differents scalfmm object templates used in feellgood  */
 
 
-#ifndef IF_VERBOSE  // same goes for SYSTEM_ERROR
+#ifndef VERBOSE  // same goes for SYSTEM_ERROR
 #error "fem.h" must be #included before "fmm_demag.h"
 #endif
 
@@ -73,15 +65,13 @@ initialization function for the building of an octree and a kernel passed to sca
 */
 int init(Fem &fem, OctreeClass* &tree, KernelClass* &kernels, Args... kernelPreArgs)
 {
-//boost::timer time; // pas utilisé. *ct*
-
     FTic counter;
     const int NbLevels = 8; 
     const int SizeSubLevels = 6;
     const unsigned int NbThreads  =  omp_get_max_threads(); // open mp function
 
     omp_set_num_threads(NbThreads);
-    IF_VERBOSE() std::cout << "\n>> Using " << omp_get_max_threads() << " threads.\n" << std::endl;
+    if(VERBOSE) { std::cout << "\n>> Using " << NbThreads << " threads.\n" << std::endl; }
 
     const double boxWidth=2.01;//2.01 ct
 
@@ -100,7 +90,7 @@ const int NOD = fem.NOD;
 const int FAC = fem.FAC;
 const int TET = fem.TET;
 
-    IF_VERBOSE(){
+    if(VERBOSE){
     std::cout << "Creating & Inserting particles ..." << std::endl;
     std::cout << "\tHeight : " << NbLevels << " \t sub-height : " << SizeSubLevels << std::endl;
     }
@@ -113,7 +103,7 @@ for (int i=0; i<NOD; i++, idxPart++){       // cibles (noeuds)
     double zTarget = (fem.node[i].p.z()-fem.c.z()) * norm;
     const FPoint<FReal> particlePosition(xTarget, yTarget, zTarget);// manque le typename du template FPoint ct
     //tree->insert(particlePosition, FParticleType::FParticleTypeTarget, idxPart, 0.0);//ct
-	tree->insert(particlePosition, 1, idxPart, 0.0);//ct 1 pour target
+	tree->insert(particlePosition, typeTarget, idxPart, 0.0);//ct 1 pour target
     }
 
     std::cout << "Physical nodes inserted." << std::endl;
@@ -135,7 +125,7 @@ for (int t=0; t<TET; t++){       // sources de volume
 		double zSource = (gauss[2][j]-fem.c.z()) * norm;
         const FPoint<FReal> particlePosition(xSource, ySource, zSource);// manque le typename du template FPoint ct
         //tree->insert(particlePosition, FParticleType::FParticleTypeSource, idxPart, 0.0);//ct
-	tree->insert(particlePosition, 0, idxPart, 0.0);//ct 0 pour source
+	tree->insert(particlePosition, typeSource, idxPart, 0.0);//ct 0 pour source
 	}
     }
 
@@ -156,14 +146,12 @@ for (int f=0; f<FAC; f++){        // sources de surface
 		double zSource = (gauss[2][j]-fem.c.z()) * norm;
         const FPoint<FReal> particlePosition(xSource, ySource, zSource);// manque le typename du template FPoint ct
         //tree->insert(particlePosition, FParticleType::FParticleTypeSource, idxPart, 0.0);//ct
-	tree->insert(particlePosition, 0, idxPart, 0.0);//ct 0 pour source
+	tree->insert(particlePosition, typeSource, idxPart, 0.0);//ct 0 pour source
 	}
     }
     counter.tac();
-    IF_VERBOSE(){
-    std::cout << "Done  " << "(@Creating and Inserting Particles = " << counter.elapsed() << "s)." << std::endl;
-
-    std::cout << "Create kernel ..." << std::endl;
+    if(VERBOSE){
+    std::cout << "Done  " << "(@Creating and Inserting Particles = " << counter.elapsed() << "s).\nCreate kernel ..." << std::endl;
     }
     counter.tic();
 
@@ -171,7 +159,7 @@ for (int f=0; f<FAC; f++){        // sources de surface
     if (!kernels) SYSTEM_ERROR;
 
     counter.tac();
-    IF_VERBOSE() std::cout << "Done  " << " in " << counter.elapsed() << "s)." << std::endl;
+    if(VERBOSE) { std::cout << "Done  " << " in " << counter.elapsed() << "s)." << std::endl; }
 
 return 0;
 }
@@ -194,7 +182,7 @@ FmmClass algo(tree, kernels);
 
 const bool analytic_corr = true;
 
-IF_VERBOSE() std::cout << "\t magnetostatics ..................... ";
+if(VERBOSE) { std::cout << "\t magnetostatics ..................... "; }
 
 const int NOD = fem.NOD;
 const int FAC = fem.FAC;
@@ -337,7 +325,7 @@ fflush(NULL);
 counter.tic();
 algo.execute();
  counter.tac();
-IF_VERBOSE() std::cout << "Done  " << "(@Algorithm = " << counter.elapsed() << "s)." << std::endl;
+if(VERBOSE) { std::cout << "Done  " << "(@Algorithm = " << counter.elapsed() << "s)." << std::endl; }
 
 double norm = fem.fmm_normalizer;
 

@@ -252,7 +252,7 @@ fem.stat.R = R;
        }
 #endif
 
-    triple Ht; // derivee de Hr : y a t'il une erreur ? on dirait que ce devrait etre Kbis*uk{0|1|2}_v et pas Kbis*ok0_v
+    triple Ht; //inutilisé!!  derivee de Hr : y a t'il une erreur ? on dirait que ce devrait etre Kbis*uk{0|1|2}_v et pas Kbis*ok0_v
     Ht[0]= Hvx[npi] + (Kbis* uk0_v - K3bis* uk0_v*(1-3*uk0_u*uk0_u) )*uk00;   
     Ht[1]= Hvy[npi] + (Kbis* uk0_v - K3bis* uk1_v*(1-3*uk1_u*uk1_u) )*uk01;   
     Ht[2]= Hvz[npi] + (Kbis* uk0_v - K3bis* uk2_v*(1-3*uk2_u*uk2_u) )*uk02;  
@@ -280,7 +280,7 @@ fem.stat.R = R;
 	BE[2*N+i]+= -Uz*(u[0][npi]*dudz[1][npi]-u[1][npi]*dudz[0][npi]+beta*dudz[2][npi]) *ai_w;
 
 
-#ifdef ORD2
+#ifdef ORD2IF_VERBOSE()
         BE[    i]+= Ht[0] *ai_w*s_dt; // ordre 2 en temps
         BE[  N+i]+= Ht[1] *ai_w*s_dt;
         BE[2*N+i]+= Ht[2] *ai_w*s_dt;
@@ -335,7 +335,7 @@ double i_vol  = 1./6.* pScal(vec,p3-p0);
    if (i_vol<0.) {
       ind[3]=i2; ind[2]=i3;
       i_vol=-i_vol;
-      IF_VERBOSE() std::cout << "ill-oriented tetrahedron, now corrected!"<< std::endl;
+      if(VERBOSE) { std::cout << "ill-oriented tetrahedron, now corrected!"<< std::endl; }
       }
 vol = i_vol;
 }

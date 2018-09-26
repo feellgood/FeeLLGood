@@ -33,7 +33,7 @@ if (filename){
 
 ifstream fin(str, std::ifstream::in); //  *ct*
 if (!fin){
-    IF_VERBOSE() cerr << "pb ouverture fichier: " << str << "en lecture" << endl;
+    if(VERBOSE) { cerr << "pb ouverture fichier: " << str << "en lecture" << endl; }
     SYSTEM_ERROR;}
 
 getline(fin, str); // 1eme ligne
@@ -43,9 +43,7 @@ idx +=2;
 
 t = stod(str.substr(idx));
 
-IF_VERBOSE() cout << "fichier solution: " << str << " a l'instant t = " << t << endl;
-
-//const int NOD = fem.NOD;
+if(VERBOSE) { cout << "fichier solution: " << str << " a l'instant t = " << t << endl; }
 
 for (int i=0; i<NOD; i++){
     Node &n = node[i];
@@ -61,7 +59,7 @@ node_.p *= scaling;
 
     if (d2 > sq(diam * 1e-9)) // attention scaling écrit en dur ... 
 	{
-        IF_VERBOSE(){
+        if(VERBOSE){
         cerr << "WARNING difference dans la position des noeuds"<< endl;
         cerr << i  << "\t" << n.p << endl << i_ << "\t" << node_.p << endl;
         }
@@ -69,7 +67,7 @@ node_.p *= scaling;
         }
     
     if (i!=i_){
-        IF_VERBOSE() cerr << "fichier solution incompatibilite de noeuds"<< endl;
+        if(VERBOSE) { cerr << "fichier solution incompatibilite de noeuds"<< endl; }
         SYSTEM_ERROR;
         }
     }

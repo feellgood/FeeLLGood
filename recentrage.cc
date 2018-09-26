@@ -14,7 +14,7 @@ time(&timeStart);
 thres=min(abs(thres), 1.);
 if (fabs(mz)<thres) return false;
 
-IF_VERBOSE() cout << "%5t centering %30T." << flush;// cout << boost::format("%5t centering %30T.") <<flush;// *ct*
+if(VERBOSE) {cout << "%5t centering %30T." << flush;}// cout << boost::format("%5t centering %30T.") <<flush;// *ct*
 
 const int NPS=1;
 int ns;
@@ -98,6 +98,6 @@ delete [] dists;
 
 time_t timeEnd;
 time(&timeEnd);
-IF_VERBOSE() cout << "elapsed time = "<< difftime(timeEnd,timeStart) << "s" <<endl;
+if(VERBOSE) { cout << "elapsed time = "<< difftime(timeEnd,timeStart) << "s" <<endl; }
 return true;
 }

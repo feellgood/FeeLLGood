@@ -12,11 +12,11 @@ else{
  //<< boost::format("_%d_B%6f_iter%d.vtk") % fem.SEQ % fem.Bext % nt;
     }
 
-IF_VERBOSE() { cout <<"\n -------------------" << endl << " " << str << endl; }
+if(VERBOSE) { cout <<"\n -------------------" << endl << " " << str << endl; }
 
 ofstream fout(str, ios::out);
 if (!fout){
-    IF_VERBOSE() cerr << "pb ouverture fichier : " << str << "en ecriture" << endl;
+    if(VERBOSE) cerr << "pb ouverture fichier : " << str << "en ecriture" << endl;
     SYSTEM_ERROR;}
 
 str = baseName + " time : " + to_string(t);  
