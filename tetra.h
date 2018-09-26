@@ -57,8 +57,8 @@ struct prm
 	{
 	int reg;/**< region number */	
 	double alpha;/**< \f$ \alpha \f$ damping parameter */
-	double A;/**< constant */
-	double J;/**< exchange */
+	double A;/**< exchange constant stiffness */
+	double J;/**< \f$ M_s = \nu_0 J \f$ */
 	double K;/**< uniaxial anisotropy constant */	
 	double K3;/**< third order uniaxial anisotropy constant */	
 	double uk[DIM][DIM]; /**< anisotropy tensor 3*3 */	

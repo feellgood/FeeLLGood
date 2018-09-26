@@ -44,15 +44,15 @@ c = Pt::pt3D(0.5*(xmax+xmin),0.5*(ymax+ymin),0.5*(zmax+zmin));
 
 void Fem::femutil_facMs(Settings &settings /**< [in] */)
 {
-pair <string,int> p;
-map <pair<string,int>,double> &param = settings.param;
+//pair <string,int> p;
+//map <pair<string,int>,double> &param = settings.param;
 
 // decomposition des tetraedres en elements de surface
 set<Facette::Fac, Facette::less_than> sf;
 if(VERBOSE) { cout << "Nb de Tet " << TET << endl; }
 
 std::for_each(tet.begin(),tet.end(),
-[&sf](Tetra::Tet const& te) //subtil, le capture oblige à passer une ref du set sf
+[&sf](Tetra::Tet const& te) //le capture oblige à passer une ref du set sf
 	{
 	int ia,ib,ic,id;
     	ia=te.ind[0];  ib=te.ind[1];  ic=te.ind[2];  id=te.ind[3];
@@ -65,43 +65,50 @@ std::for_each(tet.begin(),tet.end(),
 
 // calcul des normales aux faces
 int done = 0;
-for (int i_f=0; i_f<FAC; i_f++){
+for (int i_f=0; i_f<FAC; i_f++)
+    {
     int progress = 100*double(i_f)/FAC;
-    if (progress>done && !(progress%5)) {
+    if (progress>done && !(progress%5))
+        {
         if(VERBOSE) { cout << progress << "--"; fflush(NULL); }
         done = progress;
-    }
+        }
 
     Facette::Fac &fa = fac[i_f];
     fa.Ms = 0.;
-    p = make_pair("Js", fa.reg);
-    double Js = param[p];
+    //p = make_pair("Js", fa.reg);
+    //double Js = param[p];
+    double Js = settings.paramFacette[fa.idxPrm].Js;
     if (Js<0.) continue;  // elimination des facettes a Js<0
 
     int i0 = fa.ind[0],  i1 = fa.ind[1],  i2 = fa.ind[2];
 
     set< Facette::Fac, Facette::less_than >::iterator it=sf.end();
-    for (int perm=0; perm<2; perm++) {
-        for (int nrot=0; nrot<3; nrot++) {
+    for (int perm=0; perm<2; perm++) 
+        {
+        for (int nrot=0; nrot<3; nrot++)
+            {
             Facette::Fac fc;
 
             fc.ind[(0+nrot)%3]=i0; fc.ind[(1+nrot)%3]=i1; fc.ind[(2+nrot)%3]=i2;
             it=sf.find(fc);
             if (it!=sf.end()) break;
-        }
+            }
       
-        if (it!=sf.end()) { // found
-           int i0 = it->ind[0];
-	   int i1 = it->ind[1];
-	   int i2 = it->ind[2];
+        if (it!=sf.end()) 
+            { // found
+            int i0 = it->ind[0];
+            int i1 = it->ind[1];
+            int i2 = it->ind[2];
 
-	   Pt::pt3D p0 = node[i0].p; 
-	   Pt::pt3D p1 = node[i1].p;
-	   Pt::pt3D p2 = node[i2].p;
-           Pt::pt3D n = (p1-p0)*(p2-p0);
+            Pt::pt3D p0 = node[i0].p; 
+            Pt::pt3D p1 = node[i1].p;
+            Pt::pt3D p2 = node[i2].p;
+            Pt::pt3D n = (p1-p0)*(p2-p0);
 	
-	   p = make_pair("Js", it->reg);
-           double Ms = nu0*param[p];
+            //p = make_pair("Js", it->reg);
+            //double Ms = nu0*param[p];
+            double Ms = settings.paramFacette[it->idxPrm].Js;
 //           cout << "Ms : " << Ms << " " << fac.Ms << endl;
         if (Pt::pScal(n,fa.n) > 0) { fa.Ms += Ms; }  // la face trouvee a la meme orientation que la face traitee
         else { fa.Ms -= Ms; }  // la face trouvee a une orientation opposee

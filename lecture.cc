@@ -11,7 +11,6 @@ void Fem::lecture(Settings &mySets, double scale)//, Regions *regions)  // regio
 int ELEM, tags, reg, TYP;
 double value;
 string trash, symb;
-pair <string,int> p;
 
 string str = mySets.getPbName();
 ifstream msh(str);   // ouverture du fichier probleme en lecture
@@ -23,7 +22,11 @@ while(msh >> symb){
     if (symb == "$Scale"){
         /* scale == 0.0 is a sentinel to mean read from the file; floating point
          * comparison is reliable in this case */
-        if (scale == 0.0) msh >> scale;      // lecture de l'echelle
+        if (scale == 0.0) 
+            {
+            msh >> scale;      // lecture de l'echelle
+            mySets.setScale( scale );
+            }
         else msh >> trash;
         continue;
         }
@@ -48,10 +51,8 @@ if (scale == 0.0){
     exit(1);
 #endif
     }
-mySets.setScale( scale );
 
 msh >> NOD;        // lecture des noeuds
-
 node.resize(NOD);
 for (int i=0; i<NOD; i++){
     msh >> trash >> node[i].p;
@@ -144,9 +145,9 @@ while(msh >> symb){  // lecture des parametres
     if (msh.eof())  // be lenient
         break;
     msh >> reg >> value;
-//cout << symb << '\t' << reg << '\t' << value << endl;
-    p = make_pair(symb,reg);
-    mySets.param[p] = value;
+    if(VERBOSE) {cout <<"from msh: " << symb << '\t' << reg << '\t' << value << endl;}
+    //p = make_pair(symb,reg);
+    //mySets.param[p] = value;
     if (msh.fail()){
     #ifdef LIBRARY
         throw runtime_error("error while reading parameters");

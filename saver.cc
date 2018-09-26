@@ -4,10 +4,8 @@ using namespace std;
 
 void Fem::saver(Settings &settings, ofstream &fout, int nt)
 {
-pair <string,int> p;
-p=make_pair("save_energies",-1);   int n1 = int(settings.param[p]);
-p=make_pair("take_photo",-1);      int n2 = int(settings.param[p]);
-
+int n1 = settings.n1;
+int n2 = settings.n2;
 
 if ((nt%n1)==0) {
    // fout << boost::format("%8d %+20.10e %+20.10e %+20.10e") % nt % t % dt % dumax;

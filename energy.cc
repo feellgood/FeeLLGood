@@ -4,7 +4,7 @@ using namespace std;
 
 void Fem::energy(Settings &settings)
 {
-pair <string,int> p;
+//pair <string,int> p;
 //map <pair<string,int>,double> &param = settings.param;
 
 Etot = 0.0;
@@ -16,22 +16,40 @@ double uz_drift=2.*DW_z/l.z()*DW_dir;
 for (int i_t=0; i_t<TET; i_t++) {
 	
     Tetra::Tet &te = tet[i_t];
-    const int reg = te.reg;
-    p = make_pair("Ae", reg);   double Ae = settings.param[p];
-    p = make_pair("Js", reg);   double Js = settings.param[p];  double Ms = nu0 * settings.param[p];
+    
+    Tetra::prm & param = settings.paramTetra[te.idxPrm];
+    
+    //const int reg = te.reg;
+    //p = make_pair("Ae", reg);
+    double Ae = param.A; //settings.param[p];
+    
+    //p = make_pair("Js", reg);
+    double Js = param.J;//.param[p];
+    double Ms = nu0 * Js;
 
-    p=make_pair("Ka",reg);      double K = settings.param[p];		//cout << ", Ka=" << K;
-    p=make_pair("Ka3",reg);     double K3 = settings.param[p];   	//cout << ", Ka3=" << K3;
+    //p=make_pair("Ka",reg);
+    double K = param.K;//.param[p];		//cout << ", Ka=" << K;
+    //p=make_pair("Ka3",reg);
+    double K3 = param.K3;//.param[p];   	//cout << ", Ka3=" << K3;
 
-    p=make_pair("a1",reg);      double uk00 = settings.param[p];  	//cout << ", a1=" << k0;
-    p=make_pair("a2",reg);      double uk01 = settings.param[p];  	//cout << ", a2=" << k1;
-    p=make_pair("a3",reg);      double uk02 = settings.param[p];  	//cout << ", a3=" << k2;
-    p=make_pair("b1",reg);      double uk10 = settings.param[p];  	//cout << ", a1=" << k0;
-    p=make_pair("b2",reg);      double uk11 = settings.param[p];  	//cout << ", a2=" << k1;
-    p=make_pair("b3",reg);      double uk12 = settings.param[p];  	//cout << ", a3=" << k2;
-    p=make_pair("c1",reg);      double uk20 = settings.param[p];  	//cout << ", a1=" << k0;
-    p=make_pair("c2",reg);      double uk21 = settings.param[p];  	//cout << ", a2=" << k1;
-    p=make_pair("c3",reg);      double uk22 = settings.param[p];  	//cout << ", a3=" << k2;	
+    //p=make_pair("a1",reg);      
+    double uk00 = param.uk[0][0];//settings.param[p];  	//cout << ", a1=" << k0;
+    //p=make_pair("a2",reg);      
+    double uk01 = param.uk[0][1];  	//cout << ", a2=" << k1;
+    //p=make_pair("a3",reg);      
+    double uk02 = param.uk[0][2];  	//cout << ", a3=" << k2;
+    //p=make_pair("b1",reg);      
+    double uk10 = param.uk[1][0];  	//cout << ", a1=" << k0;
+    //p=make_pair("b2",reg);      
+    double uk11 = param.uk[1][1];  	//cout << ", a2=" << k1;
+    //p=make_pair("b3",reg);      
+    double uk12 = param.uk[1][2];  	//cout << ", a3=" << k2;
+    //p=make_pair("c1",reg);      
+    double uk20 = param.uk[2][0];  	//cout << ", a1=" << k0;
+    //p=make_pair("c2",reg);      
+    double uk21 = param.uk[2][1];  	//cout << ", a2=" << k1;
+    //p=make_pair("c3",reg);      
+    double uk22 = param.uk[2][2];  	//cout << ", a3=" << k2;	
     //p = make_pair("alpha", reg);double alpha = fem.param[p];    
    
    /*-------------------- INTERPOLATION --------------------*/
@@ -103,14 +121,22 @@ for (int i_t=0; i_t<TET; i_t++) {
 	
 for (int i_t=0; i_t<FAC; i_t++) {
 	Facette::Fac &fa = fac[i_t];
-const int reg = fa.reg;
+    //const int reg = fa.reg;
     double Ms = fa.Ms;
     Pt::pt3D n = fa.n;
 
-	p=make_pair("Ks",reg);      double K = settings.param[p];	//cout << ", Ks=" << K;
-	p=make_pair("a1",reg);      double uk00 = settings.param[p];  	//cout << ", a1=" << k0;
-	p=make_pair("a2",reg);      double uk01 = settings.param[p];  	//cout << ", a2=" << k1;
-	p=make_pair("a3",reg);      double uk02 = settings.param[p];  	//cout << ", a3=" << k2;    
+    Facette::prm & param = settings.paramFacette[fa.idxPrm];
+    //p=make_pair("Ks",reg);      
+    double K = param.Ks; //settings.param[p];	//cout << ", Ks=" << K;
+	
+    //p=make_pair("a1",reg);      
+    double uk00 = param.uk[0]; //settings.param[p];
+	
+    //p=make_pair("a2",reg);      
+    double uk01 = param.uk[1]; //settings.param[p];
+	
+    //p=make_pair("a3",reg);      
+    double uk02 = param.uk[2]; //settings.param[p];    
 		
 	/*-------------------- INTERPOLATION --------------------*/
 	double u_nod[3][Facette::N], u[3][Facette::NPI];

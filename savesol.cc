@@ -22,13 +22,10 @@ fout << "#time : " << t <<endl;
 
 for (int i=0; i<NOD; i++){
     Node &n = node[i];
-    double x   = n.p.x() / s;
-    double y   = n.p.y() / s;
-    double z   = n.p.z() / s;
- 
-//   fout << boost::format("%8d %+20.10f %+20.10f %+20.10f %+20.10f %+20.10f %+20.10f %+20.10e") 
+    Pt::pt3D p = n.p/s;
+    //   fout << boost::format("%8d %+20.10f %+20.10f %+20.10f %+20.10f %+20.10f %+20.10f %+20.10e") 
 //                   % i % x % y % z % u1 % u2 % u3 % phi << endl;}
-	fout << i << "\t" << x << "\t" << y << "\t" << z << "\t" << n.u << "\t" << n.phi << endl; //carefull! << overloaded
+	fout << i << "\t" << p << "\t" << n.u << "\t" << n.phi << endl; //carefull! << overloaded
 	}
 
 fout.close();

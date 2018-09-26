@@ -18,7 +18,7 @@ void Settings::helloDialog()
 {
 cout << "\n\t ******************************\n";
 cout <<   "\t *         feeLLGood          *\n";
-cout <<   "\t *        version 2017        *\n";
+cout <<   "\t *        version 2018        *\n";
 cout <<   "\t *      cnrs Grenoble-INP     *\n";
 cout <<   "\t ******************************\n";
 cout << "\t process\t\t" << getpid() << endl;
@@ -29,12 +29,10 @@ void Settings::printToTerminal(std::vector<Seq> &seq)
 cout << "\t name simul : "<< simName << endl;
 cout << "\t name mesh file : " << pbName << endl;
 cout << "\t temps final\t\t" << tf << endl;
-cout << "\t pas de temps init\t" << dt << endl;
-cout << endl;
+cout << "\t pas de temps init\t" << dt << endl << endl;
 cout << "\t sauve energies chaque " << n1 << " iterations" << endl;
 cout << "\t photo config chaque " << n2 << " iterations" << endl;
-cout << "\t restauration a partir d'un fichier sol.in: " << restore << endl;
-cout << endl;
+cout << "\t restauration a partir d'un fichier sol.in: " << restore << endl <<endl;
 cout << "\t sequences de champ applique Bext" << endl;
 for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
     cout << it->Bini << "\t" << it->Bfin << "\t" << it->dB << "\t" << it->a[0] << "\t" << it->a[1] << "\t" << it->a[2] << endl;
@@ -68,9 +66,6 @@ while (1)
 void Settings::dialog(std::vector<Seq> &seq)
 {
 int SEQ;
-double theta; // removed unused variable tf  *ct*
-pair <string,int>  p;
-
 
 cout << "\t name simul ? "<<endl;
 extract_comment(cin);   cin >> simName;
@@ -87,21 +82,11 @@ if (!fin){
 fin.close();
 
 extract_comment(cin);              cin >> tf;
-      
 extract_comment(cin);              cin >> dt;
-
 extract_comment(cin);              cin >> theta;
-p=make_pair("theta",-1);           param[p]=theta;  
-
 extract_comment(cin);              cin >> n1;
-p=make_pair("save_energies",-1);   param[p] = n1;
-
 extract_comment(cin);              cin >> n2;
-p=make_pair("take_photo",-1);      param[p] = n2;
-
 extract_comment(cin);              cin >> restore;
-p=make_pair("restore",-1);         param[p]=restore;
-
 extract_comment(cin);              cin >> SEQ;
 
 for (int nseq=0; nseq<SEQ; nseq++)
@@ -113,7 +98,7 @@ for (int nseq=0; nseq<SEQ; nseq++)
     seq.push_back(s);
     }
 
-cout << "\t theta\t\t\t" << theta << endl;
+if(VERBOSE) {cout << "\t theta\t\t\t" << theta << endl;}
 printToTerminal(seq);
 }
 

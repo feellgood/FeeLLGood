@@ -55,7 +55,6 @@ class Settings{
 	double tf;/**< end time of the simulation */
 	double dt;/**< step time of the simulation */
 
-	std::map < std::pair<std::string,int>,double>  param;/**< map for association of parameters to keys, it stores different parameters of a simulation, such as suppression of the charges on some surfaces or not, the material parameter values as \f$ Ms \f$ or \f$ \alpha \f$ */
 	int n1;/**< energy saved every n1 iterations */
 	int n2;/**< magnetic configuration saved every n2 iterations */
 	bool restore;/**< usefull to run a simulation from a previous calculation  */
@@ -63,6 +62,7 @@ class Settings{
 	/** for time integration \f$ \theta \f$ scheme  */
 	double theta;
 	
+    /** analytical corrections to the potential, extra contribution from surface charges */
     bool analytic_corr;
     
 	/** this vector contains the material parameters for all regions for all the tetrahedrons */

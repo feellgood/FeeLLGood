@@ -206,8 +206,8 @@ int nsrc = 0;
 /*********************** TETRAS *********************/
 for (int t=0; t<TET; t++){
     Tetra::Tet &tet = fem.tet[t];
-    double Ms = nu0 * settings.param[ std::make_pair("Js",tet.reg) ];
-
+    //double Ms = nu0 * settings.param[ std::make_pair("Js",tet.reg) ];
+    double Ms = nu0 * settings.paramTetra[tet.idxPrm].J;
    /*---------------- INTERPOLATION ---------------*/
     double u_nod[3][Tetra::N];
     double dudx[3][Tetra::NPI], dudy[3][Tetra::NPI], dudz[3][Tetra::NPI];
