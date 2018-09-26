@@ -1,6 +1,5 @@
 /**
   Elementary matrix Calculation for a tetrahedron element 
-  Theta Scheme for ech
  */ 
 
 #include "config.h" //pour macro if_verbose
@@ -280,7 +279,7 @@ fem.stat.R = R;
 	BE[2*N+i]+= -Uz*(u[0][npi]*dudz[1][npi]-u[1][npi]*dudz[0][npi]+beta*dudz[2][npi]) *ai_w;
 
 
-#ifdef ORD2IF_VERBOSE()
+#ifdef ORD2
         BE[    i]+= Ht[0] *ai_w*s_dt; // ordre 2 en temps
         BE[  N+i]+= Ht[1] *ai_w*s_dt;
         BE[2*N+i]+= Ht[2] *ai_w*s_dt;

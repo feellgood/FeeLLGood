@@ -33,7 +33,7 @@ container class to store many setting parameters, such as file names, parameters
 */
 class Settings{
 	public:
-	inline Settings() { withTsv=true; withVtk = false; theta=0.5;} /**< default constructor */
+	inline Settings() { withTsv=true; withVtk = false; theta=0.5; analytic_corr = true;} /**< default constructor */
 	
 	void helloDialog();/**< kinda hello world! */
 	void printToTerminal(std::vector<Seq> &seq);/**< some prints sent to terminal  */	
@@ -63,6 +63,8 @@ class Settings{
 	/** for time integration \f$ \theta \f$ scheme  */
 	double theta;
 	
+    bool analytic_corr;
+    
 	/** this vector contains the material parameters for all regions for all the tetrahedrons */
 	std::vector<Tetra::prm> paramTetra;
 

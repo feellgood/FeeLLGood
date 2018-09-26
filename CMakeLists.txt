@@ -1,6 +1,5 @@
 PROJECT (FEELLGOOD)
 cmake_minimum_required(VERSION 2.8)
-cmake_policy(SET CMP0015 OLD)
 
 #===========================================================================
 # FEELLGOOD version number.
@@ -21,7 +20,7 @@ MESSAGE(STATUS "CXX ${CMAKE_CXX_COMPILER_ID}")
 
 SET(ANN_INCLUDE_DIR ../ann_1.1.2/include/ANN )
 
-SET(ANN_LIB_DIR ../ann_1.1.2/lib )
+#SET(ANN_LIB_DIR ../ann_1.1.2/lib )
 
 SET(GMM_INCLUDE_DIR ../gmm-5.2/include/gmm )
 
@@ -31,7 +30,7 @@ SET(SCALFMM_CFG /usr/local/include/Utils )
 
 INCLUDE_DIRECTORIES(${ANN_INCLUDE_DIR} ${GMM_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR} ${SCALFMM_CFG})
 
-LINK_DIRECTORIES(${ANN_LIB_DIR})
+#LINK_DIRECTORIES(${ANN_LIB_DIR})
 
 #===========================================================================
 # these parameters are used to build a config.h file 

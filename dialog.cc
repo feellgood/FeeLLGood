@@ -129,12 +129,12 @@ void Settings::read(std::string fileJson,std::vector<Seq> &seq)
 	pbName = root.get<string>("mesh filename");
 	tf = root.get<double>("final_time",0);
 	dt = root.get<double>("initial_time_step",0);
-	theta = root.get<double>("theta",0);
+	
 	n1 = root.get<int>("save_energies",0);
 	n2 = root.get<int>("take_photo",0);
 	restore = root.get<bool>("restore",0);
 	
-	double trucs[6];
+    double trucs[6];
 	for (boost::property_tree::ptree::value_type &s : root.get_child("field_sequence"))
 		{
 		int j=0;
@@ -255,4 +255,19 @@ for (boost::property_tree::ptree::value_type &s : sub_tree)
 			//p.infos();	
 			}
 		}		
+
+try { sub_tree = root.get_child("solver"); }
+catch (exception &e)
+    { cout << e.what() << endl; }
+
+for (boost::property_tree::ptree::value_type &s : sub_tree)
+    {		
+    if (s.first == "analytic corrections")
+        {
+        analytic_corr = s.second.get_value<bool>();
+        if(VERBOSE) {cout << "analytic corrections set to "<< analytic_corr << endl;}
+        }
+    if (s.first == "theta")
+        { theta = s.second.get_value<double>(); }
+    }
 }

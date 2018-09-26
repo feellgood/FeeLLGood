@@ -29,7 +29,15 @@ static const int P = 9;/**< constant parameter for some scalfmm templates */
 /** double redefinition for the parametrization of some scalfmm templates */
 #define FReal double
 
+
+/**
+replace enum FParticleType::FParticleTypeSource
+*/
 #define typeSource 0
+
+/**
+replace enum FParticleType::FParticleTypeTarget
+*/
 #define typeTarget 1
 
 
@@ -180,8 +188,6 @@ void demag(Fem &fem,Settings &settings, OctreeClass *tree, KernelClass *kernels,
 FTic counter;
 FmmClass algo(tree, kernels);
 
-const bool analytic_corr = true;
-
 if(VERBOSE) { std::cout << "\t magnetostatics ..................... "; }
 
 const int NOD = fem.NOD;
@@ -257,7 +263,7 @@ for (int f=0; f<FAC; f++){
         srcDen[nsrc] =  s; 
         }
 
-    if (analytic_corr) {
+    if (settings.analytic_corr) {
       /** calc coord gauss **/
       double nod[3][Facette::N], gauss[3][Facette::NPI];
       for (int i=0; i<Facette::N; i++) {
