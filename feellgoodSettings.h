@@ -65,6 +65,24 @@ class Settings{
     /** analytical corrections to the potential, extra contribution from surface charges */
     bool analytic_corr;
     
+/** \f$ \epsilon \f$ is a small value, used to modify slightly J in (tet|facette).integrales */
+    double EPSILON;
+
+/** minimum value for du step */
+    double DUMIN;	//1e-6 ; 1e-9 en dynamique
+
+/** maximum value for du step */
+    double DUMAX; // 0.1 en stat; 0.02 en dynamique
+
+/** minimum step time for time integrator */
+    double DTMIN; //1e-14;
+
+/** maximum step time for time integrator */
+    double DTMAX;//  1e-5 en stat ;  1e-7 en dynamique;
+
+/** reduced /f$ /tau_r = 100 DT_{\mathrm{max}} /f$ */
+    double TAUR;//    = 100.*DTMAX;
+    
 	/** this vector contains the material parameters for all regions for all the tetrahedrons */
 	std::vector<Tetra::prm> paramTetra;
 

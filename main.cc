@@ -49,7 +49,7 @@ for(unsigned int i=0;i<mySettings.paramTetra.size();i++) {mySettings.paramTetra[
 for(unsigned int i=0;i<mySettings.paramFacette.size();i++) {mySettings.paramFacette[i].infos();}
 
 fem.femutil(mySettings);
-fem.chapeaux();
+fem.chapeaux(mySettings.EPSILON);
 fem.affichage();
 
 fem.t=0.;
@@ -119,7 +119,7 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
             //else cout << boost::format("nt = %d,  t = %2.8g") % nt % t << endl;
 		            
 		cout << "dt = " << dt << endl << endl;
-            if (dt < DTMIN) {
+            if (dt < mySettings.DTMIN) {
                 fem.reset();
                 break;
                 }
@@ -131,13 +131,13 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
             double dumax = dt*fem.vmax;
             //cout << boost::format("\t dumax = %2.2e,  vmax = %2.2e") % dumax % fem.vmax<< endl;// *ct*
 		cout << "\t dumax = " << dumax << ",  vmax = "<< fem.vmax << endl;
-            if (dumax < DUMIN) break; 
+            if (dumax < mySettings.DUMIN) break; 
 /*
             if (dumax > DUMAX) { 
 			flag++; dt*= DUMAX/dumax; fem.dt=dt; continue;}
 */
 
-            if (dumax > DUMAX) { 
+            if (dumax > mySettings.DUMAX) { 
 			flag++; dt*= 0.5; mySettings.dt=dt; continue;}
           
         fmm::demag<0, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> 
@@ -169,11 +169,11 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
 
             fem.saver(mySettings,fout,nt);
 
-            dt = min(1.1*dt, DTMAX); 
+            dt = min(1.1*dt, mySettings.DTMAX); 
 	    mySettings.dt=dt;
             }//endwhile
 
-        if (dt < DTMIN) cout << " aborted:  dt < DTMIN";
+        if (dt < mySettings.DTMIN) cout << " aborted:  dt < DTMIN";
         fem.saver(mySettings,fout,nt);
         
 	if (mySettings.withVtk) fem.savecfg_vtk(mySettings.getSimName(),nt,nullptr);

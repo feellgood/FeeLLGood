@@ -2,7 +2,7 @@
 
 using namespace std;
 
-void Fem::chapeaux(void)
+void Fem::chapeaux(double epsilon)
 {
 gmm::dense_matrix <double> dadu(Tetra::N,3);
 
@@ -48,7 +48,7 @@ gmm::dense_matrix <double> nod(3,Tetra::N);
         double detJ = lu_det(J);
 	//cout << "tet i: " << i_t << "   jac:" << detJ <<endl;
 	
-        if (fabs(detJ) < EPSILON){
+        if (fabs(detJ) < epsilon){
 #ifdef LIBRARY
             ostringstream what;
             what << "Singular jacobian in tetrahedron " << i_t;

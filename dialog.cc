@@ -113,7 +113,6 @@ void Settings::read(std::string fileJson,std::vector<Seq> &seq)
 	simName = root.get<string>("output file basename");
 	pbName = root.get<string>("mesh filename");
 	tf = root.get<double>("final_time",0);
-	dt = root.get<double>("initial_time_step",0);
 	
 	n1 = root.get<int>("save_energies",0);
 	n2 = root.get<int>("take_photo",0);
@@ -245,14 +244,13 @@ try { sub_tree = root.get_child("solver"); }
 catch (exception &e)
     { cout << e.what() << endl; }
 
-for (boost::property_tree::ptree::value_type &s : sub_tree)
-    {		
-    if (s.first == "analytic corrections")
-        {
-        analytic_corr = s.second.get_value<bool>();
-        if(VERBOSE) {cout << "analytic corrections set to "<< analytic_corr << endl;}
-        }
-    if (s.first == "theta")
-        { theta = s.second.get_value<double>(); }
-    }
+    analytic_corr = sub_tree.get<bool>("analytic corrections",false);
+    theta = sub_tree.get<double>("theta",0.5);
+    EPSILON = sub_tree.get<double>("epsilon",1e-16);
+    DUMIN = sub_tree.get<double>("min(du)",1e-9);
+    DUMAX = sub_tree.get<double>("max(du)",0.02);
+    DTMIN = sub_tree.get<double>("min(dt)",1e-14);
+    DTMAX = sub_tree.get<double>("max(dt)",1e-7);
+    dt = sub_tree.get<double>("initial dt",1e-9);
+    
 }

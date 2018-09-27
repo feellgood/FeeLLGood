@@ -3,7 +3,6 @@
 "output file basename" : "tommy_the_cat",
 "mesh filename" : "wire_d70_L1000.msh",
 "final_time" : 1e-6,
-"initial_time_step" : 1e-9,
 "save_energies" : 3,
 "take_photo" : 5,
 "restore" : false,
@@ -22,7 +21,9 @@
 		"Ae" : 1e-11,
 		"Js" : 1.0,
 		"Ka" : 0.0,
-		"a" : [[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,1.0]],		
+		 "a" : [[1.0,0.0,0.0],
+			[0.0,1.0,0.0],
+			[0.0,0.0,1.0]],		
 		"alpha" : 0.05		
 		}
 	},
@@ -40,6 +41,13 @@
 "solver" :
     {
     "theta" : 0.5,
-    "analytic corrections" : true
+    "analytic corrections" : true,
+    "epsilon" : 1e-40,
+    "remarque" : "epsilon est petit",
+    "min(du)" : 1e-9,
+    "max(du)" : 0.02,
+    "min(dt)" : 1e-14,
+    "max(dt)" : 1e-7,
+    "initial dt" : 1e-9
     }
 }

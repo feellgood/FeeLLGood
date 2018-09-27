@@ -93,7 +93,7 @@ for(int k=0;k<NPI;k++)
 	}
 }
 
-void Tet::integrales(std::vector<Tetra::prm> const& params,std::vector <Node> const& myNode,double Hext[DIM],double Vz,double theta,double dt,gmm::dense_matrix <double> &AE, std::vector <double> &BE)
+void Tet::integrales(std::vector<Tetra::prm> const& params,std::vector <Node> const& myNode,double Hext[DIM],double Vz,double theta,double dt,double tau_r,gmm::dense_matrix <double> &AE, std::vector <double> &BE)
 {
 /*
 std::map < std::pair<std::string,int>,double> &param = mySets.param;
@@ -233,7 +233,7 @@ for (int npi=0; npi<NPI; npi++){
     double r = 0.1;	     			
 
     double M = 2.*alpha*r/dt;  			
-R = dt/TAUR*abs(log(dt/TAUR));    	
+R = dt/tau_r*abs(log(dt/tau_r));    	
 
 #ifdef STAT
 fem.stat.r = r;

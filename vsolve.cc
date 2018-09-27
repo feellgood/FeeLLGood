@@ -37,7 +37,7 @@ for (int t=0; t<TET; t++){
     Tetra::Tet &tet = fem.tet[t];
     gmm::dense_matrix <double> K(3*Tetra::N,3*Tetra::N), Kp(2*Tetra::N,2*Tetra::N);
     vector <double> L(3*Tetra::N), Lp(2*Tetra::N);
-    tet.integrales(settings.paramTetra,fem.node,fem.Hext,fem.DW_vz,settings.theta,dt,K, L);     
+    tet.integrales(settings.paramTetra,fem.node,fem.Hext,fem.DW_vz,settings.theta,dt,settings.TAUR,K, L);     
     projection<Tetra::Tet>(tet, K, L, Kp, Lp);
     assemblage<Tetra::Tet>(tet, Kp, Lp, Kw, Lw);    
 	}

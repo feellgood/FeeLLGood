@@ -173,7 +173,7 @@ class Tet{
 		/**
 		computes the integral contribution of the tetrahedron to the evolution of the magnetization
 		*/		
-		void integrales(std::vector<Tetra::prm> const& params,std::vector<Node> const& myNode,double Hext[DIM],double Vz,double theta,double dt,gmm::dense_matrix <double> &AE, std::vector <double> &BE);
+		void integrales(std::vector<Tetra::prm> const& params,std::vector<Node> const& myNode,double Hext[DIM],double Vz,double theta,double dt,double tau_r,gmm::dense_matrix <double> &AE, std::vector <double> &BE);
 
 		/**
 		convenient getter for N, usefull for templates projection and assemblage
