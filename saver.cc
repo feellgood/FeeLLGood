@@ -17,9 +17,8 @@ fout << moy<U>(0) <<"\t" << moy<U>(1) <<"\t" << moy<U>(2) <<"\t";
 fout << E[0] <<"\t" << E[1] <<"\t" << E[2] <<"\t" << E[3] <<"\t" << Etot <<"\t" << DW_z <<"\t" << DW_vz <<"\t" << endl;
 }
 
-if ((nt%n2)==0) {
-//    savecfg_gnuplot(fem,nt);
-//    savecfg_tecplot(fem,nt);
+if ((nt%n2)==0) 
+    {
     if (settings.withVtk) savecfg_vtk(settings.getSimName(),nt,nullptr);
     savesol(settings.getSimName(),settings.getScale(),nt,nullptr);
 

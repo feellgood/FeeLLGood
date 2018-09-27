@@ -251,6 +251,7 @@ catch (exception &e)
     DUMAX = sub_tree.get<double>("max(du)",0.02);
     DTMIN = sub_tree.get<double>("min(dt)",1e-14);
     DTMAX = sub_tree.get<double>("max(dt)",1e-7);
+    TAUR = 100.*DTMAX; // pourquoi 100 ?
     dt = sub_tree.get<double>("initial dt",1e-9);
     
 }
