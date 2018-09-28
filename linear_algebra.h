@@ -25,19 +25,42 @@ class LinAlgebra
 {
 public:
 	/** constructor */	
-	inline LinAlgebra(Fem &f, Settings &s) {fem = f; settings = s;}
+	inline LinAlgebra(Settings &s,
+                      std::vector<Node> const& myNode,
+                      std::vector <Tetra::Tet> const& myTet,
+                      std::vector <Facette::Fac> const& myFace) 
+    {settings = s; refNode = myNode; refTet = myTet; refFac = myFace;}
 	
 	gmm::diagonal_precond <read_matrix>  *prc;/**< diagonal preconditionner */
 
 	int  vsolve(double dt,long nt);/**< solver */
 
+    /** setter for DW_dz */
+    inline void set_DW_vz(double vz){DW_vz = vz;}    
+
+    /** setter for Hext */
+    inline void set_Hext(double Hx,double Hy,double Hz){Hext[0]=Hx;Hext[1]=Hy;Hext[2]=Hz;}
+
+    /** getter for v_max */
+    inline double get_v_max() {return v_max;}
+    
+private:
+    const int MAXITER = 500;/**< maximum number of iteration for biconjugate gradient algorithm */
+    const int REFRESH_PRC = 20;/**< refresh every REFRESH_PRC the diagonal preconditioner */
+    
+    std::vector<Node>  refNode;/**< direct access to the Nodes */
+	std::vector <Facette::Fac> refFac; /**< direct access to the faces */
+	std::vector <Tetra::Tet> refTet; /**< direct access to the tetrahedrons */
+	
+	double Hext[DIM];/**< applied field */
+    double DW_vz;/**< speed of the domain wall */
+	Settings settings;/**< copy of the settings */
+    double v_max;/**< maximum speed */
+	
 /** computes the local vector basis {ep,eq} in the tangeant plane for projection on the elements */
 inline void base_projection(void)
-	{ std::for_each(fem.node.begin(),fem.node.end(),[](Node &n) { n.buildBase_epeq();}); }
-
-private:
-	Fem fem;/**< access to some part of struct fem */
-	Settings settings;/**< copy of the settings */
+	{ std::for_each(refNode.begin(),refNode.end(),[](Node &n) { n.buildBase_epeq();}); }
+	
 /**
 template function to compute projection of an element <br>
 template parameter T is either tetra of face
@@ -50,7 +73,7 @@ void projection(T &elt,
 const int N = elt.getN();
 gmm::dense_matrix <double> P(2*N,3*N), PA(2*N,3*N);
 for (int i=0; i<N; i++){
-    Node &n = fem.node[elt.ind[i]];
+    Node &n = refNode[elt.ind[i]];
     P(i,i)  = n.ep.x();  P(i,N+i)  = n.ep.y();  P(i,2*N+i)  = n.ep.z();
     P(N+i,i)= n.eq.x();  P(N+i,N+i)= n.eq.y();  P(N+i,2*N+i)= n.eq.z();
     }
@@ -70,23 +93,24 @@ template <class T>
 void assemblage(T &elt,
            gmm::dense_matrix <double> &Ke, std::vector <double> &Le,
            write_matrix &K, write_vector &L)
-{
-const int NOD = fem.NOD;
-const int N = elt.getN();
+    {
+    const int NOD = refNode.size();
+    const int N = elt.getN();
 
-for (int i=0; i < N; i++){
-    int i_= elt.ind[i];             
-    for (int j=0; j < N; j++){
-        int j_= elt.ind[j];
-        K(NOD+i_,j_)+= Ke(i,j);      K(NOD+i_, NOD+j_)+= Ke(  i,N+j);
-        K(    i_,j_)+= Ke(N+i,j);    K(    i_, NOD+j_)+= Ke(N+i,N+j);
-	    }
-    L[NOD+i_]+= Le[  i];
-    L[    i_]+= Le[N+i];
+    for (int i=0; i < N; i++){
+        int i_= elt.ind[i];             
+        for (int j=0; j < N; j++){
+            int j_= elt.ind[j];
+            K(NOD+i_,j_)+= Ke(i,j);      K(NOD+i_, NOD+j_)+= Ke(  i,N+j);
+            K(    i_,j_)+= Ke(N+i,j);    K(    i_, NOD+j_)+= Ke(N+i,N+j);
+            }
+        L[NOD+i_]+= Le[  i];
+        L[    i_]+= Le[N+i];
+        }
+    //std::cout<<"temps assemblage: "<<diff_t<<endl;
     }
-//std::cout<<"temps assemblage: "<<diff_t<<endl;
-}
 
+    
 }; // fin class linAlgebra
 
 #endif

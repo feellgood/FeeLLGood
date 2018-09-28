@@ -4,25 +4,6 @@
 
 using namespace std;
 
-/** convenient error handler */
-class BadConversion : public std::runtime_error {
- public:
-/**
-constructor
-*/
-   BadConversion(const std::string& s) : std::runtime_error(s) { }
- };
-
-template <typename T> 
-inline T str2num(const std::string& s)
- {
-   std::istringstream iss(s);
-   T x;
-   if (!(iss >> x))
-     throw BadConversion("convertToDouble(\"" + s + "\")");
-   return x;
- }
-
 void Fem::restoresol(double scaling, string *filename)  // filename may be NULL
 {
 string str("sol.in");
@@ -49,25 +30,18 @@ for (int i=0; i<NOD; i++){
     Node &n = node[i];
     Node node_;
     int i_;
-    fin >> i_ >>  node_.p;// carefull! >> is overloaded for class pt3D
-    fin >> n.u >> n.phi;
+    fin >> i_ >>  node_.p >> n.u >> n.phi;// carefull! >> is overloaded for class pt3D
 
-    //node_.x *= scaling;node_.y *= scaling;node_.z *= scaling;
-node_.p *= scaling;
+    node_.p *= scaling;
 
-    double d2=sq(n.p.x()-node_.p.x()) + sq(n.p.y()-node_.p.y()) + sq(n.p.z()-node_.p.z());
-
-    if (d2 > sq(diam * 1e-9)) // attention scaling écrit en dur ... 
+    if (( Pt::norme2(n.p - node_.p) > sq(diam * 1e-9))&&VERBOSE) 
 	{
-        if(VERBOSE){
-        cerr << "WARNING difference dans la position des noeuds"<< endl;
-        cerr << i  << "\t" << n.p << endl << i_ << "\t" << node_.p << endl;
-        }
-//        exit(1);
-        }
+    cerr << "WARNING difference dans la position des noeuds"<< endl;
+    cerr << i  << "\t" << n.p << endl << i_ << "\t" << node_.p << endl;
+    }
     
     if (i!=i_){
-        if(VERBOSE) { cerr << "fichier solution incompatibilite de noeuds"<< endl; }
+        if(VERBOSE) { cerr << "fichier .sol incompatibilite de noeuds"<< endl; }
         SYSTEM_ERROR;
         }
     }

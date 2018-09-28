@@ -117,7 +117,8 @@ void Settings::read(std::string fileJson,std::vector<Seq> &seq)
 	n1 = root.get<int>("save_energies",0);
 	n2 = root.get<int>("take_photo",0);
 	restore = root.get<bool>("restore",0);
-	
+	restoreFileName = root.get<string>("restore from file");
+    
     double trucs[6];
 	for (boost::property_tree::ptree::value_type &s : root.get_child("field_sequence"))
 		{

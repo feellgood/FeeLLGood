@@ -319,6 +319,11 @@ inline pt3D operator*(pt3D const& a,pt3D const& b)
 inline pt3D operator*(double const& a,pt3D const& b) { return pt3D(a*b.x(),a*b.y(),a*b.z()); }
 
 /**
+ * algebra : right scalar product
+ */
+inline pt3D operator*(pt3D const& a,double const& b) { return pt3D(b*a.x(),b*a.y(),b*a.z()); }
+
+/**
  * algebra : division components by components by a scalar to the right
  */
 inline pt3D operator/(pt3D const & a,double const& b) { return pt3D(a.x()/b,a.y()/b,a.z()/b); }

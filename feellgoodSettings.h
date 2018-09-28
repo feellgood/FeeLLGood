@@ -59,6 +59,8 @@ class Settings{
 	int n2;/**< magnetic configuration saved every n2 iterations */
 	bool restore;/**< usefull to run a simulation from a previous calculation  */
 
+	std:: string restoreFileName;/**< input file name for continuing a calculation (sol.in) */
+	
 	/** for time integration \f$ \theta \f$ scheme  */
 	double theta;
 	

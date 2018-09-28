@@ -119,9 +119,6 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
     ANNpointArray pts;/**< container for the building of the kdtree (handled by ANN library) */
     
 
-
-
-
 /**
 print some informations of fem container
 */

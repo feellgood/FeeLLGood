@@ -19,20 +19,16 @@ if (!fout){
     if(VERBOSE) cerr << "pb ouverture fichier : " << str << "en ecriture" << endl;
     SYSTEM_ERROR;}
 
-str = baseName + " time : " + to_string(t);  
-// << boost::format(" time : %+20.10e") % fem.t;
 
 fout << "# vtk DataFile Version 2.0" << endl;
-fout << str << endl;
+fout << "time : " << t << endl; // boost::format(" time : %+20.10e") % fem.t;
 fout << "ASCII" << endl;
 fout << "DATASET UNSTRUCTURED_GRID" << endl;
 fout << "POINTS "<< NOD << " float" << endl;
 
 for (int i=0; i<NOD; i++){
-    double x   = node[i].p.x();
-    double y   = node[i].p.y();
-    double z   = node[i].p.z() + DW_z;
-fout << x << "\t" << y << "\t" << z << endl;    //fout << boost::format("%+20.10e %+20.10e %+20.10e") % x % y % z << endl;
+fout << node[i].p.x() << "\t" << node[i].p.y() << "\t" << node[i].p.z() + DW_z << endl;
+//fout << boost::format("%+20.10e %+20.10e %+20.10e") % x % y % z << endl;
     }
 
 fout << "CELLS " << setw(8) << TET << "\t" << setw(8) << (5*TET) << endl;
@@ -49,10 +45,6 @@ for (int t=0; t<TET; t++) { fout << setw(8) << 10 << endl; }
 
 fout <<"POINT_DATA " << setw(8) << NOD << endl;
 fout <<"SCALARS phi float 1" << endl;
-   
-//fout << boost::format("POINT_DATA %8d") % NOD << endl;
-//fout << boost::format("SCALARS phi float %d") % 1 << endl;
-
 fout << "LOOKUP_TABLE my_table" << endl;
 
 for (int i=0; i<NOD; i++) { fout << node[i].phi << endl; }

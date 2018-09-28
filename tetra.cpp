@@ -95,32 +95,6 @@ for(int k=0;k<NPI;k++)
 
 void Tet::integrales(std::vector<Tetra::prm> const& params,std::vector <Node> const& myNode,double Hext[DIM],double Vz,double theta,double dt,double tau_r,gmm::dense_matrix <double> &AE, std::vector <double> &BE)
 {
-/*
-std::map < std::pair<std::string,int>,double> &param = mySets.param;
-
-double s = param[ std::make_pair("theta",-1) ];   	//cout << ", theta= " << s;
-double alpha = param[ std::make_pair("alpha",reg) ];  	//cout << ", alpha= " << alpha;
-double A = param[ std::make_pair("Ae",reg) ];    	//cout << ", Ae= " << A ;
-double J = param[ std::make_pair("Js",reg) ]+EPSILON;//cout <<", Js=" << J;
-
-double K = param[std::make_pair("Ka",reg)];   	//cout << ", Ka=" << K;
-double K3 = param[std::make_pair("Ka3",reg)];   	//cout << ", Ka3=" << K3;
-
-double uk00 = param[std::make_pair("a1",reg)];  	//cout << ", a1=" << k0;
-double uk01 = param[std::make_pair("a2",reg)];  	//cout << ", a2=" << k1;
-double uk02 = param[std::make_pair("a3",reg)];  	//cout << ", a3=" << k2;
-double uk10 = param[std::make_pair("b1",reg)];  	//cout << ", a1=" << k0;
-double uk11 = param[std::make_pair("b2",reg)];  	//cout << ", a2=" << k1;
-double uk12 = param[std::make_pair("b3",reg)];  	//cout << ", a3=" << k2;
-double uk20 = param[std::make_pair("c1",reg)];  	//cout << ", a1=" << k0;
-double uk21 = param[std::make_pair("c2",reg)];  	//cout << ", a2=" << k1;
-double uk22 = param[std::make_pair("c3",reg)];  	//cout << ", a3=" << k2;
-
-double Uz   = param[std::make_pair("UzDW",reg)];//deplacement de paroi par courant polarise en spin
-double beta = param[std::make_pair("betaDW",reg)];
-
-*/
-
 double alpha = params[idxPrm].alpha;
 double A = params[idxPrm].A;
 double J = params[idxPrm].J;
@@ -167,22 +141,16 @@ for (int i=0; i<N; i++){
     negphiv0_nod[i] = -node.phiv0;
     }
 
-//calc_u(u,myNode);
 tiny::mult<double, 3, N, NPI> (u_nod, a, u);
-//calc_dudx(dudx,myNode);
+
 tiny::mult<double, 3, N, NPI> (u_nod, dadx, dudx);
-//calc_dudy(dudy,myNode);
 tiny::mult<double, 3, N, NPI> (u_nod, dady, dudy);
-//calc_dudz(dudz,myNode);
 tiny::mult<double, 3, N, NPI> (u_nod, dadz, dudz);
 
-//calc_v(v,myNode);
 tiny::mult<double, 3, N, NPI> (v_nod, a, v);
-//calc_dudx(dvdx,myNode);
+
 tiny::mult<double, 3, N, NPI> (v_nod, dadx, dvdx);
-//calc_dudx(dvdy,myNode);
 tiny::mult<double, 3, N, NPI> (v_nod, dady, dvdy);
-//calc_dudx(dvdz,myNode);
 tiny::mult<double, 3, N, NPI> (v_nod, dadz, dvdz);
 
 tiny::transposed_mult<double, N, NPI> (negphi0_nod, dadx, Hdx);
@@ -198,8 +166,8 @@ tiny::transposed_mult<double, N, NPI> (negphiv0_nod, dadz, Hvz);
 
 /*-------------------------------------------------------*/
 for (int npi=0; npi<NPI; npi++){
-    double ai, ai_w, dai_dx, dai_dy, dai_dz, daj_dx, daj_dy, daj_dz;
-    double Dai_Daj, Dai_Du0, Dai_Du1, Dai_Du2;
+    double ai, ai_w, dai_dx, dai_dy, dai_dz;
+    double Dai_Daj, Dai_Du0, Dai_Du1, Dai_Du2, contrib;
     
 	double w = weight[npi];
     double uk0_u = uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi]; 
@@ -230,9 +198,9 @@ for (int npi=0; npi<NPI; npi++){
 #endif
 
 #ifdef ORD2
-    double r = 0.1;	     			
 
-    double M = 2.*alpha*r/dt;  			
+double r = 0.1;	     			
+double M = 2.*alpha*r/dt;  			
 R = dt/tau_r*abs(log(dt/tau_r));    	
 
 #ifdef STAT
@@ -250,11 +218,6 @@ fem.stat.R = R;
        else alfa=alpha/(1.-dt/(2.*alpha)*uHeff);
        }
 #endif
-
-    triple Ht; //inutilisé!!  derivee de Hr : y a t'il une erreur ? on dirait que ce devrait etre Kbis*uk{0|1|2}_v et pas Kbis*ok0_v
-    Ht[0]= Hvx[npi] + (Kbis* uk0_v - K3bis* uk0_v*(1-3*uk0_u*uk0_u) )*uk00;   
-    Ht[1]= Hvy[npi] + (Kbis* uk0_v - K3bis* uk1_v*(1-3*uk1_u*uk1_u) )*uk01;   
-    Ht[2]= Hvz[npi] + (Kbis* uk0_v - K3bis* uk2_v*(1-3*uk2_u*uk2_u) )*uk02;  
 
     for (int i=0; i<N; i++){
         ai = a[i][npi];
@@ -278,8 +241,12 @@ fem.stat.R = R;
 	BE[N+i]  += -Uz*(u[2][npi]*dudz[0][npi]-u[0][npi]*dudz[2][npi]+beta*dudz[1][npi]) *ai_w;
 	BE[2*N+i]+= -Uz*(u[0][npi]*dudz[1][npi]-u[1][npi]*dudz[0][npi]+beta*dudz[2][npi]) *ai_w;
 
-
 #ifdef ORD2
+        triple Ht; //derivee de Hr : y a t'il une erreur ? on dirait que ce devrait etre Kbis*uk{0|1|2}_v et pas Kbis*ok0_v
+        Ht[0]= Hvx[npi] + (Kbis* uk0_v - K3bis* uk0_v*(1-3*uk0_u*uk0_u) )*uk00;   
+        Ht[1]= Hvy[npi] + (Kbis* uk0_v - K3bis* uk1_v*(1-3*uk1_u*uk1_u) )*uk01;   
+        Ht[2]= Hvz[npi] + (Kbis* uk0_v - K3bis* uk2_v*(1-3*uk2_u*uk2_u) )*uk02; 
+        
         BE[    i]+= Ht[0] *ai_w*s_dt; // ordre 2 en temps
         BE[  N+i]+= Ht[1] *ai_w*s_dt;
         BE[2*N+i]+= Ht[2] *ai_w*s_dt;
@@ -307,13 +274,11 @@ fem.stat.R = R;
         AE(2*N+i,0*N+i)+= -u_nod[1][i]* ai_w;
 
         for (int j=0; j<N; j++){
-            //aj = tet.a[j][npi];
-            daj_dx= dadx[j][npi];  daj_dy= dady[j][npi];  daj_dz= dadz[j][npi];
-            Dai_Daj = dai_dx*daj_dx + dai_dy*daj_dy + dai_dz*daj_dz;
-
-            AE(i,j)        +=  s_dt*(1.+R)* Abis* Dai_Daj *w;
-            AE(N+i,N+j)    +=  s_dt*(1.+R)* Abis* Dai_Daj *w;
-            AE(2*N+i,2*N+j)+=  s_dt*(1.+R)* Abis* Dai_Daj *w;
+            Dai_Daj = dai_dx*dadx[j][npi] + dai_dy*dady[j][npi] + dai_dz*dadz[j][npi];
+            contrib = s_dt*(1.+R)* Abis* Dai_Daj *w;
+            AE(i,j)        +=  contrib;
+            AE(N+i,N+j)    +=  contrib;
+            AE(2*N+i,2*N+j)+=  contrib;
 	    }
 	}
     }
@@ -330,25 +295,19 @@ Pt::pt3D p2 = myNode[i2].p;
 Pt::pt3D p3 = myNode[i3].p;
 Pt::pt3D vec = (p1-p0)*(p2-p0);
 
-double i_vol  = 1./6.* pScal(vec,p3-p0);
-   if (i_vol<0.) {
+vol  = 1./6.* pScal(vec,p3-p0);
+   if (vol<0.) {
       ind[3]=i2; ind[2]=i3;
-      i_vol=-i_vol;
+      vol *= -1;
       if(VERBOSE) { std::cout << "ill-oriented tetrahedron, now corrected!"<< std::endl; }
       }
-vol = i_vol;
 }
 
-
-
 void Tetra::init_dadu(gmm::dense_matrix <double> &X)
-	{
-	X(0,0)= -1.0;   X(0,1)= -1.0;   X(0,2)= -1.0;
-        X(1,0)= +1.0;   X(1,1)=  0.0;   X(1,2)=  0.0;
-        X(2,0)=  0.0;   X(2,1)= +1.0;   X(2,2)=  0.0;
-        X(3,0)=  0.0;   X(3,1)=  0.0;   X(3,2)= +1.0;
-	}
-
-
-
+{
+X(0,0)= -1.0;   X(0,1)= -1.0;   X(0,2)= -1.0;
+X(1,0)= +1.0;   X(1,1)=  0.0;   X(1,2)=  0.0;
+X(2,0)=  0.0;   X(2,1)= +1.0;   X(2,2)=  0.0;
+X(3,0)=  0.0;   X(3,1)=  0.0;   X(3,2)= +1.0;
+}
 

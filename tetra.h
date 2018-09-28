@@ -49,7 +49,6 @@ const double v[NPI]   = {A,B,B,C,B};/**< some constants to build hat functions *
 const double w[NPI]   = {A,B,C,B,B};/**< some constants to build hat functions */
 const double pds[NPI] = {D,E,E,E,E};/**< some constant weights to build hat functions */
 
-
 /** \class prm
 region number and material constants
 */
@@ -183,8 +182,8 @@ class Tet{
 		/**
 		computes volume		
 		*/
-		void calc_vol(std::vector<Node> const& myNode);	
-	};
+		void calc_vol(std::vector<Node> const& myNode);
+    };//end class Tetra
 }
 
 #endif /* tetra_h */

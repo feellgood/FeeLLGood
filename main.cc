@@ -9,13 +9,10 @@ int main(int argc,char* argv[])
 {
 Settings mySettings = Settings();
 Fem fem;
-LinAlgebra linAlg = LinAlgebra(fem,mySettings);
+
 
 OctreeClass *tree    = nullptr;
 KernelClass *kernels = nullptr; 
-
-cout << "Hello! This is feeLLGood SHA1= " + string(SHAnumber) << endl;
-
 
 #ifdef STAT
 fem.stat.h = gsl_histogram_alloc (NCLASSES);
@@ -52,17 +49,17 @@ fem.affichage();
 
 fem.t=0.;
 
-if (mySettings.restore)
-    fem.restoresol(mySettings.getScale(), nullptr);
-else
-    fem.init_distrib();
+if (mySettings.restore) {fem.restoresol(mySettings.getScale(), nullptr);}
+else {fem.init_distrib();}
 
 fem.direction();/* determination de la direction de propagation de la paroi */
+
+//once fem containers are ok, we build a linAlgebra object
+LinAlgebra linAlg = LinAlgebra(mySettings,fem.node,fem.tet,fem.fac);
 
 fmm::init< CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem, tree, kernels);
 
 double dt0= mySettings.dt;
-
 int nseq=0;
 for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
     double &Bini=it->Bini;
@@ -125,7 +122,14 @@ while (t < mySettings.tf)
         break;
         }
 
+        /* changement de referentiel */
+    fem.DW_vz += fem.DW_dir*fem.moy<V>(Pt::IDX_Z)*fem.l.z()/2.;
+    
+    linAlg.set_Hext(fem.Hext[0],fem.Hext[1],fem.Hext[2]);
+    linAlg.set_DW_vz(fem.DW_vz);
     int err = linAlg.vsolve(dt,nt);  
+    fem.vmax = linAlg.get_v_max();
+    
     if (err) { cout << "err : " << err << endl;
 		    	flag++; dt*= 0.5; mySettings.dt=dt; continue;}
 
@@ -152,8 +156,7 @@ while (t < mySettings.tf)
          */
 //            double dissip = 1. - fem.evol/dt/fem.phy;
 //            cout << boost::format("\t dissipation %+3.1f") %(dissip*100) <<'%'<< endl;
-    if (fem.evol > 0.0)
-        { cout << "Warning energy increases! : " << fem.evol << endl; }
+    if (fem.evol > 0.0) { cout << "Warning energy increases! : " << fem.evol << endl; }
 
 /* mise a jour de la vitesse du dernier referentiel et deplacement de paroi */
     fem.DW_vz0 = fem.DW_vz; 
@@ -174,9 +177,8 @@ if (dt < mySettings.DTMIN) cout << " aborted:  dt < DTMIN";
         
 fem.saver(mySettings,fout,nt);
         
-double end_cpu = cputime();
 cout << "\n  * iterations: " << nt;
-cout << "\n  * duree cpu: " << difftime(end_cpu,start_cpu) << " s"<< endl << endl;
+cout << "\n  * duree cpu: " << difftime(cputime(),start_cpu) << " s\n" << endl;
 fout.close();
 
 //      initialisation du temps pour l'iteration en champ suivante

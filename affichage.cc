@@ -1,9 +1,13 @@
 #include "fem.h"
 
+
+
 using namespace std;
 
 void Fem::affichage(void)
 {
+cout << "This is feeLLGood SHA1= " + string(SHAnumber) << endl;
+    
 cout << "diam bounding box ="<< diam << endl;
 	//cout << "\n\t regions\t\t" << REG << endl;
 cout << "\t noeuds\t\t\t" << NOD << endl;

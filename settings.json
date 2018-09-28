@@ -6,6 +6,7 @@
 "save_energies" : 3,
 "take_photo" : 5,
 "restore" : false,
+"restore from file" : "sol.in",
 
 "field_sequence" :
 	[
