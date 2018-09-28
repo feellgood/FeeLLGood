@@ -49,8 +49,8 @@ MESSAGE(STATUS "executable built with SHA1=${SHAstr}")
 
 
 set(VERBOSE_MODE true)
-
-
+set(NB_THREADS 16)
+MESSAGE(STATUS "NB_THREADS=${NB_THREADS}")
 #===========================================================================
 # Compiler options
 #===========================================================================

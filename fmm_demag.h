@@ -20,6 +20,8 @@ this header is the interface to scalfmm. Its purpose is to prepare an octree for
 #include "Kernels/Rotation/FRotationKernel.hpp"
 #include "Kernels/Rotation/FRotationCell.hpp"
 
+#include "config.h" //for NbThreads
+
 
 #ifndef FMM_DEMAG_H
 #define FMM_DEMAG_H
@@ -76,7 +78,7 @@ int init(Fem &fem, OctreeClass* &tree, KernelClass* &kernels, Args... kernelPreA
     FTic counter;
     const int NbLevels = 8; 
     const int SizeSubLevels = 6;
-    const unsigned int NbThreads  =  omp_get_max_threads(); // open mp function
+    //const unsigned int NbThreads  =  omp_get_max_threads(); // open mp function
 
     omp_set_num_threads(NbThreads);
     if(VERBOSE) { std::cout << "\n>> Using " << NbThreads << " threads.\n" << std::endl; }

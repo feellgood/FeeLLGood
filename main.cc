@@ -32,7 +32,7 @@ if(argc<2)
 	}
 else 
 	{
-	fileJson = argv[1]; // argv[0] is "./feellgood_exe"
+	fileJson = argv[1]; // argv[0] is "./feellgood"
 	cout << "using loaded settings in " << fileJson << " JSON file." <<endl;	
 	}
 
