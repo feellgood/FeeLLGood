@@ -30,6 +30,7 @@ namespace Pt
  * sign(x) = 1.0 if x>0, otherwise -1.0
 */
 inline double sign(double x) {if (x>0) return 1.0; else return -1.0; }
+inline double sq(double x) {return x*x;}
 
 /** \class pt2D
 \brief convenient class to perform geometrical operations on \f$ \mathbb{R}^2 \f$ points
@@ -329,9 +330,16 @@ inline pt3D operator*(pt3D const& a,double const& b) { return pt3D(b*a.x(),b*a.y
 inline pt3D operator/(pt3D const & a,double const& b) { return pt3D(a.x()/b,a.y()/b,a.z()/b); }
 
 /**
- * algebra : R^3 scalar product
+algebra : R^3 scalar product
  */
 inline double pScal(pt3D const& a,pt3D const& b) { return( a.x()*b.x() + a.y()*b.y() + a.z()*b.z() ); }
+
+
+/**
+algebra : R^3 euclidian distance
+ */
+inline double dist(pt3D const& a,pt3D const& b) { return sqrt( sq(a.x()-b.x()) + sq(a.y()-b.y()) + sq(a.z()-b.z()) ); }
+
 
 /**
 algebra : returns square of the R^3 norm

@@ -177,7 +177,7 @@ return 0;
 /**
 computes correction on potential on facettes using fem struct
 */
-template <int Hv> double potential(Fem &fem, Facette::Fac &fac, int i);
+template <int Hv> double potential(std::vector<Node> const& myNode, Facette::Fac &fac, int i);
 
 
 /**
@@ -281,19 +281,14 @@ for (int f=0; f<FAC; f++){
       for (int i=0; i<Facette::N; i++) {
 	      int i_= fac.ind[i];
 	      
-		//Node &node = fem.node[i_];
 		Pt::pt3D p_i_ = fem.node[i_].p;	      
-		double x,y,z;
-	      //x=node.p.x();  y=node.p.y();  z=node.p.z();
-		x=p_i_.x(); y=p_i_.y(); z=p_i_.z();	      
 		for (int j=0; j<Facette::NPI; j++) {
-	          double xg,yg,zg;
-	          xg=gauss[0][j];  yg=gauss[1][j];  zg=gauss[2][j];
-	          double rij = sqrt( sq(x-xg) + sq(y-yg) + sq(z-zg) );
+	          Pt::pt3D pg = Pt::pt3D(gauss[Pt::IDX_X][j], gauss[Pt::IDX_Y][j], gauss[Pt::IDX_Z][j]);
+              double rij = Pt::dist(p_i_,pg);
 	          double sj = Ms* ( u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z() );
 	          corr[i_]-= sj/rij * fac.weight[j];
 	          }
-	      corr[i_]+= potential<Hv>(fem, fac, i);
+	      corr[i_]+= potential<Hv>(fem.node, fac, i);
           }
       }
    }
@@ -324,9 +319,7 @@ fflush(NULL);
         });
 
 
-    tree->forEachCell([&](CellClass* cell){
-	cell->resetToInitialState();
-        });
+    tree->forEachCell([&](CellClass* cell){ cell->resetToInitialState(); });
 
     }// end reset
 
@@ -358,7 +351,7 @@ delete [] corr;
 }
 
 template <int Hv>
-double potential(Fem &fem, Facette::Fac &fac, int i) // template, mais Hv est utilisé comme un booleen 
+double potential(std::vector<Node> const& myNode, Facette::Fac &fac, int i) // template, mais Hv est utilisé comme un booleen 
 {
   double Ms = fac.Ms;
   Pt::pt3D n = fac.n;
@@ -369,13 +362,9 @@ double potential(Fem &fem, Facette::Fac &fac, int i) // template, mais Hv est ut
  int i_,ii_,iii_;
  i_=fac.ind[i];  ii_=fac.ind[ii];  iii_=fac.ind[iii];
 
- //double x1,x2,x3, y1,y2,y3, z1,z2,z3;
-Node &node1 = fem.node[i_];
-Node &node2 = fem.node[ii_];
-Node &node3 = fem.node[iii_];
- //x1=node1.x;  x2=node2.x;  x3=node3.x;
- //y1=node1.y;  y2=node2.y;  y3=node3.y;
- //z1=node1.z;  z2=node2.z;  z3=node3.z;
+Node const& node1 = myNode[i_];
+Node const& node2 = myNode[ii_];
+Node const& node3 = myNode[iii_];
 
 Pt::pt3D p1p2 = node2.p - node1.p;
 Pt::pt3D p1p3 = node3.p - node1.p;
