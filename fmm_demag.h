@@ -127,7 +127,7 @@ for (int t=0; t<TET; t++){       // sources de volume
         nod[1][i] = fem.node[i_].p.y();
 		nod[2][i] = fem.node[i_].p.z();
 	}
-    tiny::mult<double, 3, Tetra::N, Tetra::NPI> (nod, tet.a, gauss);
+    tiny::mult<double, 3, Tetra::N, Tetra::NPI> (nod, Tetra::a, gauss);
 
     for (int j=0; j<Tetra::NPI; j++, idxPart++){
         double xSource = (gauss[0][j]-fem.c.x()) * norm;

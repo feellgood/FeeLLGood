@@ -68,9 +68,9 @@ for (int i_t=0; i_t<TET; i_t++) {
         negphi_nod[i] = -n.phi;
         }
 
-	tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (phi_nod, te.a, phi);
+	tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (phi_nod, Tetra::a, phi);
 
-	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, te.a, u);
+	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, Tetra::a, u);
 	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, te.dadx, dudx);
 	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, te.dady, dudy);
 	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, te.dadz, dudz);

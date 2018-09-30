@@ -4,19 +4,21 @@
 
 using namespace Facette;
 
+void Fac::init(void)
+{
+for (int j=0; j<NPI; j++)
+    {
+    a[0][j] = 1.-u[j]-v[j];
+    a[1][j] = u[j];
+    a[2][j] = v[j];
+    weight[j] = 2.*surf*pds[j]; // detJ = 2*surf;
+    }    
+    
+}
+
+
 void Fac::integrales(std::vector<Facette::prm> const& params, std::vector<Node> const& myNode, std::vector <double> &BE)
 {
-/*
-std::map <std::pair<std::string,int>,double> &param = mySets.param;
-
-double Js = abs(param[std::make_pair("Js",reg)])+EPSILON;//cout << ", Js=" << Js;
-double Ks = param[std::make_pair("Ks",reg)];   	//cout << ", Ks=" << Ks;
-
-double uk00 = param[std::make_pair("a1",reg)];  	//cout << ", a1=" << k0;
-double uk01 = param[std::make_pair("a2",reg)];  	//cout << ", a2=" << k1;
-double uk02 = param[std::make_pair("a3",reg)];  	//cout << ", a3=" << k2;
-*/
-
 double Js = params[idxPrm].Js;
 double Ks = params[idxPrm].Ks;
 

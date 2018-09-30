@@ -8,90 +8,7 @@
 #include "pt3D.h"
 #include "tiny.h"
 
-
-
 using namespace Tetra;
-
-void Tet::calc_u(double u[DIM][NPI],std::vector <Node> const& myNode)
-{
-for(int k=0;k<NPI;k++)
-	{ 
-	u[0][k]= myNode[ind[0]].u0.x()*a[0][k] + myNode[ind[1]].u0.x()*a[1][k] + myNode[ind[2]].u0.x()*a[2][k] + myNode[ind[3]].u0.x()*a[3][k]; 
-	u[1][k]= myNode[ind[0]].u0.y()*a[0][k] + myNode[ind[1]].u0.y()*a[1][k] + myNode[ind[2]].u0.y()*a[2][k] + myNode[ind[3]].u0.y()*a[3][k];
-	u[2][k]= myNode[ind[0]].u0.z()*a[0][k] + myNode[ind[1]].u0.z()*a[1][k] + myNode[ind[2]].u0.z()*a[2][k] + myNode[ind[3]].u0.z()*a[3][k];
-	}
-}
-
-void Tet::calc_dudx(double dudx[DIM][NPI],std::vector <Node> const& myNode)
-{
-for(int k=0;k<NPI;k++)
-	{ 
-	dudx[0][k]= myNode[ind[0]].u0.x()*dadx[0][k] + myNode[ind[1]].u0.x()*dadx[1][k] + myNode[ind[2]].u0.x()*dadx[2][k] + myNode[ind[3]].u0.x()*dadx[3][k]; 
-	dudx[1][k]= myNode[ind[0]].u0.y()*dadx[0][k] + myNode[ind[1]].u0.y()*dadx[1][k] + myNode[ind[2]].u0.y()*dadx[2][k] + myNode[ind[3]].u0.y()*dadx[3][k];
-	dudx[2][k]= myNode[ind[0]].u0.z()*dadx[0][k] + myNode[ind[1]].u0.z()*dadx[1][k] + myNode[ind[2]].u0.z()*dadx[2][k] + myNode[ind[3]].u0.z()*dadx[3][k];
-	}
-}
-
-void Tet::calc_dudy(double dudy[DIM][NPI],std::vector <Node> const& myNode)
-{
-for(int k=0;k<NPI;k++)
-	{ 
-	dudy[0][k]= myNode[ind[0]].u0.x()*dady[0][k] + myNode[ind[1]].u0.x()*dady[1][k] + myNode[ind[2]].u0.x()*dady[2][k] + myNode[ind[3]].u0.x()*dady[3][k]; 
-	dudy[1][k]= myNode[ind[0]].u0.y()*dady[0][k] + myNode[ind[1]].u0.y()*dady[1][k] + myNode[ind[2]].u0.y()*dady[2][k] + myNode[ind[3]].u0.y()*dady[3][k];
-	dudy[2][k]= myNode[ind[0]].u0.z()*dady[0][k] + myNode[ind[1]].u0.z()*dady[1][k] + myNode[ind[2]].u0.z()*dady[2][k] + myNode[ind[3]].u0.z()*dady[3][k];
-	}
-}
-
-void Tet::calc_dudz(double dudz[DIM][NPI],std::vector <Node> const& myNode)
-{
-for(int k=0;k<NPI;k++)
-	{ 
-	dudz[0][k]= myNode[ind[0]].u0.x()*dadz[0][k] + myNode[ind[1]].u0.x()*dadz[1][k] + myNode[ind[2]].u0.x()*dadz[2][k] + myNode[ind[3]].u0.x()*dadz[3][k]; 
-	dudz[1][k]= myNode[ind[0]].u0.y()*dadz[0][k] + myNode[ind[1]].u0.y()*dadz[1][k] + myNode[ind[2]].u0.y()*dadz[2][k] + myNode[ind[3]].u0.y()*dadz[3][k];
-	dudz[2][k]= myNode[ind[0]].u0.z()*dadz[0][k] + myNode[ind[1]].u0.z()*dadz[1][k] + myNode[ind[2]].u0.z()*dadz[2][k] + myNode[ind[3]].u0.z()*dadz[3][k];
-	}
-}
-//////////////////////////////////////
-
-void Tet::calc_v(double v[DIM][NPI],std::vector <Node> const& myNode)
-{
-for(int k=0;k<NPI;k++)
-	{ 
-	v[0][k]= myNode[ind[0]].v0.x()*a[0][k] + myNode[ind[1]].v0.x()*a[1][k] + myNode[ind[2]].v0.x()*a[2][k] + myNode[ind[3]].v0.x()*a[3][k]; 
-	v[1][k]= myNode[ind[0]].v0.y()*a[0][k] + myNode[ind[1]].v0.y()*a[1][k] + myNode[ind[2]].v0.y()*a[2][k] + myNode[ind[3]].v0.y()*a[3][k];
-	v[2][k]= myNode[ind[0]].v0.z()*a[0][k] + myNode[ind[1]].v0.z()*a[1][k] + myNode[ind[2]].v0.z()*a[2][k] + myNode[ind[3]].v0.z()*a[3][k];
-	}
-}
-
-void Tet::calc_dvdx(double dvdx[DIM][NPI],std::vector <Node> const& myNode)
-{
-for(int k=0;k<NPI;k++)
-	{ 
-	dvdx[0][k]= myNode[ind[0]].v0.x()*dadx[0][k] + myNode[ind[1]].v0.x()*dadx[1][k] + myNode[ind[2]].v0.x()*dadx[2][k] + myNode[ind[3]].v0.x()*dadx[3][k]; 
-	dvdx[1][k]= myNode[ind[0]].v0.y()*dadx[0][k] + myNode[ind[1]].v0.y()*dadx[1][k] + myNode[ind[2]].v0.y()*dadx[2][k] + myNode[ind[3]].v0.y()*dadx[3][k];
-	dvdx[2][k]= myNode[ind[0]].v0.z()*dadx[0][k] + myNode[ind[1]].v0.z()*dadx[1][k] + myNode[ind[2]].v0.z()*dadx[2][k] + myNode[ind[3]].v0.z()*dadx[3][k];
-	}
-}
-
-void Tet::calc_dvdy(double dvdy[DIM][NPI],std::vector <Node> const& myNode)
-{
-for(int k=0;k<NPI;k++)
-	{ 
-	dvdy[0][k]= myNode[ind[0]].v0.x()*dady[0][k] + myNode[ind[1]].v0.x()*dady[1][k] + myNode[ind[2]].v0.x()*dady[2][k] + myNode[ind[3]].v0.x()*dady[3][k]; 
-	dvdy[1][k]= myNode[ind[0]].v0.y()*dady[0][k] + myNode[ind[1]].v0.y()*dady[1][k] + myNode[ind[2]].v0.y()*dady[2][k] + myNode[ind[3]].v0.y()*dady[3][k];
-	dvdy[2][k]= myNode[ind[0]].v0.z()*dady[0][k] + myNode[ind[1]].v0.z()*dady[1][k] + myNode[ind[2]].v0.z()*dady[2][k] + myNode[ind[3]].v0.z()*dady[3][k];
-	}
-}
-
-void Tet::calc_dvdz(double dvdz[DIM][NPI],std::vector <Node> const& myNode)
-{
-for(int k=0;k<NPI;k++)
-	{ 
-	dvdz[0][k]= myNode[ind[0]].v0.x()*dadz[0][k] + myNode[ind[1]].v0.x()*dadz[1][k] + myNode[ind[2]].v0.x()*dadz[2][k] + myNode[ind[3]].v0.x()*dadz[3][k]; 
-	dvdz[1][k]= myNode[ind[0]].v0.y()*dadz[0][k] + myNode[ind[1]].v0.y()*dadz[1][k] + myNode[ind[2]].v0.y()*dadz[2][k] + myNode[ind[3]].v0.y()*dadz[3][k];
-	dvdz[2][k]= myNode[ind[0]].v0.z()*dadz[0][k] + myNode[ind[1]].v0.z()*dadz[1][k] + myNode[ind[2]].v0.z()*dadz[2][k] + myNode[ind[3]].v0.z()*dadz[3][k];
-	}
-}
 
 void Tet::integrales(std::vector<Tetra::prm> const& params,std::vector <Node> const& myNode,double Hext[DIM],double Vz,double theta,double dt,double tau_r,gmm::dense_matrix <double> &AE, std::vector <double> &BE)
 {
@@ -284,6 +201,18 @@ fem.stat.R = R;
     }
 }
 
+void Tet::getNod(gmm::dense_matrix <double> &nod,std::vector <Node> const& myNode)
+{
+for (int i=0; i<N; i++)
+    {
+    int i_= ind[i];
+    nod(0,i) = myNode[i_].p.x();
+    nod(1,i) = myNode[i_].p.y();
+    nod(2,i) = myNode[i_].p.z();
+    }
+}
+
+
 void Tet::calc_vol(std::vector<Node> const& myNode)
 {
 int i0,i1,i2,i3;
@@ -310,4 +239,16 @@ X(1,0)= +1.0;   X(1,1)=  0.0;   X(1,2)=  0.0;
 X(2,0)=  0.0;   X(2,1)= +1.0;   X(2,2)=  0.0;
 X(3,0)=  0.0;   X(3,1)=  0.0;   X(3,2)= +1.0;
 }
+
+void Tetra::init_a(double a[N][NPI])
+{
+for (int j=0; j<NPI; j++)
+    {
+    a[0][j]   = 1.-u[j]-v[j]-w[j];
+    a[1][j]   = u[j];
+    a[2][j]   = v[j];
+    a[3][j]   = w[j];
+    }
+}
+
 

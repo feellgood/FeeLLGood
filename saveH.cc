@@ -30,7 +30,7 @@ for (int t=0; t<TET; t++){
 		negphi_nod[i] = -n.phi;
 	    }
 
-    tiny::mult<double, 3, Tetra::N, Tetra::NPI> (nod, te.a, gauss);
+    tiny::mult<double, 3, Tetra::N, Tetra::NPI> (nod, Tetra::a, gauss);
 	tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphi_nod, te.dadx, Hdx);
 	tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphi_nod, te.dady, Hdy);
 	tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphi_nod, te.dadz, Hdz);

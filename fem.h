@@ -115,7 +115,7 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
 	//void savestat(Fem &fem, int nt);/**< file writing function for the statistics (if any) */
 #endif
 
-    ANNkd_tree* kdtree;/**< a kdtree to find efficiently the closest set of nodes to a physical point in the mesh  */
+    ANNkd_tree* kdtree;/**< ANN kdtree to find efficiently the closest set of nodes to a physical point in the mesh  */
     ANNpointArray pts;/**< container for the building of the kdtree (handled by ANN library) */
     
 
@@ -235,7 +235,7 @@ for (int i_t=0; i_t<TET; i_t++){
 		val_nod[ie] = n.u(d);
 	else val_nod[ie] = n.v(d); 
         }
-   tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (val_nod, te.a, val);
+   tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (val_nod, Tetra::a, val);
    sum += tiny::sp<double, Tetra::NPI> (val, te.weight);
    }
 

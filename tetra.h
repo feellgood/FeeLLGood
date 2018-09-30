@@ -49,6 +49,17 @@ const double v[NPI]   = {A,B,B,C,B};/**< some constants to build hat functions *
 const double w[NPI]   = {A,B,C,B,B};/**< some constants to build hat functions */
 const double pds[NPI] = {D,E,E,E,E};/**< some constant weights to build hat functions */
 
+/** constant matrix */
+const double a[N][NPI] = {{1.-u[0]-v[0]-w[0],1.-u[1]-v[1]-w[1],1.-u[2]-v[2]-w[2],1.-u[3]-v[3]-w[3],1.-u[4]-v[4]-w[4]},
+{u[0],u[1],u[2],u[3],u[4]}, {v[0],v[1],v[2],v[3],v[4]}, {w[0],w[1],w[2],w[3],w[4]}};
+
+/*
+a[0][j]   = 1.-u[j]-v[j]-w[j];
+a[1][j]   = u[j];
+a[2][j]   = v[j];
+a[3][j]   = w[j];
+*/
+
 /** \class prm
 region number and material constants
 */
@@ -89,6 +100,11 @@ initialisation of a constant matrix
 */
 void init_dadu(gmm::dense_matrix <double> &X); // ça pourrait faire partie d'un constructeur si Tetra devient une classe
 
+/**
+initialisation of a constant matrix
+ */
+void init_a(double a[N][NPI]);
+
 /** \class Tet
 Tet is a tetrahedron, containing the index references to nodes, must not be flat <br>
 indices convention is<br>
@@ -121,54 +137,14 @@ class Tet{
 		double vol;/**< volume of the tetrahedron */
 		int ind[N];/**< indices to the nodes */
 		double weight[NPI];/**< weights */
-		double a[N][NPI];/**< hat functions */
+		//double a[N][NPI];/**< hat functions */
 		double dadx[N][NPI];/**< variations of hat function along x directions */
 		double dady[N][NPI];/**< variations of hat function along y directions */
 		double dadz[N][NPI];/**< variations of hat function along z directions */
 	
 		/** basic region infos */		
 		inline void infos(){std::cout<< reg << ":" << idxPrm <<std::endl;};
-		/**
-		computes matrix u = unod*a; with unod = {node[ind].u0}_N and a from tetrahedron directly from vector<node>, without any copy		
-		*/		
-		void calc_u(double u[DIM][NPI],std::vector <Node> const& myNode);
 		
-		/**
-		computes dudx = unod * dadx with unod = {node[ind].u0}_N		
-		*/
-		void calc_dudx(double dudx[DIM][NPI],std::vector <Node> const& myNode);
-
-		/**
-		computes dudy = unod * dady with unod = {node[ind].u0}_N		
-		*/
-		void calc_dudy(double dudy[DIM][NPI],std::vector <Node> const& myNode);
-
-		/**
-		computes dudz = unod * dadz with unod = {node[ind].u0}_N		
-		*/
-		void calc_dudz(double dudz[DIM][NPI],std::vector <Node> const& myNode);
-
-		/**
-		computes matrix v = vnod*a; with vnod = {node[ind].v0}_N and a from tetrahedron directly from vector<node>, without any copy		
-		*/
-		void calc_v(double v[DIM][NPI],std::vector <Node> const& myNode);
-
-
-		/**
-		computes dvdx = vnod * dadx with vnod = {node[ind].v0}_N		
-		*/
-		void calc_dvdx(double dvdx[DIM][NPI],std::vector <Node> const& myNode);
-
-		/**
-		computes dvdy = vnod * dady with vnod = {node[ind].v0}_N		
-		*/
-		void calc_dvdy(double dvdy[DIM][NPI],std::vector <Node> const& myNode);
-
-		/**
-		computes dvdz = vnod * dadz with vnod = {node[ind].v0}_N		
-		*/
-		void calc_dvdz(double dvdz[DIM][NPI],std::vector <Node> const& myNode);
-
 		/**
 		computes the integral contribution of the tetrahedron to the evolution of the magnetization
 		*/		
@@ -178,6 +154,8 @@ class Tet{
 		convenient getter for N, usefull for templates projection and assemblage
 		*/
 		inline int getN(void) {return N;}
+		
+		void getNod(gmm::dense_matrix <double> &nod,std::vector <Node> const& myNode);
 		
 		/**
 		computes volume		

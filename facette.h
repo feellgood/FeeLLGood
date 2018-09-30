@@ -68,6 +68,9 @@ class Fac{
 		double weight[NPI];/**< weights table */
 		double a[N][NPI];          /**< hat functions table */
     
+        /** initialize a and weight  */
+        void init(void);
+    
 		/** computes the integral contribution of the triangular face */
 		void integrales(std::vector<Facette::prm> const& params,std::vector <Node> const& myNode, std::vector <double> &BE);
 		

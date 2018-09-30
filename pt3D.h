@@ -30,6 +30,10 @@ namespace Pt
  * sign(x) = 1.0 if x>0, otherwise -1.0
 */
 inline double sign(double x) {if (x>0) return 1.0; else return -1.0; }
+
+/**
+\return \f$ x^2 \f$
+*/
 inline double sq(double x) {return x*x;}
 
 /** \class pt2D
@@ -364,7 +368,7 @@ inline pt3D barycentre(pt3D a,pt3D b,pt3D c) { return( (a+b+c)/3.0 );}
 
 
 /**
- * function template to write into a file the vector<typename>, as a column of text : use overwritten operator<<
+ * function template to write into a file the vector<typename>, as a column of text : use overloaded operator<<
  */
 template <class T>
 int writeToFile(std::string fileName,std::vector<T> v)
