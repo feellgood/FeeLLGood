@@ -21,6 +21,8 @@
  */
 namespace Pt
 {
+    const int DIM = 3;/**< space dimension, usefull for many tables */
+    
     /** \enum index
      specify by integer indices the coordinate
      */
@@ -355,6 +357,37 @@ inline double norme2(pt3D const & p) {return( p.x()*p.x() + p.y()*p.y() + p.z()*
  */
 inline double norme(pt3D const & p) {return sqrt(norme2(p));}
 
+/** 
+\return \f$ \det M \f$
+*/
+inline double det(const double M[DIM][DIM])
+{return( M[0][0]*(M[1][1]*M[2][2] - M[1][2]*M[2][1]) 
+    - M[0][1]*(M[1][0]*M[2][2] - M[1][2]*M[2][0]) 
+    + M[0][2]*(M[1][0]*M[2][1] - M[1][1]*M[2][0]) );}
+
+/** compute in place \f$ M^{-1} \f$, detM must be non zero  */
+inline void inverse(double M[DIM][DIM],double detM) 
+{
+    double m00 = M[0][0];
+    double m01 = M[0][1];
+    double m02 = M[0][2]; 
+    double m10 = M[1][0];
+    double m11 = M[1][1];
+    double m12 = M[1][2];
+    double m20 = M[2][0];
+    double m21 = M[2][1];
+    double m22 = M[2][2];
+
+    M[0][0] = (m11*m22 - m12*m21)/detM;
+    M[0][1] = (m02*m21 - m01*m22)/detM;
+    M[0][2] = (m01*m12 - m02*m11)/detM;
+    M[1][0] = (m12*m20 - m10*m22)/detM;
+    M[1][1] = (m00*m22 - m02*m20)/detM;
+    M[1][2] = (m02*m10 - m00*m12)/detM;
+    M[2][0] = (m10*m21 - m11*m20)/detM;
+    M[2][1] = (m01*m20 - m00*m21)/detM;
+    M[2][2] = (m00*m11 - m01*m10)/detM;
+}    
 
 /**
 returns a random vector with each componant inferior to 1

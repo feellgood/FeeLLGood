@@ -212,6 +212,20 @@ for (int i=0; i<N; i++)
     }
 }
 
+double Tet::Jacobian(double J[DIM][DIM],std::vector <Node> const& myNode)
+{
+Pt::pt3D p0 = myNode[ ind[0] ].p;
+Pt::pt3D p1 = myNode[ ind[1] ].p;
+Pt::pt3D p2 = myNode[ ind[2] ].p;
+Pt::pt3D p3 = myNode[ ind[3] ].p;
+J[0][0] = p1.x()-p0.x(); J[0][1] = p2.x()-p0.x(); J[0][2] = p3.x()-p0.x();   
+J[1][0] = p1.y()-p0.y(); J[1][1] = p2.y()-p0.y(); J[1][2] = p3.y()-p0.y();
+J[2][0] = p1.z()-p0.z(); J[2][1] = p2.z()-p0.z(); J[2][2] = p3.z()-p0.z();
+    
+    return Pt::det(J);
+    
+}
+
 
 void Tet::calc_vol(std::vector<Node> const& myNode)
 {

@@ -50,15 +50,18 @@ const double w[NPI]   = {A,B,C,B,B};/**< some constants to build hat functions *
 const double pds[NPI] = {D,E,E,E,E};/**< some constant weights to build hat functions */
 
 /** constant matrix */
-const double a[N][NPI] = {{1.-u[0]-v[0]-w[0],1.-u[1]-v[1]-w[1],1.-u[2]-v[2]-w[2],1.-u[3]-v[3]-w[3],1.-u[4]-v[4]-w[4]},
-{u[0],u[1],u[2],u[3],u[4]}, {v[0],v[1],v[2],v[3],v[4]}, {w[0],w[1],w[2],w[3],w[4]}};
+const double dadu[N][DIM] = {{-1.,-1.,-1.},{1.,0.,0.},{0.,1.,0.},{0.,0.,1.}};
 
-/*
+
+/** constant matrix \f$ j:0..4 \f$
 a[0][j]   = 1.-u[j]-v[j]-w[j];
 a[1][j]   = u[j];
 a[2][j]   = v[j];
 a[3][j]   = w[j];
 */
+const double a[N][NPI] = {{1.-u[0]-v[0]-w[0],1.-u[1]-v[1]-w[1],1.-u[2]-v[2]-w[2],1.-u[3]-v[3]-w[3],1.-u[4]-v[4]-w[4]},
+{u[0],u[1],u[2],u[3],u[4]}, {v[0],v[1],v[2],v[3],v[4]}, {w[0],w[1],w[2],w[3],w[4]}};
+
 
 /** \class prm
 region number and material constants
@@ -155,8 +158,16 @@ class Tet{
 		*/
 		inline int getN(void) {return N;}
 		
+		/**
+        initializes nod matrix from vector myNode
+        */
 		void getNod(gmm::dense_matrix <double> &nod,std::vector <Node> const& myNode);
 		
+        /**
+        \return \f$ |J| \f$ build Jacobian \f$ J \f$
+        */
+        double Jacobian(double J[DIM][DIM],std::vector <Node> const& myNode);
+        
 		/**
 		computes volume		
 		*/
