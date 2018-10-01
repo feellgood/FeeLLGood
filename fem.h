@@ -62,11 +62,10 @@ struct Stat{
 massive container to grab altogether all parameters of a simulation, including mesh geometry, containers for the mesh
 */
 struct Fem{
-	//int REG; /**< number of regions in the msh file */
 	int NOD;/**< number of nodes in the corresponding container */
 	int FAC;/**< number of faces in the corresponding container */
 	int TET;/**< number of tetrahedron in the corresponding container */
-	int SRC;/**< number of sources for scalfmm */
+	
 	int SEQ;/**< number of sequences, usefull to define a vector applied field eventually varying in time */
 	Pt::pt3D c;/**< center position */	
 	Pt::pt3D l;/**< lengths along x,y,z axis */	
@@ -154,14 +153,9 @@ void restoresol(double scaling /**< [in] scaling factor for physical coordinates
 	std::string *filename /**< [in] */ );
 
 /** reading file function */
-void lecture(Settings &mySets, double scale);//, Regions *regions);
+void lecture(Settings &mySets, double scale);
 
-
-/** decomposition of the tetrahedrons in surface elements; calculation of the normal vectors to the face */
-void femutil_facMs(Settings &settings /**< [in] */);
-
-
-/**  utilitary function to initialize pts,kdtree,l,c,diam, computes the surfaces and volumes and reorientation of the tetrahedrons if needed in fem struct call all femutil_facMs function <br>
+/**  utilitary function to initialize pts,kdtree,l,c,diam, computes the surfaces and volumes and reorientation of the tetrahedrons if needed in fem struct; definition of Ms on facette elements <br>
 Indices and orientation convention : 
 
                         v
@@ -184,7 +178,7 @@ Indices and orientation convention :
                         ` w
 
 */
-void femutil(Settings &settings);
+void femutil(Settings &settings /**< [in] */);
 
 /** find direction of motion of DW */
 void direction(void);

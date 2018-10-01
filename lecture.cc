@@ -132,11 +132,9 @@ if (msh.fail()){
 
 FAC = fac.size();
 TET = tet.size();
-SRC = FAC * Facette::NPI + TET * Tetra::NPI;
 
 while(msh >> symb){
-    if (symb == "$Parameters")
-        break;
+    if (symb == "$Parameters") break;
     }
 
 while(msh >> symb){  // lecture des parametres

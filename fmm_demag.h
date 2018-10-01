@@ -31,19 +31,7 @@ static const int P = 9;/**< constant parameter for some scalfmm templates */
 /** double redefinition for the parametrization of some scalfmm templates */
 #define FReal double
 
-
-/**
-replace enum FParticleType::FParticleTypeSource
-*/
-#define typeSource 0
-
-/**
-replace enum FParticleType::FParticleTypeTarget
-*/
-#define typeTarget 1
-
-
-// pb avec ces templates : ils prennent un argument de plus en 1.5.0 //ct
+// pb avec ces templates : ils prennent un argument de plus en 1.5.0 et 1.4.148 //ct
 //typedef FTypedRotationCell<P>            CellClass; ct
 typedef FTypedRotationCell<FReal, P>            CellClass; /**< convenient typedef for the definition of cell type in scalfmm  */
 
@@ -84,8 +72,6 @@ int init(Fem &fem, OctreeClass* &tree, KernelClass* &kernels, Args... kernelPreA
     if(VERBOSE) { std::cout << "\n>> Using " << NbThreads << " threads.\n" << std::endl; }
 
     const double boxWidth=2.01;//2.01 ct
-
-//const FPoint centerOfBox(0., 0., 0.);
     const FPoint<FReal> centerOfBox(0., 0., 0.);// manque le typename du template FPoint *ct*
 
     // -----------------------------------------------------
@@ -93,72 +79,73 @@ int init(Fem &fem, OctreeClass* &tree, KernelClass* &kernels, Args... kernelPreA
     if (!tree) SYSTEM_ERROR;
     // -----------------------------------------------------
 
-fem.fmm_normalizer = 2./fem.diam*0.999999; // pourquoi 2 ?
+fem.fmm_normalizer = 1./(2.*fem.diam);
 double norm= fem.fmm_normalizer;
 
-const int NOD = fem.NOD;
-const int FAC = fem.FAC;
-const int TET = fem.TET;
-
-    if(VERBOSE){
+if(VERBOSE){
+    std::cout << "fmm_normalizer = " << norm << std::endl;
     std::cout << "Creating & Inserting particles ..." << std::endl;
     std::cout << "\tHeight : " << NbLevels << " \t sub-height : " << SizeSubLevels << std::endl;
     }
     counter.tic();
 
-int idxPart=0;
-for (int i=0; i<NOD; i++, idxPart++){       // cibles (noeuds)
-    double xTarget = (fem.node[i].p.x()-fem.c.x()) * norm;
-    double yTarget = (fem.node[i].p.y()-fem.c.y()) * norm;
-    double zTarget = (fem.node[i].p.z()-fem.c.z()) * norm;
-    const FPoint<FReal> particlePosition(xTarget, yTarget, zTarget);// manque le typename du template FPoint ct
-    //tree->insert(particlePosition, FParticleType::FParticleTypeTarget, idxPart, 0.0);//ct
-	tree->insert(particlePosition, typeTarget, idxPart, 0.0);//ct 1 pour target
-    }
+    Pt::pt3D c = fem.c;
+    FSize idxPart=0;
 
-    std::cout << "Physical nodes inserted." << std::endl;
+    std::for_each(fem.node.begin(),fem.node.end(),
+    [c,norm,&tree,&idxPart](Node const& n)
+        {
+        Pt::pt3D pTarget = n.p - c; pTarget *= norm;
+        const FPoint<FReal> particlePosition(pTarget.x(), pTarget.y(), pTarget.z());
+        tree->insert(particlePosition, FParticleTypeTarget, idxPart, 0.0);//ct 1 pour target    
+        idxPart++;
+        });//end for_each sur node
+  
+    if(VERBOSE) { std::cout << "Physical nodes inserted." << std::endl; }
+
+    std::for_each(fem.tet.begin(),fem.tet.end(),
+    [&fem,c,norm,&tree,&idxPart](Tetra::Tet const& tet)              
+        {       // sources de volume
+        double nod[3][Tetra::N], gauss[3][Tetra::NPI];
+        for (int i=0; i<Tetra::N; i++)
+            {
+            int i_= tet.ind[i];
+            nod[0][i] = fem.node[i_].p.x();
+            nod[1][i] = fem.node[i_].p.y();
+            nod[2][i] = fem.node[i_].p.z();
+            }
+        tiny::mult<double, 3, Tetra::N, Tetra::NPI> (nod, Tetra::a, gauss);
+
+        for (int j=0; j<Tetra::NPI; j++, idxPart++)
+            {
+            Pt::pt3D pSource = Pt::pt3D(gauss[0][j],gauss[1][j],gauss[2][j]) - c; pSource *= norm;
+            const FPoint<FReal> particlePosition(pSource.x(), pSource.y(), pSource.z());
+            tree->insert(particlePosition, FParticleTypeSource, idxPart, 0.0);
+            }
+        });//end for_each on tet
+
+    if(VERBOSE) { std::cout << "Volume charges inserted." << std::endl; }
     
-for (int t=0; t<TET; t++){       // sources de volume
-    Tetra::Tet &tet = fem.tet[t];
-    double nod[3][Tetra::N], gauss[3][Tetra::NPI];
-    for (int i=0; i<Tetra::N; i++){
-        int i_= tet.ind[i];
-        nod[0][i] = fem.node[i_].p.x();
-        nod[1][i] = fem.node[i_].p.y();
-		nod[2][i] = fem.node[i_].p.z();
-	}
-    tiny::mult<double, 3, Tetra::N, Tetra::NPI> (nod, Tetra::a, gauss);
+    std::for_each(fem.fac.begin(),fem.fac.end(),
+    [&fem,c,norm,&tree,&idxPart](Facette::Fac const& fac)
+        {        // sources de surface
+        double nod[3][Facette::N], gauss[3][Facette::NPI];
+        for (int i=0; i<Facette::N; i++)
+            {
+            int i_= fac.ind[i];
+            nod[0][i] = fem.node[i_].p.x();
+            nod[1][i] = fem.node[i_].p.y();
+            nod[2][i] = fem.node[i_].p.z();
+            }
+        tiny::mult<double, 3, Facette::N, Facette::NPI> (nod, fac.a, gauss);
 
-    for (int j=0; j<Tetra::NPI; j++, idxPart++){
-        double xSource = (gauss[0][j]-fem.c.x()) * norm;
-        double ySource = (gauss[1][j]-fem.c.y()) * norm;
-		double zSource = (gauss[2][j]-fem.c.z()) * norm;
-        const FPoint<FReal> particlePosition(xSource, ySource, zSource);// manque le typename du template FPoint ct
-        //tree->insert(particlePosition, FParticleType::FParticleTypeSource, idxPart, 0.0);//ct
-	tree->insert(particlePosition, typeSource, idxPart, 0.0);//ct 0 pour source
-	}
-    }
-
-for (int f=0; f<FAC; f++){        // sources de surface
-    Facette::Fac &fac = fem.fac[f];
-    double nod[3][Facette::N], gauss[3][Facette::NPI];
-    for (int i=0; i<Facette::N; i++){
-        int i_= fac.ind[i];
-        nod[0][i] = fem.node[i_].p.x();
-        nod[1][i] = fem.node[i_].p.y();
-		nod[2][i] = fem.node[i_].p.z();
-	}
-    tiny::mult<double, 3, Facette::N, Facette::NPI> (nod, fac.a, gauss);
-
-    for (int j=0; j<Facette::NPI; j++, idxPart++){
-        double xSource = (gauss[0][j]-fem.c.x()) * norm;
-        double ySource = (gauss[1][j]-fem.c.y()) * norm;
-		double zSource = (gauss[2][j]-fem.c.z()) * norm;
-        const FPoint<FReal> particlePosition(xSource, ySource, zSource);// manque le typename du template FPoint ct
-        //tree->insert(particlePosition, FParticleType::FParticleTypeSource, idxPart, 0.0);//ct
-	tree->insert(particlePosition, typeSource, idxPart, 0.0);//ct 0 pour source
-	}
-    }
+        for (int j=0; j<Facette::NPI; j++, idxPart++)
+            {
+            Pt::pt3D pSource = Pt::pt3D(gauss[0][j],gauss[1][j],gauss[2][j]) - c; pSource *= norm;
+            const FPoint<FReal> particlePosition(pSource.x(), pSource.y(), pSource.z());
+            tree->insert(particlePosition, FParticleTypeSource, idxPart, 0.0);
+            }
+        });//end for_each on fac
     counter.tac();
     if(VERBOSE){
     std::cout << "Done  " << "(@Creating and Inserting Particles = " << counter.elapsed() << "s).\nCreate kernel ..." << std::endl;
@@ -177,7 +164,7 @@ return 0;
 /**
 computes correction on potential on facettes using fem struct
 */
-template <int Hv> double potential(std::vector<Node> const& myNode, Facette::Fac &fac, int i);
+template <int Hv> double potential(std::vector<Node> const& myNode, Facette::Fac const& fac, int i);
 
 
 /**
@@ -195,7 +182,7 @@ if(VERBOSE) { std::cout << "\t magnetostatics ..................... "; }
 const int NOD = fem.NOD;
 const int FAC = fem.FAC;
 const int TET = fem.TET;
-const int SRC = fem.SRC;
+const int SRC = FAC * Facette::NPI + TET * Tetra::NPI;
 
 FReal *srcDen=(FReal*) new FReal[SRC]; if (!srcDen) SYSTEM_ERROR;
 memset(srcDen, 0, SRC*sizeof(FReal));
@@ -206,92 +193,89 @@ memset(corr, 0, NOD*sizeof(FReal));
 int nsrc = 0;
 
 /*********************** TETRAS *********************/
-for (int t=0; t<TET; t++){
-    Tetra::Tet &tet = fem.tet[t];
-    //double Ms = nu0 * settings.param[ std::make_pair("Js",tet.reg) ];
+std::for_each(fem.tet.begin(),fem.tet.end(),
+[&nsrc,&srcDen,&settings,&fem](Tetra::Tet const& tet)              
+    {
     double Ms = nu0 * settings.paramTetra[tet.idxPrm].J;
    /*---------------- INTERPOLATION ---------------*/
     double u_nod[3][Tetra::N];
     double dudx[3][Tetra::NPI], dudy[3][Tetra::NPI], dudz[3][Tetra::NPI];
 
-    for (int i=0; i<Tetra::N; i++) {
-        int i_= tet.ind[i];
-        Node &node = fem.node[i_];
-        //for (int d=0; d<3; d++) u_nod[d][i] = (Hv? node.v[d]: node.u[d]);
-	u_nod[Pt::IDX_X][i] = (Hv? node.v.x(): node.u.x());
-	u_nod[Pt::IDX_Y][i] = (Hv? node.v.y(): node.u.y());
-	u_nod[Pt::IDX_Z][i] = (Hv? node.v.z(): node.u.z());        
-	}
+    for (int i=0; i<Tetra::N; i++)
+        {
+        Node &node = fem.node[ tet.ind[i] ];
+        u_nod[Pt::IDX_X][i] = (Hv? node.v.x(): node.u.x());
+        u_nod[Pt::IDX_Y][i] = (Hv? node.v.y(): node.u.y());
+        u_nod[Pt::IDX_Z][i] = (Hv? node.v.z(): node.u.z());        
+        }
 
-	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, tet.dadx, dudx);
+    tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, tet.dadx, dudx);
 	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, tet.dady, dudy);
 	tiny::mult<double, 3, Tetra::N, Tetra::NPI> (u_nod, tet.dadz, dudz);
    /*-----------------------------------------------*/
 
     for (int j=0; j<Tetra::NPI; j++, nsrc++){
         double div_u = dudx[0][j] + dudy[1][j] + dudz[2][j];
-        double q = -Ms * div_u * tet.weight[j];
-
-        srcDen[nsrc] = q;
+        srcDen[nsrc] = -Ms * div_u * tet.weight[j];
         }
- }
+    });//end for_each on tet
 
 
 /************************ FACES **************************/
-for (int f=0; f<FAC; f++){
-    Facette::Fac &fac = fem.fac[f];
-    //const int N    = Fac::N;
-    //const int NPI  = Fac::NPI;
+const bool pot_corr = settings.analytic_corr; 
+
+std::for_each(fem.fac.begin(),fem.fac.end(),
+[pot_corr,&nsrc,&srcDen,&corr,&fem](Facette::Fac const& fac)
+    {
     double Ms = fac.Ms;
     Pt::pt3D n = fac.n;//nx=fac.nx; ny=fac.ny; nz=fac.nz;
-
-    /** calc u gauss **/  
+        /** calc u gauss **/  
     double u_nod[3][Facette::N], u[3][Facette::NPI];
-        for (int i=0; i<Facette::N; i++){
-        int i_= fac.ind[i];
-        Node &node = fem.node[i_];
-        //for (int d=0; d<3; d++) u_nod[d][i] = (Hv? node.v[d]: node.u[d]);
-	u_nod[Pt::IDX_X][i] = (Hv? node.v.x(): node.u.x());
-	u_nod[Pt::IDX_Y][i] = (Hv? node.v.y(): node.u.y());
-	u_nod[Pt::IDX_Z][i] = (Hv? node.v.z(): node.u.z());
+    for (int i=0; i<Facette::N; i++)
+        {
+        Node &node = fem.node[ fac.ind[i] ];
+        u_nod[Pt::IDX_X][i] = (Hv? node.v.x(): node.u.x());
+        u_nod[Pt::IDX_Y][i] = (Hv? node.v.y(): node.u.y());
+        u_nod[Pt::IDX_Z][i] = (Hv? node.v.z(): node.u.z());
         }
 
     tiny::mult<double, 3, Facette::N, Facette::NPI> (u_nod, fac.a, u);
 
-    /** calc sigma, fill distrib.alpha **/
-    for (int j=0; j<Facette::NPI; j++, nsrc++){
+        /** calc sigma, fill distrib.alpha **/
+    for (int j=0; j<Facette::NPI; j++, nsrc++)
+        {
         double un = u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z();
-        double s = Ms * un * fac.weight[j];
-        srcDen[nsrc] =  s; 
+        srcDen[nsrc] = Ms * un * fac.weight[j];
         }
 
-    if (settings.analytic_corr) {
-      /** calc coord gauss **/
-      double nod[3][Facette::N], gauss[3][Facette::NPI];
-      for (int i=0; i<Facette::N; i++) {
-	      int i_= fac.ind[i];
-	      //Node &node = fem.node[i_]; // inutilisé *ct*
-	      nod[0][i] = fem.node[i_].p.x();
-	      nod[1][i] = fem.node[i_].p.y();
-	      nod[2][i] = fem.node[i_].p.z();
-          }
-      tiny::mult<double, 3, Facette::N, Facette::NPI> (nod, fac.a, gauss);
+    if (pot_corr)
+        {/** calc coord gauss **/
+        double nod[3][Facette::N], gauss[3][Facette::NPI];
+        for (int i=0; i<Facette::N; i++)
+            {
+            int i_= fac.ind[i];
+            nod[0][i] = fem.node[i_].p.x();
+            nod[1][i] = fem.node[i_].p.y();
+            nod[2][i] = fem.node[i_].p.z();
+            }
+        tiny::mult<double, 3, Facette::N, Facette::NPI> (nod, fac.a, gauss);
 
       /** calc corr node by node **/
-      for (int i=0; i<Facette::N; i++) {
-	      int i_= fac.ind[i];
-	      
-		Pt::pt3D p_i_ = fem.node[i_].p;	      
-		for (int j=0; j<Facette::NPI; j++) {
-	          Pt::pt3D pg = Pt::pt3D(gauss[Pt::IDX_X][j], gauss[Pt::IDX_Y][j], gauss[Pt::IDX_Z][j]);
-              double rij = Pt::dist(p_i_,pg);
-	          double sj = Ms* ( u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z() );
-	          corr[i_]-= sj/rij * fac.weight[j];
-	          }
-	      corr[i_]+= potential<Hv>(fem.node, fac, i);
-          }
+      for (int i=0; i<Facette::N; i++)
+        {
+        int i_ = fac.ind[i];
+	    Pt::pt3D p_i_ = fem.node[i_].p;	      
+		for (int j=0; j<Facette::NPI; j++)
+            {
+            Pt::pt3D pg = Pt::pt3D(gauss[Pt::IDX_X][j], gauss[Pt::IDX_Y][j], gauss[Pt::IDX_Z][j]);
+            double rij = Pt::dist(p_i_,pg);
+            double sj = Ms* ( u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z() );
+            corr[i_]-= sj/rij * fac.weight[j];
+            }
+        corr[i_]+= potential<Hv>(fem.node, fac, i);
+        }
       }
-   }
+   });// end for_each on fac
 
 fflush(NULL);
 
@@ -351,7 +335,7 @@ delete [] corr;
 }
 
 template <int Hv>
-double potential(std::vector<Node> const& myNode, Facette::Fac &fac, int i) // template, mais Hv est utilisé comme un booleen 
+double potential(std::vector<Node> const& myNode, Facette::Fac const& fac, int i) // template, mais Hv est utilisé comme un booleen 
 {
   double Ms = fac.Ms;
   Pt::pt3D n = fac.n;
