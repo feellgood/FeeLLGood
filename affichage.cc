@@ -1,18 +1,12 @@
 #include "fem.h"
 
-
-
-using namespace std;
-
 void Fem::affichage(void)
 {
-cout << "This is feeLLGood SHA1= " + string(SHAnumber) << endl;
-    
-cout << "diam bounding box ="<< diam << endl;
-	//cout << "\n\t regions\t\t" << REG << endl;
-cout << "\t noeuds\t\t\t" << NOD << endl;
-cout << "\t faces\t\t\t" << FAC << endl;
-cout << "\t tetraedres\t\t" << TET << endl;
-cout << "\t surface\t\t"  << surf << endl;
-cout << "\t volume\t\t\t" << vol << endl;
+std::cout << "This is feeLLGood SHA1= " + std::string(SHAnumber) << std::endl;
+std::cout << "diam bounding box ="<< diam << std::endl;
+std::cout << "\t noeuds\t\t\t" << node.size() << std::endl;
+std::cout << "\t faces\t\t\t" << fac.size() << std::endl;
+std::cout << "\t tetraedres\t\t" << tet.size() << std::endl;
+std::cout << "\t Total surface\t\t"  << surf << std::endl;
+std::cout << "\t Total volume\t\t\t" << vol << std::endl;
 }

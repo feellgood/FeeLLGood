@@ -246,14 +246,6 @@ vol  = 1./6.* pScal(vec,p3-p0);
       }
 }
 
-void Tetra::init_dadu(gmm::dense_matrix <double> &X)
-{
-X(0,0)= -1.0;   X(0,1)= -1.0;   X(0,2)= -1.0;
-X(1,0)= +1.0;   X(1,1)=  0.0;   X(1,2)=  0.0;
-X(2,0)=  0.0;   X(2,1)= +1.0;   X(2,2)=  0.0;
-X(3,0)=  0.0;   X(3,1)=  0.0;   X(3,2)= +1.0;
-}
-
 void Tetra::init_a(double a[N][NPI])
 {
 for (int j=0; j<NPI; j++)

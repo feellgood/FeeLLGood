@@ -44,6 +44,7 @@ for(unsigned int i=0;i<mySettings.paramTetra.size();i++) {mySettings.paramTetra[
 for(unsigned int i=0;i<mySettings.paramFacette.size();i++) {mySettings.paramFacette[i].infos();}
 
 fem.femutil(mySettings);
+
 fem.chapeaux(mySettings.EPSILON);
 fem.affichage();
 

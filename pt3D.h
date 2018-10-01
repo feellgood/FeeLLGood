@@ -291,7 +291,10 @@ public:
      scaling factor mainly for writing files in user units
      */
     inline void rescale(double scaling) {_x *= scaling; _y *= scaling; _z *= scaling; }
-    
+   
+    /** \return max length coordinate */
+    inline double maxLength(void) {return std::max(_z,std::max(_y,_x));}   
+   
 private:
     double _x;/**< rectangular X coordinate */
     double _y;/**< rectangular Y coordinate */

@@ -100,11 +100,6 @@ struct prm
 
 /**
 initialisation of a constant matrix
-*/
-void init_dadu(gmm::dense_matrix <double> &X); // ça pourrait faire partie d'un constructeur si Tetra devient une classe
-
-/**
-initialisation of a constant matrix
  */
 void init_a(double a[N][NPI]);
 

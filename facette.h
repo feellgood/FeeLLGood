@@ -58,6 +58,8 @@ class Fac{
 		inline Fac() {reg = 0;} /**< default constructor */
 		/** constructor from a region number and three indices */		
 		inline Fac(int r,int i0,int i1,int i2) {reg = r; ind[0]=i0;ind[1]=i1;ind[2]=i2;}
+		/** constructor from a region number, idxPrm and three indices */		
+		inline Fac(int r,int idx,int i0,int i1,int i2) {reg = r; idxPrm=idx; ind[0]=i0;ind[1]=i1;ind[2]=i2;}
 		
 		int reg;/**< .msh region number */
 		int idxPrm;/**< index of the material parameters of the facette */		

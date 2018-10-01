@@ -44,12 +44,6 @@ It does also contains the definition of many constants for the solver, and for s
 const bool U = true;/**< used as a template parameter */
 const bool V = false;/**< used as a template parameter */
 
-const int D = 3;         /**< dimension, required by ANN for kdTree */
-const double invD = 1./(double)D;/**< convenient const value */
-
-
-
-
 /** \struct Stat
 used to build some statistics, with GSL library
 */
@@ -162,16 +156,13 @@ void restoresol(double scaling /**< [in] scaling factor for physical coordinates
 /** reading file function */
 void lecture(Settings &mySets, double scale);//, Regions *regions);
 
-/** initialize pts,kdtree,l,c,diam in fem struct */
-void femutil_node(void);
-
 
 /** decomposition of the tetrahedrons in surface elements; calculation of the normal vectors to the face */
 void femutil_facMs(Settings &settings /**< [in] */);
 
 
-/** utilitary function to call all femutil_xxxxx functions <br>
-calculation of the volumes and reorientation of the tetrahedrons if needed in fem struct with the following convention :
+/**  utilitary function to initialize pts,kdtree,l,c,diam, computes the surfaces and volumes and reorientation of the tetrahedrons if needed in fem struct call all femutil_facMs function <br>
+Indices and orientation convention : 
 
                         v
                       .
@@ -192,7 +183,7 @@ calculation of the volumes and reorientation of the tetrahedrons if needed in fe
                      `\.
                         ` w
 
- and calculation of all elementary surfaces and total surface in the face container in fem struct */
+*/
 void femutil(Settings &settings);
 
 /** find direction of motion of DW */
