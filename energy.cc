@@ -1,12 +1,7 @@
 #include "fem.h"
 
-using namespace std;
-
 void Fem::energy(Settings &settings)
 {
-//pair <string,int> p;
-//map <pair<string,int>,double> &param = settings.param;
-
 Etot = 0.0;
 double _E[5] = {0.0,0.0,0.0,0.0,0.0};
 
