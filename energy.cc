@@ -16,41 +16,24 @@ double uz_drift=2.*DW_z/l.z()*DW_dir;
 for (int i_t=0; i_t<TET; i_t++) {
 	
     Tetra::Tet &te = tet[i_t];
-    
     Tetra::prm & param = settings.paramTetra[te.idxPrm];
     
-    //const int reg = te.reg;
-    //p = make_pair("Ae", reg);
-    double Ae = param.A; //settings.param[p];
-    
-    //p = make_pair("Js", reg);
-    double Js = param.J;//.param[p];
+    double Ae = param.A;
+    double Js = param.J;
     double Ms = nu0 * Js;
 
-    //p=make_pair("Ka",reg);
-    double K = param.K;//.param[p];		//cout << ", Ka=" << K;
-    //p=make_pair("Ka3",reg);
-    double K3 = param.K3;//.param[p];   	//cout << ", Ka3=" << K3;
-
-    //p=make_pair("a1",reg);      
-    double uk00 = param.uk[0][0];//settings.param[p];  	//cout << ", a1=" << k0;
-    //p=make_pair("a2",reg);      
-    double uk01 = param.uk[0][1];  	//cout << ", a2=" << k1;
-    //p=make_pair("a3",reg);      
-    double uk02 = param.uk[0][2];  	//cout << ", a3=" << k2;
-    //p=make_pair("b1",reg);      
-    double uk10 = param.uk[1][0];  	//cout << ", a1=" << k0;
-    //p=make_pair("b2",reg);      
-    double uk11 = param.uk[1][1];  	//cout << ", a2=" << k1;
-    //p=make_pair("b3",reg);      
-    double uk12 = param.uk[1][2];  	//cout << ", a3=" << k2;
-    //p=make_pair("c1",reg);      
-    double uk20 = param.uk[2][0];  	//cout << ", a1=" << k0;
-    //p=make_pair("c2",reg);      
-    double uk21 = param.uk[2][1];  	//cout << ", a2=" << k1;
-    //p=make_pair("c3",reg);      
-    double uk22 = param.uk[2][2];  	//cout << ", a3=" << k2;	
-    //p = make_pair("alpha", reg);double alpha = fem.param[p];    
+    double K = param.K;
+    double K3 = param.K3;
+    
+    double uk00 = param.uk[0][0];
+    double uk01 = param.uk[0][1];
+    double uk02 = param.uk[0][2];
+    double uk10 = param.uk[1][0];
+    double uk11 = param.uk[1][1];
+    double uk12 = param.uk[1][2];
+    double uk20 = param.uk[2][0];
+    double uk21 = param.uk[2][1];
+    double uk22 = param.uk[2][2];   
    
    /*-------------------- INTERPOLATION --------------------*/
     double u_nod[3][Tetra::N], u[3][Tetra::NPI];
@@ -59,12 +42,11 @@ for (int i_t=0; i_t<TET; i_t++) {
     double phi_nod[Tetra::N], negphi_nod[Tetra::N], Hdx[Tetra::NPI], Hdy[Tetra::NPI], Hdz[Tetra::NPI];
 
     for (int i=0; i<Tetra::N; i++)
-	{
+        {
         int i_= te.ind[i];
         Node &n = node[i_];
-        //for (int d=0; d<3; d++) { u_nod[d][i] = n.u[d]; }
-	u_nod[Pt::IDX_X][i] = n.u.x(); u_nod[Pt::IDX_Y][i] = n.u.y(); u_nod[Pt::IDX_Z][i] = n.u.z();
-           phi_nod[i] =  n.phi;
+        u_nod[Pt::IDX_X][i] = n.u.x(); u_nod[Pt::IDX_Y][i] = n.u.y(); u_nod[Pt::IDX_Z][i] = n.u.z();
+        phi_nod[i] =  n.phi;
         negphi_nod[i] = -n.phi;
         }
 
@@ -121,22 +103,14 @@ for (int i_t=0; i_t<TET; i_t++) {
 	
 for (int i_t=0; i_t<FAC; i_t++) {
 	Facette::Fac &fa = fac[i_t];
-    //const int reg = fa.reg;
     double Ms = fa.Ms;
     Pt::pt3D n = fa.n;
 
     Facette::prm & param = settings.paramFacette[fa.idxPrm];
-    //p=make_pair("Ks",reg);      
-    double K = param.Ks; //settings.param[p];	//cout << ", Ks=" << K;
-	
-    //p=make_pair("a1",reg);      
-    double uk00 = param.uk[0]; //settings.param[p];
-	
-    //p=make_pair("a2",reg);      
-    double uk01 = param.uk[1]; //settings.param[p];
-	
-    //p=make_pair("a3",reg);      
-    double uk02 = param.uk[2]; //settings.param[p];    
+    double K = param.Ks;
+	double uk00 = param.uk[0];
+	double uk01 = param.uk[1];
+	double uk02 = param.uk[2];    
 		
 	/*-------------------- INTERPOLATION --------------------*/
 	double u_nod[3][Facette::N], u[3][Facette::NPI];
@@ -147,16 +121,15 @@ for (int i_t=0; i_t<FAC; i_t++) {
 		{
 		int i_= fa.ind[i];
 		Node &n = node[i_];
-		//for (int d=0; d<3; d++) { u_nod[d][i] = n.u[d]; }
 		u_nod[Pt::IDX_X][i] = n.u.x(); u_nod[Pt::IDX_Y][i] = n.u.y(); u_nod[Pt::IDX_Z][i] = n.u.z();	        
 		phi_nod[i] =  n.phi;
-	        }
+        }
 
-	tiny::transposed_mult<double, Facette::N, Facette::NPI> (phi_nod, fa.a, phi);
-		
-	tiny::mult<double, 3, Facette::N, Facette::NPI> (u_nod, fa.a, u);
+	tiny::transposed_mult<double, Facette::N, Facette::NPI> (phi_nod, Facette::a, phi);
+	tiny::mult<double, 3, Facette::N, Facette::NPI> (u_nod, Facette::a, u);
 	
-    for (int npi=0; npi<Facette::NPI; npi++) { q[npi] = Ms * (u[0][npi]*n.x() + u[1][npi]*n.y() + u[2][npi]*n.z()); }
+    for (int npi=0; npi<Facette::NPI; npi++)
+        { q[npi] = Ms * (u[0][npi]*n.x() + u[1][npi]*n.y() + u[2][npi]*n.z()); }
 	
 	/*-------------------------------------------------------*/	    
 	double dens[Facette::NPI];

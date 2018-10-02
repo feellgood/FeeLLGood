@@ -4,19 +4,6 @@
 
 using namespace Facette;
 
-void Fac::init(void)
-{
-for (int j=0; j<NPI; j++)
-    {
-    a[0][j] = 1.-u[j]-v[j];
-    a[1][j] = u[j];
-    a[2][j] = v[j];
-    weight[j] = 2.*surf*pds[j]; // detJ = 2*surf;
-    }    
-    
-}
-
-
 void Fac::integrales(std::vector<Facette::prm> const& params, std::vector<Node> const& myNode, std::vector <double> &BE)
 {
 double Js = params[idxPrm].Js;

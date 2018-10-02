@@ -137,7 +137,7 @@ if(VERBOSE){
             nod[1][i] = fem.node[i_].p.y();
             nod[2][i] = fem.node[i_].p.z();
             }
-        tiny::mult<double, 3, Facette::N, Facette::NPI> (nod, fac.a, gauss);
+        tiny::mult<double, 3, Facette::N, Facette::NPI> (nod, Facette::a, gauss);
 
         for (int j=0; j<Facette::NPI; j++, idxPart++)
             {
@@ -239,7 +239,7 @@ std::for_each(fem.fac.begin(),fem.fac.end(),
         u_nod[Pt::IDX_Z][i] = (Hv? node.v.z(): node.u.z());
         }
 
-    tiny::mult<double, 3, Facette::N, Facette::NPI> (u_nod, fac.a, u);
+    tiny::mult<double, 3, Facette::N, Facette::NPI> (u_nod, Facette::a, u);
 
         /** calc sigma, fill distrib.alpha **/
     for (int j=0; j<Facette::NPI; j++, nsrc++)
@@ -258,7 +258,7 @@ std::for_each(fem.fac.begin(),fem.fac.end(),
             nod[1][i] = fem.node[i_].p.y();
             nod[2][i] = fem.node[i_].p.z();
             }
-        tiny::mult<double, 3, Facette::N, Facette::NPI> (nod, fac.a, gauss);
+        tiny::mult<double, 3, Facette::N, Facette::NPI> (nod, Facette::a, gauss);
 
       /** calc corr node by node **/
       for (int i=0; i<Facette::N; i++)

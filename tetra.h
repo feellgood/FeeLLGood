@@ -134,8 +134,7 @@ class Tet{
 		int idxPrm;/**< index of the material parameters of the tetrahedron */		
 		double vol;/**< volume of the tetrahedron */
 		int ind[N];/**< indices to the nodes */
-		double weight[NPI];/**< weights */
-		//double a[N][NPI];/**< hat functions */
+		double weight[NPI];/**< weights \f$ w_i = |J| p_i  \f$ with  \f$ p_i = pds[i] = (D,E,E,E,E) \f$ */
 		double dadx[N][NPI];/**< variations of hat function along x directions */
 		double dady[N][NPI];/**< variations of hat function along y directions */
 		double dadz[N][NPI];/**< variations of hat function along z directions */
