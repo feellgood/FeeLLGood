@@ -98,11 +98,6 @@ struct prm
 		};	
 	};
 
-/**
-initialisation of a constant matrix
- */
-void init_a(double a[N][NPI]);
-
 /** \class Tet
 Tet is a tetrahedron, containing the index references to nodes, must not be flat <br>
 indices convention is<br>
@@ -139,6 +134,9 @@ class Tet{
 		double dady[N][NPI];/**< variations of hat function along y directions */
 		double dadz[N][NPI];/**< variations of hat function along z directions */
 	
+		/** initializes weight and dad(x|y|z) */
+		void init(std::vector<Node> const& myNode,double epsilon);
+		
 		/** basic region infos */		
 		inline void infos(){std::cout<< reg << ":" << idxPrm <<std::endl;};
 		

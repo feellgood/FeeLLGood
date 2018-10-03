@@ -77,7 +77,7 @@ class Fac{
 		int ind[N];/**< indices table of the nodes */
 		double weight[NPI];/**< weights table */
 		
-        /** initialize a and weight  */
+        /** initialize weight  */
         inline void init(void)
             {for (int j=0; j<NPI; j++) {weight[j] = 2.*surf*pds[j]; }}// detJ = 2*surf;
     

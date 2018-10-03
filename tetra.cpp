@@ -10,6 +10,34 @@
 
 using namespace Tetra;
 
+void Tet::init(std::vector<Node> const& myNode,double epsilon)
+{
+double J[Pt::DIM][Pt::DIM];
+double detJ = Jacobian(J,myNode);
+double da[N][Pt::DIM];
+    
+if (fabs(detJ) < epsilon){
+        #ifdef LIBRARY
+            ostringstream what;
+            what << "Singular jacobian in tetrahedron ";
+            throw runtime_error(what.str());
+        #else
+            std::cerr << "jacobienne singuliere ds le tetraedre " << std::endl;
+			infos();
+            SYSTEM_ERROR;
+        #endif
+            }
+Pt::inverse(J,detJ);
+tiny::mult<double, N, Pt::DIM, Pt::DIM> (Tetra::dadu, J, da);
+    
+for (int j=0; j<NPI; j++)
+    {
+    for (int i=0; i<N; i++)
+        { dadx[i][j]=da[i][0]; dady[i][j]=da[i][1]; dadz[i][j]=da[i][2]; }
+    weight[j]    = detJ * Tetra::pds[j];
+    }    
+}
+
 void Tet::integrales(std::vector<Tetra::prm> const& params,std::vector <Node> const& myNode,double Hext[DIM],double Vz,double theta,double dt,double tau_r,gmm::dense_matrix <double> &AE, std::vector <double> &BE)
 {
 double alpha = params[idxPrm].alpha;
@@ -222,8 +250,7 @@ J[0][0] = p1.x()-p0.x(); J[0][1] = p2.x()-p0.x(); J[0][2] = p3.x()-p0.x();
 J[1][0] = p1.y()-p0.y(); J[1][1] = p2.y()-p0.y(); J[1][2] = p3.y()-p0.y();
 J[2][0] = p1.z()-p0.z(); J[2][1] = p2.z()-p0.z(); J[2][2] = p3.z()-p0.z();
     
-    return Pt::det(J);
-    
+return Pt::det(J);
 }
 
 
@@ -245,16 +272,3 @@ vol  = 1./6.* pScal(vec,p3-p0);
       if(VERBOSE) { std::cout << "ill-oriented tetrahedron, now corrected!"<< std::endl; }
       }
 }
-
-void Tetra::init_a(double a[N][NPI])
-{
-for (int j=0; j<NPI; j++)
-    {
-    a[0][j]   = 1.-u[j]-v[j]-w[j];
-    a[1][j]   = u[j];
-    a[2][j]   = v[j];
-    a[3][j]   = w[j];
-    }
-}
-
-

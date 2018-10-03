@@ -46,14 +46,13 @@ for(unsigned int i=0;i<mySettings.paramFacette.size();i++) {mySettings.paramFace
 fem.femutil(mySettings);
 
 fem.chapeaux(mySettings.EPSILON);
-fem.affichage();
-
-fem.t=0.;
 
 if (mySettings.restore) {fem.restoresol(mySettings.getScale(), nullptr);}
 else {fem.init_distrib();}
 
 fem.direction();/* determination de la direction de propagation de la paroi */
+fem.t=0.;
+fem.affichage();
 
 //once fem containers are ok, we build a linAlgebra object
 LinAlgebra linAlg = LinAlgebra(mySettings,fem.node,fem.tet,fem.fac);

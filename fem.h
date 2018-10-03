@@ -138,8 +138,13 @@ Etot0 = Etot;
 /**
 computes the hat functions for all containers
 */
-void chapeaux(double epsilon /**< [in] if \f$ | detJ | < \epsilon \f$ jacobian is considered degenerated */); 
+inline void chapeaux(double epsilon /**< [in] if \f$ | detJ | < \epsilon \f$ jacobian is considered degenerated */) 
+{
+std::for_each(fac.begin(),fac.end(),[](Facette::Fac &f) {f.init();});
 
+std::vector<Node> const& vecNodes = node;
+std::for_each(tet.begin(),tet.end(),[vecNodes,epsilon](Tetra::Tet &t) { t.init(vecNodes,epsilon); });
+}
 /**
 computes an analytical initial magnetization distribution as a starting point for the simulation
 */
