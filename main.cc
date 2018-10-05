@@ -10,7 +10,6 @@ int main(int argc,char* argv[])
 Settings mySettings = Settings();
 Fem fem;
 
-
 OctreeClass *tree    = nullptr;
 KernelClass *kernels = nullptr; 
 
@@ -40,9 +39,6 @@ mySettings.printToTerminal(seq);
 //mySettings.dialog(seq); // deprecated
 fem.lecture(mySettings, 0.0);//, nullptr);
 
-for(unsigned int i=0;i<mySettings.paramTetra.size();i++) {mySettings.paramTetra[i].infos();}
-for(unsigned int i=0;i<mySettings.paramFacette.size();i++) {mySettings.paramFacette[i].infos();}
-
 fem.femutil(mySettings);
 
 fem.chapeaux(mySettings.EPSILON);
@@ -61,7 +57,8 @@ fmm::init< CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmCl
 
 double dt0= mySettings.dt;
 int nseq=0;
-for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
+for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it)
+    {
     double &Bini=it->Bini;
     double &Bfin=it->Bfin;
     double &dB=it->dB;
@@ -113,14 +110,9 @@ while (t < mySettings.tf)
     cout << "\n ------------------------------\n";
     if (flag) cout << "    t  : same (" << flag << ")" << endl;
     else cout << "nt = " << nt << ", t = " << t << endl; // *ct*
-            //else cout << boost::format("nt = %d,  t = %2.8g") % nt % t << endl;
-		            
-    cout << "dt = " << dt << endl << endl;
-    if (dt < mySettings.DTMIN)
-        {
-        fem.reset();
-        break;
-        }
+    
+	cout << "dt = " << dt << endl << endl;
+    if (dt < mySettings.DTMIN) { fem.reset();break; }
 
         /* changement de referentiel */
     fem.DW_vz += fem.DW_dir*fem.moy<V>(Pt::IDX_Z)*fem.l.z()/2.;
@@ -130,45 +122,28 @@ while (t < mySettings.tf)
     int err = linAlg.vsolve(dt,nt);  
     fem.vmax = linAlg.get_v_max();
     
-    if (err) { cout << "err : " << err << endl;
-		    	flag++; dt*= 0.5; mySettings.dt=dt; continue;}
+    if (err) { cout << "err : " << err << endl;flag++; dt*= 0.5; mySettings.dt=dt; continue;}
 
     double dumax = dt*fem.vmax;
-    //cout << boost::format("\t dumax = %2.2e,  vmax = %2.2e") % dumax % fem.vmax<< endl;// *ct*
     cout << "\t dumax = " << dumax << ",  vmax = "<< fem.vmax << endl;
     if (dumax < mySettings.DUMIN) break; 
             
-    if (dumax > mySettings.DUMAX)
-        { flag++; dt*= 0.5; mySettings.dt=dt; continue;}
+    if (dumax > mySettings.DUMAX) { flag++; dt*= 0.5; mySettings.dt=dt; continue;}
           
-    fmm::demag<0, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> 
-		(fem,mySettings, tree, kernels); // Hd(u)
+    fmm::demag<0, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree, kernels); // Hd(u)
 #ifdef ORD2
-    fmm::demag<1, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> 
-		(fem,mySettings, tree, kernels); // Hd(v)
+    fmm::demag<1, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree, kernels); // Hd(v)
 #endif
 
     fem.energy(mySettings);
-
-         /*   cout << boost::format("\t energy %+2.3e") % fem.Etot << endl;
-              cout << boost::format("\t   (dE/dt %+2.2e, av2 %+2.2e)")
-                         % (fem.evol/dt) % fem.phy << endl;
-         */
-//            double dissip = 1. - fem.evol/dt/fem.phy;
-//            cout << boost::format("\t dissipation %+3.1f") %(dissip*100) <<'%'<< endl;
     if (fem.evol > 0.0) { cout << "Warning energy increases! : " << fem.evol << endl; }
 
-/* mise a jour de la vitesse du dernier referentiel et deplacement de paroi */
-    fem.DW_vz0 = fem.DW_vz; 
+    fem.DW_vz0 = fem.DW_vz;/* mise a jour de la vitesse du dernier referentiel et deplacement de paroi */ 
     fem.DW_z  += fem.DW_vz*dt;
-
     fem.evolution(); t+=dt; fem.t=t; nt++; flag=0;
-
-	double mz = fem.moy<U>(Pt::IDX_Z);	    
+    double mz = fem.moy<U>(Pt::IDX_Z);	    
 	fem.recentrage( 0.1,mz);
-
     fem.saver(mySettings,fout,nt);
-
     dt = min(1.1*dt, mySettings.DTMAX); 
     mySettings.dt=dt;
     }//endwhile

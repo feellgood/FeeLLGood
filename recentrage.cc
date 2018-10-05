@@ -4,17 +4,15 @@
 /*   recentrage de la paroi selon Oz       */
 /*-----------------------------------------*/
 
-using namespace std;
-
 bool Fem::recentrage(double thres,double mz) // abs(thres) < 1
 {
 time_t timeStart;
 time(&timeStart);
 
-thres=min(abs(thres), 1.);
+thres = std::min(abs(thres), 1.);
 if (fabs(mz)<thres) return false;
 
-if(VERBOSE) {cout << "%5t centering %30T." << flush;}// cout << boost::format("%5t centering %30T.") <<flush;// *ct*
+if(VERBOSE) {std::cout << "centering ..." << std::flush;}
 
 const int NPS=1;
 int ns;
@@ -54,7 +52,7 @@ if (u2L*u2R>0) {
 #ifdef LIBRARY
     throw runtime_error("Error No Domain Wall");
 #else
-    cout << "Error No Domain Wall" << endl;
+    std::cout << "Error No Domain Wall" << std::endl;
     exit(1);
 #endif
    }
@@ -98,6 +96,6 @@ delete [] dists;
 
 time_t timeEnd;
 time(&timeEnd);
-if(VERBOSE) { cout << "elapsed time = "<< difftime(timeEnd,timeStart) << "s" <<endl; }
+if(VERBOSE) { std::cout << "elapsed time = "<< difftime(timeEnd,timeStart) << "s" << std::endl; }
 return true;
 }

@@ -138,7 +138,7 @@ class Tet{
 		void init(std::vector<Node> const& myNode,double epsilon);
 		
 		/** basic region infos */		
-		inline void infos(){std::cout<< reg << ":" << idxPrm <<std::endl;};
+		inline void infos(){std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2]<< "\t"<< ind[3] <<std::endl;};
 		
 		/**
 		computes the integral contribution of the tetrahedron to the evolution of the magnetization

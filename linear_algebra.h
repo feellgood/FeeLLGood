@@ -25,13 +25,13 @@ class LinAlgebra
 {
 public:
 	/** constructor */	
-	inline LinAlgebra(Settings &s,
-                      std::vector<Node> const& myNode,
-                      std::vector <Tetra::Tet> const& myTet,
-                      std::vector <Facette::Fac> const& myFace) 
-    {settings = s; refNode = myNode; refTet = myTet; refFac = myFace;}
+	inline LinAlgebra(Settings & s,
+                      std::vector<Node> & myNode,
+                      std::vector <Tetra::Tet> & myTet,
+                      std::vector <Facette::Fac> & myFace) 
+    {settings = &s; refNode = &myNode; refTet = &myTet; refFac = &myFace;}
 	
-	gmm::diagonal_precond <read_matrix>  *prc;/**< diagonal preconditionner */
+	gmm::diagonal_precond <read_matrix>  * prc;/**< diagonal preconditionner */
 
 	int  vsolve(double dt,long nt);/**< solver */
 
@@ -44,22 +44,29 @@ public:
     /** getter for v_max */
     inline double get_v_max() {return v_max;}
     
+    /** getter node */
+    inline Node getNode(int i) {return (*refNode)[i];}
+    
+    /** getter node physical position */
+    inline Pt::pt3D getNodePhysPos(int i) {return (*refNode)[i].p;} 
+    
+    
 private:
     const int MAXITER = 500;/**< maximum number of iteration for biconjugate gradient algorithm */
     const int REFRESH_PRC = 20;/**< refresh every REFRESH_PRC the diagonal preconditioner */
     
-    std::vector<Node>  refNode;/**< direct access to the Nodes */
-	std::vector <Facette::Fac> refFac; /**< direct access to the faces */
-	std::vector <Tetra::Tet> refTet; /**< direct access to the tetrahedrons */
+    std::vector<Node>  *refNode;/**< direct access to the Nodes */
+	std::vector <Facette::Fac> *refFac; /**< direct access to the faces */
+	std::vector <Tetra::Tet> *refTet; /**< direct access to the tetrahedrons */
 	
 	double Hext[DIM];/**< applied field */
     double DW_vz;/**< speed of the domain wall */
-	Settings settings;/**< copy of the settings */
+	Settings *settings;/**< copy of the settings */
     double v_max;/**< maximum speed */
 	
 /** computes the local vector basis {ep,eq} in the tangeant plane for projection on the elements */
 inline void base_projection(void)
-	{ std::for_each(refNode.begin(),refNode.end(),[](Node &n) { n.buildBase_epeq();}); }
+	{ std::for_each(refNode->begin(),refNode->end(),[](Node &n) { n.buildBase_epeq();}); }
 	
 /**
 template function to compute projection of an element <br>
@@ -73,7 +80,7 @@ void projection(T &elt,
 const int N = elt.getN();
 gmm::dense_matrix <double> P(2*N,3*N), PA(2*N,3*N);
 for (int i=0; i<N; i++){
-    Node &n = refNode[elt.ind[i]];
+    Node &n = (*refNode)[elt.ind[i]];
     P(i,i)  = n.ep.x();  P(i,N+i)  = n.ep.y();  P(i,2*N+i)  = n.ep.z();
     P(N+i,i)= n.eq.x();  P(N+i,N+i)= n.eq.y();  P(N+i,2*N+i)= n.eq.z();
     }
@@ -94,7 +101,7 @@ void assemblage(T &elt,
            gmm::dense_matrix <double> &Ke, std::vector <double> &Le,
            write_matrix &K, write_vector &L)
     {
-    const int NOD = refNode.size();
+    const int NOD = refNode->size();
     const int N = elt.getN();
 
     for (int i=0; i < N; i++){

@@ -30,7 +30,7 @@ reset the node magnetization, speed, phi, and phiv
 inline void reset(void) { u=u0; v=v0; phi = phi0; phiv = phiv0;}
 
 /** 
-one step in time, preparation of the magnetization u0,vo,phi0,phiv0 for next time-step
+preparation of the quantities u0,v0,phi0,phiv0 for incomming time-step
 */
 inline void evolution(void) { u0=u; v0=v; phi0 = phi; phiv0 = phiv; }
 
@@ -49,7 +49,7 @@ inline void buildBase_epeq()
 {
 if ( Pt::norme2( u0 ) > 0)
 	{         
-        ep = Pt::rand()*u0;
+    ep = Pt::rand()*u0;
 	ep.normalize();        
 	eq = u0*ep;        
 	}
