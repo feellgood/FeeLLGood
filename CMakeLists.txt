@@ -20,9 +20,7 @@ MESSAGE(STATUS "CXX ${CMAKE_CXX_COMPILER_ID}")
 
 SET(ANN_INCLUDE_DIR ../ann_1.1.2/include/ANN )
 
-#SET(ANN_LIB_DIR ../ann_1.1.2/lib )
-
-SET(GMM_INCLUDE_DIR ../gmm-5.2/include/gmm )
+SET(MTL_INCLUDE_DIR ../mtl4 )
 
 SET(SCALFMM_INCLUDE_DIR ../SCALFMM-1.4-148/Src )
 
@@ -68,7 +66,7 @@ SET( SOURCES config.h pt3D.h tetra.h tetra.cpp facette.h facette.cpp feellgoodSe
 	saveH.cc lecture.cc femutil.cc restoresol.cc direction.cc
 	recentrage.cc energy.cc saver.cc savesol.cc savecfg_vtk.cc vsolve.cc tiny.h)
 
-SET( HEADERS ${ANN_INCLUDE_DIR}/ANN.h ${GMM_INCLUDE_DIR}/gmm.h ${SCALFMM_INCLUDE_DIR}/Kernels/Rotation/FRotationKernel.hpp)
+SET( HEADERS ${ANN_INCLUDE_DIR}/ANN.h ${SCALFMM_INCLUDE_DIR}/Kernels/Rotation/FRotationKernel.hpp)
 
 
 configure_file(config.h.in ./config.h)

@@ -6,6 +6,8 @@
   header containing Fac class, and some constants and a less_than operator to redo orientation of triangular faces
  */
 
+#include "boost/numeric/mtl/mtl.hpp"
+
 #include "config.h"
 #include "node.h"
 
@@ -82,7 +84,7 @@ class Fac{
             {for (int j=0; j<NPI; j++) {weight[j] = 2.*surf*pds[j]; }}// detJ = 2*surf;
     
 		/** computes the integral contribution of the triangular face */
-		void integrales(std::vector<Facette::prm> const& params,std::vector <Node> const& myNode, std::vector <double> &BE);
+		void integrales(std::vector<Facette::prm> const& params,std::vector <Node> const& myNode, mtl::dense_vector <double> &BE);
 		
 		/**
 		convenient getter for N, usefull for templates projection and assemblage

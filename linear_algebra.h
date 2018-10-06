@@ -4,19 +4,19 @@ It encapsulates the calls to GMM , the assemblage and projection of the matrix f
 two templates projection and assemblage template class parameter is either Facette::Fac or Tetra::Tet 
 */
 
-#include "gmm_kernel.h"  // ct gmm_kernel.h plutôt que gmm.h , qui appelle des fichiers de getfem
-#include "gmm_precond_diagonal.h" //ct
+#include "boost/numeric/mtl/mtl.hpp"
+#include "boost/numeric/itl/itl.hpp"
+
+#include <boost/numeric/mtl/matrix/inserter.hpp>
+#include <boost/numeric/mtl/operation/set_to_zero.hpp>
+#include <boost/numeric/mtl/interface/vpt.hpp>
 
 #include "fem.h"
 
 #ifndef linear_algebra_h
 #define linear_algebra_h
 
-typedef gmm::wsvector <double>   write_vector;/**< convenient typedef : a write sparse vector in GMM is a stl::map, complexity for both read and write an element is \f$ \log(N) \f$ */
-typedef gmm::rsvector <double>   read_vector;/**< convenient typedef : a read sparse vector */
-
-typedef gmm::row_matrix	<write_vector>   write_matrix;/**< convenient typedef for row matrix in write mode */
-typedef gmm::row_matrix	<read_vector>    read_matrix;/**< convenient typedef for row matrix in read mode */
+typedef typename mtl::Collection< mtl::compressed2D<double> >::value_type v_type;
 
 /** \class LinAlgebra
 convenient class to grab altogether some part of the calculations involved using gmm solver at each timestep
@@ -31,7 +31,7 @@ public:
                       std::vector <Facette::Fac> & myFace) 
     {settings = &s; refNode = &myNode; refTet = &myTet; refFac = &myFace;}
 	
-	gmm::diagonal_precond <read_matrix>  * prc;/**< diagonal preconditionner */
+	//itl::pc::diagonal < mtl::compressed2D<double> > prc;/**< diagonal preconditionner */
 
 	int  vsolve(double dt,long nt);/**< solver */
 
@@ -74,21 +74,23 @@ template parameter T is either tetra of face
 */
 template <class T>
 void projection(T &elt,
-           gmm::dense_matrix <double> &A,  std::vector <double> &B,
-           gmm::dense_matrix <double> &Ap, std::vector <double> &Bp)
+           mtl::dense2D <double> &A,  mtl::dense_vector <double> &B,
+           mtl::dense2D <double> &Ap, mtl::dense_vector <double> &Bp)
 {
 const int N = elt.getN();
-gmm::dense_matrix <double> P(2*N,3*N), PA(2*N,3*N);
+mtl::dense2D <double> P(2*N,3*N), PA(2*N,3*N);
+mtl::mat::set_to_zero(P);
+mtl::mat::set_to_zero(PA);
+
 for (int i=0; i<N; i++){
     Node &n = (*refNode)[elt.ind[i]];
     P(i,i)  = n.ep.x();  P(i,N+i)  = n.ep.y();  P(i,2*N+i)  = n.ep.z();
     P(N+i,i)= n.eq.x();  P(N+i,N+i)= n.eq.y();  P(N+i,2*N+i)= n.eq.z();
     }
 
-mult(P,A,PA);
-mult(PA, gmm::transposed(P), Ap);
-
-mult(P,B,Bp);
+PA = P*A;
+Ap = PA*trans(P);
+Bp = P*B;
 }
 
 /**
@@ -96,10 +98,11 @@ template function to perform the
 matrix assembly with all the contributions of the tetrahedrons/faces <br>
 template parameter T is either tetra or face
 */
+
 template <class T>
-void assemblage(T &elt,
-           gmm::dense_matrix <double> &Ke, std::vector <double> &Le,
-           write_matrix &K, write_vector &L)
+void assemblage(T &elt,mtl::mat::inserter< mtl::compressed2D<double>,mtl::update_plus<v_type> > ins,
+           mtl::dense2D <double> &Ke, mtl::dense_vector <double> &Le,
+           mtl::compressed2D<double> &K, mtl::dense_vector<double> &L)
     {
     const int NOD = refNode->size();
     const int N = elt.getN();
@@ -108,8 +111,8 @@ void assemblage(T &elt,
         int i_= elt.ind[i];             
         for (int j=0; j < N; j++){
             int j_= elt.ind[j];
-            K(NOD+i_,j_)+= Ke(i,j);      K(NOD+i_, NOD+j_)+= Ke(  i,N+j);
-            K(    i_,j_)+= Ke(N+i,j);    K(    i_, NOD+j_)+= Ke(N+i,N+j);
+            ins(NOD+i_,j_) << Ke(i,j);      ins(NOD+i_, NOD+j_) << Ke(  i,N+j);
+            ins(    i_,j_) << Ke(N+i,j);    ins(    i_, NOD+j_) << Ke(N+i,N+j);
             }
         L[NOD+i_]+= Le[  i];
         L[    i_]+= Le[N+i];

@@ -4,7 +4,7 @@
 
 using namespace Facette;
 
-void Fac::integrales(std::vector<Facette::prm> const& params, std::vector<Node> const& myNode, std::vector <double> &BE)
+void Fac::integrales(std::vector<Facette::prm> const& params, std::vector<Node> const& myNode, mtl::dense_vector <double> &BE)
 {
 double Js = params[idxPrm].Js;
 double Ks = params[idxPrm].Ks;
