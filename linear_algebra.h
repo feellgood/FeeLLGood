@@ -17,6 +17,8 @@ two templates projection and assemblage template class parameter is either Facet
 #define linear_algebra_h
 
 typedef typename mtl::Collection< mtl::compressed2D<double> >::value_type v_type;
+typedef mtl::mat::inserter< mtl::compressed2D<double>,mtl::update_plus<v_type> > sparseInserter;
+
 
 /** \class LinAlgebra
 convenient class to grab altogether some part of the calculations involved using gmm solver at each timestep
@@ -79,8 +81,7 @@ void projection(T &elt,
 {
 const int N = elt.getN();
 mtl::dense2D <double> P(2*N,3*N), PA(2*N,3*N);
-mtl::mat::set_to_zero(P);
-mtl::mat::set_to_zero(PA);
+mtl::mat::set_to_zero(P); mtl::mat::set_to_zero(PA);
 
 for (int i=0; i<N; i++){
     Node &n = (*refNode)[elt.ind[i]];
@@ -100,7 +101,7 @@ template parameter T is either tetra or face
 */
 
 template <class T>
-void assemblage(T &elt,mtl::mat::inserter< mtl::compressed2D<double>,mtl::update_plus<v_type> > ins,
+void assemblage(T &elt,sparseInserter *ins,
            mtl::dense2D <double> &Ke, mtl::dense_vector <double> &Le,
            mtl::compressed2D<double> &K, mtl::dense_vector<double> &L)
     {
@@ -111,8 +112,8 @@ void assemblage(T &elt,mtl::mat::inserter< mtl::compressed2D<double>,mtl::update
         int i_= elt.ind[i];             
         for (int j=0; j < N; j++){
             int j_= elt.ind[j];
-            ins(NOD+i_,j_) << Ke(i,j);      ins(NOD+i_, NOD+j_) << Ke(  i,N+j);
-            ins(    i_,j_) << Ke(N+i,j);    ins(    i_, NOD+j_) << Ke(N+i,N+j);
+            (*ins)(NOD+i_,j_) << Ke(i,j);      (*ins)(NOD+i_, NOD+j_) << Ke(  i,N+j);
+            (*ins)(    i_,j_) << Ke(N+i,j);    (*ins)(    i_, NOD+j_) << Ke(N+i,N+j);
             }
         L[NOD+i_]+= Le[  i];
         L[    i_]+= Le[N+i];

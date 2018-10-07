@@ -21,47 +21,52 @@ if(VERBOSE) { std::cout <<"DW speed = " << DW_vz << "\nmatrix size " << 2*NOD <<
 
 time(&timeStart);
 
-{
-mtl::mat::inserter< mtl::compressed2D<double>,mtl::update_plus<v_type> > ins(Kw,64); //64 maybe too small
+sparseInserter *ins;
+ins = new sparseInserter(Kw,256); //64 maybe too small
+
+mtl::dense2D <double> K(3*Tetra::N,3*Tetra::N), Kp(2*Tetra::N,2*Tetra::N);
+mtl::dense_vector <double> L(3*Tetra::N), Lp(2*Tetra::N);
+mtl::mat::set_to_zero(K); mtl::mat::set_to_zero(Kp);
+mtl::vec::set_to_zero(L); mtl::vec::set_to_zero(Lp);
 
 for_each(refTet->begin(),refTet->end(),
-    [this,dt,&Kw,&Lw,&ins](Tetra::Tet & tet)
+    [this,dt,&Kw,&Lw,&K,&L,&Kp,&Lp,&ins](Tetra::Tet & tet)
         { 
-        mtl::dense2D <double> K(3*Tetra::N,3*Tetra::N), Kp(2*Tetra::N,2*Tetra::N);
-        mtl::dense_vector <double> L(3*Tetra::N), Lp(2*Tetra::N);
+        
         tet.integrales(settings->paramTetra,*refNode,Hext,DW_vz,settings->theta,dt,settings->TAUR,K, L);     
         projection<Tetra::Tet>(tet, K, L, Kp, Lp);
         assemblage<Tetra::Tet>(tet,ins, Kp, Lp, Kw, Lw);
         }
 );
 
+mtl::dense2D <double> Ks(3*Facette::N,3*Facette::N), Ksp(2*Facette::N,2*Facette::N);
+mtl::dense_vector <double> Ls(3*Facette::N), Lsp(2*Facette::N);
+mtl::mat::set_to_zero(Ks); mtl::mat::set_to_zero(Ksp);
+mtl::vec::set_to_zero(Ls); mtl::vec::set_to_zero(Lsp);
+
 for_each(refFac->begin(),refFac->end(),
-    [this,&Kw,&Lw,&ins](Facette::Fac &fac)
+    [this,&Kw,&Lw,&Ks,&Ls,&Ksp,&Lsp,&ins](Facette::Fac &fac)
         {
-        mtl::dense2D <double> K(3*Facette::N,3*Facette::N), Kp(2*Facette::N,2*Facette::N);
-        mtl::dense_vector <double> L(3*Facette::N), Lp(2*Facette::N);
-        fac.integrales(settings->paramFacette,*refNode, L);     
-        projection<Facette::Fac>(fac, K, L, Kp, Lp);
-        assemblage<Facette::Fac>(fac,ins, Kp, Lp, Kw, Lw);    
+        
+        fac.integrales(settings->paramFacette,*refNode, Ls);     
+        projection<Facette::Fac>(fac, Ks, Ls, Ksp, Lsp);
+        assemblage<Facette::Fac>(fac,ins, Ksp, Lsp, Kw, Lw);    
         }
 );
-}//inserter destructor called 
+
+delete ins;
+
 time_t timeEnd;
 time(&timeEnd);
 
 if(VERBOSE) { std::cout << "elapsed time = " << difftime(timeEnd,timeStart) << "s" << std::endl; }
 
 mtl::dense_vector<double> Xw(2*NOD);
+mtl::vec::set_to_zero(Xw);
 
 itl::noisy_iteration<double> bicg_iter(Lw,MAXITER,1e-6);
 
-itl::noisy_iteration<double> gmr_iter(Lw,MAXITER,1e-6);
-
-//bicg_iter.set_maxiter(MAXITER);
-//gmr_iter.set_maxiter(MAXITER);
-
-bicg_iter.set_quite(VERBOSE);
-gmr_iter.set_quite(VERBOSE);
+bicg_iter.set_quite(true);
 
 time(&timeStart);
 
@@ -88,13 +93,23 @@ else if (!(nt % REFRESH_PRC))
 
 
 time(&timeStart);
+
+std::cout << "Kw(0,0)=" << Kw(0,0) << std::endl;
+std::cout << "Kw(1,1)=" << Kw(1,1) << std::endl;
+std::cout << "Kw(2,2)=" << Kw(2,2) << std::endl;
+
 bicgstab(Kw, Xw, Lw, prc, bicg_iter);
+
+
+itl::noisy_iteration<double> gmr_iter(Lw,MAXITER,1e-6);
+gmr_iter.set_quite(true);
+
 
 if(VERBOSE) {std::cout<< "bi-conjugate gradient stabilized done." <<std::endl;}
 
 if (!(bicg_iter.is_converged() )) {
     time(&timeEnd);
-	if(VERBOSE) { std::cout << "%5t  bicg FAILED in " << bicg_iter.iterations() << " %30T. " << difftime(timeEnd,timeStart) << " s" << std::endl; }
+	if(VERBOSE) { std::cout << "bicg FAILED in " << bicg_iter.iterations() << " difftime: " << difftime(timeEnd,timeStart) << " s" << std::endl; }
     itl::pc::diagonal < mtl::compressed2D<double> >  gmr_prc (Kw);
     time(&timeStart);
     //gmm::clear(Xw);
@@ -109,7 +124,7 @@ if (!(bicg_iter.is_converged() )) {
         }
     }
 else {time(&timeEnd);
-    if(VERBOSE) { std::cout << "%5t v-solve in " << bicg_iter.iterations() << " (bicg,prc-" << (nt % REFRESH_PRC) << ") .......... " 
+    if(VERBOSE) { std::cout << "v-solve in " << bicg_iter.iterations() << " (bicg,prc-" << (nt % REFRESH_PRC) << ") :difftime = " 
 << difftime(timeEnd,timeStart) << " s" << std::endl; }
     }
 
