@@ -16,7 +16,6 @@ mtl::mat::set_to_zero(Kw);
 mtl::dense_vector<double> Lw(2*NOD);
 mtl::vec::set_to_zero(Lw);
 
-
 if(VERBOSE) { std::cout <<"DW speed = " << DW_vz << "\nmatrix size " << 2*NOD << "; assembling ..." << std::endl; }
 
 time(&timeStart);
@@ -32,7 +31,6 @@ mtl::vec::set_to_zero(L); mtl::vec::set_to_zero(Lp);
 for_each(refTet->begin(),refTet->end(),
     [this,dt,&Kw,&Lw,&K,&L,&Kp,&Lp,&ins](Tetra::Tet & tet)
         { 
-        
         tet.integrales(settings->paramTetra,*refNode,Hext,DW_vz,settings->theta,dt,settings->TAUR,K, L);     
         projection<Tetra::Tet>(tet, K, L, Kp, Lp);
         assemblage<Tetra::Tet>(tet,ins, Kp, Lp, Kw, Lw);
@@ -54,7 +52,9 @@ for_each(refFac->begin(),refFac->end(),
         }
 );
 
-delete ins;
+delete ins;//Kw should be ready
+
+itl::pc::diagonal < mtl::compressed2D<double> > prc(Kw);
 
 time_t timeEnd;
 time(&timeEnd);
@@ -62,7 +62,7 @@ time(&timeEnd);
 if(VERBOSE) { std::cout << "elapsed time = " << difftime(timeEnd,timeStart) << "s" << std::endl; }
 
 mtl::dense_vector<double> Xw(2*NOD);
-mtl::vec::set_to_zero(Xw);
+mtl::vec::set_to_zero(Xw);//should be useless
 
 itl::noisy_iteration<double> bicg_iter(Lw,MAXITER,1e-6);
 
@@ -70,7 +70,7 @@ bicg_iter.set_quite(true);
 
 time(&timeStart);
 
-itl::pc::diagonal < mtl::compressed2D<double> > prc(Kw);
+
 
 /*
 if (!nt) 
@@ -93,10 +93,6 @@ else if (!(nt % REFRESH_PRC))
 
 
 time(&timeStart);
-
-std::cout << "Kw(0,0)=" << Kw(0,0) << std::endl;
-std::cout << "Kw(1,1)=" << Kw(1,1) << std::endl;
-std::cout << "Kw(2,2)=" << Kw(2,2) << std::endl;
 
 bicgstab(Kw, Xw, Lw, prc, bicg_iter);
 
@@ -127,8 +123,6 @@ else {time(&timeEnd);
     if(VERBOSE) { std::cout << "v-solve in " << bicg_iter.iterations() << " (bicg,prc-" << (nt % REFRESH_PRC) << ") :difftime = " 
 << difftime(timeEnd,timeStart) << " s" << std::endl; }
     }
-
-//read_vector Xr(2*NOD);    gmm::copy(Xw, Xr);
 
 double v2max = 0.0;
 

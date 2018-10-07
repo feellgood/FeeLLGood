@@ -115,8 +115,8 @@ void assemblage(T &elt,sparseInserter *ins,
             (*ins)(NOD+i_,j_) << Ke(i,j);      (*ins)(NOD+i_, NOD+j_) << Ke(  i,N+j);
             (*ins)(    i_,j_) << Ke(N+i,j);    (*ins)(    i_, NOD+j_) << Ke(N+i,N+j);
             }
-        L[NOD+i_]+= Le[  i];
-        L[    i_]+= Le[N+i];
+        L(NOD+i_) += Le(i);//L[NOD+i_]+= Le[  i];
+        L(i_) += Le(N+i);//L[    i_]+= Le[N+i];
         }
     //std::cout<<"temps assemblage: "<<diff_t<<endl;
     }

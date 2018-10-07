@@ -9,10 +9,11 @@ void Fac::integrales(std::vector<Facette::prm> const& params, std::vector<Node> 
 double Js = params[idxPrm].Js;
 double Ks = params[idxPrm].Ks;
 
+if(Ks!=0.)
+{
 double uk00 = params[idxPrm].uk[0];
 double uk01 = params[idxPrm].uk[1];
 double uk02 = params[idxPrm].uk[2];
-
 double Kbis = 2.0*Ks/Js;
 /*-------------------- INTERPOLATION --------------------*/
 double u_nod[3][N], u[3][NPI];
@@ -29,17 +30,19 @@ tiny::mult<double, 3, N, NPI> (u_nod, a, u);
 
 /*-------------------------------------------------------*/
 
-for (int npi=0; npi<NPI; npi++){
-    double Kbis_ai;
-    double w_uk0_u = weight[npi]*(uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi]); 
+    for (int npi=0; npi<NPI; npi++)
+        {
+        double Kbis_ai;
+        double w_uk0_u = weight[npi]*(uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi]); 
 
-    for (int i=0; i<N; i++){
-        Kbis_ai = Kbis*a[i][npi];
-
-        BE[i]    += (Kbis_ai* w_uk0_u*uk00);
-        BE[N+i]  += (Kbis_ai* w_uk0_u*uk01);
-        BE[2*N+i]+= (Kbis_ai* w_uk0_u*uk02);
-	}
+        for (int i=0; i<N; i++)
+            {
+            Kbis_ai = Kbis*a[i][npi];
+            BE[i]    += (Kbis_ai* w_uk0_u*uk00);
+            BE[N+i]  += (Kbis_ai* w_uk0_u*uk01);
+            BE[2*N+i]+= (Kbis_ai* w_uk0_u*uk02);
+            }
+        }
     }
 }
 
