@@ -130,8 +130,8 @@ for (int i_t=0; i_t<FAC; i_t++) {
 	double dens[Facette::NPI];
 	double Eelem;
 		
-	for (int npi=0; npi<Facette::NPI; npi++) {
-		// cosinus directeurs
+	for (int npi=0; npi<Facette::NPI; npi++)
+        {// cosinus directeurs
 		double al0=uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi];
 		dens[npi] = -K  * sq(al0);      // uniaxe
 		}

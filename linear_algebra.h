@@ -118,7 +118,6 @@ void assemblage(T &elt,sparseInserter *ins,
         L(NOD+i_) += Le(i);//L[NOD+i_]+= Le[  i];
         L(i_) += Le(N+i);//L[    i_]+= Le[N+i];
         }
-    //std::cout<<"temps assemblage: "<<diff_t<<endl;
     }
 
     

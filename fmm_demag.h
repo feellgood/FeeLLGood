@@ -228,7 +228,7 @@ std::for_each(fem.fac.begin(),fem.fac.end(),
 [pot_corr,&nsrc,&srcDen,&corr,&fem](Facette::Fac const& fac)
     {
     double Ms = fac.Ms;
-    Pt::pt3D n = fac.n;//nx=fac.nx; ny=fac.ny; nz=fac.nz;
+    Pt::pt3D n = fac.n;
         /** calc u gauss **/  
     double u_nod[3][Facette::N], u[3][Facette::NPI];
     for (int i=0; i<Facette::N; i++)
@@ -281,19 +281,19 @@ fflush(NULL);
 
     { // reset potentials and forces - physicalValues[idxPart] = Q
 
-    tree->forEachLeaf([&](LeafClass* leaf){
-	const int nbParticlesInLeaf = leaf->getSrc()->getNbParticles();
-	//const FVector<int>& indexes = leaf->getSrc()->getIndexes(); // *ct*
-	const FVector<long long>& indexes = leaf->getSrc()->getIndexes(); // pas int mais long long  *ct*
-	FReal* const physicalValues = leaf->getSrc()->getPhysicalValues();
-	memset(physicalValues, 0, nbParticlesInLeaf*sizeof(FReal));
+    tree->forEachLeaf([&](LeafClass* leaf)
+        {
+        const int nbParticlesInLeaf = leaf->getSrc()->getNbParticles();
+        const FVector<long long>& indexes = leaf->getSrc()->getIndexes(); // pas int mais long long  *ct*
+        FReal* const physicalValues = leaf->getSrc()->getPhysicalValues();
+        memset(physicalValues, 0, nbParticlesInLeaf*sizeof(FReal));
 
-	for(int idxPart = 0 ; idxPart < nbParticlesInLeaf ; ++idxPart){
-	    const int indexPartOrig = indexes[idxPart];
+        for(int idxPart = 0 ; idxPart < nbParticlesInLeaf ; ++idxPart){
+            const int indexPartOrig = indexes[idxPart];
             const int nsrc = indexPartOrig-NOD;
- 	    assert((nsrc>=0) && (nsrc<SRC));
-	    physicalValues[idxPart]=srcDen[nsrc];
-	    }
+            assert((nsrc>=0) && (nsrc<SRC));
+            physicalValues[idxPart]=srcDen[nsrc];
+            }
         });
 
     tree->forEachLeaf([&](LeafClass* leaf){
