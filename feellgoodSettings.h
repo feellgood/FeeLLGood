@@ -33,7 +33,7 @@ container class to store many setting parameters, such as file names, parameters
 */
 class Settings{
 	public:
-	inline Settings() { withTsv=true; withVtk = false; theta=0.5; analytic_corr = true;} /**< default constructor */
+	inline Settings() { withTsv=true; withVtk = false; theta=0.5; analytic_corr = true;MAXITER = 500;REFRESH_PRC = 20;} /**< default constructor */
 	
 	void helloDialog();/**< kinda hello world! */
 	void printToTerminal(std::vector<Seq> &seq);/**< some prints sent to terminal  */	
@@ -50,6 +50,12 @@ class Settings{
 	inline void setScale(double s) {_scale = s;} /**< setter for geometrical scaling factor for physical coordinates of the mesh  */	
 	inline double getScale(void) {return _scale;}/**< getter for geometrical scaling factor for physical coordinates of the mesh */ 
 
+	/** maximum number of iterations setter for bicgstab */
+    inline void set_MAXITER(int i) {MAXITER = i;} 
+    
+    /** refresh diagonal pre-conditionner every REFRESH_PRC for bicgstab */
+    inline void set_REFRESH_PRC(int i) {REFRESH_PRC = i;}
+	
 	bool withTsv;/**< boolean flag to mention if you want output in txt tsv file format  */
 	bool withVtk;/**< boolean flag to mention if you want output in txt vtk file format (readable by paraview) */
 	double tf;/**< end time of the simulation */
@@ -84,6 +90,10 @@ class Settings{
 
 /** reduced /f$ /tau_r = 100 DT_{\mathrm{max}} /f$ */
     double TAUR;//    = 100.*DTMAX;
+    
+    int MAXITER;/**< maximum number of iteration for biconjugate gradient algorithm */
+    
+    int REFRESH_PRC;/**< refresh every REFRESH_PRC the diagonal preconditioner */
     
 	/** this vector contains the material parameters for all regions for all the tetrahedrons */
 	std::vector<Tetra::prm> paramTetra;

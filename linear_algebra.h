@@ -33,7 +33,7 @@ public:
                       std::vector <Facette::Fac> & myFace) 
     {settings = &s; refNode = &myNode; refTet = &myTet; refFac = &myFace;}
 	
-	//itl::pc::diagonal < mtl::compressed2D<double> > prc;/**< diagonal preconditionner */
+	itl::pc::diagonal < mtl::compressed2D<double> > *prc;
 
 	int  vsolve(double dt,long nt);/**< solver */
 
@@ -52,11 +52,7 @@ public:
     /** getter node physical position */
     inline Pt::pt3D getNodePhysPos(int i) {return (*refNode)[i].p;} 
     
-    
 private:
-    const int MAXITER = 500;/**< maximum number of iteration for biconjugate gradient algorithm */
-    const int REFRESH_PRC = 20;/**< refresh every REFRESH_PRC the diagonal preconditioner */
-    
     std::vector<Node>  *refNode;/**< direct access to the Nodes */
 	std::vector <Facette::Fac> *refFac; /**< direct access to the faces */
 	std::vector <Tetra::Tet> *refTet; /**< direct access to the tetrahedrons */

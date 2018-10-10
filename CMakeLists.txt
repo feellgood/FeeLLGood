@@ -47,6 +47,7 @@ MESSAGE(STATUS "executable built with SHA1=${SHAstr}")
 
 
 set(VERBOSE_MODE true)
+set(SECOND_ORDER true)
 set(NB_THREADS 16)
 MESSAGE(STATUS "NB_THREADS=${NB_THREADS}")
 #===========================================================================
@@ -55,11 +56,11 @@ MESSAGE(STATUS "NB_THREADS=${NB_THREADS}")
 # we could use AVX when possible instead of SSE4.2, with option -mavx
 # also -mtune=native and -march=native
 
-set( CMAKE_CXX_FLAGS "-DORD2 -DNDEBUG -DNSTAT -Wall -Wextra -std=c++11 -O3 -fopenmp -ffast-math -msse4.2 -mfpmath=sse" CACHE STRING "C++ compiler flags used during default builds." FORCE )
+set( CMAKE_CXX_FLAGS "-DNDEBUG -DNSTAT -Wall -Wextra -std=c++11 -O3 -fopenmp -ffast-math -msse4.2 -mfpmath=sse" CACHE STRING "C++ compiler flags used during default builds." FORCE )
 
-set( CMAKE_CXX_FLAGS_DEBUG "-DORD1 -DNDEBUG -DNSTAT -Wall -Wextra -std=c++11 -O2 -fopenmp -ffast-math -msse4.2 -mfpmath=sse" CACHE STRING "C++ compiler flags used during debug builds." FORCE )
+set( CMAKE_CXX_FLAGS_DEBUG "-DNDEBUG -DNSTAT -Wall -Wextra -std=c++11 -O2 -fopenmp -ffast-math -msse4.2 -mfpmath=sse" CACHE STRING "C++ compiler flags used during debug builds." FORCE )
 
-set( CMAKE_CXX_FLAGS_RELEASE "-DORD2 -DNDEBUG -DNSTAT -Wall -Wextra -std=c++11 -O3 -fopenmp -ffast-math -msse4.2 -mfpmath=sse" CACHE STRING "C++ compiler flags used during release builds." FORCE )
+set( CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -DNSTAT -Wall -Wextra -std=c++11 -O3 -fopenmp -ffast-math -msse4.2 -mfpmath=sse" CACHE STRING "C++ compiler flags used during release builds." FORCE )
 
 SET( SOURCES config.h pt3D.h tetra.h tetra.cpp facette.h facette.cpp feellgoodSettings.h node.h
 	linear_algebra.h main.cc cputime.cc dialog.cc affichage.cc

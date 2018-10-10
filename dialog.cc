@@ -233,5 +233,6 @@ catch (std::exception &e)
     DTMAX = sub_tree.get<double>("max(dt)",1e-7);
     TAUR = 100.*DTMAX; // pourquoi 100 ?
     dt = sub_tree.get<double>("initial dt",1e-9);
-    
+    MAXITER = sub_tree.get<int>("max(iter)",500);
+    REFRESH_PRC = sub_tree.get<int>("refresh prc every",20);
 }

@@ -43,6 +43,8 @@
     {
     "theta" : 0.5,
     "analytic corrections" : true,
+    "max(iter)" : 500,
+    "refresh prc every" : 20,
     "epsilon" : 1e-40,
     "remarque" : "epsilon est petit",
     "min(du)" : 1e-9,

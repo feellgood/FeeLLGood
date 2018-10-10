@@ -33,7 +33,7 @@ for_each(refTet->begin(),refTet->end(),
         mtl::vec::set_to_zero(L); mtl::vec::set_to_zero(Lp);
         tet.integrales(settings->paramTetra,*refNode,Hext,DW_vz,settings->theta,dt,settings->TAUR,K, L);     
         projection<Tetra::Tet>(tet, K, L, Kp, Lp);
-        assemblage<Tetra::Tet>(tet,ins, Kp, Lp, Kw, Lw);
+        assemblage<Tetra::Tet>(tet, ins, Kp, Lp, Kw, Lw);
         }
 );
 
@@ -47,13 +47,11 @@ for_each(refFac->begin(),refFac->end(),
         mtl::vec::set_to_zero(Ls); mtl::vec::set_to_zero(Lsp);
         fac.integrales(settings->paramFacette,*refNode, Ls);     
         projection<Facette::Fac>(fac, Ks, Ls, Ksp, Lsp);
-        assemblage<Facette::Fac>(fac,ins, Ksp, Lsp, Kw, Lw);    
+        assemblage<Facette::Fac>(fac, ins, Ksp, Lsp, Kw, Lw);    
         }
 );
 
 delete ins;//Kw should be ready
-
-itl::pc::diagonal < mtl::compressed2D<double> > prc(Kw);
 
 time_t timeEnd;
 time(&timeEnd);
@@ -63,40 +61,35 @@ if(VERBOSE) { std::cout << "elapsed time = " << difftime(timeEnd,timeStart) << "
 mtl::dense_vector<double> Xw(2*NOD);
 mtl::vec::set_to_zero(Xw);//should be useless
 
-itl::noisy_iteration<double> bicg_iter(Lw,MAXITER,1e-6);
+itl::noisy_iteration<double> bicg_iter(Lw,settings->MAXITER,1e-6);
 
 bicg_iter.set_quite(true);
 
 time(&timeStart);
 
-
-
-/*
 if (!nt) 
     {
     if(VERBOSE) { std::cout << "computing prc.";std::fflush(NULL); }
-
-    itl::pc::diagonal < mtl::compressed2D<double> > prc(Kw); 
+    prc = new itl::pc::diagonal < mtl::compressed2D<double> >(Kw); //mind the constructor call syntax
 	time(&timeEnd);    
 	if(VERBOSE) { std::cout << "elapsed time = " << difftime(timeEnd,timeStart) << "s" << std::endl; }
     }
-else if (!(nt % REFRESH_PRC))
+else if (!(nt % (settings->REFRESH_PRC)))
     {
     delete prc;
     if(VERBOSE) { std::cout << "computing prc.";std::fflush(NULL); }
-    itl::pc::diagonal < mtl::compressed2D<double> > prc(Kw); 
+    prc = new itl::pc::diagonal < mtl::compressed2D<double> >(Kw); //mind the constructor call syntax
     time(&timeEnd);    
 	if(VERBOSE) { std::cout << "elapsed time = " << difftime(timeEnd,timeStart) << "s" << std::endl; }
     } 
-*/
 
 
 time(&timeStart);
 
-bicgstab(Kw, Xw, Lw, prc, bicg_iter);
+bicgstab(Kw, Xw, Lw, *prc, bicg_iter);
 
 
-itl::noisy_iteration<double> gmr_iter(Lw,MAXITER,1e-6);
+itl::noisy_iteration<double> gmr_iter(Lw,settings->MAXITER,1e-6);
 gmr_iter.set_quite(true);
 
 
@@ -119,7 +112,7 @@ if (!(bicg_iter.is_converged() )) {
         }
     }
 else {time(&timeEnd);
-    if(VERBOSE) { std::cout << "v-solve in " << bicg_iter.iterations() << " (bicg,prc-" << (nt % REFRESH_PRC) << ") :difftime = " 
+    if(VERBOSE) { std::cout << "v-solve in " << bicg_iter.iterations() << " (bicg,prc-" << (nt % (settings->REFRESH_PRC)) << ") :difftime = " 
 << difftime(timeEnd,timeStart) << " s" << std::endl; }
     }
 
