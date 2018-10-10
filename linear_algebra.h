@@ -16,7 +16,10 @@ two templates projection and assemblage template class parameter is either Facet
 #ifndef linear_algebra_h
 #define linear_algebra_h
 
+/** convenient typedef for mtl4 */
 typedef typename mtl::Collection< mtl::compressed2D<double> >::value_type v_type;
+
+/** convenient typedef for mtl4 inserter */
 typedef mtl::mat::inserter< mtl::compressed2D<double>,mtl::update_plus<v_type> > sparseInserter;
 
 
@@ -33,9 +36,11 @@ public:
                       std::vector <Facette::Fac> & myFace) 
     {settings = &s; refNode = &myNode; refTet = &myTet; refFac = &myFace;}
 	
+	/** pointer to diagonal preconditionner  */
 	itl::pc::diagonal < mtl::compressed2D<double> > *prc;
 
-	int  vsolve(double dt,long nt);/**< solver */
+    /** solver, uses bicgstab and gmres */
+	int  vsolve(double dt,long nt);
 
     /** setter for DW_dz */
     inline void set_DW_vz(double vz){DW_vz = vz;}    

@@ -1,3 +1,6 @@
+#ifndef FMM_DEMAG_H
+#define FMM_DEMAG_H
+
 /** \file fmm_demag.h
 this header is the interface to scalfmm. Its purpose is to prepare an octree for the application of the fast multipole algorithm, and to compute the demag field.
 */
@@ -21,10 +24,6 @@ this header is the interface to scalfmm. Its purpose is to prepare an octree for
 #include "Kernels/Rotation/FRotationCell.hpp"
 
 #include "config.h" //for NbThreads
-
-
-#ifndef FMM_DEMAG_H
-#define FMM_DEMAG_H
 
 static const int P = 9;/**< constant parameter for some scalfmm templates */
 
