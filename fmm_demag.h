@@ -25,7 +25,8 @@ this header is the interface to scalfmm. Its purpose is to prepare an octree for
 
 #include "config.h" //for NbThreads
 
-static const int P = 9;/**< constant parameter for some scalfmm templates */
+/** constant parameter for some scalfmm templates */
+static const int P = 9;
 
 /** double redefinition for the parametrization of some scalfmm templates */
 #define FReal double
@@ -53,19 +54,19 @@ typedef FFmmAlgorithmThreadTsm<OctreeClass, CellClass, ContainerClass, KernelCla
 /**
 \namespace fmm to grab altogether the templates and functions using scalfmm for the computation of the demag field 
 */
+
 namespace fmm{
-template <class CellClass, class ContainerClass, class LeafClass, class OctreeClass,
-          class KernelClass, class FmmClass, typename... Args>
 
 /**
 initialization function for the building of an octree and a kernel passed to scalfmm to compute the demag field
 */
+template <class CellClass, class ContainerClass, class LeafClass, class OctreeClass, class KernelClass, class FmmClass, typename... Args>
 int init(Fem &fem, OctreeClass* &tree, KernelClass* &kernels, Args... kernelPreArgs)
 {
     FTic counter;
     const int NbLevels = 8; 
     const int SizeSubLevels = 6;
-    //const unsigned int NbThreads  =  omp_get_max_threads(); // open mp function
+    //const unsigned int NbThreads  =  omp_get_max_threads();
 
     omp_set_num_threads(NbThreads);
     if(VERBOSE) { std::cout << "\n>> Using " << NbThreads << " threads.\n" << std::endl; }

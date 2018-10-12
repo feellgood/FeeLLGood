@@ -137,21 +137,11 @@ for (int npi=0; npi<NPI; npi++){
     double alfa=alpha; // seulement pour l'ordre 1 en temps
     double R=0.;
 
-#ifdef STAT
-    gsl_histogram_increment (fem.stat.h, uHeff);
-#endif
-
 #ifdef ORD2
 
 double r = 0.1;	     			
 double M = 2.*alpha*r/dt;  			
 R = dt/tau_r*abs(log(dt/tau_r));    	
-
-#ifdef STAT
-fem.stat.r = r;
-fem.stat.M = M;
-fem.stat.R = R;
-#endif
 
     if (uHeff>0.){ 
        if (uHeff>M) alfa=alpha+dt/2.*M;

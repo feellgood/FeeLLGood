@@ -1,6 +1,11 @@
 #include "fem.h"
+#include "config.h"
+
+//#include <boost/format.hpp>
+
 
 using namespace std;
+
 
 void Fem::saver(Settings &settings, ofstream &fout, int nt)
 {
@@ -22,9 +27,6 @@ if ((nt%n2)==0)
     if (settings.withVtk) savecfg_vtk(settings.getSimName(),nt,nullptr);
     savesol(settings.getSimName(),settings.getScale(),nt,nullptr);
 
-#ifdef STAT
-    savestat(fem,nt);
-#endif
 //    saveH(fem,nt);
     }
 }

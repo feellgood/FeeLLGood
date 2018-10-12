@@ -13,11 +13,6 @@ Fem fem;
 OctreeClass *tree    = nullptr;
 KernelClass *kernels = nullptr; 
 
-#ifdef STAT
-fem.stat.h = gsl_histogram_alloc (NCLASSES);
-gsl_histogram_set_ranges_uniform (fem.stat.h, -HMAX, HMAX);
-#endif
-
 vector<Seq> seq;
 
 string fileJson;
@@ -85,9 +80,8 @@ if (!fout) { cerr << "erreur ouverture fichier" << endl; exit(1); }
 
 fmm::demag<0, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree,kernels);
 
-#ifdef ORD2
-fmm::demag<1, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree,kernels);
-#endif
+if(ORD2)
+    { fmm::demag<1, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree,kernels); }
 
 fem.DW_z  = 0.0;
 fem.energy(mySettings); 
@@ -131,9 +125,10 @@ while (t < mySettings.tf)
     if (dumax > mySettings.DUMAX) { flag++; dt*= 0.5; mySettings.dt=dt; continue;}
           
     fmm::demag<0, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree, kernels); // Hd(u)
-#ifdef ORD2
-    fmm::demag<1, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree, kernels); // Hd(v)
-#endif
+
+if(ORD2)
+    { fmm::demag<1, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree, kernels); } // Hd(v)
+
 
     fem.energy(mySettings);
     if (fem.evol > 0.0) { cout << "Warning energy increases! : " << fem.evol << endl; }
@@ -167,8 +162,5 @@ cout << "--- the end ---" << endl;
 delete tree;
 delete kernels;
 
-#ifdef STAT
-gsl_histogram_free (fem.stat.h);
-#endif
 return 0;
 }

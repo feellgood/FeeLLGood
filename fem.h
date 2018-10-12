@@ -20,19 +20,11 @@ It does also contains the definition of many constants for the solver, and for s
 #include <sys/times.h>
 #include <unistd.h>
 
-/* only pull GSL if needed */
-#ifdef STAT
-	#include <gsl/gsl_rng.h>
-	#include <gsl/gsl_histogram.h>
-	const size_t NCLASSES=100;/**< number of BIN for statistics */
-	const double HMAX=1e6;/**< maximum value */
-#endif //endif STAT
 
 #include "config.h"
 #include "feellgoodSettings.h"
 
-
-#include "ANN.h" // ct "ANN/ANN.h"		// ANN declarations
+#include "ANN.h" // ANN declarations
 
 #include "tiny.h"
 #include "pt3D.h"
@@ -44,19 +36,6 @@ It does also contains the definition of many constants for the solver, and for s
 const bool U = true;/**< used as a template parameter */
 const bool V = false;/**< used as a template parameter */
 
-/** \struct Stat
-used to build some statistics, with GSL library
-*/
-struct Stat{
-#ifdef STAT
-    gsl_histogram* h;/**< pointer to GSL histogram */
-#else
-    void* h;  /**< placeholder, we don't include GSL */
-#endif
-    double M; /**< M defined by \f$ M = \alpha/ \tau_R |log(dt/ \tau_R)| \f$ */
-    double R; /**< R defined by \f$ R = dt/\tau_R*|log(dt/\tau_R)| \f$ */
-    double r; /**< r defined by \f$ r = 0.5*dt/\tau_R*|log(dt/\tau_R)| \f$ */
-    };
 
 /** \struct Fem
 massive container to grab altogether all parameters of a simulation, including mesh geometry, containers for the mesh
@@ -102,12 +81,6 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
     double Bext;/**< amplitude of the applied field */
     triple Hext;/**< external applied field direction (should be normalized) */
     
-
-#ifdef STAT
-	Stat stat;/**< to build some histograms  */
-	//void savestat(Fem &fem, int nt);/**< file writing function for the statistics (if any) */
-#endif
-
     ANNkd_tree* kdtree;/**< ANN kdtree to find efficiently the closest set of nodes to a physical point in the mesh  */
     ANNpointArray pts;/**< container for the building of the kdtree (handled by ANN library) */
     
@@ -196,6 +169,9 @@ bool recentrage(double thres/**< [in] translation parameter */,double mz /**<[in
 
 /** saving function for a solution */
 void saver(Settings &settings, std::ofstream &fout, int nt);
+
+/** save histogram in txt file */
+void savestat(int nt);
 
 /** text file (vtk) writing function for a solution */
 void savecfg_vtk(std::string baseName, int nt, std::string *filename);
