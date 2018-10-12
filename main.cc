@@ -32,7 +32,7 @@ mySettings.read(fileJson,seq);
 mySettings.printToTerminal(seq);
 
 //mySettings.dialog(seq); // deprecated
-fem.lecture(mySettings, 0.0);//, nullptr);
+fem.lecture(mySettings);
 
 fem.femutil(mySettings);
 

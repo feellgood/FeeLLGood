@@ -6,7 +6,7 @@
 
 using namespace std;
 
-void Fem::lecture(Settings &mySets, double scale)//, Regions *regions)  // regions may be NULL
+void Fem::lecture(Settings &mySets)
 {
 int ELEM, tags, reg, TYP;
 double value;
@@ -19,17 +19,6 @@ if (!msh){
     SYSTEM_ERROR;}
 
 while(msh >> symb){
-    if (symb == "$Scale"){
-        /* scale == 0.0 is a sentinel to mean read from the file; floating point
-         * comparison is reliable in this case */
-        if (scale == 0.0) 
-            {
-            msh >> scale;      // lecture de l'echelle
-            mySets.setScale( scale );
-            }
-        else msh >> trash;
-        continue;
-        }
     if (symb == "$Nodes")
         break;
     }
@@ -43,11 +32,13 @@ if (msh.fail()){
 #endif
     }
 
+    double scale = mySets.getScale();
+    
 if (scale == 0.0){
 #ifdef LIBRARY
-    throw runtime_error("scale must be passed as argument or defined in the problem file");
+    throw runtime_error("scale must be passed defined in json settings file");
 #else
-    cerr << "scale must be passed as argument or defined in the problem file" << endl;
+    cerr << "scale must be passed defined in json settings file" << endl;
     exit(1);
 #endif
     }

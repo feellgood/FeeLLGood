@@ -38,7 +38,7 @@ const bool V = false;/**< used as a template parameter */
 
 
 /** \struct Fem
-massive container to grab altogether all parameters of a simulation, including mesh geometry, containers for the mesh
+container to grab altogether all parameters of a simulation, including mesh geometry, containers for the mesh
 */
 struct Fem{
 	int NOD;/**< number of nodes in the corresponding container */
@@ -140,7 +140,7 @@ void restoresol(double scaling /**< [in] scaling factor for physical coordinates
 	std::string *filename /**< [in] */ );
 
 /** reading file function */
-void lecture(Settings &mySets, double scale);
+void lecture(Settings &mySets);
 
 /**  utilitary function to initialize pts,kdtree,l,c,diam, computes the surfaces and volumes and reorientation of the tetrahedrons if needed in fem struct; definition of Ms on facette elements <br>
 Indices and orientation convention : 

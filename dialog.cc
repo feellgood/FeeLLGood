@@ -110,7 +110,9 @@ void Settings::read(std::string fileJson,std::vector<Seq> &seq)
 	r_path_output_dir = root.get<std::string>("output directory");
 	simName = root.get<std::string>("output file basename");
 	pbName = root.get<std::string>("mesh filename");
-	tf = root.get<double>("final_time",0);
+	double s = root.get<double>("scaling factor",1e-9);
+    setScale(s);
+    tf = root.get<double>("final_time",0);
 	
 	n1 = root.get<int>("save_energies",0);
 	n2 = root.get<int>("take_photo",0);
