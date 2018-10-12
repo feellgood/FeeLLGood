@@ -64,7 +64,7 @@ private:
 	
 	double Hext[DIM];/**< applied field */
     double DW_vz;/**< speed of the domain wall */
-	Settings *settings;/**< copy of the settings */
+	Settings *settings;/**< pointer to the settings */
     double v_max;/**< maximum speed */
 	
 /** computes the local vector basis {ep,eq} in the tangeant plane for projection on the elements */
@@ -76,22 +76,21 @@ template function to compute projection of an element <br>
 template parameter T is either tetra of face
 */
 template <class T>
-void projection(T &elt,
-           mtl::dense2D <double> &A,  mtl::dense_vector <double> &B,
+void projection(T &elt,mtl::dense2D <double> &P,
+           mtl::dense2D <double> const& A,  mtl::dense_vector <double> const& B,
            mtl::dense2D <double> &Ap, mtl::dense_vector <double> &Bp)
 {
 const int N = elt.getN();
-mtl::dense2D <double> P(2*N,3*N), PA(2*N,3*N);
-mtl::mat::set_to_zero(P); mtl::mat::set_to_zero(PA);
+//mtl::dense2D <double> P(2*N,3*N);
+mtl::mat::set_to_zero(P);
 
 for (int i=0; i<N; i++){
-    Node &n = (*refNode)[elt.ind[i]];
+    Node const& n = (*refNode)[elt.ind[i]];
     P(i,i)  = n.ep.x();  P(i,N+i)  = n.ep.y();  P(i,2*N+i)  = n.ep.z();
     P(N+i,i)= n.eq.x();  P(N+i,N+i)= n.eq.y();  P(N+i,2*N+i)= n.eq.z();
     }
 
-PA = P*A;
-Ap = PA*trans(P);
+Ap = (P*A)*trans(P);
 Bp = P*B;
 }
 
@@ -102,11 +101,9 @@ template parameter T is either tetra or face
 */
 
 template <class T>
-void assemblage(T &elt,sparseInserter *ins,
-           mtl::dense2D <double> &Ke, mtl::dense_vector <double> &Le,
-           mtl::compressed2D<double> &K, mtl::dense_vector<double> &L)
+void assemblage(T &elt,sparseInserter *ins,const int NOD,
+           mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le, mtl::dense_vector<double> &L)//mtl::compressed2D<double> &K, avant dernier
     {
-    const int NOD = refNode->size();
     const int N = elt.getN();
 
     for (int i=0; i < N; i++){

@@ -11,6 +11,8 @@ FTic counter;
 
 const int NOD = refNode->size();
 
+counter.tic();
+
 base_projection();   // definit plan tangent
 
 mtl::compressed2D<double>  Kw(2*NOD, 2*NOD);
@@ -20,36 +22,38 @@ mtl::vec::set_to_zero(Lw);
 
 if(VERBOSE) { std::cout <<"DW speed = " << DW_vz << "\nmatrix size " << 2*NOD << "; assembling ..." << std::endl; }
 
-counter.tic();
-
 sparseInserter *ins;
 ins = new sparseInserter(Kw,256); //64 maybe too small
 
 mtl::dense2D <double> K(3*Tetra::N,3*Tetra::N), Kp(2*Tetra::N,2*Tetra::N);
 mtl::dense_vector <double> L(3*Tetra::N), Lp(2*Tetra::N);
 
+mtl::dense2D <double> P(2*Tetra::N,3*Tetra::N);
+
 for_each(refTet->begin(),refTet->end(),
-    [this,dt,&Kw,&Lw,&K,&L,&Kp,&Lp,&ins](Tetra::Tet & tet)
+    [this,dt,&Lw,&K,&L,&Kp,&Lp,&ins,NOD,&P](Tetra::Tet & tet)
         {
         mtl::mat::set_to_zero(K); mtl::mat::set_to_zero(Kp);
         mtl::vec::set_to_zero(L); mtl::vec::set_to_zero(Lp);
         tet.integrales(settings->paramTetra,*refNode,Hext,DW_vz,settings->theta,dt,settings->TAUR,K, L);     
-        projection<Tetra::Tet>(tet, K, L, Kp, Lp);
-        assemblage<Tetra::Tet>(tet, ins, Kp, Lp, Kw, Lw);
+        projection<Tetra::Tet>(tet, P, K, L, Kp, Lp);
+        assemblage<Tetra::Tet>(tet, ins,NOD, Kp, Lp, Lw);//Kw avant dernier
         }
 );
+
+mtl::dense2D <double> Ps(2*Facette::N,3*Facette::N);
 
 mtl::dense2D <double> Ks(3*Facette::N,3*Facette::N), Ksp(2*Facette::N,2*Facette::N);
 mtl::dense_vector <double> Ls(3*Facette::N), Lsp(2*Facette::N);
 
 for_each(refFac->begin(),refFac->end(),
-    [this,&Kw,&Lw,&Ks,&Ls,&Ksp,&Lsp,&ins](Facette::Fac &fac)
+    [this,&Lw,&Ks,&Ls,&Ksp,&Lsp,&ins,NOD,&Ps](Facette::Fac &fac)
         {
         mtl::mat::set_to_zero(Ks); mtl::mat::set_to_zero(Ksp);
         mtl::vec::set_to_zero(Ls); mtl::vec::set_to_zero(Lsp);
         fac.integrales(settings->paramFacette,*refNode, Ls);     
-        projection<Facette::Fac>(fac, Ks, Ls, Ksp, Lsp);
-        assemblage<Facette::Fac>(fac, ins, Ksp, Lsp, Kw, Lw);    
+        projection<Facette::Fac>(fac, Ps, Ks, Ls, Ksp, Lsp);
+        assemblage<Facette::Fac>(fac, ins, NOD, Ksp, Lsp, Lw);//Kw avant dernier    
         }
 );
 
