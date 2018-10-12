@@ -164,15 +164,15 @@ void direction(enum Pt::index idx_dir);
 /** computes energies stored in E table */
 void energy(Settings &settings);
 
-/** recentering algorithm for the study of the motion of a micromagnetic object, for example a domain wall. 
+/** recentering algorithm for the study of the motion of a micromagnetic object (domain wall). 
  
-if D_i>0				        if D_i<0
+if \f$ D_i>0 \f$				        if  \f$ D_i<0 \f$
 
-<----------------|------->		------->|<----------------	m_i = <u_i> < 0
+<----------------|------->		------->|<----------------	\f$ m_i = < u_i > < 0 \f$
 
-ou					ou
+or					or
 
----------------->|<-------		<-------|---------------->	m_i = <u_i> > 0
+---------------->|<-------		<-------|---------------->	\f$ m_i = <u_i> > 0 \f$
 */
 bool recentrage(double thres/**< [in] translation parameter */,enum Pt::index idx_dir /**< [in] */,double m_i /**<[in] average magnetization along idx_dir */);
 

@@ -58,8 +58,8 @@ set( CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -std=c++11 -O3 -fopenmp -ffast-math 
 
 SET( SOURCES config.h pt3D.h tetra.h tetra.cpp facette.h facette.cpp feellgoodSettings.h node.h
 	linear_algebra.h main.cc cputime.cc dialog.cc affichage.cc
-	saveH.cc lecture.cc femutil.cc restoresol.cc
-	recentrage.cc energy.cc saver.cc savesol.cc savecfg_vtk.cc vsolve.cc tiny.h)
+	lecture.cc femutil.cc restoresol.cc
+	recentrage.cc energy.cc save.cpp vsolve.cc tiny.h)
 
 SET( HEADERS ${ANN_INCLUDE_DIR}/ANN.h ${SCALFMM_INCLUDE_DIR}/Kernels/Rotation/FRotationKernel.hpp)
 
