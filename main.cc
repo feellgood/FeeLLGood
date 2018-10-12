@@ -43,7 +43,7 @@ else {fem.init_distrib();}
 
 fem.direction(Pt::IDX_Z);/* determination de la direction de propagation de la paroi */
 fem.t=0.;
-fem.affichage();
+fem.infos();
 
 //once fem containers are ok, we build a linAlgebra object
 LinAlgebra linAlg = LinAlgebra(mySettings,fem.node,fem.tet,fem.fac);
@@ -73,10 +73,11 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it)
 
 	cout << "Bext : " << Bext*a[0] << "\t" << Bext*a[1] << "\t" << Bext*a[2] << endl;
 
-string str = mySettings.getSimName() +"_"+ to_string(fem.SEQ) + "_B" + to_string(fem.Bext) + ".evol";	
+	string baseName = mySettings.r_path_output_dir + mySettings.getSimName();
+    string str = baseName +"_"+ to_string(fem.SEQ) + "_B" + to_string(fem.Bext) + ".evol";
 
-ofstream fout(str);
-if (!fout) { cerr << "erreur ouverture fichier" << endl; exit(1); }
+    ofstream fout(str);
+    if (!fout) { cerr << "erreur ouverture fichier" << endl; SYSTEM_ERROR; }
 
 fmm::demag<0, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree,kernels);
 

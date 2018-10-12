@@ -88,7 +88,16 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
 /**
 print some informations of fem container
 */
-void affichage(void);
+inline void infos(void)
+{
+std::cout << "This is feeLLGood SHA1= " + std::string(SHAnumber) << std::endl;
+std::cout << "diam bounding box ="<< diam << std::endl;
+std::cout << "\t nodes\t\t\t" << node.size() << std::endl;
+std::cout << "\t faces\t\t\t" << fac.size() << std::endl;
+std::cout << "\t tetraedrons\t\t" << tet.size() << std::endl;
+std::cout << "\t Total surface\t\t"  << surf << std::endl;
+std::cout << "\t Total volume\t\t\t" << vol << std::endl;
+}
 
 /**
 reset the nodes struct to restart another step time simulation
@@ -179,17 +188,14 @@ bool recentrage(double thres/**< [in] translation parameter */,enum Pt::index id
 /** saving function for a solution */
 void saver(Settings &settings, std::ofstream &fout, int nt);
 
-/** save histogram in txt file */
-void savestat(int nt);
-
 /** text file (vtk) writing function for a solution */
-void savecfg_vtk(std::string baseName, int nt, std::string *filename);
+void savecfg_vtk(std::string fileName);
 
 /** text file (tsv) writing function for a solution */
-void savesol(std::string baseName,double s, int nt, std::string *filename);
+void savesol(std::string fileName,double s);
 
 /** save the field values */
-void saveH(std::string baseName,double scale, int nt);
+void saveH(std::string fileName,double scale);
 
 
 /** 

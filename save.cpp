@@ -14,40 +14,43 @@ void Fem::saver(Settings &settings, ofstream &fout, int nt)
 int n1 = settings.n1;
 int n2 = settings.n2;
 
-if ((nt%n1)==0) {
+if ((nt%n1)==0)
+    {
    // fout << boost::format("%8d %+20.10e %+20.10e %+20.10e") % nt % t % dt % dumax;
    // fout << boost::format("%+20.10e %+20.10e %+20.10e") % u_moy(fem,0) % u_moy(fem,1) % u_moy(fem,2);
    // fout << boost::format("%+20.10e %+20.10e %+20.10e %+20.10e %+20.10e %+20.10e %+20.10e")% Ee % Ea % Ed % Ez % Etot % DW_z % DW_vz<< endl;
-fout << nt <<"\t" << t <<"\t" << settings.dt <<"\t" << vmax*settings.dt <<"\t";
-fout << moy<U>(0) <<"\t" << moy<U>(1) <<"\t" << moy<U>(2) <<"\t";
+    fout << nt <<"\t" << t <<"\t" << settings.dt <<"\t" << vmax*settings.dt <<"\t";
+    fout << moy<U>(0) <<"\t" << moy<U>(1) <<"\t" << moy<U>(2) <<"\t";
+    fout << E[0] <<"\t" << E[1] <<"\t" << E[2] <<"\t" << E[3] <<"\t" << Etot <<"\t" << DW_z <<"\t" << DW_vz <<"\t" << endl;
+    }
 
-fout << E[0] <<"\t" << E[1] <<"\t" << E[2] <<"\t" << E[3] <<"\t" << Etot <<"\t" << DW_z <<"\t" << DW_vz <<"\t" << endl;
-}
-
+    string baseName = settings.r_path_output_dir + settings.getSimName();
+    
 if ((nt%n2)==0) 
     {
-    if (settings.withVtk) savecfg_vtk(settings.getSimName(),nt,nullptr);
-    savesol(settings.getSimName(),settings.getScale(),nt,nullptr);
-
-//    saveH(fem,nt);
+    if (settings.withVtk)
+        {
+        string str = baseName + "_" + to_string(SEQ) + "_B" + to_string(Bext) + "_iter" + to_string(nt) + ".vtk";
+            //boost::format("_%d_B%6f_iter%d.vtk") % fem.SEQ % fem.Bext % nt;
+        savecfg_vtk(str);
+        }
+    
+    string str = baseName + "_" + to_string(SEQ) +"_B" + to_string(Bext) + "_iter" + to_string(nt) + ".sol";
+ //<< boost::format("_%d_B%6f_iter%d.sol") % fem.SEQ % fem.Bext % nt;
+    savesol(str,settings.getScale());
+    
+    //string str = baseName + "_" + to_string(SEQ) + "_B" + to_string(Bext) + "_iter" + to_string(nt) + ".hdm";
+    //    saveH(str);
     }
 }
 
-void Fem::savecfg_vtk(string baseName, int nt, string *filename)  // filename may be NULL
+void Fem::savecfg_vtk(string fileName)
 {
-string str;
+if(VERBOSE) { cout <<"\n -------------------\n " << fileName << endl; }
 
-if (filename) { str = *filename; }
-else{
-    str = baseName + "_" + to_string(SEQ) + "_B" + to_string(Bext) + "_iter" + to_string(nt) + ".vtk";
- //<< boost::format("_%d_B%6f_iter%d.vtk") % fem.SEQ % fem.Bext % nt;
-    }
-
-if(VERBOSE) { cout <<"\n -------------------" << endl << " " << str << endl; }
-
-ofstream fout(str, ios::out);
+ofstream fout(fileName, ios::out);
 if (!fout){
-    if(VERBOSE) cerr << "pb ouverture fichier : " << str << "en ecriture" << endl;
+    if(VERBOSE) cerr << "cannot open file : " << fileName << "in write mode" << endl;
     SYSTEM_ERROR;}
 
 
@@ -88,20 +91,13 @@ fout << node[i].u << endl;
     }
 }
 
-void Fem::savesol(string baseName,double s, int nt, string *filename)
+void Fem::savesol(string fileName,double s)
 {
-string str;
+if(VERBOSE) { cout << " " << fileName << endl; }
 
-if (filename) { str = *filename; }
-else{
-    str = baseName + "_" + to_string(SEQ) +"_B" + to_string(Bext) + "_iter" + to_string(nt) + ".sol";
- //<< boost::format("_%d_B%6f_iter%d.sol") % fem.SEQ % fem.Bext % nt;
-    }
-if(VERBOSE) { cout << " " << str << endl; }
-
-ofstream fout(str, ios::out);
+ofstream fout(fileName, ios::out);
 if (!fout){
-   if(VERBOSE) { cerr << "pb ouverture fichier " << str << "en ecriture" << endl; }
+   if(VERBOSE) { cerr << "cannot open file " << fileName << "in write mode" << endl; }
    SYSTEM_ERROR;}
 //fout << boost::format("#time : %+20.10e ") % fem.t << endl;
 fout << "#time : " << t <<endl;
@@ -123,16 +119,16 @@ if(VERBOSE) { cout << i <<"nodes written." << endl; }
 fout.close();
 }
 
-void Fem::saveH(string baseName,double scale, int nt)
+void Fem::saveH(string fileName,double scale)
 {
-string str = baseName + "_" + to_string(SEQ) + "_B" + to_string(Bext) + "_iter" + to_string(nt) + ".hdm";
 
-cout << " " << str << endl <<" -------------------" << endl << endl;
 
-ofstream fout(str, ios::out);
+cout << " " << fileName << endl <<" -------------------" << endl << endl;
+
+ofstream fout(fileName, ios::out);
 if (!fout){
-   cerr << "pb ouverture fichier " << str << "en ecriture" << endl;
-   exit(1);}
+   cerr << "cannot open file " << fileName << "in write mode" << endl;
+   SYSTEM_ERROR;}
 fout << "#time : "<< t << endl;
 
 for (int t=0; t<TET; t++){
