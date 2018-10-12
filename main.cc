@@ -41,7 +41,7 @@ fem.chapeaux(mySettings.EPSILON);
 if (mySettings.restore) {fem.restoresol(mySettings.getScale(), nullptr);}
 else {fem.init_distrib();}
 
-fem.direction();/* determination de la direction de propagation de la paroi */
+fem.direction(Pt::IDX_Z);/* determination de la direction de propagation de la paroi */
 fem.t=0.;
 fem.affichage();
 
@@ -137,7 +137,7 @@ if(ORD2)
     fem.DW_z  += fem.DW_vz*dt;
     fem.evolution(); t+=dt; fem.t=t; nt++; flag=0;
     double mz = fem.moy<U>(Pt::IDX_Z);	    
-	if(mySettings.recentering) { fem.recentrage( 0.1,mz); }
+	if(mySettings.recentering) { fem.recentrage( 0.1,Pt::IDX_Z,mz); }
     fem.saver(mySettings,fout,nt);
     dt = min(1.1*dt, mySettings.DTMAX); 
     mySettings.dt=dt;

@@ -59,7 +59,7 @@ public:
      * returns a unit vector built by coordinate index, usefull to buid basis
      * example : pt2D p = pt2D(IDX_Y); //p will contain (x,y) = (0.0,1.0)
      */
-    inline pt2D(int idx) {_x = _y = 0.0;if(idx==0) {_x=1.0;} else {_y=1.0;}}
+    inline pt2D(enum index idx) {_x = _y = 0.0;if(idx==0) {_x=1.0;} else {_y=1.0;}}
     
     /**
      * constructor copy
@@ -189,7 +189,7 @@ public:
      * example : pt3D p = pt3D(IDX_Y); <br>
      p will contain \f$ (x,y,z) = (0.0,1.0,0.0) \f$
      */
-    inline pt3D(int idx)
+    inline pt3D(enum index idx)
         {_x = _y = _z = 0.0;if(idx==IDX_X) {_x=1.0;} else {if(idx==IDX_Y) {_y=1.0;} else _z=1.0;}}
     
     
