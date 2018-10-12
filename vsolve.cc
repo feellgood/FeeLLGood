@@ -1,11 +1,13 @@
 #include <algorithm>
 
+#include "Utils/FTic.hpp"
+
 #include "linear_algebra.h"
 
 
 int LinAlgebra::vsolve(double dt,long nt)
 {
-time_t timeStart;
+FTic counter;
 
 const int NOD = refNode->size();
 
@@ -18,7 +20,7 @@ mtl::vec::set_to_zero(Lw);
 
 if(VERBOSE) { std::cout <<"DW speed = " << DW_vz << "\nmatrix size " << 2*NOD << "; assembling ..." << std::endl; }
 
-time(&timeStart);
+counter.tic();
 
 sparseInserter *ins;
 ins = new sparseInserter(Kw,256); //64 maybe too small
@@ -53,10 +55,9 @@ for_each(refFac->begin(),refFac->end(),
 
 delete ins;//Kw should be ready
 
-time_t timeEnd;
-time(&timeEnd);
+counter.tac();
 
-if(VERBOSE) { std::cout << "elapsed time = " << difftime(timeEnd,timeStart) << "s" << std::endl; }
+if(VERBOSE) { std::cout << "elapsed time = " << counter.elapsed() << "s" << std::endl; }
 
 mtl::dense_vector<double> Xw(2*NOD);
 mtl::vec::set_to_zero(Xw);//should be useless
@@ -65,55 +66,53 @@ itl::noisy_iteration<double> bicg_iter(Lw,settings->MAXITER,1e-6);
 
 bicg_iter.set_quite(true);
 
-time(&timeStart);
+counter.tic();
 
 if (!nt) 
     {
     if(VERBOSE) { std::cout << "computing prc.";std::fflush(NULL); }
     prc = new itl::pc::diagonal < mtl::compressed2D<double> >(Kw); //mind the constructor call syntax
-	time(&timeEnd);    
-	if(VERBOSE) { std::cout << "elapsed time = " << difftime(timeEnd,timeStart) << "s" << std::endl; }
+	counter.tac();    
+	if(VERBOSE) { std::cout << "elapsed time = " << counter.elapsed() << "s" << std::endl; }
     }
 else if (!(nt % (settings->REFRESH_PRC)))
     {
     delete prc;
     if(VERBOSE) { std::cout << "computing prc.";std::fflush(NULL); }
     prc = new itl::pc::diagonal < mtl::compressed2D<double> >(Kw); //mind the constructor call syntax
-    time(&timeEnd);    
-	if(VERBOSE) { std::cout << "elapsed time = " << difftime(timeEnd,timeStart) << "s" << std::endl; }
+    counter.tac();    
+	if(VERBOSE) { std::cout << "elapsed time = " << counter.elapsed() << "s" << std::endl; }
     } 
 
 
-time(&timeStart);
+counter.tic();
 
 bicgstab(Kw, Xw, Lw, *prc, bicg_iter);
-
 
 itl::noisy_iteration<double> gmr_iter(Lw,settings->MAXITER,1e-6);
 gmr_iter.set_quite(true);
 
-
-if(VERBOSE) {std::cout<< "bi-conjugate gradient stabilized done." <<std::endl;}
-
-if (!(bicg_iter.is_converged() )) {
-    time(&timeEnd);
-	if(VERBOSE) { std::cout << "bicg FAILED in " << bicg_iter.iterations() << " difftime: " << difftime(timeEnd,timeStart) << " s" << std::endl; }
+if (!(bicg_iter.is_converged() )) 
+    {
+    counter.tac();
+	if(VERBOSE) { std::cout << "bicg FAILED in " << bicg_iter.iterations() << "iterations, duration: " << counter.elapsed() << " s" << std::endl; }
     itl::pc::diagonal < mtl::compressed2D<double> >  gmr_prc (Kw);
-    time(&timeStart);
+    counter.tic();
     
     itl::gmres(Kw, Xw, Lw, gmr_prc, gmr_prc,gmr_iter, gmr_iter);
     if (!(gmr_iter.is_converged() )) {
-	time(&timeEnd);
-    if(VERBOSE) { std::cout << "gmres FAILED in " << gmr_iter.iterations() << " difftime: " << difftime(timeEnd,timeStart) << " s" << std::endl; }
+	counter.tac();
+    if(VERBOSE) { std::cout << "gmres FAILED in " << gmr_iter.iterations() << "iterations, duration: " << counter.elapsed() << " s" << std::endl; }
     return 1;
     }
-    else {time(&timeEnd);
-        if(VERBOSE) { std::cout << "v-solve in " << gmr_iter.iterations() << " (gmres) difftime= " << difftime(timeEnd,timeStart) << " s" << std::endl; }
+    else {counter.tac();
+        if(VERBOSE) { std::cout << "v-solve in " << gmr_iter.iterations() << " iterations (gmres) duration: " << counter.elapsed() << " s" << std::endl; }
         }
     }
-else {time(&timeEnd);
-    if(VERBOSE) { std::cout << "v-solve in " << bicg_iter.iterations() << " (bicg,prc-" << (nt % (settings->REFRESH_PRC)) << ") :difftime = " 
-<< difftime(timeEnd,timeStart) << " s" << std::endl; }
+else 
+    {counter.tac();
+    if(VERBOSE) { std::cout << "v-solve converged in " << bicg_iter.iterations() << " (bicg,prc-" << (nt % (settings->REFRESH_PRC)) << ") :duration: " 
+<< counter.elapsed() << " s" << std::endl; }
     }
 
 double v2max = 0.0;

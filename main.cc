@@ -1,4 +1,7 @@
 #include <iostream>
+#include <unistd.h> // for getpid()
+
+#include "Utils/FTic.hpp"//for counter
 
 #include "linear_algebra.h"
 #include "fmm_demag.h"
@@ -10,6 +13,8 @@ int main(int argc,char* argv[])
 Settings mySettings = Settings();
 Fem fem;
 
+FTic counter;
+
 OctreeClass *tree    = nullptr;
 KernelClass *kernels = nullptr; 
 
@@ -19,26 +24,34 @@ string fileJson;
 if(argc<2)
 	{
 	fileJson = "settings.json";
-	cout << "using default settings in " << fileJson << " JSON file." <<endl; 
+	cout << "using default settings from " << fileJson << " JSON file." <<endl; 
 	}
 else 
 	{
 	fileJson = argv[1]; // argv[0] is "./feellgood"
-	cout << "using loaded settings in " << fileJson << " JSON file." <<endl;	
+	cout << "using loaded settings from " << fileJson << " JSON file." <<endl;	
 	}
 
+std::cout << "\n\t ┌────────────────────────────┐\n";
+std::cout <<   "\t │         feeLLGood          │\n";
+std::cout <<   "\t │        version 2018        │\n";
+std::cout <<   "\t │      cnrs Grenoble-INP     │\n";
+std::cout <<   "\t └────────────────────────────┘\n";
+std::cout << "\t process\t\t" << getpid() << std::endl;
+	
 mySettings.read(fileJson,seq);
 
-mySettings.printToTerminal(seq);
+mySettings.infos(seq);
 
-//mySettings.dialog(seq); // deprecated
-fem.lecture(mySettings);
+fem.readMesh(mySettings);
+
+counter.tic();
 
 fem.femutil(mySettings);
 
 fem.chapeaux(mySettings.EPSILON);
 
-if (mySettings.restore) {fem.restoresol(mySettings.getScale(), nullptr);}
+if (mySettings.restore) {fem.readSol(mySettings.getScale(), mySettings.restoreFileName);}
 else {fem.init_distrib();}
 
 fem.direction(Pt::IDX_Z);/* determination de la direction de propagation de la paroi */
@@ -77,7 +90,7 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it)
     string str = baseName +"_"+ to_string(fem.SEQ) + "_B" + to_string(fem.Bext) + ".evol";
 
     ofstream fout(str);
-    if (!fout) { cerr << "erreur ouverture fichier" << endl; SYSTEM_ERROR; }
+    if (!fout) { cerr << "cannot open file "<< str << endl; SYSTEM_ERROR; }
 
 fmm::demag<0, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree,kernels);
 
@@ -97,8 +110,6 @@ fem.DW_z  = 0.0;
 
 int nt = 0;
 fem.saver(mySettings,fout,nt);
-
-double start_cpu = cputime();
 
 while (t < mySettings.tf)
     {
@@ -149,7 +160,8 @@ if (dt < mySettings.DTMIN) cout << " aborted:  dt < DTMIN";
 fem.saver(mySettings,fout,nt);
         
 cout << "\n  * iterations: " << nt;
-cout << "\n  * duree cpu: " << difftime(cputime(),start_cpu) << " s\n" << endl;
+counter.tac();
+cout << "\n  * total computing time: " << counter.elapsed() << " s\n" << endl;
 fout.close();
 
 //      initialisation du temps pour l'iteration en champ suivante

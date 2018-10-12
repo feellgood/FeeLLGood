@@ -3,8 +3,6 @@
 #include <string>
 #include <ctime>
 #include <cctype>
-#include <unistd.h> // for getpid()
-
 #include <exception>
 
 #include<boost/property_tree/ptree.hpp>
@@ -12,17 +10,7 @@
 
 #include "feellgoodSettings.h"
 
-void Settings::helloDialog()
-{
-std::cout << "\n\t ******************************\n";
-std::cout <<   "\t *         feeLLGood          *\n";
-std::cout <<   "\t *        version 2018        *\n";
-std::cout <<   "\t *      cnrs Grenoble-INP     *\n";
-std::cout <<   "\t ******************************\n";
-std::cout << "\t process\t\t" << getpid() << std::endl;
-}
-
-void Settings::printToTerminal(std::vector<Seq> &seq)
+void Settings::infos(std::vector<Seq> &seq)
 {
 std::cout << "\t name simul : "<< simName << std::endl;
 std::cout << "\t name mesh file : " << pbName << std::endl;
@@ -30,7 +18,11 @@ std::cout << "\t temps final\t\t" << tf << std::endl;
 std::cout << "\t pas de temps init\t" << dt << std::endl << std::endl;
 std::cout << "\t sauve energies chaque " << n1 << " iterations" << std::endl;
 std::cout << "\t photo config chaque " << n2 << " iterations" << std::endl;
-std::cout << "\t restauration a partir d'un fichier sol.in: " << restore << std::endl <<std::endl;
+if (restore)
+    { std::cout << "\t restauration a partir du fichier : " << restoreFileName <<std::endl; }
+else
+    { std::cout << "\t distribution initiale d'aimantation uniforme" << std::endl; }
+
 std::cout << "\t sequences de champ applique Bext" << std::endl;
 for (std::vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
     std::cout << it->Bini << "\t" << it->Bfin << "\t" << it->dB << "\t" << it->a[0] << "\t" << it->a[1] << "\t" << it->a[2] << std::endl;
@@ -39,73 +31,13 @@ for(unsigned int i=0;i<paramTetra.size();i++) {paramTetra[i].infos();}
 for(unsigned int i=0;i<paramFacette.size();i++) {paramFacette[i].infos();}
 }
 
-void Settings::extract_comment(std::istream &flux)
-{
-std::string comment;
-char c;
-while (1)
-      {
-      while (flux.get(c))  // lecture des caracteres blancs (espaces, nl, tab, cr, np)
-	    if (isspace(c)==0)
-	       {
-	       flux.putback(c);
-	       break;
-	       }
-
-      flux.get(c);  
-      if (c=='#') 
-	 getline(flux, comment,'\n');  // lecture du commentaire
-      else
-	 {
-	 flux.putback(c);
-	 break;
-	 }
-      }
-}
-
-void Settings::dialog(std::vector<Seq> &seq)
-{
-int SEQ;
-
-std::cout << "\t name simul ? "<< std::endl;
-extract_comment(std::cin);   std::cin >> simName;
-std::cout << "\t name simul\t\t"<< simName << std::endl;
-
-std::cout << "\t file mesh ?"<< std::endl;
-extract_comment(std::cin);   std::cin >> pbName;
-std::cout << "\t name file pro\t" << pbName << std::endl;
-
-std::ifstream fin(pbName);
-if (!fin){
-    std::cerr << "Cannot open problem file, fileName = " << pbName << std::endl;
-    exit(1);}
-fin.close();
-
-extract_comment(std::cin);              std::cin >> tf;
-extract_comment(std::cin);              std::cin >> dt;
-extract_comment(std::cin);              std::cin >> theta;
-extract_comment(std::cin);              std::cin >> n1;
-extract_comment(std::cin);              std::cin >> n2;
-extract_comment(std::cin);              std::cin >> restore;
-extract_comment(std::cin);              std::cin >> SEQ;
-
-for (int nseq=0; nseq<SEQ; nseq++)
-	{
-    Seq s;
-    extract_comment(std::cin);          std::cin >> s.Bini >> s.Bfin >> s.dB >> s.a[0] >> s.a[1] >> s.a[2];
-    s.dB=fabs(s.dB)*(s.Bfin<s.Bini? -1.0: 1.0);
-    normalize(s.a);
-    seq.push_back(s);
-    }
-printToTerminal(seq);
-}
 
 void Settings::read(std::string fileJson,std::vector<Seq> &seq)
 {
 	boost::property_tree::ptree root;
 	boost::property_tree::read_json(fileJson,root);
 	
-	std::cout << "parsing parameters and settings from json file :\n" << std::endl;
+	std::cout << "\nparsing "<< fileJson <<" :" << std::endl;
 	
 	r_path_output_dir = root.get<std::string>("output directory");
 	simName = root.get<std::string>("output file basename");
@@ -138,7 +70,7 @@ void Settings::read(std::string fileJson,std::vector<Seq> &seq)
 		normalize(field.a);
 		seq.push_back(field);
 		}
-std::cout << "volumic regions..." << std::endl;
+std::cout << "\tvolumic regions..." << std::endl;
 
 boost::property_tree::ptree sub_tree;
 
@@ -161,7 +93,7 @@ catch (std::exception &e)
 				if (sub_k.first == "Ka")
 					{
 					p.K = sub_k.second.get_value<double>();
-					if (p.K == 0) { std::cout<< "Ka is zero, flag NO_ANISOTROPY to true" << std::endl;}
+					if (p.K == 0) { std::cout<< "\tKa is zero, flag NO_ANISOTROPY to true" << std::endl;}
 					}
 				if (sub_k.first == "a")
 					{int i=0;
@@ -185,7 +117,7 @@ catch (std::exception &e)
 			}
 		}
 		
-std::cout << "surfacic regions..." << std::endl;
+std::cout << "\tsurfacic regions..." << std::endl;
 
 try { sub_tree = root.get_child("surface_regions"); }
 catch (std::exception &e)
@@ -204,7 +136,7 @@ for (boost::property_tree::ptree::value_type &s : sub_tree)
 				if (sub_k.first == "Ks")
 					{
 					p.Ks = sub_k.second.get_value<double>();
-					if (p.Ks == 0) { std::cout<< "Ks is zero, flag NO_SURF_ANISOTROPY to true" << std::endl;}
+					if (p.Ks == 0) { std::cout<< "\tKs is zero, flag NO_SURF_ANISOTROPY to true" << std::endl;}
 					}
 				if (sub_k.first == "uk")
 					{int i=0;

@@ -6,7 +6,7 @@
 "final_time" : 1e-6,
 "save_energies" : 3,
 "take_photo" : 5,
-"restore" : false,
+"restore" : true,
 "restore from file" : "sol.in",
 "recentering" : true,
 "field_sequence" :

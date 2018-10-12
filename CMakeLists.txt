@@ -57,7 +57,7 @@ set( CMAKE_CXX_FLAGS_DEBUG "-Wall -Wextra -std=c++11 -O2 -fopenmp -ffast-math -m
 set( CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -std=c++11 -O3 -fopenmp -ffast-math -msse4.2 -mfpmath=sse" CACHE STRING "C++ compiler flags used during release builds." FORCE )
 
 SET( SOURCES config.h pt3D.h tetra.h tetra.cpp facette.h facette.cpp feellgoodSettings.h node.h
-	linear_algebra.h main.cc cputime.cc dialog.cc lecture.cc femutil.cc restoresol.cc
+	linear_algebra.h main.cc feellgoodSettings.cpp read.cpp femutil.cc
 	recentrage.cc energy.cc save.cpp vsolve.cc tiny.h)
 
 SET( HEADERS ${ANN_INCLUDE_DIR}/ANN.h ${SCALFMM_INCLUDE_DIR}/Kernels/Rotation/FRotationKernel.hpp)

@@ -20,7 +20,7 @@ if ((nt%n1)==0)
    // fout << boost::format("%+20.10e %+20.10e %+20.10e") % u_moy(fem,0) % u_moy(fem,1) % u_moy(fem,2);
    // fout << boost::format("%+20.10e %+20.10e %+20.10e %+20.10e %+20.10e %+20.10e %+20.10e")% Ee % Ea % Ed % Ez % Etot % DW_z % DW_vz<< endl;
     fout << nt <<"\t" << t <<"\t" << settings.dt <<"\t" << vmax*settings.dt <<"\t";
-    fout << moy<U>(0) <<"\t" << moy<U>(1) <<"\t" << moy<U>(2) <<"\t";
+    fout << moy<U>(Pt::IDX_X) <<"\t" << moy<U>(Pt::IDX_Y) <<"\t" << moy<U>(Pt::IDX_Z) <<"\t";
     fout << E[0] <<"\t" << E[1] <<"\t" << E[2] <<"\t" << E[3] <<"\t" << Etot <<"\t" << DW_z <<"\t" << DW_vz <<"\t" << endl;
     }
 
@@ -46,11 +46,13 @@ if ((nt%n2)==0)
 
 void Fem::savecfg_vtk(string fileName)
 {
+    const int TET = tet.size();
+    
 if(VERBOSE) { cout <<"\n -------------------\n " << fileName << endl; }
 
 ofstream fout(fileName, ios::out);
 if (!fout){
-    if(VERBOSE) cerr << "cannot open file : " << fileName << "in write mode" << endl;
+    if(VERBOSE) cerr << "cannot open file : " << fileName << endl;
     SYSTEM_ERROR;}
 
 
@@ -97,7 +99,7 @@ if(VERBOSE) { cout << " " << fileName << endl; }
 
 ofstream fout(fileName, ios::out);
 if (!fout){
-   if(VERBOSE) { cerr << "cannot open file " << fileName << "in write mode" << endl; }
+   if(VERBOSE) { cerr << "cannot open file " << fileName << endl; }
    SYSTEM_ERROR;}
 //fout << boost::format("#time : %+20.10e ") % fem.t << endl;
 fout << "#time : " << t <<endl;
@@ -114,20 +116,20 @@ std::for_each(node.begin(),node.end(),
         i++;
         } // lambda works with << overloaded
     );
-if(VERBOSE) { cout << i <<"nodes written." << endl; }
+if(VERBOSE) { cout << i <<" nodes written." << endl; }
 
 fout.close();
 }
 
 void Fem::saveH(string fileName,double scale)
 {
-
+const int TET = tet.size();
 
 cout << " " << fileName << endl <<" -------------------" << endl << endl;
 
 ofstream fout(fileName, ios::out);
 if (!fout){
-   cerr << "cannot open file " << fileName << "in write mode" << endl;
+   cerr << "cannot open file " << fileName << endl;
    SYSTEM_ERROR;}
 fout << "#time : "<< t << endl;
 

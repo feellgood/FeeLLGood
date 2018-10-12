@@ -2,20 +2,17 @@
 
 #include "pt3D.h"
 
-#define DEBUG 0
-
 using namespace std;
 
-void Fem::lecture(Settings &mySets)
+void Fem::readMesh(Settings &mySets)
 {
 int ELEM, tags, reg, TYP;
-double value;
 string trash, symb;
 
 string str = mySets.getPbName();
 ifstream msh(str);   // ouverture du fichier probleme en lecture
 if (!msh){
-    if(VERBOSE) { cerr << "Impossible d'ouvrir le fichier " << str << endl; } 
+    if(VERBOSE) { cerr << "cannot open file " << str << endl; } 
     SYSTEM_ERROR;}
 
 while(msh >> symb){
@@ -36,9 +33,9 @@ if (msh.fail()){
     
 if (scale == 0.0){
 #ifdef LIBRARY
-    throw runtime_error("scale must be passed defined in json settings file");
+    throw runtime_error("scaling factor must be defined in json settings file");
 #else
-    cerr << "scale must be passed defined in json settings file" << endl;
+    cerr << "scaling factor must be defined in json settings file" << endl;
     exit(1);
 #endif
     }
@@ -92,7 +89,6 @@ while(msh >> symb){
 	        f.ind[i]--;           // passage convention Matlab/msh a C++
 		
             fac.push_back(f);
-            //if (regions) ++regions->surfaces[reg];
             break;
 	    }
         case 4:{
@@ -104,7 +100,6 @@ while(msh >> symb){
 	    	te.ind[i]--;           // passage convention Matlab/msh a C++
 		
             tet.push_back(te);
-            //if (regions) ++regions->volumes[reg];
             break;
 	    }
         default:
@@ -121,31 +116,46 @@ if (msh.fail()){
 #endif
     }
 
-FAC = fac.size();
-TET = tet.size();
+msh.close();
+}
 
-while(msh >> symb){
-    if (symb == "$Parameters") break;
+void Fem::readSol(double scaling, string fileName)
+{
+ifstream fin(fileName, std::ifstream::in);
+if (!fin){
+    if(VERBOSE) { cerr << "cannot open .sol file: " << fileName << endl; }
+    SYSTEM_ERROR;}
+
+string str;
+getline(fin, str); // 1eme ligne
+
+unsigned long idx = str.find(":");
+idx +=2;
+
+t = stod(str.substr(idx));
+
+if(VERBOSE) { cout << ".sol file: " << str << " @ time t = " << t << endl; }
+
+for (int i=0; i<NOD; i++){
+    Node &n = node[i];
+    Node node_;
+    int i_;
+    fin >> i_ >>  node_.p >> n.u >> n.phi;// carefull! >> is overloaded for class pt3D
+
+    node_.p *= scaling;
+
+    if (( Pt::norme2(n.p - node_.p) > sq(diam * 1e-9))&&VERBOSE) 
+	{
+    cerr << "WARNING difference in node positions"<< endl;
+    cerr << i  << "\t" << n.p << endl << i_ << "\t" << node_.p << endl;
     }
-
-while(msh >> symb){  // lecture des parametres
-    if (symb=="$EndParameters" || (symb=="$End"))
-        break;
-    if (msh.eof())  // be lenient
-        break;
-    msh >> reg >> value;
-    if(VERBOSE) {cout <<"from msh: " << symb << '\t' << reg << '\t' << value << endl;}
-    //p = make_pair(symb,reg);
-    //mySets.param[p] = value;
-    if (msh.fail()){
-    #ifdef LIBRARY
-        throw runtime_error("error while reading parameters");
-    #else
-        cerr << "error while reading parameters" << endl;
-        exit(1);
-    #endif
+    
+    if (i!=i_){
+        if(VERBOSE) { cerr << ".sol file mismatch with mesh nodes"<< endl; }
+        SYSTEM_ERROR;
         }
     }
 
-msh.close();
+fin.close();    			     
 }
+

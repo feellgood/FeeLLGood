@@ -41,10 +41,7 @@ const bool V = false;/**< used as a template parameter */
 container to grab altogether all parameters of a simulation, including mesh geometry, containers for the mesh
 */
 struct Fem{
-	int NOD;/**< number of nodes in the corresponding container */
-	int FAC;/**< number of faces in the corresponding container */
-	int TET;/**< number of tetrahedron in the corresponding container */
-	
+	int NOD;/**< number of nodes in vector container */
 	int SEQ;/**< number of sequences, usefull to define a vector applied field eventually varying in time */
 	Pt::pt3D c;/**< center position */	
 	Pt::pt3D l;/**< lengths along x,y,z axis */	
@@ -136,11 +133,11 @@ inline void init_distrib(void)
 /**
 read a solution from a file (tsv formated) and initialize fem struct to restart computation from that distribution
 */
-void restoresol(double scaling /**< [in] scaling factor for physical coordinates */,
-	std::string *filename /**< [in] */ );
+void readSol(double scaling /**< [in] scaling factor for physical coordinates */,
+	std::string fileName /**< [in] */ );
 
-/** reading file function */
-void lecture(Settings &mySets);
+/** reading mesh file function */
+void readMesh(Settings &mySets);
 
 /**  utilitary function to initialize pts,kdtree,l,c,diam, computes the surfaces and volumes and reorientation of the tetrahedrons if needed in fem struct; definition of Ms on facette elements <br>
 Indices and orientation convention : 
@@ -199,42 +196,28 @@ void saveH(std::string fileName,double scale);
 
 
 /** 
-template to compute average of either u or v on the whole set of tetetrahedron
+template to compute average component of either u or v on the whole set of tetetrahedron
 */
 template <int UorV>
-double moy(int d)
+double moy(Pt::index d)
 {
 double sum = 0.;
-for (int i_t=0; i_t<TET; i_t++){
-    Tetra::Tet &te = tet[i_t];
+std::for_each(tet.begin(),tet.end(),[this,&sum,&d](Tetra::Tet &te)
+    {
     double val_nod[Tetra::N], val[Tetra::NPI];
     for (int ie=0; ie<Tetra::N; ie++) 
-	{
+        {
         int i = te.ind[ie];
         Node &n = node[i];
-	if(UorV)        
-		val_nod[ie] = n.u(d);
-	else val_nod[ie] = n.v(d); 
+        if(UorV) { val_nod[ie] = n.u(d);} else { val_nod[ie] = n.v(d);} 
         }
-   tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (val_nod, Tetra::a, val);
-   sum += tiny::sp<double, Tetra::NPI> (val, te.weight);
-   }
+    tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (val_nod, Tetra::a, val);
+    sum += tiny::sp<double, Tetra::NPI> (val, te.weight);
+    }
+);//fin for_each
 
 return sum/vol;
 }
 
 
 }; // end struct fem definition
-
-
-
-double cputime();/**< convenient function to compute the duration of a simulation */
-
-
-
-
-
-
-
-
-

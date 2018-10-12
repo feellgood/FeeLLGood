@@ -35,9 +35,7 @@ class Settings{
 	public:
 	inline Settings() { withTsv=true; withVtk = false; theta=0.5; analytic_corr = true;MAXITER = 500;REFRESH_PRC = 20;recentering = true;} /**< default constructor */
 	
-	void helloDialog();/**< kinda hello world! */
-	void printToTerminal(std::vector<Seq> &seq);/**< some prints sent to terminal  */	
-	void dialog(std::vector<Seq> &seq);/**< text interaction with user from terminal to fix some parameters of the simulation to run */
+	void infos(std::vector<Seq> &seq);/**< some prints sent to terminal  */	
 	
 	void read(std::string fileJson,std::vector<Seq> &seq);/**< read settings from a json file */
 	
@@ -124,8 +122,6 @@ class Settings{
 	
 	private:
 	
-	void extract_comment(std::istream &flux);/**< parser */
-
 	double _scale;/**< scaling factor from gmsh files to feellgood */
 	std::string simName;/**< simulation name */
 	std::string pbName;     /**< mesh file, gmsh file format */

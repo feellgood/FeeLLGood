@@ -2,6 +2,8 @@
 
 void Fem::energy(Settings &settings)
 {
+    const int FAC = fac.size();
+    const int TET = tet.size();
 Etot = 0.0;
 double _E[5] = {0.0,0.0,0.0,0.0,0.0};
 

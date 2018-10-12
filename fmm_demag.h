@@ -46,11 +46,6 @@ typedef FRotationKernel< FReal, CellClass, ContainerClass, P >          KernelCl
 
 typedef FFmmAlgorithmThreadTsm<OctreeClass, CellClass, ContainerClass, KernelClass, LeafClass > FmmClass;/**< convenient typedef for handling altogether the differents scalfmm object templates used in feellgood  */
 
-
-#ifndef VERBOSE  // same goes for SYSTEM_ERROR
-#error "fem.h" must be #included before "fmm_demag.h"
-#endif
-
 /**
 \namespace fmm to grab altogether the templates and functions using scalfmm for the computation of the demag field 
 */
@@ -180,8 +175,8 @@ FmmClass algo(tree, kernels);
 if(VERBOSE) { std::cout << "\t magnetostatics ..................... "; }
 
 const int NOD = fem.NOD;
-const int FAC = fem.FAC;
-const int TET = fem.TET;
+const int FAC = fem.fac.size();
+const int TET = fem.tet.size();
 const int SRC = FAC * Facette::NPI + TET * Tetra::NPI;
 
 FReal *srcDen=(FReal*) new FReal[SRC]; if (!srcDen) SYSTEM_ERROR;
