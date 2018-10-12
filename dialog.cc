@@ -116,7 +116,7 @@ void Settings::read(std::string fileJson,std::vector<Seq> &seq)
 	n2 = root.get<int>("take_photo",0);
 	restore = root.get<bool>("restore",0);
 	restoreFileName = root.get<std::string>("restore from file");
-    
+    recentering = root.get<bool>("recentering",true);
     double trucs[6];
 	for (boost::property_tree::ptree::value_type &s : root.get_child("field_sequence"))
 		{

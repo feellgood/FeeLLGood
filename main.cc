@@ -137,7 +137,7 @@ if(ORD2)
     fem.DW_z  += fem.DW_vz*dt;
     fem.evolution(); t+=dt; fem.t=t; nt++; flag=0;
     double mz = fem.moy<U>(Pt::IDX_Z);	    
-	fem.recentrage( 0.1,mz);
+	if(mySettings.recentering) { fem.recentrage( 0.1,mz); }
     fem.saver(mySettings,fout,nt);
     dt = min(1.1*dt, mySettings.DTMAX); 
     mySettings.dt=dt;

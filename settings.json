@@ -7,7 +7,7 @@
 "take_photo" : 5,
 "restore" : false,
 "restore from file" : "sol.in",
-
+"recentering" : true,
 "field_sequence" :
 	[
 	[0.0,1.0,0.2,1.0,0.0,0.0],

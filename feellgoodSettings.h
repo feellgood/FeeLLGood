@@ -33,7 +33,7 @@ container class to store many setting parameters, such as file names, parameters
 */
 class Settings{
 	public:
-	inline Settings() { withTsv=true; withVtk = false; theta=0.5; analytic_corr = true;MAXITER = 500;REFRESH_PRC = 20;} /**< default constructor */
+	inline Settings() { withTsv=true; withVtk = false; theta=0.5; analytic_corr = true;MAXITER = 500;REFRESH_PRC = 20;recentering = true;} /**< default constructor */
 	
 	void helloDialog();/**< kinda hello world! */
 	void printToTerminal(std::vector<Seq> &seq);/**< some prints sent to terminal  */	
@@ -64,7 +64,9 @@ class Settings{
 	int n1;/**< energy saved every n1 iterations */
 	int n2;/**< magnetic configuration saved every n2 iterations */
 	bool restore;/**< usefull to run a simulation from a previous calculation  */
-
+    bool recentering;/**< to recenter DW or not */
+	
+	
 	std:: string restoreFileName;/**< input file name for continuing a calculation (sol.in) */
 	
 	/** for time integration \f$ \theta \f$ scheme  */
@@ -88,7 +90,7 @@ class Settings{
 /** maximum step time for time integrator */
     double DTMAX;//  1e-5 en stat ;  1e-7 en dynamique;
 
-/** reduced /f$ /tau_r = 100 DT_{\mathrm{max}} /f$ */
+/** reduced \f$ \tau_r = 100 DT_{\mathrm{max}} \f$ */
     double TAUR;//    = 100.*DTMAX;
     
     int MAXITER;/**< maximum number of iteration for biconjugate gradient algorithm */
