@@ -31,8 +31,11 @@ l = Pt::pt3D(xmax-xmin,ymax-ymin,zmax-zmin);
 diam = l.maxLength();
 c = Pt::pt3D(0.5*(xmax+xmin),0.5*(ymax+ymin),0.5*(zmax+zmin));
 
+//ici on affecte refNode des tetraedres
+std::for_each(tet.begin(),tet.end(),[this](Tetra::Tet &te) {te.setRefNode( &(this->node) );} );
+
 //ici on calcule les volumes elementaires et on reoriente si besoin par une permutation d'indice
-std::for_each(tet.begin(),tet.end(),[this](Tetra::Tet &te) {te.calc_vol(this->node);} );
+std::for_each(tet.begin(),tet.end(),[](Tetra::Tet &te) {te.calc_vol();} );
 
 //volume total
 vol = std::accumulate(tet.begin(),tet.end(),0.0,[](double x,Tetra::Tet &te){return x+te.vol;} );

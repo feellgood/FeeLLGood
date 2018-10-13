@@ -10,10 +10,10 @@
 
 using namespace Tetra;
 
-void Tet::init(std::vector<Node> const& myNode,double epsilon)
+void Tet::init(double epsilon)
 {
 double J[Pt::DIM][Pt::DIM];
-double detJ = Jacobian(J,myNode);
+double detJ = Jacobian(J);
 double da[N][Pt::DIM];
     
 if (fabs(detJ) < epsilon){
@@ -38,7 +38,8 @@ for (int j=0; j<NPI; j++)
     }    
 }
 
-void Tet::integrales(std::vector<Tetra::prm> const& params,std::vector <Node> const& myNode,double Hext[DIM],double Vz,double theta,double dt,double tau_r,mtl::dense2D <double> &AE, mtl::dense_vector <double> &BE)
+void Tet::integrales(std::vector<Tetra::prm> const& params,double Hext[DIM],double Vz,
+                     double theta,double dt,double tau_r,mtl::dense2D <double> &AE, mtl::dense_vector <double> &BE)
 {
 double alpha = params[idxPrm].alpha;
 double A = params[idxPrm].A;
@@ -78,7 +79,7 @@ double dvdx[3][NPI], dvdy[3][NPI], dvdz[3][NPI];
 double negphiv0_nod[N], Hvx[NPI], Hvy[NPI], Hvz[NPI];
 
 for (int i=0; i<N; i++){
-    Node const& node = myNode[ ind[i] ];
+    Node const& node = (*refNode)[ ind[i] ];
     u_nod[Pt::IDX_X][i]  = node.u0.x(); u_nod[Pt::IDX_Y][i] = node.u0.y(); u_nod[Pt::IDX_Z][i]  = node.u0.z();
     v_nod[Pt::IDX_X][i]  = node.v0.x(); v_nod[Pt::IDX_Y][i] = node.v0.y(); v_nod[Pt::IDX_Z][i]  = node.v0.z();			
     negphi0_nod[i]  = -node.phi0;
@@ -218,23 +219,58 @@ R = dt/tau_r*abs(log(dt/tau_r));
     }
 }
 
-void Tet::getNod(mtl::dense2D <double> &nod,std::vector <Node> const& myNode)
+
+void Tet::projection(mtl::dense2D <double> &P,
+           mtl::dense2D <double> const& A,  mtl::dense_vector <double> const& B,
+           mtl::dense2D <double> &Ap, mtl::dense_vector <double> &Bp)
+{
+//mtl::dense2D <double> P(2*N,3*N);
+mtl::mat::set_to_zero(P);
+
+for (int i=0; i<N; i++){
+    Node const& n = (*refNode)[ind[i]];
+    P(i,i)  = n.ep.x();  P(i,N+i)  = n.ep.y();  P(i,2*N+i)  = n.ep.z();
+    P(N+i,i)= n.eq.x();  P(N+i,N+i)= n.eq.y();  P(N+i,2*N+i)= n.eq.z();
+    }
+
+Ap = (P*A)*trans(P);
+Bp = P*B;
+}
+
+
+void Tet::assemblage(sparseInserter *ins,const int NOD,
+           mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le, mtl::dense_vector<double> &L)//mtl::compressed2D<double> &K, avant dernier
+    {
+    for (int i=0; i < N; i++){
+        int i_= ind[i];             
+        for (int j=0; j < N; j++){
+            int j_= ind[j];
+            (*ins)(NOD+i_,j_) << Ke(i,j);      (*ins)(NOD+i_, NOD+j_) << Ke(  i,N+j);
+            (*ins)(    i_,j_) << Ke(N+i,j);    (*ins)(    i_, NOD+j_) << Ke(N+i,N+j);
+            }
+        L(NOD+i_) += Le(i);//L[NOD+i_]+= Le[  i];
+        L(i_) += Le(N+i);//L[    i_]+= Le[N+i];
+        }
+    }
+
+
+void Tet::getNod(mtl::dense2D <double> &nod)
 {
 for (int i=0; i<N; i++)
     {
     int i_= ind[i];
-    nod(0,i) = myNode[i_].p.x();
-    nod(1,i) = myNode[i_].p.y();
-    nod(2,i) = myNode[i_].p.z();
+    nod(0,i) = (*refNode)[i_].p.x();
+    nod(1,i) = (*refNode)[i_].p.y();
+    nod(2,i) = (*refNode)[i_].p.z();
     }
 }
 
-double Tet::Jacobian(double J[DIM][DIM],std::vector <Node> const& myNode)
+double Tet::Jacobian(double J[DIM][DIM])
 {
-Pt::pt3D p0 = myNode[ ind[0] ].p;
-Pt::pt3D p1 = myNode[ ind[1] ].p;
-Pt::pt3D p2 = myNode[ ind[2] ].p;
-Pt::pt3D p3 = myNode[ ind[3] ].p;
+Pt::pt3D p0 = (*refNode)[ ind[0] ].p;
+Pt::pt3D p1 = (*refNode)[ ind[1] ].p;
+Pt::pt3D p2 = (*refNode)[ ind[2] ].p;
+Pt::pt3D p3 = (*refNode)[ ind[3] ].p;
 J[0][0] = p1.x()-p0.x(); J[0][1] = p2.x()-p0.x(); J[0][2] = p3.x()-p0.x();   
 J[1][0] = p1.y()-p0.y(); J[1][1] = p2.y()-p0.y(); J[1][2] = p3.y()-p0.y();
 J[2][0] = p1.z()-p0.z(); J[2][1] = p2.z()-p0.z(); J[2][2] = p3.z()-p0.z();
@@ -243,15 +279,15 @@ return Pt::det(J);
 }
 
 
-void Tet::calc_vol(std::vector<Node> const& myNode)
+void Tet::calc_vol(void)
 {
 int i0,i1,i2,i3;
 i0=ind[0];   i1=ind[1];   i2=ind[2];   i3=ind[3];
    
-Pt::pt3D p0 = myNode[i0].p;
-Pt::pt3D p1 = myNode[i1].p;
-Pt::pt3D p2 = myNode[i2].p;
-Pt::pt3D p3 = myNode[i3].p;
+Pt::pt3D p0 = (*refNode)[i0].p;
+Pt::pt3D p1 = (*refNode)[i1].p;
+Pt::pt3D p2 = (*refNode)[i2].p;
+Pt::pt3D p3 = (*refNode)[i3].p;
 Pt::pt3D vec = (p1-p0)*(p2-p0);
 
 vol  = 1./6.* pScal(vec,p3-p0);

@@ -7,6 +7,11 @@
  */
 
 #include "boost/numeric/mtl/mtl.hpp"
+#include "boost/numeric/itl/itl.hpp"
+
+#include <boost/numeric/mtl/matrix/inserter.hpp>
+#include <boost/numeric/mtl/operation/set_to_zero.hpp>
+#include <boost/numeric/mtl/interface/vpt.hpp>
 
 //#include "feellgoodSettings.h"
 
@@ -14,7 +19,14 @@
 
 #include "node.h"
 
-typedef double triple[DIM];/**< a 3D point */
+/** convenient typedef for mtl4 */
+typedef typename mtl::Collection< mtl::compressed2D<double> >::value_type v_type;
+
+/** convenient typedef for mtl4 inserter */
+typedef mtl::mat::inserter< mtl::compressed2D<double>,mtl::update_plus<v_type> > sparseInserter;
+
+/** a 3D point */
+typedef double triple[DIM];
 
 /** 
 \return square of a number \f$ x^2 \f$
@@ -135,7 +147,7 @@ class Tet{
 		double dadz[N][NPI];/**< variations of hat function along z directions */
 	
 		/** initializes weight and dad(x|y|z) */
-		void init(std::vector<Node> const& myNode,double epsilon);
+		void init(double epsilon);
 		
 		/** basic region infos */		
 		inline void infos(){std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2]<< "\t"<< ind[3] <<std::endl;};
@@ -143,9 +155,21 @@ class Tet{
 		/**
 		computes the integral contribution of the tetrahedron to the evolution of the magnetization
 		*/		
-		void integrales(std::vector<Tetra::prm> const& params,std::vector<Node> const& myNode,double Hext[DIM],double Vz,double theta,double dt,double tau_r,mtl::dense2D <double> &AE, mtl::dense_vector <double> &BE);
+		void integrales(std::vector<Tetra::prm> const& params,double Hext[DIM],double Vz,double theta,double dt,double tau_r,mtl::dense2D <double> &AE, mtl::dense_vector <double> &BE);
 
 		/**
+        computes projection of a tetrahedron
+        */
+        void projection(mtl::dense2D <double> &P,
+           mtl::dense2D <double> const& A,  mtl::dense_vector <double> const& B,mtl::dense2D <double> &Ap, mtl::dense_vector <double> &Bp);
+        
+        
+        /**
+        perform the matrix assembly with all the contributions of the tetrahedrons
+        */
+        void assemblage(sparseInserter *ins,const int NOD, mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le, mtl::dense_vector<double> &L);
+        
+        /**
 		convenient getter for N, usefull for templates projection and assemblage
 		*/
 		inline int getN(void) {return N;}
@@ -153,18 +177,24 @@ class Tet{
 		/**
         initializes nod matrix from vector myNode
         */
-		void getNod(mtl::dense2D <double> &nod,std::vector <Node> const& myNode);
+		void getNod(mtl::dense2D <double> &nod);
 		
         /**
         \return \f$ |J| \f$ build Jacobian \f$ J \f$
         */
-        double Jacobian(double J[DIM][DIM],std::vector <Node> const& myNode);
+        double Jacobian(double J[DIM][DIM]);
         
 		/**
 		computes volume		
 		*/
-		void calc_vol(std::vector<Node> const& myNode);
-    };//end class Tetra
+		void calc_vol(void);
+    
+        /** pointer to the nodes */
+        inline void setRefNode(std::vector<Node>  *_p_node) {refNode = _p_node;}
+        
+    private:
+        std::vector<Node>  *refNode;/**< direct access to the Nodes */
+};//end class Tetra
 }
 
 #endif /* tetra_h */

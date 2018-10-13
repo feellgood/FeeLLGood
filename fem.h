@@ -20,6 +20,13 @@ It does also contains the definition of many constants for the solver, and for s
 #include <sys/times.h>
 #include <unistd.h>
 
+#include "boost/numeric/mtl/mtl.hpp"
+#include "boost/numeric/itl/itl.hpp"
+
+#include <boost/numeric/mtl/matrix/inserter.hpp>
+#include <boost/numeric/mtl/operation/set_to_zero.hpp>
+#include <boost/numeric/mtl/interface/vpt.hpp>
+
 
 #include "config.h"
 #include "feellgoodSettings.h"
@@ -121,8 +128,7 @@ inline void chapeaux(double epsilon /**< [in] if \f$ | detJ | < \epsilon \f$ jac
 {
 std::for_each(fac.begin(),fac.end(),[](Facette::Fac &f) {f.init();});
 
-std::vector<Node> const& vecNodes = node;
-std::for_each(tet.begin(),tet.end(),[vecNodes,epsilon](Tetra::Tet &t) { t.init(vecNodes,epsilon); });
+std::for_each(tet.begin(),tet.end(),[epsilon](Tetra::Tet &t) { t.init(epsilon); });
 }
 /**
 computes an analytical initial magnetization distribution as a starting point for the simulation

@@ -30,16 +30,30 @@ mtl::dense_vector <double> L(3*Tetra::N), Lp(2*Tetra::N);
 
 mtl::dense2D <double> P(2*Tetra::N,3*Tetra::N);
 
+Settings *mySettings = settings;
+double H[DIM];
+H[0] = Hext[0];H[1] = Hext[1];H[2] = Hext[2];
+double vz = DW_vz;
+
+
 for_each(refTet->begin(),refTet->end(),
-    [this,dt,&Lw,&K,&L,&Kp,&Lp,&ins,NOD,&P](Tetra::Tet & tet)
+    [mySettings,&H,vz,dt,&Lw,&K,&L,&Kp,&Lp,&ins,NOD,&P](Tetra::Tet & tet)
         {
         mtl::mat::set_to_zero(K); mtl::mat::set_to_zero(Kp);
         mtl::vec::set_to_zero(L); mtl::vec::set_to_zero(Lp);
-        tet.integrales(settings->paramTetra,*refNode,Hext,DW_vz,settings->theta,dt,settings->TAUR,K, L);     
-        projection<Tetra::Tet>(tet, P, K, L, Kp, Lp);
-        assemblage<Tetra::Tet>(tet, ins,NOD, Kp, Lp, Lw);//Kw avant dernier
+        tet.integrales(mySettings->paramTetra,H,vz,mySettings->theta,dt,mySettings->TAUR,K, L);     
+        tet.projection( P, K, L, Kp, Lp);
+        tet.assemblage( ins,NOD, Kp, Lp, Lw);
+        //projection<Tetra::Tet>(tet, P, K, L, Kp, Lp);
+        //assemblage<Tetra::Tet>(tet, ins,NOD, Kp, Lp, Lw);//Kw avant dernier
         }
 );
+
+counter.tac();
+
+if(VERBOSE) { std::cout << "vector<tetra> done. elapsed time = " << counter.elapsed() << "s" << std::endl; }
+
+counter.tic();
 
 mtl::dense2D <double> Ps(2*Facette::N,3*Facette::N);
 
