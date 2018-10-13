@@ -43,9 +43,7 @@ for_each(refTet->begin(),refTet->end(),
         mtl::vec::set_to_zero(L); mtl::vec::set_to_zero(Lp);
         tet.integrales(mySettings->paramTetra,H,vz,mySettings->theta,dt,mySettings->TAUR,K, L);     
         tet.projection( P, K, L, Kp, Lp);
-        tet.assemblage( ins,NOD, Kp, Lp, Lw);
-        //projection<Tetra::Tet>(tet, P, K, L, Kp, Lp);
-        //assemblage<Tetra::Tet>(tet, ins,NOD, Kp, Lp, Lw);//Kw avant dernier
+        tet.assemblage( ins,NOD, Kp, Lp, Lw);// on passe l'inserter plutot que Kw
         }
 );
 
@@ -61,13 +59,13 @@ mtl::dense2D <double> Ks(3*Facette::N,3*Facette::N), Ksp(2*Facette::N,2*Facette:
 mtl::dense_vector <double> Ls(3*Facette::N), Lsp(2*Facette::N);
 
 for_each(refFac->begin(),refFac->end(),
-    [this,&Lw,&Ks,&Ls,&Ksp,&Lsp,&ins,NOD,&Ps](Facette::Fac &fac)
+    [mySettings,&Lw,&Ks,&Ls,&Ksp,&Lsp,&ins,NOD,&Ps](Facette::Fac &fac)
         {
         mtl::mat::set_to_zero(Ks); mtl::mat::set_to_zero(Ksp);
         mtl::vec::set_to_zero(Ls); mtl::vec::set_to_zero(Lsp);
-        fac.integrales(settings->paramFacette,*refNode, Ls);     
-        projection<Facette::Fac>(fac, Ps, Ks, Ls, Ksp, Lsp);
-        assemblage<Facette::Fac>(fac, ins, NOD, Ksp, Lsp, Lw);//Kw avant dernier    
+        fac.integrales(mySettings->paramFacette, Ls);     
+        fac.projection(Ps, Ks, Ls, Ksp, Lsp);
+        fac.assemblage(ins, NOD, Ksp, Lsp, Lw);//Kw avant dernier    
         }
 );
 

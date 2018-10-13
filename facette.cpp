@@ -4,7 +4,7 @@
 
 using namespace Facette;
 
-void Fac::integrales(std::vector<Facette::prm> const& params, std::vector<Node> const& myNode, mtl::dense_vector <double> &BE)
+void Fac::integrales(std::vector<Facette::prm> const& params, mtl::dense_vector <double> &BE)
 {
 double Js = params[idxPrm].Js;
 double Ks = params[idxPrm].Ks;
@@ -19,7 +19,7 @@ double Kbis = 2.0*Ks/Js;
 double u_nod[3][N], u[3][NPI];
 
 for (int i=0; i<N; i++){
-    Node const& node = myNode[ ind[i] ];
+    Node const& node = (*refNode)[ ind[i] ];
     
     u_nod[0][i]   = node.u0.x();
     u_nod[1][i]   = node.u0.y();
@@ -46,14 +46,51 @@ tiny::mult<double, 3, N, NPI> (u_nod, a, u);
     }
 }
 
-void Fac::calc_surf(std::vector<Node> const& myNode)
+
+void Fac::projection(mtl::dense2D <double> &P,
+           mtl::dense2D <double> const& A,  mtl::dense_vector <double> const& B,
+           mtl::dense2D <double> &Ap, mtl::dense_vector <double> &Bp)
+{
+//mtl::dense2D <double> P(2*N,3*N);
+mtl::mat::set_to_zero(P);
+
+for (int i=0; i<N; i++){
+    Node const& n = (*refNode)[ind[i]];
+    P(i,i)  = n.ep.x();  P(i,N+i)  = n.ep.y();  P(i,2*N+i)  = n.ep.z();
+    P(N+i,i)= n.eq.x();  P(N+i,N+i)= n.eq.y();  P(N+i,2*N+i)= n.eq.z();
+    }
+
+Ap = (P*A)*trans(P);
+Bp = P*B;
+}
+
+/**
+perform the matrix assembly with all the contributions of the face
+*/
+
+void Fac::assemblage(sparseInserter *ins,const int NOD,
+           mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le, mtl::dense_vector<double> &L)//mtl::compressed2D<double> &K, avant dernier
+    {
+    for (int i=0; i < N; i++){
+        int i_= ind[i];             
+        for (int j=0; j < N; j++){
+            int j_= ind[j];
+            (*ins)(NOD+i_,j_) << Ke(i,j);      (*ins)(NOD+i_, NOD+j_) << Ke(  i,N+j);
+            (*ins)(    i_,j_) << Ke(N+i,j);    (*ins)(    i_, NOD+j_) << Ke(N+i,N+j);
+            }
+        L(NOD+i_) += Le(i);//L[NOD+i_]+= Le[  i];
+        L(i_) += Le(N+i);//L[    i_]+= Le[N+i];
+        }
+    }
+
+void Fac::calc_surf(void)
 {
 int i0,i1,i2;
 i0 = ind[0];    i1 = ind[1];    i2 = ind[2];
 
-Pt::pt3D p0 = myNode[i0].p;
-Pt::pt3D p1 = myNode[i1].p;
-Pt::pt3D p2 = myNode[i2].p;
+Pt::pt3D p0 = (*refNode)[i0].p;
+Pt::pt3D p1 = (*refNode)[i1].p;
+Pt::pt3D p2 = (*refNode)[i2].p;
 
 Pt::pt3D vec = (p1-p0)*(p2-p0);
 

@@ -71,54 +71,6 @@ private:
 inline void base_projection(void)
 	{ std::for_each(refNode->begin(),refNode->end(),[](Node &n) { n.buildBase_epeq();}); }
 	
-/**
-template function to compute projection of an element <br>
-template parameter T is either tetra of face
-*/
-template <class T>
-void projection(T &elt,mtl::dense2D <double> &P,
-           mtl::dense2D <double> const& A,  mtl::dense_vector <double> const& B,
-           mtl::dense2D <double> &Ap, mtl::dense_vector <double> &Bp)
-{
-const int N = elt.getN();
-//mtl::dense2D <double> P(2*N,3*N);
-mtl::mat::set_to_zero(P);
-
-for (int i=0; i<N; i++){
-    Node const& n = (*refNode)[elt.ind[i]];
-    P(i,i)  = n.ep.x();  P(i,N+i)  = n.ep.y();  P(i,2*N+i)  = n.ep.z();
-    P(N+i,i)= n.eq.x();  P(N+i,N+i)= n.eq.y();  P(N+i,2*N+i)= n.eq.z();
-    }
-
-Ap = (P*A)*trans(P);
-Bp = P*B;
-}
-
-/**
-template function to perform the
-matrix assembly with all the contributions of the tetrahedrons/faces <br>
-template parameter T is either tetra or face
-*/
-
-template <class T>
-void assemblage(T &elt,sparseInserter *ins,const int NOD,
-           mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le, mtl::dense_vector<double> &L)//mtl::compressed2D<double> &K, avant dernier
-    {
-    const int N = elt.getN();
-
-    for (int i=0; i < N; i++){
-        int i_= elt.ind[i];             
-        for (int j=0; j < N; j++){
-            int j_= elt.ind[j];
-            (*ins)(NOD+i_,j_) << Ke(i,j);      (*ins)(NOD+i_, NOD+j_) << Ke(  i,N+j);
-            (*ins)(    i_,j_) << Ke(N+i,j);    (*ins)(    i_, NOD+j_) << Ke(N+i,N+j);
-            }
-        L(NOD+i_) += Le(i);//L[NOD+i_]+= Le[  i];
-        L(i_) += Le(N+i);//L[    i_]+= Le[N+i];
-        }
-    }
-
-    
 }; // fin class linAlgebra
 
 #endif

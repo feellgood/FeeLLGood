@@ -7,9 +7,20 @@
  */
 
 #include "boost/numeric/mtl/mtl.hpp"
+#include "boost/numeric/itl/itl.hpp"
+
+#include <boost/numeric/mtl/matrix/inserter.hpp>
+#include <boost/numeric/mtl/operation/set_to_zero.hpp>
+#include <boost/numeric/mtl/interface/vpt.hpp>
 
 #include "config.h"
 #include "node.h"
+
+/** convenient typedef for mtl4 */
+typedef typename mtl::Collection< mtl::compressed2D<double> >::value_type v_type;
+
+/** convenient typedef for mtl4 inserter */
+typedef mtl::mat::inserter< mtl::compressed2D<double>,mtl::update_plus<v_type> > sparseInserter;
 
 /** \namespace Facette
  to grab altogether some constants and calculation functions for class Fac
@@ -84,8 +95,18 @@ class Fac{
             {for (int j=0; j<NPI; j++) {weight[j] = 2.*surf*pds[j]; }}// detJ = 2*surf;
     
 		/** computes the integral contribution of the triangular face */
-		void integrales(std::vector<Facette::prm> const& params,std::vector <Node> const& myNode, mtl::dense_vector <double> &BE);
+		void integrales(std::vector<Facette::prm> const& params, mtl::dense_vector <double> &BE);
 		
+        /**
+        compute projection of a face
+        */
+        void projection(mtl::dense2D <double> &P, mtl::dense2D <double> const& A, mtl::dense_vector <double> const& B,mtl::dense2D <double> &Ap, mtl::dense_vector <double> &Bp);
+        
+        /**
+        perform the matrix assembly with all the contributions of the face
+        */
+        void assemblage(sparseInserter *ins,const int NOD, mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le, mtl::dense_vector<double> &L);
+        
 		/**
 		convenient getter for N, usefull for templates projection and assemblage
 		*/		
@@ -94,7 +115,13 @@ class Fac{
 		/**
 		computes normal vector n and surface surf		
 		*/		
-		void calc_surf(std::vector<Node> const& myNode);	
+		void calc_surf(void);
+        
+        /** pointer to the nodes */
+        inline void setRefNode(std::vector<Node>  *_p_node) {refNode = _p_node;}
+        
+    private:
+        std::vector<Node>  *refNode;/**< direct access to the Nodes */
 	};
 
 /**

@@ -40,8 +40,11 @@ std::for_each(tet.begin(),tet.end(),[](Tetra::Tet &te) {te.calc_vol();} );
 //volume total
 vol = std::accumulate(tet.begin(),tet.end(),0.0,[](double x,Tetra::Tet &te){return x+te.vol;} );
 
+//ici on affecte refNode des facettes
+std::for_each(fac.begin(),fac.end(),[this](Facette::Fac &fa) {fa.setRefNode( &(this->node) );} );
+
 //ici on calcule les normales et surfaces elementaires
-std::for_each(fac.begin(),fac.end(),[this](Facette::Fac &fa) {fa.calc_surf(this->node);} );
+std::for_each(fac.begin(),fac.end(),[](Facette::Fac &fa) {fa.calc_surf();} );
 
 //ici la somme des surfaces elementaires = surface totale
 surf = std::accumulate(fac.begin(),fac.end(),0.0,[](double x,Facette::Fac &fa){return x+fa.surf;} );
