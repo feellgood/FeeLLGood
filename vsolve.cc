@@ -59,13 +59,13 @@ mtl::dense2D <double> Ks(3*Facette::N,3*Facette::N), Ksp(2*Facette::N,2*Facette:
 mtl::dense_vector <double> Ls(3*Facette::N), Lsp(2*Facette::N);
 
 for_each(refFac->begin(),refFac->end(),
-    [mySettings,&Lw,&Ks,&Ls,&Ksp,&Lsp,&ins,NOD,&Ps](Facette::Fac &fac)
+    [mySettings,&Lw,&Ks,&Ls,&Ksp,&Lsp,&ins,NOD,&Ps](Facette::Fac & fac)
         {
         mtl::mat::set_to_zero(Ks); mtl::mat::set_to_zero(Ksp);
         mtl::vec::set_to_zero(Ls); mtl::vec::set_to_zero(Lsp);
         fac.integrales(mySettings->paramFacette, Ls);     
         fac.projection(Ps, Ks, Ls, Ksp, Lsp);
-        fac.assemblage(ins, NOD, Ksp, Lsp, Lw);//Kw avant dernier    
+        fac.assemblage(ins, NOD, Ksp, Lsp, Lw);    
         }
 );
 
