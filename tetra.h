@@ -110,6 +110,7 @@ struct prm
 		};	
 	};
 
+    
 /** \class Tet
 Tet is a tetrahedron, containing the index references to nodes, must not be flat <br>
 indices convention is<br>
@@ -168,6 +169,7 @@ class Tet{
         perform the matrix assembly with all the contributions of the tetrahedrons
         */
         void assemblage(sparseInserter *ins,const int NOD, mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le, mtl::dense_vector<double> &L);
+        
         
         /**
 		convenient getter for N, usefull for templates projection and assemblage

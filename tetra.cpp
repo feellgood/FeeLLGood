@@ -86,6 +86,7 @@ for (int i=0; i<N; i++){
     negphiv0_nod[i] = -node.phiv0;
     }
 
+    
 tiny::mult<double, 3, N, NPI> (u_nod, a, u);
 
 tiny::mult<double, 3, N, NPI> (u_nod, dadx, dudx);
@@ -106,6 +107,7 @@ tiny::transposed_mult<double, N, NPI> (negphiv0_nod, dadx, Hvx);
 tiny::transposed_mult<double, N, NPI> (negphiv0_nod, dady, Hvy);
 tiny::transposed_mult<double, N, NPI> (negphiv0_nod, dadz, Hvz);
 
+    
 /* on se place dans le referentiel mobile */
 //double Vz=fem.DW_vz;
 
@@ -212,6 +214,7 @@ if(ORD2)
 	BE[2*N+i]+= -Uz*(u[0][npi]*dvdz[1][npi]-u[1][npi]*dvdz[0][npi]+v[0][npi]*dudz[1][npi]-v[1][npi]*dudz[0][npi]+beta*dvdz[2][npi]) *ai_w*s_dt;
     }
 
+        
         AE(    i,    i)+=  alfa* ai_w;  //lumping
         AE(  N+i,  N+i)+=  alfa* ai_w;
         AE(2*N+i,2*N+i)+=  alfa* ai_w;
@@ -223,14 +226,17 @@ if(ORD2)
         AE(2*N+i,1*N+i)+= +u_nod[0][i]* ai_w;
         AE(2*N+i,0*N+i)+= -u_nod[1][i]* ai_w;
 
-        for (int j=0; j<N; j++){
+        for (int j=0; j<N; j++)
+            {
             Dai_Daj = dai_dx*dadx[j][npi] + dai_dy*dady[j][npi] + dai_dz*dadz[j][npi];
             contrib = s_dt*(1.+R)* Abis* Dai_Daj *w;
             AE(i,j)        +=  contrib;
             AE(N+i,N+j)    +=  contrib;
             AE(2*N+i,2*N+j)+=  contrib;
-	    }
-	}
+            }
+        
+        
+        }
     }
 }
 

@@ -71,6 +71,9 @@ private:
 inline void base_projection(void)
 	{ std::for_each(refNode->begin(),refNode->end(),[](Node &n) { n.buildBase_epeq();}); }
 	
+
+    void feedMat(const int NOD,double dt, mtl::compressed2D<double> &K_T,mtl::dense_vector<double> &L_T,std::vector<Tetra::Tet>::iterator it_b,std::vector<Tetra::Tet>::iterator it_e);
+    
 }; // fin class linAlgebra
 
 #endif
