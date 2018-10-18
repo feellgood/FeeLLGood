@@ -241,11 +241,11 @@ if(ORD2)
 }
 
 
-void Tet::projection(mtl::dense2D <double> &P,
+void Tet::projection(//mtl::dense2D <double> &P,
            mtl::dense2D <double> const& A,  mtl::dense_vector <double> const& B,
            mtl::dense2D <double> &Ap, mtl::dense_vector <double> &Bp)
 {
-//mtl::dense2D <double> P(2*N,3*N);
+mtl::dense2D <double> P(2*N,3*N);
 mtl::mat::set_to_zero(P);
 
 for (int i=0; i<N; i++){

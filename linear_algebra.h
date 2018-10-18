@@ -23,6 +23,9 @@ typedef typename mtl::Collection< mtl::compressed2D<double> >::value_type v_type
 typedef mtl::mat::inserter< mtl::compressed2D<double>,mtl::update_plus<v_type> > sparseInserter;
 
 
+
+
+
 /** \class LinAlgebra
 convenient class to grab altogether some part of the calculations involved using gmm solver at each timestep
 */
@@ -72,7 +75,8 @@ inline void base_projection(void)
 	{ std::for_each(refNode->begin(),refNode->end(),[](Node &n) { n.buildBase_epeq();}); }
 	
 
-    void feedMat(const int NOD,double dt, mtl::compressed2D<double> &K_T,mtl::dense_vector<double> &L_T,std::vector<Tetra::Tet>::iterator it_b,std::vector<Tetra::Tet>::iterator it_e);
+    /** function to feed sparse MTL4 matrix */
+    void feedMat(const int NOD,double dt, mtl::compressed2D<double> *K_T,mtl::dense_vector<double> *L_T,std::vector<Tetra::Tet>::iterator it_b,std::vector<Tetra::Tet>::iterator it_e);
     
 }; // fin class linAlgebra
 

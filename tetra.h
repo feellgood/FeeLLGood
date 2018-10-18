@@ -161,7 +161,7 @@ class Tet{
 		/**
         computes projection of a tetrahedron
         */
-        void projection(mtl::dense2D <double> &P,
+        void projection(//mtl::dense2D <double> &P,
            mtl::dense2D <double> const& A,  mtl::dense_vector <double> const& B,mtl::dense2D <double> &Ap, mtl::dense_vector <double> &Bp);
         
         
