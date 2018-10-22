@@ -4,6 +4,8 @@ It encapsulates the calls to GMM , the assemblage and projection of the matrix f
 two templates projection and assemblage template class parameter is either Facette::Fac or Tetra::Tet 
 */
 
+#include <mutex>
+
 #include "boost/numeric/mtl/mtl.hpp"
 #include "boost/numeric/itl/itl.hpp"
 
@@ -37,7 +39,7 @@ public:
                       std::vector<Node> & myNode,
                       std::vector <Tetra::Tet> & myTet,
                       std::vector <Facette::Fac> & myFace) 
-    {settings = &s; refNode = &myNode; refTet = &myTet; refFac = &myFace;}
+    {settings = &s; refNode = &myNode; refTet = &myTet; refFac = &myFace; my_lock = new std::mutex;}
 	
 	/** pointer to diagonal preconditionner  */
 	itl::pc::diagonal < mtl::compressed2D<double> > *prc;
@@ -70,13 +72,24 @@ private:
 	Settings *settings;/**< pointer to the settings */
     double v_max;/**< maximum speed */
 	
+	/** pointer to sparse matrix inserter */
+	sparseInserter *ins;
+	
+    /** mutex to avoid improper access to inserter */
+    std::mutex *my_lock;
+    
 /** computes the local vector basis {ep,eq} in the tangeant plane for projection on the elements */
 inline void base_projection(void)
 	{ std::for_each(refNode->begin(),refNode->end(),[](Node &n) { n.buildBase_epeq();}); }
 	
 
+	/**
+        perform the matrix assembly with all the contributions of the tetrahedrons
+        */
+        void assemblage(const int NOD,const int N,const int ind[], mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le, mtl::dense_vector<double> &L);
+	
     /** function to feed sparse MTL4 matrix */
-    void feedMat(const int NOD,double dt, mtl::compressed2D<double> *K_T,mtl::dense_vector<double> *L_T,std::vector<Tetra::Tet>::iterator it_b,std::vector<Tetra::Tet>::iterator it_e);
+    void feedMat(const int NOD,double dt,mtl::dense_vector<double> &L_T,std::vector<Tetra::Tet>::iterator it_b,std::vector<Tetra::Tet>::iterator it_e);
     
 }; // fin class linAlgebra
 
