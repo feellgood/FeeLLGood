@@ -102,13 +102,11 @@ class Fac{
         */
         void projection(mtl::dense2D <double> &P, mtl::dense2D <double> const& A, mtl::dense_vector <double> const& B,mtl::dense2D <double> &Ap, mtl::dense_vector <double> &Bp);
         
+        /** assemblage of the matrix and vector elements */
+        void assemblage(sparseInserter *ins,const int NOD,mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le, mtl::dense_vector<double> &L);
+		
         /**
-        perform the matrix assembly with all the contributions of the face
-        */
-        void assemblage(sparseInserter *ins,const int NOD, mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le, mtl::dense_vector<double> &L);
-        
-		/**
-		convenient getter for N, usefull for templates projection and assemblage
+		convenient getter for N
 		*/		
 		inline int getN(void) {return N;}	
 

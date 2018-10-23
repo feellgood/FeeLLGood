@@ -1,7 +1,6 @@
 #include <algorithm>
 
-#include <thread>
-#include <mutex>
+
 #include <functional>
 
 #include "Utils/FTic.hpp"
@@ -10,7 +9,8 @@
 
 
 void LinAlgebra::assemblage(const int NOD,const int N,const int ind[],
-           mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le, mtl::dense_vector<double> &L)//mtl::compressed2D<double> &K, avant dernier
+           mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le,
+           mtl::dense_vector<double> &L)//mtl::compressed2D<double> &K, avant dernier
     {
     for (int i=0; i < N; i++)
         {
@@ -29,24 +29,6 @@ void LinAlgebra::assemblage(const int NOD,const int N,const int ind[],
         }
     }
 
-void LinAlgebra::feedMat(const int NOD,double dt, mtl::dense_vector<double> &L_T, std::vector<Tetra::Tet>::iterator it_b, std::vector<Tetra::Tet>::iterator it_e)
-{
-mtl::dense2D <double> K(3*Tetra::N,3*Tetra::N), Kp(2*Tetra::N,2*Tetra::N);
-mtl::dense_vector <double> L(3*Tetra::N), Lp(2*Tetra::N);
-
-//mtl::dense2D <double> P(2*Tetra::N,3*Tetra::N);
-
-for_each(it_b,it_e,
-    [this,dt,&L_T,&K,&L,&Kp,&Lp,NOD](Tetra::Tet & tet) //,&P
-        {
-        mtl::mat::set_to_zero(K); mtl::mat::set_to_zero(Kp);
-        mtl::vec::set_to_zero(L); mtl::vec::set_to_zero(Lp);
-        tet.integrales(settings->paramTetra,Hext,DW_vz,settings->theta,dt,settings->TAUR,K, L);     
-        tet.projection( K, L, Kp, Lp);//P
-        assemblage(NOD, Tetra::N, tet.ind, Kp, Lp, L_T );
-        }
-);
-}
 
 int LinAlgebra::vsolve(double dt,long nt)
 {
@@ -58,19 +40,13 @@ counter.tic();
 
 base_projection();   // definit plan tangent
 
-const int NbTH=8;
-
 mtl::compressed2D<double> K_TH(2*NOD, 2*NOD);
 mtl::mat::set_to_zero( K_TH );
 
-ins = new sparseInserter(K_TH,256); //64 maybe too small
-
+ins = new sparseInserter(K_TH,64);
 
 mtl::dense_vector<double> L_TH(2*NOD);
 mtl::vec::set_to_zero( L_TH );
-
-
-std::thread tab_TH[NbTH];
 
 const unsigned long block_size = std::distance(refTet->begin(),refTet->end())/NbTH;
 
@@ -83,23 +59,19 @@ for(int i=0;i<(NbTH-1);i++)
     
     tab_TH[i] = std::thread( [this,NOD,dt,&L_TH,it_begin,it_end]() 
         {
-            //feedMat(NOD,dt,L_TH,it_begin,it_end);
-        
             mtl::dense2D <double> K(3*Tetra::N,3*Tetra::N), Kp(2*Tetra::N,2*Tetra::N);
             mtl::dense_vector <double> L(3*Tetra::N), Lp(2*Tetra::N);
-
+            
             std::for_each(it_begin,it_end, [this,dt,&L_TH,&K,&L,&Kp,&Lp,NOD](Tetra::Tet & tet) //,&P
                 {
                 mtl::mat::set_to_zero(K); mtl::mat::set_to_zero(Kp);
                 mtl::vec::set_to_zero(L); mtl::vec::set_to_zero(Lp);
                 tet.integrales(settings->paramTetra,Hext,DW_vz,settings->theta,dt,settings->TAUR,K, L);     
                 tet.projection( K, L, Kp, Lp);//P
-                assemblage(NOD, Tetra::N, tet.ind, Kp, Lp, L_TH );
+                assemblage(NOD, Tetra::N, tet.ind,Kp,Lp, L_TH );
                 }
                 );//end for_each
         } 
-    
-        
     ); //end thread
     
     it_begin = it_end;
@@ -108,27 +80,22 @@ for(int i=0;i<(NbTH-1);i++)
     //last thread must be treated differently 
 tab_TH[NbTH-1] = std::thread( [this,NOD,dt,&L_TH,it_begin]() 
     {
-        //feedMat(NOD,dt,L_TH,it_begin,refTet->end());
         mtl::dense2D <double> K(3*Tetra::N,3*Tetra::N), Kp(2*Tetra::N,2*Tetra::N);
-            mtl::dense_vector <double> L(3*Tetra::N), Lp(2*Tetra::N);
-
-            std::for_each(it_begin,refTet->end(), [this,dt,&L_TH,&K,&L,&Kp,&Lp,NOD](Tetra::Tet & tet) //,&P
-                {
-                mtl::mat::set_to_zero(K); mtl::mat::set_to_zero(Kp);
-                mtl::vec::set_to_zero(L); mtl::vec::set_to_zero(Lp);
-                tet.integrales(settings->paramTetra,Hext,DW_vz,settings->theta,dt,settings->TAUR,K, L);     
-                tet.projection( K, L, Kp, Lp);//P
-                assemblage(NOD, Tetra::N, tet.ind, Kp, Lp, L_TH );
-                }
-                );//end for_each
+        mtl::dense_vector <double> L(3*Tetra::N), Lp(2*Tetra::N);
+            
+        std::for_each(it_begin,refTet->end(), [this,dt,&L_TH,&K,&L,&Kp,&Lp,NOD](Tetra::Tet & tet) //,&P
+            {
+            mtl::mat::set_to_zero(K); mtl::mat::set_to_zero(Kp);
+            mtl::vec::set_to_zero(L); mtl::vec::set_to_zero(Lp);
+            tet.integrales(settings->paramTetra,Hext,DW_vz,settings->theta,dt,settings->TAUR,K, L);     
+            tet.projection( K, L, Kp, Lp);//P
+            assemblage(NOD, Tetra::N, tet.ind,Kp,Lp, L_TH );
+            }
+            );//end for_each
     } 
 );//end last thread
     
 for(int i=0;i<NbTH;i++) {tab_TH[i].join();}
-
-
-//feedMat(NOD,dt,L_TH,refTet->begin(),refTet->end());//monothread
-
 
 mtl::dense2D <double> Ps(2*Facette::N,3*Facette::N);
 
@@ -142,7 +109,7 @@ for_each(refFac->begin(),refFac->end(),
         mtl::vec::set_to_zero(Ls); mtl::vec::set_to_zero(Lsp);
         fac.integrales(settings->paramFacette, Ls);     
         fac.projection(Ps, Ks, Ls, Ksp, Lsp);
-        assemblage(NOD, Facette::N, fac.ind, Ksp, Lsp, L_TH);    
+        fac.assemblage(ins,NOD, Ksp, Lsp, L_TH);    
         }
 );
 
