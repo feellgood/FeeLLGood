@@ -29,7 +29,33 @@ void LinAlgebra::assemblage(const int NOD,const int N,const int ind[],
         }
     }
 
-
+    void LinAlgebra::assemblageMat(const int NOD,const int N,const int ind[],mtl::dense2D <double> const& Ke)
+    {
+    for (int i=0; i < N; i++)
+        {
+        int i_= ind[i];             
+        my_lock->lock();
+        for (int j=0; j < N; j++)
+            {
+            int j_= ind[j];
+            (*ins)(NOD+i_,j_) << Ke(i,j);      (*ins)(NOD+i_, NOD+j_) << Ke(  i,N+j);
+            (*ins)(    i_,j_) << Ke(N+i,j);    (*ins)(    i_, NOD+j_) << Ke(N+i,N+j);
+            }
+        my_lock->unlock();   
+        }
+    }
+    
+void LinAlgebra::assemblageVec(const int NOD,const int N,const int ind[], mtl::dense_vector <double> const& Le,mtl::dense_vector<double> &L)
+    {
+    for (int i=0; i < N; i++)
+        {
+        int i_= ind[i];             
+        L(NOD+i_) += Le(i);//L[NOD+i_]+= Le[  i];
+        L(i_) += Le(N+i);//L[    i_]+= Le[N+i];
+        }
+    }
+    
+    
 int LinAlgebra::vsolve(double dt,long nt)
 {
 FTic counter;

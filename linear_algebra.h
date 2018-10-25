@@ -90,11 +90,21 @@ inline void base_projection(void)
 	
 
 	/**
-    perform the matrix assembly with all the contributions of the tetrahedrons
+    perform the matrix and vector assembly with all the contributions of the tetrahedrons
     */
     void assemblage(const int NOD,const int N,const int ind[],mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le,
                     mtl::dense_vector<double> &L);
 	
+    /**
+    perform the matrix assembly with all the contributions of the tetrahedrons
+    */
+    void assemblageMat(const int NOD,const int N,const int ind[],mtl::dense2D <double> const& Ke);
+    
+    /**
+    perform the vector assembly with all the contributions of the tetrahedrons
+    */
+    void assemblageVec(const int NOD,const int N,const int ind[], mtl::dense_vector <double> const& Le,mtl::dense_vector<double> &L);
+    
 }; // fin class linAlgebra
 
 #endif
