@@ -1,7 +1,7 @@
 /** \file linear_algebra.h
 \brief secondary header, it grabs altogether the linear algebra by the solver to apply fem method  <br>
-It encapsulates the calls to GMM , the assemblage and projection of the matrix for all elements <br>
-two templates projection and assemblage template class parameter is either Facette::Fac or Tetra::Tet 
+It encapsulates the calls to MTL4 , the assemblage and projection of the matrix for all elements <br> 
+projection and matrix assembly is multithreaded for tetrahedron, monothread for facette
 */
 
 #include <thread>
@@ -36,14 +36,32 @@ class LinAlgebra
 {
 public:
 	/** constructor */	
-	inline LinAlgebra(Settings & s,
+    inline LinAlgebra(Settings & s,
                       std::vector<Node> & myNode,
                       std::vector <Tetra::Tet> & myTet,
-                      std::vector <Facette::Fac> & myFace) 
-    {
-    settings = &s; refNode = &myNode; refTet = &myTet; refFac = &myFace; my_lock = new std::mutex;tab_TH.resize(NbTH);
-        
-    }
+                      std::vector <Facette::Fac> & myFace,const int _Nb) : NbTH(_Nb)
+{
+    settings = &s; refNode = &myNode;  refFac = &myFace; my_lock = new std::mutex;tab_TH.resize(NbTH);
+    refTet.resize(NbTH);
+    const unsigned long block_size = std::distance(myTet.begin(),myTet.end())/NbTH;
+
+    std::vector<Tetra::Tet>::iterator it_begin = myTet.begin();
+
+    for(int i=0;i<(NbTH-1);i++) 
+        {
+        std::vector<Tetra::Tet>::iterator it_end = it_begin;
+        std::advance(it_end,block_size);
+        refTet[i].resize(block_size);
+        std::copy( it_begin, it_end, refTet[i].begin() );
+        it_begin = it_end;
+        }
+    const unsigned long last_block_size = std::distance(it_begin,myTet.end());
+    refTet[NbTH-1].resize(last_block_size);
+    std::copy( it_begin, myTet.end(), refTet[NbTH-1].begin() );
+    
+    std::cout<<"splitted copy of vector(tet) done."<<std::endl;
+}
+    
 	
 	/** pointer to diagonal preconditionner  */
 	itl::pc::diagonal < mtl::compressed2D<double> > *prc;
@@ -72,7 +90,8 @@ public:
 private:
     std::vector<Node>  *refNode;/**< direct access to the Nodes */
 	std::vector <Facette::Fac> *refFac; /**< direct access to the faces */
-	std::vector <Tetra::Tet> *refTet; /**< direct access to the tetrahedrons */
+	
+	std::vector < std::vector <Tetra::Tet> > refTet; /**< splitted copy of the tetrahedrons for multithreading */
 	
 	double Hext[DIM];/**< applied field */
     double DW_vz;/**< speed of the domain wall */
@@ -81,7 +100,11 @@ private:
 	
 	/** mutex to avoid improper access to inserter */
     std::mutex *my_lock;
-    const int NbTH=8;
+    
+    /** number of threads, initialized by constructor */ 
+    const int NbTH;
+    
+    /** thread vector */
     std::vector<std::thread> tab_TH;
     
 /** computes the local vector basis {ep,eq} in the tangeant plane for projection on the elements */

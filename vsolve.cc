@@ -7,7 +7,6 @@
 
 #include "linear_algebra.h"
 
-
 void LinAlgebra::assemblage(const int NOD,const int N,const int ind[],
            mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le,
            mtl::dense_vector<double> &L)//mtl::compressed2D<double> &K, avant dernier
@@ -16,7 +15,8 @@ void LinAlgebra::assemblage(const int NOD,const int N,const int ind[],
         {
         int i_= ind[i];             
         my_lock->lock();
-        for (int j=0; j < N; j++)
+        
+            for (int j=0; j < N; j++)
             {
             int j_= ind[j];
             (*ins)(NOD+i_,j_) << Ke(i,j);      (*ins)(NOD+i_, NOD+j_) << Ke(  i,N+j);
@@ -25,7 +25,8 @@ void LinAlgebra::assemblage(const int NOD,const int N,const int ind[],
         L(NOD+i_) += Le(i);//L[NOD+i_]+= Le[  i];
         L(i_) += Le(N+i);//L[    i_]+= Le[N+i];
         
-        my_lock->unlock();   
+        my_lock->unlock();    
+          
         }
     }
 
@@ -74,21 +75,14 @@ ins = new sparseInserter(K_TH,64);
 mtl::dense_vector<double> L_TH(2*NOD);
 mtl::vec::set_to_zero( L_TH );
 
-const unsigned long block_size = std::distance(refTet->begin(),refTet->end())/NbTH;
-
-std::vector<Tetra::Tet>::iterator it_begin = refTet->begin();
-
-for(int i=0;i<(NbTH-1);i++) 
+for(int i=0;i<NbTH;i++) 
     {
-    std::vector<Tetra::Tet>::iterator it_end = it_begin;
-    std::advance(it_end,block_size);
-    
-    tab_TH[i] = std::thread( [this,NOD,dt,&L_TH,it_begin,it_end]() 
+    tab_TH[i] = std::thread( [this,NOD,dt,&L_TH,i]() 
         {
             mtl::dense2D <double> K(3*Tetra::N,3*Tetra::N), Kp(2*Tetra::N,2*Tetra::N);
             mtl::dense_vector <double> L(3*Tetra::N), Lp(2*Tetra::N);
             
-            std::for_each(it_begin,it_end, [this,dt,&L_TH,&K,&L,&Kp,&Lp,NOD](Tetra::Tet & tet) //,&P
+            std::for_each(refTet[i].begin(),refTet[i].end(), [this,dt,&L_TH,&K,&L,&Kp,&Lp,NOD](Tetra::Tet & tet)
                 {
                 mtl::mat::set_to_zero(K); mtl::mat::set_to_zero(Kp);
                 mtl::vec::set_to_zero(L); mtl::vec::set_to_zero(Lp);
@@ -99,32 +93,12 @@ for(int i=0;i<(NbTH-1);i++)
                 );//end for_each
         } 
     ); //end thread
-    
-    it_begin = it_end;
     }
 
-    //last thread must be treated differently 
-tab_TH[NbTH-1] = std::thread( [this,NOD,dt,&L_TH,it_begin]() 
-    {
-        mtl::dense2D <double> K(3*Tetra::N,3*Tetra::N), Kp(2*Tetra::N,2*Tetra::N);
-        mtl::dense_vector <double> L(3*Tetra::N), Lp(2*Tetra::N);
-            
-        std::for_each(it_begin,refTet->end(), [this,dt,&L_TH,&K,&L,&Kp,&Lp,NOD](Tetra::Tet & tet) //,&P
-            {
-            mtl::mat::set_to_zero(K); mtl::mat::set_to_zero(Kp);
-            mtl::vec::set_to_zero(L); mtl::vec::set_to_zero(Lp);
-            tet.integrales(settings->paramTetra,Hext,DW_vz,settings->theta,dt,settings->TAUR,K, L);     
-            tet.projection( K, L, Kp, Lp);//P
-            assemblage(NOD, Tetra::N, tet.ind,Kp,Lp, L_TH );
-            }
-            );//end for_each
-    } 
-);//end last thread
-    
 for(int i=0;i<NbTH;i++) {tab_TH[i].join();}
 
-mtl::dense2D <double> Ps(2*Facette::N,3*Facette::N);
 
+mtl::dense2D <double> Ps(2*Facette::N,3*Facette::N);
 mtl::dense2D <double> Ks(3*Facette::N,3*Facette::N), Ksp(2*Facette::N,2*Facette::N);
 mtl::dense_vector <double> Ls(3*Facette::N), Lsp(2*Facette::N);
 

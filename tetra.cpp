@@ -249,9 +249,9 @@ void Tet::projection(//mtl::dense2D <double> &P,
 {
 mtl::dense2D <double> P(2*N,3*N);
 mtl::mat::set_to_zero(P);
-matBlocDiag::matBloc myP;
+//matBlocDiag::matBloc myP;
 
-myP.D[0][0] = matBlocDiag::BlocElem(1,2,3,4);
+//myP.D[0][0] = matBlocDiag::BlocElem(1,2,3,4);
 
 for (int i=0; i<N; i++){
     Node const& n = (*refNode)[ind[i]];
