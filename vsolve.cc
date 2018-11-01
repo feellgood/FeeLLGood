@@ -26,7 +26,7 @@ void LinAlgebra::assemblage_monoThread(const int N, const int ind[],
 }
 
 
-void LinAlgebra::assemblage(const int N, const int ind[],
+void LinAlgebra::assemblage(const int i,const int N, const int ind[],
            mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le,
            mtl::dense_vector<double> &L)
 {
@@ -35,8 +35,7 @@ void LinAlgebra::assemblage(const int N, const int ind[],
         for (int i=0; i < N; i++)
             {
             int i_= ind[i];             
-            //my_lock->lock();
-        
+            
                 for (int j=0; j < N; j++)
                     {
                     int j_= ind[j];
@@ -51,9 +50,7 @@ void LinAlgebra::assemblage(const int N, const int ind[],
         }
     else
         {
-        lock_buff->lock();
-        buff_TH.push_back(Obj(N,ind,Ke,Le));    
-        lock_buff->unlock();
+        buff_TH[i].push_back(Obj(N,ind,Ke,Le));    
         }
 }
 
@@ -63,8 +60,6 @@ int LinAlgebra::vsolve(long nt)
 FTic counter;
 
 counter.tic();
-
-for(int i=0;i<NbTH;i++){ std::cout << "size "<< i << "= " << refTet[i].size() << std::endl; }
 
 base_projection();   // definit plan tangent
 
@@ -85,13 +80,13 @@ for(int i=0;i<NbTH;i++)
             thread_local mtl::dense_vector <double> L(3*Tetra::N);
             thread_local mtl::dense_vector <double>  Lp(2*Tetra::N);
             
-            std::for_each(refTet[i].begin(),refTet[i].end(), [this,&L_TH](Tetra::Tet const& tet)
+            std::for_each(refTet[i].begin(),refTet[i].end(), [this,&L_TH,i](Tetra::Tet const& tet)
                 {
                 mtl::mat::set_to_zero(K); mtl::mat::set_to_zero(Kp);
                 mtl::vec::set_to_zero(L); mtl::vec::set_to_zero(Lp);
                 tet.integrales(settings->paramTetra,Hext,DW_vz,settings->theta,dt,settings->TAUR,K, L);     
                 tet.projection( K, L, Kp, Lp);
-                assemblage(Tetra::N,tet.ind,Kp ,Lp, L_TH );
+                assemblage(i,Tetra::N,tet.ind,Kp ,Lp, L_TH );
                 });//end for_each
         }); //end thread
     }
@@ -111,7 +106,7 @@ tab_TH[NbTH] = std::thread( [this,&L_TH]()
         mtl::vec::set_to_zero(Ls); mtl::vec::set_to_zero(Lsp);
         fac.integrales(settings->paramFacette, Ls);     
         fac.projection( Ks, Ls, Ksp, Lsp);//(Ps, Ks, Ls, Ksp, Lsp);
-        assemblage(Facette::N,fac.ind, Ksp, Lsp, L_TH);    
+        assemblage(NbTH,Facette::N,fac.ind, Ksp, Lsp, L_TH);    
         }
         );
     }
@@ -119,16 +114,16 @@ tab_TH[NbTH] = std::thread( [this,&L_TH]()
 
 for(int i=0;i<(NbTH+1);i++) {tab_TH[i].join();}
 
-
-std::for_each(buff_TH.begin(),buff_TH.end(), [this,&L_TH](Obj const& x) 
+for(int i=0;i<(NbTH+1);i++)
+{
+std::for_each(buff_TH[i].begin(),buff_TH[i].end(), [this,&L_TH](Obj const& x) 
     { 
     assemblage_monoThread(x.N,x.ind,x.Ke,x.Le,L_TH);    
     delete [] x.ind; 
     } );
 
-std::cout<<"buff_th="<<buff_TH.size() <<std::endl;
-buff_TH.clear();
-
+buff_TH[i].clear();
+}
 
 delete ins;//K_TH should be ready
 

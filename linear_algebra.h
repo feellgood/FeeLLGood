@@ -58,9 +58,8 @@ public:
 {
     settings = &s; 
     my_lock = new std::mutex;
-    lock_buff = new std::mutex;
     tab_TH.resize(NbTH+1);
-    
+    buff_TH.resize(NbTH+1);
     refTet.resize(NbTH);
     const unsigned long block_size = std::distance(myTet.begin(),myTet.end())/NbTH;
 
@@ -127,14 +126,11 @@ private:
 	/** mutex to avoid improper access to inserter */
     std::mutex *my_lock;
     
-    /** mutex to avoid improper access to buffer */
-    std::mutex *lock_buff;
-    
     /** number of threads, initialized by constructor */ 
     const int NbTH;
     
     /** buffer when try_lock failed on assemblage */
-    std::vector<Obj> buff_TH;
+    std::vector<std::vector<Obj> > buff_TH;
     /** thread vector */
     std::vector<std::thread> tab_TH;
     
@@ -151,7 +147,7 @@ inline void base_projection(void)
     /**
     perform the matrix and vector assembly with all the contributions of the tetrahedrons, use two mutexs
     */
-    void assemblage(const int N,const int ind[],mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le,
+    void assemblage(const int i,const int N,const int ind[],mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le,
                     mtl::dense_vector<double> &L);
     
 }; // fin class linAlgebra
