@@ -6,6 +6,7 @@ projection and matrix assembly is multithreaded for tetrahedron, monothread for 
 
 #include <thread>
 #include <mutex>
+#include <future>
 
 #include "boost/numeric/mtl/mtl.hpp"
 #include "boost/numeric/itl/itl.hpp"
@@ -26,7 +27,21 @@ typedef typename mtl::Collection< mtl::compressed2D<double> >::value_type v_type
 typedef mtl::mat::inserter< mtl::compressed2D<double>,mtl::update_plus<v_type> > sparseInserter;
 
 
-
+class Obj
+    {
+    public:
+        inline Obj(const int _N,const int _ind[],mtl::dense2D <double> const& K,mtl::dense_vector <double> const& L):N(_N)
+        {
+        ind = new int[N];
+        for(int i=0;i<N;i++) {ind[i] = _ind[i];}   
+        Ke=K;Le=L;
+        }
+        
+        const int N;
+        int *ind;
+        mtl::dense2D <double> Ke;
+        mtl::dense_vector <double> Le;
+    };
 
 
 /** \class LinAlgebra
@@ -36,12 +51,16 @@ class LinAlgebra
 {
 public:
 	/** constructor */	
-    inline LinAlgebra(Settings & s,
+    inline LinAlgebra(Settings & s,const int _NOD,
                       std::vector<Node> & myNode,
                       std::vector <Tetra::Tet> & myTet,
-                      std::vector <Facette::Fac> & myFace,const int _Nb) : NbTH(_Nb)
+                      std::vector <Facette::Fac> & myFace,const int _Nb) : NOD(_NOD),refNode(&myNode),refFac(&myFace) , NbTH(_Nb)
 {
-    settings = &s; refNode = &myNode;  refFac = &myFace; my_lock = new std::mutex;tab_TH.resize(NbTH);
+    settings = &s; 
+    my_lock = new std::mutex;
+    lock_buff = new std::mutex;
+    tab_TH.resize(NbTH+1);
+    
     refTet.resize(NbTH);
     const unsigned long block_size = std::distance(myTet.begin(),myTet.end())/NbTH;
 
@@ -67,8 +86,11 @@ public:
 	itl::pc::diagonal < mtl::compressed2D<double> > *prc;
 
     /** solver, uses bicgstab and gmres */
-	int  vsolve(double dt,long nt);
+	int  vsolve(long nt);
 
+    /** setter for dt */
+    inline void set_dt(double _dt){dt = _dt;}
+    
     /** setter for DW_dz */
     inline void set_DW_vz(double vz){DW_vz = vz;}    
 
@@ -88,12 +110,16 @@ public:
 	sparseInserter *ins;
     
 private:
+    const int NOD;/** total number of nodes, also an offset for filling sparseMatrix, initialized by constructor */
     std::vector<Node>  *refNode;/**< direct access to the Nodes */
 	std::vector <Facette::Fac> *refFac; /**< direct access to the faces */
 	
 	std::vector < std::vector <Tetra::Tet> > refTet; /**< splitted copy of the tetrahedrons for multithreading */
 	
+	
+	
 	double Hext[DIM];/**< applied field */
+    double dt;/**< timestep */
     double DW_vz;/**< speed of the domain wall */
 	Settings *settings;/**< pointer to the settings */
     double v_max;/**< maximum speed */
@@ -101,9 +127,14 @@ private:
 	/** mutex to avoid improper access to inserter */
     std::mutex *my_lock;
     
+    /** mutex to avoid improper access to buffer */
+    std::mutex *lock_buff;
+    
     /** number of threads, initialized by constructor */ 
     const int NbTH;
     
+    /** buffer when try_lock failed on assemblage */
+    std::vector<Obj> buff_TH;
     /** thread vector */
     std::vector<std::thread> tab_TH;
     
@@ -111,22 +142,17 @@ private:
 inline void base_projection(void)
 	{ std::for_each(refNode->begin(),refNode->end(),[](Node &n) { n.buildBase_epeq();}); }
 	
-
-	/**
-    perform the matrix and vector assembly with all the contributions of the tetrahedrons
-    */
-    void assemblage(const int NOD,const int N,const int ind[],mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le,
-                    mtl::dense_vector<double> &L);
-	
-    /**
-    perform the matrix assembly with all the contributions of the tetrahedrons
-    */
-    void assemblageMat(const int NOD,const int N,const int ind[],mtl::dense2D <double> const& Ke);
+	/** assemblage without mutexes to empty buffer */
+    void assemblage_monoThread(const int N, const int ind[],
+           mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le,
+           mtl::dense_vector<double> &L);
+    
     
     /**
-    perform the vector assembly with all the contributions of the tetrahedrons
+    perform the matrix and vector assembly with all the contributions of the tetrahedrons, use two mutexs
     */
-    void assemblageVec(const int NOD,const int N,const int ind[], mtl::dense_vector <double> const& Le,mtl::dense_vector<double> &L);
+    void assemblage(const int N,const int ind[],mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le,
+                    mtl::dense_vector<double> &L);
     
 }; // fin class linAlgebra
 

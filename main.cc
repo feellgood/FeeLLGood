@@ -59,7 +59,7 @@ fem.t=0.;
 fem.infos();
 
 //once fem containers are ok, we build a linAlgebra object
-LinAlgebra linAlg = LinAlgebra(mySettings,fem.node,fem.tet,fem.fac,8);
+LinAlgebra linAlg = LinAlgebra(mySettings,fem.NOD,fem.node,fem.tet,fem.fac,15);
 
 fmm::init< CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem, tree, kernels);
 
@@ -125,7 +125,8 @@ while (t < mySettings.tf)
     
     linAlg.set_Hext(fem.Hext[0],fem.Hext[1],fem.Hext[2]);
     linAlg.set_DW_vz(fem.DW_vz);
-    int err = linAlg.vsolve(dt,nt);  
+    linAlg.set_dt(dt);
+    int err = linAlg.vsolve(nt);  
     fem.vmax = linAlg.get_v_max();
     
     if (err) { cout << "err : " << err << endl;flag++; dt*= 0.5; mySettings.dt=dt; continue;}

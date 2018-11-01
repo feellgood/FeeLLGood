@@ -41,7 +41,7 @@ for (int j=0; j<NPI; j++)
 }
 
 void Tet::integrales(std::vector<Tetra::prm> const& params,double Hext[DIM],double Vz,
-                     double theta,double dt,double tau_r,mtl::dense2D <double> &AE, mtl::dense_vector <double> &BE)
+                     double theta,double dt,double tau_r,mtl::dense2D <double> &AE, mtl::dense_vector <double> &BE) const
 {
 double alpha = params[idxPrm].alpha;
 double A = params[idxPrm].A;
@@ -245,9 +245,9 @@ if(ORD2)
 
 void Tet::projection(//mtl::dense2D <double> &P,
            mtl::dense2D <double> const& A,  mtl::dense_vector <double> const& B,
-           mtl::dense2D <double> &Ap, mtl::dense_vector <double> &Bp)
+           mtl::dense2D <double> &Ap, mtl::dense_vector <double> &Bp) const
 {
-mtl::dense2D <double> P(2*N,3*N);
+thread_local mtl::dense2D <double> P(2*N,3*N);
 mtl::mat::set_to_zero(P);
 //matBlocDiag::matBloc myP;
 
@@ -262,6 +262,24 @@ for (int i=0; i<N; i++){
 Ap = (P*A)*trans(P);
 Bp = P*B;
 }
+
+void Tet::assemblage(sparseInserter *ins,const int NOD,mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le, mtl::dense_vector<double> &L)
+    {
+    for (int i=0; i < N; i++)
+        {
+        int i_= ind[i];             
+        
+        for (int j=0; j < N; j++)
+            {
+            int j_= ind[j];
+            (*ins)(NOD+i_,j_) << Ke(i,j);      (*ins)(NOD+i_, NOD+j_) << Ke(  i,N+j);
+            (*ins)(    i_,j_) << Ke(N+i,j);    (*ins)(    i_, NOD+j_) << Ke(N+i,N+j);
+            }
+        L(NOD+i_) += Le(i);//L[NOD+i_]+= Le[  i];
+        L(i_) += Le(N+i);//L[    i_]+= Le[N+i];
+        
+        }
+    }
 
 void Tet::getNod(mtl::dense2D <double> &nod)
 {

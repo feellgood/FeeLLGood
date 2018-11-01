@@ -181,7 +181,7 @@ public:
     /**
      * constructor by values
      */
-    inline pt3D(double a,double b,double c) {_x=a; _y=b; _z=c;}
+    inline pt3D(double a,double b,double c) : _x(a),_y(b),_z(c) {}
     
     
     /**

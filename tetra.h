@@ -136,7 +136,7 @@ indices convention is<br>
 ```
 */
 class Tet{
-	public:
+    public:
 		inline Tet() {reg = 0;idxPrm=-1;} /**< default constructor */
 		int reg;/**< .msh region number */
 		int idxPrm;/**< index of the material parameters of the tetrahedron */		
@@ -156,14 +156,16 @@ class Tet{
 		/**
 		computes the integral contribution of the tetrahedron to the evolution of the magnetization
 		*/		
-		void integrales(std::vector<Tetra::prm> const& params,double Hext[DIM],double Vz,double theta,double dt,double tau_r,mtl::dense2D <double> &AE, mtl::dense_vector <double> &BE);
+		void integrales(std::vector<Tetra::prm> const& params,double Hext[DIM],double Vz,double theta,double dt,double tau_r,mtl::dense2D <double> &AE, mtl::dense_vector <double> &BE)  const;
 
 		/**
         computes projection of a tetrahedron
         */
-        void projection(mtl::dense2D <double> const& A,  mtl::dense_vector <double> const& B,mtl::dense2D <double> &Ap, mtl::dense_vector <double> &Bp);
+        void projection(mtl::dense2D <double> const& A,  mtl::dense_vector <double> const& B,mtl::dense2D <double> &Ap, mtl::dense_vector <double> &Bp)  const;
         
         
+        /** matrix and vector assembly */
+        void assemblage(sparseInserter *ins,const int NOD,mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le, mtl::dense_vector<double> &L);
         
         /**
 		convenient getter for N

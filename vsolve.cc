@@ -7,63 +7,64 @@
 
 #include "linear_algebra.h"
 
-void LinAlgebra::assemblage(const int NOD,const int N,const int ind[],
+void LinAlgebra::assemblage_monoThread(const int N, const int ind[],
            mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le,
-           mtl::dense_vector<double> &L)//mtl::compressed2D<double> &K, avant dernier
-    {
+           mtl::dense_vector<double> &L)
+{
     for (int i=0; i < N; i++)
         {
         int i_= ind[i];             
-        my_lock->lock();
-        
             for (int j=0; j < N; j++)
-            {
-            int j_= ind[j];
-            (*ins)(NOD+i_,j_) << Ke(i,j);      (*ins)(NOD+i_, NOD+j_) << Ke(  i,N+j);
-            (*ins)(    i_,j_) << Ke(N+i,j);    (*ins)(    i_, NOD+j_) << Ke(N+i,N+j);
-            }
-        L(NOD+i_) += Le(i);//L[NOD+i_]+= Le[  i];
-        L(i_) += Le(N+i);//L[    i_]+= Le[N+i];
-        
-        my_lock->unlock();    
-          
+                {
+                int j_= ind[j];
+                (*ins)(NOD+i_,j_) << Ke(i,j);      (*ins)(NOD+i_, NOD+j_) << Ke(  i,N+j);
+                (*ins)(    i_,j_) << Ke(N+i,j);    (*ins)(    i_, NOD+j_) << Ke(N+i,N+j);
+                }
+            L(NOD+i_) += Le(i);//L[NOD+i_]+= Le[  i];
+            L(i_) += Le(N+i);//L[    i_]+= Le[N+i];
         }
-    }
+}
 
-    void LinAlgebra::assemblageMat(const int NOD,const int N,const int ind[],mtl::dense2D <double> const& Ke)
-    {
-    for (int i=0; i < N; i++)
+
+void LinAlgebra::assemblage(const int N, const int ind[],
+           mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le,
+           mtl::dense_vector<double> &L)
+{
+    if(my_lock->try_lock())
         {
-        int i_= ind[i];             
-        my_lock->lock();
-        for (int j=0; j < N; j++)
+        for (int i=0; i < N; i++)
             {
-            int j_= ind[j];
-            (*ins)(NOD+i_,j_) << Ke(i,j);      (*ins)(NOD+i_, NOD+j_) << Ke(  i,N+j);
-            (*ins)(    i_,j_) << Ke(N+i,j);    (*ins)(    i_, NOD+j_) << Ke(N+i,N+j);
+            int i_= ind[i];             
+            //my_lock->lock();
+        
+                for (int j=0; j < N; j++)
+                    {
+                    int j_= ind[j];
+                    (*ins)(NOD+i_,j_) << Ke(i,j);      (*ins)(NOD+i_, NOD+j_) << Ke(  i,N+j);
+                    (*ins)(    i_,j_) << Ke(N+i,j);    (*ins)(    i_, NOD+j_) << Ke(N+i,N+j);
+                    }
+                L(NOD+i_) += Le(i);//L[NOD+i_]+= Le[  i];
+                L(i_) += Le(N+i);//L[    i_]+= Le[N+i];
             }
-        my_lock->unlock();   
+        my_lock->unlock();    
+        return;
         }
-    }
-    
-void LinAlgebra::assemblageVec(const int NOD,const int N,const int ind[], mtl::dense_vector <double> const& Le,mtl::dense_vector<double> &L)
-    {
-    for (int i=0; i < N; i++)
+    else
         {
-        int i_= ind[i];             
-        L(NOD+i_) += Le(i);//L[NOD+i_]+= Le[  i];
-        L(i_) += Le(N+i);//L[    i_]+= Le[N+i];
+        lock_buff->lock();
+        buff_TH.push_back(Obj(N,ind,Ke,Le));    
+        lock_buff->unlock();
         }
-    }
+}
+
     
-    
-int LinAlgebra::vsolve(double dt,long nt)
+int LinAlgebra::vsolve(long nt)
 {
 FTic counter;
 
-const int NOD = refNode->size();
-
 counter.tic();
+
+for(int i=0;i<NbTH;i++){ std::cout << "size "<< i << "= " << refTet[i].size() << std::endl; }
 
 base_projection();   // definit plan tangent
 
@@ -77,43 +78,59 @@ mtl::vec::set_to_zero( L_TH );
 
 for(int i=0;i<NbTH;i++) 
     {
-    tab_TH[i] = std::thread( [this,NOD,dt,&L_TH,i]() 
+    tab_TH[i] = std::thread( [this,&L_TH,i]() 
         {
-            mtl::dense2D <double> K(3*Tetra::N,3*Tetra::N), Kp(2*Tetra::N,2*Tetra::N);
-            mtl::dense_vector <double> L(3*Tetra::N), Lp(2*Tetra::N);
+            thread_local mtl::dense2D <double> K(3*Tetra::N,3*Tetra::N);
+            thread_local mtl::dense2D <double> Kp(2*Tetra::N,2*Tetra::N);
+            thread_local mtl::dense_vector <double> L(3*Tetra::N);
+            thread_local mtl::dense_vector <double>  Lp(2*Tetra::N);
             
-            std::for_each(refTet[i].begin(),refTet[i].end(), [this,dt,&L_TH,&K,&L,&Kp,&Lp,NOD](Tetra::Tet & tet)
+            std::for_each(refTet[i].begin(),refTet[i].end(), [this,&L_TH](Tetra::Tet const& tet)
                 {
                 mtl::mat::set_to_zero(K); mtl::mat::set_to_zero(Kp);
                 mtl::vec::set_to_zero(L); mtl::vec::set_to_zero(Lp);
                 tet.integrales(settings->paramTetra,Hext,DW_vz,settings->theta,dt,settings->TAUR,K, L);     
-                tet.projection( K, L, Kp, Lp);//P
-                assemblage(NOD, Tetra::N, tet.ind,Kp,Lp, L_TH );
-                }
-                );//end for_each
-        } 
-    ); //end thread
+                tet.projection( K, L, Kp, Lp);
+                assemblage(Tetra::N,tet.ind,Kp ,Lp, L_TH );
+                });//end for_each
+        }); //end thread
     }
+    
+tab_TH[NbTH] = std::thread( [this,&L_TH]()
+    {
+    //thread_local mtl::dense2D <double> Ps(2*Facette::N,3*Facette::N);
+    thread_local mtl::dense2D <double> Ks(3*Facette::N,3*Facette::N);
+    thread_local mtl::dense2D <double> Ksp(2*Facette::N,2*Facette::N);
+    thread_local mtl::dense_vector <double> Ls(3*Facette::N);
+    thread_local mtl::dense_vector <double> Lsp(2*Facette::N);
 
-for(int i=0;i<NbTH;i++) {tab_TH[i].join();}
-
-
-mtl::dense2D <double> Ps(2*Facette::N,3*Facette::N);
-mtl::dense2D <double> Ks(3*Facette::N,3*Facette::N), Ksp(2*Facette::N,2*Facette::N);
-mtl::dense_vector <double> Ls(3*Facette::N), Lsp(2*Facette::N);
-
-for_each(refFac->begin(),refFac->end(),
-    [this,&L_TH,&Ks,&Ls,&Ksp,&Lsp,NOD,&Ps](Facette::Fac & fac)
+    std::for_each(refFac->begin(),refFac->end(),
+    [this,&L_TH](Facette::Fac const& fac)
         {
         mtl::mat::set_to_zero(Ks); mtl::mat::set_to_zero(Ksp);
         mtl::vec::set_to_zero(Ls); mtl::vec::set_to_zero(Lsp);
         fac.integrales(settings->paramFacette, Ls);     
-        fac.projection(Ps, Ks, Ls, Ksp, Lsp);
-        fac.assemblage(ins,NOD, Ksp, Lsp, L_TH);    
+        fac.projection( Ks, Ls, Ksp, Lsp);//(Ps, Ks, Ls, Ksp, Lsp);
+        assemblage(Facette::N,fac.ind, Ksp, Lsp, L_TH);    
         }
-);
+        );
+    }
+);//end thread
 
-delete ins;//Kw should be ready
+for(int i=0;i<(NbTH+1);i++) {tab_TH[i].join();}
+
+
+std::for_each(buff_TH.begin(),buff_TH.end(), [this,&L_TH](Obj const& x) 
+    { 
+    assemblage_monoThread(x.N,x.ind,x.Ke,x.Le,L_TH);    
+    delete [] x.ind; 
+    } );
+
+std::cout<<"buff_th="<<buff_TH.size() <<std::endl;
+buff_TH.clear();
+
+
+delete ins;//K_TH should be ready
 
 counter.tac();
 
@@ -178,8 +195,8 @@ else
 double v2max = 0.0;
 
 int i=0;
-for_each(refNode->begin(),refNode->end(),
-    [&i,&v2max,&Xw,NOD,dt](Node &n)
+std::for_each(refNode->begin(),refNode->end(),
+    [this,&i,&v2max,&Xw](Node &n)
         {
         double vp = Xw[i];
         double vq = Xw[NOD+i];

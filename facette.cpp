@@ -4,7 +4,7 @@
 
 using namespace Facette;
 
-void Fac::integrales(std::vector<Facette::prm> const& params, mtl::dense_vector <double> &BE)
+void Fac::integrales(std::vector<Facette::prm> const& params, mtl::dense_vector <double> &BE) const
 {
 double Js = params[idxPrm].Js;
 double Ks = params[idxPrm].Ks;
@@ -47,11 +47,11 @@ tiny::mult<double, 3, N, NPI> (u_nod, a, u);
 }
 
 
-void Fac::projection(mtl::dense2D <double> &P,
+void Fac::projection(//mtl::dense2D <double> &P,
            mtl::dense2D <double> const& A,  mtl::dense_vector <double> const& B,
-           mtl::dense2D <double> &Ap, mtl::dense_vector <double> &Bp)
+           mtl::dense2D <double> &Ap, mtl::dense_vector <double> &Bp) const
 {
-//mtl::dense2D <double> P(2*N,3*N);
+thread_local mtl::dense2D <double> P(2*N,3*N);
 mtl::mat::set_to_zero(P);
 
 for (int i=0; i<N; i++){

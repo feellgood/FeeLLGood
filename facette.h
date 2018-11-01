@@ -95,12 +95,13 @@ class Fac{
             {for (int j=0; j<NPI; j++) {weight[j] = 2.*surf*pds[j]; }}// detJ = 2*surf;
     
 		/** computes the integral contribution of the triangular face */
-		void integrales(std::vector<Facette::prm> const& params, mtl::dense_vector <double> &BE);
+		void integrales(std::vector<Facette::prm> const& params, mtl::dense_vector <double> &BE) const;
 		
         /**
         compute projection of a face
         */
-        void projection(mtl::dense2D <double> &P, mtl::dense2D <double> const& A, mtl::dense_vector <double> const& B,mtl::dense2D <double> &Ap, mtl::dense_vector <double> &Bp);
+        void projection(//mtl::dense2D <double> &P,
+                        mtl::dense2D <double> const& A, mtl::dense_vector <double> const& B,mtl::dense2D <double> &Ap, mtl::dense_vector <double> &Bp) const;
         
         /** assemblage of the matrix and vector elements */
         void assemblage(sparseInserter *ins,const int NOD,mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le, mtl::dense_vector<double> &L);
