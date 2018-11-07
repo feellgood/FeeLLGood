@@ -26,7 +26,7 @@ SET(SCALFMM_INCLUDE_DIR ../SCALFMM-1.4-148/Src )
 
 SET(SCALFMM_CFG /usr/local/include/Utils )
 
-INCLUDE_DIRECTORIES(${ANN_INCLUDE_DIR} ${GMM_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR} ${SCALFMM_CFG})
+INCLUDE_DIRECTORIES(${ANN_INCLUDE_DIR} ${MTL_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR} ${SCALFMM_CFG})
 
 #===========================================================================
 # these parameters are used to build a config.h file 
