@@ -3,5 +3,8 @@ CMakeFiles
 Makefile
 Makefile.X86_64
 cmake_install.cmake
+config.h
+feellgood
 feellgood_exe
 html
+install_manifest.txt
