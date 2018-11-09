@@ -3,6 +3,8 @@
 It encapsulates the calls to MTL4 , the assemblage and projection of the matrix for all elements <br> 
 projection and matrix assembly is multithreaded for tetrahedron, monothread for facette
 */
+#include <deque>
+#include <queue>
 
 #include <thread>
 #include <mutex>
@@ -26,24 +28,6 @@ typedef typename mtl::Collection< mtl::compressed2D<double> >::value_type v_type
 /** convenient typedef for mtl4 inserter */
 typedef mtl::mat::inserter< mtl::compressed2D<double>,mtl::update_plus<v_type> > sparseInserter;
 
-
-class Obj
-    {
-    public:
-        inline Obj(const int _N,const int _ind[],mtl::dense2D <double> const& K,mtl::dense_vector <double> const& L):N(_N)
-        {
-        ind = new int[N];
-        for(int i=0;i<N;i++) {ind[i] = _ind[i];}   
-        Ke=K;Le=L;
-        }
-        
-        const int N;
-        int *ind;
-        mtl::dense2D <double> Ke;
-        mtl::dense_vector <double> Le;
-    };
-
-
 /** \class LinAlgebra
 convenient class to grab altogether some part of the calculations involved using gmm solver at each timestep
 */
@@ -59,7 +43,7 @@ public:
     settings = &s; 
     my_lock = new std::mutex;
     tab_TH.resize(NbTH+1);
-    buff_TH.resize(NbTH+1);
+    buff_tet.resize(NbTH);
     refTet.resize(NbTH);
     const unsigned long block_size = std::distance(myTet.begin(),myTet.end())/NbTH;
 
@@ -109,7 +93,7 @@ public:
 	sparseInserter *ins;
     
 private:
-    const int NOD;/** total number of nodes, also an offset for filling sparseMatrix, initialized by constructor */
+    const int NOD;/**< total number of nodes, also an offset for filling sparseMatrix, initialized by constructor */
     std::vector<Node>  *refNode;/**< direct access to the Nodes */
 	std::vector <Facette::Fac> *refFac; /**< direct access to the faces */
 	
@@ -130,7 +114,11 @@ private:
     const int NbTH;
     
     /** buffer when try_lock failed on assemblage */
-    std::vector<std::vector<Obj> > buff_TH;
+    std::vector<std::queue<Tetra::Obj> > buff_tet;
+    
+    /** buffer fr facette::Obj when try_lock fail */
+    std::queue<Facette::Obj> buff_fac;
+    
     /** thread vector */
     std::vector<std::thread> tab_TH;
     
@@ -145,10 +133,19 @@ inline void base_projection(void)
     
     
     /**
-    perform the matrix and vector assembly with all the contributions of the tetrahedrons, use two mutexs
+    perform the matrix and vector assembly with all the contributions of the tetrahedrons, use a mutex on inserter
     */
-    void assemblage(const int i,const int N,const int ind[],mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le,
-                    mtl::dense_vector<double> &L);
+    void assemblageTet(const int i, const int ind[],
+           mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le,
+           mtl::dense_vector<double> &L);
+    
+    
+    /**
+    perform the matrix and vector assembly with all the contributions of the facettes, use a mutex on inserter
+    */
+    void assemblageFac(const int ind[],
+           mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le,
+           mtl::dense_vector<double> &L);
     
 }; // fin class linAlgebra
 

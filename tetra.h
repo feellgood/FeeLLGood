@@ -110,6 +110,24 @@ struct prm
 		};	
 	};
 
+    /** \class Obj
+     container for buffering the projection(Tetrahedron) matrix results when mutex is locked
+     */
+    class Obj
+    {
+    public:
+        /** constructor */
+        inline Obj(const int _ind[],mtl::dense2D <double> const& K,mtl::dense_vector <double> const& L)
+        {
+        for(int i=0;i<N;i++) {ind[i] = _ind[i];}   
+        Ke=K;Le=L;
+        }
+        
+        int ind[N];/**< a copy of the node indexes from the corresponding tetrahedron */
+        mtl::dense2D <double> Ke;/**< small matrix resulting from projection */
+        mtl::dense_vector <double> Le;/**< small vector resulting from projection */
+    };
+    
     
 /** \class Tet
 Tet is a tetrahedron, containing the index references to nodes, must not be flat <br>

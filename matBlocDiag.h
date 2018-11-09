@@ -243,11 +243,18 @@ int writeToFile(std::string fileName,std::vector<T> v)
     return 0;
     }
 
-    struct matBloc
-    {
-        static const int I=2;
-        static const int J=3;
-        BlocElem D[I][J];
+    /** \class matBloc
+     * container for 4*4 bloc diagonal matrices
+    */
+    class matBloc
+    {   
+    public:
+        /** constructor */
+        inline matBloc(const int _I,const int _J):I(_I),J(_J) {}
+        const int I;/**< rows */
+        const int J;/**< columns */
+        
+        std::vector<BlocElem> D;/**< container for the elementary block diagonal  */
     };
     
 } // fin namespace

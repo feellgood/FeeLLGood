@@ -23,13 +23,11 @@ namespace Pt
 {
     const int DIM = 3;/**< space dimension, usefull for many tables */
     
-    /** \enum index
-     specify by integer indices the coordinate
-     */
-    enum index {IDX_X = 0,IDX_Y = 1,IDX_Z = 2};
+    enum index /**< convenient enum mainly to avoid direct indices values to specify coordinates in calculations */
+        {IDX_X = 0,IDX_Y = 1,IDX_Z = 2};
 
 /**
- * sign(x) = 1.0 if x>0, otherwise -1.0
+sign(x) = 1.0 if x>0, otherwise -1.0
 */
 inline double sign(double x) {if (x>0) return 1.0; else return -1.0; }
 

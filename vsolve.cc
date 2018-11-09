@@ -25,32 +25,59 @@ void LinAlgebra::assemblage_monoThread(const int N, const int ind[],
         }
 }
 
-
-void LinAlgebra::assemblage(const int i,const int N, const int ind[],
+void LinAlgebra::assemblageTet(const int i, const int ind[],
            mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le,
            mtl::dense_vector<double> &L)
 {
     if(my_lock->try_lock())
         {
-        for (int i=0; i < N; i++)
+        for (int i=0; i < Tetra::N; i++)
             {
             int i_= ind[i];             
             
-                for (int j=0; j < N; j++)
+                for (int j=0; j < Tetra::N; j++)
                     {
                     int j_= ind[j];
-                    (*ins)(NOD+i_,j_) << Ke(i,j);      (*ins)(NOD+i_, NOD+j_) << Ke(  i,N+j);
-                    (*ins)(    i_,j_) << Ke(N+i,j);    (*ins)(    i_, NOD+j_) << Ke(N+i,N+j);
+                    (*ins)(NOD+i_,j_) << Ke(i,j);      (*ins)(NOD+i_, NOD+j_) << Ke(  i,Tetra::N+j);
+                    (*ins)(    i_,j_) << Ke(Tetra::N+i,j);    (*ins)(    i_, NOD+j_) << Ke(Tetra::N+i,Tetra::N+j);
                     }
                 L(NOD+i_) += Le(i);//L[NOD+i_]+= Le[  i];
-                L(i_) += Le(N+i);//L[    i_]+= Le[N+i];
+                L(i_) += Le(Tetra::N+i);//L[    i_]+= Le[N+i];
             }
         my_lock->unlock();    
         return;
         }
     else
         {
-        buff_TH[i].push_back(Obj(N,ind,Ke,Le));    
+        buff_tet[i].push(Tetra::Obj(ind,Ke,Le));    
+        }
+}
+
+void LinAlgebra::assemblageFac(const int ind[],
+           mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le,
+           mtl::dense_vector<double> &L)
+{
+    if(my_lock->try_lock())
+        {
+        for (int i=0; i < Facette::N; i++)
+            {
+            int i_= ind[i];             
+            
+                for (int j=0; j < Facette::N; j++)
+                    {
+                    int j_= ind[j];
+                    (*ins)(NOD+i_,j_) << Ke(i,j);      (*ins)(NOD+i_, NOD+j_) << Ke(  i,Facette::N+j);
+                    (*ins)(    i_,j_) << Ke(Facette::N+i,j);    (*ins)(    i_, NOD+j_) << Ke(Facette::N+i,Facette::N+j);
+                    }
+                L(NOD+i_) += Le(i);//L[NOD+i_]+= Le[  i];
+                L(i_) += Le(Facette::N+i);//L[    i_]+= Le[N+i];
+            }
+        my_lock->unlock();    
+        return;
+        }
+    else
+        {
+        buff_fac.push(Facette::Obj(ind,Ke,Le));    
         }
 }
 
@@ -86,7 +113,7 @@ for(int i=0;i<NbTH;i++)
                 mtl::vec::set_to_zero(L); mtl::vec::set_to_zero(Lp);
                 tet.integrales(settings->paramTetra,Hext,DW_vz,settings->theta,dt,settings->TAUR,K, L);     
                 tet.projection( K, L, Kp, Lp);
-                assemblage(i,Tetra::N,tet.ind,Kp ,Lp, L_TH );
+                assemblageTet(i,tet.ind,Kp ,Lp, L_TH );
                 });//end for_each
         }); //end thread
     }
@@ -106,7 +133,7 @@ tab_TH[NbTH] = std::thread( [this,&L_TH]()
         mtl::vec::set_to_zero(Ls); mtl::vec::set_to_zero(Lsp);
         fac.integrales(settings->paramFacette, Ls);     
         fac.projection( Ks, Ls, Ksp, Lsp);//(Ps, Ks, Ls, Ksp, Lsp);
-        assemblage(NbTH,Facette::N,fac.ind, Ksp, Lsp, L_TH);    
+        assemblageFac(fac.ind, Ksp, Lsp, L_TH);    
         }
         );
     }
@@ -114,16 +141,33 @@ tab_TH[NbTH] = std::thread( [this,&L_TH]()
 
 for(int i=0;i<(NbTH+1);i++) {tab_TH[i].join();}
 
-for(int i=0;i<(NbTH+1);i++)
+for(int i=0;i<(NbTH);i++)
 {
-std::for_each(buff_TH[i].begin(),buff_TH[i].end(), [this,&L_TH](Obj const& x) 
+    while (!buff_tet[i].empty())
+    {
+        Tetra::Obj const& x = buff_tet[i].front();
+        assemblage_monoThread(Tetra::N,x.ind,x.Ke,x.Le,L_TH);
+        //delete [] x.ind; 
+        buff_tet[i].pop();
+    }
+/*
+    std::for_each(buff_TH[i].begin(),buff_TH[i].end(), [this,&L_TH](Obj const& x) 
     { 
     assemblage_monoThread(x.N,x.ind,x.Ke,x.Le,L_TH);    
     delete [] x.ind; 
     } );
-
-buff_TH[i].clear();
+*/
+//buff_TH[i].clear();
+    
 }
+
+while (!buff_fac.empty())
+    {
+        Facette::Obj const& x = buff_fac.front();
+        assemblage_monoThread(Facette::N,x.ind,x.Ke,x.Le,L_TH);
+        //delete [] x.ind; 
+        buff_fac.pop();
+    }
 
 delete ins;//K_TH should be ready
 
