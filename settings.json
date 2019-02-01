@@ -1,6 +1,7 @@
 {
 "output directory" : "data_out/",
 "output file basename" : "tommy_the_cat",
+"output vtk file" : false,
 "mesh filename" : "wire_d70_L1000.msh",
 "scaling factor" : 1e-9,
 "final_time" : 1e-6,

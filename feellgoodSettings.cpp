@@ -41,7 +41,8 @@ void Settings::read(std::string fileJson,std::vector<Seq> &seq)
 	
 	r_path_output_dir = root.get<std::string>("output directory");
 	simName = root.get<std::string>("output file basename");
-	pbName = root.get<std::string>("mesh filename");
+	withVtk = root.get<bool>("output vtk file");
+    pbName = root.get<std::string>("mesh filename");
 	double s = root.get<double>("scaling factor",1e-9);
     setScale(s);
     tf = root.get<double>("final_time",0);
