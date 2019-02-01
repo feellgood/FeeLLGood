@@ -6,6 +6,7 @@
 #include "linear_algebra.h"
 #include "fmm_demag.h"
 
+
 using namespace std;
 
 int main(int argc,char* argv[])

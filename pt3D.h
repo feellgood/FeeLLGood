@@ -23,7 +23,10 @@ namespace Pt
 {
     const int DIM = 3;/**< space dimension, usefull for many tables */
     
-    enum index /**< convenient enum mainly to avoid direct indices values to specify coordinates in calculations */
+    /** 
+     *convenient enum mainly to avoid direct indices values to specify coordinates in calculations 
+     */
+    enum index 
         {IDX_X = 0,IDX_Y = 1,IDX_Z = 2};
 
 /**

@@ -63,8 +63,8 @@ int init(Fem &fem, OctreeClass* &tree, KernelClass* &kernels, Args... kernelPreA
     const int SizeSubLevels = 6;
     //const unsigned int NbThreads  =  omp_get_max_threads();
 
-    omp_set_num_threads(NbThreads);
-    if(VERBOSE) { std::cout << "\n>> Using " << NbThreads << " threads.\n" << std::endl; }
+    omp_set_num_threads(ScalfmmNbThreads);
+    if(VERBOSE) { std::cout << "\n>> ScalFMM using " << ScalfmmNbThreads << " threads.\n" << std::endl; }
 
     const double boxWidth=2.01;//2.01 ct
     const FPoint<FReal> centerOfBox(0., 0., 0.);// manque le typename du template FPoint *ct*
