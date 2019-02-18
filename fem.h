@@ -59,7 +59,7 @@ struct Fem{
 	
 	double fmm_normalizer;/**< normalizing geometrical constant for the computation of the demag field */
 	
-	double locmax;/**< no idea */
+	//double locmax;/**< no idea */
 	double t;/**< physical current time of the simulation */
 	
 	double vmax;/**< maximum speed of magnetization */

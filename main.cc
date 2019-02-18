@@ -34,8 +34,8 @@ else
 	}
 
 std::cout << "\n\t ┌────────────────────────────┐\n";
-std::cout <<   "\t │         feeLLGood          │\n";
-std::cout <<   "\t │        version 2018        │\n";
+std::cout <<   "\t │         FeeLLGood          │\n";
+std::cout <<   "\t │        version " << feellgood_version << "       │\n";
 std::cout <<   "\t │      cnrs Grenoble-INP     │\n";
 std::cout <<   "\t └────────────────────────────┘\n";
 std::cout << "\t process\t\t" << getpid() << std::endl;

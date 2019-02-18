@@ -6,9 +6,8 @@ cmake_minimum_required(VERSION 2.8)
 #===========================================================================
 
 set(FEELLGOOD_MAJOR_VERSION 0)
-set(FEELLGOOD_MINOR_VERSION 0)
+set(FEELLGOOD_MINOR_VERSION 1)
 set(FEELLGOOD_PATCH_VERSION 0)
-set(FEELLGOOD_VERSION  "${FEELLGOOD_MAJOR_VERSION}.${FEELLGOOD_MINOR_VERSION}.${FEELLGOOD_PATCH_VERSION}" )
 
 ENABLE_LANGUAGE(CXX)
 
@@ -32,6 +31,8 @@ INCLUDE_DIRECTORIES(${ANN_INCLUDE_DIR} ${MTL_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR}
 # these parameters are used to build a config.h file 
 #===========================================================================
 
+set(FEELLGOOD_VERSION "\"${FEELLGOOD_MAJOR_VERSION}.${FEELLGOOD_MINOR_VERSION}.${FEELLGOOD_PATCH_VERSION}\"") 
+
 set(my_cmd "git")
 set(my_arg "show-ref")
 set(my_arg1 "--head")
@@ -41,6 +42,7 @@ set(my_arg3 "--hash")
 execute_process(COMMAND ${my_cmd} ${my_arg} ${my_arg1} ${my_arg2} ${my_arg3} RESULT_VARIABLE git_result OUTPUT_VARIABLE git_var)
 
 string(REPLACE "\n" "" SHAstr "\"${git_var}\"") 
+MESSAGE(STATUS "version = ${FEELLGOOD_VERSION}")
 MESSAGE(STATUS "executable built with SHA1=${SHAstr}")
 
 
