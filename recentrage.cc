@@ -21,23 +21,26 @@ pt3D p_dir = pt3D(idx_dir);//unit vector
 queryPt[0]=c.x()-0.5*pScal(p_dir,l);
 queryPt[1]=c.y()-0.5*pScal(p_dir,l);
 queryPt[2]=c.z()-0.5*pScal(p_dir,l);
+//std::cout << "left P = " << queryPt[0] << " ; " <<  queryPt[1] << " ; " << queryPt[2] << std::endl;
 
 kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 int ns=nnIdx[0];
 if(VERBOSE) { std::cerr << "ns : " << ns << std::endl; }
 
 double u2L= node[ns].u(idx_dir);
-if(VERBOSE) { std::cout << "z : " << queryPt[2] << " u2 : "<< u2L << std::endl; }
+if(VERBOSE) { std::cout << "left z : " << queryPt[idx_dir] << " mag : "<< node[ns].u << std::endl; }
 
 /* bord droit */
 queryPt[0]=c.x()+0.5*pScal(p_dir,l);
 queryPt[1]=c.y()+0.5*pScal(p_dir,l);
 queryPt[2]=c.z()+0.5*pScal(p_dir,l);
 
+//std::cout << "right P = " << queryPt[0] << " ; " <<  queryPt[1] << " ; " << queryPt[2] << std::endl;
+
 kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 ns=nnIdx[0];
 double u2R= node[ns].u(idx_dir);
-if(VERBOSE) { std::cout << "z : " << queryPt[idx_dir] << " u2 : "<< u2R << std::endl; }
+if(VERBOSE) { std::cout << "right z : " << queryPt[idx_dir] << " mag : "<< node[ns].u << std::endl; }
 
 if ((u2L*u2R>0.)&&VERBOSE){ std::cout << "Warning apparently no DW!" << std::endl; }
 

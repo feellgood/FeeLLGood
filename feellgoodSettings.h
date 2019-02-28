@@ -8,6 +8,9 @@
 #include <cmath>
 #include <string>
 
+#include "exprtk.hpp"
+
+#include "pt3D.h"
 #include "tetra.h"
 #include "facette.h"
 
@@ -33,7 +36,25 @@ container class to store many setting parameters, such as file names, parameters
 */
 class Settings{
 	public:
-	inline Settings() { withTsv=true; withVtk = false; theta=0.5; analytic_corr = true;MAXITER = 500;REFRESH_PRC = 20;recentering = true;} /**< default constructor */
+	inline Settings() 
+        {
+        withTsv=true;
+        withVtk = false;
+        theta=0.5;
+        analytic_corr = true;
+        MAXITER = 500;
+        REFRESH_PRC = 20;
+        recentering = true;
+          
+        
+        
+        s_table.add_variable("x",x);
+        s_table.add_variable("y",y);
+        s_table.add_variable("z",z);
+        s_table.add_constants();
+        
+        
+        } /**< default constructor */
 	
 	void infos(std::vector<Seq> &seq);/**< some prints sent to terminal  */	
 	
@@ -64,7 +85,13 @@ class Settings{
 	bool restore;/**< usefull to run a simulation from a previous calculation  */
     bool recentering;/**< to recenter DW or not */
 	
-	
+	std::string sMx;/**< string for analytical definition of Mx */
+	std::string sMy;/**< string for analytical definition of My */
+    std::string sMz;/**< string for analytical definition of Mz */
+    
+    
+    
+    
 	std:: string restoreFileName;/**< input file name for continuing a calculation (sol.in) */
 	
 	/** for time integration \f$ \theta \f$ scheme  */
@@ -120,11 +147,46 @@ class Settings{
 	else {return std::distance(paramFacette.begin(),result);}	
 	};
 	
+    /** parser magnetization compiler */
+    inline void doCompile(void)
+        {
+        exprtk::parser<double> parser;
+            
+        expr_Mx.register_symbol_table(s_table);
+        expr_My.register_symbol_table(s_table);
+        expr_Mz.register_symbol_table(s_table);
+        parser.compile(sMx,expr_Mx);
+        parser.compile(sMy,expr_My);
+        parser.compile(sMz,expr_Mz);
+        };
+    
+    /** evaluation of the magnetization components through math expression */
+    inline Pt::pt3D getValue(const Pt::pt3D &p)
+        {
+        x= p.x();
+        y= p.y();
+        z= p.z();
+        
+        double mx = expr_Mx.value();
+        double my = expr_My.value();
+        double mz = expr_Mz.value();
+        Pt::pt3D mag = Pt::pt3D(mx,my,mz);
+        mag.normalize();
+        return mag;
+        }
+    
 	private:
 	
 	double _scale;/**< scaling factor from gmsh files to feellgood */
 	std::string simName;/**< simulation name */
 	std::string pbName;     /**< mesh file, gmsh file format */
+	
+	double x,y,z;
+	
+	exprtk::symbol_table<double> s_table; /**< symbol table for exprtk math parser  */
+	exprtk::expression<double> expr_Mx;/**< Mx expression */
+    exprtk::expression<double> expr_My;/**< My expression */
+    exprtk::expression<double> expr_Mz;/**< Mz expression */
 };
 
 #endif /* feellgoodSettings_h */

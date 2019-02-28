@@ -133,8 +133,13 @@ std::for_each(tet.begin(),tet.end(),[epsilon](Tetra::Tet &t) { t.init(epsilon); 
 /**
 computes an analytical initial magnetization distribution as a starting point for the simulation
 */
-inline void init_distrib(void)
-	{ std::for_each( node.begin(),node.end(), [](Node &n) { n.u.x(1./sqrt(2.)); n.u.y(0.); n.u.z(1./sqrt(2.)); n.phi  = 0.;} ); }
+inline void init_distrib(Settings &mySets)
+	{ std::for_each( node.begin(),node.end(), [this,&mySets](Node &n) 
+        {
+        Pt::pt3D pNorm = Pt::pt3D( (n.p.x() - c.x())/l.x() , (n.p.y() - c.y())/l.y() , (n.p.z() - c.z())/l.z() );
+        n.u = mySets.getValue(pNorm);
+        n.phi  = 0.;} 
+    ); }
 
 /**
 read a solution from a file (tsv formated) and initialize fem struct to restart computation from that distribution

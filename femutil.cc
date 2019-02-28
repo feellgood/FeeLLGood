@@ -17,19 +17,25 @@ std::for_each(node.begin(),node.end(),
 	{ this->pts[i][0] = n.p.x();this->pts[i][1] = n.p.y();this->pts[i][2] = n.p.z();i++; } 
 );// end for_each
 
-auto extrema = std::minmax_element(node.begin(),node.end(),[](Node const& n1,Node const& n2) {return !(n2.p.x()<n1.p.x())?n1.p.x():n2.p.x(); } );
-double xmin = extrema.first->p.x(); double xmax = extrema.second->p.x();
+const auto minX = std::min_element(node.begin(),node.end(),[](Node const& n1,Node const& n2) {return (n1.p.x()<n2.p.x()); } );
+double xmin = minX->p.x(); 
+const auto maxX = std::max_element(node.begin(),node.end(),[](Node const& n1,Node const& n2) {return (n1.p.x()<n2.p.x()); } );
+double xmax = maxX->p.x();
 
-extrema = std::minmax_element(node.begin(),node.end(),[](Node const& n1,Node const& n2) {return !(n2.p.y()<n1.p.y())?n1.p.y():n2.p.y(); } );
-double ymin = extrema.first->p.y(); double ymax = extrema.second->p.y();
+const auto minY = std::min_element(node.begin(),node.end(),[](Node const& n1,Node const& n2) {return (n1.p.y()<n2.p.y()); } );
+double ymin = minY->p.y();
+const auto maxY = std::max_element(node.begin(),node.end(),[](Node const& n1,Node const& n2) {return (n1.p.y()<n2.p.y()); } );
+double ymax = maxY->p.y();
 
-extrema = std::minmax_element(node.begin(),node.end(),[](Node const& n1,Node const& n2) {return !(n2.p.z()<n1.p.z())?n1.p.z():n2.p.z(); } );
-double zmin = extrema.first->p.z(); double zmax = extrema.second->p.z();
+const auto minZ = std::min_element(node.begin(),node.end(),[](Node const& n1,Node const& n2) {return (n1.p.z()<n2.p.z()); } );
+double zmin = minZ->p.z();
+const auto maxZ = std::max_element(node.begin(),node.end(),[](Node const& n1,Node const& n2) {return (n1.p.z()<n2.p.z()); } );
+double zmax = maxZ->p.z();
 
 // calcul du diametre et du centrage
-l = Pt::pt3D(xmax-xmin,ymax-ymin,zmax-zmin);
+l = Pt::pt3D(xmax - xmin,ymax - ymin,zmax - zmin);
 diam = l.maxLength();
-c = Pt::pt3D(0.5*(xmax+xmin),0.5*(ymax+ymin),0.5*(zmax+zmin));
+c = Pt::pt3D(0.5*(xmax + xmin),0.5*(ymax + ymin),0.5*(zmax + zmin));
 
 //ici on affecte refNode des tetraedres
 std::for_each(tet.begin(),tet.end(),[this](Tetra::Tet &te) {te.setRefNode( &(this->node) );} );

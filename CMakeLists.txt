@@ -17,6 +17,8 @@ MESSAGE(STATUS "CXX ${CMAKE_CXX_COMPILER_ID}")
 # Path
 #===========================================================================
 
+SET(EXPRTK_INCLUDE_DIR ../exprtk )
+
 SET(ANN_INCLUDE_DIR ../ann_1.1.2/include/ANN )
 
 SET(MTL_INCLUDE_DIR ../mtl4 )
@@ -25,7 +27,7 @@ SET(SCALFMM_INCLUDE_DIR ../SCALFMM-1.4-148/Src )
 
 SET(SCALFMM_CFG /usr/local/include/Utils )
 
-INCLUDE_DIRECTORIES(${ANN_INCLUDE_DIR} ${MTL_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR} ${SCALFMM_CFG})
+INCLUDE_DIRECTORIES(${ANN_INCLUDE_DIR} ${MTL_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR} ${SCALFMM_CFG} ${EXPRTK_INCLUDE_DIR} )
 
 #===========================================================================
 # these parameters are used to build a config.h file 
@@ -72,7 +74,7 @@ SET( SOURCES config.h pt3D.h matBlocDiag.h tetra.h tetra.cpp facette.h facette.c
 	linear_algebra.h main.cc feellgoodSettings.cpp read.cpp femutil.cc
 	recentrage.cc energy.cc save.cpp vsolve.cc tiny.h)
 
-SET( HEADERS ${ANN_INCLUDE_DIR}/ANN.h ${SCALFMM_INCLUDE_DIR}/Kernels/Rotation/FRotationKernel.hpp)
+SET( HEADERS ${ANN_INCLUDE_DIR}/ANN.h ${SCALFMM_INCLUDE_DIR}/Kernels/Rotation/FRotationKernel.hpp ${EXPRTK_INCLUDE_DIR}/exprtk.hpp )
 
 
 configure_file(config.h.in ./config.h)

@@ -31,21 +31,12 @@ if (msh.fail()){
 
     double scale = mySets.getScale();
     
-if (scale == 0.0){
-#ifdef LIBRARY
-    throw runtime_error("scaling factor must be defined in json settings file");
-#else
-    cerr << "scaling factor must be defined in json settings file" << endl;
-    exit(1);
-#endif
-    }
-
 msh >> NOD;        // lecture des noeuds
 node.resize(NOD);
 for (int i=0; i<NOD; i++){
     msh >> trash >> node[i].p;
-	node[i].p *= scale;
-	//cout <<"scale=" << scale <<";" << trash << ";" << node[i].p << endl;
+	node[i].p.rescale(scale);
+	//std::cout <<"scale=" << scale <<";" << trash << ";" << node[i].p << std::endl;
 	}
 
 if (msh.fail()){
@@ -142,7 +133,8 @@ for (int i=0; i<NOD; i++){
     int i_;
     fin >> i_ >>  node_.p >> n.u >> n.phi;// carefull! >> is overloaded for class pt3D
 
-    node_.p *= scaling;
+    node_.p.rescale(scaling);
+    //node_.p *= scaling;
 
     if (( Pt::norme2(n.p - node_.p) > sq(diam * 1e-9))&&VERBOSE) 
 	{

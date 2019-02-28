@@ -52,8 +52,15 @@ fem.femutil(mySettings);
 
 fem.chapeaux(mySettings.EPSILON);
 
-if (mySettings.restore) {fem.readSol(mySettings.getScale(), mySettings.restoreFileName);}
-else {fem.init_distrib();}
+if (mySettings.restore)
+    {
+    fem.readSol(mySettings.getScale(), mySettings.restoreFileName);
+    }
+else
+    {
+    std::cout<< "initial magnetization distribution :\nMx =" << mySettings.sMx << "\nMy =" << mySettings.sMy << "\nMz =" << mySettings.sMz <<endl; 
+    fem.init_distrib(mySettings);
+    }
 
 fem.direction(Pt::IDX_Z);/* determination de la direction de propagation de la paroi */
 fem.t=0.;

@@ -35,6 +35,8 @@ for(unsigned int i=0;i<paramFacette.size();i++) {paramFacette[i].infos();}
 void Settings::read(std::string fileJson,std::vector<Seq> &seq)
 {
 	boost::property_tree::ptree root;
+    boost::property_tree::ptree sub_tree;
+    
 	boost::property_tree::read_json(fileJson,root);
 	
 	std::cout << "\nparsing "<< fileJson <<" :" << std::endl;
@@ -44,13 +46,41 @@ void Settings::read(std::string fileJson,std::vector<Seq> &seq)
 	withVtk = root.get<bool>("output vtk file");
     pbName = root.get<std::string>("mesh filename");
 	double s = root.get<double>("scaling factor",1e-9);
+    
+    if (s == 0.0){
+#ifdef LIBRARY
+    throw runtime_error("scaling factor must be defined in json settings file");
+#else
+    std::cerr << "scaling factor must be defined in json settings file" << std::endl;
+    exit(1);
+#endif
+    }
+
+    
     setScale(s);
     tf = root.get<double>("final_time",0);
 	
 	n1 = root.get<int>("save_energies",0);
 	n2 = root.get<int>("take_photo",0);
 	restore = root.get<bool>("restore",0);
-	restoreFileName = root.get<std::string>("restore from file");
+    if (restore)
+        {
+        restoreFileName = root.get<std::string>("restore from file");
+        }
+    else
+        {
+        try { sub_tree = root.get_child("initial magnetization"); }
+        catch (std::exception &e)
+            { std::cout << e.what() << std::endl; }
+
+        sMx = sub_tree.get<std::string>("Mx");
+        sMy = sub_tree.get<std::string>("My");
+        sMz = sub_tree.get<std::string>("Mz");
+    
+        doCompile();
+        }
+        
+	
     recentering = root.get<bool>("recentering",true);
     double trucs[6];
 	for (boost::property_tree::ptree::value_type &s : root.get_child("field_sequence"))
@@ -73,7 +103,7 @@ void Settings::read(std::string fileJson,std::vector<Seq> &seq)
 		}
 std::cout << "\tvolumic regions..." << std::endl;
 
-boost::property_tree::ptree sub_tree;
+
 
 try { sub_tree = root.get_child("volume_regions"); }
 catch (std::exception &e)

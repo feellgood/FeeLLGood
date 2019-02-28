@@ -7,8 +7,15 @@
 "final_time" : 1e-6,
 "save_energies" : 3,
 "take_photo" : 5,
-"restore" : true,
+"restore" : false,
 "restore from file" : "sol.in",
+"initial magnetization" :
+    {
+    "Mx": "1-z^2",
+    "My": "0",
+    "Mz": "tanh(z*10)"
+    },
+
 "recentering" : true,
 "field_sequence" :
 	[
