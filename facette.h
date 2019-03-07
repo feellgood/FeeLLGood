@@ -6,21 +6,22 @@
   header containing Fac class, and some constants and a less_than operator to redo orientation of triangular faces
  */
 
-#include "boost/numeric/mtl/mtl.hpp"
-#include "boost/numeric/itl/itl.hpp"
+#include "gmm/gmm_kernel.h"
 
-#include <boost/numeric/mtl/matrix/inserter.hpp>
-#include <boost/numeric/mtl/operation/set_to_zero.hpp>
-#include <boost/numeric/mtl/interface/vpt.hpp>
+typedef gmm::wsvector <double>   write_vector;/**< gmm write vector */
+typedef gmm::rsvector <double>   read_vector; /**< gmm read vector */
+
+typedef gmm::row_matrix	<write_vector>   write_matrix; /**< gmm write sparse matrix */
+typedef gmm::row_matrix	<read_vector>    read_matrix; /**< gmm read sparse matrix */
 
 #include "config.h"
 #include "node.h"
 
 /** convenient typedef for mtl4 */
-typedef typename mtl::Collection< mtl::compressed2D<double> >::value_type v_type;
+//typedef typename mtl::Collection< mtl::compressed2D<double> >::value_type v_type;
 
 /** convenient typedef for mtl4 inserter */
-typedef mtl::mat::inserter< mtl::compressed2D<double>,mtl::update_plus<v_type> > sparseInserter;
+//typedef mtl::mat::inserter< mtl::compressed2D<double>,mtl::update_plus<v_type> > sparseInserter;
 
 /** \namespace Facette
  to grab altogether some constants and calculation functions for class Fac
@@ -76,15 +77,15 @@ class Obj
     {
     public:
         /** constructor */
-        inline Obj(const int _ind[],mtl::dense2D <double> const& K,mtl::dense_vector <double> const& L)
+        inline Obj(const int _idx,gmm::dense_matrix <double> const& K,std::vector <double> const& L)
         {
-        for(int i=0;i<N;i++) {ind[i] = _ind[i];}   
+        idx = _idx;   
         Ke=K;Le=L;
         }
         
-        int ind[N];/**< a copy of the node indexes from the corresponding facette */
-        mtl::dense2D <double> Ke;/**< small matrix resulting from projection */
-        mtl::dense_vector <double> Le;/**< small vector resulting from projection */
+        int idx;/**< index of the corresponding facette */
+        gmm::dense_matrix <double> Ke;/**< small matrix resulting from projection */
+        std::vector <double> Le;/**< small vector resulting from projection */
     };
     
     
@@ -114,16 +115,15 @@ class Fac{
             {for (int j=0; j<NPI; j++) {weight[j] = 2.*surf*pds[j]; }}// detJ = 2*surf;
     
 		/** computes the integral contribution of the triangular face */
-		void integrales(std::vector<Facette::prm> const& params, mtl::dense_vector <double> &BE) const;
+		void integrales(std::vector<Facette::prm> const& params, std::vector <double> &BE) const;
 		
         /**
         compute projection of a face
         */
-        void projection(//mtl::dense2D <double> &P,
-                        mtl::dense2D <double> const& A, mtl::dense_vector <double> const& B,mtl::dense2D <double> &Ap, mtl::dense_vector <double> &Bp) const;
+        void projection(gmm::dense_matrix <double> const& A, std::vector <double> const& B,gmm::dense_matrix <double> &Ap, std::vector <double> &Bp) const;
         
         /** assemblage of the matrix and vector elements */
-        void assemblage(sparseInserter *ins,const int NOD,mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le, mtl::dense_vector<double> &L);
+        void assemblage(const int NOD,gmm::dense_matrix <double> const& Ke, std::vector <double> const& Le,write_matrix &K,write_vector &L) const;
 		
         /**
 		convenient getter for N

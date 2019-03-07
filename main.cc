@@ -67,9 +67,11 @@ fem.t=0.;
 fem.infos();
 
 //once fem containers are ok, we build a linAlgebra object
-LinAlgebra linAlg = LinAlgebra(mySettings,fem.NOD,fem.node,fem.tet,fem.fac,15);
+LinAlgebra linAlg = LinAlgebra(mySettings,fem.NOD,fem.node,fem.tet,fem.fac,MaxNbThreads/2 -1 );
 
 fmm::init< CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem, tree, kernels);
+
+cout << "init scalfmm done.\n" << endl;
 
 double dt0= mySettings.dt;
 int nseq=0;
@@ -104,6 +106,7 @@ fmm::demag<0, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, Fm
 
 if(ORD2)
     { fmm::demag<1, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree,kernels); }
+
 
 fem.DW_z  = 0.0;
 fem.energy(mySettings); 

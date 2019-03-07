@@ -10,23 +10,30 @@ projection and matrix assembly is multithreaded for tetrahedron, monothread for 
 #include <mutex>
 #include <future>
 
-#include "boost/numeric/mtl/mtl.hpp"
-#include "boost/numeric/itl/itl.hpp"
+#include "gmm/gmm_precond_diagonal.h"
+#include "gmm/gmm_iter.h"
+#include "gmm/gmm_solver_bicgstab.h"
+#include "gmm/gmm_solver_gmres.h"
 
-#include <boost/numeric/mtl/matrix/inserter.hpp>
-#include <boost/numeric/mtl/operation/set_to_zero.hpp>
-#include <boost/numeric/mtl/interface/vpt.hpp>
 
 #include "fem.h"
 
 #ifndef linear_algebra_h
 #define linear_algebra_h
 
+
 /** convenient typedef for mtl4 */
-typedef typename mtl::Collection< mtl::compressed2D<double> >::value_type v_type;
+//typedef typename mtl::Collection< mtl::compressed2D<double> >::value_type v_type;
 
 /** convenient typedef for mtl4 inserter */
-typedef mtl::mat::inserter< mtl::compressed2D<double>,mtl::update_plus<v_type> > sparseInserter;
+//typedef mtl::mat::inserter< mtl::compressed2D<double>,mtl::update_plus<v_type> > sparseInserter;
+
+
+typedef gmm::wsvector <double>   write_vector;/**< gmm write vector build on std::map, log(n) for read and write access */
+typedef gmm::rsvector <double>   read_vector; /**< gmm read vector */
+
+typedef gmm::row_matrix	<write_vector>   write_matrix; /**< gmm write sparse matrix */
+typedef gmm::row_matrix	<read_vector>    read_matrix; /**< gmm read sparse matrix */
 
 /** \class LinAlgebra
 convenient class to grab altogether some part of the calculations involved using gmm solver at each timestep
@@ -40,6 +47,7 @@ public:
                       std::vector <Tetra::Tet> & myTet,
                       std::vector <Facette::Fac> & myFace,const int _Nb) : NOD(_NOD),refNode(&myNode),refFac(&myFace) , NbTH(_Nb)
 {
+    if(VERBOSE) std::cout << NbTH+1 << " threads for assembling matrix." << std::endl;
     settings = &s; 
     my_lock = new std::mutex;
     tab_TH.resize(NbTH+1);
@@ -66,7 +74,7 @@ public:
     
 	
 	/** pointer to diagonal preconditionner  */
-	itl::pc::diagonal < mtl::compressed2D<double> > *prc;
+	gmm::diagonal_precond <read_matrix> *prc;
 
     /** solver, uses bicgstab and gmres */
 	int  vsolve(long nt);
@@ -90,7 +98,7 @@ public:
     inline Pt::pt3D getNodePhysPos(int i) {return (*refNode)[i].p;} 
     
     /** pointer to sparse matrix inserter */
-	sparseInserter *ins;
+	//sparseInserter *ins;
     
 private:
     const int NOD;/**< total number of nodes, also an offset for filling sparseMatrix, initialized by constructor */
@@ -126,26 +134,20 @@ private:
 inline void base_projection(void)
 	{ std::for_each(refNode->begin(),refNode->end(),[](Node &n) { n.buildBase_epeq();}); }
 	
-	/** assemblage without mutexes to empty buffer */
-    void assemblage_monoThread(const int N, const int ind[],
-           mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le,
-           mtl::dense_vector<double> &L);
-    
-    
-    /**
+	/**
     perform the matrix and vector assembly with all the contributions of the tetrahedrons, use a mutex on inserter
     */
-    void assemblageTet(const int i, const int ind[],
-           mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le,
-           mtl::dense_vector<double> &L);
+    void assemblageTet(const int i_buf, const int i_tet,
+           gmm::dense_matrix <double> const& Ke, std::vector <double> const& Le,
+           write_matrix &K,write_vector &L);
     
     
     /**
     perform the matrix and vector assembly with all the contributions of the facettes, use a mutex on inserter
     */
-    void assemblageFac(const int ind[],
-           mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le,
-           mtl::dense_vector<double> &L);
+    void assemblageFac(const int i_fac,
+           gmm::dense_matrix <double> const& Ke, std::vector <double> const& Le,
+           write_matrix &K,write_vector &L);
     
 }; // fin class linAlgebra
 

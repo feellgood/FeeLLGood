@@ -4,7 +4,7 @@
 
 using namespace Facette;
 
-void Fac::integrales(std::vector<Facette::prm> const& params, mtl::dense_vector <double> &BE) const
+void Fac::integrales(std::vector<Facette::prm> const& params, std::vector <double> &BE) const
 {
 double Js = params[idxPrm].Js;
 double Ks = params[idxPrm].Ks;
@@ -47,12 +47,12 @@ tiny::mult<double, 3, N, NPI> (u_nod, a, u);
 }
 
 
-void Fac::projection(//mtl::dense2D <double> &P,
-           mtl::dense2D <double> const& A,  mtl::dense_vector <double> const& B,
-           mtl::dense2D <double> &Ap, mtl::dense_vector <double> &Bp) const
+void Fac::projection(gmm::dense_matrix <double> const& A,  std::vector <double> const& B,
+           gmm::dense_matrix <double> &Ap, std::vector <double> &Bp) const
 {
-thread_local mtl::dense2D <double> P(2*N,3*N);
-mtl::mat::set_to_zero(P);
+thread_local gmm::dense_matrix <double> P(2*N,3*N);
+thread_local gmm::dense_matrix <double> PA(2*N,3*N);
+//mtl::mat::set_to_zero(P);
 
 for (int i=0; i<N; i++){
     Node const& n = (*refNode)[ind[i]];
@@ -60,11 +60,16 @@ for (int i=0; i<N; i++){
     P(N+i,i)= n.eq.x();  P(N+i,N+i)= n.eq.y();  P(N+i,2*N+i)= n.eq.z();
     }
 
-Ap = (P*A)*trans(P);
-Bp = P*B;
+//Ap = (P*A)*trans(P);
+//Bp = P*B;
+gmm::mult(P,A,PA);
+gmm::mult(PA, gmm::transposed(P), Ap);
+
+gmm::mult(P,B,Bp);
+
 }
 
-void Fac::assemblage(sparseInserter *ins,const int NOD,mtl::dense2D <double> const& Ke, mtl::dense_vector <double> const& Le, mtl::dense_vector<double> &L)
+void Fac::assemblage(const int NOD,gmm::dense_matrix <double> const& Ke, std::vector <double> const& Le,write_matrix &K,write_vector &L) const
     {
     for (int i=0; i < N; i++)
         {
@@ -73,11 +78,11 @@ void Fac::assemblage(sparseInserter *ins,const int NOD,mtl::dense2D <double> con
         for (int j=0; j < N; j++)
             {
             int j_= ind[j];
-            (*ins)(NOD+i_,j_) << Ke(i,j);      (*ins)(NOD+i_, NOD+j_) << Ke(  i,N+j);
-            (*ins)(    i_,j_) << Ke(N+i,j);    (*ins)(    i_, NOD+j_) << Ke(N+i,N+j);
+            K(NOD+i_,j_) += Ke(i,j);      K(NOD+i_, NOD+j_) += Ke(  i,N+j);
+            K(    i_,j_) += Ke(N+i,j);    K(    i_, NOD+j_) += Ke(N+i,N+j);
             }
-        L(NOD+i_) += Le(i);//L[NOD+i_]+= Le[  i];
-        L(i_) += Le(N+i);//L[    i_]+= Le[N+i];
+        L[NOD+i_] += Le[i];//L[NOD+i_]+= Le[  i];
+        L[i_] += Le[N+i];//L[    i_]+= Le[N+i];
         
         }
     }

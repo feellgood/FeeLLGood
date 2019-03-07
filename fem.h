@@ -19,14 +19,14 @@ It does also contains the definition of many constants for the solver, and for s
 #include <time.h>
 #include <sys/times.h>
 #include <unistd.h>
-
+/*
 #include "boost/numeric/mtl/mtl.hpp"
 #include "boost/numeric/itl/itl.hpp"
 
 #include <boost/numeric/mtl/matrix/inserter.hpp>
 #include <boost/numeric/mtl/operation/set_to_zero.hpp>
 #include <boost/numeric/mtl/interface/vpt.hpp>
-
+*/
 
 #include "config.h"
 #include "feellgoodSettings.h"
