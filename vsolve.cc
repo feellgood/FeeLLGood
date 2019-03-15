@@ -15,14 +15,10 @@ void LinAlgebra::assemblageTet(const int i_buf, const int i_tet,
     if(my_lock->try_lock())
         {
         refTet[i_buf][i_tet].assemblage(NOD,Ke,Le,K,L);
-        
         my_lock->unlock();    
         return;
         }
-    else
-        {
-        buff_tet[i_buf].push(Tetra::Obj(i_tet,Ke,Le));    
-        }
+    else { buff_tet[i_buf].push(Tetra::Obj(i_tet,Ke,Le)); }
 }
 
 void LinAlgebra::assemblageFac(const int i_fac,
@@ -32,14 +28,11 @@ void LinAlgebra::assemblageFac(const int i_fac,
     if(my_lock->try_lock())
         {
         (*refFac)[i_fac].assemblage(NOD,Ke,Le,K,L);
-            
         my_lock->unlock();    
         return;
         }
     else
-        {
-        buff_fac.push(Facette::Obj(i_fac,Ke,Le));    
-        }
+        { buff_fac.push(Facette::Obj(i_fac,Ke,Le)); }
 }
 
     
@@ -80,6 +73,15 @@ for(int i=0;i<NbTH;i++)
                 tet.integrales(settings->second_order,settings->paramTetra,Hext,DW_vz,settings->theta,dt,settings->TAUR,K, L);     
                 tet.projection( K, L, Kp, Lp);
                 assemblageTet(i, i_tet, Kp, Lp, K_TH, L_TH );
+                /*
+                if(my_lock->try_lock())
+                    {
+                    refTet[i][i_tet].assemblage(NOD, Kp, Lp, K_TH, L_TH);
+                    my_lock->unlock();    
+                    return;
+                    }
+                else { buff_tet[i].push(Tetra::Obj(i_tet,Kp,Lp)); }
+                */
                 i_tet++;
                 });//end for_each
         }); //end thread

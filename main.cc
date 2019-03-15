@@ -6,22 +6,28 @@
 #include "linear_algebra.h"
 #include "fmm_demag.h"
 
-
 using namespace std;
+
+void prompt(void)
+{
+std::cout << "\n\t ┌────────────────────────────┐\n";
+std::cout <<   "\t │         FeeLLGood          │\n";
+std::cout <<   "\t │        version " << feellgood_version << "       │\n";
+std::cout <<   "\t │      cnrs Grenoble-INP     │\n";
+std::cout <<   "\t └────────────────────────────┘\n";
+std::cout << "\t process\t\t" << getpid() << std::endl;
+}
 
 int main(int argc,char* argv[])
 {
-Settings mySettings = Settings();
+Settings mySettings;
 Fem fem;
-
 FTic counter;
-
 OctreeClass *tree    = nullptr;
 KernelClass *kernels = nullptr; 
-
 vector<Seq> seq;
-
 string fileJson;
+
 if(argc<2)
 	{
 	fileJson = "settings.json";
@@ -33,12 +39,7 @@ else
 	cout << "using loaded settings from " << fileJson << " JSON file." <<endl;	
 	}
 
-std::cout << "\n\t ┌────────────────────────────┐\n";
-std::cout <<   "\t │         FeeLLGood          │\n";
-std::cout <<   "\t │        version " << feellgood_version << "       │\n";
-std::cout <<   "\t │      cnrs Grenoble-INP     │\n";
-std::cout <<   "\t └────────────────────────────┘\n";
-std::cout << "\t process\t\t" << getpid() << std::endl;
+prompt();
 	
 mySettings.read(fileJson,seq);
 
@@ -67,7 +68,7 @@ fem.t=0.;
 fem.infos();
 
 //once fem containers are ok, we build a linAlgebra object
-LinAlgebra linAlg = LinAlgebra(mySettings,fem.NOD,fem.node,fem.tet,fem.fac,MaxNbThreads/2 -1 );
+LinAlgebra linAlg = LinAlgebra(mySettings,fem.NOD,fem.node,fem.tet,fem.fac,MaxNbThreads/4 -1 );
 
 fmm::init< CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem, tree, kernels);
 
@@ -104,7 +105,7 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it)
 
 fmm::demag<0, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree,kernels);
 
-if(ORD2)
+if(mySettings.second_order)
     { fmm::demag<1, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree,kernels); }
 
 
@@ -150,7 +151,7 @@ while (t < mySettings.tf)
           
     fmm::demag<0, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree, kernels); // Hd(u)
 
-if(ORD2)
+if(mySettings.second_order)
     { fmm::demag<1, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree, kernels); } // Hd(v)
 
 
