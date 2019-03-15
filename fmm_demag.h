@@ -309,7 +309,7 @@ if(VERBOSE) { std::cout << "Done  " << "(@Algorithm = " << counter.elapsed() << 
 
 double norm = fem.fmm_normalizer;
 
-    tree->forEachLeaf([&](LeafClass* leaf){
+    tree->forEachLeaf([&fem,norm,corr](LeafClass* leaf){
         const FReal*const potentials = leaf->getTargets()->getPotentials();
         const int nbParticlesInLeaf  = leaf->getTargets()->getNbParticles();
         //const FVector<int>& indexes  = leaf->getTargets()->getIndexes(); // *ct*
