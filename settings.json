@@ -50,6 +50,7 @@
 
 "solver" :
     {
+    "second order" : true,
     "theta" : 0.5,
     "analytic corrections" : true,
     "max(iter)" : 500,

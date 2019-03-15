@@ -77,7 +77,7 @@ for(int i=0;i<NbTH;i++)
                 {
                 //mtl::mat::set_to_zero(K); mtl::mat::set_to_zero(Kp);
                 //mtl::vec::set_to_zero(L); mtl::vec::set_to_zero(Lp);
-                tet.integrales(settings->paramTetra,Hext,DW_vz,settings->theta,dt,settings->TAUR,K, L);     
+                tet.integrales(settings->second_order,settings->paramTetra,Hext,DW_vz,settings->theta,dt,settings->TAUR,K, L);     
                 tet.projection( K, L, Kp, Lp);
                 assemblageTet(i, i_tet, Kp, Lp, K_TH, L_TH );
                 i_tet++;

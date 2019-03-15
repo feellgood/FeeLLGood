@@ -40,7 +40,7 @@ for (int j=0; j<NPI; j++)
     }    
 }
 
-void Tet::integrales(std::vector<Tetra::prm> const& params,double Hext[DIM],double Vz,
+void Tet::integrales(bool sec_order,std::vector<Tetra::prm> const& params,double Hext[DIM],double Vz,
                      double theta,double dt,double tau_r,gmm::dense_matrix <double> &AE, std::vector <double> &BE) const
 {
 double alpha = params[idxPrm].alpha;
@@ -148,7 +148,7 @@ for (int npi=0; npi<NPI; npi++){
     double alfa=alpha; // seulement pour l'ordre 1 en temps
     double R=0.;
 
-if(ORD2)
+if(sec_order)
 {
 double r = 0.1;	     			
 double M = 2.*alpha*r/dt;  			
@@ -194,7 +194,7 @@ R = dt/tau_r*abs(log(dt/tau_r));
 	BE[N+i]  += -Uz*(u[2][npi]*dudz[0][npi]-u[0][npi]*dudz[2][npi]+beta*dudz[1][npi]) *ai_w;
 	BE[2*N+i]+= -Uz*(u[0][npi]*dudz[1][npi]-u[1][npi]*dudz[0][npi]+beta*dudz[2][npi]) *ai_w;
 
-if(ORD2)
+if(sec_order)
     {
     triple Ht; //derivee de Hr : y a t'il une erreur ? on dirait que ce devrait etre Kbis*uk{0|1|2}_v et pas Kbis*ok0_v
     Ht[0]= Hvx[npi] + (Kbis* uk0_v - K3bis* uk0_v*(1-3*uk0_u*uk0_u) )*uk00;   

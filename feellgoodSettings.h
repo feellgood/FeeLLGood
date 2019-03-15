@@ -46,7 +46,7 @@ class Settings{
         REFRESH_PRC = 20;
         recentering = true;
           
-        
+        second_order = true;
         
         s_table.add_variable("x",x);
         s_table.add_variable("y",y);
@@ -93,6 +93,9 @@ class Settings{
     
     
 	std:: string restoreFileName;/**< input file name for continuing a calculation (sol.in) */
+	
+	/** second order corrections */
+	bool second_order;
 	
 	/** for time integration \f$ \theta \f$ scheme  */
 	double theta;
