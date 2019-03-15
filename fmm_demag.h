@@ -276,7 +276,7 @@ fflush(NULL);
 
     { // reset potentials and forces - physicalValues[idxPart] = Q
 
-    tree->forEachLeaf([&](LeafClass* leaf)
+    tree->forEachLeaf([NOD,SRC,&srcDen](LeafClass* leaf)
         {
         const int nbParticlesInLeaf = leaf->getSrc()->getNbParticles();
         const FVector<long long>& indexes = leaf->getSrc()->getIndexes(); // pas int mais long long  *ct*
@@ -291,14 +291,14 @@ fflush(NULL);
             }
         });
 
-    tree->forEachLeaf([&](LeafClass* leaf){
+    tree->forEachLeaf([](LeafClass* leaf){
 	FReal*const potentials = leaf->getTargets()->getPotentials();
 	const int nbParticlesInLeaf = leaf->getTargets()->getNbParticles();
 	memset(potentials, 0, nbParticlesInLeaf*sizeof(FReal));
         });
 
 
-    tree->forEachCell([&](CellClass* cell){ cell->resetToInitialState(); });
+    tree->forEachCell([](CellClass* cell){ cell->resetToInitialState(); });
 
     }// end reset
 
