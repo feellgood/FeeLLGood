@@ -18,6 +18,14 @@ std::cout <<   "\t └───────────────────�
 std::cout << "\t process\t\t" << getpid() << std::endl;
 }
 
+void calc_demag(Fem &fem,Settings &mySettings,OctreeClass *tree,KernelClass *kernels)
+{
+fmm::demag<0, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree, kernels); // Hd(u)
+
+if(mySettings.second_order)
+    { fmm::demag<1, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree, kernels); } // Hd(v)
+}
+
 int main(int argc,char* argv[])
 {
 Settings mySettings;
@@ -103,11 +111,14 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it)
     ofstream fout(str);
     if (!fout) { cerr << "cannot open file "<< str << endl; SYSTEM_ERROR; }
 
+    calc_demag(fem,mySettings, tree,kernels);
+   
+    /*
 fmm::demag<0, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree,kernels);
 
 if(mySettings.second_order)
     { fmm::demag<1, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree,kernels); }
-
+*/
 
 fem.DW_z  = 0.0;
 fem.energy(mySettings); 
@@ -148,13 +159,9 @@ while (t < mySettings.tf)
     if (dumax < mySettings.DUMIN) break; 
             
     if (dumax > mySettings.DUMAX) { flag++; dt*= 0.5; mySettings.dt=dt; continue;}
-          
-    fmm::demag<0, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree, kernels); // Hd(u)
-
-if(mySettings.second_order)
-    { fmm::demag<1, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree, kernels); } // Hd(v)
-
-
+       
+    calc_demag(fem,mySettings, tree, kernels);
+       
     fem.energy(mySettings);
     if (fem.evol > 0.0) { cout << "Warning energy increases! : " << fem.evol << endl; }
 
