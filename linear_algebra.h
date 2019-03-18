@@ -15,18 +15,10 @@ projection and matrix assembly is multithreaded for tetrahedron, monothread for 
 #include "gmm/gmm_solver_bicgstab.h"
 #include "gmm/gmm_solver_gmres.h"
 
-
 #include "fem.h"
 
 #ifndef linear_algebra_h
 #define linear_algebra_h
-
-
-/** convenient typedef for mtl4 */
-//typedef typename mtl::Collection< mtl::compressed2D<double> >::value_type v_type;
-
-/** convenient typedef for mtl4 inserter */
-//typedef mtl::mat::inserter< mtl::compressed2D<double>,mtl::update_plus<v_type> > sparseInserter;
 
 
 typedef gmm::wsvector <double>   write_vector;/**< gmm write vector build on std::map, log(n) for read and write access */
@@ -45,10 +37,8 @@ public:
     inline LinAlgebra(Settings & s,const int _NOD,
                       std::vector<Node> & myNode,
                       std::vector <Tetra::Tet> & myTet,
-                      std::vector <Facette::Fac> & myFace,const int _Nb) : NOD(_NOD),refNode(&myNode),refFac(&myFace) , NbTH(_Nb)
-{
-    if(VERBOSE) std::cout << NbTH+1 << " threads for assembling matrix." << std::endl;
-    settings = &s; 
+                      std::vector <Facette::Fac> & myFace,const int _Nb) : settings(&s), NOD(_NOD),refNode(&myNode),refFac(&myFace) , NbTH(_Nb)
+    {
     my_lock = new std::mutex;
     tab_TH.resize(NbTH+1);
     buff_tet.resize(NbTH);
@@ -69,10 +59,9 @@ public:
     refTet[NbTH-1].resize(last_block_size);
     std::copy( it_begin, myTet.end(), refTet[NbTH-1].begin() );
     
-    std::cout<<"splitted copy of vector(tet) done."<<std::endl;
-}
+    if(VERBOSE) { std::cout << NbTH+1 << " threads for assembling matrix." << std::endl; }
+    }
     
-	
 	/** pointer to diagonal preconditionner  */
 	gmm::diagonal_precond <read_matrix> *prc;
 
@@ -97,8 +86,6 @@ public:
     /** getter node physical position */
     inline Pt::pt3D getNodePhysPos(int i) {return (*refNode)[i].p;} 
     
-    /** pointer to sparse matrix inserter */
-	//sparseInserter *ins;
     
 private:
     const int NOD;/**< total number of nodes, also an offset for filling sparseMatrix, initialized by constructor */
@@ -107,15 +94,13 @@ private:
 	
 	std::vector < std::vector <Tetra::Tet> > refTet; /**< splitted copy of the tetrahedrons for multithreading */
 	
-	
-	
 	double Hext[DIM];/**< applied field */
     double dt;/**< timestep */
     double DW_vz;/**< speed of the domain wall */
 	Settings *settings;/**< pointer to the settings */
     double v_max;/**< maximum speed */
 	
-	/** mutex to avoid improper access to inserter */
+	/** mutex to avoid improper access to sparse matrix */
     std::mutex *my_lock;
     
     /** number of threads, initialized by constructor */ 
@@ -134,21 +119,6 @@ private:
 inline void base_projection(void)
 	{ std::for_each(refNode->begin(),refNode->end(),[](Node &n) { n.buildBase_epeq();}); }
 	
-	/**
-    perform the matrix and vector assembly with all the contributions of the tetrahedrons, use a mutex on inserter
-    */
-    void assemblageTet(const int i_buf, const int i_tet,
-           gmm::dense_matrix <double> const& Ke, std::vector <double> const& Le,
-           write_matrix &K,write_vector &L);
-    
-    
-    /**
-    perform the matrix and vector assembly with all the contributions of the facettes, use a mutex on inserter
-    */
-    void assemblageFac(const int i_fac,
-           gmm::dense_matrix <double> const& Ke, std::vector <double> const& Le,
-           write_matrix &K,write_vector &L);
-    
 }; // fin class linAlgebra
 
 #endif
