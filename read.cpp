@@ -83,7 +83,7 @@ while(msh >> symb){
             break;
 	    }
         case 4:{
-            Tetra::Tet te;
+            Tetra::Tet te(NOD);
             te.reg = reg; 
 			te.idxPrm = mySets.findTetraRegionIdx(reg);
             msh >> te.ind[0] >> te.ind[1] >> te.ind[2] >> te.ind[3];

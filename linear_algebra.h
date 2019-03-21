@@ -37,11 +37,10 @@ public:
     inline LinAlgebra(Settings & s,const int _NOD,
                       std::vector<Node> & myNode,
                       std::vector <Tetra::Tet> & myTet,
-                      std::vector <Facette::Fac> & myFace,const int _Nb) : settings(&s), NOD(_NOD),refNode(&myNode),refFac(&myFace) , NbTH(_Nb)
+                      std::vector <Facette::Fac> & myFace,const int _Nb) : settings(s), NOD(_NOD),refNode(&myNode),refFac(&myFace) , NbTH(_Nb)
     {
     my_lock = new std::mutex;
     tab_TH.resize(NbTH+1);
-    buff_tet.resize(NbTH);
     refTet.resize(NbTH);
     const unsigned long block_size = std::distance(myTet.begin(),myTet.end())/NbTH;
 
@@ -51,12 +50,12 @@ public:
         {
         std::vector<Tetra::Tet>::iterator it_end = it_begin;
         std::advance(it_end,block_size);
-        refTet[i].resize(block_size);
+        refTet[i].resize(block_size,Tetra::Tet(_NOD));
         std::copy( it_begin, it_end, refTet[i].begin() );
         it_begin = it_end;
         }
     const unsigned long last_block_size = std::distance(it_begin,myTet.end());
-    refTet[NbTH-1].resize(last_block_size);
+    refTet[NbTH-1].resize(last_block_size,Tetra::Tet(_NOD));
     std::copy( it_begin, myTet.end(), refTet[NbTH-1].begin() );
     
     if(VERBOSE) { std::cout << NbTH+1 << " threads for assembling matrix." << std::endl; }
@@ -97,7 +96,7 @@ private:
 	double Hext[DIM];/**< applied field */
     double dt;/**< timestep */
     double DW_vz;/**< speed of the domain wall */
-	Settings *settings;/**< pointer to the settings */
+	Settings settings;/**< settings */
     double v_max;/**< maximum speed */
 	
 	/** mutex to avoid improper access to sparse matrix */
@@ -105,9 +104,6 @@ private:
     
     /** number of threads, initialized by constructor */ 
     const int NbTH;
-    
-    /** buffer when try_lock failed on assemblage */
-    std::vector<std::queue<Tetra::Obj> > buff_tet;
     
     /** buffer fr facette::Obj when try_lock fail */
     std::queue<Facette::Obj> buff_fac;

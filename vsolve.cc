@@ -26,24 +26,20 @@ for(int i=0;i<NbTH;i++)
     tab_TH[i] = std::thread( [this,&K_TH,&L_TH,i]() 
         {
             thread_local gmm::dense_matrix <double> K(3*Tetra::N,3*Tetra::N);
-            thread_local gmm::dense_matrix <double> Kp(2*Tetra::N,2*Tetra::N);
             thread_local std::vector <double> L(3*Tetra::N);
-            thread_local std::vector <double>  Lp(2*Tetra::N);
-            int i_tet =0;
-            std::for_each(refTet[i].begin(),refTet[i].end(), [this,&K_TH,&L_TH,i,&i_tet](Tetra::Tet const& tet)
+            
+            std::for_each(refTet[i].begin(),refTet[i].end(), [this,&K_TH,&L_TH](Tetra::Tet & tet)
                 {
-                tet.integrales(settings->second_order,settings->paramTetra,Hext,DW_vz,settings->theta,dt,settings->TAUR,K, L);     
-                tet.projection( K, L, Kp, Lp);
-                
+                tet.integrales(settings.second_order,settings.paramTetra,Hext,DW_vz,settings.theta,dt,settings.TAUR,K, L);     
+                tet.projection( K, L);
                 if(my_lock->try_lock())
                     {
-                    tet.assemblage(NOD, Kp, Lp, K_TH, L_TH);
+                    tet.assemblage(K_TH, L_TH);
+                    tet.treated = true;
                     my_lock->unlock();    
                     return;
                     }
-                else { buff_tet[i].push(Tetra::Obj(i_tet,Kp,Lp)); }
-                
-                i_tet++;
+                else { tet.treated = false;}
                 });//end for_each
         }); //end thread
     }
@@ -58,7 +54,7 @@ tab_TH[NbTH] = std::thread( [this,&K_TH,&L_TH]()
     std::for_each(refFac->begin(),refFac->end(),
     [this,&K_TH,&L_TH,&i_fac](Facette::Fac const& fac)
         {
-        fac.integrales(settings->paramFacette, Ls);     
+        fac.integrales(settings.paramFacette, Ls);     
         fac.projection( Ks, Ls, Ksp, Lsp);
         
         if(my_lock->try_lock())
@@ -78,14 +74,7 @@ tab_TH[NbTH] = std::thread( [this,&K_TH,&L_TH]()
 for(int i=0;i<(NbTH+1);i++) {tab_TH[i].join();}
 
 for(int i=0;i<(NbTH);i++)
-{
-    while (!buff_tet[i].empty())
-    {
-        Tetra::Obj const& x = buff_tet[i].front();
-        refTet[i][x.idx].assemblage(NOD,x.Ke,x.Le,K_TH,L_TH);
-        buff_tet[i].pop();
-    }
-}
+    { std::for_each(refTet[i].begin(),refTet[i].end(),[&K_TH,&L_TH](Tetra::Tet const& tet){if(!tet.treated) tet.assemblage(K_TH,L_TH);}); }
 
 while (!buff_fac.empty())
     {
@@ -104,8 +93,8 @@ write_vector Xw(2*NOD);
 
 gmm::iteration bicg_iter(1e-6);
 gmm::iteration gmr_iter(1e-6);
-bicg_iter.set_maxiter(settings->MAXITER);
-gmr_iter.set_maxiter(settings->MAXITER);
+bicg_iter.set_maxiter(settings.MAXITER);
+gmr_iter.set_maxiter(settings.MAXITER);
 bicg_iter.set_noisy(false);//VERBOSE
 gmr_iter.set_noisy(false);//VERBOSE
 
@@ -118,7 +107,7 @@ if (!nt)
 	counter.tac();    
 	if(VERBOSE) { std::cout << "elapsed time = " << counter.elapsed() << "s" << std::endl; }
     }
-else if (!(nt % (settings->REFRESH_PRC)))
+else if (!(nt % (settings.REFRESH_PRC)))
     {
     delete prc;
     if(VERBOSE) { std::cout << "computing prc.";std::fflush(NULL); }
@@ -152,7 +141,7 @@ if (!(bicg_iter.converged() ))
     }
 else 
     {counter.tac();
-    if(VERBOSE) { std::cout << "v-solve converged in " << bicg_iter.get_iteration() << " (bicg,prc-" << (nt % (settings->REFRESH_PRC)) << ") :duration: " 
+    if(VERBOSE) { std::cout << "v-solve converged in " << bicg_iter.get_iteration() << " (bicg,prc-" << (nt % (settings.REFRESH_PRC)) << ") :duration: " 
 << counter.elapsed() << " s" << std::endl; }
     }
 

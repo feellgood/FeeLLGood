@@ -111,15 +111,15 @@ struct prm
     {
     public:
         /** constructor */
-        inline Obj(const int _idx,gmm::dense_matrix <double> const& K,std::vector <double> const& L)
+        inline Obj(const int _idx)//,gmm::dense_matrix <double> const& K,std::vector <double> const& L)
         {
         idx = _idx;  
-        Ke=K;Le=L;
+        //Ke=K;Le=L;
         }
         
         int idx;/**< index of the corresponding tetrahedron */
-        gmm::dense_matrix <double> Ke;/**< small matrix resulting from projection */
-        std::vector <double> Le;/**< small vector resulting from projection */
+        //gmm::dense_matrix <double> Ke;/**< small matrix resulting from projection */
+        //std::vector <double> Le;/**< small vector resulting from projection */
     };
     
     
@@ -149,7 +149,8 @@ indices convention is<br>
 */
 class Tet{
     public:
-		inline Tet() {reg = 0;idxPrm=-1;} /**< default constructor */
+		inline Tet(int _NOD): NOD(_NOD), Kp(2*N,2*N), Lp(2*N) 
+        { reg = 0; idxPrm=-1; treated = false;} /**< default constructor */
 		int reg;/**< .msh region number */
 		int idxPrm;/**< index of the material parameters of the tetrahedron */		
 		double vol;/**< volume of the tetrahedron */
@@ -158,7 +159,9 @@ class Tet{
 		double dadx[N][NPI];/**< variations of hat function along x directions */
 		double dady[N][NPI];/**< variations of hat function along y directions */
 		double dadz[N][NPI];/**< variations of hat function along z directions */
-	
+        
+        bool treated;
+        
 		/** initializes weight and dad(x|y|z) */
 		void init(double epsilon);
 		
@@ -175,13 +178,19 @@ class Tet{
         */
         void projection(gmm::dense_matrix <double> const& A,  std::vector <double> const& B,gmm::dense_matrix <double> &Ap, std::vector <double> &Bp)  const;
         
+        /**
+        computes projection of a tetrahedron using inner matrix in tetra object
+        */
+        void projection(gmm::dense_matrix <double> const& A,  std::vector <double> const& B);
+        
         
         /** matrix and vector assembly */
-        void assemblage(const int NOD,gmm::dense_matrix <double> const& Ke, std::vector <double> const& Le,write_matrix &K,write_vector &L) const;
+        void assemblage(gmm::dense_matrix <double> const& Ke, std::vector <double> const& Le,write_matrix &K,write_vector &L) const;
         
-        /**
-		convenient getter for N
-		*/
+        /** matrix and vector assembly using inner matrix in tetra */
+        void assemblage(write_matrix &K,write_vector &L) const;
+        
+        /** getter for N */
 		inline int getN(void) {return N;}
 		
 		/**
@@ -194,16 +203,18 @@ class Tet{
         */
         double Jacobian(double J[DIM][DIM]);
         
-		/**
-		computes volume		
-		*/
+		/** computes volume		*/
 		void calc_vol(void);
     
         /** pointer to the nodes */
         inline void setRefNode(std::vector<Node>  *_p_node) {refNode = _p_node;}
         
     private:
+        int NOD;/**< total number of nodes, also an offset for filling sparseMatrix */
         std::vector<Node>  *refNode;/**< direct access to the Nodes */
+        
+        gmm::dense_matrix <double> Kp;//Kp(2*N,2*N);
+        std::vector <double>  Lp;//Lp(2*N);
 };//end class Tetra
 }
 

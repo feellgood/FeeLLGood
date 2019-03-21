@@ -216,7 +216,7 @@ std::for_each(fem.tet.begin(),fem.tet.end(),
     });//end for_each on tet
 
 
-/************************ FACES **************************/
+//      ************************ FACES **************************
 const bool pot_corr = settings.analytic_corr; 
 
 std::for_each(fem.fac.begin(),fem.fac.end(),
@@ -236,7 +236,7 @@ std::for_each(fem.fac.begin(),fem.fac.end(),
 
     tiny::mult<double, 3, Facette::N, Facette::NPI> (u_nod, Facette::a, u);
 
-        /** calc sigma, fill distrib.alpha **/
+        // calc sigma, fill distrib.alpha
     for (int j=0; j<Facette::NPI; j++, nsrc++)
         {
         double un = u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z();
@@ -244,7 +244,7 @@ std::for_each(fem.fac.begin(),fem.fac.end(),
         }
 
     if (pot_corr)
-        {/** calc coord gauss **/
+        {// calc coord gauss
         double nod[3][Facette::N], gauss[3][Facette::NPI];
         for (int i=0; i<Facette::N; i++)
             {
@@ -255,7 +255,7 @@ std::for_each(fem.fac.begin(),fem.fac.end(),
             }
         tiny::mult<double, 3, Facette::N, Facette::NPI> (nod, Facette::a, gauss);
 
-      /** calc corr node by node **/
+      // calc corr node by node
       for (int i=0; i<Facette::N; i++)
         {
         int i_ = fac.ind[i];

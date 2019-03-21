@@ -50,24 +50,17 @@ else
 prompt();
 	
 mySettings.read(fileJson,seq);
-
 mySettings.infos(seq);
-
 fem.readMesh(mySettings);
-
 counter.tic();
-
 fem.femutil(mySettings);
-
 fem.chapeaux(mySettings.EPSILON);
 
 if (mySettings.restore)
-    {
-    fem.readSol(mySettings.getScale(), mySettings.restoreFileName);
-    }
+    { fem.readSol(mySettings.getScale(), mySettings.restoreFileName); }
 else
     {
-    std::cout<< "initial magnetization distribution :\nMx =" << mySettings.sMx << "\nMy =" << mySettings.sMy << "\nMz =" << mySettings.sMz <<endl; 
+    std::cout<< "initial magnetization(x,y,z,t=0) :\nMx =" << mySettings.sMx << "\nMy =" << mySettings.sMy << "\nMz =" << mySettings.sMz <<endl; 
     fem.init_distrib(mySettings);
     }
 
@@ -75,8 +68,8 @@ fem.direction(Pt::IDX_Z);/* determination de la direction de propagation de la p
 fem.t=0.;
 fem.infos();
 
-//once fem containers are ok, we build a linAlgebra object
-LinAlgebra linAlg = LinAlgebra(mySettings,fem.NOD,fem.node,fem.tet,fem.fac,MaxNbThreads/4 -1 );
+//once fem containers are ok, linAlgebra object is built
+LinAlgebra linAlg(mySettings,fem.NOD,fem.node,fem.tet,fem.fac,MaxNbThreads -1 );
 
 fmm::init< CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem, tree, kernels);
 
@@ -103,93 +96,88 @@ for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it)
         fem.Hext[1]=nu0*Bext*a[1];
         fem.Hext[2]=nu0*Bext*a[2]; 
 
-	cout << "Bext : " << Bext*a[0] << "\t" << Bext*a[1] << "\t" << Bext*a[2] << endl;
+        cout << "Bext : " << Bext*a[0] << "\t" << Bext*a[1] << "\t" << Bext*a[2] << endl;
 
-	string baseName = mySettings.r_path_output_dir + mySettings.getSimName();
-    string str = baseName +"_"+ to_string(fem.SEQ) + "_B" + to_string(fem.Bext) + ".evol";
+        string baseName = mySettings.r_path_output_dir + mySettings.getSimName();
+        string str = baseName +"_"+ to_string(fem.SEQ) + "_B" + to_string(fem.Bext) + ".evol";
 
-    ofstream fout(str);
-    if (!fout) { cerr << "cannot open file "<< str << endl; SYSTEM_ERROR; }
+        ofstream fout(str);
+        if (!fout) { cerr << "cannot open file "<< str << endl; SYSTEM_ERROR; }
 
-    calc_demag(fem,mySettings, tree,kernels);
+        calc_demag(fem,mySettings, tree,kernels);
    
-    /*
-fmm::demag<0, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree,kernels);
+        fem.DW_z  = 0.0;
+        fem.energy(mySettings); 
+        fem.evolution();
 
-if(mySettings.second_order)
-    { fmm::demag<1, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree,kernels); }
-*/
+        int flag  = 0;
+        double dt = dt0;
+        double t= fem.t;
+        fem.vmax  = 0.0;
+        fem.DW_vz = fem.DW_vz0 = 0.0;
+        fem.DW_z  = 0.0;
 
-fem.DW_z  = 0.0;
-fem.energy(mySettings); 
-fem.evolution();
+        int nt = 0;
+        fem.saver(mySettings,fout,nt);
 
-int flag  = 0;
-double dt = dt0;
-double t= fem.t;
-fem.vmax  = 0.0;
-fem.DW_vz = fem.DW_vz0 = 0.0;
-fem.DW_z  = 0.0;
-
-int nt = 0;
-fem.saver(mySettings,fout,nt);
-
-while (t < mySettings.tf)
-    {
-    cout << "\n ------------------------------\n";
-    if (flag) cout << "    t  : same (" << flag << ")" << endl;
-    else cout << "nt = " << nt << ", t = " << t << endl; // *ct*
+        while (t < mySettings.tf)
+            {
+            cout << "\n ------------------------------\n";
+            if (flag) cout << "    t  : same (" << flag << ")" << endl;
+            else cout << "nt = " << nt << ", t = " << t << endl; // *ct*
     
-	cout << "dt = " << dt << endl << endl;
-    if (dt < mySettings.DTMIN) { fem.reset();break; }
+            cout << "dt = " << dt << endl << endl;
+            if (dt < mySettings.DTMIN) { fem.reset();break; }
 
-        /* changement de referentiel */
-    fem.DW_vz += fem.DW_dir*fem.moy<V>(Pt::IDX_Z)*fem.l.z()/2.;
+            /* changement de referentiel */
+            fem.DW_vz += fem.DW_dir*fem.moy<V>(Pt::IDX_Z)*fem.l.z()/2.;
     
-    linAlg.set_Hext(fem.Hext[0],fem.Hext[1],fem.Hext[2]);
-    linAlg.set_DW_vz(fem.DW_vz);
-    linAlg.set_dt(dt);
-    int err = linAlg.vsolve(nt);  
-    fem.vmax = linAlg.get_v_max();
+            linAlg.set_Hext(fem.Hext[0],fem.Hext[1],fem.Hext[2]);
+            linAlg.set_DW_vz(fem.DW_vz);
+            linAlg.set_dt(dt);
+            int err = linAlg.vsolve(nt);  
+            fem.vmax = linAlg.get_v_max();
     
-    if (err) { cout << "err : " << err << endl;flag++; dt*= 0.5; mySettings.dt=dt; continue;}
+            if (err)
+                { cout << "err : " << err << endl;flag++; dt*= 0.5; mySettings.dt=dt; continue;}
 
-    double dumax = dt*fem.vmax;
-    cout << "\t dumax = " << dumax << ",  vmax = "<< fem.vmax << endl;
-    if (dumax < mySettings.DUMIN) break; 
+            double dumax = dt*fem.vmax;
+            cout << "\t dumax = " << dumax << ",  vmax = "<< fem.vmax << endl;
+            if (dumax < mySettings.DUMIN) break; 
             
-    if (dumax > mySettings.DUMAX) { flag++; dt*= 0.5; mySettings.dt=dt; continue;}
+            if (dumax > mySettings.DUMAX)
+                { flag++; dt*= 0.5; mySettings.dt=dt; continue;}
        
-    calc_demag(fem,mySettings, tree, kernels);
+            calc_demag(fem,mySettings, tree, kernels);
        
-    fem.energy(mySettings);
-    if (fem.evol > 0.0) { cout << "Warning energy increases! : " << fem.evol << endl; }
+            fem.energy(mySettings);
+            if (fem.evol > 0.0)
+                { cout << "Warning energy increases! : " << fem.evol << endl; }
 
-    fem.DW_vz0 = fem.DW_vz;/* mise a jour de la vitesse du dernier referentiel et deplacement de paroi */ 
-    fem.DW_z  += fem.DW_vz*dt;
-    fem.evolution(); t+=dt; fem.t=t; nt++; flag=0;
-    double mz = fem.moy<U>(Pt::IDX_Z);	    
-	if(mySettings.recentering) { fem.recentrage( 0.1,Pt::IDX_Z,mz); }
-    fem.saver(mySettings,fout,nt);
-    dt = min(1.1*dt, mySettings.DTMAX); 
-    mySettings.dt=dt;
-    }//endwhile
+            fem.DW_vz0 = fem.DW_vz;/* mise a jour de la vitesse du dernier referentiel et deplacement de paroi */ 
+            fem.DW_z  += fem.DW_vz*dt;
+            fem.evolution(); t+=dt; fem.t=t; nt++; flag=0;
+            double mz = fem.moy<U>(Pt::IDX_Z);	    
+            if(mySettings.recentering)
+                { fem.recentrage( 0.1,Pt::IDX_Z,mz); }
+            fem.saver(mySettings,fout,nt);
+            dt = min(1.1*dt, mySettings.DTMAX); 
+            mySettings.dt=dt;
+            }//endwhile
 
-if (dt < mySettings.DTMIN) cout << " aborted:  dt < DTMIN";
+        if (dt < mySettings.DTMIN)
+            { cout << " aborted:  dt < DTMIN"; }
         
-fem.saver(mySettings,fout,nt);
+        fem.saver(mySettings,fout,nt);
         
-cout << "\n  * iterations: " << nt;
-counter.tac();
-cout << "\n  * total computing time: " << counter.elapsed() << " s\n" << endl;
-fout.close();
-
-//      initialisation du temps pour l'iteration en champ suivante
-fem.t=0.;
-mySettings.dt=dt0;
-}//endfor Bext
-
-}//endfor it
+        counter.tac();
+        cout << "\n  * iterations: " << nt << "\n  * total computing time: " << counter.elapsed() << " s\n" << endl;
+        fout.close();
+    //      initialisation du temps pour l'iteration en champ suivante
+        fem.t=0.;
+        mySettings.dt=dt0;
+        }//endfor Bext
+    }//endfor it
 
 cout << "--- the end ---" << endl;
 delete tree;
