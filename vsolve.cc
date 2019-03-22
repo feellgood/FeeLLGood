@@ -47,25 +47,23 @@ for(int i=0;i<NbTH;i++)
 tab_TH[NbTH] = std::thread( [this,&K_TH,&L_TH]()
     {
     thread_local gmm::dense_matrix <double> Ks(3*Facette::N,3*Facette::N);
-    thread_local gmm::dense_matrix <double> Ksp(2*Facette::N,2*Facette::N);
+    //thread_local gmm::dense_matrix <double> Ksp(2*Facette::N,2*Facette::N);
     thread_local std::vector <double> Ls(3*Facette::N);
-    thread_local std::vector <double> Lsp(2*Facette::N);
-    int i_fac=0;
-    std::for_each(refFac->begin(),refFac->end(),
-    [this,&K_TH,&L_TH,&i_fac](Facette::Fac const& fac)
+    //thread_local std::vector <double> Lsp(2*Facette::N);
+    
+    std::for_each(refFac->begin(),refFac->end(), [this,&K_TH,&L_TH](Facette::Fac & fac)
         {
         fac.integrales(settings.paramFacette, Ls);     
-        fac.projection( Ks, Ls, Ksp, Lsp);
+        fac.projection( Ks, Ls);
         
         if(my_lock->try_lock())
             {
-            fac.assemblage(NOD,Ksp,Lsp,K_TH,L_TH);
+            fac.assemblage(K_TH,L_TH);
+            fac.treated =true;
             my_lock->unlock();    
             return;
             }
-        else { buff_fac.push(Facette::Obj(i_fac,Ksp,Lsp)); }
-        i_fac++;
-            
+        else { fac.treated = false; }
         }
         );
     }
@@ -76,13 +74,16 @@ for(int i=0;i<(NbTH+1);i++) {tab_TH[i].join();}
 for(int i=0;i<(NbTH);i++)
     { std::for_each(refTet[i].begin(),refTet[i].end(),[&K_TH,&L_TH](Tetra::Tet const& tet){if(!tet.treated) tet.assemblage(K_TH,L_TH);}); }
 
+std::for_each( (*refFac).begin(), (*refFac).end(), [&K_TH,&L_TH](Facette::Fac const& fac){if(!fac.treated) fac.assemblage(K_TH,L_TH); } );    
+
+/*
 while (!buff_fac.empty())
     {
         Facette::Obj const& x = buff_fac.front();
         (*refFac)[x.idx].assemblage(NOD,x.Ke,x.Le,K_TH,L_TH);
         buff_fac.pop();
     }
-
+*/
 counter.tac();
 
 if(VERBOSE) { std::cout << "Matrix assembly done, elapsed time = " << counter.elapsed() << "s" << std::endl; }

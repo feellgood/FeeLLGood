@@ -72,7 +72,7 @@ while(msh >> symb){
         msh >> trash;
     switch (TYP){
         case 2:{
-            Facette::Fac f;
+            Facette::Fac f(NOD);
             f.reg = reg;
 			f.idxPrm = mySets.findFacetteRegionIdx(reg);
             msh >> f.ind[0] >> f.ind[1] >> f.ind[2];

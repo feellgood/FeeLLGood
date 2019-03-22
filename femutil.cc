@@ -69,7 +69,7 @@ std::for_each(tet.begin(),tet.end(),
 	});//fin for_each
 
 std::for_each(fac.begin(),fac.end(),
-[this,&settings,&sf](Facette::Fac &fa)
+[this,&settings,&sf,nb_nod](Facette::Fac &fa)
     {
     fa.Ms = 0.;
     double Js = settings.paramFacette[fa.idxPrm].Js;
@@ -82,7 +82,7 @@ std::for_each(fac.begin(),fac.end(),
             {
             for (int nrot=0; nrot<3; nrot++)
                 {
-                Facette::Fac fc;
+                Facette::Fac fc(nb_nod);
                 fc.ind[(0+nrot)%3]=i0; fc.ind[(1+nrot)%3]=i1; fc.ind[(2+nrot)%3]=i2;
                 it=sf.find(fc);
                 if (it!=sf.end()) break;

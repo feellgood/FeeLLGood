@@ -77,15 +77,15 @@ class Obj
     {
     public:
         /** constructor */
-        inline Obj(const int _idx,gmm::dense_matrix <double> const& K,std::vector <double> const& L)
+        inline Obj(const int _idx)//,gmm::dense_matrix <double> const& K,std::vector <double> const& L)
         {
         idx = _idx;   
-        Ke=K;Le=L;
+        //Ke=K;Le=L;
         }
         
         int idx;/**< index of the corresponding facette */
-        gmm::dense_matrix <double> Ke;/**< small matrix resulting from projection */
-        std::vector <double> Le;/**< small vector resulting from projection */
+        //gmm::dense_matrix <double> Ke;/**< small matrix resulting from projection */
+        //std::vector <double> Le;/**< small vector resulting from projection */
     };
     
     
@@ -94,8 +94,9 @@ Face is a class containing the index references to nodes, it has a triangular sh
 */
 class Fac{
 	public:
-		inline Fac() {reg = 0;} /**< default constructor */
-		
+		inline Fac(int _NOD):NOD(_NOD),Ksp(2*N,2*N), Lsp(2*N)  /**< constructor */
+            {reg = 0; treated = false;}
+        
 		/** constructor from a region number and three indices */		
 		inline Fac(int r,int i0,int i1,int i2) {reg = r; ind[0]=i0;ind[1]=i1;ind[2]=i2;}
 		
@@ -110,6 +111,8 @@ class Fac{
 		int ind[N];/**< indices table of the nodes */
 		double weight[NPI];/**< weights table */
 		
+		bool treated;
+		
         /** initialize weight  */
         inline void init(void)
             {for (int j=0; j<NPI; j++) {weight[j] = 2.*surf*pds[j]; }}// detJ = 2*surf;
@@ -117,14 +120,18 @@ class Fac{
 		/** computes the integral contribution of the triangular face */
 		void integrales(std::vector<Facette::prm> const& params, std::vector <double> &BE) const;
 		
-        /**
-        compute projection of a face
-        */
+        /** compute projection of a face */
         void projection(gmm::dense_matrix <double> const& A, std::vector <double> const& B,gmm::dense_matrix <double> &Ap, std::vector <double> &Bp) const;
+        
+        /** compute projection of a face from inner object matrix */
+        void projection(gmm::dense_matrix <double> const& A, std::vector <double> const& B);
         
         /** assemblage of the matrix and vector elements */
         void assemblage(const int NOD,gmm::dense_matrix <double> const& Ke, std::vector <double> const& Le,write_matrix &K,write_vector &L) const;
 		
+        /** assemblage of the matrix and vector elements from inner matrix in facette object */
+        void assemblage(write_matrix &K,write_vector &L) const;
+        
         /**
 		convenient getter for N
 		*/		
@@ -139,7 +146,10 @@ class Fac{
         inline void setRefNode(std::vector<Node>  *_p_node) {refNode = _p_node;}
         
     private:
+        int NOD;
         std::vector<Node>  *refNode;/**< direct access to the Nodes */
+        gmm::dense_matrix <double> Ksp;
+        std::vector <double> Lsp;
 	};
 
 /**

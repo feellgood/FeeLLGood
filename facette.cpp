@@ -69,6 +69,26 @@ gmm::mult(P,B,Bp);
 
 }
 
+void Fac::projection(gmm::dense_matrix <double> const& A, std::vector <double> const& B)
+{
+thread_local gmm::dense_matrix <double> P(2*N,3*N);
+thread_local gmm::dense_matrix <double> PA(2*N,3*N);
+
+for (int i=0; i<N; i++){
+    Node const& n = (*refNode)[ind[i]];
+    P(i,i)  = n.ep.x();  P(i,N+i)  = n.ep.y();  P(i,2*N+i)  = n.ep.z();
+    P(N+i,i)= n.eq.x();  P(N+i,N+i)= n.eq.y();  P(N+i,2*N+i)= n.eq.z();
+    }
+
+//Ap = (P*A)*trans(P);
+//Bp = P*B;
+gmm::mult(P,A,PA);
+gmm::mult(PA, gmm::transposed(P), Ksp);
+
+gmm::mult(P,B,Lsp);
+
+}
+
 void Fac::assemblage(const int NOD,gmm::dense_matrix <double> const& Ke, std::vector <double> const& Le,write_matrix &K,write_vector &L) const
     {
     for (int i=0; i < N; i++)
@@ -86,6 +106,25 @@ void Fac::assemblage(const int NOD,gmm::dense_matrix <double> const& Ke, std::ve
         
         }
     }
+    
+void Fac::assemblage(write_matrix &K,write_vector &L) const
+{
+    for (int i=0; i < N; i++)
+        {
+        int i_= ind[i];             
+        
+        for (int j=0; j < N; j++)
+            {
+            int j_= ind[j];
+            K(NOD+i_,j_) += Ksp(i,j);      K(NOD+i_, NOD+j_) += Ksp(  i,N+j);
+            K(    i_,j_) += Ksp(N+i,j);    K(    i_, NOD+j_) += Ksp(N+i,N+j);
+            }
+        L[NOD+i_] += Lsp[i];//L[NOD+i_]+= Le[  i];
+        L[i_] += Lsp[N+i];//L[    i_]+= Le[N+i];
+        
+        }
+    
+}
 
 void Fac::calc_surf(void)
 {
