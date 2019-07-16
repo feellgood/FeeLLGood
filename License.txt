@@ -1,0 +1,31 @@
+FeeLLGood micromagnetic simulator
+Copyright (C) 2012-2014  Jean-Christophe Toussaint.
+Contributions by F. Alouges, D. Gusakova, S. Jamet, M. Struma, C. Thirion
+
+FeeLLGood is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+FeeLLGood uses SCALFMM (https://gforge.inria.fr/frs/?group_id=4479&release_id=9533),
+Copyright (c) ScalFmm 2011-2017 INRIA,
+licensed under the CeCILL-C license and abiding by therules of distribution of free software.
+
+FeeLLGood uses ANN (https://www.cs.umd.edu/~mount/ANN/), 
+Copyright (c) 1997-2010 University of Maryland and Sunil Arya and David Mount,
+licensed under the terms and conditions of the GNU Lesser General Public Library. (http://www.gnu.org/copyleft/lesser.html)
+
+FeeLLGood uses exprtk (http://partow.net/programming/exprtk/index.html)
+Copyright (c) Arash Partow, 
+licensed under the guidelines and in accordance with the most current version of the MIT License. (http://www.opensource.org/licenses/MIT)  
+
+FeeLLGood uses GMM (http://getfem.org/gmm/index.html)
+Copyright (c) Yves Renard and Julien Pommier,
+licensed under under  the  terms  of the  GNU Lesser General Public License as published
+ by  the  Free Software Foundation;  either version 3 of the License,  or (at your option) any later version along with the GCC Runtime Library Exception either version 3.1 or (at your option) any later version.
+
