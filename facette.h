@@ -111,7 +111,7 @@ class Fac{
 		int ind[N];/**< indices table of the nodes */
 		double weight[NPI];/**< weights table */
 		
-		bool treated;
+		bool treated;/**< flag */
 		
         /** initialize weight  */
         inline void init(void)
@@ -146,10 +146,10 @@ class Fac{
         inline void setRefNode(std::vector<Node>  *_p_node) {refNode = _p_node;}
         
     private:
-        int NOD;
+        int NOD;/**< number of nodes */
         std::vector<Node>  *refNode;/**< direct access to the Nodes */
-        gmm::dense_matrix <double> Ksp;
-        std::vector <double> Lsp;
+        gmm::dense_matrix <double> Ksp;/**< matrix initialized by constructor */
+        std::vector <double> Lsp;/**< vector initialized by constructor */
 	};
 
 /**

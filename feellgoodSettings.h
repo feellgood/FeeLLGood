@@ -184,7 +184,9 @@ class Settings{
 	std::string simName;/**< simulation name */
 	std::string pbName;     /**< mesh file, gmsh file format */
 	
-	double x,y,z;
+	double x;/**< working variable x for exprtk parser function f(x,y,z) */
+	double y;/**< working variable y for exprtk parser function f(x,y,z) */
+    double z;/**< working variable z for exprtk parser function f(x,y,z) */
 	
 	exprtk::symbol_table<double> s_table; /**< symbol table for exprtk math parser  */
 	exprtk::expression<double> expr_Mx;/**< Mx expression */

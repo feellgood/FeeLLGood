@@ -160,7 +160,7 @@ class Tet{
 		double dady[N][NPI];/**< variations of hat function along y directions */
 		double dadz[N][NPI];/**< variations of hat function along z directions */
         
-        bool treated;
+        bool treated;/**< flag */
         
 		/** initializes weight and dad(x|y|z) */
 		void init(double epsilon);
@@ -213,8 +213,8 @@ class Tet{
         int NOD;/**< total number of nodes, also an offset for filling sparseMatrix */
         std::vector<Node>  *refNode;/**< direct access to the Nodes */
         
-        gmm::dense_matrix <double> Kp;//Kp(2*N,2*N);
-        std::vector <double>  Lp;//Lp(2*N);
+        gmm::dense_matrix <double> Kp;/**< Kp(2*N,2*N) initialized by constructor */
+        std::vector <double>  Lp;/**< Lp(2*N) initialized by constructor  */
 };//end class Tetra
 }
 
