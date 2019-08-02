@@ -37,8 +37,9 @@ public:
     inline LinAlgebra(Settings & s,const int _NOD,
                       std::vector<Node> & myNode,
                       std::vector <Tetra::Tet> & myTet,
-                      std::vector <Facette::Fac> & myFace,const int _Nb) : settings(s), NOD(_NOD),refNode(&myNode),refFac(&myFace) , NbTH(_Nb)
+                      std::vector <Facette::Fac> & myFace,const int _Nb) :  NOD(_NOD),refNode(&myNode),refFac(&myFace) , NbTH(_Nb)
     {
+    settings = s;
     my_lock = new std::mutex;
     tab_TH.resize(NbTH+1);
     refTet.resize(NbTH);
