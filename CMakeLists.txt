@@ -6,8 +6,8 @@ cmake_minimum_required(VERSION 2.8)
 #===========================================================================
 
 set(FEELLGOOD_MAJOR_VERSION 0)
-set(FEELLGOOD_MINOR_VERSION 1)
-set(FEELLGOOD_PATCH_VERSION 1)
+set(FEELLGOOD_MINOR_VERSION 2)
+set(FEELLGOOD_PATCH_VERSION 0)
 
 ENABLE_LANGUAGE(CXX)
 
@@ -48,10 +48,6 @@ MESSAGE(STATUS "version = ${FEELLGOOD_VERSION}")
 MESSAGE(STATUS "executable built with SHA1=${SHAstr}")
 
 set(VERBOSE_MODE true)
-
-set(SCALFMM_NB_THREADS 8)
-
-MESSAGE(STATUS "SCALFMM_NB_THREADS=${SCALFMM_NB_THREADS}")
 
 set(my_cmd "getconf")
 set(my_arg "_NPROCESSORS_ONLN")

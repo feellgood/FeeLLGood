@@ -4,6 +4,8 @@
 "output vtk file" : false,
 "mesh filename" : "wire_d70_L1000.msh",
 "scaling factor" : 1e-9,
+"scalfmmNbThreads" : 16,
+"solverNbThreads" : 16,
 "final_time" : 1e-6,
 "save_energies" : 3,
 "take_photo" : 5,

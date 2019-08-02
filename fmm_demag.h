@@ -56,7 +56,7 @@ namespace fmm{
 initialization function for the building of an octree and a kernel passed to scalfmm to compute the demag field
 */
 template <class CellClass, class ContainerClass, class LeafClass, class OctreeClass, class KernelClass, class FmmClass, typename... Args>
-int init(Fem &fem, OctreeClass* &tree, KernelClass* &kernels, Args... kernelPreArgs)
+int init(Fem &fem,const int ScalfmmNbThreads, OctreeClass* &tree, KernelClass* &kernels, Args... kernelPreArgs)
 {
     FTic counter;
     const int NbLevels = 8; 

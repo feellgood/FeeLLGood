@@ -37,9 +37,10 @@ public:
     inline LinAlgebra(Settings & s,const int _NOD,
                       std::vector<Node> & myNode,
                       std::vector <Tetra::Tet> & myTet,
-                      std::vector <Facette::Fac> & myFace,const int _Nb) :  NOD(_NOD),refNode(&myNode),refFac(&myFace) , NbTH(_Nb)
+                      std::vector <Facette::Fac> & myFace) :  NOD(_NOD),refNode(&myNode),refFac(&myFace)
     {
     settings = s;
+    NbTH = s.solverNbTh;
     my_lock = new std::mutex;
     tab_TH.resize(NbTH+1);
     refTet.resize(NbTH);
@@ -104,7 +105,7 @@ private:
     std::mutex *my_lock;
     
     /** number of threads, initialized by constructor */ 
-    const int NbTH;
+    int NbTH;
     
     /** buffer fr facette::Obj when try_lock fail */
     std::queue<Facette::Obj> buff_fac;

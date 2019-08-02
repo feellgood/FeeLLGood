@@ -58,6 +58,11 @@ void Settings::read(std::string fileJson,std::vector<Seq> &seq)
 
     
     setScale(s);
+    
+    
+    scalfmmNbTh = root.get<int>("scalfmmNbThreads",8);
+    solverNbTh = root.get<int>("solverNbThreads",8);
+    
     tf = root.get<double>("final_time",0);
 	
 	n1 = root.get<int>("save_energies",0);
