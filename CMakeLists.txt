@@ -47,9 +47,7 @@ string(REPLACE "\n" "" SHAstr "\"${git_var}\"")
 MESSAGE(STATUS "version = ${FEELLGOOD_VERSION}")
 MESSAGE(STATUS "executable built with SHA1=${SHAstr}")
 
-
 set(VERBOSE_MODE true)
-set(SECOND_ORDER true)
 
 set(SCALFMM_NB_THREADS 8)
 

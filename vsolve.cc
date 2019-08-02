@@ -30,7 +30,7 @@ for(int i=0;i<NbTH;i++)
             
             std::for_each(refTet[i].begin(),refTet[i].end(), [this,&K_TH,&L_TH](Tetra::Tet & tet)
                 {
-                tet.integrales(settings.second_order,settings.paramTetra,Hext,DW_vz,settings.theta,dt,settings.TAUR,K, L);     
+                tet.integrales(settings.paramTetra,Hext,DW_vz,settings.theta,dt,settings.TAUR,K, L);     
                 tet.projection( K, L);
                 if(my_lock->try_lock())
                     {

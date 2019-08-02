@@ -21,9 +21,7 @@ std::cout << "\t process\t\t" << getpid() << std::endl;
 void calc_demag(Fem &fem,Settings &mySettings,OctreeClass *tree,KernelClass *kernels)
 {
 fmm::demag<0, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree, kernels); // Hd(u)
-
-if(mySettings.second_order)
-    { fmm::demag<1, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree, kernels); } // Hd(v)
+fmm::demag<1, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree, kernels); // Hd(v), second order contribution
 }
 
 int main(int argc,char* argv[])

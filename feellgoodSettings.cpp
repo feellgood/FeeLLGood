@@ -188,7 +188,6 @@ for (boost::property_tree::ptree::value_type &s : sub_tree)
 try { sub_tree = root.get_child("solver"); }
 catch (std::exception &e)
     { std::cout << e.what() << std::endl; }
-    second_order = sub_tree.get<bool>("second order",true);
     analytic_corr = sub_tree.get<bool>("analytic corrections",false);
     theta = sub_tree.get<double>("theta",0.5);
     EPSILON = sub_tree.get<double>("epsilon",1e-16);
