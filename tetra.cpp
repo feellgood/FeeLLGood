@@ -71,8 +71,7 @@ double s_dt = theta*dt;//theta du theta schema, defini dans config.h
 
 /*-------------------- INTERPOLATION --------------------*/
 double u_nod[3][N]; 
-double u[3][NPI];
-double dudx[3][NPI], dudy[3][NPI], dudz[3][NPI];
+double u[3][NPI], dudx[3][NPI], dudy[3][NPI], dudz[3][NPI];//should be Pt::pt3D X[NPI]
 double negphi0_nod[N], Hdx[NPI], Hdy[NPI], Hdz[NPI];
 
 double v_nod[3][N];
@@ -89,7 +88,7 @@ for (int i=0; i<N; i++){
     }
 
     
-tiny::mult<double, 3, N, NPI> (u_nod, a, u);
+tiny::mult<double, 3, N, NPI> (u_nod, a, u);// a is const matrix from namespace tetra 
 
 tiny::mult<double, 3, N, NPI> (u_nod, dadx, dudx);
 tiny::mult<double, 3, N, NPI> (u_nod, dady, dudy);
