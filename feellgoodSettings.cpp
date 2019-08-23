@@ -71,85 +71,80 @@ try { s_sub_tree = sub_tree.get_child("volume_regions"); }
 catch (std::exception &e)
     { std::cout << e.what() << std::endl; }
 	
-	for (boost::property_tree::ptree::value_type &s : s_sub_tree)
-		{
-		std::string name_reg = s.first;
-		if (!name_reg.empty())
-			{
-			Tetra::prm p;
-			p.reg = stoi(name_reg);
-			for (boost::property_tree::ptree::value_type &sub_k : s_sub_tree.get_child(name_reg))
-				{
-				if (sub_k.first == "Ae") {p.A = sub_k.second.get_value<double>();}
-				if (sub_k.first == "alpha") {p.alpha = sub_k.second.get_value<double>();}
-				
-				if (sub_k.first == "Ka")
-					{
-					p.K = sub_k.second.get_value<double>();
-					if (p.K == 0) { std::cout<< "\tKa is zero, flag NO_ANISOTROPY to true" << std::endl;}
-					}
-				if (sub_k.first == "a")
-					{int i=0;
-					for(boost::property_tree::ptree::value_type &row : sub_k.second)
-						{
-						int j=0;
-						for(boost::property_tree::ptree::value_type &coeff : row.second)
-							{
-							p.uk[i][j] = coeff.second.get_value<double>();	
-							j++;
-							}
-						i++;	
-						}
-					}
-						
-				
-				if (sub_k.first == "Js") {p.J = sub_k.second.get_value<double>();}
-				}
-			paramTetra.push_back(p);
-			//p.infos();	
-			}
-		}
+for (boost::property_tree::ptree::value_type &s : s_sub_tree)
+    {
+    std::string name_reg = s.first;
+    if (!name_reg.empty())
+        {
+        Tetra::prm p;
+        p.reg = stoi(name_reg);
+        for (boost::property_tree::ptree::value_type &sub_k : s_sub_tree.get_child(name_reg))
+            {
+            if (sub_k.first == "Ae") {p.A = sub_k.second.get_value<double>();}
+            if (sub_k.first == "alpha") {p.alpha = sub_k.second.get_value<double>();}
+            
+            if (sub_k.first == "Ka")
+                {
+                p.K = sub_k.second.get_value<double>();
+                if (p.K == 0) { std::cout<< "\tKa is zero, flag NO_ANISOTROPY to true" << std::endl;}
+                }
+            if (sub_k.first == "a")
+                {int i=0;
+                for(boost::property_tree::ptree::value_type &row : sub_k.second)
+                    {
+                    int j=0;
+                    for(boost::property_tree::ptree::value_type &coeff : row.second)
+                        {
+                        p.uk[i][j] = coeff.second.get_value<double>();	
+                        j++;
+                        }
+                    i++;	
+                    }
+                }
+			if (sub_k.first == "Js") {p.J = sub_k.second.get_value<double>();}
+            }
+        paramTetra.push_back(p);
+        //p.infos();	
+        }
+    }
 		
-std::cout << "\tsurfacic regions..." << std::endl;
+std::cout << "\tsurface regions..." << std::endl;
 
 try { s_sub_tree = sub_tree.get_child("surface_regions"); }
 catch (std::exception &e)
     { std::cout << e.what() << std::endl; }
 
 for (boost::property_tree::ptree::value_type &s : s_sub_tree)
-		{
-		std::string name_reg = s.first;
-		if (!name_reg.empty())
-			{
-			Facette::prm p;
-			p.reg = stoi(name_reg);
-			for (boost::property_tree::ptree::value_type &sub_k : s_sub_tree.get_child(name_reg))
-				{
-				
-				if (sub_k.first == "Ks")
-					{
-					p.Ks = sub_k.second.get_value<double>();
-					if (p.Ks == 0) { std::cout<< "\tKs is zero, flag NO_SURF_ANISOTROPY to true" << std::endl;}
-					}
-				if (sub_k.first == "uk")
-					{int i=0;
-					for(boost::property_tree::ptree::value_type &row : sub_k.second)
-						{
-						p.uk[i] = row.second.get_value<double>();
-						i++;	
-						}
-					}
-			
-				if (sub_k.first == "Js") {p.Js = sub_k.second.get_value<double>();}	
-				}
-			paramFacette.push_back(p);
-			//p.infos();	
-			}
-		}
+    {
+    std::string name_reg = s.first;
+    if (!name_reg.empty())
+        {
+        Facette::prm p;
+        p.reg = stoi(name_reg);
+        for (boost::property_tree::ptree::value_type &sub_k : s_sub_tree.get_child(name_reg))
+            {
+            
+            if (sub_k.first == "Ks")
+                {
+                p.Ks = sub_k.second.get_value<double>();
+                if (p.Ks == 0) { std::cout<< "\tKs is zero, flag NO_SURF_ANISOTROPY to true" << std::endl;}
+                }
+            if (sub_k.first == "uk")
+                {int i=0;
+                for(boost::property_tree::ptree::value_type &row : sub_k.second)
+                    {
+                    p.uk[i] = row.second.get_value<double>();
+                    i++;	
+                    }
+                }
+			if (sub_k.first == "Js") {p.Js = sub_k.second.get_value<double>();}	
+            }
+        paramFacette.push_back(p);
+        //p.infos();	
+        }
+    }
 
-    
-    scalfmmNbTh = root.get<int>("scalfmmNbThreads",8);
-    solverNbTh = root.get<int>("solverNbThreads",8);
+solverNbTh = root.get<int>("solverNbThreads",8);
     
     tf = root.get<double>("final_time",0);
 	
@@ -184,13 +179,17 @@ for(boost::property_tree::ptree::value_type &cell :sub_tree)
     Bext[j] = cell.second.get_value<double>();
     j++;
     }
-		
-		
+
+try { sub_tree = root.get_child("demagnetization field solver"); }
+catch (std::exception &e)
+    { std::cout << e.what() << std::endl; }
+scalfmmNbTh = sub_tree.get<int>("nbThreads",8);
+analytic_corr = sub_tree.get<bool>("analytic corrections",true);
 
 try { sub_tree = root.get_child("solver"); }
 catch (std::exception &e)
     { std::cout << e.what() << std::endl; }
-    analytic_corr = sub_tree.get<bool>("analytic corrections",false);
+    
     theta = sub_tree.get<double>("theta",0.5);
     EPSILON = sub_tree.get<double>("epsilon",1e-16);
     DUMIN = sub_tree.get<double>("min(du)",1e-9);

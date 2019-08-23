@@ -37,7 +37,6 @@
         }
     },
     
-"scalfmmNbThreads" : 16,
 "solverNbThreads" : 16,
 "final_time" : 1e-6,
 "restore" : false,
@@ -49,17 +48,21 @@
     "Mz": "tanh(z*20)"
     },
 
-"recentering" : true,
+"recentering" : false,
 "Bext" : [0.0, 0.0, 0.005],
+
+"demagnetization field solver" :
+    {
+    "nbThreads" : 16,
+    "analytic corrections" : true
+    },
 
 "solver" :
     {
     "theta" : 0.5,
-    "analytic corrections" : true,
     "max(iter)" : 500,
     "refresh prc every" : 20,
     "epsilon" : 1e-40,
-    "remarque" : "epsilon est petit",
     "min(du)" : 1e-9,
     "max(du)" : 0.02,
     "min(dt)" : 1e-14,
