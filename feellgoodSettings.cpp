@@ -10,7 +10,7 @@
 
 #include "feellgoodSettings.h"
 
-void Settings::infos(std::vector<Seq> &seq)
+void Settings::infos()
 {
 std::cout << "\t name simul : "<< simName << std::endl;
 std::cout << "\t name mesh file : " << pbName << std::endl;
@@ -23,16 +23,14 @@ if (restore)
 else
     { std::cout << "\t distribution initiale d'aimantation uniforme" << std::endl; }
 
-std::cout << "\t sequences de champ applique Bext" << std::endl;
-for (std::vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it) {
-    std::cout << it->Bini << "\t" << it->Bfin << "\t" << it->dB << "\t" << it->a[0] << "\t" << it->a[1] << "\t" << it->a[2] << std::endl;
-    }
+std::cout << "\t applied field Bext = [ " << Bext[0] << ",\t" << Bext[1] << ",\t" << Bext[2] << " ] T" << std::endl;
+
 for(unsigned int i=0;i<paramTetra.size();i++) {paramTetra[i].infos();}
 for(unsigned int i=0;i<paramFacette.size();i++) {paramFacette[i].infos();}
 }
 
 
-void Settings::read(std::string fileJson,std::vector<Seq> &seq)
+void Settings::read(std::string fileJson)
 {
 	boost::property_tree::ptree root;
     boost::property_tree::ptree sub_tree;
@@ -87,27 +85,18 @@ void Settings::read(std::string fileJson,std::vector<Seq> &seq)
         
 	
     recentering = root.get<bool>("recentering",true);
-    double trucs[6];
-	for (boost::property_tree::ptree::value_type &s : root.get_child("field_sequence"))
-		{
-		int j=0;
-		for(boost::property_tree::ptree::value_type &cell : s.second)
-			{
-			trucs[j] = cell.second.get_value<double>();
-			j++;
-			}
-		Seq field;
-		field.Bini = trucs[0];
-		field.Bfin = trucs[1];
-		field.dB = trucs[2];
-		field.a[0] = trucs[3];
-		field.a[1] = trucs[4];
-		field.a[2] = trucs[5];
-		normalize(field.a);
-		seq.push_back(field);
-		}
+    
+try {sub_tree = root.get_child("Bext");}
+catch(std::exception &e)
+    { std::cout << e.what() << std::endl; }
+int j=0;    
+for(boost::property_tree::ptree::value_type &cell :sub_tree)
+    {
+    Bext[j] = cell.second.get_value<double>();
+    j++;
+    }
+		
 std::cout << "\tvolumic regions..." << std::endl;
-
 
 
 try { sub_tree = root.get_child("volume_regions"); }

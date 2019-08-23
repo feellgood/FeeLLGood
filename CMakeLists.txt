@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 2.8)
 #===========================================================================
 
 set(FEELLGOOD_MAJOR_VERSION 0)
-set(FEELLGOOD_MINOR_VERSION 2)
+set(FEELLGOOD_MINOR_VERSION 3)
 set(FEELLGOOD_PATCH_VERSION 0)
 
 ENABLE_LANGUAGE(CXX)

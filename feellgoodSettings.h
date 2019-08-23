@@ -18,19 +18,6 @@
 #define feellgoodSettings_h
 
 
-
-/** \struct Seq
-Seq describe a sequence of field from \f$ B_{ini} \f$ to \f$ B_{fin} \f$ by steps \f$ dB \f$ with orientation \f$ \vec{a} \f$, should be a unit vector.
-*/    
-struct Seq{
-double Bini;/**< starting value */
-double Bfin;/**< ending value */
-double dB;/**< step field */
-triple a;/**< field direction componants */
-};
-
-
-
 /** \class Settings
 container class to store many setting parameters, such as file names, parameters for the solver, output file format. It also handles text user interation through terminal, and some parsing functions. 
 */
@@ -55,9 +42,9 @@ class Settings{
         s_table.add_constants();
         } /**< default constructor */
 	
-	void infos(std::vector<Seq> &seq);/**< some prints sent to terminal  */	
+	void infos(void);/**< some prints sent to terminal  */	
 	
-	void read(std::string fileJson,std::vector<Seq> &seq);/**< read settings from a json file */
+	void read(std::string fileJson);/**< read settings from a json file */
 	
 	inline void setPbName(std::string str) {pbName = str;} /**< setter for .msh file name  */
 	inline std::string getPbName() {return pbName;}/**< getter for problem file name */
@@ -86,6 +73,8 @@ class Settings{
 	
 	int solverNbTh;
 	int scalfmmNbTh;
+    
+    triple Bext;
     
 	std::string sMx;/**< string for analytical definition of Mx */
 	std::string sMy;/**< string for analytical definition of My */

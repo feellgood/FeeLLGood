@@ -30,16 +30,13 @@ if ((nt%n2)==0)
     {
     if (settings.withVtk)
         {
-        string str = baseName + "_" + to_string(SEQ) + "_B" + to_string(Bext) + "_iter" + to_string(nt) + ".vtk";
-            //boost::format("_%d_B%6f_iter%d.vtk") % fem.SEQ % fem.Bext % nt;
+        string str = baseName + "_iter" + to_string(nt) + ".vtk";
         savecfg_vtk(str);
         }
     
-    string str = baseName + "_" + to_string(SEQ) +"_B" + to_string(Bext) + "_iter" + to_string(nt) + ".sol";
- //<< boost::format("_%d_B%6f_iter%d.sol") % fem.SEQ % fem.Bext % nt;
+    string str = baseName + "_iter" + to_string(nt) + ".sol";
+ 
     savesol(str,settings.getScale());
-    
-    //string str = baseName + "_" + to_string(SEQ) + "_B" + to_string(Bext) + "_iter" + to_string(nt) + ".hdm";
     //    saveH(str);
     }
 }

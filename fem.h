@@ -49,7 +49,7 @@ container to grab altogether all parameters of a simulation, including mesh geom
 */
 struct Fem{
 	int NOD;/**< number of nodes in vector container */
-	int SEQ;/**< number of sequences, usefull to define a vector applied field eventually varying in time */
+	//int SEQ;/**< number of sequences, usefull to define a vector applied field eventually varying in time */
 	Pt::pt3D c;/**< center position */	
 	Pt::pt3D l;/**< lengths along x,y,z axis */	
 	
@@ -82,7 +82,8 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
 	std::vector <Node> node; /**< node container */
 	std::vector <Facette::Fac>  fac; /**< face container */
 	std::vector <Tetra::Tet>  tet; /**< tetrahedron container */
-    double Bext;/**< amplitude of the applied field */
+    
+    //double Bext;/**< amplitude of the applied field */
     triple Hext;/**< external applied field direction (should be normalized) */
     
     ANNkd_tree* kdtree;/**< ANN kdtree to find efficiently the closest set of nodes to a physical point in the mesh  */

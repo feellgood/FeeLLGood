@@ -31,7 +31,6 @@ Fem fem;
 FTic counter;
 OctreeClass *tree    = nullptr;
 KernelClass *kernels = nullptr; 
-vector<Seq> seq;
 string fileJson;
 
 if(argc<2)
@@ -47,8 +46,8 @@ else
 
 prompt();
 	
-mySettings.read(fileJson,seq);
-mySettings.infos(seq);
+mySettings.read(fileJson);
+mySettings.infos();
 fem.readMesh(mySettings);
 counter.tic();
 fem.femutil(mySettings);
@@ -74,109 +73,97 @@ fmm::init< CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmCl
 cout << "init scalfmm done.\n" << endl;
 
 double dt0= mySettings.dt;
-int nseq=0;
-for (vector<Seq>::iterator it = seq.begin(); it!=seq.end(); ++it)
-    {
-    double &Bini=it->Bini;
-    double &Bfin=it->Bfin;
-    double &dB=it->dB;
-    triple &a = it->a;
-    nseq++;
-    fem.SEQ=nseq;
 
-    cout << "dB : " << dB << endl;
+triple Bext;
 
-    for (int loop=0; loop<=(int)((Bfin-Bini)/dB+0.5); loop++)
-    	{
-    	double Bext=Bini+dB*loop;
-        fem.Bext=Bext;
-        fem.Hext[0]=nu0*Bext*a[0];
-        fem.Hext[1]=nu0*Bext*a[1];
-        fem.Hext[2]=nu0*Bext*a[2]; 
+Bext[0] = mySettings.Bext[0];
+Bext[1] = mySettings.Bext[1];
+Bext[2] = mySettings.Bext[2];
+        
+fem.Hext[0]=nu0*Bext[0];
+fem.Hext[1]=nu0*Bext[1];
+fem.Hext[2]=nu0*Bext[2]; 
 
-        cout << "Bext : " << Bext*a[0] << "\t" << Bext*a[1] << "\t" << Bext*a[2] << endl;
+cout << "Bext : " << Bext[0] << "\t" << Bext[1] << "\t" << Bext[2] << endl;
 
-        string baseName = mySettings.r_path_output_dir + mySettings.getSimName();
-        string str = baseName +"_"+ to_string(fem.SEQ) + "_B" + to_string(fem.Bext) + ".evol";
+string baseName = mySettings.r_path_output_dir + mySettings.getSimName();
+string str = baseName + ".evol";
 
-        ofstream fout(str);
-        if (!fout) { cerr << "cannot open file "<< str << endl; SYSTEM_ERROR; }
+ofstream fout(str);
+if (!fout) { cerr << "cannot open file "<< str << endl; SYSTEM_ERROR; }
 
-        calc_demag(fem,mySettings, tree,kernels);
+calc_demag(fem,mySettings, tree,kernels);
    
-        fem.DW_z  = 0.0;
-        fem.energy(mySettings); 
-        fem.evolution();
+fem.DW_z  = 0.0;
+fem.energy(mySettings); 
+fem.evolution();
 
-        int flag  = 0;
-        double dt = dt0;
-        double t= fem.t;
-        fem.vmax  = 0.0;
-        fem.DW_vz = fem.DW_vz0 = 0.0;
-        fem.DW_z  = 0.0;
+int flag  = 0;
+double dt = dt0;
+double t= fem.t;
+fem.vmax  = 0.0;
+fem.DW_vz = fem.DW_vz0 = 0.0;
+fem.DW_z  = 0.0;
+int nt = 0;
 
-        int nt = 0;
-        fem.saver(mySettings,fout,nt);
+fem.saver(mySettings,fout,nt);
 
-        while (t < mySettings.tf)
-            {
-            cout << "\n ------------------------------\n";
-            if (flag) cout << "    t  : same (" << flag << ")" << endl;
-            else cout << "nt = " << nt << ", t = " << t << endl; // *ct*
+while (t < mySettings.tf)
+    {
+    cout << "\n ------------------------------\n";
+    if (flag) cout << "    t  : same (" << flag << ")" << endl;
+    else cout << "nt = " << nt << ", t = " << t << endl; // *ct*
+    cout << "dt = " << dt << endl << endl;
+    if (dt < mySettings.DTMIN) { fem.reset();break; }
+
+    /* changement de referentiel */
+    fem.DW_vz += fem.DW_dir*fem.moy<V>(Pt::IDX_Z)*fem.l.z()/2.;
     
-            cout << "dt = " << dt << endl << endl;
-            if (dt < mySettings.DTMIN) { fem.reset();break; }
-
-            /* changement de referentiel */
-            fem.DW_vz += fem.DW_dir*fem.moy<V>(Pt::IDX_Z)*fem.l.z()/2.;
+    linAlg.set_Hext(fem.Hext[0],fem.Hext[1],fem.Hext[2]);
+    linAlg.set_DW_vz(fem.DW_vz);
+    linAlg.set_dt(dt);
+    int err = linAlg.vsolve(nt);  
+    fem.vmax = linAlg.get_v_max();
     
-            linAlg.set_Hext(fem.Hext[0],fem.Hext[1],fem.Hext[2]);
-            linAlg.set_DW_vz(fem.DW_vz);
-            linAlg.set_dt(dt);
-            int err = linAlg.vsolve(nt);  
-            fem.vmax = linAlg.get_v_max();
-    
-            if (err)
-                { cout << "err : " << err << endl;flag++; dt*= 0.5; mySettings.dt=dt; continue;}
+    if (err)
+        { cout << "err : " << err << endl;flag++; dt*= 0.5; mySettings.dt=dt; continue;}
 
-            double dumax = dt*fem.vmax;
-            cout << "\t dumax = " << dumax << ",  vmax = "<< fem.vmax << endl;
-            if (dumax < mySettings.DUMIN) break; 
+    double dumax = dt*fem.vmax;
+    cout << "\t dumax = " << dumax << ",  vmax = "<< fem.vmax << endl;
+    if (dumax < mySettings.DUMIN) break; 
             
-            if (dumax > mySettings.DUMAX)
-                { flag++; dt*= 0.5; mySettings.dt=dt; continue;}
+    if (dumax > mySettings.DUMAX)
+        { flag++; dt*= 0.5; mySettings.dt=dt; continue;}
        
-            calc_demag(fem,mySettings, tree, kernels);
+    calc_demag(fem,mySettings, tree, kernels);
        
-            fem.energy(mySettings);
-            if (fem.evol > 0.0)
-                { cout << "Warning energy increases! : " << fem.evol << endl; }
+    fem.energy(mySettings);
+    if (fem.evol > 0.0)
+        { cout << "Warning energy increases! : " << fem.evol << endl; }
 
-            fem.DW_vz0 = fem.DW_vz;/* mise a jour de la vitesse du dernier referentiel et deplacement de paroi */ 
-            fem.DW_z  += fem.DW_vz*dt;
-            fem.evolution(); t+=dt; fem.t=t; nt++; flag=0;
-            double mz = fem.moy<U>(Pt::IDX_Z);	    
-            if(mySettings.recentering)
-                { fem.recentrage( 0.1,Pt::IDX_Z,mz); }
-            fem.saver(mySettings,fout,nt);
-            dt = min(1.1*dt, mySettings.DTMAX); 
-            mySettings.dt=dt;
-            }//endwhile
+    fem.DW_vz0 = fem.DW_vz;/* mise a jour de la vitesse du dernier referentiel et deplacement de paroi */ 
+    fem.DW_z  += fem.DW_vz*dt;
+    fem.evolution(); t+=dt; fem.t=t; nt++; flag=0;
+    double mz = fem.moy<U>(Pt::IDX_Z);	    
+    if(mySettings.recentering)
+        { fem.recentrage( 0.1,Pt::IDX_Z,mz); }
+    fem.saver(mySettings,fout,nt);
+    dt = min(1.1*dt, mySettings.DTMAX); 
+    mySettings.dt=dt;
+    }//endwhile
 
-        if (dt < mySettings.DTMIN)
-            { cout << " aborted:  dt < DTMIN"; }
+if (dt < mySettings.DTMIN)
+    { cout << " aborted:  dt < DTMIN"; }
         
-        fem.saver(mySettings,fout,nt);
+fem.saver(mySettings,fout,nt);
         
-        counter.tac();
-        cout << "\n  * iterations: " << nt << "\n  * total computing time: " << counter.elapsed() << " s\n" << endl;
-        fout.close();
-    //      initialisation du temps pour l'iteration en champ suivante
-        fem.t=0.;
-        mySettings.dt=dt0;
-        }//endfor Bext
-    }//endfor it
-
+counter.tac();
+cout << "\n  * iterations: " << nt << "\n  * total computing time: " << counter.elapsed() << " s\n" << endl;
+fout.close();
+//      initialisation du temps pour l'iteration en champ suivante
+fem.t=0.;
+mySettings.dt=dt0;
+    
 cout << "--- the end ---" << endl;
 delete tree;
 delete kernels;
