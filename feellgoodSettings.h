@@ -71,19 +71,16 @@ class Settings{
 	bool restore;/**< usefull to run a simulation from a previous calculation  */
     bool recentering;/**< to recenter DW or not */
 	
-	int solverNbTh;
-	int scalfmmNbTh;
+	int solverNbTh;/**< nb of threads for the finite element solver */
+	int scalfmmNbTh;/**< nb of threads for the computation of the demag field with scalfmm */
     
-    triple Bext;
+    triple Bext;/**< applied external field */
     
 	std::string sMx;/**< string for analytical definition of Mx */
 	std::string sMy;/**< string for analytical definition of My */
     std::string sMz;/**< string for analytical definition of Mz */
     
-    
-    
-    
-	std:: string restoreFileName;/**< input file name for continuing a calculation (sol.in) */
+    std:: string restoreFileName;/**< input file name for continuing a calculation (sol.in) */
 	
 	/** for time integration \f$ \theta \f$ scheme  */
 	double theta;
