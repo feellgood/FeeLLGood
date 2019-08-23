@@ -37,8 +37,6 @@
         }
     },
     
-"solverNbThreads" : 16,
-"final_time" : 1e-6,
 "restore" : false,
 "restore from file" : "sol.in",
 "initial magnetization" :
@@ -57,12 +55,18 @@
     "analytic corrections" : true
     },
 
-"solver" :
+"finite element solver" :
     {
-    "theta" : 0.5,
+    "nbThreads" : 16,
     "max(iter)" : 500,
-    "refresh prc every" : 20,
-    "epsilon" : 1e-40,
+    "refresh preconditionner every" : 20,
+    "epsilon" : 1e-40
+    },
+
+"time integration" :
+    {
+    "final_time" : 1e-6,
+    "theta" : 0.5,
     "min(du)" : 1e-9,
     "max(du)" : 0.02,
     "min(dt)" : 1e-14,

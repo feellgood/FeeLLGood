@@ -144,31 +144,22 @@ for (boost::property_tree::ptree::value_type &s : s_sub_tree)
         }
     }
 
-solverNbTh = root.get<int>("solverNbThreads",8);
-    
-    tf = root.get<double>("final_time",0);
-	
-	
-	restore = root.get<bool>("restore",0);
-    if (restore)
-        {
-        restoreFileName = root.get<std::string>("restore from file");
-        }
-    else
-        {
-        try { sub_tree = root.get_child("initial magnetization"); }
-        catch (std::exception &e)
-            { std::cout << e.what() << std::endl; }
+restore = root.get<bool>("restore",0);
+if (restore)
+    { restoreFileName = root.get<std::string>("restore from file"); }
+else
+    {
+    try { sub_tree = root.get_child("initial magnetization"); }
+    catch (std::exception &e)
+        { std::cout << e.what() << std::endl; }
 
-        sMx = sub_tree.get<std::string>("Mx");
-        sMy = sub_tree.get<std::string>("My");
-        sMz = sub_tree.get<std::string>("Mz");
-    
-        doCompile();
-        }
+    sMx = sub_tree.get<std::string>("Mx");
+    sMy = sub_tree.get<std::string>("My");
+    sMz = sub_tree.get<std::string>("Mz");
+    doCompile();
+    }
         
-	
-    recentering = root.get<bool>("recentering",true);
+recentering = root.get<bool>("recentering",true);
     
 try {sub_tree = root.get_child("Bext");}
 catch(std::exception &e)
@@ -186,18 +177,23 @@ catch (std::exception &e)
 scalfmmNbTh = sub_tree.get<int>("nbThreads",8);
 analytic_corr = sub_tree.get<bool>("analytic corrections",true);
 
-try { sub_tree = root.get_child("solver"); }
+try { sub_tree = root.get_child("finite element solver"); }
 catch (std::exception &e)
     { std::cout << e.what() << std::endl; }
-    
-    theta = sub_tree.get<double>("theta",0.5);
-    EPSILON = sub_tree.get<double>("epsilon",1e-16);
-    DUMIN = sub_tree.get<double>("min(du)",1e-9);
-    DUMAX = sub_tree.get<double>("max(du)",0.02);
-    DTMIN = sub_tree.get<double>("min(dt)",1e-14);
-    DTMAX = sub_tree.get<double>("max(dt)",1e-7);
-    TAUR = 100.*DTMAX; // pourquoi 100 ?
-    dt = sub_tree.get<double>("initial dt",1e-9);
-    MAXITER = sub_tree.get<int>("max(iter)",500);
-    REFRESH_PRC = sub_tree.get<int>("refresh prc every",20);
+solverNbTh = sub_tree.get<int>("nbThreads",8);
+EPSILON = sub_tree.get<double>("epsilon",1e-16);
+MAXITER = sub_tree.get<int>("max(iter)",500);
+REFRESH_PRC = sub_tree.get<int>("refresh preconditionner every",20);
+
+try { sub_tree = root.get_child("time integration"); }
+catch (std::exception &e)
+    { std::cout << e.what() << std::endl; }
+theta = sub_tree.get<double>("theta",0.5);
+DUMIN = sub_tree.get<double>("min(du)",1e-9);
+DUMAX = sub_tree.get<double>("max(du)",0.02);
+DTMIN = sub_tree.get<double>("min(dt)",1e-14);
+DTMAX = sub_tree.get<double>("max(dt)",1e-7);
+TAUR = 100.*DTMAX; // pourquoi 100 ?
+dt = sub_tree.get<double>("initial dt",1e-9);
+tf = sub_tree.get<double>("final_time",0);
 }
