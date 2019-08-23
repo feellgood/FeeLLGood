@@ -39,9 +39,17 @@ void Settings::read(std::string fileJson)
 	
 	std::cout << "\nparsing "<< fileJson <<" :" << std::endl;
 	
-	r_path_output_dir = root.get<std::string>("output directory");
-	simName = root.get<std::string>("output file basename");
-	withVtk = root.get<bool>("output vtk file");
+    
+    try { sub_tree = root.get_child("outputs"); }
+        catch (std::exception &e)
+            { std::cout << e.what() << std::endl; }
+
+    r_path_output_dir = sub_tree.get<std::string>("directory");
+    simName = sub_tree.get<std::string>("file basename");
+    withVtk = sub_tree.get<bool>("vtk file",0);
+    n1 = sub_tree.get<int>("save_energies",0);
+	n2 = sub_tree.get<int>("take_photo",0);
+    
     pbName = root.get<std::string>("mesh filename");
 	double s = root.get<double>("scaling factor",1e-9);
     
@@ -63,8 +71,7 @@ void Settings::read(std::string fileJson)
     
     tf = root.get<double>("final_time",0);
 	
-	n1 = root.get<int>("save_energies",0);
-	n2 = root.get<int>("take_photo",0);
+	
 	restore = root.get<bool>("restore",0);
     if (restore)
         {

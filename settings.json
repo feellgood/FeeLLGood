@@ -1,14 +1,18 @@
 {
-"output directory" : "data_out/",
-"output file basename" : "tommy_the_cat",
-"output vtk file" : false,
+"outputs" :
+    {
+    "directory" : "data_out/",
+    "file basename" : "tommy_the_cat",
+    "vtk file" : false,
+    "save_energies" : 3,
+    "take_photo" : 5
+    },
+
 "mesh filename" : "wire_d70_L1000.msh",
 "scaling factor" : 1e-9,
 "scalfmmNbThreads" : 16,
 "solverNbThreads" : 16,
 "final_time" : 1e-6,
-"save_energies" : 3,
-"take_photo" : 5,
 "restore" : false,
 "restore from file" : "sol.in",
 "initial magnetization" :
