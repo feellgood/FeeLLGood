@@ -80,7 +80,7 @@ class Settings{
 	std::string sMy;/**< string for analytical definition of My */
     std::string sMz;/**< string for analytical definition of Mz */
     
-    std:: string restoreFileName;/**< input file name for continuing a calculation (sol.in) */
+    std::string restoreFileName;/**< input file name for continuing a calculation (sol.in) */
 	
 	/** for time integration \f$ \theta \f$ scheme  */
 	double theta;

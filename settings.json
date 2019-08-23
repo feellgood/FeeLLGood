@@ -7,9 +7,36 @@
     "save_energies" : 3,
     "take_photo" : 5
     },
+    
+"mesh" :
+    {
+    "filename" : "wire_d70_L1000.msh",
+    "scaling factor" : 1e-9,
+    "volume_regions" :
+        {
+        "300" : 
+            {
+            "Ae" : 1e-11,
+            "Js" : 1.0,
+            "Ka" : 0.0,
+            "a" : [[1.0,0.0,0.0],
+                    [0.0,1.0,0.0],
+                    [0.0,0.0,1.0]],		
+            "alpha" : 0.05		
+            }
+        },
 
-"mesh filename" : "wire_d70_L1000.msh",
-"scaling factor" : 1e-9,
+    "surface_regions" :
+        {
+        "200" : 
+            {
+            "Js" : -1,
+            "Ks" : 0.0,
+            "uk" : [0.0,0.0,1.0]
+            }	
+        }
+    },
+    
 "scalfmmNbThreads" : 16,
 "solverNbThreads" : 16,
 "final_time" : 1e-6,
@@ -24,30 +51,6 @@
 
 "recentering" : true,
 "Bext" : [0.0, 0.0, 0.005],
-
-"volume_regions" :
-	{
-	"300" : 
-		{
-		"Ae" : 1e-11,
-		"Js" : 1.0,
-		"Ka" : 0.0,
-		 "a" : [[1.0,0.0,0.0],
-			[0.0,1.0,0.0],
-			[0.0,0.0,1.0]],		
-		"alpha" : 0.05		
-		}
-	},
-
-"surface_regions" :
-	{
-	"200" : 
-		{
-		"Js" : -1,
-		"Ks" : 0.0,
-		"uk" : [0.0,0.0,1.0]
-		}	
-	},
 
 "solver" :
     {
