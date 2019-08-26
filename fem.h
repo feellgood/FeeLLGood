@@ -224,7 +224,8 @@ std::for_each(tet.begin(),tet.end(),[this,&sum,&d](Tetra::Tet &te)
         if(UorV) { val_nod[ie] = n.u(d);} else { val_nod[ie] = n.v(d);} 
         }
     tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (val_nod, Tetra::a, val);
-    sum += tiny::sp<double, Tetra::NPI> (val, te.weight);
+    //sum += tiny::sp<double, Tetra::NPI> (val, te.weight);
+    sum += te.weightedScalarProd(val);
     }
 );//fin for_each
 

@@ -164,6 +164,10 @@ class Tet{
         
 		/** initializes weight and dad(x|y|z) */
 		void init(double epsilon);
+        
+        /** weighted scalar product */
+        inline double weightedScalarProd(const double X[NPI])
+            {return (X[0]*weight[0] + X[1]*weight[1] + X[2]*weight[2] + X[3]*weight[3] +X[4]*weight[4]);}
 		
 		/** basic region infos */		
 		inline void infos(){std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2]<< "\t"<< ind[3] <<std::endl;};

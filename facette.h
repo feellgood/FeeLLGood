@@ -117,9 +117,16 @@ class Fac{
         inline void init(void)
             {for (int j=0; j<NPI; j++) {weight[j] = 2.*surf*pds[j]; }}// detJ = 2*surf;
     
+        /** weighted scalar product */
+        inline double weightedScalarProd(const double X[NPI])
+            {return (X[0]*weight[0] + X[1]*weight[1] + X[2]*weight[2] + X[3]*weight[3] );}
+        
+        
 		/** computes the integral contribution of the triangular face */
 		void integrales(std::vector<Facette::prm> const& params, std::vector <double> &BE) const;
 		
+        void energy(Facette::prm const& param,double E[5]);
+        
         /** compute projection of a face */
         void projection(gmm::dense_matrix <double> const& A, std::vector <double> const& B,gmm::dense_matrix <double> &Ap, std::vector <double> &Bp) const;
         

@@ -46,6 +46,45 @@ tiny::mult<double, 3, N, NPI> (u_nod, a, u);
     }
 }
 
+void Fac::energy(Facette::prm const& param,double E[5])
+{
+    double K = param.Ks;
+	double uk00 = param.uk[0];
+	double uk01 = param.uk[1];
+	double uk02 = param.uk[2];    
+		
+	/*-------------------- INTERPOLATION --------------------*/
+	double u_nod[3][N], u[3][NPI];
+    double phi_nod[N];
+    double q[NPI],  phi[NPI];
+		
+	for (int i=0; i<N; i++)
+		{
+		int i_= ind[i];
+		Node &n = (*refNode)[i_];
+		u_nod[Pt::IDX_X][i] = n.u.x(); u_nod[Pt::IDX_Y][i] = n.u.y(); u_nod[Pt::IDX_Z][i] = n.u.z();	        
+		phi_nod[i] =  n.phi;
+        }
+
+	tiny::transposed_mult<double, N, NPI> (phi_nod, a, phi);
+	tiny::mult<double, 3, N, NPI> (u_nod, a, u);
+	/*----------------- FIN INTERPOLATION --------------------*/
+    for (int npi=0; npi<NPI; npi++)
+        { q[npi] = Ms * (u[0][npi]*n.x() + u[1][npi]*n.y() + u[2][npi]*n.z()); }
+	
+	double dens[NPI];
+		
+	for (int npi=0; npi<NPI; npi++)
+        {// cosinus directeurs
+		double al0=uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi];
+		dens[npi] = -K*al0*al0;      // uniaxe
+		}
+	E[1] += weightedScalarProd(dens);
+
+	for (int npi=0; npi<NPI; npi++) { dens[npi] = 0.5*mu0*q[npi]*phi[npi]; }
+	E[2] += weightedScalarProd(dens);
+}
+
 
 void Fac::projection(gmm::dense_matrix <double> const& A,  std::vector <double> const& B,
            gmm::dense_matrix <double> &Ap, std::vector <double> &Bp) const
