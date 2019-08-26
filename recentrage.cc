@@ -50,12 +50,10 @@ if(VERBOSE) {std::cout << "DW dir   : " << DW_dir << std::endl; }
 
 
 
-bool Fem::recentrage(double thres,enum index idx_dir,double m_i)
+bool Fem::recentrage(double thres,enum index idx_dir)
 {
-time_t timeStart;
-time(&timeStart);
-
 thres = std::min(abs(thres), 1.);
+double m_i = Fem::moy<U>(idx_dir);//(Pt::IDX_Z);
 if (fabs(m_i)<thres) return false;
 
 if(VERBOSE) {std::cout << "centering ..." << std::flush;}
@@ -94,19 +92,14 @@ kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 ns=nnIdx[0]; 
 double u2R=node[ns].u(idx_dir);
 
-if (u2L*u2R>0) {
-#ifdef LIBRARY
-    throw runtime_error("Error No Domain Wall");
-#else
+if (u2L*u2R>0)
+    {
     std::cout << "Error No Domain Wall" << std::endl;
     exit(1);
-#endif
    }
 
 assert(u2L*u2R<0);
 double D_i= m_i*0.5*l(idx_dir)*u2L;  // decalage avec signe OK
-
-
 
 for (int i=0; i<NOD; i++){    
     Node &tgt_node = node[i];
@@ -129,8 +122,5 @@ delete queryPt;
 delete [] nnIdx;
 delete [] dists;
 
-time_t timeEnd;
-time(&timeEnd);
-if(VERBOSE) { std::cout << "elapsed time = "<< difftime(timeEnd,timeStart) << "s" << std::endl; }
 return true;
 }

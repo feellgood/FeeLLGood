@@ -144,9 +144,18 @@ while (t < mySettings.tf)
     fem.DW_vz0 = fem.DW_vz;/* mise a jour de la vitesse du dernier referentiel et deplacement de paroi */ 
     fem.DW_z  += fem.DW_vz*dt;
     fem.evolution(); t+=dt; fem.t=t; nt++; flag=0;
-    double mz = fem.moy<U>(Pt::IDX_Z);	    
-    if(mySettings.recentering)
-        { fem.recentrage( 0.1,Pt::IDX_Z,mz); }
+    //double mz = fem.moy<U>(Pt::IDX_Z);	    
+    if(mySettings.recenter)
+        {
+        switch(mySettings.recentering_direction)
+            {
+            case 'X':fem.recentrage( mySettings.threshold,Pt::IDX_X);break;
+            case 'Y':fem.recentrage( mySettings.threshold,Pt::IDX_Y);break;
+            case 'Z':fem.recentrage( mySettings.threshold,Pt::IDX_Z);break;
+            default: std::cout << "unknown recentering direction"<< std::endl; break;
+            }
+        
+        }
     fem.saver(mySettings,fout,nt);
     dt = min(1.1*dt, mySettings.DTMAX); 
     mySettings.dt=dt;

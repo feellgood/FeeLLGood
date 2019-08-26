@@ -159,9 +159,15 @@ else
     sMz = sub_tree.get<std::string>("Mz");
     doCompile();
     }
-        
-recentering = root.get<bool>("recentering",true);
-    
+
+try { sub_tree = root.get_child("recentering"); }
+catch (std::exception &e)
+        { std::cout << e.what() << std::endl; }
+
+recenter = sub_tree.get<bool>("recenter",false);
+recentering_direction = sub_tree.get<char>("direction",'Z');
+threshold = sub_tree.get<double>("threshold",0.1);
+
 try {sub_tree = root.get_child("Bext");}
 catch(std::exception &e)
     { std::cout << e.what() << std::endl; }

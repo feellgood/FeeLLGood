@@ -47,7 +47,13 @@
     "Mz": "tanh(z*20)"
     },
 
-"recentering" : false,
+"recentering" :
+    {
+    "recenter" : false,
+    "direction" : "Z",
+    "threshold" : 0.1
+    },
+    
 "Bext" : [0.0, 0.0, 0.005],
 
 "demagnetization field solver" :

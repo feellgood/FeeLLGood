@@ -192,7 +192,7 @@ or					or
 
 ---------------->|<-------		<-------|---------------->	\f$ m_i = <u_i> > 0 \f$
 */
-bool recentrage(double thres/**< [in] translation parameter */,enum Pt::index idx_dir /**< [in] */,double m_i /**<[in] average magnetization along idx_dir */);
+bool recentrage(double thres/**< [in] threshold parameter */,enum Pt::index idx_dir /**< [in] */);
 
 /** saving function for a solution */
 void saver(Settings &settings, std::ofstream &fout, int nt);

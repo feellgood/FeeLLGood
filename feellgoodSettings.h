@@ -31,7 +31,9 @@ class Settings{
         analytic_corr = true;
         MAXITER = 500;
         REFRESH_PRC = 20;
-        recentering = true;
+        recenter = false;
+        recentering_direction = 'Z';
+        threshold = 0.1;
         
         solverNbTh = 8;
         scalfmmNbTh = 8;
@@ -69,7 +71,10 @@ class Settings{
 	int n1;/**< energy saved every n1 iterations */
 	int n2;/**< magnetic configuration saved every n2 iterations */
 	bool restore;/**< usefull to run a simulation from a previous calculation  */
-    bool recentering;/**< to recenter DW or not */
+    
+    bool recenter;/**< to recenter DW or not */
+	char recentering_direction;/**< recentering direction, should be 'X'|'Y'|'Z' */
+	double threshold;/**< threshold value to recenter or not versus moy(M_recentering_direction) */
 	
 	int solverNbTh;/**< nb of threads for the finite element solver */
 	int scalfmmNbTh;/**< nb of threads for the computation of the demag field with scalfmm */

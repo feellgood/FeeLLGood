@@ -30,7 +30,12 @@ mySettings["restore"] = False
 mySettings["restore from file"] = "sol.in"
 mySettings["initial magnetization"] = {"Mx" : "1-z^2", "My" : "0" , "Mz": "tanh(z*20)"}
 
-mySettings["recentering"] = False
+recentering = {}
+recentering["recenter"] = False
+recentering["direction"] = 'Z'
+recentering["threshold"] = 0.1
+mySettings["recentering"] = recentering
+
 mySettings["Bext"] = [0.0,0.0,0.007]
 
 FEMsolver = {}
