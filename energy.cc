@@ -14,7 +14,8 @@ for (int i_t=0; i_t<TET; i_t++) {
 	
     Tetra::Tet &te = tet[i_t];
     Tetra::prm & param = settings.paramTetra[te.idxPrm];
-    
+    te.energy(param,_E,Hext,uz_drift);
+    /*
     double Ae = param.A;
     double Js = param.J;
     double Ms = nu0 * Js;
@@ -31,9 +32,10 @@ for (int i_t=0; i_t<TET; i_t++) {
     double uk20 = param.uk[2][0];
     double uk21 = param.uk[2][1];
     double uk22 = param.uk[2][2];   
-   
+   */
    /*-------------------- INTERPOLATION --------------------*/
-    double u_nod[3][Tetra::N], u[3][Tetra::NPI];
+   /* 
+   double u_nod[3][Tetra::N], u[3][Tetra::NPI];
     double dudx[3][Tetra::NPI], dudy[3][Tetra::NPI], dudz[3][Tetra::NPI];
     double q[Tetra::NPI],  phi[Tetra::NPI];
     double phi_nod[Tetra::N], negphi_nod[Tetra::N], Hdx[Tetra::NPI], Hdy[Tetra::NPI], Hdz[Tetra::NPI];
@@ -63,8 +65,6 @@ for (int i_t=0; i_t<TET; i_t++) {
 	tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphi_nod, te.dady, Hdy);
 	tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphi_nod, te.dadz, Hdz);
 
-   /*-------------------------------------------------------*/
-	    
     double dens[5][Tetra::NPI];
     double Eelem[5];
 
@@ -92,8 +92,14 @@ for (int i_t=0; i_t<TET; i_t++) {
         dens[4][npi] = 0.;
         }
     tiny::mult<double, 5, Tetra::NPI> (dens, te.weight, Eelem);
-    tiny::add<double, 5> (Eelem, _E);
-    }
+    _E[0] += Eelem[0];
+    _E[1] += Eelem[1];
+    _E[2] += Eelem[2];
+    _E[3] += Eelem[3];
+    _E[4] += Eelem[4];
+    
+    */
+}
 
 /* Contribution des facettes triangulaires a l'energie d'anisotropie */
 

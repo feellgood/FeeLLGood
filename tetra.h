@@ -173,6 +173,11 @@ class Tet{
 		*/		
 		void integrales(std::vector<Tetra::prm> const& params,double Hext[DIM],double Vz,double theta,double dt,double tau_r,gmm::dense_matrix <double> &AE, std::vector <double> &BE)  const;
 
+        /**
+        computes all the contributions to the energy of the tetrahedron
+        */
+        void energy(Tetra::prm const& param,double E[5],const double Hext[DIM],double uz_drift);
+        
 		/**
         computes projection of a tetrahedron
         */

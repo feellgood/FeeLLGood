@@ -3,7 +3,6 @@ contains a namespace to perform simple printing and algebra simple operations on
 \todo this namespace is redondant with gmm, could probably be replaced or improved with overloaded operators and a matrix class, or valarrays
 */
 #include <iostream>
-#include <complex>
 
 /**
 \namespace tiny to grab altogether the templates to compute some linear algebra
@@ -29,15 +28,6 @@ template <typename T, int N> inline T sp(T X[N], T Y[N]) {
    return v;
    }
    
-
-/** in place addition += 
-\return return in Y \f$ Y \mathrel{+}= X \f$
-*/
-template <typename T, int N> inline void add(T X[N], T Y[N]) {
-   for (int i=0; i<N; i++) 
-       Y[i]+= X[i];
-   }
-
 /** mat vector multiplication
 \return returns Y \f$ Y = A X \f$
 */

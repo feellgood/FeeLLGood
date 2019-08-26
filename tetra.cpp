@@ -67,7 +67,7 @@ double beta = params[idxPrm].beta;
 double Abis = 2.0*A/J;
 double Kbis = 2.0*K/J;
 double K3bis = 2.0*K3/J;
-double s_dt = theta*dt;//theta du theta schema, defini dans config.h
+double s_dt = theta*dt;//theta du theta schema
 
 /*-------------------- INTERPOLATION --------------------*/
 double u_nod[3][N]; 
@@ -239,6 +239,89 @@ R = dt/tau_r*abs(log(dt/tau_r));
     }
 }
 
+void Tet::energy(Tetra::prm const& param,double E[5],const double Hext[DIM],double uz_drift)
+{
+double Ae = param.A;
+double Js = param.J;
+double Ms = nu0 * Js;
+double K = param.K;
+double K3 = param.K3;
+    
+double uk00 = param.uk[0][0];
+double uk01 = param.uk[0][1];
+double uk02 = param.uk[0][2];
+double uk10 = param.uk[1][0];
+double uk11 = param.uk[1][1];
+double uk12 = param.uk[1][2];
+double uk20 = param.uk[2][0];
+double uk21 = param.uk[2][1];
+double uk22 = param.uk[2][2];   
+   
+   /*-------------------- INTERPOLATION --------------------*/
+double u_nod[3][N], u[3][NPI];
+double dudx[3][NPI], dudy[3][NPI], dudz[3][NPI];
+double q[NPI],  phi[NPI];
+double phi_nod[N], negphi_nod[N], Hdx[NPI], Hdy[NPI], Hdz[NPI];
+
+for (int i=0; i<N; i++)
+    {
+    int i_= ind[i];
+    Node &n = (*refNode)[i_];
+    u_nod[Pt::IDX_X][i] = n.u.x(); u_nod[Pt::IDX_Y][i] = n.u.y(); u_nod[Pt::IDX_Z][i] = n.u.z();
+    phi_nod[i] =  n.phi;
+    negphi_nod[i] = -n.phi;
+    }
+
+tiny::transposed_mult<double, N, NPI> (phi_nod, a, phi);
+tiny::mult<double, 3, N, NPI> (u_nod, a, u);
+tiny::mult<double, 3, N, NPI> (u_nod, dadx, dudx);
+tiny::mult<double, 3, N, NPI> (u_nod, dady, dudy);
+tiny::mult<double, 3, N, NPI> (u_nod, dadz, dudz);
+
+for (int npi=0; npi<NPI; npi++){
+        //double div_u = dudx[0][npi] + dudy[1][npi] + dudz[2][npi];
+    q[npi] = -Ms*(dudx[0][npi] + dudy[1][npi] + dudz[2][npi]);
+    }
+
+tiny::transposed_mult<double, N, NPI> (negphi_nod, dadx, Hdx);
+tiny::transposed_mult<double, N, NPI> (negphi_nod, dady, Hdy);
+tiny::transposed_mult<double, N, NPI> (negphi_nod, dadz, Hdz);
+
+   /*-------------------------------------------------------*/
+	    
+double dens[5][NPI];
+double Eelem[5];
+
+for (int npi=0; npi<NPI; npi++) {
+
+        // cosinus directeurs
+    double al0=uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi];
+    double al1=uk10*u[0][npi] + uk11*u[1][npi] + uk12*u[2][npi];
+    double al2=uk20*u[0][npi] + uk21*u[1][npi] + uk22*u[2][npi];
+
+//        cout << dudx[0][npi] << "\t" << dudx[1][npi] << "\t" << dudx[2][npi] << endl;
+        dens[0][npi] = Ae*(sq( dudx[0][npi] ) + sq( dudy[0][npi] ) + sq( dudz[0][npi] )+
+                           sq( dudx[1][npi] ) + sq( dudy[1][npi] ) + sq( dudz[1][npi] )+
+                           sq( dudx[2][npi] ) + sq( dudy[2][npi] ) + sq( dudz[2][npi] ) );
+
+        dens[1][npi] = -K  * sq(al0);      // uniaxe
+        dens[1][npi]+= +K3 * (sq(al0) * sq(al1) + sq(al1) * sq(al2) + sq(al2) * sq(al0)); //cubique
+ 
+ //       dens[2][npi] = -0.5*Js* (u[0][npi]*Hdx[npi] + u[1][npi]*Hdy[npi] + u[2][npi]*Hdz[npi]);
+
+        dens[2][npi] = 0.5*mu0*q[npi]*phi[npi];
+
+        dens[3][npi] = -Js*(u[0][npi]*Hext[0] + u[1][npi]*Hext[1] + u[2][npi]*Hext[2] + uz_drift*Hext[2]);
+
+        dens[4][npi] = 0.;
+        }
+    tiny::mult<double, 5, NPI> (dens, weight, Eelem);
+    E[0] += Eelem[0];
+    E[1] += Eelem[1];
+    E[2] += Eelem[2];
+    E[3] += Eelem[3];
+    E[4] += Eelem[4];
+}
 
 void Tet::projection(//mtl::dense2D <double> &P,
            gmm::dense_matrix <double> const& A,  std::vector <double> const& B,
