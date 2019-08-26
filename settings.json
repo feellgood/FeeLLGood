@@ -12,6 +12,7 @@
     {
     "filename" : "wire_d70_L1000.msh",
     "scaling factor" : 1e-9,
+    "epsilon" : 1e-40,
     "volume_regions" :
         {
         "300" : 
@@ -59,8 +60,7 @@
     {
     "nbThreads" : 16,
     "max(iter)" : 500,
-    "refresh preconditionner every" : 20,
-    "epsilon" : 1e-40
+    "refresh preconditionner every" : 20
     },
 
 "time integration" :

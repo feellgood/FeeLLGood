@@ -56,7 +56,8 @@ try { sub_tree = root.get_child("mesh"); }
 
 pbName = sub_tree.get<std::string>("filename");
 double s = sub_tree.get<double>("scaling factor",0.0);
-    
+EPSILON = sub_tree.get<double>("epsilon",1e-16);
+
 if (s <= 0.0)
     {
     std::cerr << "scaling factor must be defined and strictly positive in json settings file" << std::endl;
@@ -181,7 +182,7 @@ try { sub_tree = root.get_child("finite element solver"); }
 catch (std::exception &e)
     { std::cout << e.what() << std::endl; }
 solverNbTh = sub_tree.get<int>("nbThreads",8);
-EPSILON = sub_tree.get<double>("epsilon",1e-16);
+
 MAXITER = sub_tree.get<int>("max(iter)",500);
 REFRESH_PRC = sub_tree.get<int>("refresh preconditionner every",20);
 

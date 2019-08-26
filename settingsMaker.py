@@ -14,6 +14,7 @@ mySettings["outputs"] = outputs
 mesh = {}
 mesh["filename"] = "wire_d70_L1000.msh"
 mesh["scaling factor"] = 1e-9
+mesh["epsilon"] = 1e-40
 vol300 = {"Ae":1e-11, "Js":1.0, "Ka":0.0, "a" : [[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,1.0]], 
         "alpha":0.05
         }
@@ -36,7 +37,6 @@ FEMsolver = {}
 FEMsolver["nbThreads"] = 16
 FEMsolver["max(iter)"] = 500
 FEMsolver["refresh preconditionner every"] = 20
-FEMsolver["epsilon"] = 1e-40
 
 mySettings["finite element solver"] = FEMsolver
 
