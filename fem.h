@@ -19,14 +19,6 @@ It does also contains the definition of many constants for the solver, and for s
 #include <time.h>
 #include <sys/times.h>
 #include <unistd.h>
-/*
-#include "boost/numeric/mtl/mtl.hpp"
-#include "boost/numeric/itl/itl.hpp"
-
-#include <boost/numeric/mtl/matrix/inserter.hpp>
-#include <boost/numeric/mtl/operation/set_to_zero.hpp>
-#include <boost/numeric/mtl/interface/vpt.hpp>
-*/
 
 #include "config.h"
 #include "feellgoodSettings.h"
@@ -58,7 +50,6 @@ struct Fem{
 	
 	double fmm_normalizer;/**< normalizing geometrical constant for the computation of the demag field */
 	
-	//double locmax;/**< no idea */
 	double t;/**< physical current time of the simulation */
 	
 	double vmax;/**< maximum speed of magnetization */
@@ -82,7 +73,6 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
 	std::vector <Facette::Fac>  fac; /**< face container */
 	std::vector <Tetra::Tet>  tet; /**< tetrahedron container */
     
-    //double Bext;/**< amplitude of the applied field */
     triple Hext;/**< external applied field direction (should be normalized) */
     
     ANNkd_tree* kdtree;/**< ANN kdtree to find efficiently the closest set of nodes to a physical point in the mesh  */

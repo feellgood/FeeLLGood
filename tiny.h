@@ -34,7 +34,7 @@ template <typename T, int N> inline T sp(T X[N], T Y[N]) {
 /** mat vector multiplication
 \return returns Y \f$ Y = A X \f$
 */
-template <typename T, int M, int N> inline void mult(T A[M][N], T X[N], T Y[M]) {
+template <typename T, int M, int N> inline void mult(const T A[M][N],const T X[N], T Y[M]) {
    for (int i=0; i<M; i++) {
        T v=T(0);
        for (int j=0; j<N; j++) 

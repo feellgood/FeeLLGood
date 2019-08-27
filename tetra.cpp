@@ -239,7 +239,7 @@ R = dt/tau_r*abs(log(dt/tau_r));
     }
 }
 
-void Tet::energy(Tetra::prm const& param,double E[5],const double Hext[DIM],double uz_drift)
+void Tet::energy(Tetra::prm const& param,double E[5],const double Hext[DIM],double uz_drift) const
 {
 double Ae = param.A;
 double Js = param.J;

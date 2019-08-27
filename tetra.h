@@ -180,7 +180,7 @@ class Tet{
         /**
         computes all the contributions to the energy of the tetrahedron
         */
-        void energy(Tetra::prm const& param,double E[5],const double Hext[DIM],double uz_drift);
+        void energy(Tetra::prm const& param,double E[5],const double Hext[DIM],double uz_drift) const;
         
 		/**
         computes projection of a tetrahedron

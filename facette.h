@@ -125,7 +125,7 @@ class Fac{
         inline double weightedScalarProd(const double X[NPI]) const
             {return (X[0]*weight[0] + X[1]*weight[1] + X[2]*weight[2] + X[3]*weight[3] );}
         
-        /** interpolation : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
+        /** interpolation for 3D vector field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
         inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double result[DIM][NPI]) const
         {
         double vec_nod[DIM][N];
@@ -140,6 +140,7 @@ class Fac{
         tiny::mult<double, DIM, N, NPI> (vec_nod, a, result);
         }
         
+        /** interpolation for scalar field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
         inline void interpolation(std::function<double (Nodes::Node)> getter,double result[NPI]) const
         {
         double scalar_nod[N];    
@@ -155,7 +156,7 @@ class Fac{
 		void integrales(std::vector<Facette::prm> const& params, std::vector <double> &BE) const;
 		
         /** total energy of the facette = anisotropy + demag */
-        void energy(Facette::prm const& param,double E[5]);
+        void energy(Facette::prm const& param,double E[5]) const;
         
         /** anisotropy energy of the facette */
         double anisotropyEnergy(Facette::prm const& param) const;

@@ -48,7 +48,7 @@ interpolation(Nodes::get_u0,u);
     }
 }
 
-void Fac::energy(Facette::prm const& param,double E[5])
+void Fac::energy(Facette::prm const& param,double E[5]) const
 {//E : 1-anisotropy 2-demagnetizing
     double K = param.Ks;
 	double uk00 = param.uk[0];
