@@ -71,6 +71,15 @@ if ( Pt::norme2( u0 ) > 0)
 
 };//end struct node
 
+/** getter for u0*/
+inline const Pt::pt3D get_u0(Node const& n) {return n.u0;}
+
+/** getter for u */
+inline const Pt::pt3D get_u(Node const& n) {return n.u;}
+
+/** getter for phi */
+inline double get_phi(Node const& n) {return n.phi;}
+
 } //end namespace Nodes
 
 #endif /* node_h */

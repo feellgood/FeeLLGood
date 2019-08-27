@@ -6,6 +6,8 @@
   header containing Fac class, and some constants and a less_than operator to redo orientation of triangular faces
  */
 
+#include <functional>
+
 #include "gmm/gmm_kernel.h"
 
 typedef gmm::wsvector <double>   write_vector;/**< gmm write vector */
@@ -16,6 +18,8 @@ typedef gmm::row_matrix	<read_vector>    read_matrix; /**< gmm read sparse matri
 
 #include "config.h"
 #include "node.h"
+
+#include "tiny.h"
 
 /** convenient typedef for mtl4 */
 //typedef typename mtl::Collection< mtl::compressed2D<double> >::value_type v_type;
@@ -121,8 +125,31 @@ class Fac{
         inline double weightedScalarProd(const double X[NPI]) const
             {return (X[0]*weight[0] + X[1]*weight[1] + X[2]*weight[2] + X[3]*weight[3] );}
         
-        /** interpolation */
-        void interpolation(double u[DIM][NPI]) const;
+        /** interpolation : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
+        inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double result[DIM][NPI]) const
+        {
+        double vec_nod[DIM][N];
+        for (int i=0; i<N; i++)
+            {
+            Nodes::Node const& node = (*refNode)[ ind[i] ];
+    
+            vec_nod[0][i]   = getter(node).x();
+            vec_nod[1][i]   = getter(node).y();
+            vec_nod[2][i]   = getter(node).z();
+            }
+        tiny::mult<double, DIM, N, NPI> (vec_nod, a, result);
+        }
+        
+        inline void interpolation(std::function<double (Nodes::Node)> getter,double result[NPI]) const
+        {
+        double scalar_nod[N];    
+        for (int i=0; i<N; i++)
+            {
+            Nodes::Node const& n = (*refNode)[ ind[i] ];
+            scalar_nod[i] =  getter(n);
+            }
+        tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result);
+        }
         
 		/** computes the integral contribution of the triangular face */
 		void integrales(std::vector<Facette::prm> const& params, std::vector <double> &BE) const;

@@ -1,24 +1,8 @@
 #include "facette.h"
 
-#include "tiny.h"
+
 
 using namespace Facette;
-
-void Fac::interpolation(double u[DIM][NPI]) const
-{
-double u_nod[DIM][N];
-
-for (int i=0; i<N; i++)
-    {
-    Nodes::Node const& node = (*refNode)[ ind[i] ];
-    
-    u_nod[0][i]   = node.u0.x();
-    u_nod[1][i]   = node.u0.y();
-    u_nod[2][i]   = node.u0.z();
-    }
-
-tiny::mult<double, 3, N, NPI> (u_nod, a, u);
-}
 
 void Fac::integrales(std::vector<Facette::prm> const& params, std::vector <double> &BE) const
 {
@@ -31,9 +15,10 @@ double uk00 = params[idxPrm].uk[0];
 double uk01 = params[idxPrm].uk[1];
 double uk02 = params[idxPrm].uk[2];
 double Kbis = 2.0*Ks/Js;
-/*-------------------- INTERPOLATION --------------------*/
-double u_nod[3][N], u[3][NPI];
 
+double u[DIM][NPI];
+/*-------------------- INTERPOLATION --------------------
+double u_nod[3][N];
 for (int i=0; i<N; i++){
     Nodes::Node const& node = (*refNode)[ ind[i] ];
     
@@ -44,7 +29,8 @@ for (int i=0; i<N; i++){
 
 tiny::mult<double, 3, N, NPI> (u_nod, a, u);
 
-/*-------------------------------------------------------*/
+-------------------------------------------------------*/
+interpolation(Nodes::get_u0,u);
 
     for (int npi=0; npi<NPI; npi++)
         {
@@ -68,8 +54,10 @@ void Fac::energy(Facette::prm const& param,double E[5])
 	double uk00 = param.uk[0];
 	double uk01 = param.uk[1];
 	double uk02 = param.uk[2];    
-		
-	/*-------------------- INTERPOLATION --------------------*/
+	
+    double u[DIM][NPI];
+    double q[NPI],  phi[NPI];
+	/*-------------------- INTERPOLATION --------------------
 	double u_nod[3][N], u[3][NPI];
     double phi_nod[N];
     double q[NPI],  phi[NPI];
@@ -84,7 +72,11 @@ void Fac::energy(Facette::prm const& param,double E[5])
 
 	tiny::transposed_mult<double, N, NPI> (phi_nod, a, phi);
 	tiny::mult<double, 3, N, NPI> (u_nod, a, u);
-	/*----------------- FIN INTERPOLATION --------------------*/
+	----------------- FIN INTERPOLATION --------------------*/
+    
+    interpolation(Nodes::get_u,u);
+    interpolation(Nodes::get_phi,phi);
+    
     for (int npi=0; npi<NPI; npi++)
         { q[npi] = Ms * (u[0][npi]*n.x() + u[1][npi]*n.y() + u[2][npi]*n.z()); }
 	
@@ -103,18 +95,10 @@ void Fac::energy(Facette::prm const& param,double E[5])
 
 double Fac::anisotropyEnergy(Facette::prm const& param) const
 {
-/*-------------------- INTERPOLATION --------------------*/
-double u_nod[DIM][N], u[DIM][NPI];
+double  u[DIM][NPI];
 
-for (int i=0; i<N; i++)
-    {
-    int i_= ind[i];
-    Nodes::Node &n = (*refNode)[i_];
-    u_nod[Pt::IDX_X][i] = n.u.x(); u_nod[Pt::IDX_Y][i] = n.u.y(); u_nod[Pt::IDX_Z][i] = n.u.z();	        
-    }
-tiny::mult<double, DIM, N, NPI> (u_nod, a, u);
-/*-----------------FIN INTERPOLATION --------------------*/
-    
+interpolation(Nodes::get_u,u);
+
 double uk00 = param.uk[0];
 double uk01 = param.uk[1];
 double uk02 = param.uk[2];    
@@ -130,21 +114,11 @@ return weightedScalarProd(dens);
 
 double Fac::demagEnergy(void) const
 {
-/*-------------------- INTERPOLATION --------------------*/    
 double q[NPI],  phi[NPI];
-double u_nod[DIM][N], u[DIM][NPI];
-double phi_nod[N];
+double u[DIM][NPI];
 
-for (int i=0; i<N; i++)
-		{
-		int i_= ind[i];
-		Nodes::Node &n = (*refNode)[i_];
-        u_nod[Pt::IDX_X][i] = n.u.x(); u_nod[Pt::IDX_Y][i] = n.u.y(); u_nod[Pt::IDX_Z][i] = n.u.z();
-		phi_nod[i] =  n.phi;
-        }
-tiny::mult<double, DIM, N, NPI> (u_nod, a, u);
-tiny::transposed_mult<double, N, NPI> (phi_nod, a, phi);
-/*-----------------FIN INTERPOLATION --------------------*/
+interpolation(Nodes::get_u,u);
+interpolation(Nodes::get_phi,phi);
 
 for (int npi=0; npi<NPI; npi++)
         { q[npi] = Ms * (u[0][npi]*n.x() + u[1][npi]*n.y() + u[2][npi]*n.z()); }

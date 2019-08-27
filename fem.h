@@ -33,10 +33,9 @@ It does also contains the definition of many constants for the solver, and for s
 
 #include "ANN.h" // ANN declarations
 
-#include "tiny.h"
 #include "pt3D.h"
 #include "tetra.h"
-#include "facette.h"
+#include "facette.h" // tiny.h est includé là
 
 #include "node.h"
 
