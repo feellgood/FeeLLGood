@@ -35,7 +35,7 @@ class LinAlgebra
 public:
 	/** constructor */	
     inline LinAlgebra(Settings & s,const int _NOD,
-                      std::vector<Node> & myNode,
+                      std::vector<Nodes::Node> & myNode,
                       std::vector <Tetra::Tet> & myTet,
                       std::vector <Facette::Fac> & myFace) :  NOD(_NOD),refNode(&myNode),refFac(&myFace)
     {
@@ -82,7 +82,7 @@ public:
     inline double get_v_max() {return v_max;}
     
     /** getter node */
-    inline Node getNode(int i) {return (*refNode)[i];}
+    inline Nodes::Node getNode(int i) {return (*refNode)[i];}
     
     /** getter node physical position */
     inline Pt::pt3D getNodePhysPos(int i) {return (*refNode)[i].p;} 
@@ -90,7 +90,7 @@ public:
     
 private:
     const int NOD;/**< total number of nodes, also an offset for filling sparseMatrix, initialized by constructor */
-    std::vector<Node>  *refNode;/**< direct access to the Nodes */
+    std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
 	std::vector <Facette::Fac> *refFac; /**< direct access to the faces */
 	
 	std::vector < std::vector <Tetra::Tet> > refTet; /**< splitted copy of the tetrahedrons for multithreading */
@@ -115,7 +115,7 @@ private:
     
 /** computes the local vector basis {ep,eq} in the tangeant plane for projection on the elements */
 inline void base_projection(void)
-	{ std::for_each(refNode->begin(),refNode->end(),[](Node &n) { n.buildBase_epeq();}); }
+	{ std::for_each(refNode->begin(),refNode->end(),[](Nodes::Node &n) { n.buildBase_epeq();}); }
 	
 }; // fin class linAlgebra
 

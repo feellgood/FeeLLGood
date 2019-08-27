@@ -118,14 +118,23 @@ class Fac{
             {for (int j=0; j<NPI; j++) {weight[j] = 2.*surf*pds[j]; }}// detJ = 2*surf;
     
         /** weighted scalar product */
-        inline double weightedScalarProd(const double X[NPI])
+        inline double weightedScalarProd(const double X[NPI]) const
             {return (X[0]*weight[0] + X[1]*weight[1] + X[2]*weight[2] + X[3]*weight[3] );}
         
+        /** interpolation */
+        void interpolation(double u[DIM][NPI]) const;
         
 		/** computes the integral contribution of the triangular face */
 		void integrales(std::vector<Facette::prm> const& params, std::vector <double> &BE) const;
 		
+        /** total energy of the facette = anisotropy + demag */
         void energy(Facette::prm const& param,double E[5]);
+        
+        /** anisotropy energy of the facette */
+        double anisotropyEnergy(Facette::prm const& param) const;
+        
+        /** demagnetizing energy of the facette */
+        double demagEnergy(void) const;
         
         /** compute projection of a face */
         void projection(gmm::dense_matrix <double> const& A, std::vector <double> const& B,gmm::dense_matrix <double> &Ap, std::vector <double> &Bp) const;
@@ -150,11 +159,11 @@ class Fac{
 		void calc_surf(void);
         
         /** pointer to the nodes */
-        inline void setRefNode(std::vector<Node>  *_p_node) {refNode = _p_node;}
+        inline void setRefNode(std::vector<Nodes::Node>  *_p_node) {refNode = _p_node;}
         
     private:
         int NOD;/**< number of nodes */
-        std::vector<Node>  *refNode;/**< direct access to the Nodes */
+        std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
         gmm::dense_matrix <double> Ksp;/**< matrix initialized by constructor */
         std::vector <double> Lsp;/**< vector initialized by constructor */
 	};

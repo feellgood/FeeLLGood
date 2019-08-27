@@ -88,7 +88,7 @@ if(VERBOSE){
     FSize idxPart=0;
 
     std::for_each(fem.node.begin(),fem.node.end(),
-    [c,norm,&tree,&idxPart](Node const& n)
+    [c,norm,&tree,&idxPart](Nodes::Node const& n)
         {
         Pt::pt3D pTarget = n.p - c; pTarget *= norm;
         const FPoint<FReal> particlePosition(pTarget.x(), pTarget.y(), pTarget.z());
@@ -159,7 +159,7 @@ return 0;
 /**
 computes correction on potential on facettes using fem struct
 */
-template <int Hv> double potential(std::vector<Node> const& myNode, Facette::Fac const& fac, int i);
+template <int Hv> double potential(std::vector<Nodes::Node> const& myNode, Facette::Fac const& fac, int i);
 
 
 /**
@@ -198,7 +198,7 @@ std::for_each(fem.tet.begin(),fem.tet.end(),
 
     for (int i=0; i<Tetra::N; i++)
         {
-        Node &node = fem.node[ tet.ind[i] ];
+        Nodes::Node &node = fem.node[ tet.ind[i] ];
         u_nod[Pt::IDX_X][i] = (Hv? node.v.x(): node.u.x());
         u_nod[Pt::IDX_Y][i] = (Hv? node.v.y(): node.u.y());
         u_nod[Pt::IDX_Z][i] = (Hv? node.v.z(): node.u.z());        
@@ -228,7 +228,7 @@ std::for_each(fem.fac.begin(),fem.fac.end(),
     double u_nod[3][Facette::N], u[3][Facette::NPI];
     for (int i=0; i<Facette::N; i++)
         {
-        Node &node = fem.node[ fac.ind[i] ];
+        Nodes::Node &node = fem.node[ fac.ind[i] ];
         u_nod[Pt::IDX_X][i] = (Hv? node.v.x(): node.u.x());
         u_nod[Pt::IDX_Y][i] = (Hv? node.v.y(): node.u.y());
         u_nod[Pt::IDX_Z][i] = (Hv? node.v.z(): node.u.z());
@@ -330,7 +330,7 @@ delete [] corr;
 }
 
 template <int Hv>
-double potential(std::vector<Node> const& myNode, Facette::Fac const& fac, int i) // template, mais Hv est utilisé comme un booleen 
+double potential(std::vector<Nodes::Node> const& myNode, Facette::Fac const& fac, int i) // template, mais Hv est utilisé comme un booleen 
 {
   double Ms = fac.Ms;
   Pt::pt3D n = fac.n;
@@ -341,9 +341,9 @@ double potential(std::vector<Node> const& myNode, Facette::Fac const& fac, int i
  int i_,ii_,iii_;
  i_=fac.ind[i];  ii_=fac.ind[ii];  iii_=fac.ind[iii];
 
-Node const& node1 = myNode[i_];
-Node const& node2 = myNode[ii_];
-Node const& node3 = myNode[iii_];
+Nodes::Node const& node1 = myNode[i_];
+Nodes::Node const& node2 = myNode[ii_];
+Nodes::Node const& node3 = myNode[iii_];
 
 Pt::pt3D p1p2 = node2.p - node1.p;
 Pt::pt3D p1p3 = node3.p - node1.p;

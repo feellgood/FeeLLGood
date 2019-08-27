@@ -106,7 +106,7 @@ fout << "#time : " << t <<endl;
 
 int i=0;
 std::for_each(node.begin(),node.end(),
-    [&i,s,&fout](Node &n)
+    [&i,s,&fout](Nodes::Node &n)
         { 
         Pt::pt3D p = n.p/s;
         fout << i << "\t" << p << "\t" << n.u << "\t" << n.phi << endl;
@@ -139,7 +139,7 @@ for (int t=0; t<TET; t++){
 
     for (int i=0; i<Tetra::N; i++){
         int i_= te.ind[i];
-	    Node &n = node[i_];
+	    Nodes::Node &n = node[i_];
 	    nod[0][i] = n.p.x();
 	    nod[1][i] = n.p.y();
 	    nod[2][i] = n.p.z();

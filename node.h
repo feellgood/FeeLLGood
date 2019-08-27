@@ -7,6 +7,18 @@
 
 #include "pt3D.h"
 
+/**
+ \namespace Nodes
+ to grab altogether some dedicated functions and data of the nodes
+ */
+namespace Nodes
+{
+    /** 
+     *convenient enum mainly to access some data values in calculations, used by some templates 
+     */
+    enum index 
+        {IDX_p = 0,IDX_u0 = 1,IDX_v0 = 2,IDX_u = 3,IDX_v = 4,IDX_ep = 5,IDX_eq = 6,IDX_phi0 = 7,IDX_phi = 8,IDX_phiv0 = 9,IDX_phiv = 10};
+
 /** \struct Node
 Node is containing physical point of coordinates \f$ p = (x,y,z) \f$, magnetization value at \f$ m(p,t) \f$. 
 Many other values for the computation of the scalar potential \f$ \phi \f$
@@ -59,6 +71,6 @@ if ( Pt::norme2( u0 ) > 0)
 
 };//end struct node
 
-
+} //end namespace Nodes
 
 #endif /* node_h */

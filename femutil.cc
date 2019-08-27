@@ -13,23 +13,23 @@ if (!kdtree) SYSTEM_ERROR;
 
 int i=0;
 std::for_each(node.begin(),node.end(),
-[this,&i](Node const& n) 
+[this,&i](Nodes::Node const& n) 
 	{ this->pts[i][0] = n.p.x();this->pts[i][1] = n.p.y();this->pts[i][2] = n.p.z();i++; } 
 );// end for_each
 
-const auto minX = std::min_element(node.begin(),node.end(),[](Node const& n1,Node const& n2) {return (n1.p.x()<n2.p.x()); } );
+const auto minX = std::min_element(node.begin(),node.end(),[](Nodes::Node const& n1,Nodes::Node const& n2) {return (n1.p.x()<n2.p.x()); } );
 double xmin = minX->p.x(); 
-const auto maxX = std::max_element(node.begin(),node.end(),[](Node const& n1,Node const& n2) {return (n1.p.x()<n2.p.x()); } );
+const auto maxX = std::max_element(node.begin(),node.end(),[](Nodes::Node const& n1,Nodes::Node const& n2) {return (n1.p.x()<n2.p.x()); } );
 double xmax = maxX->p.x();
 
-const auto minY = std::min_element(node.begin(),node.end(),[](Node const& n1,Node const& n2) {return (n1.p.y()<n2.p.y()); } );
+const auto minY = std::min_element(node.begin(),node.end(),[](Nodes::Node const& n1,Nodes::Node const& n2) {return (n1.p.y()<n2.p.y()); } );
 double ymin = minY->p.y();
-const auto maxY = std::max_element(node.begin(),node.end(),[](Node const& n1,Node const& n2) {return (n1.p.y()<n2.p.y()); } );
+const auto maxY = std::max_element(node.begin(),node.end(),[](Nodes::Node const& n1,Nodes::Node const& n2) {return (n1.p.y()<n2.p.y()); } );
 double ymax = maxY->p.y();
 
-const auto minZ = std::min_element(node.begin(),node.end(),[](Node const& n1,Node const& n2) {return (n1.p.z()<n2.p.z()); } );
+const auto minZ = std::min_element(node.begin(),node.end(),[](Nodes::Node const& n1,Nodes::Node const& n2) {return (n1.p.z()<n2.p.z()); } );
 double zmin = minZ->p.z();
-const auto maxZ = std::max_element(node.begin(),node.end(),[](Node const& n1,Node const& n2) {return (n1.p.z()<n2.p.z()); } );
+const auto maxZ = std::max_element(node.begin(),node.end(),[](Nodes::Node const& n1,Nodes::Node const& n2) {return (n1.p.z()<n2.p.z()); } );
 double zmax = maxZ->p.z();
 
 // calcul du diametre et du centrage

@@ -166,7 +166,7 @@ class Tet{
 		void init(double epsilon);
         
         /** weighted scalar product */
-        inline double weightedScalarProd(const double X[NPI])
+        inline double weightedScalarProd(const double X[NPI]) const
             {return (X[0]*weight[0] + X[1]*weight[1] + X[2]*weight[2] + X[3]*weight[3] +X[4]*weight[4]);}
 		
 		/** basic region infos */		
@@ -216,11 +216,11 @@ class Tet{
 		void calc_vol(void);
     
         /** pointer to the nodes */
-        inline void setRefNode(std::vector<Node>  *_p_node) {refNode = _p_node;}
+        inline void setRefNode(std::vector<Nodes::Node>  *_p_node) {refNode = _p_node;}
         
     private:
         int NOD;/**< total number of nodes, also an offset for filling sparseMatrix */
-        std::vector<Node>  *refNode;/**< direct access to the Nodes */
+        std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
         
         gmm::dense_matrix <double> Kp;/**< Kp(2*N,2*N) initialized by constructor */
         std::vector <double>  Lp;/**< Lp(2*N) initialized by constructor  */

@@ -79,7 +79,7 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
 	double Etot;/**< total energy */
 	double evol;/**< increment dE for dt */
 	double phy;/**< no idea */
-	std::vector <Node> node; /**< node container */
+	std::vector <Nodes::Node> node; /**< node container */
 	std::vector <Facette::Fac>  fac; /**< face container */
 	std::vector <Tetra::Tet>  tet; /**< tetrahedron container */
     
@@ -110,14 +110,14 @@ Undo the action of one or many "vsolve" runs in case of failure.
 Demagnetizing field and energies don't need to be reset, because they won't be updated if failure is detected.
 I don't know how to cleanly reset "fem.DW_vz". BC
 */
-inline void reset(void) { std::for_each(node.begin(),node.end(),[](Node &n) {n.reset();}); }
+inline void reset(void) { std::for_each(node.begin(),node.end(),[](Nodes::Node &n) {n.reset();}); }
 
 /**
 time evolution : one step in time
 */
 inline void evolution(void)
 {
-std::for_each(node.begin(), node.end(), [](Node &n){ n.evolution();} );
+std::for_each(node.begin(), node.end(), [](Nodes::Node &n){ n.evolution();} );
 for (int e=0; e<4; e++) { E0[e] = E[e]; }
 Etot0 = Etot;
 }
@@ -135,7 +135,7 @@ std::for_each(tet.begin(),tet.end(),[epsilon](Tetra::Tet &t) { t.init(epsilon); 
 computes an analytical initial magnetization distribution as a starting point for the simulation
 */
 inline void init_distrib(Settings &mySets)
-	{ std::for_each( node.begin(),node.end(), [this,&mySets](Node &n) 
+	{ std::for_each( node.begin(),node.end(), [this,&mySets](Nodes::Node &n) 
         {
         Pt::pt3D pNorm = Pt::pt3D( (n.p.x() - c.x())/l.x() , (n.p.y() - c.y())/l.y() , (n.p.z() - c.z())/l.z() );
         n.u = mySets.getValue(pNorm);
@@ -220,7 +220,7 @@ std::for_each(tet.begin(),tet.end(),[this,&sum,&d](Tetra::Tet &te)
     for (int ie=0; ie<Tetra::N; ie++) 
         {
         int i = te.ind[ie];
-        Node &n = node[i];
+        Nodes::Node &n = node[i];
         if(UorV) { val_nod[ie] = n.u(d);} else { val_nod[ie] = n.v(d);} 
         }
     tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (val_nod, Tetra::a, val);

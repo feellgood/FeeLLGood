@@ -151,7 +151,7 @@ double v2max = 0.0;
 
 int i=0;
 std::for_each(refNode->begin(),refNode->end(),
-    [this,&i,&v2max,&Xr](Node &n)
+    [this,&i,&v2max,&Xr](Nodes::Node &n)
         {
         double vp = Xr[i];
         double vq = Xr[NOD+i];

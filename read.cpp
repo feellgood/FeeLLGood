@@ -128,8 +128,8 @@ t = stod(str.substr(idx));
 if(VERBOSE) { cout << ".sol file: " << str << " @ time t = " << t << endl; }
 
 for (int i=0; i<NOD; i++){
-    Node &n = node[i];
-    Node node_;
+    Nodes::Node &n = node[i];
+    Nodes::Node node_;
     int i_;
     fin >> i_ >>  node_.p >> n.u >> n.phi;// carefull! >> is overloaded for class pt3D
 

@@ -80,7 +80,7 @@ double dvdx[3][NPI], dvdy[3][NPI], dvdz[3][NPI];
 double negphiv0_nod[N], Hvx[NPI], Hvy[NPI], Hvz[NPI];
 
 for (int i=0; i<N; i++){
-    Node const& node = (*refNode)[ ind[i] ];
+    Nodes::Node const& node = (*refNode)[ ind[i] ];
     u_nod[Pt::IDX_X][i]  = node.u0.x(); u_nod[Pt::IDX_Y][i] = node.u0.y(); u_nod[Pt::IDX_Z][i]  = node.u0.z();
     v_nod[Pt::IDX_X][i]  = node.v0.x(); v_nod[Pt::IDX_Y][i] = node.v0.y(); v_nod[Pt::IDX_Z][i]  = node.v0.z();			
     negphi0_nod[i]  = -node.phi0;
@@ -266,7 +266,7 @@ double phi_nod[N], negphi_nod[N], Hdx[NPI], Hdy[NPI], Hdz[NPI];
 for (int i=0; i<N; i++)
     {
     int i_= ind[i];
-    Node &n = (*refNode)[i_];
+    Nodes::Node &n = (*refNode)[i_];
     u_nod[Pt::IDX_X][i] = n.u.x(); u_nod[Pt::IDX_Y][i] = n.u.y(); u_nod[Pt::IDX_Z][i] = n.u.z();
     phi_nod[i] =  n.phi;
     negphi_nod[i] = -n.phi;
@@ -335,7 +335,7 @@ thread_local gmm::dense_matrix <double> PA(2*N,3*N);
 //myP.D[0][0] = matBlocDiag::BlocElem(1,2,3,4);
 
 for (int i=0; i<N; i++){
-    Node const& n = (*refNode)[ind[i]];
+    Nodes::Node const& n = (*refNode)[ind[i]];
     P(i,i)  = n.ep.x();  P(i,N+i)  = n.ep.y();  P(i,2*N+i)  = n.ep.z();
     P(N+i,i)= n.eq.x();  P(N+i,N+i)= n.eq.y();  P(N+i,2*N+i)= n.eq.z();
     }
@@ -355,7 +355,7 @@ thread_local gmm::dense_matrix <double> P(2*N,3*N);
 thread_local gmm::dense_matrix <double> PA(2*N,3*N);
 
 for (int i=0; i<N; i++){
-    Node const& n = (*refNode)[ind[i]];
+    Nodes::Node const& n = (*refNode)[ind[i]];
     P(i,i)  = n.ep.x();  P(i,N+i)  = n.ep.y();  P(i,2*N+i)  = n.ep.z();
     P(N+i,i)= n.eq.x();  P(N+i,N+i)= n.eq.y();  P(N+i,2*N+i)= n.eq.z();
     }

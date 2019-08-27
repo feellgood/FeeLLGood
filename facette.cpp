@@ -4,6 +4,22 @@
 
 using namespace Facette;
 
+void Fac::interpolation(double u[DIM][NPI]) const
+{
+double u_nod[DIM][N];
+
+for (int i=0; i<N; i++)
+    {
+    Nodes::Node const& node = (*refNode)[ ind[i] ];
+    
+    u_nod[0][i]   = node.u0.x();
+    u_nod[1][i]   = node.u0.y();
+    u_nod[2][i]   = node.u0.z();
+    }
+
+tiny::mult<double, 3, N, NPI> (u_nod, a, u);
+}
+
 void Fac::integrales(std::vector<Facette::prm> const& params, std::vector <double> &BE) const
 {
 double Js = params[idxPrm].Js;
@@ -19,7 +35,7 @@ double Kbis = 2.0*Ks/Js;
 double u_nod[3][N], u[3][NPI];
 
 for (int i=0; i<N; i++){
-    Node const& node = (*refNode)[ ind[i] ];
+    Nodes::Node const& node = (*refNode)[ ind[i] ];
     
     u_nod[0][i]   = node.u0.x();
     u_nod[1][i]   = node.u0.y();
@@ -47,7 +63,7 @@ tiny::mult<double, 3, N, NPI> (u_nod, a, u);
 }
 
 void Fac::energy(Facette::prm const& param,double E[5])
-{
+{//E : 1-anisotropy 2-demagnetizing
     double K = param.Ks;
 	double uk00 = param.uk[0];
 	double uk01 = param.uk[1];
@@ -61,7 +77,7 @@ void Fac::energy(Facette::prm const& param,double E[5])
 	for (int i=0; i<N; i++)
 		{
 		int i_= ind[i];
-		Node &n = (*refNode)[i_];
+		Nodes::Node &n = (*refNode)[i_];
 		u_nod[Pt::IDX_X][i] = n.u.x(); u_nod[Pt::IDX_Y][i] = n.u.y(); u_nod[Pt::IDX_Z][i] = n.u.z();	        
 		phi_nod[i] =  n.phi;
         }
@@ -85,6 +101,59 @@ void Fac::energy(Facette::prm const& param,double E[5])
 	E[2] += weightedScalarProd(dens);
 }
 
+double Fac::anisotropyEnergy(Facette::prm const& param) const
+{
+/*-------------------- INTERPOLATION --------------------*/
+double u_nod[DIM][N], u[DIM][NPI];
+
+for (int i=0; i<N; i++)
+    {
+    int i_= ind[i];
+    Nodes::Node &n = (*refNode)[i_];
+    u_nod[Pt::IDX_X][i] = n.u.x(); u_nod[Pt::IDX_Y][i] = n.u.y(); u_nod[Pt::IDX_Z][i] = n.u.z();	        
+    }
+tiny::mult<double, DIM, N, NPI> (u_nod, a, u);
+/*-----------------FIN INTERPOLATION --------------------*/
+    
+double uk00 = param.uk[0];
+double uk01 = param.uk[1];
+double uk02 = param.uk[2];    
+
+double dens[NPI];
+for (int npi=0; npi<NPI; npi++)
+    {// cosinus directeurs
+    double al0=uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi];
+    dens[npi] = -param.Ks*al0*al0;      // uniaxe
+    }
+return weightedScalarProd(dens);
+}
+
+double Fac::demagEnergy(void) const
+{
+/*-------------------- INTERPOLATION --------------------*/    
+double q[NPI],  phi[NPI];
+double u_nod[DIM][N], u[DIM][NPI];
+double phi_nod[N];
+
+for (int i=0; i<N; i++)
+		{
+		int i_= ind[i];
+		Nodes::Node &n = (*refNode)[i_];
+        u_nod[Pt::IDX_X][i] = n.u.x(); u_nod[Pt::IDX_Y][i] = n.u.y(); u_nod[Pt::IDX_Z][i] = n.u.z();
+		phi_nod[i] =  n.phi;
+        }
+tiny::mult<double, DIM, N, NPI> (u_nod, a, u);
+tiny::transposed_mult<double, N, NPI> (phi_nod, a, phi);
+/*-----------------FIN INTERPOLATION --------------------*/
+
+for (int npi=0; npi<NPI; npi++)
+        { q[npi] = Ms * (u[0][npi]*n.x() + u[1][npi]*n.y() + u[2][npi]*n.z()); }
+double dens[NPI];
+for (int npi=0; npi<NPI; npi++)
+    { dens[npi] = 0.5*mu0*q[npi]*phi[npi]; }
+return weightedScalarProd(dens);
+}
+
 
 void Fac::projection(gmm::dense_matrix <double> const& A,  std::vector <double> const& B,
            gmm::dense_matrix <double> &Ap, std::vector <double> &Bp) const
@@ -94,7 +163,7 @@ thread_local gmm::dense_matrix <double> PA(2*N,3*N);
 //mtl::mat::set_to_zero(P);
 
 for (int i=0; i<N; i++){
-    Node const& n = (*refNode)[ind[i]];
+    Nodes::Node const& n = (*refNode)[ind[i]];
     P(i,i)  = n.ep.x();  P(i,N+i)  = n.ep.y();  P(i,2*N+i)  = n.ep.z();
     P(N+i,i)= n.eq.x();  P(N+i,N+i)= n.eq.y();  P(N+i,2*N+i)= n.eq.z();
     }
@@ -114,7 +183,7 @@ thread_local gmm::dense_matrix <double> P(2*N,3*N);
 thread_local gmm::dense_matrix <double> PA(2*N,3*N);
 
 for (int i=0; i<N; i++){
-    Node const& n = (*refNode)[ind[i]];
+    Nodes::Node const& n = (*refNode)[ind[i]];
     P(i,i)  = n.ep.x();  P(i,N+i)  = n.ep.y();  P(i,2*N+i)  = n.ep.z();
     P(N+i,i)= n.eq.x();  P(N+i,N+i)= n.eq.y();  P(N+i,2*N+i)= n.eq.z();
     }
