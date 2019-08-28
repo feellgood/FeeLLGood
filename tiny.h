@@ -55,6 +55,18 @@ template <typename T, int M, int N> inline void transposed_mult(const T X[M],con
        }
    }
 
+/** operator: do multiplication of a vector and a transposed matrix, and multiply by -1
+\return returns in Y \f$ Y = -A^{\dagger} X \f$
+*/
+template <typename T, int M, int N> inline void neg_transposed_mult(const T X[M],const T A[M][N], T Y[N]) {
+   for (int j=0; j<N; j++) { 
+       T v=T(0);
+       for (int i=0; i<M; i++)
+           v+= X[i]*A[i][j];
+       Y[j] = -v;
+       }
+   }
+   
    
 /** const mat const mat multiplication <br>
 \return \f$ C = A B \f$

@@ -27,9 +27,7 @@ typedef double triple[DIM];
 */
 inline double sq(double x /**< [in] */ ) {return x*x;}
 
-/**
-in place normalizing function of triple
-a */
+/** in place normalizing function of triple a */
 inline void normalize(triple &a /**< [in,out] */)
 {
 double norme=sqrt(sq(a[0])+sq(a[1])+sq(a[2]));
@@ -65,7 +63,7 @@ a[1][j]   = u[j];
 a[2][j]   = v[j];
 a[3][j]   = w[j];
 */
-const double a[N][NPI] = {{1.-u[0]-v[0]-w[0],1.-u[1]-v[1]-w[1],1.-u[2]-v[2]-w[2],1.-u[3]-v[3]-w[3],1.-u[4]-v[4]-w[4]},
+constexpr double a[N][NPI] = {{1.-u[0]-v[0]-w[0],1.-u[1]-v[1]-w[1],1.-u[2]-v[2]-w[2],1.-u[3]-v[3]-w[3],1.-u[4]-v[4]-w[4]},
 {u[0],u[1],u[2],u[3],u[4]}, {v[0],v[1],v[2],v[3],v[4]}, {w[0],w[1],w[2],w[3],w[4]}};
 
 
@@ -84,9 +82,7 @@ struct prm
 	double Uz;/**< for spin polarized current */
 	double beta;/**< non adiabatic constant \f$ \beta \f$ for spin polarization current */	
 	
-	/**
-	 print the struct parameters
-	 */
+	/** print the struct parameters */
 	inline void infos()
 		{
 		std::cout<< "volume region number = " << reg <<std::endl;
@@ -111,15 +107,11 @@ struct prm
     {
     public:
         /** constructor */
-        inline Obj(const int _idx)//,gmm::dense_matrix <double> const& K,std::vector <double> const& L)
+        inline Obj(const int _idx)
         {
         idx = _idx;  
-        //Ke=K;Le=L;
         }
-        
-        int idx;/**< index of the corresponding tetrahedron */
-        //gmm::dense_matrix <double> Ke;/**< small matrix resulting from projection */
-        //std::vector <double> Le;/**< small vector resulting from projection */
+    int idx;/**< index of the corresponding tetrahedron */
     };
     
     
@@ -207,12 +199,10 @@ class Tet{
         */
 		void getNod(gmm::dense_matrix <double> &nod);
 		
-        /**
-        \return \f$ |J| \f$ build Jacobian \f$ J \f$
-        */
+        /** \return \f$ |J| \f$ build Jacobian \f$ J \f$ */
         double Jacobian(double J[DIM][DIM]);
         
-		/** computes volume		*/
+		/** computes volume	of the tetrahedron */
 		void calc_vol(void);
     
         /** pointer to the nodes */
@@ -225,6 +215,6 @@ class Tet{
         gmm::dense_matrix <double> Kp;/**< Kp(2*N,2*N) initialized by constructor */
         std::vector <double>  Lp;/**< Lp(2*N) initialized by constructor  */
 };//end class Tetra
-}
+}//end namespace Tetra
 
 #endif /* tetra_h */

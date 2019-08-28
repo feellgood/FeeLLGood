@@ -18,14 +18,8 @@ typedef gmm::row_matrix	<read_vector>    read_matrix; /**< gmm read sparse matri
 
 #include "config.h"
 #include "node.h"
-
 #include "tiny.h"
 
-/** convenient typedef for mtl4 */
-//typedef typename mtl::Collection< mtl::compressed2D<double> >::value_type v_type;
-
-/** convenient typedef for mtl4 inserter */
-//typedef mtl::mat::inserter< mtl::compressed2D<double>,mtl::update_plus<v_type> > sparseInserter;
 
 /** \namespace Facette
  to grab altogether some constants and calculation functions for class Fac
@@ -40,11 +34,8 @@ const double v[NPI]   = {   1/3.,   1/5.,   1/5.,   3/5.};/**< some constants  t
 const double pds[NPI] = {-27/96., 25/96., 25/96., 25/96.};/**< some constant weights  to build hat functions */
 
 /** hat function constants */
-const double a[N][NPI] ={
+constexpr double a[N][NPI] ={
     {1.-u[0]-v[0],1.-u[1]-v[1],1.-u[2]-v[2],1.-u[3]-v[3]},{u[0],u[1],u[2],u[3]},{v[0],v[1],v[2],v[3]}};
-
-// for (int j=0; j<NPI; j++) { a[0][j] = 1.-u[j]-v[j]; a[1][j] = u[j]; a[2][j] = v[j];}
-
 
 /** \class prm
 region number and material constants
@@ -56,9 +47,7 @@ struct prm
 	double Ks;/**< uniaxial surface anisotropy constant */	
 	double uk[DIM]; /**< anisotropy axis */	
 	
-	/**
-	 print the struct parameters
-	 */
+	/** print the struct parameters */
 	inline void infos()
 		{
 		std::cout<< "surface region number = " << reg <<std::endl;
@@ -81,16 +70,13 @@ class Obj
     {
     public:
         /** constructor */
-        inline Obj(const int _idx)//,gmm::dense_matrix <double> const& K,std::vector <double> const& L)
+        inline Obj(const int _idx)
         {
         idx = _idx;   
-        //Ke=K;Le=L;
         }
         
         int idx;/**< index of the corresponding facette */
-        //gmm::dense_matrix <double> Ke;/**< small matrix resulting from projection */
-        //std::vector <double> Le;/**< small vector resulting from projection */
-    };
+     };
     
     
 /** \class Fac
@@ -176,14 +162,10 @@ class Fac{
         /** assemblage of the matrix and vector elements from inner matrix in facette object */
         void assemblage(write_matrix &K,write_vector &L) const;
         
-        /**
-		convenient getter for N
-		*/		
+        /** convenient getter for N */		
 		inline int getN(void) {return N;}	
 
-		/**
-		computes normal vector n and surface surf		
-		*/		
+		/** computes normal vector n and surface surf		*/		
 		void calc_surf(void);
         
         /** pointer to the nodes */

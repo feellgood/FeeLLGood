@@ -18,17 +18,12 @@ double J[Pt::DIM][Pt::DIM];
 double detJ = Jacobian(J);
 double da[N][Pt::DIM];
     
-if (fabs(detJ) < epsilon){
-        #ifdef LIBRARY
-            ostringstream what;
-            what << "Singular jacobian in tetrahedron ";
-            throw runtime_error(what.str());
-        #else
-            std::cerr << "jacobienne singuliere ds le tetraedre " << std::endl;
-			infos();
-            SYSTEM_ERROR;
-        #endif
-            }
+if (fabs(detJ) < epsilon)
+    {
+    std::cerr << "Singular jacobian in tetrahedron" << std::endl;
+    infos();
+    SYSTEM_ERROR;
+    }
 Pt::inverse(J,detJ);
 tiny::mult<double, N, Pt::DIM, Pt::DIM> (Tetra::dadu, J, da);
     
@@ -70,13 +65,13 @@ double K3bis = 2.0*K3/J;
 double s_dt = theta*dt;//theta du theta schema
 
 /*-------------------- INTERPOLATION --------------------*/
-double u_nod[3][N]; 
-double u[3][NPI], dudx[3][NPI], dudy[3][NPI], dudz[3][NPI];//should be Pt::pt3D X[NPI]
+double u_nod[DIM][N]; 
+double u[DIM][NPI], dudx[DIM][NPI], dudy[DIM][NPI], dudz[DIM][NPI];//should be Pt::pt3D X[NPI]
 double negphi0_nod[N], Hdx[NPI], Hdy[NPI], Hdz[NPI];
 
-double v_nod[3][N];
-double v[3][NPI];
-double dvdx[3][NPI], dvdy[3][NPI], dvdz[3][NPI];
+double v_nod[DIM][N];
+double v[DIM][NPI];
+double dvdx[DIM][NPI], dvdy[DIM][NPI], dvdz[DIM][NPI];
 double negphiv0_nod[N], Hvx[NPI], Hvy[NPI], Hvz[NPI];
 
 for (int i=0; i<N; i++){
@@ -88,17 +83,17 @@ for (int i=0; i<N; i++){
     }
 
     
-tiny::mult<double, 3, N, NPI> (u_nod, a, u);// a is const matrix from namespace tetra 
+tiny::mult<double, DIM, N, NPI> (u_nod, a, u);// a is const matrix from namespace tetra 
 
-tiny::mult<double, 3, N, NPI> (u_nod, dadx, dudx);
-tiny::mult<double, 3, N, NPI> (u_nod, dady, dudy);
-tiny::mult<double, 3, N, NPI> (u_nod, dadz, dudz);
+tiny::mult<double, DIM, N, NPI> (u_nod, dadx, dudx);
+tiny::mult<double, DIM, N, NPI> (u_nod, dady, dudy);
+tiny::mult<double, DIM, N, NPI> (u_nod, dadz, dudz);
 
-tiny::mult<double, 3, N, NPI> (v_nod, a, v);
+tiny::mult<double, DIM, N, NPI> (v_nod, a, v);
 
-tiny::mult<double, 3, N, NPI> (v_nod, dadx, dvdx);
-tiny::mult<double, 3, N, NPI> (v_nod, dady, dvdy);
-tiny::mult<double, 3, N, NPI> (v_nod, dadz, dvdz);
+tiny::mult<double, DIM, N, NPI> (v_nod, dadx, dvdx);
+tiny::mult<double, DIM, N, NPI> (v_nod, dady, dvdy);
+tiny::mult<double, DIM, N, NPI> (v_nod, dadz, dvdz);
 
 tiny::transposed_mult<double, N, NPI> (negphi0_nod, dadx, Hdx);
 tiny::transposed_mult<double, N, NPI> (negphi0_nod, dady, Hdy);
@@ -258,10 +253,12 @@ double uk21 = param.uk[2][1];
 double uk22 = param.uk[2][2];   
    
    /*-------------------- INTERPOLATION --------------------*/
-double u_nod[3][N], u[3][NPI];
-double dudx[3][NPI], dudy[3][NPI], dudz[3][NPI];
+double u_nod[DIM][N], u[DIM][NPI];
+double dudx[DIM][NPI], dudy[DIM][NPI], dudz[DIM][NPI];
 double q[NPI],  phi[NPI];
-double phi_nod[N], negphi_nod[N], Hdx[NPI], Hdy[NPI], Hdz[NPI];
+double phi_nod[N];
+//negphi_nod[N],
+double Hdx[NPI], Hdy[NPI], Hdz[NPI];
 
 for (int i=0; i<N; i++)
     {
@@ -269,67 +266,60 @@ for (int i=0; i<N; i++)
     Nodes::Node &n = (*refNode)[i_];
     u_nod[Pt::IDX_X][i] = n.u.x(); u_nod[Pt::IDX_Y][i] = n.u.y(); u_nod[Pt::IDX_Z][i] = n.u.z();
     phi_nod[i] =  n.phi;
-    negphi_nod[i] = -n.phi;
+    //negphi_nod[i] = -n.phi;
     }
 
 tiny::transposed_mult<double, N, NPI> (phi_nod, a, phi);
-tiny::mult<double, 3, N, NPI> (u_nod, a, u);
-tiny::mult<double, 3, N, NPI> (u_nod, dadx, dudx);
-tiny::mult<double, 3, N, NPI> (u_nod, dady, dudy);
-tiny::mult<double, 3, N, NPI> (u_nod, dadz, dudz);
+tiny::mult<double, DIM, N, NPI> (u_nod, a, u);
+tiny::mult<double, DIM, N, NPI> (u_nod, dadx, dudx);
+tiny::mult<double, DIM, N, NPI> (u_nod, dady, dudy);
+tiny::mult<double, DIM, N, NPI> (u_nod, dadz, dudz);
 
-for (int npi=0; npi<NPI; npi++){
-        //double div_u = dudx[0][npi] + dudy[1][npi] + dudz[2][npi];
-    q[npi] = -Ms*(dudx[0][npi] + dudy[1][npi] + dudz[2][npi]);
-    }
+for (int npi=0; npi<NPI; npi++)
+    { q[npi] = -Ms*(dudx[0][npi] + dudy[1][npi] + dudz[2][npi]); }
 
-tiny::transposed_mult<double, N, NPI> (negphi_nod, dadx, Hdx);
-tiny::transposed_mult<double, N, NPI> (negphi_nod, dady, Hdy);
-tiny::transposed_mult<double, N, NPI> (negphi_nod, dadz, Hdz);
+tiny::neg_transposed_mult<double, N, NPI> (phi_nod, dadx, Hdx);
+tiny::neg_transposed_mult<double, N, NPI> (phi_nod, dady, Hdy);
+tiny::neg_transposed_mult<double, N, NPI> (phi_nod, dadz, Hdz);
 
    /*-------------------------------------------------------*/
 	    
 double dens[5][NPI];
 double Eelem[5];
 
-for (int npi=0; npi<NPI; npi++) {
-
+for (int npi=0; npi<NPI; npi++)
+    {
         // cosinus directeurs
     double al0=uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi];
     double al1=uk10*u[0][npi] + uk11*u[1][npi] + uk12*u[2][npi];
     double al2=uk20*u[0][npi] + uk21*u[1][npi] + uk22*u[2][npi];
 
-//        cout << dudx[0][npi] << "\t" << dudx[1][npi] << "\t" << dudx[2][npi] << endl;
-        dens[0][npi] = Ae*(sq( dudx[0][npi] ) + sq( dudy[0][npi] ) + sq( dudz[0][npi] )+
-                           sq( dudx[1][npi] ) + sq( dudy[1][npi] ) + sq( dudz[1][npi] )+
-                           sq( dudx[2][npi] ) + sq( dudy[2][npi] ) + sq( dudz[2][npi] ) );
+    dens[0][npi] = Ae*(sq( dudx[0][npi] ) + sq( dudy[0][npi] ) + sq( dudz[0][npi] )+
+                        sq( dudx[1][npi] ) + sq( dudy[1][npi] ) + sq( dudz[1][npi] )+
+                        sq( dudx[2][npi] ) + sq( dudy[2][npi] ) + sq( dudz[2][npi] ) );
 
-        dens[1][npi] = -K  * sq(al0);      // uniaxe
-        dens[1][npi]+= +K3 * (sq(al0) * sq(al1) + sq(al1) * sq(al2) + sq(al2) * sq(al0)); //cubique
+    dens[1][npi] = -K  * sq(al0);      // uniaxe
+    dens[1][npi]+= +K3 * (sq(al0) * sq(al1) + sq(al1) * sq(al2) + sq(al2) * sq(al0)); //cubique
  
- //       dens[2][npi] = -0.5*Js* (u[0][npi]*Hdx[npi] + u[1][npi]*Hdy[npi] + u[2][npi]*Hdz[npi]);
+    dens[2][npi] = 0.5*mu0*q[npi]*phi[npi];
 
-        dens[2][npi] = 0.5*mu0*q[npi]*phi[npi];
+    dens[3][npi] = -Js*(u[0][npi]*Hext[0] + u[1][npi]*Hext[1] + u[2][npi]*Hext[2] + uz_drift*Hext[2]);
 
-        dens[3][npi] = -Js*(u[0][npi]*Hext[0] + u[1][npi]*Hext[1] + u[2][npi]*Hext[2] + uz_drift*Hext[2]);
-
-        dens[4][npi] = 0.;
-        }
-    tiny::mult<double, 5, NPI> (dens, weight, Eelem);
-    E[0] += Eelem[0];
-    E[1] += Eelem[1];
-    E[2] += Eelem[2];
-    E[3] += Eelem[3];
-    E[4] += Eelem[4];
+    dens[4][npi] = 0.;
+    }
+tiny::mult<double, 5, NPI> (dens, weight, Eelem);
+E[0] += Eelem[0];
+E[1] += Eelem[1];
+E[2] += Eelem[2];
+E[3] += Eelem[3];
+E[4] += Eelem[4];
 }
 
-void Tet::projection(//mtl::dense2D <double> &P,
-           gmm::dense_matrix <double> const& A,  std::vector <double> const& B,
+void Tet::projection( gmm::dense_matrix <double> const& A,  std::vector <double> const& B,
            gmm::dense_matrix <double> &Ap, std::vector <double> &Bp) const
 {
 thread_local gmm::dense_matrix <double> P(2*N,3*N);
 thread_local gmm::dense_matrix <double> PA(2*N,3*N);
-//mtl::mat::set_to_zero(P);
 //matBlocDiag::matBloc myP;
 
 //myP.D[0][0] = matBlocDiag::BlocElem(1,2,3,4);
@@ -344,9 +334,7 @@ for (int i=0; i<N; i++){
 //Ap = (P*A)*trans(P);
 //Bp = P*B;
 gmm::mult(PA, gmm::transposed(P), Ap);
-
 gmm::mult(P,B,Bp);
-    
 }
 
 void Tet::projection(gmm::dense_matrix <double> const& A,  std::vector <double> const& B)
@@ -364,7 +352,6 @@ for (int i=0; i<N; i++){
 //Ap = (P*A)*trans(P);
 //Bp = P*B;
 gmm::mult(PA, gmm::transposed(P), Kp);
-
 gmm::mult(P,B,Lp);
 }
 

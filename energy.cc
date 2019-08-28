@@ -4,10 +4,7 @@ void Fem::energy(Settings &settings)
 {
 Etot = 0.0;
 double _E[5] = {0.0,0.0,0.0,0.0,0.0};
-
 double uz_drift=2.*DW_z/l.z()*DW_dir;
-
-/* Contribution des tetraedres */
 
 std::for_each(tet.begin(),tet.end(),[this,settings,&_E,uz_drift](Tetra::Tet const& te) 
     {
@@ -15,8 +12,6 @@ std::for_each(tet.begin(),tet.end(),[this,settings,&_E,uz_drift](Tetra::Tet cons
     te.energy(param,_E,Hext,uz_drift);    
     }
 );
-
-/* Contribution des facettes triangulaires a l'energie d'anisotropie */
 
 std::for_each(fac.begin(),fac.end(),[settings,&_E](Facette::Fac const& fa)
     {
@@ -26,8 +21,7 @@ std::for_each(fac.begin(),fac.end(),[settings,&_E](Facette::Fac const& fa)
 );
 
 for (int e=0; e<4; e++)
-    { E[e] = _E[e]; Etot += _E[e];
-    }
+    { E[e] = _E[e]; Etot += _E[e]; }
 
 evol = Etot-Etot0;
 phy = 0;
