@@ -66,19 +66,19 @@ double s_dt = theta*dt;//theta du theta schema
 /*-------------------- INTERPOLATION --------------------*/
 double u_nod[DIM][N]; 
 double u[DIM][NPI], dudx[DIM][NPI], dudy[DIM][NPI], dudz[DIM][NPI];//should be Pt::pt3D X[NPI]
-double negphi0_nod[N], Hdx[NPI], Hdy[NPI], Hdz[NPI];
+double phi0_nod[N], Hdx[NPI], Hdy[NPI], Hdz[NPI];
 
 double v_nod[DIM][N];
 double v[DIM][NPI];
 double dvdx[DIM][NPI], dvdy[DIM][NPI], dvdz[DIM][NPI];
-double negphiv0_nod[N], Hvx[NPI], Hvy[NPI], Hvz[NPI];
+double phiv0_nod[N], Hvx[NPI], Hvy[NPI], Hvz[NPI];
 
 for (int i=0; i<N; i++){
     Nodes::Node const& node = (*refNode)[ ind[i] ];
     u_nod[Pt::IDX_X][i]  = node.u0.x(); u_nod[Pt::IDX_Y][i] = node.u0.y(); u_nod[Pt::IDX_Z][i]  = node.u0.z();
     v_nod[Pt::IDX_X][i]  = node.v0.x(); v_nod[Pt::IDX_Y][i] = node.v0.y(); v_nod[Pt::IDX_Z][i]  = node.v0.z();			
-    negphi0_nod[i]  = -node.phi0;
-    negphiv0_nod[i] = -node.phiv0;
+    phi0_nod[i]  = node.phi0;
+    phiv0_nod[i] = node.phiv0;
     }
 
 tiny::mult<double, DIM, N, NPI> (u_nod, a, u);// a is const matrix from namespace tetra 
@@ -93,13 +93,13 @@ tiny::mult<double, DIM, N, NPI> (v_nod, dadx, dvdx);
 tiny::mult<double, DIM, N, NPI> (v_nod, dady, dvdy);
 tiny::mult<double, DIM, N, NPI> (v_nod, dadz, dvdz);
 
-tiny::transposed_mult<double, N, NPI> (negphi0_nod, dadx, Hdx);
-tiny::transposed_mult<double, N, NPI> (negphi0_nod, dady, Hdy);
-tiny::transposed_mult<double, N, NPI> (negphi0_nod, dadz, Hdz);
+tiny::neg_transposed_mult<double, N, NPI> (phi0_nod, dadx, Hdx);
+tiny::neg_transposed_mult<double, N, NPI> (phi0_nod, dady, Hdy);
+tiny::neg_transposed_mult<double, N, NPI> (phi0_nod, dadz, Hdz);
 
-tiny::transposed_mult<double, N, NPI> (negphiv0_nod, dadx, Hvx);
-tiny::transposed_mult<double, N, NPI> (negphiv0_nod, dady, Hvy);
-tiny::transposed_mult<double, N, NPI> (negphiv0_nod, dadz, Hvz);
+tiny::neg_transposed_mult<double, N, NPI> (phiv0_nod, dadx, Hvx);
+tiny::neg_transposed_mult<double, N, NPI> (phiv0_nod, dady, Hvy);
+tiny::neg_transposed_mult<double, N, NPI> (phiv0_nod, dadz, Hvz);
 
 /*-------------------------------------------------------*/
 for (int npi=0; npi<NPI; npi++){
@@ -126,8 +126,6 @@ for (int npi=0; npi<NPI; npi++){
     double uk0_uuu = (1-uk0_u*uk0_u)*uk0_u;
     double uk1_uuu = (1-uk1_u*uk1_u)*uk1_u;
     double uk2_uuu = (1-uk2_u*uk2_u)*uk2_u;
-    
-    //double uHa3u = -K3bis*(uk0_u*(1-uk0_u*uk0_u)*uk0_u + uk1_u*(1-uk1_u*uk1_u)*uk1_u + uk2_u*(1-uk2_u*uk2_u)*uk2_u);
     
     double uHa3u = -K3bis*(uk0_u*uk0_uuu + uk1_u*uk1_uuu + uk2_u*uk2_uuu);
     
@@ -158,12 +156,6 @@ R = dt/tau_r*abs(log(dt/tau_r));
         Dai_Du1 = dai_dx * dudx[1][npi] + dai_dy * dudy[1][npi] + dai_dz * dudz[1][npi];
         Dai_Du2 = dai_dx * dudx[2][npi] + dai_dy * dudy[2][npi] + dai_dz * dudz[2][npi];
 
-/*        BE[i]    += (-Abis* Dai_Du0 + ( Kbis* uk0_u*uk00 -K3bis*( uk0_u*(1-uk0_u*uk0_u)*uk00 + uk1_u*(1-uk1_u*uk1_u)*uk10 + uk2_u*(1-uk2_u*uk2_u)*uk20 ) + Hdx[npi] + Hext[0] )*ai) *w;
-        
-        BE[N+i]  += (-Abis* Dai_Du1 + ( Kbis* uk0_u*uk01 -K3bis*( uk0_u*(1-uk0_u*uk0_u)*uk01 + uk1_u*(1-uk1_u*uk1_u)*uk11 + uk2_u*(1-uk2_u*uk2_u)*uk21 ) + Hdy[npi] + Hext[1] )*ai) *w;
-        
-        BE[2*N+i]+= (-Abis* Dai_Du2 + ( Kbis* uk0_u*uk02 -K3bis*( uk0_u*(1-uk0_u*uk0_u)*uk02 + uk1_u*(1-uk1_u*uk1_u)*uk12 + uk2_u*(1-uk2_u*uk2_u)*uk22 ) + Hdz[npi] + Hext[2] )*ai ) *w;
-*/
         BE[i]    += (-Abis* Dai_Du0 + ( Kbis* uk0_u*uk00 -K3bis*( uk0_uuu*uk00 + uk1_uuu*uk10 + uk2_uuu*uk20 ) + Hdx[npi] + Hext[0] )*ai) *w;
         BE[N+i]  += (-Abis* Dai_Du1 + ( Kbis* uk0_u*uk01 -K3bis*( uk0_uuu*uk01 + uk1_uuu*uk11 + uk2_uuu*uk21 ) + Hdy[npi] + Hext[1] )*ai) *w;
         BE[2*N+i]+= (-Abis* Dai_Du2 + ( Kbis* uk0_u*uk02 -K3bis*( uk0_uuu*uk02 + uk1_uuu*uk12 + uk2_uuu*uk22 ) + Hdz[npi] + Hext[2] )*ai) *w;
