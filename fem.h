@@ -1,6 +1,6 @@
 /** \file fem.h
-\brief principal header, contains the struct fem <br>
-This file is called by almost all source files in feellgood project <br>
+\brief principal header, contains the struct fem
+This file is called by many source files in feellgood.
 It does also contains the definition of many constants for the solver, and for scalfmm 
 */
 
@@ -27,7 +27,7 @@ It does also contains the definition of many constants for the solver, and for s
 
 #include "pt3D.h"
 #include "tetra.h"
-#include "facette.h" // tiny.h est includé là
+#include "facette.h"
 
 #include "node.h"
 
@@ -40,7 +40,6 @@ container to grab altogether all parameters of a simulation, including mesh geom
 */
 struct Fem{
 	int NOD;/**< number of nodes in vector container */
-	//int SEQ;/**< number of sequences, usefull to define a vector applied field eventually varying in time */
 	Pt::pt3D c;/**< center position */	
 	Pt::pt3D l;/**< lengths along x,y,z axis */	
 	

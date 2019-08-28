@@ -1,3 +1,6 @@
+#ifndef tiny_h
+#define tiny_h
+
 /** \file tiny.h
 contains a namespace to perform simple printing and algebra simple operations on matrices and vectors. <br>
 \todo this namespace is redondant with gmm, could probably be replaced or improved with overloaded operators and a matrix class, or valarrays
@@ -81,3 +84,5 @@ template <typename T, int M, int N, int P> inline void mult(const T A[M][N],cons
        }
    }
 }
+
+#endif

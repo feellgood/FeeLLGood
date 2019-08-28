@@ -5,6 +5,7 @@
   \brief namespace Tetra
   header containing Tet class, some constants, and integrales
  */
+#include <functional>
 
 #include "gmm/gmm_kernel.h"
 
@@ -14,10 +15,10 @@ typedef gmm::rsvector <double>   read_vector; /**< gmm read vector */
 typedef gmm::row_matrix	<write_vector>   write_matrix; /**< gmm write sparse matrix */
 typedef gmm::row_matrix	<read_vector>    read_matrix; /**< gmm read sparse matrix */
 
-
-
 #include "config.h"
 #include "node.h"
+
+#include "tiny.h"
 
 /** a 3D point */
 typedef double triple[DIM];
@@ -161,27 +162,65 @@ class Tet{
         inline double weightedScalarProd(const double X[NPI]) const
             {return (X[0]*weight[0] + X[1]*weight[1] + X[2]*weight[2] + X[3]*weight[3] +X[4]*weight[4]);}
 		
+		/** interpolation for 3D vector field and a tensor : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
+        inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double result[DIM][NPI],
+                                  double Tx[DIM][NPI],double Ty[DIM][NPI],double Tz[DIM][NPI]) const
+        {
+        double vec_nod[DIM][N];
+        for (int i=0; i<N; i++)
+            {
+            Nodes::Node const& node = (*refNode)[ ind[i] ];
+    
+            vec_nod[0][i]   = getter(node).x();
+            vec_nod[1][i]   = getter(node).y();
+            vec_nod[2][i]   = getter(node).z();
+            }
+        tiny::mult<double, DIM, N, NPI> (vec_nod, a, result);
+        tiny::mult<double, DIM, N, NPI> (vec_nod, dadx, Tx);
+        tiny::mult<double, DIM, N, NPI> (vec_nod, dady, Ty);
+        tiny::mult<double, DIM, N, NPI> (vec_nod, dadz, Tz);
+        }
+		
+		/** interpolation for scalar field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
+        inline void interpolation(std::function<double (Nodes::Node)> getter,double result[NPI],double Xx[NPI],double Xy[NPI],double Xz[NPI]) const
+        {
+        double scalar_nod[N];    
+        for (int i=0; i<N; i++)
+            {
+            Nodes::Node const& n = (*refNode)[ ind[i] ];
+            scalar_nod[i] =  getter(n);
+            }
+        tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result);
+        tiny::neg_transposed_mult<double, N, NPI> (scalar_nod, dadx, Xx);
+        tiny::neg_transposed_mult<double, N, NPI> (scalar_nod, dady, Xy);
+        tiny::neg_transposed_mult<double, N, NPI> (scalar_nod, dadz, Xz);
+        }
+		
+		/** interpolation for scalar field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
+        inline void interpolation(std::function<double (Nodes::Node)> getter,double result[NPI]) const
+        {
+        double scalar_nod[N];    
+        for (int i=0; i<N; i++)
+            {
+            Nodes::Node const& n = (*refNode)[ ind[i] ];
+            scalar_nod[i] =  getter(n);
+            }
+        tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result);
+        }
+		
 		/** basic region infos */		
 		inline void infos(){std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2]<< "\t"<< ind[3] <<std::endl;};
 		
-		/**
-		computes the integral contribution of the tetrahedron to the evolution of the magnetization
-		*/		
+		/** computes the integral contribution of the tetrahedron to the evolution of the magnetization */		
 		void integrales(std::vector<Tetra::prm> const& params,double Hext[DIM],double Vz,double theta,double dt,double tau_r,gmm::dense_matrix <double> &AE, std::vector <double> &BE)  const;
 
-        /**
-        computes all the contributions to the energy of the tetrahedron
-        */
+        /** computes all the contributions to the energy of the tetrahedron */
         void energy(Tetra::prm const& param,double E[5],const double Hext[DIM],double uz_drift) const;
         
-		/**
-        computes projection of a tetrahedron
-        */
+		/** computes projection of a tetrahedron */
         void projection(gmm::dense_matrix <double> const& A,  std::vector <double> const& B,gmm::dense_matrix <double> &Ap, std::vector <double> &Bp)  const;
         
-        /**
-        computes projection of a tetrahedron using inner matrix in tetra object
-        */
+        /** computes projection of a tetrahedron using inner matrix in tetra object */
         void projection(gmm::dense_matrix <double> const& A,  std::vector <double> const& B);
         
         
@@ -193,11 +232,6 @@ class Tet{
         
         /** getter for N */
 		inline int getN(void) {return N;}
-		
-		/**
-        initializes nod matrix from vector myNode
-        */
-		void getNod(gmm::dense_matrix <double> &nod);
 		
         /** \return \f$ |J| \f$ build Jacobian \f$ J \f$ */
         double Jacobian(double J[DIM][DIM]);
