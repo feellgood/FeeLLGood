@@ -74,11 +74,21 @@ if ( Pt::norme2( u0 ) > 0)
 /** getter for u0*/
 inline const Pt::pt3D get_u0(Node const& n) {return n.u0;}
 
+/** getter for v0*/
+inline const Pt::pt3D get_v0(Node const& n) {return n.v0;}
+
 /** getter for u */
 inline const Pt::pt3D get_u(Node const& n) {return n.u;}
 
 /** getter for phi */
 inline double get_phi(Node const& n) {return n.phi;}
+
+/** getter for phi0 */
+inline double get_phi0(Node const& n) {return n.phi0;}
+
+/** getter for phiv0 */
+inline double get_phiv0(Node const& n) {return n.phiv0;}
+
 
 } //end namespace Nodes
 

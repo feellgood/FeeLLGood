@@ -66,40 +66,53 @@ double s_dt = theta*dt;//theta du theta schema
 /*-------------------- INTERPOLATION --------------------*/
 double u_nod[DIM][N]; 
 double u[DIM][NPI], dudx[DIM][NPI], dudy[DIM][NPI], dudz[DIM][NPI];//should be Pt::pt3D X[NPI]
-double phi0_nod[N], Hdx[NPI], Hdy[NPI], Hdz[NPI];
+//double phi0_nod[N];
+double Hdx[NPI], Hdy[NPI], Hdz[NPI];
 
-double v_nod[DIM][N];
+//double v_nod[DIM][N];
 double v[DIM][NPI];
 double dvdx[DIM][NPI], dvdy[DIM][NPI], dvdz[DIM][NPI];
-double phiv0_nod[N], Hvx[NPI], Hvy[NPI], Hvz[NPI];
+//double phiv0_nod[N];
+double Hvx[NPI], Hvy[NPI], Hvz[NPI];
 
+// u_nod(u0) is required for lumping in AE matrix
 for (int i=0; i<N; i++){
     Nodes::Node const& node = (*refNode)[ ind[i] ];
     u_nod[Pt::IDX_X][i]  = node.u0.x(); u_nod[Pt::IDX_Y][i] = node.u0.y(); u_nod[Pt::IDX_Z][i]  = node.u0.z();
-    v_nod[Pt::IDX_X][i]  = node.v0.x(); v_nod[Pt::IDX_Y][i] = node.v0.y(); v_nod[Pt::IDX_Z][i]  = node.v0.z();			
-    phi0_nod[i]  = node.phi0;
-    phiv0_nod[i] = node.phiv0;
+    //v_nod[Pt::IDX_X][i]  = node.v0.x(); v_nod[Pt::IDX_Y][i] = node.v0.y(); v_nod[Pt::IDX_Z][i]  = node.v0.z();			
+    //phi0_nod[i]  = node.phi0;
+    //phiv0_nod[i] = node.phiv0;
     }
 
+/*
 tiny::mult<double, DIM, N, NPI> (u_nod, a, u);// a is const matrix from namespace tetra 
-
 tiny::mult<double, DIM, N, NPI> (u_nod, dadx, dudx);
 tiny::mult<double, DIM, N, NPI> (u_nod, dady, dudy);
 tiny::mult<double, DIM, N, NPI> (u_nod, dadz, dudz);
+*/
+interpolation(Nodes::get_u0,u,dudx,dudy,dudz);
 
+/*
 tiny::mult<double, DIM, N, NPI> (v_nod, a, v);
-
 tiny::mult<double, DIM, N, NPI> (v_nod, dadx, dvdx);
 tiny::mult<double, DIM, N, NPI> (v_nod, dady, dvdy);
 tiny::mult<double, DIM, N, NPI> (v_nod, dadz, dvdz);
+*/
+interpolation(Nodes::get_v0,v,dvdx,dvdy,dvdz);
 
+/*
 tiny::neg_transposed_mult<double, N, NPI> (phi0_nod, dadx, Hdx);
 tiny::neg_transposed_mult<double, N, NPI> (phi0_nod, dady, Hdy);
 tiny::neg_transposed_mult<double, N, NPI> (phi0_nod, dadz, Hdz);
+*/
+interpolation(Nodes::get_phi0,Hdx,Hdy,Hdz);
 
+/*
 tiny::neg_transposed_mult<double, N, NPI> (phiv0_nod, dadx, Hvx);
 tiny::neg_transposed_mult<double, N, NPI> (phiv0_nod, dady, Hvy);
 tiny::neg_transposed_mult<double, N, NPI> (phiv0_nod, dadz, Hvz);
+*/
+interpolation(Nodes::get_phiv0,Hvx,Hvy,Hvz);
 
 /*-------------------------------------------------------*/
 for (int npi=0; npi<NPI; npi++){
