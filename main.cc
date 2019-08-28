@@ -117,7 +117,7 @@ while (t < mySettings.tf)
     if (dt < mySettings.DTMIN) { fem.reset();break; }
 
     /* changement de referentiel */
-    fem.DW_vz += fem.DW_dir*fem.moy<V>(Pt::IDX_Z)*fem.l.z()/2.;
+    fem.DW_vz += fem.DW_dir*fem.avg<V>(Pt::IDX_Z)*fem.l.z()/2.;
     
     linAlg.set_Hext(fem.Hext[0],fem.Hext[1],fem.Hext[2]);
     linAlg.set_DW_vz(fem.DW_vz);
@@ -144,7 +144,7 @@ while (t < mySettings.tf)
     fem.DW_vz0 = fem.DW_vz;/* mise a jour de la vitesse du dernier referentiel et deplacement de paroi */ 
     fem.DW_z  += fem.DW_vz*dt;
     fem.evolution(); t+=dt; fem.t=t; nt++; flag=0;
-    //double mz = fem.moy<U>(Pt::IDX_Z);	    
+    
     if(mySettings.recenter)
         {
         switch(mySettings.recentering_direction)

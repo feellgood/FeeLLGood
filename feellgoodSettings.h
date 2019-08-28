@@ -74,7 +74,7 @@ class Settings{
     
     bool recenter;/**< to recenter DW or not */
 	char recentering_direction;/**< recentering direction, should be 'X'|'Y'|'Z' */
-	double threshold;/**< threshold value to recenter or not versus moy(M_recentering_direction) */
+	double threshold;/**< threshold value to recenter or not versus avg(M_recentering_direction) */
 	
 	int solverNbTh;/**< nb of threads for the finite element solver */
 	int scalfmmNbTh;/**< nb of threads for the computation of the demag field with scalfmm */
@@ -153,7 +153,7 @@ class Settings{
         parser.compile(sMz,expr_Mz);
         };
     
-    /** evaluation of the magnetization components through math expression */
+    /** evaluation of the magnetization components through math expression, each component of the magnetization is a function of (x,y,z). */
     inline Pt::pt3D getValue(const Pt::pt3D &p)
         {
         x= p.x();

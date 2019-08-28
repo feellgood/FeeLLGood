@@ -1,7 +1,7 @@
 #include "fem.h"
 
 /*-----------------------------------------*/
-/*   recentering of the DW along idx_dir       */
+/*   recentering of the DW along idx_dir   */
 /*-----------------------------------------*/
 
 using namespace Pt;
@@ -21,39 +21,36 @@ pt3D p_dir = pt3D(idx_dir);//unit vector
 queryPt[0]=c.x()-0.5*pScal(p_dir,l);
 queryPt[1]=c.y()-0.5*pScal(p_dir,l);
 queryPt[2]=c.z()-0.5*pScal(p_dir,l);
-//std::cout << "left P = " << queryPt[0] << " ; " <<  queryPt[1] << " ; " << queryPt[2] << std::endl;
 
 kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 int ns=nnIdx[0];
 if(VERBOSE) { std::cerr << "ns : " << ns << std::endl; }
 
 double u2L= node[ns].u(idx_dir);
-if(VERBOSE) { std::cout << "left z : " << queryPt[idx_dir] << " mag : "<< node[ns].u << std::endl; }
+if(VERBOSE) { std::cout << "left: " << queryPt[idx_dir] << " mag : "<< node[ns].u << std::endl; }
 
 /* bord droit */
 queryPt[0]=c.x()+0.5*pScal(p_dir,l);
 queryPt[1]=c.y()+0.5*pScal(p_dir,l);
 queryPt[2]=c.z()+0.5*pScal(p_dir,l);
 
-//std::cout << "right P = " << queryPt[0] << " ; " <<  queryPt[1] << " ; " << queryPt[2] << std::endl;
-
 kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 ns=nnIdx[0];
 double u2R= node[ns].u(idx_dir);
-if(VERBOSE) { std::cout << "right z : " << queryPt[idx_dir] << " mag : "<< node[ns].u << std::endl; }
+if(VERBOSE) { std::cout << "right: " << queryPt[idx_dir] << " mag : "<< node[ns].u << std::endl; }
 
 if ((u2L*u2R>0.)&&VERBOSE){ std::cout << "Warning apparently no DW!" << std::endl; }
 
 DW_dir=(u2L>0? 1.: -1.); /* sens de deplacement de la paroi +Oz ou -Oz */
-if(VERBOSE) {std::cout << "DW dir   : " << DW_dir << std::endl; }
+if(VERBOSE) {std::cout << "DW dir: " << DW_dir << std::endl; }
 }
 
 
 
 bool Fem::recentrage(double thres,enum index idx_dir)
 {
-thres = std::min(abs(thres), 1.);
-double m_i = Fem::moy<U>(idx_dir);//(Pt::IDX_Z);
+thres = abs(thres);
+double m_i = Fem::avg<U>(idx_dir);
 if (fabs(m_i)<thres) return false;
 
 if(VERBOSE) {std::cout << "centering ..." << std::flush;}

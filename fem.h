@@ -200,7 +200,7 @@ void saveH(std::string fileName,double scale);
 template to compute average component of either u or v on the whole set of tetetrahedron
 */
 template <int UorV>
-double moy(Pt::index d)
+double avg(Pt::index d)
 {
 double sum = 0.;
 std::for_each(tet.begin(),tet.end(),[this,&sum,&d](Tetra::Tet &te)
@@ -213,7 +213,6 @@ std::for_each(tet.begin(),tet.end(),[this,&sum,&d](Tetra::Tet &te)
         if(UorV) { val_nod[ie] = n.u(d);} else { val_nod[ie] = n.v(d);} 
         }
     tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (val_nod, Tetra::a, val);
-    //sum += tiny::sp<double, Tetra::NPI> (val, te.weight);
     sum += te.weightedScalarProd(val);
     }
 );//fin for_each
