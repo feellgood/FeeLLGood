@@ -107,9 +107,10 @@ class Fac{
         inline void init(void)
             {for (int j=0; j<NPI; j++) {weight[j] = 2.*surf*pds[j]; }}// detJ = 2*surf;
     
-        /** weighted scalar product */
+        /** weighted scalar product : factorized formulation */
         inline double weightedScalarProd(const double X[NPI]) const
-            {return (X[0]*weight[0] + X[1]*weight[1] + X[2]*weight[2] + X[3]*weight[3] );}
+            {return ( X[0]*weight[0] + (X[1] +X[2] + X[3])*weight[1] );}
+            //{return (X[0]*weight[0] + X[1]*weight[1] + X[2]*weight[2] + X[3]*weight[3] );}
         
         /** interpolation for 3D vector field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
         inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double result[DIM][NPI]) const

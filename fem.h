@@ -67,7 +67,7 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
 	double Etot0;/**< initial total energy (to check) */
 	double Etot;/**< total energy */
 	double evol;/**< increment dE for dt */
-	double phy;/**< no idea */
+	
 	std::vector <Nodes::Node> node; /**< node container */
 	std::vector <Facette::Fac>  fac; /**< face container */
 	std::vector <Tetra::Tet>  tet; /**< tetrahedron container */

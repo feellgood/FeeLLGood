@@ -24,5 +24,4 @@ for (int e=0; e<4; e++)
     { E[e] = _E[e]; Etot += _E[e]; }
 
 evol = Etot-Etot0;
-phy = 0;
 }
