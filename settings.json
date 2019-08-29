@@ -54,7 +54,7 @@
     "threshold" : 0.1
     },
     
-"Bext" : [0.0, 0.0, 0.005],
+"Bext" : [0.0, 0.0, 0.010],
 
 "demagnetization field solver" :
     {
@@ -73,10 +73,10 @@
     {
     "final_time" : 1e-6,
     "theta" : 0.5,
-    "min(du)" : 1e-9,
+    "min(du)" : 0.5e-9,
     "max(du)" : 0.02,
     "min(dt)" : 1e-14,
     "max(dt)" : 1e-7,
-    "initial dt" : 1e-9
+    "initial dt" : 1.0e-9
     }
 }

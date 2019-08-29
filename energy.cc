@@ -3,7 +3,7 @@
 void Fem::energy(Settings &settings)
 {
 Etot = 0.0;
-double _E[5] = {0.0,0.0,0.0,0.0,0.0};
+double _E[4] = {0.0,0.0,0.0,0.0};
 double uz_drift=2.*DW_z/l.z()*DW_dir;
 
 std::for_each(tet.begin(),tet.end(),[this,settings,&_E,uz_drift](Tetra::Tet const& te) 

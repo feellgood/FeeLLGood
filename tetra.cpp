@@ -228,7 +228,7 @@ R = dt/tau_r*abs(log(dt/tau_r));
     }
 }
 
-void Tet::energy(Tetra::prm const& param,double E[5],const double Hext[DIM],double uz_drift) const
+void Tet::energy(Tetra::prm const& param,double E[4],const double Hext[DIM],double uz_drift) const
 {
 double Ae = param.A;
 double Js = param.J;
@@ -258,8 +258,11 @@ double q[NPI];
 for (int npi=0; npi<NPI; npi++)
     { q[npi] = -Ms*(dudx[0][npi] + dudy[1][npi] + dudz[2][npi]); }
 
-double dens[5][NPI];
-double Eelem[5];
+//double dens[5][NPI];
+//double Eelem[5];
+
+double dens[4][NPI];
+double Eelem[4];
 
 for (int npi=0; npi<NPI; npi++)
     {
@@ -279,14 +282,14 @@ for (int npi=0; npi<NPI; npi++)
 
     dens[3][npi] = -Js*(u[0][npi]*Hext[0] + u[1][npi]*Hext[1] + u[2][npi]*Hext[2] + uz_drift*Hext[2]);
 
-    dens[4][npi] = 0.;
+    //dens[4][npi] = 0.;
     }
-tiny::mult<double, 5, NPI> (dens, weight, Eelem);
+tiny::mult<double, 4, NPI> (dens, weight, Eelem);
 E[0] += Eelem[0];
 E[1] += Eelem[1];
 E[2] += Eelem[2];
 E[3] += Eelem[3];
-E[4] += Eelem[4];
+//E[4] += Eelem[4];
 }
 
 void Tet::projection( gmm::dense_matrix <double> const& A,  std::vector <double> const& B,
