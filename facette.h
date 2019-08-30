@@ -34,8 +34,7 @@ const double v[NPI]   = {   1/3.,   1/5.,   1/5.,   3/5.};/**< some constants  t
 const double pds[NPI] = {-27/96., 25/96., 25/96., 25/96.};/**< some constant weights  to build hat functions */
 
 /** hat function constants */
-constexpr double a[N][NPI] ={
-    {1.-u[0]-v[0],1.-u[1]-v[1],1.-u[2]-v[2],1.-u[3]-v[3]},{u[0],u[1],u[2],u[3]},{v[0],v[1],v[2],v[3]}};
+constexpr double a[N][NPI] = {{1.-u[0]-v[0],1.-u[1]-v[1],1.-u[2]-v[2],1.-u[3]-v[3]},{u[0],u[1],u[2],u[3]},{v[0],v[1],v[2],v[3]}};
 
 /** \class prm
 region number and material constants
@@ -143,13 +142,13 @@ class Fac{
 		void integrales(std::vector<Facette::prm> const& params, std::vector <double> &BE) const;
 		
         /** total energy of the facette = anisotropy + demag */
-        void energy(Facette::prm const& param,double E[5]) const;
+        //void energy(Facette::prm const& param,double E[5]) const;
         
         /** anisotropy energy of the facette */
-        double anisotropyEnergy(Facette::prm const& param) const;
+        double anisotropyEnergy(Facette::prm const& param,const double u[DIM][NPI]) const;
         
         /** demagnetizing energy of the facette */
-        double demagEnergy(void) const;
+        double demagEnergy(const double u[DIM][NPI],const double phi[NPI]) const;
         
         /** compute projection of a face */
         void projection(gmm::dense_matrix <double> const& A, std::vector <double> const& B,gmm::dense_matrix <double> &Ap, std::vector <double> &Bp) const;
