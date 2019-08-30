@@ -214,7 +214,19 @@ class Tet{
 		void integrales(std::vector<Tetra::prm> const& params,double Hext[DIM],double Vz,double theta,double dt,double tau_r,gmm::dense_matrix <double> &AE, std::vector <double> &BE)  const;
 
         /** computes all the contributions to the energy of the tetrahedron */
-        void energy(Tetra::prm const& param,double E[4],const double Hext[DIM],double uz_drift) const;
+        //void energy(Tetra::prm const& param,double E[4],const double Hext[DIM],double uz_drift) const;
+        
+        /** exchange energy of the tetrahedron */
+        double exchangeEnergy(Tetra::prm const& param,const double dudx[DIM][NPI],const double dudy[DIM][NPI],const double dudz[DIM][NPI]) const;
+        
+        /** anisotropy energy of the tetrahedron */
+        double anisotropyEnergy(Tetra::prm const& param,const double u[DIM][NPI]) const;
+        
+        /** demagnetizing energy of the tetrahedron */
+        double demagEnergy(Tetra::prm const& param,const double dudx[DIM][NPI],const double dudy[DIM][NPI],const double dudz[DIM][NPI],const double phi[NPI]) const;
+        
+        /** zeeman energy of the tetrahedron */
+        double zeemanEnergy(Tetra::prm const& param,double uz_drift,const double Hext[DIM],const double u[DIM][NPI]) const;
         
 		/** computes projection of a tetrahedron */
         void projection(gmm::dense_matrix <double> const& A,  std::vector <double> const& B,gmm::dense_matrix <double> &Ap, std::vector <double> &Bp)  const;

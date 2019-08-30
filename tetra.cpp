@@ -228,6 +228,7 @@ R = dt/tau_r*abs(log(dt/tau_r));
     }
 }
 
+/*
 void Tet::energy(Tetra::prm const& param,double E[4],const double Hext[DIM],double uz_drift) const
 {
 double Ae = param.A;
@@ -246,20 +247,15 @@ double uk20 = param.uk[2][0];
 double uk21 = param.uk[2][1];
 double uk22 = param.uk[2][2];   
    
-   /*-------------------- INTERPOLATION --------------------*/
 double u[DIM][NPI],dudx[DIM][NPI], dudy[DIM][NPI], dudz[DIM][NPI];
 double phi[NPI];
 
 interpolation(Nodes::get_u,u,dudx,dudy,dudz);
 interpolation(Nodes::get_phi,phi);
-/*-------------------------------------------------------*/
 
 double q[NPI];
 for (int npi=0; npi<NPI; npi++)
     { q[npi] = -Ms*(dudx[0][npi] + dudy[1][npi] + dudz[2][npi]); }
-
-//double dens[5][NPI];
-//double Eelem[5];
 
 double dens[4][NPI];
 double Eelem[4];
@@ -275,22 +271,82 @@ for (int npi=0; npi<NPI; npi++)
                         sq( dudx[1][npi] ) + sq( dudy[1][npi] ) + sq( dudz[1][npi] )+
                         sq( dudx[2][npi] ) + sq( dudy[2][npi] ) + sq( dudz[2][npi] ) );
 
-    dens[1][npi] = -K  * sq(al0);      // uniaxe
-    dens[1][npi]+= +K3 * (sq(al0) * sq(al1) + sq(al1) * sq(al2) + sq(al2) * sq(al0)); //cubique
+    dens[1][npi] = -K  * sq(al0) + K3 * (sq(al0) * sq(al1) + sq(al1) * sq(al2) + sq(al2) * sq(al0)); // uniaxial(K) + cubic(K3)
  
     dens[2][npi] = 0.5*mu0*q[npi]*phi[npi];
 
     dens[3][npi] = -Js*(u[0][npi]*Hext[0] + u[1][npi]*Hext[1] + u[2][npi]*Hext[2] + uz_drift*Hext[2]);
-
-    //dens[4][npi] = 0.;
     }
 tiny::mult<double, 4, NPI> (dens, weight, Eelem);
-E[0] += Eelem[0];
-E[1] += Eelem[1];
-E[2] += Eelem[2];
-E[3] += Eelem[3];
-//E[4] += Eelem[4];
+E[0] += Eelem[0]; E[1] += Eelem[1]; E[2] += Eelem[2]; E[3] += Eelem[3];
 }
+*/
+
+double Tet::exchangeEnergy(Tetra::prm const& param,const double dudx[DIM][NPI],const double dudy[DIM][NPI],const double dudz[DIM][NPI]) const
+{
+double dens[NPI];
+
+for (int npi=0; npi<NPI; npi++)
+    {
+    dens[npi] = sq( dudx[0][npi] ) + sq( dudy[0][npi] ) + sq( dudz[0][npi] )+
+                sq( dudx[1][npi] ) + sq( dudy[1][npi] ) + sq( dudz[1][npi] )+
+                sq( dudx[2][npi] ) + sq( dudy[2][npi] ) + sq( dudz[2][npi] ) ;
+    }
+return ( param.A * weightedScalarProd(dens) );
+}
+
+double Tet::anisotropyEnergy(Tetra::prm const& param,const double u[DIM][NPI]) const
+{
+double dens[NPI];
+
+double K = param.K;
+double K3 = param.K3;
+
+double uk00 = param.uk[0][0];
+double uk01 = param.uk[0][1];
+double uk02 = param.uk[0][2];
+double uk10 = param.uk[1][0];
+double uk11 = param.uk[1][1];
+double uk12 = param.uk[1][2];
+double uk20 = param.uk[2][0];
+double uk21 = param.uk[2][1];
+double uk22 = param.uk[2][2];   
+
+for (int npi=0; npi<NPI; npi++)
+    {
+        // cosinus directeurs
+    double al0=uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi];
+    double al1=uk10*u[0][npi] + uk11*u[1][npi] + uk12*u[2][npi];
+    double al2=uk20*u[0][npi] + uk21*u[1][npi] + uk22*u[2][npi];
+    
+    dens[npi] = -K  * sq(al0) + K3 * (sq(al0) * sq(al1) + sq(al1) * sq(al2) + sq(al2) * sq(al0)); // uniaxial(K) + cubic(K3)
+    }
+
+return weightedScalarProd(dens);
+}
+        
+double Tet::demagEnergy(Tetra::prm const& param,const double dudx[DIM][NPI],const double dudy[DIM][NPI],const double dudz[DIM][NPI],const double phi[NPI]) const
+{
+double dens[NPI];
+double Ms = nu0 * param.J;
+
+for (int npi=0; npi<NPI; npi++)
+    { dens[npi] = (dudx[0][npi] + dudy[1][npi] + dudz[2][npi])*phi[npi]; }
+return ( -0.5*mu0*Ms*weightedScalarProd(dens) );
+}
+
+double Tet::zeemanEnergy(Tetra::prm const& param,double uz_drift,const double Hext[DIM],const double u[DIM][NPI]) const
+{
+double dens[NPI];
+double Js = param.J;
+
+for (int npi=0; npi<NPI; npi++)
+    {
+    dens[npi] = u[0][npi]*Hext[0] + u[1][npi]*Hext[1] + u[2][npi]*Hext[2] + uz_drift*Hext[2];
+    }
+return ( -Js*weightedScalarProd(dens) );
+}
+
 
 void Tet::projection( gmm::dense_matrix <double> const& A,  std::vector <double> const& B,
            gmm::dense_matrix <double> &Ap, std::vector <double> &Bp) const

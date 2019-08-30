@@ -141,9 +141,6 @@ class Fac{
 		/** computes the integral contribution of the triangular face */
 		void integrales(std::vector<Facette::prm> const& params, std::vector <double> &BE) const;
 		
-        /** total energy of the facette = anisotropy + demag */
-        //void energy(Facette::prm const& param,double E[5]) const;
-        
         /** anisotropy energy of the facette */
         double anisotropyEnergy(Facette::prm const& param,const double u[DIM][NPI]) const;
         

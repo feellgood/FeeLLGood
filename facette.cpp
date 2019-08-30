@@ -1,7 +1,5 @@
 #include "facette.h"
 
-
-
 using namespace Facette;
 
 void Fac::integrales(std::vector<Facette::prm> const& params, std::vector <double> &BE) const
@@ -35,42 +33,8 @@ interpolation(Nodes::get_u0,u);
     }
 }
 
-/*
-void Fac::energy(Facette::prm const& param,double E[5]) const
-{//E : 1-anisotropy 2-demagnetizing
-    double K = param.Ks;
-	double uk00 = param.uk[0];
-	double uk01 = param.uk[1];
-	double uk02 = param.uk[2];    
-	
-    double u[DIM][NPI];
-    double q[NPI],  phi[NPI];
-	
-    interpolation(Nodes::get_u,u);
-    interpolation(Nodes::get_phi,phi);
-    
-    for (int npi=0; npi<NPI; npi++)
-        { q[npi] = Ms * (u[0][npi]*n.x() + u[1][npi]*n.y() + u[2][npi]*n.z()); }
-	
-	double dens[NPI];
-		
-	for (int npi=0; npi<NPI; npi++)
-        {// cosinus directeurs
-		double al0=uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi];
-		dens[npi] = -K*al0*al0;      // uniaxe
-		}
-	E[1] += weightedScalarProd(dens);
-
-	for (int npi=0; npi<NPI; npi++) { dens[npi] = 0.5*mu0*q[npi]*phi[npi]; }
-	E[2] += weightedScalarProd(dens);
-}
-*/
-
 double Fac::anisotropyEnergy(Facette::prm const& param,const double u[DIM][NPI]) const
 {
-//double  u[DIM][NPI];
-//interpolation(Nodes::get_u,u);
-
 double uk00 = param.uk[0];
 double uk01 = param.uk[1];
 double uk02 = param.uk[2];    
@@ -87,13 +51,7 @@ return weightedScalarProd(dens);
 double Fac::demagEnergy(const double u[DIM][NPI],const double phi[NPI]) const
 {
 double q[NPI];
-/*
-double phi[NPI];
-double u[DIM][NPI];
 
-interpolation(Nodes::get_u,u);
-interpolation(Nodes::get_phi,phi);
-*/
 for (int npi=0; npi<NPI; npi++)
         { q[npi] = Ms * (u[0][npi]*n.x() + u[1][npi]*n.y() + u[2][npi]*n.z()); }
 double dens[NPI];
@@ -108,7 +66,6 @@ void Fac::projection(gmm::dense_matrix <double> const& A,  std::vector <double> 
 {
 thread_local gmm::dense_matrix <double> P(2*N,3*N);
 thread_local gmm::dense_matrix <double> PA(2*N,3*N);
-//mtl::mat::set_to_zero(P);
 
 for (int i=0; i<N; i++){
     Nodes::Node const& n = (*refNode)[ind[i]];
@@ -116,8 +73,7 @@ for (int i=0; i<N; i++){
     P(N+i,i)= n.eq.x();  P(N+i,N+i)= n.eq.y();  P(N+i,2*N+i)= n.eq.z();
     }
 
-//Ap = (P*A)*trans(P);
-//Bp = P*B;
+//Ap = (P*A)*trans(P); Bp = P*B;
 gmm::mult(P,A,PA);
 gmm::mult(PA, gmm::transposed(P), Ap);
 
@@ -136,8 +92,7 @@ for (int i=0; i<N; i++){
     P(N+i,i)= n.eq.x();  P(N+i,N+i)= n.eq.y();  P(N+i,2*N+i)= n.eq.z();
     }
 
-//Ap = (P*A)*trans(P);
-//Bp = P*B;
+//Ap = (P*A)*trans(P); Bp = P*B;
 gmm::mult(P,A,PA);
 gmm::mult(PA, gmm::transposed(P), Ksp);
 
