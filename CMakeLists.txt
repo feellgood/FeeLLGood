@@ -65,8 +65,8 @@ set( CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -Wall -Wextra -std=c++11 -fopenmp -O3 -ff
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
 
 SET( SOURCES config.h pt3D.h matBlocDiag.h tetra.h tetra.cpp facette.h facette.cpp feellgoodSettings.h node.h
-	linear_algebra.h main.cc feellgoodSettings.cpp read.cpp femutil.cc
-	recentrage.cc energy.cpp save.cpp vsolve.cc tiny.h)
+	linear_algebra.h main.cpp feellgoodSettings.cpp read.cpp femutil.cpp
+	recentering.cpp energy.cpp save.cpp solver.cpp tiny.h)
 
 SET( HEADERS ${ANN_INCLUDE_DIR}/ANN.h ${SCALFMM_INCLUDE_DIR}/Kernels/Rotation/FRotationKernel.hpp ${EXPRTK_INCLUDE_DIR}/exprtk.hpp )
 

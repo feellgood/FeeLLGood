@@ -1,21 +1,16 @@
 #include <algorithm>
-
-
 #include <functional>
 
 #include "Utils/FTic.hpp"
-
 #include "linear_algebra.h"
-
     
-int LinAlgebra::vsolve(long nt)
+int LinAlgebra::solver(long nt)
 {
 FTic counter;
 
 counter.tic();
 
-base_projection();   // definit plan tangent
-
+base_projection();
 write_matrix K_TH(2*NOD, 2*NOD);
 write_vector L_TH(2*NOD);
 

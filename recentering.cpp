@@ -1,14 +1,10 @@
 #include "fem.h"
 
-/*-----------------------------------------*/
-/*   recentering of the DW along idx_dir   */
-/*-----------------------------------------*/
-
 using namespace Pt;
 
 void Fem::direction(enum index idx_dir)
 {
-if(VERBOSE) { std::cerr << "direction " << std::endl; }
+if(VERBOSE) { std::cout << "direction " << std::endl; }
 const int NPS=1;
 
 ANNidxArray nnIdx = new ANNidx[NPS];    if(!nnIdx) SYSTEM_ERROR;
@@ -24,7 +20,7 @@ queryPt[2]=c.z()-0.5*pScal(p_dir,l);
 
 kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 int ns=nnIdx[0];
-if(VERBOSE) { std::cerr << "ns : " << ns << std::endl; }
+if(VERBOSE) { std::cout << "ns : " << ns << std::endl; }
 
 double u2L= node[ns].u(idx_dir);
 if(VERBOSE) { std::cout << "left: " << queryPt[idx_dir] << " mag : "<< node[ns].u << std::endl; }

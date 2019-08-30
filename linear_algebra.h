@@ -5,7 +5,6 @@ projection and matrix assembly is multithreaded for tetrahedron, monothread for 
 */
 #include <deque>
 #include <queue>
-
 #include <thread>
 #include <mutex>
 #include <future>
@@ -67,7 +66,7 @@ public:
 	gmm::diagonal_precond <read_matrix> *prc;
 
     /** solver, uses bicgstab and gmres */
-	int  vsolve(long nt);
+	int  solver(long nt);
 
     /** setter for dt */
     inline void set_dt(double _dt){dt = _dt;}

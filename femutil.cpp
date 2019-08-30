@@ -7,8 +7,8 @@ void Fem::femutil(Settings &settings)
 {
 const long nb_nod = node.size();
     
-pts= annAllocPts(nb_nod, 3);
-kdtree = new ANNkd_tree(pts, nb_nod, 3);
+pts= annAllocPts(nb_nod, DIM);
+kdtree = new ANNkd_tree(pts, nb_nod, DIM);
 if (!kdtree) SYSTEM_ERROR;
 
 int i=0;

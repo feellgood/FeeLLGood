@@ -1,7 +1,7 @@
 #include <iostream>
 #include <unistd.h> // for getpid()
 
-#include "Utils/FTic.hpp"//for counter
+#include "Utils/FTic.hpp"//for counter from scalfmm
 
 #include "linear_algebra.h"
 #include "fmm_demag.h"
@@ -74,17 +74,11 @@ cout << "init scalfmm done.\n" << endl;
 
 double dt0= mySettings.dt;
 
-triple Bext;
+fem.Hext[0] = nu0*mySettings.Bext[0];
+fem.Hext[1] = nu0*mySettings.Bext[1];
+fem.Hext[2] = nu0*mySettings.Bext[2]; 
 
-Bext[0] = mySettings.Bext[0];
-Bext[1] = mySettings.Bext[1];
-Bext[2] = mySettings.Bext[2];
-        
-fem.Hext[0]=nu0*Bext[0];
-fem.Hext[1]=nu0*Bext[1];
-fem.Hext[2]=nu0*Bext[2]; 
-
-cout << "Bext : " << Bext[0] << "\t" << Bext[1] << "\t" << Bext[2] << endl;
+cout << "Bext : " << mySettings.Bext[0] << "\t" << mySettings.Bext[1] << "\t" << mySettings.Bext[2] << endl;
 
 string baseName = mySettings.r_path_output_dir + mySettings.getSimName();
 string str = baseName + ".evol";
@@ -122,7 +116,7 @@ while (t < mySettings.tf)
     linAlg.set_Hext(fem.Hext[0],fem.Hext[1],fem.Hext[2]);
     linAlg.set_DW_vz(fem.DW_vz);
     linAlg.set_dt(dt);
-    int err = linAlg.vsolve(nt);  
+    int err = linAlg.solver(nt);  
     fem.vmax = linAlg.get_v_max();
     
     if (err)
