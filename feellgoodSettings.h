@@ -81,6 +81,9 @@ class Settings{
     
     triple Bext;/**< applied external field */
     
+    double Uz;/**< spin transfert torque adiabatic prefactor along z direction */
+    double beta;/**< spin transfert torque non-adiabatic prefactor along z direction */
+    
 	std::string sMx;/**< string for analytical definition of Mx */
 	std::string sMy;/**< string for analytical definition of My */
     std::string sMz;/**< string for analytical definition of Mz */

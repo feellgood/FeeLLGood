@@ -178,6 +178,12 @@ for(boost::property_tree::ptree::value_type &cell :sub_tree)
     j++;
     }
 
+try {sub_tree = root.get_child("spin polarized current");}
+catch(std::exception &e)
+    { std::cout << e.what() << std::endl; }
+Uz = sub_tree.get<double>("Uz",0.0);
+beta = sub_tree.get<double>("beta",0.0);
+
 try { sub_tree = root.get_child("demagnetization field solver"); }
 catch (std::exception &e)
     { std::cout << e.what() << std::endl; }

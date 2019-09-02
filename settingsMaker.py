@@ -38,6 +38,12 @@ mySettings["recentering"] = recentering
 
 mySettings["Bext"] = [0.0,0.0,0.007]
 
+current = {}
+current["Uz"] = 0.0
+current["beta"] = 0.0
+mySettings["spin polarized current"] = current
+
+
 FEMsolver = {}
 FEMsolver["nbThreads"] = 16
 FEMsolver["max(iter)"] = 500
