@@ -195,31 +195,17 @@ void savesol(std::string fileName,double s);
 /** save the field values */
 void saveH(std::string fileName,double scale);
 
-
 /** 
 average component of either u or v through getter on the whole set of tetetrahedron
 */
-//template <int UorV>
 double avg(std::function<double (Nodes::Node,Pt::index)> getter,Pt::index d)
-{
-double sum = 0.;
-std::for_each(tet.begin(),tet.end(),[&getter,&sum,&d](Tetra::Tet &te)
-    {
-    //double val_nod[Tetra::N];
-    double val[Tetra::NPI];
-    
-    te.interpolation(getter,d,val);
-    /*
-    for (int ie=0; ie<Tetra::N; ie++) 
-        {
-        Nodes::Node &n = node[ te.ind[ie] ];
-        if(UorV) { val_nod[ie] = n.u(d);} else { val_nod[ie] = n.v(d);} 
-        }
-    tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (val_nod, Tetra::a, val);
-    */
-    sum += te.weightedScalarProd(val);
-    }
-);//fin for_each
+{// syntaxe pénible avec opérateur binaire dans la lambda pour avoir un += sur la fonction voulue, with C++17 we should use reduce instead of accumulate here
+double sum = std::accumulate(tet.begin(),tet.end(),0.0, [&getter,&d](double &s,Tetra::Tet &te)
+                            {
+                            double val[Tetra::NPI]; 
+                            te.interpolation(getter,d,val); 
+                            return (s + te.weightedScalarProd(val));    
+                            } );
 
 return sum/vol;
 }
