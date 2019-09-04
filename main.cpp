@@ -111,7 +111,7 @@ while (t < mySettings.tf)
     if (dt < mySettings.DTMIN) { fem.reset();break; }
 
     /* changement de referentiel */
-    fem.DW_vz += fem.DW_dir*fem.avg<V>(Pt::IDX_Z)*fem.l.z()/2.;
+    fem.DW_vz += fem.DW_dir*fem.avg(Nodes::get_v_comp,Pt::IDX_Z)*fem.l.z()/2.;
     
     linAlg.set_Hext(fem.Hext[0],fem.Hext[1],fem.Hext[2]);
     linAlg.set_DW_vz(fem.DW_vz);

@@ -17,7 +17,7 @@ if ((nt%n1)==0)
    // fout << boost::format("%+20.10e %+20.10e %+20.10e") % u_moy(fem,0) % u_moy(fem,1) % u_moy(fem,2);
    // fout << boost::format("%+20.10e %+20.10e %+20.10e %+20.10e %+20.10e %+20.10e %+20.10e")% Ee % Ea % Ed % Ez % Etot % DW_z % DW_vz<< endl;
     fout << nt <<"\t" << t <<"\t" << settings.dt <<"\t" << vmax*settings.dt <<"\t";
-    fout << avg<U>(Pt::IDX_X) <<"\t" << avg<U>(Pt::IDX_Y) <<"\t" << avg<U>(Pt::IDX_Z) <<"\t";
+    fout << avg(Nodes::get_u_comp,Pt::IDX_X) <<"\t" << avg(Nodes::get_u_comp,Pt::IDX_Y) <<"\t" << avg(Nodes::get_u_comp,Pt::IDX_Z) <<"\t";
     fout << E[0] <<"\t" << E[1] <<"\t" << E[2] <<"\t" << E[3] <<"\t" << Etot <<"\t" << DW_z <<"\t" << DW_vz <<"\t" << endl;
     }
 

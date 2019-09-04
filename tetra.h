@@ -207,6 +207,18 @@ class Tet{
         tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result);
         }
 		
+		/** interpolation for scalar field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
+        inline void interpolation(std::function<double (Nodes::Node,Pt::index)> getter,Pt::index idx,double result[NPI]) const
+        {
+        double scalar_nod[N];    
+        for (int i=0; i<N; i++)
+            {
+            Nodes::Node const& n = (*refNode)[ ind[i] ];
+            scalar_nod[i] =  getter(n,idx);
+            }
+        tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result);
+        }
+		
 		/** basic region infos */		
 		inline void infos(){std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2]<< "\t"<< ind[3] <<std::endl;};
 		

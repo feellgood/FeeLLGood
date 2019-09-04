@@ -239,12 +239,10 @@ public:
     inline void z(double c) {_z = c;}
     
     /**
-     * setter/getter by index
+     * getter/setter by index
      @param i is an unsigned (0|1|2) use of IDX_X IDX_Y IDX_Z is recommended
-     example : p(IDX_X) = 3.14; is equivalent to p.x(3.14);
      */
-    inline double& operator() (unsigned i) { if(i==IDX_X) {return _x;} else {if(i==IDX_Y) {return _y;} else return _z;} }
-    
+    inline double& operator() (index i) { if(i==IDX_X) {return _x;} else {if(i==IDX_Y) {return _y;} else return _z;} }
     
     inline pt3D& operator=(pt3D const& p) {_x = p.x(); _y = p.y(); _z = p.z(); return *this;} /**< operator= */
     

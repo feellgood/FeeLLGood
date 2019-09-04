@@ -15,6 +15,7 @@ It does also contains the definition of many constants for the solver, and for s
 #include <cstdlib>
 #include <cassert>
 #include <list>
+#include <functional>
 
 #include <time.h>
 #include <sys/times.h>
@@ -196,22 +197,26 @@ void saveH(std::string fileName,double scale);
 
 
 /** 
-template to compute average component of either u or v on the whole set of tetetrahedron
+average component of either u or v through getter on the whole set of tetetrahedron
 */
-template <int UorV>
-double avg(Pt::index d)
+//template <int UorV>
+double avg(std::function<double (Nodes::Node,Pt::index)> getter,Pt::index d)
 {
 double sum = 0.;
-std::for_each(tet.begin(),tet.end(),[this,&sum,&d](Tetra::Tet &te)
+std::for_each(tet.begin(),tet.end(),[&getter,&sum,&d](Tetra::Tet &te)
     {
-    double val_nod[Tetra::N], val[Tetra::NPI];
+    //double val_nod[Tetra::N];
+    double val[Tetra::NPI];
+    
+    te.interpolation(getter,d,val);
+    /*
     for (int ie=0; ie<Tetra::N; ie++) 
         {
-        int i = te.ind[ie];
-        Nodes::Node &n = node[i];
+        Nodes::Node &n = node[ te.ind[ie] ];
         if(UorV) { val_nod[ie] = n.u(d);} else { val_nod[ie] = n.v(d);} 
         }
     tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (val_nod, Tetra::a, val);
+    */
     sum += te.weightedScalarProd(val);
     }
 );//fin for_each
