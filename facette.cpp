@@ -112,8 +112,8 @@ void Fac::assemblage(const int NOD,gmm::dense_matrix <double> const& Ke, std::ve
             K(NOD+i_,j_) += Ke(i,j);      K(NOD+i_, NOD+j_) += Ke(  i,N+j);
             K(    i_,j_) += Ke(N+i,j);    K(    i_, NOD+j_) += Ke(N+i,N+j);
             }
-        L[NOD+i_] += Le[i];//L[NOD+i_]+= Le[  i];
-        L[i_] += Le[N+i];//L[    i_]+= Le[N+i];
+        L[NOD+i_] += Le[i];
+        L[i_] += Le[N+i];
         
         }
     }
@@ -130,8 +130,8 @@ void Fac::assemblage(write_matrix &K,write_vector &L) const
             K(NOD+i_,j_) += Ksp(i,j);      K(NOD+i_, NOD+j_) += Ksp(  i,N+j);
             K(    i_,j_) += Ksp(N+i,j);    K(    i_, NOD+j_) += Ksp(N+i,N+j);
             }
-        L[NOD+i_] += Lsp[i];//L[NOD+i_]+= Le[  i];
-        L[i_] += Lsp[N+i];//L[    i_]+= Le[N+i];
+        L[NOD+i_] += Lsp[i];
+        L[i_] += Lsp[N+i];
         
         }
     

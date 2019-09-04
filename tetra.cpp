@@ -66,55 +66,23 @@ double s_dt = theta*dt;//theta du theta schema
 /*-------------------- INTERPOLATION --------------------*/
 double u_nod[DIM][N]; 
 double u[DIM][NPI], dudx[DIM][NPI], dudy[DIM][NPI], dudz[DIM][NPI];//should be Pt::pt3D X[NPI]
-//double phi0_nod[N];
 double Hdx[NPI], Hdy[NPI], Hdz[NPI];
 
-//double v_nod[DIM][N];
 double v[DIM][NPI];
 double dvdx[DIM][NPI], dvdy[DIM][NPI], dvdz[DIM][NPI];
-//double phiv0_nod[N];
 double Hvx[NPI], Hvy[NPI], Hvz[NPI];
 
 // u_nod(u0) is required for lumping in AE matrix
 for (int i=0; i<N; i++){
     Nodes::Node const& node = (*refNode)[ ind[i] ];
     u_nod[Pt::IDX_X][i]  = node.u0.x(); u_nod[Pt::IDX_Y][i] = node.u0.y(); u_nod[Pt::IDX_Z][i]  = node.u0.z();
-    //v_nod[Pt::IDX_X][i]  = node.v0.x(); v_nod[Pt::IDX_Y][i] = node.v0.y(); v_nod[Pt::IDX_Z][i]  = node.v0.z();			
-    //phi0_nod[i]  = node.phi0;
-    //phiv0_nod[i] = node.phiv0;
     }
 
-/*
-tiny::mult<double, DIM, N, NPI> (u_nod, a, u);// a is const matrix from namespace tetra 
-tiny::mult<double, DIM, N, NPI> (u_nod, dadx, dudx);
-tiny::mult<double, DIM, N, NPI> (u_nod, dady, dudy);
-tiny::mult<double, DIM, N, NPI> (u_nod, dadz, dudz);
-*/
 interpolation(Nodes::get_u0,u,dudx,dudy,dudz);
-
-/*
-tiny::mult<double, DIM, N, NPI> (v_nod, a, v);
-tiny::mult<double, DIM, N, NPI> (v_nod, dadx, dvdx);
-tiny::mult<double, DIM, N, NPI> (v_nod, dady, dvdy);
-tiny::mult<double, DIM, N, NPI> (v_nod, dadz, dvdz);
-*/
 interpolation(Nodes::get_v0,v,dvdx,dvdy,dvdz);
-
-/*
-tiny::neg_transposed_mult<double, N, NPI> (phi0_nod, dadx, Hdx);
-tiny::neg_transposed_mult<double, N, NPI> (phi0_nod, dady, Hdy);
-tiny::neg_transposed_mult<double, N, NPI> (phi0_nod, dadz, Hdz);
-*/
 interpolation(Nodes::get_phi0,Hdx,Hdy,Hdz);
-
-/*
-tiny::neg_transposed_mult<double, N, NPI> (phiv0_nod, dadx, Hvx);
-tiny::neg_transposed_mult<double, N, NPI> (phiv0_nod, dady, Hvy);
-tiny::neg_transposed_mult<double, N, NPI> (phiv0_nod, dadz, Hvz);
-*/
 interpolation(Nodes::get_phiv0,Hvx,Hvy,Hvz);
 
-/*-------------------------------------------------------*/
 for (int npi=0; npi<NPI; npi++){
     double ai, ai_w, dai_dx, dai_dy, dai_dz;
     double Dai_Daj, Dai_Du0, Dai_Du1, Dai_Du2, contrib;
@@ -227,60 +195,6 @@ R = dt/tau_r*abs(log(dt/tau_r));
         }
     }
 }
-
-/*
-void Tet::energy(Tetra::prm const& param,double E[4],const double Hext[DIM],double uz_drift) const
-{
-double Ae = param.A;
-double Js = param.J;
-double Ms = nu0 * Js;
-double K = param.K;
-double K3 = param.K3;
-    
-double uk00 = param.uk[0][0];
-double uk01 = param.uk[0][1];
-double uk02 = param.uk[0][2];
-double uk10 = param.uk[1][0];
-double uk11 = param.uk[1][1];
-double uk12 = param.uk[1][2];
-double uk20 = param.uk[2][0];
-double uk21 = param.uk[2][1];
-double uk22 = param.uk[2][2];   
-   
-double u[DIM][NPI],dudx[DIM][NPI], dudy[DIM][NPI], dudz[DIM][NPI];
-double phi[NPI];
-
-interpolation(Nodes::get_u,u,dudx,dudy,dudz);
-interpolation(Nodes::get_phi,phi);
-
-double q[NPI];
-for (int npi=0; npi<NPI; npi++)
-    { q[npi] = -Ms*(dudx[0][npi] + dudy[1][npi] + dudz[2][npi]); }
-
-double dens[4][NPI];
-double Eelem[4];
-
-for (int npi=0; npi<NPI; npi++)
-    {
-        // cosinus directeurs
-    double al0=uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi];
-    double al1=uk10*u[0][npi] + uk11*u[1][npi] + uk12*u[2][npi];
-    double al2=uk20*u[0][npi] + uk21*u[1][npi] + uk22*u[2][npi];
-
-    dens[0][npi] = Ae*(sq( dudx[0][npi] ) + sq( dudy[0][npi] ) + sq( dudz[0][npi] )+
-                        sq( dudx[1][npi] ) + sq( dudy[1][npi] ) + sq( dudz[1][npi] )+
-                        sq( dudx[2][npi] ) + sq( dudy[2][npi] ) + sq( dudz[2][npi] ) );
-
-    dens[1][npi] = -K  * sq(al0) + K3 * (sq(al0) * sq(al1) + sq(al1) * sq(al2) + sq(al2) * sq(al0)); // uniaxial(K) + cubic(K3)
- 
-    dens[2][npi] = 0.5*mu0*q[npi]*phi[npi];
-
-    dens[3][npi] = -Js*(u[0][npi]*Hext[0] + u[1][npi]*Hext[1] + u[2][npi]*Hext[2] + uz_drift*Hext[2]);
-    }
-tiny::mult<double, 4, NPI> (dens, weight, Eelem);
-E[0] += Eelem[0]; E[1] += Eelem[1]; E[2] += Eelem[2]; E[3] += Eelem[3];
-}
-*/
 
 double Tet::exchangeEnergy(Tetra::prm const& param,const double dudx[DIM][NPI],const double dudy[DIM][NPI],const double dudz[DIM][NPI]) const
 {

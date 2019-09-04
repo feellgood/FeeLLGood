@@ -48,7 +48,6 @@ if(VERBOSE) {std::cout << "DW dir: " << DW_dir << std::endl; }
 bool Fem::recentrage(double thres,enum index idx_dir)
 {
 thres = abs(thres);
-//double m_i = Fem::avg<U>(idx_dir);
 double m_i = Fem::avg(Nodes::get_u_comp,idx_dir);
 if (fabs(m_i)<thres) return false;
 

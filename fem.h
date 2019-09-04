@@ -166,10 +166,10 @@ Indices and orientation convention :
 void femutil(Settings &settings /**< [in] */);
 
 /** find direction of motion of DW */
-void direction(enum Pt::index idx_dir);
+void direction(enum Pt::index idx_dir /**< [in] */);
 
 /** computes energies stored in E table */
-void energy(Settings &settings);
+void energy(Settings &settings /**< [in] */);
 
 /** recentering algorithm for the study of the motion of a micromagnetic object (domain wall). 
  
@@ -184,21 +184,21 @@ or					or
 bool recentrage(double thres/**< [in] threshold parameter */,enum Pt::index idx_dir /**< [in] */);
 
 /** saving function for a solution */
-void saver(Settings &settings, std::ofstream &fout, int nt);
+void saver(Settings &settings /**< [in] */, std::ofstream &fout /**< [out] */, int nt /**< [in] */);
 
 /** text file (vtk) writing function for a solution */
-void savecfg_vtk(std::string fileName);
+void savecfg_vtk(std::string fileName /**< [in] */);
 
 /** text file (tsv) writing function for a solution */
-void savesol(std::string fileName,double s);
+void savesol(std::string fileName /**< [in] */,double s);
 
 /** save the field values */
-void saveH(std::string fileName,double scale);
+void saveH(std::string fileName /**< [in] */,double scale);
 
 /** 
 average component of either u or v through getter on the whole set of tetetrahedron
 */
-double avg(std::function<double (Nodes::Node,Pt::index)> getter,Pt::index d)
+double avg(std::function<double (Nodes::Node,Pt::index)> getter /**< [in] */,Pt::index d /**< [in] */)
 {// syntaxe pénible avec opérateur binaire dans la lambda pour avoir un += sur la fonction voulue, with C++17 we should use reduce instead of accumulate here
 double sum = std::accumulate(tet.begin(),tet.end(),0.0, [&getter,&d](double &s,Tetra::Tet &te)
                             {
