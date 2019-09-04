@@ -1,8 +1,16 @@
 import json
 
+## \class Settings
+# this class gives an efficient way to build and write a json file from a dictionnary to be able to script easily feellgood executable
+
 class Settings(object):
 
+    ## \brief creator
+    # this is creator to build a nested dictionnary to mimmic json settings
     def __init__(self):
+        ## \brief dictionnary
+        # mySets is the strict equivalent to the json file needed by executable feellgood to run a simulation, any (key,value) not corresponding
+        # to what is expected by feellgood is just ignored.
         self.mySets = {}
 
         outputs = {}
@@ -68,12 +76,19 @@ class Settings(object):
         
         self.mySets["time integration"] = timing
     
+    ## \brief getter
+    # standard getter
+    #
     def __getitem__(self,key):
         return self.mySets[key]
 
+    ## \brief setter
+    # (key,value) setter
     def __setitem__(self,key,value):
         self.mySets[key] = value
     
+    ## \brief write json file
+    # this method write a json file from the dictionnary built by the creator
     def write(self,fileName):
         with open(fileName,'w') as outfile:
             json.dump(self.mySets,outfile)
