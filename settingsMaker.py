@@ -1,14 +1,14 @@
 import json
 
 ## \class Settings
-# this class gives an efficient way to build and write a json file from a dictionnary to be able to script easily feellgood executable
+# this class gives an efficient way to build and write a json file from a dictionary to be able to script easily feellgood executable
 
 class Settings(object):
 
     ## \brief creator
-    # this is creator to build a nested dictionnary to mimmic json settings
+    # this is creator to build a nested dictionary to mimmic json settings
     def __init__(self):
-        ## \brief dictionnary
+        ## \brief dictionary
         # mySets is the strict equivalent to the json file needed by executable feellgood to run a simulation, any (key,value) not corresponding
         # to what is expected by feellgood is just ignored.
         self.mySets = {}
@@ -88,7 +88,7 @@ class Settings(object):
         self.mySets[key] = value
     
     ## \brief write json file
-    # this method write a json file from the dictionnary built by the creator
+    # this method write a json file from the dictionary built by the creator
     def write(self,fileName):
         with open(fileName,'w') as outfile:
             json.dump(self.mySets,outfile)

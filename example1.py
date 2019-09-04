@@ -1,17 +1,17 @@
 import os
 from settingsMaker import Settings
 
-toto = Settings()
+mySettings = Settings()
 
-print("output directory is " + toto["outputs"]["directory"] )
+print("output directory is " + mySettings["outputs"]["directory"] )
 
 myFields = [0.01,0.02,0.04]
 
 for Bz in myFields:
 	myDir = "data_out_B" + str(Bz) + "/"
-	toto["outputs"]["directory"] = myDir
+	mySettings["outputs"]["directory"] = myDir
 	os.system("mkdir "+ myDir)
-	toto["Bext"] = [0.0,0.0,Bz]	
+	mySettings["Bext"] = [0.0,0.0,Bz]	
 	print("Bext is " + str(toto["Bext"]))
-	toto.write('essaiSettings.json')
-	os.system("./feellgood essaiSettings.json")
+	mySettings.write('mySettings.json')
+	os.system("./feellgood mySettings.json")
