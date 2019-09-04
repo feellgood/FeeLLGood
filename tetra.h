@@ -177,6 +177,23 @@ class Tet{
         tiny::mult<double, DIM, N, NPI> (vec_nod, a, result);
         }
 		
+		/** interpolation for a tensor : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
+        inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double Tx[DIM][NPI],double Ty[DIM][NPI],double Tz[DIM][NPI]) const
+        {
+        double vec_nod[DIM][N];
+        for (int i=0; i<N; i++)
+            {
+            Nodes::Node const& node = (*refNode)[ ind[i] ];
+    
+            vec_nod[0][i]   = getter(node).x();
+            vec_nod[1][i]   = getter(node).y();
+            vec_nod[2][i]   = getter(node).z();
+            }
+        tiny::mult<double, DIM, N, NPI> (vec_nod, dadx, Tx);
+        tiny::mult<double, DIM, N, NPI> (vec_nod, dady, Ty);
+        tiny::mult<double, DIM, N, NPI> (vec_nod, dadz, Tz);
+        }
+		
 		
 		/** interpolation for 3D vector field and a tensor : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
         inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double result[DIM][NPI],

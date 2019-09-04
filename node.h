@@ -83,6 +83,9 @@ inline const Pt::pt3D get_v0(Node const& n /**< [in] */) {return n.v0;}
 /** getter for u */
 inline const Pt::pt3D get_u(Node const& n /**< [in] */) {return n.u;}
 
+/** getter for v */
+inline const Pt::pt3D get_v(Node const& n /**< [in] */) {return n.v;}
+
 /** getter for u component */
 inline double get_u_comp(Node n /**< [in] */, Pt::index idx /**< [in] */) {return n.u(idx);}
 

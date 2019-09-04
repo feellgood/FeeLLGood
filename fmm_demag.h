@@ -179,9 +179,9 @@ std::for_each(fem.tet.begin(),fem.tet.end(),
     {
     double Ms = nu0 * settings.paramTetra[tet.idxPrm].J;
    /*---------------- INTERPOLATION ---------------*/
-    double u_nod[DIM][Tetra::N];
+    //double u_nod[DIM][Tetra::N];
     double dudx[DIM][Tetra::NPI], dudy[DIM][Tetra::NPI], dudz[DIM][Tetra::NPI];
-
+/*
     for (int i=0; i<Tetra::N; i++)
         {
         Nodes::Node &node = fem.node[ tet.ind[i] ];
@@ -193,7 +193,13 @@ std::for_each(fem.tet.begin(),fem.tet.end(),
     tiny::mult<double, DIM, Tetra::N, Tetra::NPI> (u_nod, tet.dadx, dudx);
 	tiny::mult<double, DIM, Tetra::N, Tetra::NPI> (u_nod, tet.dady, dudy);
 	tiny::mult<double, DIM, Tetra::N, Tetra::NPI> (u_nod, tet.dadz, dudz);
-   /*-----------------------------------------------*/
+  */ 
+    if(Hv)
+        {tet.interpolation(Nodes::get_v,dudx,dudy,dudz);}
+    else
+        {tet.interpolation(Nodes::get_u,dudx,dudy,dudz);}
+    
+    /*-----------------------------------------------*/
 
     for (int j=0; j<Tetra::NPI; j++, nsrc++){
         double div_u = dudx[0][j] + dudy[1][j] + dudz[2][j];
@@ -211,7 +217,9 @@ std::for_each(fem.fac.begin(),fem.fac.end(),
     double Ms = fac.Ms;
     Pt::pt3D n = fac.n;
         /** calc u gauss **/  
-    double u_nod[DIM][Facette::N], u[DIM][Facette::NPI];
+    //double u_nod[DIM][Facette::N];
+    double u[DIM][Facette::NPI];
+    /*
     for (int i=0; i<Facette::N; i++)
         {
         Nodes::Node &node = fem.node[ fac.ind[i] ];
@@ -221,7 +229,13 @@ std::for_each(fem.fac.begin(),fem.fac.end(),
         }
 
     tiny::mult<double, DIM, Facette::N, Facette::NPI> (u_nod, Facette::a, u);
-
+*/
+    
+    if(Hv)
+        {fac.interpolation(Nodes::get_v,u);}
+    else
+        {fac.interpolation(Nodes::get_u,u);}
+    
         // calc sigma, fill distrib.alpha
     for (int j=0; j<Facette::NPI; j++, nsrc++)
         {
@@ -231,7 +245,9 @@ std::for_each(fem.fac.begin(),fem.fac.end(),
 
     if (pot_corr)
         {// calc coord gauss
-        double nod[DIM][Facette::N], gauss[DIM][Facette::NPI];
+        //double nod[DIM][Facette::N];
+        double gauss[DIM][Facette::NPI];
+        /*
         for (int i=0; i<Facette::N; i++)
             {
             int i_= fac.ind[i];
@@ -240,7 +256,8 @@ std::for_each(fem.fac.begin(),fem.fac.end(),
             nod[2][i] = fem.node[i_].p.z();
             }
         tiny::mult<double, DIM, Facette::N, Facette::NPI> (nod, Facette::a, gauss);
-
+        */
+        fac.interpolation(Nodes::get_p,gauss);
       // calc corr node by node
       for (int i=0; i<Facette::N; i++)
         {
