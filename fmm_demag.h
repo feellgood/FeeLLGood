@@ -101,16 +101,9 @@ if(VERBOSE){
     std::for_each(fem.tet.begin(),fem.tet.end(),
     [&fem,c,norm,&tree,&idxPart](Tetra::Tet const& tet)              
         {       // sources de volume
-        double nod[DIM][Tetra::N], gauss[DIM][Tetra::NPI];
-        for (int i=0; i<Tetra::N; i++)
-            {
-            int i_= tet.ind[i];
-            nod[0][i] = fem.node[i_].p.x();
-            nod[1][i] = fem.node[i_].p.y();
-            nod[2][i] = fem.node[i_].p.z();
-            }
-        tiny::mult<double, DIM, Tetra::N, Tetra::NPI> (nod, Tetra::a, gauss);
-
+        double gauss[DIM][Tetra::NPI];
+        tet.interpolation(Nodes::get_p,gauss);
+        
         for (int j=0; j<Tetra::NPI; j++, idxPart++)
             {
             Pt::pt3D pSource = Pt::pt3D(gauss[0][j],gauss[1][j],gauss[2][j]) - c; pSource *= norm;
@@ -124,16 +117,9 @@ if(VERBOSE){
     std::for_each(fem.fac.begin(),fem.fac.end(),
     [&fem,c,norm,&tree,&idxPart](Facette::Fac const& fac)
         {        // sources de surface
-        double nod[DIM][Facette::N], gauss[DIM][Facette::NPI];
-        for (int i=0; i<Facette::N; i++)
-            {
-            int i_= fac.ind[i];
-            nod[0][i] = fem.node[i_].p.x();
-            nod[1][i] = fem.node[i_].p.y();
-            nod[2][i] = fem.node[i_].p.z();
-            }
-        tiny::mult<double, DIM, Facette::N, Facette::NPI> (nod, Facette::a, gauss);
-
+        double gauss[DIM][Facette::NPI];
+        fac.interpolation(Nodes::get_p,gauss);
+        
         for (int j=0; j<Facette::NPI; j++, idxPart++)
             {
             Pt::pt3D pSource = Pt::pt3D(gauss[0][j],gauss[1][j],gauss[2][j]) - c; pSource *= norm;

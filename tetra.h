@@ -162,6 +162,22 @@ class Tet{
         inline double weightedScalarProd(const double X[NPI]) const
             {return (X[0]*weight[0] + X[1]*weight[1] + X[2]*weight[2] + X[3]*weight[3] +X[4]*weight[4]);}
 		
+		/** interpolation for 3D vector field: the getter function is given as a parameter in order to know what part of the node you want to interpolate */
+		inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double result[DIM][NPI]) const
+        {
+        double vec_nod[DIM][N];
+        for (int i=0; i<N; i++)
+            {
+            Nodes::Node const& node = (*refNode)[ ind[i] ];
+    
+            vec_nod[0][i]   = getter(node).x();
+            vec_nod[1][i]   = getter(node).y();
+            vec_nod[2][i]   = getter(node).z();
+            }
+        tiny::mult<double, DIM, N, NPI> (vec_nod, a, result);
+        }
+		
+		
 		/** interpolation for 3D vector field and a tensor : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
         inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double result[DIM][NPI],
                                   double Tx[DIM][NPI],double Ty[DIM][NPI],double Tz[DIM][NPI]) const

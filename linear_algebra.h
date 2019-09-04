@@ -33,9 +33,9 @@ class LinAlgebra
 {
 public:
 	/** constructor */	
-    inline LinAlgebra(Settings & s,const int _NOD,
-                      std::vector<Nodes::Node> & myNode,
-                      std::vector <Tetra::Tet> & myTet,
+    inline LinAlgebra(Settings & s /**< [in] */,const int _NOD /**< [in] */,
+                      std::vector<Nodes::Node> & myNode /**< [in] */,
+                      std::vector <Tetra::Tet> & myTet /**< [in] */,
                       std::vector <Facette::Fac> & myFace) :  NOD(_NOD),refNode(&myNode),refFac(&myFace)
     {
     settings = s;
@@ -66,25 +66,25 @@ public:
 	gmm::diagonal_precond <read_matrix> *prc;
 
     /** solver, uses bicgstab and gmres */
-	int  solver(long nt);
+	int  solver(long nt /**< [in] */);
 
     /** setter for dt */
-    inline void set_dt(double _dt){dt = _dt;}
+    inline void set_dt(double _dt /**< [in] */){dt = _dt;}
     
     /** setter for DW_dz */
-    inline void set_DW_vz(double vz){DW_vz = vz;}    
+    inline void set_DW_vz(double vz /**< [in] */){DW_vz = vz;}    
 
     /** setter for Hext */
-    inline void set_Hext(double Hx,double Hy,double Hz){Hext[0]=Hx;Hext[1]=Hy;Hext[2]=Hz;}
+    inline void set_Hext(double Hx /**< [in] */,double Hy /**< [in] */,double Hz /**< [in] */){Hext[0]=Hx;Hext[1]=Hy;Hext[2]=Hz;}
 
     /** getter for v_max */
     inline double get_v_max() {return v_max;}
     
     /** getter node */
-    inline Nodes::Node getNode(int i) {return (*refNode)[i];}
+    inline Nodes::Node getNode(int i /**< [in] */) {return (*refNode)[i];}
     
     /** getter node physical position */
-    inline Pt::pt3D getNodePhysPos(int i) {return (*refNode)[i].p;} 
+    inline Pt::pt3D getNodePhysPos(int i /**< [in] */) {return (*refNode)[i].p;} 
     
     
 private:

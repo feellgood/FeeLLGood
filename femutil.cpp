@@ -55,7 +55,7 @@ std::for_each(fac.begin(),fac.end(),[](Facette::Fac &fa) {fa.calc_surf();} );
 //ici la somme des surfaces elementaires = surface totale
 surf = std::accumulate(fac.begin(),fac.end(),0.0,[](double x,Facette::Fac &fa){return x+fa.surf;} );
 
-//on construit un set de facettes à partir des tetraèdres
+//on construit un set de facettes avec l'ordre less_than
 std::set<Facette::Fac, Facette::less_than> sf;
 
 std::for_each(tet.begin(),tet.end(),

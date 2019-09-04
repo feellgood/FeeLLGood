@@ -123,7 +123,7 @@ std::for_each(tet.begin(),tet.end(),[epsilon](Tetra::Tet &t) { t.init(epsilon); 
 /**
 computes an analytical initial magnetization distribution as a starting point for the simulation
 */
-inline void init_distrib(Settings &mySets)
+inline void init_distrib(Settings &mySets /**< [in] */)
 	{ std::for_each( node.begin(),node.end(), [this,&mySets](Nodes::Node &n) 
         {
         Pt::pt3D pNorm = Pt::pt3D( (n.p.x() - c.x())/l.x() , (n.p.y() - c.y())/l.y() , (n.p.z() - c.z())/l.z() );
@@ -190,10 +190,10 @@ void saver(Settings &settings /**< [in] */, std::ofstream &fout /**< [out] */, i
 void savecfg_vtk(std::string fileName /**< [in] */);
 
 /** text file (tsv) writing function for a solution */
-void savesol(std::string fileName /**< [in] */,double s);
+void savesol(std::string fileName /**< [in] */,double s /**< [in] */);
 
 /** save the field values */
-void saveH(std::string fileName /**< [in] */,double scale);
+void saveH(std::string fileName /**< [in] */,double scale /**< [in] */);
 
 /** 
 average component of either u or v through getter on the whole set of tetetrahedron

@@ -49,7 +49,7 @@ inline void evolution(void) { u0=u; v0=v; phi0 = phi; phiv0 = phiv; }
 /**
 integration of the evolution of the magnetization for time step dt
 */
-inline void make_evol(double vp,double vq,double dt) {
+inline void make_evol(double vp /**< [in] */,double vq /**< [in] */,double dt /**< [in] */) {
 	v = vp*ep + vq*eq;
 	u = u0 + dt*v;
 	u.normalize();}
@@ -71,30 +71,33 @@ if ( Pt::norme2( u0 ) > 0)
 
 };//end struct node
 
+/** getter for p */
+inline const Pt::pt3D get_p(Node const& n /**< [in] */) {return n.p;}
+
 /** getter for u0*/
-inline const Pt::pt3D get_u0(Node const& n) {return n.u0;}
+inline const Pt::pt3D get_u0(Node const& n /**< [in] */) {return n.u0;}
 
 /** getter for v0*/
-inline const Pt::pt3D get_v0(Node const& n) {return n.v0;}
+inline const Pt::pt3D get_v0(Node const& n /**< [in] */) {return n.v0;}
 
 /** getter for u */
-inline const Pt::pt3D get_u(Node const& n) {return n.u;}
+inline const Pt::pt3D get_u(Node const& n /**< [in] */) {return n.u;}
 
 /** getter for u component */
-inline double get_u_comp(Node n,Pt::index idx) {return n.u(idx);}
+inline double get_u_comp(Node n /**< [in] */, Pt::index idx /**< [in] */) {return n.u(idx);}
 
 /** getter for v component */
-inline double get_v_comp(Node n,Pt::index idx) {return n.v(idx);}
+inline double get_v_comp(Node n /**< [in] */ ,Pt::index idx /**< [in] */) {return n.v(idx);}
 
 
 /** getter for phi */
-inline double get_phi(Node const& n) {return n.phi;}
+inline double get_phi(Node const& n /**< [in] */) {return n.phi;}
 
 /** getter for phi0 */
-inline double get_phi0(Node const& n) {return n.phi0;}
+inline double get_phi0(Node const& n /**< [in] */) {return n.phi0;}
 
 /** getter for phiv0 */
-inline double get_phiv0(Node const& n) {return n.phiv0;}
+inline double get_phiv0(Node const& n /**< [in] */) {return n.phiv0;}
 
 
 } //end namespace Nodes

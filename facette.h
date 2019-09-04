@@ -83,7 +83,7 @@ Face is a class containing the index references to nodes, it has a triangular sh
 */
 class Fac{
 	public:
-		inline Fac(int _NOD):NOD(_NOD),Ksp(2*N,2*N), Lsp(2*N)  /**< constructor */
+		inline Fac(int _NOD /**< [in] */):NOD(_NOD),Ksp(2*N,2*N), Lsp(2*N)  /**< constructor */
             {reg = 0; treated = false;}
         
 		/** constructor from a region number and three indices */		
@@ -107,12 +107,12 @@ class Fac{
             {for (int j=0; j<NPI; j++) {weight[j] = 2.*surf*pds[j]; }}// detJ = 2*surf;
     
         /** weighted scalar product : factorized formulation */
-        inline double weightedScalarProd(const double X[NPI]) const
+        inline double weightedScalarProd(const double X[NPI] /**< [in] */) const
             {return ( X[0]*weight[0] + (X[1] +X[2] + X[3])*weight[1] );}
             //{return (X[0]*weight[0] + X[1]*weight[1] + X[2]*weight[2] + X[3]*weight[3] );}
         
         /** interpolation for 3D vector field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
-        inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double result[DIM][NPI]) const
+        inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter /**< [in] */,double result[DIM][NPI] /**< [out] */) const
         {
         double vec_nod[DIM][N];
         for (int i=0; i<N; i++)
@@ -127,7 +127,7 @@ class Fac{
         }
         
         /** interpolation for scalar field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
-        inline void interpolation(std::function<double (Nodes::Node)> getter,double result[NPI]) const
+        inline void interpolation(std::function<double (Nodes::Node)> getter /**< [in] */,double result[NPI] /**< [out] */) const
         {
         double scalar_nod[N];    
         for (int i=0; i<N; i++)
@@ -139,13 +139,13 @@ class Fac{
         }
         
 		/** computes the integral contribution of the triangular face */
-		void integrales(std::vector<Facette::prm> const& params, std::vector <double> &BE) const;
+		void integrales(std::vector<Facette::prm> const& params /**< [in] */, std::vector <double> &BE /**< [out] */) const;
 		
         /** anisotropy energy of the facette */
-        double anisotropyEnergy(Facette::prm const& param,const double u[DIM][NPI]) const;
+        double anisotropyEnergy(Facette::prm const& param /**< [in] */,const double u[DIM][NPI] /**< [in] */) const;
         
         /** demagnetizing energy of the facette */
-        double demagEnergy(const double u[DIM][NPI],const double phi[NPI]) const;
+        double demagEnergy(const double u[DIM][NPI] /**< [in] */,const double phi[NPI] /**< [in] */) const;
         
         /** compute projection of a face */
         void projection(gmm::dense_matrix <double> const& A, std::vector <double> const& B,gmm::dense_matrix <double> &Ap, std::vector <double> &Bp) const;
@@ -166,7 +166,9 @@ class Fac{
 		void calc_surf(void);
         
         /** pointer to the nodes */
-        inline void setRefNode(std::vector<Nodes::Node>  *_p_node) {refNode = _p_node;}
+        inline void setRefNode(std::vector<Nodes::Node>  *_p_node /**< [in] */) {refNode = _p_node;}
+        
+        
         
     private:
         int NOD;/**< number of nodes */
@@ -175,15 +177,25 @@ class Fac{
         std::vector <double> Lsp;/**< vector initialized by constructor */
 	};
 
-/**
-operator less_than for the orientation of the facette, lexicographic order
+/*    
+inline bool operator< (const Fac &f1, const Fac &f2)
+    {
+    if (f1.ind[0]<f2.ind[0]) return true;
+    else
+        if ((f1.ind[0]==f2.ind[0]) && (f1.ind[1]<f2.ind[1])) return true;
+        else
+            if ((f1.ind[0]==f2.ind[0]) && (f1.ind[1]==f2.ind[1]) && (f1.ind[2]<f2.ind[2])) return true;
+
+    return false;
+    }
 */
+
+/** operator less_than for the orientation of the facette, lexicographic order */
 struct less_than
 {
-/**
-operator() for the comparison of two faces with lexicographical order
-*/
-bool operator()(Fac f1, Fac f2) const
+/** operator() for the comparison of two faces with lexicographical order */
+
+bool operator()(const Fac &f1, const Fac &f2) const
   {
   if (f1.ind[0]<f2.ind[0]) return true;
   else
@@ -194,6 +206,7 @@ bool operator()(Fac f1, Fac f2) const
   return false;
   }
 };
+
 
 }
 
