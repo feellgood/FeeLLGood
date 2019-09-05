@@ -18,12 +18,10 @@ this header is the interface to scalfmm. Its purpose is to prepare an octree for
 
 #include "Core/FFmmAlgorithmThreadTsm.hpp"
 
-
 #include "Kernels/P2P/FP2PParticleContainerIndexed.hpp"
 #include "Kernels/Rotation/FRotationKernel.hpp"
 #include "Kernels/Rotation/FRotationCell.hpp"
 
-#include "config.h" //for NbThreads
 
 /** constant parameter for some scalfmm templates */
 static const int P = 9;
@@ -61,8 +59,7 @@ int init(Fem &fem,const int ScalfmmNbThreads, OctreeClass* &tree, KernelClass* &
     FTic counter;
     const int NbLevels = 8; 
     const int SizeSubLevels = 6;
-    //const unsigned int NbThreads  =  omp_get_max_threads();
-
+    
     omp_set_num_threads(ScalfmmNbThreads);
     if(VERBOSE) { std::cout << "\n>> ScalFMM using " << ScalfmmNbThreads << " threads.\n" << std::endl; }
 
@@ -179,32 +176,16 @@ std::for_each(fem.tet.begin(),fem.tet.end(),
     {
     double Ms = nu0 * settings.paramTetra[tet.idxPrm].J;
    /*---------------- INTERPOLATION ---------------*/
-    //double u_nod[DIM][Tetra::N];
     double dudx[DIM][Tetra::NPI], dudy[DIM][Tetra::NPI], dudz[DIM][Tetra::NPI];
-/*
-    for (int i=0; i<Tetra::N; i++)
-        {
-        Nodes::Node &node = fem.node[ tet.ind[i] ];
-        u_nod[Pt::IDX_X][i] = (Hv? node.v.x(): node.u.x());
-        u_nod[Pt::IDX_Y][i] = (Hv? node.v.y(): node.u.y());
-        u_nod[Pt::IDX_Z][i] = (Hv? node.v.z(): node.u.z());        
-        }
-
-    tiny::mult<double, DIM, Tetra::N, Tetra::NPI> (u_nod, tet.dadx, dudx);
-	tiny::mult<double, DIM, Tetra::N, Tetra::NPI> (u_nod, tet.dady, dudy);
-	tiny::mult<double, DIM, Tetra::N, Tetra::NPI> (u_nod, tet.dadz, dudz);
-  */ 
+ 
     if(Hv)
         {tet.interpolation(Nodes::get_v,dudx,dudy,dudz);}
     else
         {tet.interpolation(Nodes::get_u,dudx,dudy,dudz);}
-    
     /*-----------------------------------------------*/
 
-    for (int j=0; j<Tetra::NPI; j++, nsrc++){
-        double div_u = dudx[0][j] + dudy[1][j] + dudz[2][j];
-        srcDen[nsrc] = -Ms * div_u * tet.weight[j];
-        }
+    for (int j=0; j<Tetra::NPI; j++, nsrc++)
+        { srcDen[nsrc] = -Ms * ( dudx[0][j] + dudy[1][j] + dudz[2][j] ) * tet.weight[j]; }
     });//end for_each on tet
 
 
@@ -216,47 +197,20 @@ std::for_each(fem.fac.begin(),fem.fac.end(),
     {
     double Ms = fac.Ms;
     Pt::pt3D n = fac.n;
-        /** calc u gauss **/  
-    //double u_nod[DIM][Facette::N];
     double u[DIM][Facette::NPI];
-    /*
-    for (int i=0; i<Facette::N; i++)
-        {
-        Nodes::Node &node = fem.node[ fac.ind[i] ];
-        u_nod[Pt::IDX_X][i] = (Hv? node.v.x(): node.u.x());
-        u_nod[Pt::IDX_Y][i] = (Hv? node.v.y(): node.u.y());
-        u_nod[Pt::IDX_Z][i] = (Hv? node.v.z(): node.u.z());
-        }
-
-    tiny::mult<double, DIM, Facette::N, Facette::NPI> (u_nod, Facette::a, u);
-*/
     
     if(Hv)
         {fac.interpolation(Nodes::get_v,u);}
     else
         {fac.interpolation(Nodes::get_u,u);}
     
-        // calc sigma, fill distrib.alpha
     for (int j=0; j<Facette::NPI; j++, nsrc++)
-        {
-        double un = u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z();
-        srcDen[nsrc] = Ms * un * fac.weight[j];
-        }
+        { srcDen[nsrc] = Ms * ( u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z() ) * fac.weight[j]; }
 
     if (pot_corr)
         {// calc coord gauss
-        //double nod[DIM][Facette::N];
         double gauss[DIM][Facette::NPI];
-        /*
-        for (int i=0; i<Facette::N; i++)
-            {
-            int i_= fac.ind[i];
-            nod[0][i] = fem.node[i_].p.x();
-            nod[1][i] = fem.node[i_].p.y();
-            nod[2][i] = fem.node[i_].p.z();
-            }
-        tiny::mult<double, DIM, Facette::N, Facette::NPI> (nod, Facette::a, gauss);
-        */
+        
         fac.interpolation(Nodes::get_p,gauss);
       // calc corr node by node
       for (int i=0; i<Facette::N; i++)
@@ -351,10 +305,7 @@ Nodes::Node const& node3 = myNode[iii_];
 Pt::pt3D p1p2 = node2.p - node1.p;
 Pt::pt3D p1p3 = node3.p - node1.p;
 
-//double b = sqrt( sq(x2-x1) + sq(y2-y1) + sq(z2-z1) );
 double b = p1p2.norm();
-
-//double t = (x2-x1)*(x3-x1) + (y2-y1)*(y3-y1) + (z2-z1)*(z3-z1);
 double t = Pt::pScal(p1p2,p1p3);
 double h = 2.*fac.surf;
  t/=b;  h/=b;
@@ -362,14 +313,14 @@ double h = 2.*fac.surf;
 
 double s1, s2, s3;
 if (Hv) {
-	s1 = Pt::pScal(node1.v,n);//node1.v[0]*nx + node1.v[1]*ny + node1.v[2]*nz;
-	s2 = Pt::pScal(node2.v,n);//node2.v[0]*nx + node2.v[1]*ny + node2.v[2]*nz;
-	s3 = Pt::pScal(node3.v,n);//node3.v[0]*nx + node3.v[1]*ny + node3.v[2]*nz;
+	s1 = Pt::pScal(node1.v,n);
+	s2 = Pt::pScal(node2.v,n);
+	s3 = Pt::pScal(node3.v,n);
    }
 else {
-	s1 = Pt::pScal(node1.u,n);//node1.u[0]*nx + node1.u[1]*ny + node1.u[2]*nz;
-	s2 = Pt::pScal(node1.u,n);//node2.u[0]*nx + node2.u[1]*ny + node2.u[2]*nz;
-	s3 = Pt::pScal(node1.u,n);//node3.u[0]*nx + node3.u[1]*ny + node3.u[2]*nz;
+	s1 = Pt::pScal(node1.u,n);
+	s2 = Pt::pScal(node1.u,n);
+	s3 = Pt::pScal(node1.u,n);
    }
 
  double l = s1;

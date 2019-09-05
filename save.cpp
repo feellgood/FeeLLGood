@@ -117,8 +117,6 @@ fout.close();
 
 void Fem::saveH(string fileName,double scale)
 {
-const int TET = tet.size();
-
 cout << " " << fileName << endl <<" -------------------" << endl << endl;
 
 ofstream fout(fileName, ios::out);
@@ -127,39 +125,30 @@ if (!fout){
    SYSTEM_ERROR;}
 fout << "#time : "<< t << endl;
 
-for (int t=0; t<TET; t++){
-    Tetra::Tet &te = tet[t];
+int idx_tet=0;
+std::for_each(tet.begin(),tet.end(),[&idx_tet,&fout,scale](Tetra::Tet const &te) 
+    {
     
     /*------------------- INTERPOL --------------------*/
-    double nod[3][Tetra::N], gauss[3][Tetra::NPI];
-    double negphi_nod[Tetra::N], Hdx[Tetra::NPI], Hdy[Tetra::NPI], Hdz[Tetra::NPI];
+    double gauss[DIM][Tetra::NPI];
+    double Hdx[Tetra::NPI], Hdy[Tetra::NPI], Hdz[Tetra::NPI];
 
-    for (int i=0; i<Tetra::N; i++){
-        int i_= te.ind[i];
-	    Nodes::Node &n = node[i_];
-	    nod[0][i] = n.p.x();
-	    nod[1][i] = n.p.y();
-	    nod[2][i] = n.p.z();
-		negphi_nod[i] = -n.phi;
-	    }
-
-    tiny::mult<double, 3, Tetra::N, Tetra::NPI> (nod, Tetra::a, gauss);
-	tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphi_nod, te.dadx, Hdx);
-	tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphi_nod, te.dady, Hdy);
-	tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphi_nod, te.dadz, Hdz);
+    te.interpolation(Nodes::get_p,gauss);
+    te.interpolation(Nodes::get_phi,Hdx,Hdy,Hdz);
     /*---------------------------------------------------*/
     
-    for (int npi=0; npi<Tetra::NPI; npi++){
+    for (int npi=0; npi<Tetra::NPI; npi++)
+        {
 	    double x = gauss[0][npi]/scale;
 	    double y = gauss[1][npi]/scale;
 	    double z = gauss[2][npi]/scale;
 	
-	
-	fout << t << " " << npi << " " << x << " " << y << " " << z;
-	fout << " "<< Hdx[npi] << " " << Hdy[npi] << " " << Hdz[npi] << endl;
-	// " %8d %3d %+20.10f %+20.10f %+20.10f %+20.10e %+20.10e %+20.10e"
-	}
-}
+        fout << idx_tet << " " << npi << " " << x << " " << y << " " << z << " "<< Hdx[npi] << " " << Hdy[npi] << " " << Hdz[npi] << endl;
+        // " %8d %3d %+20.10f %+20.10f %+20.10f %+20.10e %+20.10e %+20.10e"
+        }
+    idx_tet++;
+    }
+);//end for_each
 
 fout.close();
 }
