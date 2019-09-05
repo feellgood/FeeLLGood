@@ -22,18 +22,6 @@ template <typename T, int M, int N> inline void print(T A[M][N]) {
    std::cout << std::endl;
    }
 
-/** scalar product of two vectors
-*/
-
-/*
-template <typename T, int N> inline T sp(T X[N], T Y[N]) {
-   T v=T(0);
-   for (int i=0; i<N; i++) 
-       v+= X[i]*Y[i];
-   return v;
-   }
-*/
-
 /** mat vector multiplication
 \return returns Y \f$ Y = A X \f$
 */
@@ -46,8 +34,8 @@ template <typename T, int M, int N> inline void mult(const T A[M][N],const T X[N
        }
    }
 
-/** multiplication of a vector and a transposed matrix
-\return returns in Y \f$ Y = A^{\dagger} X \f$
+/** left multiplication of a transposed vector and a matrix
+\return returns in Y \f$ Y = X^{\dagger} A \f$
 */
 template <typename T, int M, int N> inline void transposed_mult(const T X[M],const T A[M][N], T Y[N]) {
    for (int j=0; j<N; j++) { 
@@ -58,8 +46,8 @@ template <typename T, int M, int N> inline void transposed_mult(const T X[M],con
        }
    }
 
-/** operator: do multiplication of a vector and a transposed matrix, and multiply by -1
-\return returns in Y \f$ Y = -A^{\dagger} X \f$
+/** operator: do left multiplication of a transposed vector and a matrix, and multiply by -1
+\return returns in Y \f$ Y = -X^{\dagger} A \f$
 */
 template <typename T, int M, int N> inline void neg_transposed_mult(const T X[M],const T A[M][N], T Y[N]) {
    for (int j=0; j<N; j++) { 

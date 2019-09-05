@@ -123,7 +123,20 @@ class Fac{
             vec_nod[1][i]   = getter(node).y();
             vec_nod[2][i]   = getter(node).z();
             }
-        tiny::mult<double, DIM, N, NPI> (vec_nod, a, result);
+        double sx = (vec_nod[Pt::IDX_X][0] + vec_nod[Pt::IDX_X][1] + vec_nod[Pt::IDX_X][2] )/5.0;
+        double sy = (vec_nod[Pt::IDX_Y][0] + vec_nod[Pt::IDX_Y][1] + vec_nod[Pt::IDX_Y][2] )/5.0;
+        double sz = (vec_nod[Pt::IDX_Z][0] + vec_nod[Pt::IDX_Z][1] + vec_nod[Pt::IDX_Z][2] )/5.0;
+        
+        result[0][0] = result[0][1] = result[0][2] = result[0][3] = sx;
+        result[1][0] = result[1][1] = result[1][2] = result[1][3] = sy;
+        result[2][0] = result[2][1] = result[2][2] = result[2][3] = sz;
+        
+        result[0][0] *= (5.0/3.0); result[1][0] *= (5.0/3.0); result[2][0] *= (5.0/3.0);
+        result[0][1] += vec_nod[0][0]*2.0/5.0; result[0][2] += vec_nod[0][1]*2.0/5.0; result[0][3] += vec_nod[0][2]*2.0/5.0;
+        result[1][1] += vec_nod[1][0]*2.0/5.0; result[1][2] += vec_nod[1][1]*2.0/5.0; result[1][3] += vec_nod[1][2]*2.0/5.0;
+        result[2][1] += vec_nod[2][0]*2.0/5.0; result[2][2] += vec_nod[2][1]*2.0/5.0; result[2][3] += vec_nod[2][2]*2.0/5.0;
+        
+        //tiny::mult<double, DIM, N, NPI> (vec_nod, a, result);
         }
         
         /** interpolation for scalar field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
@@ -135,7 +148,11 @@ class Fac{
             Nodes::Node const& n = (*refNode)[ ind[i] ];
             scalar_nod[i] =  getter(n);
             }
-        tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result);
+        
+        double sn = scalar_nod[0] + scalar_nod[1] + scalar_nod[2];
+        
+        result[0] = sn/3.0; result[1] = (sn + 2.0*scalar_nod[0])/5.0; result[2] = (sn + 2.0*scalar_nod[1])/5.0; result[2] = (sn + 2.0*scalar_nod[2])/5.0;
+        //tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result);
         }
         
 		/** computes the integral contribution of the triangular face */

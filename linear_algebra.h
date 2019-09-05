@@ -36,7 +36,7 @@ public:
     inline LinAlgebra(Settings & s /**< [in] */,const int _NOD /**< [in] */,
                       std::vector<Nodes::Node> & myNode /**< [in] */,
                       std::vector <Tetra::Tet> & myTet /**< [in] */,
-                      std::vector <Facette::Fac> & myFace) :  NOD(_NOD),refNode(&myNode),refFac(&myFace)
+                      std::vector <Facette::Fac> & myFace /**< [in] */) :  NOD(_NOD),refNode(&myNode),refFac(&myFace)
     {
     settings = s;
     NbTH = s.solverNbTh;
