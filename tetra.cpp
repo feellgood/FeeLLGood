@@ -73,11 +73,13 @@ double dvdx[DIM][NPI], dvdy[DIM][NPI], dvdz[DIM][NPI];
 double Hvx[NPI], Hvy[NPI], Hvz[NPI];
 
 // u_nod(u0) is required for lumping in AE matrix
+getVecDataFromNode(Nodes::get_u0,u_nod);
+/*
 for (int i=0; i<N; i++){
     Nodes::Node const& node = (*refNode)[ ind[i] ];
     u_nod[Pt::IDX_X][i]  = node.u0.x(); u_nod[Pt::IDX_Y][i] = node.u0.y(); u_nod[Pt::IDX_Z][i]  = node.u0.z();
     }
-
+*/
 interpolation(Nodes::get_u0,u,dudx,dudy,dudz);
 interpolation(Nodes::get_v0,v,dvdx,dvdy,dvdz);
 interpolation(Nodes::get_phi0,Hdx,Hdy,Hdz);
@@ -143,35 +145,45 @@ R = dt/tau_r*abs(log(dt/tau_r));
         
         ai_w = ai*w;
 /* changement de referentiel */
-        BE[i]    += +Vz*(u[1][npi]*dudz[2][npi]-u[2][npi]*dudz[1][npi]+alpha*dudz[0][npi]) *ai_w;
-        BE[N+i]  += +Vz*(u[2][npi]*dudz[0][npi]-u[0][npi]*dudz[2][npi]+alpha*dudz[1][npi]) *ai_w;
-        BE[2*N+i]+= +Vz*(u[0][npi]*dudz[1][npi]-u[1][npi]*dudz[0][npi]+alpha*dudz[2][npi]) *ai_w;
+    //   BE[i]    += +Vz*(u[1][npi]*dudz[2][npi]-u[2][npi]*dudz[1][npi]+alpha*dudz[0][npi]) *ai_w;
+    //  BE[N+i]  += +Vz*(u[2][npi]*dudz[0][npi]-u[0][npi]*dudz[2][npi]+alpha*dudz[1][npi]) *ai_w;
+    //  BE[2*N+i]+= +Vz*(u[0][npi]*dudz[1][npi]-u[1][npi]*dudz[0][npi]+alpha*dudz[2][npi]) *ai_w;
 
 /* second membre pour les termes de courant polarise en spin pour une paroi */
-        BE[i]    += -Uz*(u[1][npi]*dudz[2][npi]-u[2][npi]*dudz[1][npi]+beta*dudz[0][npi]) *ai_w;
-        BE[N+i]  += -Uz*(u[2][npi]*dudz[0][npi]-u[0][npi]*dudz[2][npi]+beta*dudz[1][npi]) *ai_w;
-        BE[2*N+i]+= -Uz*(u[0][npi]*dudz[1][npi]-u[1][npi]*dudz[0][npi]+beta*dudz[2][npi]) *ai_w;
+    //   BE[i]    += -Uz*(u[1][npi]*dudz[2][npi]-u[2][npi]*dudz[1][npi]+beta*dudz[0][npi]) *ai_w;
+    //   BE[N+i]  += -Uz*(u[2][npi]*dudz[0][npi]-u[0][npi]*dudz[2][npi]+beta*dudz[1][npi]) *ai_w;
+    //  BE[2*N+i]+= -Uz*(u[0][npi]*dudz[1][npi]-u[1][npi]*dudz[0][npi]+beta*dudz[2][npi]) *ai_w;
 
+        BE[i]    += ( (Vz-Uz)*(u[1][npi]*dudz[2][npi]-u[2][npi]*dudz[1][npi])+(alpha*Vz - beta*Uz)*dudz[0][npi])*ai_w;
+        BE[N+i]  += ( (Vz-Uz)*(u[2][npi]*dudz[0][npi]-u[0][npi]*dudz[2][npi])+(alpha*Vz - beta*Uz)*dudz[1][npi])*ai_w;
+        BE[2*N+i]+= ( (Vz-Uz)*(u[0][npi]*dudz[1][npi]-u[1][npi]*dudz[0][npi])+(alpha*Vz - beta*Uz)*dudz[2][npi])*ai_w;
+        
 //second order corrections
         triple Ht; //derivee de Hr : y a t'il une erreur ? on dirait que ce devrait etre Kbis*uk{0|1|2}_v et pas Kbis*ok0_v
         Ht[0]= Hvx[npi] + (Kbis* uk0_v - K3bis* uk0_v*(1-3*uk0_u*uk0_u) )*uk00;   
         Ht[1]= Hvy[npi] + (Kbis* uk0_v - K3bis* uk1_v*(1-3*uk1_u*uk1_u) )*uk01;   
         Ht[2]= Hvz[npi] + (Kbis* uk0_v - K3bis* uk2_v*(1-3*uk2_u*uk2_u) )*uk02; 
         
-        BE[    i]+= Ht[0] *ai_w*s_dt; // ordre 2 en temps
-        BE[  N+i]+= Ht[1] *ai_w*s_dt;
-        BE[2*N+i]+= Ht[2] *ai_w*s_dt;
+   //     BE[    i]+= Ht[0] *ai_w*s_dt; // ordre 2 en temps
+   //     BE[  N+i]+= Ht[1] *ai_w*s_dt;
+   //     BE[2*N+i]+= Ht[2] *ai_w*s_dt;
 
 /* changement de referentiel */
-        BE[i]    += +Vz*(u[1][npi]*dvdz[2][npi]-u[2][npi]*dvdz[1][npi]+v[1][npi]*dudz[2][npi]-v[2][npi]*dudz[1][npi]+alpha*dvdz[0][npi]) *ai_w*s_dt;
-        BE[N+i]  += +Vz*(u[2][npi]*dvdz[0][npi]-u[0][npi]*dvdz[2][npi]+v[2][npi]*dudz[0][npi]-v[0][npi]*dudz[2][npi]+alpha*dvdz[1][npi]) *ai_w*s_dt;
-        BE[2*N+i]+= +Vz*(u[0][npi]*dvdz[1][npi]-u[1][npi]*dvdz[0][npi]+v[0][npi]*dudz[1][npi]-v[1][npi]*dudz[0][npi]+alpha*dvdz[2][npi]) *ai_w*s_dt;
+    //    BE[i]    += +Vz*(u[1][npi]*dvdz[2][npi]-u[2][npi]*dvdz[1][npi]+v[1][npi]*dudz[2][npi]-v[2][npi]*dudz[1][npi]+alpha*dvdz[0][npi]) *ai_w*s_dt;
+    //    BE[N+i]  += +Vz*(u[2][npi]*dvdz[0][npi]-u[0][npi]*dvdz[2][npi]+v[2][npi]*dudz[0][npi]-v[0][npi]*dudz[2][npi]+alpha*dvdz[1][npi]) *ai_w*s_dt;
+    //    BE[2*N+i]+= +Vz*(u[0][npi]*dvdz[1][npi]-u[1][npi]*dvdz[0][npi]+v[0][npi]*dudz[1][npi]-v[1][npi]*dudz[0][npi]+alpha*dvdz[2][npi]) *ai_w*s_dt;
 
 /* second membre pour les termes de courant polarise en spin pour une paroi  pour ordre 2 en temps*/
-        BE[i]    += -Uz*(u[1][npi]*dvdz[2][npi]-u[2][npi]*dvdz[1][npi]+v[1][npi]*dudz[2][npi]-v[2][npi]*dudz[1][npi]+beta*dvdz[0][npi]) *ai_w*s_dt;
-        BE[N+i]  += -Uz*(u[2][npi]*dvdz[0][npi]-u[0][npi]*dvdz[2][npi]+v[2][npi]*dudz[0][npi]-v[0][npi]*dudz[2][npi]+beta*dvdz[1][npi]) *ai_w*s_dt;
-        BE[2*N+i]+= -Uz*(u[0][npi]*dvdz[1][npi]-u[1][npi]*dvdz[0][npi]+v[0][npi]*dudz[1][npi]-v[1][npi]*dudz[0][npi]+beta*dvdz[2][npi]) *ai_w*s_dt;
-// end second order corrections
+    //   BE[i]    += -Uz*(u[1][npi]*dvdz[2][npi]-u[2][npi]*dvdz[1][npi]+v[1][npi]*dudz[2][npi]-v[2][npi]*dudz[1][npi]+beta*dvdz[0][npi]) *ai_w*s_dt;
+    //   BE[N+i]  += -Uz*(u[2][npi]*dvdz[0][npi]-u[0][npi]*dvdz[2][npi]+v[2][npi]*dudz[0][npi]-v[0][npi]*dudz[2][npi]+beta*dvdz[1][npi]) *ai_w*s_dt;
+    //   BE[2*N+i]+= -Uz*(u[0][npi]*dvdz[1][npi]-u[1][npi]*dvdz[0][npi]+v[0][npi]*dudz[1][npi]-v[1][npi]*dudz[0][npi]+beta*dvdz[2][npi]) *ai_w*s_dt;
+
+BE[i]    += (Ht[0] + (Vz-Uz)*(u[1][npi]*dvdz[2][npi]-u[2][npi]*dvdz[1][npi]+v[1][npi]*dudz[2][npi]-v[2][npi]*dudz[1][npi])+(alpha*Vz - beta*Uz)*dvdz[0][npi])*ai_w*s_dt;
+BE[N+i]  += (Ht[1] + (Vz-Uz)*(u[2][npi]*dvdz[0][npi]-u[0][npi]*dvdz[2][npi]+v[2][npi]*dudz[0][npi]-v[0][npi]*dudz[2][npi])+(alpha*Vz - beta*Uz)*dvdz[1][npi])*ai_w*s_dt;
+BE[2*N+i]+= (Ht[2] + (Vz-Uz)*(u[0][npi]*dvdz[1][npi]-u[1][npi]*dvdz[0][npi]+v[0][npi]*dudz[1][npi]-v[1][npi]*dudz[0][npi])+(alpha*Vz - beta*Uz)*dvdz[2][npi])*ai_w*s_dt;
+    
+    
+    // end second order corrections
 
         AE(    i,    i)+=  alfa* ai_w;  //lumping
         AE(  N+i,  N+i)+=  alfa* ai_w;
@@ -261,29 +273,6 @@ for (int npi=0; npi<NPI; npi++)
 return ( -Js*weightedScalarProd(dens) );
 }
 
-
-void Tet::projection( gmm::dense_matrix <double> const& A,  std::vector <double> const& B,
-           gmm::dense_matrix <double> &Ap, std::vector <double> &Bp) const
-{
-thread_local gmm::dense_matrix <double> P(2*N,3*N);
-thread_local gmm::dense_matrix <double> PA(2*N,3*N);
-//matBlocDiag::matBloc myP;
-
-//myP.D[0][0] = matBlocDiag::BlocElem(1,2,3,4);
-
-for (int i=0; i<N; i++){
-    Nodes::Node const& n = (*refNode)[ind[i]];
-    P(i,i)  = n.ep.x();  P(i,N+i)  = n.ep.y();  P(i,2*N+i)  = n.ep.z();
-    P(N+i,i)= n.eq.x();  P(N+i,N+i)= n.eq.y();  P(N+i,2*N+i)= n.eq.z();
-    }
-
-    gmm::mult(P,A,PA);
-//Ap = (P*A)*trans(P);
-//Bp = P*B;
-gmm::mult(PA, gmm::transposed(P), Ap);
-gmm::mult(P,B,Bp);
-}
-
 void Tet::projection(gmm::dense_matrix <double> const& A,  std::vector <double> const& B)
 {
 thread_local gmm::dense_matrix <double> P(2*N,3*N);
@@ -295,31 +284,12 @@ for (int i=0; i<N; i++){
     P(N+i,i)= n.eq.x();  P(N+i,N+i)= n.eq.y();  P(N+i,2*N+i)= n.eq.z();
     }
 
-    gmm::mult(P,A,PA);
+gmm::mult(P,A,PA);
 //Ap = (P*A)*trans(P);
 //Bp = P*B;
 gmm::mult(PA, gmm::transposed(P), Kp);
 gmm::mult(P,B,Lp);
 }
-
-void Tet::assemblage(gmm::dense_matrix <double> const& Ke, std::vector <double> const& Le,
-                     write_matrix &K,write_vector &L) const
-    {
-    for (int i=0; i < N; i++)
-        {
-        int i_= ind[i];             
-        
-        for (int j=0; j < N; j++)
-            {
-            int j_= ind[j];
-            K(NOD+i_,j_) += Ke(i,j);      K(NOD+i_, NOD+j_) += Ke(  i,N+j);
-            K(    i_,j_) += Ke(N+i,j);    K(    i_, NOD+j_) += Ke(N+i,N+j);
-            }
-        L[NOD+i_] += Le[i];
-        L[i_] += Le[N+i];
-        
-        }
-    }
 
 void Tet::assemblage(write_matrix &K,write_vector &L) const
 {

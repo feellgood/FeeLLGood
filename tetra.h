@@ -245,15 +245,8 @@ class Tet{
         /** zeeman energy of the tetrahedron */
         double zeemanEnergy(Tetra::prm const& param,double uz_drift,const double Hext[DIM],const double u[DIM][NPI]) const;
         
-		/** computes projection of a tetrahedron */
-        void projection(gmm::dense_matrix <double> const& A,  std::vector <double> const& B,gmm::dense_matrix <double> &Ap, std::vector <double> &Bp)  const;
-        
         /** computes projection of a tetrahedron using inner matrix in tetra object */
         void projection(gmm::dense_matrix <double> const& A,  std::vector <double> const& B);
-        
-        
-        /** matrix and vector assembly */
-        void assemblage(gmm::dense_matrix <double> const& Ke, std::vector <double> const& Le,write_matrix &K,write_vector &L) const;
         
         /** matrix and vector assembly using inner matrix in tetra */
         void assemblage(write_matrix &K,write_vector &L) const;
@@ -266,13 +259,14 @@ class Tet{
         
 		/** computes volume	of the tetrahedron */
 		void calc_vol(void);
-    
-        /** pointer to the nodes */
+        
+        /** set pointer to the nodes */
         inline void setRefNode(std::vector<Nodes::Node>  *_p_node) {refNode = _p_node;}
         
     private:
         int NOD;/**< total number of nodes, also an offset for filling sparseMatrix */
         std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
+        
         
         /** getter to access and copy some vector parts of the node vector */
 		inline void getVecDataFromNode(std::function<Pt::pt3D (Nodes::Node)> getter,double vecData[DIM][N]) const

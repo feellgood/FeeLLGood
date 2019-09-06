@@ -42,9 +42,7 @@ for(int i=0;i<NbTH;i++)
 tab_TH[NbTH] = std::thread( [this,&K_TH,&L_TH]()
     {
     thread_local gmm::dense_matrix <double> Ks(3*Facette::N,3*Facette::N);
-    //thread_local gmm::dense_matrix <double> Ksp(2*Facette::N,2*Facette::N);
     thread_local std::vector <double> Ls(3*Facette::N);
-    //thread_local std::vector <double> Lsp(2*Facette::N);
     
     std::for_each(refFac->begin(),refFac->end(), [this,&K_TH,&L_TH](Facette::Fac & fac)
         {
@@ -71,14 +69,6 @@ for(int i=0;i<(NbTH);i++)
 
 std::for_each( (*refFac).begin(), (*refFac).end(), [&K_TH,&L_TH](Facette::Fac const& fac){if(!fac.treated) fac.assemblage(K_TH,L_TH); } );    
 
-/*
-while (!buff_fac.empty())
-    {
-        Facette::Obj const& x = buff_fac.front();
-        (*refFac)[x.idx].assemblage(NOD,x.Ke,x.Le,K_TH,L_TH);
-        buff_fac.pop();
-    }
-*/
 counter.tac();
 
 if(VERBOSE) { std::cout << "Matrix assembly done, elapsed time = " << counter.elapsed() << "s" << std::endl; }
