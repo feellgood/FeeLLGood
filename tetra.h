@@ -162,18 +162,14 @@ class Tet{
         inline double weightedScalarProd(const double X[NPI]) const
             {return (X[0]*weight[0] + X[1]*weight[1] + X[2]*weight[2] + X[3]*weight[3] +X[4]*weight[4]);}
 		
+		
+		
 		/** interpolation for 3D vector field: the getter function is given as a parameter in order to know what part of the node you want to interpolate */
 		inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double result[DIM][NPI]) const
         {
         double vec_nod[DIM][N];
-        for (int i=0; i<N; i++)
-            {
-            Nodes::Node const& node = (*refNode)[ ind[i] ];
-    
-            vec_nod[0][i]   = getter(node).x();
-            vec_nod[1][i]   = getter(node).y();
-            vec_nod[2][i]   = getter(node).z();
-            }
+        getVecDataFromNode(getter,vec_nod);
+        
         tiny::mult<double, DIM, N, NPI> (vec_nod, a, result);
         }
 		
@@ -181,14 +177,8 @@ class Tet{
         inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double Tx[DIM][NPI],double Ty[DIM][NPI],double Tz[DIM][NPI]) const
         {
         double vec_nod[DIM][N];
-        for (int i=0; i<N; i++)
-            {
-            Nodes::Node const& node = (*refNode)[ ind[i] ];
-    
-            vec_nod[0][i]   = getter(node).x();
-            vec_nod[1][i]   = getter(node).y();
-            vec_nod[2][i]   = getter(node).z();
-            }
+        getVecDataFromNode(getter,vec_nod);
+        
         tiny::mult<double, DIM, N, NPI> (vec_nod, dadx, Tx);
         tiny::mult<double, DIM, N, NPI> (vec_nod, dady, Ty);
         tiny::mult<double, DIM, N, NPI> (vec_nod, dadz, Tz);
@@ -200,14 +190,8 @@ class Tet{
                                   double Tx[DIM][NPI],double Ty[DIM][NPI],double Tz[DIM][NPI]) const
         {
         double vec_nod[DIM][N];
-        for (int i=0; i<N; i++)
-            {
-            Nodes::Node const& node = (*refNode)[ ind[i] ];
-    
-            vec_nod[0][i]   = getter(node).x();
-            vec_nod[1][i]   = getter(node).y();
-            vec_nod[2][i]   = getter(node).z();
-            }
+        getVecDataFromNode(getter,vec_nod);
+        
         tiny::mult<double, DIM, N, NPI> (vec_nod, a, result);
         tiny::mult<double, DIM, N, NPI> (vec_nod, dadx, Tx);
         tiny::mult<double, DIM, N, NPI> (vec_nod, dady, Ty);
@@ -218,11 +202,7 @@ class Tet{
         inline void interpolation(std::function<double (Nodes::Node)> getter,double Xx[NPI],double Xy[NPI],double Xz[NPI]) const
         {
         double scalar_nod[N];    
-        for (int i=0; i<N; i++)
-            {
-            Nodes::Node const& n = (*refNode)[ ind[i] ];
-            scalar_nod[i] =  getter(n);
-            }
+        getScalDataFromNode(getter,scalar_nod);
         tiny::neg_transposed_mult<double, N, NPI> (scalar_nod, dadx, Xx);
         tiny::neg_transposed_mult<double, N, NPI> (scalar_nod, dady, Xy);
         tiny::neg_transposed_mult<double, N, NPI> (scalar_nod, dadz, Xz);
@@ -232,11 +212,7 @@ class Tet{
         inline void interpolation(std::function<double (Nodes::Node)> getter,double result[NPI]) const
         {
         double scalar_nod[N];    
-        for (int i=0; i<N; i++)
-            {
-            Nodes::Node const& n = (*refNode)[ ind[i] ];
-            scalar_nod[i] =  getter(n);
-            }
+        getScalDataFromNode(getter,scalar_nod);
         tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result);
         }
 		
@@ -244,11 +220,7 @@ class Tet{
         inline void interpolation(std::function<double (Nodes::Node,Pt::index)> getter,Pt::index idx,double result[NPI]) const
         {
         double scalar_nod[N];    
-        for (int i=0; i<N; i++)
-            {
-            Nodes::Node const& n = (*refNode)[ ind[i] ];
-            scalar_nod[i] =  getter(n,idx);
-            }
+        getScalDataFromNode(getter,idx,scalar_nod);
         tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result);
         }
 		
@@ -301,6 +273,39 @@ class Tet{
     private:
         int NOD;/**< total number of nodes, also an offset for filling sparseMatrix */
         std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
+        
+        /** getter to access and copy some vector parts of the node vector */
+		inline void getVecDataFromNode(std::function<Pt::pt3D (Nodes::Node)> getter,double vecData[DIM][N]) const
+		{
+        for (int i=0; i<N; i++)
+            {
+            Nodes::Node const& node = (*refNode)[ ind[i] ];
+    
+            vecData[Pt::IDX_X][i]   = getter(node).x();
+            vecData[Pt::IDX_Y][i]   = getter(node).y();
+            vecData[Pt::IDX_Z][i]   = getter(node).z();
+            }
+        }
+		
+		/** getter to access and copy some scalar parts of the node vector */
+		inline void getScalDataFromNode(std::function<double (Nodes::Node)> getter,double scalData[N]) const
+		{
+        for (int i=0; i<N; i++)
+            {
+            Nodes::Node const& n = (*refNode)[ ind[i] ];
+            scalData[i] =  getter(n);
+            }    
+        }
+		
+		/** getter to access and copy some scalar parts (vector components) of the node vector */
+		inline void getScalDataFromNode(std::function<double (Nodes::Node,Pt::index)> getter,Pt::index idx,double scalData[N]) const
+		{
+        for (int i=0; i<N; i++)
+            {
+            Nodes::Node const& n = (*refNode)[ ind[i] ];
+            scalData[i] =  getter(n,idx);
+            }    
+        }
         
         gmm::dense_matrix <double> Kp;/**< Kp(2*N,2*N) initialized by constructor */
         std::vector <double>  Lp;/**< Lp(2*N) initialized by constructor  */
