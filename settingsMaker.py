@@ -19,6 +19,7 @@ class Settings(object):
         outputs["vtk file"] = False
         outputs["save_energies"] = 3
         outputs["take_photo"] = 5
+        outputs["verbose"] = true
 
         self.mySets["outputs"] = outputs
 

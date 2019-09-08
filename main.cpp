@@ -20,8 +20,15 @@ std::cout << "\t process\t\t" << getpid() << std::endl;
 
 void calc_demag(Fem &fem,Settings &mySettings,OctreeClass *tree,KernelClass *kernels)
 {
+if(mySettings.verbose) { std::cout << "\t magnetostatics ..................... "; }
+FTic counter;
+
+counter.tic();
 fmm::demag<0, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree, kernels); // Hd(u)
 fmm::demag<1, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree, kernels); // Hd(v), second order contribution
+counter.tac();
+if(mySettings.verbose) { std::cout << "Done  " << "(@Algorithm = " << counter.elapsed() << "s)." << std::endl; }
+    
 }
 
 int main(int argc,char* argv[])
@@ -47,28 +54,29 @@ else
 prompt();
 	
 mySettings.read(fileJson);
-if (VERBOSE) mySettings.infos();
+mySettings.infos();
+
 fem.readMesh(mySettings);
 counter.tic();
 fem.femutil(mySettings);
 fem.chapeaux(mySettings.EPSILON);
 
 if (mySettings.restore)
-    { fem.readSol(mySettings.getScale(), mySettings.restoreFileName); }
+    { fem.readSol(mySettings.verbose,mySettings.getScale(), mySettings.restoreFileName); }
 else
     {
     std::cout<< "initial magnetization(x,y,z,t=0) :\nMx =" << mySettings.sMx << "\nMy =" << mySettings.sMy << "\nMz =" << mySettings.sMz <<endl; 
     fem.init_distrib(mySettings);
     }
 
-fem.direction(Pt::IDX_Z);/* determination de la direction de propagation de la paroi */
+fem.direction(mySettings.verbose,Pt::IDX_Z);/* determination de la direction de propagation de la paroi */
 fem.t=0.;
 fem.infos();
 
 //once fem containers are ok, linAlgebra object is built
 LinAlgebra linAlg(mySettings,fem.NOD,fem.node,fem.tet,fem.fac);
 
-fmm::init< CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem, mySettings.scalfmmNbTh, tree, kernels);
+fmm::init< CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings.verbose, mySettings.scalfmmNbTh, tree, kernels);
 
 cout << "init scalfmm done.\n" << endl;
 

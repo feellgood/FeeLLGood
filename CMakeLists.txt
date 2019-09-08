@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 2.8)
 #===========================================================================
 
 set(FEELLGOOD_MAJOR_VERSION 0)
-set(FEELLGOOD_MINOR_VERSION 4)
+set(FEELLGOOD_MINOR_VERSION 5)
 set(FEELLGOOD_PATCH_VERSION 0)
 
 ENABLE_LANGUAGE(CXX)
@@ -46,8 +46,6 @@ execute_process(COMMAND ${my_cmd} ${my_arg} ${my_arg1} ${my_arg2} ${my_arg3} RES
 string(REPLACE "\n" "" SHAstr "\"${git_var}\"") 
 MESSAGE(STATUS "version = ${FEELLGOOD_VERSION}")
 MESSAGE(STATUS "executable built with SHA1=${SHAstr}")
-
-set(VERBOSE_MODE true)
 
 set(my_cmd "getconf")
 set(my_arg "_NPROCESSORS_ONLN")

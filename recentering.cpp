@@ -4,7 +4,7 @@
 
 using namespace Pt;
 
-void Fem::direction(enum index idx_dir)
+void Fem::direction(bool VERBOSE,enum index idx_dir)
 {
 if(VERBOSE) { std::cout << "direction " << std::endl; }
 const int NPS=1;
@@ -51,8 +51,6 @@ thres = abs(thres);
 double m_i = Fem::avg(Nodes::get_u_comp,idx_dir);
 if (fabs(m_i)<thres) return false;
 
-if(VERBOSE) {std::cout << "centering ..." << std::flush;}
-
 const int NPS=1;
 int ns;
 
@@ -90,7 +88,7 @@ double u2R=node[ns].u(idx_dir);
 if (u2L*u2R>0)
     {
     std::cout << "Error No Domain Wall" << std::endl;
-    exit(1);
+    SYSTEM_ERROR;
    }
 
 assert(u2L*u2R<0);

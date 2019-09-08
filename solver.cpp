@@ -71,7 +71,7 @@ std::for_each( (*refFac).begin(), (*refFac).end(), [&K_TH,&L_TH](Facette::Fac co
 
 counter.tac();
 
-if(VERBOSE) { std::cout << "Matrix assembly done, elapsed time = " << counter.elapsed() << "s" << std::endl; }
+if(settings.verbose) { std::cout << "Matrix assembly done, elapsed time = " << counter.elapsed() << "s" << std::endl; }
 
 read_matrix Kr(2*NOD,2*NOD);    gmm::copy(K_TH, Kr);
 read_vector Lr(2*NOD);          gmm::copy(L_TH, Lr);
@@ -88,18 +88,18 @@ counter.tic();
 
 if (!nt) 
     {
-    if(VERBOSE) { std::cout << "computing prc.";std::fflush(NULL); }
+    if(settings.verbose) { std::cout << "computing prc.";std::fflush(NULL); }
     prc = new gmm::diagonal_precond <read_matrix> (Kr);
 	counter.tac();    
-	if(VERBOSE) { std::cout << "elapsed time = " << counter.elapsed() << "s" << std::endl; }
+	if(settings.verbose) { std::cout << "elapsed time = " << counter.elapsed() << "s" << std::endl; }
     }
 else if (!(nt % (settings.REFRESH_PRC)))
     {
     delete prc;
-    if(VERBOSE) { std::cout << "computing prc.";std::fflush(NULL); }
+    if(settings.verbose) { std::cout << "computing prc.";std::fflush(NULL); }
     prc = new gmm::diagonal_precond <read_matrix> (Kr);
     counter.tac();    
-	if(VERBOSE) { std::cout << "elapsed time = " << counter.elapsed() << "s" << std::endl; }
+	if(settings.verbose) { std::cout << "elapsed time = " << counter.elapsed() << "s" << std::endl; }
     } 
 
 
@@ -109,7 +109,7 @@ gmm::bicgstab(Kr, Xw, L_TH, *prc, bicg_iter);
 if (!(bicg_iter.converged() )) 
     {
     counter.tac();
-	if(VERBOSE) { std::cout << "bicg FAILED in " << bicg_iter.get_iteration() << "iterations, duration: " << counter.elapsed() << " s" << std::endl; }
+	if(settings.verbose) { std::cout << "bicg FAILED in " << bicg_iter.get_iteration() << "iterations, duration: " << counter.elapsed() << " s" << std::endl; }
     gmm::diagonal_precond <read_matrix>  gmr_prc (Kr);
     counter.tic();
     
@@ -118,16 +118,16 @@ if (!(bicg_iter.converged() ))
 
     if (!(gmr_iter.converged() )) {
 	counter.tac();
-    if(VERBOSE) { std::cout << "gmres FAILED in " << gmr_iter.get_iteration() << "iterations, duration: " << counter.elapsed() << " s" << std::endl; }
+    if(settings.verbose) { std::cout << "gmres FAILED in " << gmr_iter.get_iteration() << "iterations, duration: " << counter.elapsed() << " s" << std::endl; }
     return 1;
     }
     else {counter.tac();
-        if(VERBOSE) { std::cout << "v-solve in " << gmr_iter.get_iteration() << " iterations (gmres) duration: " << counter.elapsed() << " s" << std::endl; }
+        if(settings.verbose) { std::cout << "v-solve in " << gmr_iter.get_iteration() << " iterations (gmres) duration: " << counter.elapsed() << " s" << std::endl; }
         }
     }
 else 
     {counter.tac();
-    if(VERBOSE) { std::cout << "v-solve converged in " << bicg_iter.get_iteration() << " (bicg,prc-" << (nt % (settings.REFRESH_PRC)) << ") :duration: " 
+    if(settings.verbose) { std::cout << "v-solve converged in " << bicg_iter.get_iteration() << " (bicg,prc-" << (nt % (settings.REFRESH_PRC)) << ") :duration: " 
 << counter.elapsed() << " s" << std::endl; }
     }
 

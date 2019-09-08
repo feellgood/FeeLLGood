@@ -25,6 +25,7 @@ class Settings{
 	public:
 	inline Settings() 
         {
+        verbose = true;
         withTsv=true;
         withVtk = false;
         theta=0.5;
@@ -68,6 +69,8 @@ class Settings{
 	double tf;/**< end time of the simulation */
 	double dt;/**< step time of the simulation */
 
+	bool verbose;/**< if true the user gets many printing feedback in terminal */
+	
 	int n1;/**< energy saved every n1 iterations */
 	int n2;/**< magnetic configuration saved every n2 iterations */
 	bool restore;/**< usefull to run a simulation from a previous calculation  */

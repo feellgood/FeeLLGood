@@ -28,25 +28,27 @@ if ((nt%n2)==0)
     if (settings.withVtk)
         {
         string str = baseName + "_iter" + to_string(nt) + ".vtk";
-        savecfg_vtk(str);
+        savecfg_vtk(settings,str);
         }
     
     string str = baseName + "_iter" + to_string(nt) + ".sol";
  
+    if(settings.verbose) { cout << " " << str << endl; }    
     savesol(str,settings.getScale());
+    if(settings.verbose) { cout << "all nodes written." << endl; }
     //    saveH(str);
     }
 }
 
-void Fem::savecfg_vtk(string fileName)
+void Fem::savecfg_vtk(Settings &settings,string fileName)
 {
     const int TET = tet.size();
     
-if(VERBOSE) { cout <<"\n -------------------\n " << fileName << endl; }
+if(settings.verbose) { cout <<"\n -------------------\n " << fileName << endl; }
 
 ofstream fout(fileName, ios::out);
 if (!fout){
-    if(VERBOSE) cerr << "cannot open file : " << fileName << endl;
+    if(settings.verbose) cerr << "cannot open file : " << fileName << endl;
     SYSTEM_ERROR;}
 
 
@@ -89,12 +91,12 @@ fout << node[i].u << endl;
 
 void Fem::savesol(string fileName,double s)
 {
-if(VERBOSE) { cout << " " << fileName << endl; }
-
 ofstream fout(fileName, ios::out);
-if (!fout){
-   if(VERBOSE) { cerr << "cannot open file " << fileName << endl; }
-   SYSTEM_ERROR;}
+if (!fout)
+    {
+    cerr << "cannot open file " << fileName << endl;
+    SYSTEM_ERROR;
+    }
 //fout << boost::format("#time : %+20.10e ") % fem.t << endl;
 fout << "#time : " << t <<endl;
 
@@ -110,7 +112,6 @@ std::for_each(node.begin(),node.end(),
         i++;
         } // lambda works with << overloaded
     );
-if(VERBOSE) { cout << i <<" nodes written." << endl; }
 
 fout.close();
 }

@@ -51,7 +51,8 @@ simName = sub_tree.get<std::string>("file basename");
 withVtk = sub_tree.get<bool>("vtk file",0);
 n1 = sub_tree.get<int>("save_energies",0);
 n2 = sub_tree.get<int>("take_photo",0);
-    
+verbose = sub_tree.get<bool>("verbose",true);
+
 try { sub_tree = root.get_child("mesh"); }
     catch (std::exception &e)
         { std::cout << e.what() << std::endl; }

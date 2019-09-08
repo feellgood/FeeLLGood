@@ -11,22 +11,22 @@ string trash, symb;
 
 string str = mySets.getPbName();
 ifstream msh(str);   // ouverture du fichier probleme en lecture
-if (!msh){
-    if(VERBOSE) { cerr << "cannot open file " << str << endl; } 
-    SYSTEM_ERROR;}
+
+if (!msh)
+    {
+    if(mySets.verbose) { cerr << "cannot open file " << str << endl; } 
+    SYSTEM_ERROR;
+    }
 
 while(msh >> symb){
     if (symb == "$Nodes")
         break;
     }
 
-if (msh.fail()){
-#ifdef LIBRARY
-    throw runtime_error("could not find $Nodes");
-#else
-    if(VERBOSE) { cerr << "could not find $Nodes" << endl; }
-    exit(1);
-#endif
+if (msh.fail())
+    {
+    if(mySets.verbose) { cerr << "could not find $Nodes" << endl; }
+    SYSTEM_ERROR;
     }
 
     double scale = mySets.getScale();
@@ -39,13 +39,10 @@ for (int i=0; i<NOD; i++){
 	//std::cout <<"scale=" << scale <<";" << trash << ";" << node[i].p << std::endl;
 	}
 
-if (msh.fail()){
-#ifdef LIBRARY
-    throw runtime_error("error while reading nodes");
-#else
-    cerr << "error while reading nodes" << endl;
-    exit(1);
-#endif
+if (msh.fail())
+    {
+    if(mySets.verbose) {cerr << "error while reading nodes" << endl;}
+    SYSTEM_ERROR;
     }
 
 while(msh >> symb){
@@ -53,13 +50,10 @@ while(msh >> symb){
         break;
     }
 
-if (msh.fail()){
-#ifdef LIBRARY
-    throw runtime_error("could not find $Elements");
-#else
-    cerr << "could not find $Elements" << endl;
-    exit(1);
-#endif
+if (msh.fail())
+    {
+    if(mySets.verbose) {cerr << "could not find $Elements" << endl;}
+    SYSTEM_ERROR;
     }
 
 msh >> ELEM;        // lecture des elements
@@ -110,7 +104,7 @@ if (msh.fail()){
 msh.close();
 }
 
-void Fem::readSol(double scaling, string fileName)
+void Fem::readSol(bool VERBOSE,double scaling, string fileName)
 {
 ifstream fin(fileName, std::ifstream::in);
 if (!fin){

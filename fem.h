@@ -134,8 +134,9 @@ inline void init_distrib(Settings &mySets /**< [in] */)
 /**
 read a solution from a file (tsv formated) and initialize fem struct to restart computation from that distribution
 */
-void readSol(double scaling /**< [in] scaling factor for physical coordinates */,
-	std::string fileName /**< [in] */ );
+void readSol(bool VERBOSE/**< [in] */,
+             double scaling /**< [in] scaling factor for physical coordinates */,
+             std::string fileName /**< [in] */ );
 
 /** reading mesh file function */
 void readMesh(Settings &mySets);
@@ -166,7 +167,8 @@ Indices and orientation convention :
 void femutil(Settings &settings /**< [in] */);
 
 /** find direction of motion of DW */
-void direction(enum Pt::index idx_dir /**< [in] */);
+void direction(bool VERBOSE /**< [in] VERBOSE mode */,
+               enum Pt::index idx_dir /**< [in] */);
 
 /** computes energies stored in E table */
 void energy(Settings &settings /**< [in] */);
@@ -187,7 +189,7 @@ bool recentrage(double thres/**< [in] threshold parameter */,enum Pt::index idx_
 void saver(Settings &settings /**< [in] */, std::ofstream &fout /**< [out] */, int nt /**< [in] */);
 
 /** text file (vtk) writing function for a solution */
-void savecfg_vtk(std::string fileName /**< [in] */);
+void savecfg_vtk(Settings &settings /**< [in] */,std::string fileName /**< [in] */);
 
 /** text file (tsv) writing function for a solution */
 void savesol(std::string fileName /**< [in] */,double s /**< [in] */);

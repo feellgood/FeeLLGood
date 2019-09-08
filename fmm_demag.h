@@ -55,7 +55,7 @@ namespace fmm{
 initialization function for the building of an octree and a kernel passed to scalfmm to compute the demag field
 */
 template <class CellClass, class ContainerClass, class LeafClass, class OctreeClass, class KernelClass, class FmmClass, typename... Args>
-int init(Fem &fem,const int ScalfmmNbThreads, OctreeClass* &tree, KernelClass* &kernels, Args... kernelPreArgs)
+int init(Fem &fem,bool VERBOSE,const int ScalfmmNbThreads, OctreeClass* &tree, KernelClass* &kernels, Args... kernelPreArgs)
 {
     FTic counter;
     const int NbLevels = 8; 
@@ -153,10 +153,7 @@ template <int Hv, class CellClass, class ContainerClass, class LeafClass, class 
           class KernelClass, class FmmClass, typename... Args>
 void demag(Fem &fem,Settings &settings, OctreeClass *tree, KernelClass *kernels, Args... kernelPreArgs)
 {
-FTic counter;
 FmmClass algo(tree, kernels);
-
-if(VERBOSE) { std::cout << "\t magnetostatics ..................... "; }
 
 const int NOD = fem.NOD;
 const int FAC = fem.fac.size();
@@ -260,10 +257,7 @@ fflush(NULL);
 
     }// end reset
 
-counter.tic();
 algo.execute();
- counter.tac();
-if(VERBOSE) { std::cout << "Done  " << "(@Algorithm = " << counter.elapsed() << "s)." << std::endl; }
 
 double norm = fem.fmm_normalizer;
 

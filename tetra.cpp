@@ -337,6 +337,6 @@ vol  = 1./6.* pScal(vec,p3-p0);
    if (vol<0.) {
       ind[3]=i2; ind[2]=i3;
       vol *= -1;
-      if(VERBOSE) { std::cout << "ill-oriented tetrahedron, now corrected!"<< std::endl; }
+      //if(VERBOSE) { std::cout << "ill-oriented tetrahedron, now corrected!"<< std::endl; }
       }
 }
