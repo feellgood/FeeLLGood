@@ -179,14 +179,21 @@ public:
      */
     inline pt3D() : _x(0),_y(0),_z(0) {}
     
-    /**
-     * constructor by values
-     */
-    inline pt3D(double a,double b,double c) : _x(a),_y(b),_z(c) {}
+    /** constructor by values, cartesian coordinates */
+    inline pt3D(const double a,const double b,const double c) : _x(a),_y(b),_z(c) {}
+    
+    /** unit vector constructor by values, spherical coordinates \f$ (r=1,\theta \in [0,\pi],\phi \in [0,2 \pi]) \f$ */
+    inline pt3D(const double theta,const double phi)
+        {
+        double si_t = sin(theta);
+        _x = si_t*cos(phi);
+        _y = si_t*sin(phi);
+        _z = cos(theta);
+        }
     
     
     /**
-     * returns a unit vector built by coordinate index, usefull to buid basis <br>
+     * returns a unit vector built by coordinate index, usefull to build basis <br>
      * example : pt3D p = pt3D(IDX_Y); <br>
      p will contain \f$ (x,y,z) = (0.0,1.0,0.0) \f$
      */

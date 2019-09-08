@@ -127,9 +127,13 @@ inline void base_projection(void)
         std::uniform_real_distribution<> distrib(0.0,1.0);
         std::for_each(refNode->begin(),refNode->end(),[&gen,&distrib](Nodes::Node &n) 
         { 
-            n.ep = Pt::pt3D(distrib(gen),distrib(gen),distrib(gen))*n.u0;
-            n.ep.normalize();        
-            n.eq = n.u0*n.ep; }); 
+            double theta = M_PI * distrib(gen);
+            double phi = M_2_PI * distrib(gen);
+            n.ep = Pt::pt3D(theta,phi)*n.u0;
+            n.ep.normalize(); // required because u0 is not necessarily unit vector ??       
+            n.eq = n.u0*n.ep; 
+            n.eq.normalize();
+        }); 
         
     }
 	
