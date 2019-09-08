@@ -45,7 +45,6 @@ public:
     tab_TH.resize(NbTH+1);
     refTet.resize(NbTH);
     deepCopyTet(myTet);
-    if(VERBOSE) { std::cout << NbTH+1 << " threads for assembling matrix." << std::endl; }
     }
     
 	/** pointer to diagonal preconditionner  */

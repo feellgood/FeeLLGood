@@ -49,13 +49,13 @@ class Settings{
 	void read(std::string fileJson);/**< read settings from a json file */
 	
 	inline void setPbName(std::string str) {pbName = str;} /**< setter for .msh file name  */
-	inline std::string getPbName() {return pbName;}/**< getter for problem file name */
+	inline std::string getPbName(void) const {return pbName;}/**< getter for problem file name */
 
 	inline void setSimName(std::string str) {simName = str;} /**< setter for .sol output file name  */
-	inline std::string getSimName() {return simName;}/**< getter for output file name */
+	inline std::string getSimName(void) const {return simName;}/**< getter for output file name */
 
-	inline void setScale(double s) {_scale = s;} /**< setter for geometrical scaling factor for physical coordinates of the mesh  */	
-	inline double getScale(void) {return _scale;}/**< getter for geometrical scaling factor for physical coordinates of the mesh */ 
+	inline void setScale(const double s) {_scale = s;} /**< setter for geometrical scaling factor for physical coordinates of the mesh  */	
+	inline double getScale(void) const {return _scale;}/**< getter for geometrical scaling factor for physical coordinates of the mesh */ 
 
 	/** maximum number of iterations setter for bicgstab */
     inline void set_MAXITER(int i) {MAXITER = i;} 

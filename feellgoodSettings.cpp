@@ -12,21 +12,23 @@
 
 void Settings::infos()
 {
-std::cout << "\t name simul : "<< simName << std::endl;
-std::cout << "\t name mesh file : " << pbName << std::endl;
-std::cout << "\t temps final\t\t" << tf << std::endl;
-std::cout << "\t pas de temps init\t" << dt << std::endl << std::endl;
-std::cout << "\t sauve energies chaque " << n1 << " iterations" << std::endl;
-std::cout << "\t photo config chaque " << n2 << " iterations" << std::endl;
+std::cout << "\t simulation name : "<< simName << std::endl;
+std::cout << "\t mesh file name: " << pbName << " with scaling factor " << getScale() << std::endl;
+std::cout << "\t final time of the simulation\t\t" << tf << std::endl;
+std::cout << "\t initial time step\t" << dt << std::endl << std::endl;
+std::cout << "\t save energy values every " << n1 << " iterations" << std::endl;
+std::cout << "\t snapshot of the magnetization configuration every " << n2 << " iterations" << std::endl;
 if (restore)
-    { std::cout << "\t restauration a partir du fichier : " << restoreFileName <<std::endl; }
+    { std::cout << "\t restore initial magnetization distribution from file : " << restoreFileName <<std::endl; }
 else
-    { std::cout << "\t distribution initiale d'aimantation uniforme" << std::endl; }
+    { std::cout << "\t initial magnetization distribution from math expression" << std::endl; }
 
 std::cout << "\t applied field Bext = [ " << Bext[0] << ",\t" << Bext[1] << ",\t" << Bext[2] << " ] T" << std::endl;
 
 for(unsigned int i=0;i<paramTetra.size();i++) {paramTetra[i].infos();}
 for(unsigned int i=0;i<paramFacette.size();i++) {paramFacette[i].infos();}
+
+std::cout << solverNbTh+1 << " threads for assembling matrix." << std::endl;
 }
 
 

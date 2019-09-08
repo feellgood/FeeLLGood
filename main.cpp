@@ -47,7 +47,7 @@ else
 prompt();
 	
 mySettings.read(fileJson);
-mySettings.infos();
+if (VERBOSE) mySettings.infos();
 fem.readMesh(mySettings);
 counter.tic();
 fem.femutil(mySettings);
