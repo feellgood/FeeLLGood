@@ -177,7 +177,7 @@ public:
     /**
      * default constructor : initialization by zero values
      */
-    inline pt3D() { _x = _y = _z = 0.0; }
+    inline pt3D() : _x(0),_y(0),_z(0) {}
     
     /**
      * constructor by values
@@ -390,11 +390,6 @@ inline void inverse(double M[DIM][DIM],double detM)
     M[2][1] = (m01*m20 - m00*m21)/detM;
     M[2][2] = (m00*m11 - m01*m10)/detM;
 }    
-
-/**
-returns a random vector with each componant inferior to 1
-*/
-inline pt3D rand(void) {return pt3D(std::rand() / (RAND_MAX+1.), std::rand() / (RAND_MAX+1.), std::rand() / (RAND_MAX+1.));}
 
 /** 
  geometry : returns iso-barycenter

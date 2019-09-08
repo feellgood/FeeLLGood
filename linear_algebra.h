@@ -9,6 +9,8 @@ projection and matrix assembly is multithreaded for tetrahedron, monothread for 
 #include <mutex>
 #include <future>
 
+#include <random>
+
 #include "gmm/gmm_precond_diagonal.h"
 #include "gmm/gmm_iter.h"
 #include "gmm/gmm_solver_bicgstab.h"
@@ -38,6 +40,7 @@ public:
                       std::vector <Tetra::Tet> & myTet /**< [in] */,
                       std::vector <Facette::Fac> & myFace /**< [in] */) :  NOD(_NOD),refNode(&myNode),refFac(&myFace)
     {
+    
     settings = s;
     NbTH = s.solverNbTh;
     my_lock = new std::mutex;
@@ -112,9 +115,22 @@ private:
     /** thread vector */
     std::vector<std::thread> tab_TH;
     
-/** computes the local vector basis {ep,eq} in the tangeant plane for projection on the elements */
+    std::random_device rd;
+    
+
+/** computes the local vector basis {ep,eq} in the tangeant plane for projection on the elements 
+  */
 inline void base_projection(void)
-	{ std::for_each(refNode->begin(),refNode->end(),[](Nodes::Node &n) { n.buildBase_epeq();}); }
+	{
+        std::mt19937 gen(rd());// random number generator
+        std::uniform_real_distribution<> distrib(0.0,1.0);
+        std::for_each(refNode->begin(),refNode->end(),[&gen,&distrib](Nodes::Node &n) 
+        { 
+            n.ep = Pt::pt3D(distrib(gen),distrib(gen),distrib(gen))*n.u0;
+            n.ep.normalize();        
+            n.eq = n.u0*n.ep; }); 
+        
+    }
 	
 }; // fin class linAlgebra
 
