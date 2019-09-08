@@ -115,6 +115,7 @@ private:
     /** thread vector */
     std::vector<std::thread> tab_TH;
     
+    /** will be used to obtain a seed for the random number generator engine */
     std::random_device rd;
     
 
@@ -122,7 +123,7 @@ private:
   */
 inline void base_projection(void)
 	{
-        std::mt19937 gen(rd());// random number generator
+        std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
         std::uniform_real_distribution<> distrib(0.0,1.0);
         std::for_each(refNode->begin(),refNode->end(),[&gen,&distrib](Nodes::Node &n) 
         { 
