@@ -1,6 +1,6 @@
 /** \file linear_algebra.h
 \brief secondary header, it grabs altogether the linear algebra by the solver to apply fem method  <br>
-It encapsulates the calls to MTL4 , the assemblage and projection of the matrix for all elements <br> 
+It encapsulates the calls to GMM, the assemblage and projection of the matrix for all elements <br> 
 projection and matrix assembly is multithreaded for tetrahedron, monothread for facette
 */
 #include <deque>
@@ -37,31 +37,15 @@ public:
 	/** constructor */	
     inline LinAlgebra(Settings & s /**< [in] */,const int _NOD /**< [in] */,
                       std::vector<Nodes::Node> & myNode /**< [in] */,
-                      std::vector <Tetra::Tet> & myTet /**< [in] */,
+                      std::vector <Tetra::Tet> const& myTet /**< [in] */,
                       std::vector <Facette::Fac> & myFace /**< [in] */) :  NOD(_NOD),refNode(&myNode),refFac(&myFace)
     {
-    
     settings = s;
     NbTH = s.solverNbTh;
     my_lock = new std::mutex;
     tab_TH.resize(NbTH+1);
     refTet.resize(NbTH);
-    const unsigned long block_size = std::distance(myTet.begin(),myTet.end())/NbTH;
-
-    std::vector<Tetra::Tet>::iterator it_begin = myTet.begin();
-
-    for(int i=0;i<(NbTH-1);i++) 
-        {
-        std::vector<Tetra::Tet>::iterator it_end = it_begin;
-        std::advance(it_end,block_size);
-        refTet[i].resize(block_size,Tetra::Tet(_NOD));
-        std::copy( it_begin, it_end, refTet[i].begin() );
-        it_begin = it_end;
-        }
-    const unsigned long last_block_size = std::distance(it_begin,myTet.end());
-    refTet[NbTH-1].resize(last_block_size,Tetra::Tet(_NOD));
-    std::copy( it_begin, myTet.end(), refTet[NbTH-1].begin() );
-    
+    deepCopyTet(myTet);
     if(VERBOSE) { std::cout << NbTH+1 << " threads for assembling matrix." << std::endl; }
     }
     
@@ -118,24 +102,11 @@ private:
     /** will be used to obtain a seed for the random number generator engine */
     std::random_device rd;
     
-
-/** computes the local vector basis {ep,eq} in the tangeant plane for projection on the elements 
-  */
-inline void base_projection(void)
-	{
-        std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
-        std::uniform_real_distribution<> distrib(0.0,1.0);
-        std::for_each(refNode->begin(),refNode->end(),[&gen,&distrib](Nodes::Node &n) 
-        { 
-            double theta = M_PI * distrib(gen);
-            double phi = M_2_PI * distrib(gen);
-            n.ep = Pt::pt3D(theta,phi)*n.u0;
-            n.ep.normalize(); // required because u0 is not necessarily unit vector ??       
-            n.eq = n.u0*n.ep; 
-            n.eq.normalize();
-        }); 
-        
-    }
+    /** deep copy of all the tetrahedrons to refTet container, used by constructor */
+    void deepCopyTet(std::vector <Tetra::Tet> const& myTet);
+    
+    /** computes the local vector basis {ep,eq} in the tangeant plane for projection on the elements */
+    void base_projection(void);
 	
 }; // fin class linAlgebra
 
