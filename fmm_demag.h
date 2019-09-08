@@ -22,6 +22,7 @@ this header is the interface to scalfmm. Its purpose is to prepare an octree for
 #include "Kernels/Rotation/FRotationKernel.hpp"
 #include "Kernels/Rotation/FRotationCell.hpp"
 
+#include "fem.h"
 
 /** constant parameter for some scalfmm templates */
 static const int P = 9;
