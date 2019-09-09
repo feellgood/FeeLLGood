@@ -2,7 +2,7 @@
 
 /*index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied*/
 
-void Fem::energy(Settings &settings)
+void Fem::energy(Settings const& settings)
 {
 Etot = 0.0;
 double uz_drift=2.*DW_z/l.z()*DW_dir;

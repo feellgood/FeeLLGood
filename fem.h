@@ -164,14 +164,14 @@ Indices and orientation convention :
                         ` w
 
 */
-void femutil(Settings &settings /**< [in] */);
+void femutil(Settings const& settings /**< [in] */);
 
 /** find direction of motion of DW */
 void direction(bool VERBOSE /**< [in] VERBOSE mode */,
                enum Pt::index idx_dir /**< [in] */);
 
 /** computes energies stored in E table */
-void energy(Settings &settings /**< [in] */);
+void energy(Settings const& settings /**< [in] */);
 
 /** recentering algorithm for the study of the motion of a micromagnetic object (domain wall). 
  
@@ -186,23 +186,23 @@ or					or
 bool recentrage(double thres/**< [in] threshold parameter */,enum Pt::index idx_dir /**< [in] */);
 
 /** saving function for a solution */
-void saver(Settings &settings /**< [in] */, std::ofstream &fout /**< [out] */, int nt /**< [in] */);
+void saver(Settings const& settings /**< [in] */, std::ofstream &fout /**< [out] */, const int nt /**< [in] */) const;
 
 /** text file (vtk) writing function for a solution */
-void savecfg_vtk(Settings &settings /**< [in] */,std::string fileName /**< [in] */);
+void savecfg_vtk(Settings const& settings /**< [in] */,const std::string fileName /**< [in] */) const;
 
 /** text file (tsv) writing function for a solution */
-void savesol(std::string fileName /**< [in] */,double s /**< [in] */);
+void savesol(const std::string fileName /**< [in] */,const double s /**< [in] */) const;
 
 /** save the field values */
-void saveH(std::string fileName /**< [in] */,double scale /**< [in] */);
+void saveH(const std::string fileName /**< [in] */,const double scale /**< [in] */) const;
 
 /** 
 average component of either u or v through getter on the whole set of tetetrahedron
 */
-double avg(std::function<double (Nodes::Node,Pt::index)> getter /**< [in] */,Pt::index d /**< [in] */)
+double avg(std::function<double (Nodes::Node,Pt::index)> getter /**< [in] */,Pt::index d /**< [in] */) const
 {// syntaxe pénible avec opérateur binaire dans la lambda pour avoir un += sur la fonction voulue, with C++17 we should use reduce instead of accumulate here
-double sum = std::accumulate(tet.begin(),tet.end(),0.0, [&getter,&d](double &s,Tetra::Tet &te)
+double sum = std::accumulate(tet.begin(),tet.end(),0.0, [&getter,&d](double &s,Tetra::Tet const& te)
                             {
                             double val[Tetra::NPI]; 
                             te.interpolation(getter,d,val); 

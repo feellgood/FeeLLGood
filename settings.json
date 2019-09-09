@@ -6,7 +6,7 @@
     "vtk file" : false,
     "save_energies" : 3,
     "take_photo" : 5,
-    "verbose" : false
+    "verbose" : true
     },
     
 "mesh" :

@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <numeric>
 
-void Fem::femutil(Settings &settings)
+void Fem::femutil(Settings const& settings)
 {
 const long nb_nod = node.size();
     
@@ -58,8 +58,7 @@ surf = std::accumulate(fac.begin(),fac.end(),0.0,[](double x,Facette::Fac &fa){r
 //on construit un set de facettes avec l'ordre less_than
 std::set<Facette::Fac, Facette::less_than> sf;
 
-std::for_each(tet.begin(),tet.end(),
-[&sf](Tetra::Tet const& te)
+std::for_each(tet.begin(),tet.end(),[&sf](Tetra::Tet const& te)
 	{
 	int ia=te.ind[0];int ib=te.ind[1];int ic=te.ind[2];int id=te.ind[3];
 	sf.insert( Facette::Fac(te.reg,te.idxPrm,ia,ic,ib) );
@@ -68,8 +67,7 @@ std::for_each(tet.begin(),tet.end(),
     sf.insert( Facette::Fac(te.reg,te.idxPrm,ia,ib,id) ); 
 	});//fin for_each
 
-std::for_each(fac.begin(),fac.end(),
-[this,&settings,&sf,nb_nod](Facette::Fac &fa)
+std::for_each(fac.begin(),fac.end(),[this,&settings,&sf,nb_nod](Facette::Fac &fa)
     {
     fa.Ms = 0.;
     double Js = settings.paramFacette[fa.idxPrm].Js;
