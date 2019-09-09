@@ -155,7 +155,7 @@ void demag(Fem &fem,Settings &settings, OctreeClass *tree, KernelClass *kernels,
 {
 FmmClass algo(tree, kernels);
 
-const int NOD = fem.NOD;
+const int NOD = fem.node.size();
 const int FAC = fem.fac.size();
 const int TET = fem.tet.size();
 const int SRC = FAC * Facette::NPI + TET * Tetra::NPI;

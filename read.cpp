@@ -4,7 +4,7 @@
 
 using namespace std;
 
-void Fem::readMesh(Settings &mySets)
+void Fem::readMesh(Settings const& mySets)
 {
 int ELEM, tags, reg, TYP;
 string trash, symb;
@@ -29,11 +29,13 @@ if (msh.fail())
     SYSTEM_ERROR;
     }
 
-    double scale = mySets.getScale();
-    
+double scale = mySets.getScale();
+int NOD;    
 msh >> NOD;        // lecture des noeuds
 node.resize(NOD);
-for (int i=0; i<NOD; i++){
+
+for (int i=0; i<NOD; i++)
+    {
     msh >> trash >> node[i].p;
 	node[i].p.rescale(scale);
 	//std::cout <<"scale=" << scale <<";" << trash << ";" << node[i].p << std::endl;
@@ -121,27 +123,28 @@ t = stod(str.substr(idx));
 
 if(VERBOSE) { cout << ".sol file: " << str << " @ time t = " << t << endl; }
 
-for (int i=0; i<NOD; i++){
-    Nodes::Node &n = node[i];
+const int NOD = node.size();
+
+for (int i=0; i<NOD; i++)
+    {
+    Nodes::Node & n = node[i];
     Nodes::Node node_;
     int i_;
     fin >> i_ >>  node_.p >> n.u >> n.phi;// carefull! >> is overloaded for class pt3D
 
-    node_.p.rescale(scaling);
-    //node_.p *= scaling;
-
-    if (( Pt::norme2(n.p - node_.p) > sq(diam * 1e-9))&&VERBOSE) 
-	{
-    cerr << "WARNING difference in node positions"<< endl;
-    cerr << i  << "\t" << n.p << endl << i_ << "\t" << node_.p << endl;
-    }
-    
-    if (i!=i_){
+    if (i!=i_)
+        {
         if(VERBOSE) { cerr << ".sol file mismatch with mesh nodes"<< endl; }
+        fin.close();
         SYSTEM_ERROR;
         }
+    else
+        {
+        node_.p.rescale(scaling);
+        if (( Pt::norme2(n.p - node_.p) > sq(diam * 1e-9))&&VERBOSE) 
+            { cerr << "WARNING difference in node positions"  << i  << "\t" << n.p << endl << i_ << "\t" << node_.p << endl; }
+        }
     }
-
 fin.close();    			     
 }
 

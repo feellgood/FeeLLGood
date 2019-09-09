@@ -40,7 +40,7 @@ const bool V = false;/**< used as a template parameter */
 container to grab altogether all parameters of a simulation, including mesh geometry, containers for the mesh
 */
 struct Fem{
-	int NOD;/**< number of nodes in vector container */
+	//int NOD;/**< number of nodes in vector container */
 	Pt::pt3D c;/**< center position */	
 	Pt::pt3D l;/**< lengths along x,y,z axis */	
 	
@@ -60,12 +60,12 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
 	double E[4]; /**< table to store energy values at time t <br>
 index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
 
-	double DW_vz0;/**< initial speed of the domain wall (to check) */
+	double DW_vz0;/**< initial speed of the domain wall */
 	double DW_vz;/**< speed of the domain wall along z */
-	double DW_dir;/**< direction of the domain wall (to check) */
+	double DW_dir;/**< direction of the domain wall */
 	double DW_z; /**< domain wall displacement along Oz */
 	
-	double Etot0;/**< initial total energy (to check) */
+	double Etot0;/**< initial total energy */
 	double Etot;/**< total energy */
 	double evol;/**< increment dE for dt */
 	
@@ -82,7 +82,7 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
 /**
 print some informations of fem container
 */
-inline void infos(void)
+inline void infos(void) const
 {
 std::cout << "This is feeLLGood SHA1= " + std::string(SHAnumber) << std::endl;
 std::cout << "diam bounding box ="<< diam << std::endl;
@@ -139,7 +139,7 @@ void readSol(bool VERBOSE/**< [in] */,
              std::string fileName /**< [in] */ );
 
 /** reading mesh file function */
-void readMesh(Settings &mySets);
+void readMesh(Settings const& mySets);
 
 /**  utilitary function to initialize pts,kdtree,l,c,diam, computes the surfaces and volumes and reorientation of the tetrahedrons if needed in fem struct; definition of Ms on facette elements <br>
 Indices and orientation convention : 

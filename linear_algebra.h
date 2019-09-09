@@ -35,10 +35,10 @@ class LinAlgebra
 {
 public:
 	/** constructor */	
-    inline LinAlgebra(Settings & s /**< [in] */,const int _NOD /**< [in] */,
+    inline LinAlgebra(Settings & s /**< [in] */,
                       std::vector<Nodes::Node> & myNode /**< [in] */,
                       std::vector <Tetra::Tet> const& myTet /**< [in] */,
-                      std::vector <Facette::Fac> & myFace /**< [in] */) :  NbTH(s.solverNbTh),NOD(_NOD),refNode(&myNode),refFac(&myFace)
+                      std::vector <Facette::Fac> & myFace /**< [in] */) :  NbTH(s.solverNbTh),NOD(myNode.size()),refNode(&myNode),refFac(&myFace)
     {
     settings = s;
     my_lock = new std::mutex;

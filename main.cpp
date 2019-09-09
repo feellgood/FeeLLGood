@@ -74,7 +74,7 @@ fem.t=0.;
 fem.infos();
 
 //once fem containers are ok, linAlgebra object is built
-LinAlgebra linAlg(mySettings,fem.NOD,fem.node,fem.tet,fem.fac);
+LinAlgebra linAlg(mySettings,fem.node,fem.tet,fem.fac);
 
 fmm::init< CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings.verbose, mySettings.scalfmmNbTh, tree, kernels);
 

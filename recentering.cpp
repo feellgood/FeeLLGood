@@ -94,6 +94,7 @@ if (u2L*u2R>0)
 assert(u2L*u2R<0);
 double D_i= m_i*0.5*l(idx_dir)*u2L;  // decalage avec signe OK
 
+const int NOD = node.size();
 for (int i=0; i<NOD; i++){    
     Nodes::Node &tgt_node = node[i];
     pt3D p = tgt_node.p + D_i*p_dir;

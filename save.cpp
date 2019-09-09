@@ -43,6 +43,7 @@ if ((nt%n2)==0)
 void Fem::savecfg_vtk(Settings const& settings,const string fileName) const
 {
     const int TET = tet.size();
+    const int NOD = node.size();
     
 if(settings.verbose) { cout <<"\n -------------------\n " << fileName << endl; }
 

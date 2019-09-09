@@ -125,9 +125,9 @@ class Settings{
 	std::vector<Tetra::prm> paramTetra;
 
 	/** \return index of the region in volume region container  */
-	inline int findTetraRegionIdx(int r /**< [in] */) 
+	inline int findTetraRegionIdx(const int r /**< [in] */) const
 	{ 
-	std::vector<Tetra::prm>::iterator result = std::find_if(paramTetra.begin(),paramTetra.end(),[r](Tetra::prm const& p){return(p.reg == r); }  ); 
+	std::vector<Tetra::prm>::const_iterator result = std::find_if(paramTetra.begin(),paramTetra.end(),[r](Tetra::prm const& p){return(p.reg == r); }  ); 
 	if (result == paramTetra.end()) return -1;
 	else {return std::distance(paramTetra.begin(),result);}	
 	};
@@ -139,9 +139,9 @@ class Settings{
 	std::string r_path_output_dir;
 	
 	/** \return index of the region in surface region container  */
-	inline int findFacetteRegionIdx(int r /**< [in] */) 
+	inline int findFacetteRegionIdx(const int r /**< [in] */) const
 	{ 
-	std::vector<Facette::prm>::iterator result = std::find_if(paramFacette.begin(),paramFacette.end(),[r](Facette::prm const& p){return(p.reg == r); }  ); 
+	std::vector<Facette::prm>::const_iterator result = std::find_if(paramFacette.begin(),paramFacette.end(),[r](Facette::prm const& p){return(p.reg == r); }  ); 
 	if (result == paramFacette.end()) return -1;
 	else {return std::distance(paramFacette.begin(),result);}	
 	};
