@@ -35,12 +35,31 @@ It does also contains the definition of many constants for the solver, and for s
 const bool U = true;/**< used as a template parameter */
 const bool V = false;/**< used as a template parameter */
 
-
-/** \struct Fem
-container to grab altogether all parameters of a simulation, including mesh geometry, containers for the mesh
+/** \class Fem
+class container to grab altogether all parameters of a simulation, including mesh geometry, containers for the mesh
 */
-struct Fem{
-	//int NOD;/**< number of nodes in vector container */
+class Fem
+    {
+    public:
+        /** constructor */
+        inline Fem(Settings & mySets) //mySets cannot be passed const because of getValue method in init_distrib, to set x,y,z values
+            {
+            readMesh(mySets);
+            femutil(mySets);
+            chapeaux(mySets.EPSILON);
+            
+            if (mySets.restore)
+                { readSol(mySets.verbose,mySets.getScale(), mySets.restoreFileName); }
+            else
+                {
+                std::cout<< "initial magnetization(x,y,z,t=0) :\nMx =" << mySets.sMx << "\nMy =" << mySets.sMy << "\nMz =" << mySets.sMz << std::endl; 
+                init_distrib(mySets);
+                }    
+            direction(mySets.verbose,Pt::IDX_Z);/* determination de la direction de propagation de la paroi */
+            t=0.;
+                
+            }
+        
 	Pt::pt3D c;/**< center position */	
 	Pt::pt3D l;/**< lengths along x,y,z axis */	
 	
@@ -75,41 +94,83 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
     
     triple Hext;/**< external applied field direction (should be normalized) */
     
+    /**
+    print some informations of fem container
+    */
+    void infos(void) const;
+    
+    /** computes energies stored in E table */
+    void energy(Settings const& settings /**< [in] */);
+    
+    /**
+    time evolution : one step in time
+    */
+    inline void evolution(void)
+        {
+        std::for_each(node.begin(), node.end(), [](Nodes::Node &n){ n.evolution();} );
+        for (int e=0; e<4; e++) { E0[e] = E[e]; }
+        Etot0 = Etot;
+        }
+        
+    /**
+    reset the nodes struct to restart another step time simulation
+    Undo the action of one or many "vsolve" runs in case of failure.
+    Demagnetizing field and energies don't need to be reset, because they won't be updated if failure is detected.
+    I don't know how to cleanly reset "fem.DW_vz". BC
+    */
+    inline void reset(void) { std::for_each(node.begin(),node.end(),[](Nodes::Node &n) {n.reset();}); }    
+    
+    /** saving function for a solution */
+    void saver(Settings const& settings /**< [in] */, std::ofstream &fout /**< [out] */, const int nt /**< [in] */) const;
+
+    /** text file (vtk) writing function for a solution */
+    void savecfg_vtk(Settings const& settings /**< [in] */,const std::string fileName /**< [in] */) const;
+
+    /** text file (tsv) writing function for a solution */
+    void savesol(const std::string fileName /**< [in] */,const double s /**< [in] */) const;
+
+    /** save the field values */
+    void saveH(const std::string fileName /**< [in] */,const double scale /**< [in] */) const;
+    
+    /** 
+    average component of either u or v through getter on the whole set of tetetrahedron
+    */
+    double avg(std::function<double (Nodes::Node,Pt::index)> getter /**< [in] */,Pt::index d /**< [in] */) const
+    {// syntaxe pénible avec opérateur binaire dans la lambda pour avoir un += sur la fonction voulue, with C++17 we should use reduce instead of accumulate here
+    double sum = std::accumulate(tet.begin(),tet.end(),0.0, [&getter,&d](double &s,Tetra::Tet const& te)
+                            {
+                            double val[Tetra::NPI]; 
+                            te.interpolation(getter,d,val); 
+                            return (s + te.weightedScalarProd(val));    
+                            } );
+
+    return sum/vol;
+    }
+    
+    /** recentering algorithm for the study of the motion of a micromagnetic object (domain wall). 
+ 
+    if \f$ D_i>0 \f$				        if  \f$ D_i<0 \f$
+
+    <----------------|------->		------->|<----------------	\f$ m_i = < u_i > < 0 \f$
+
+    or					or
+
+    ---------------->|<-------		<-------|---------------->	\f$ m_i = <u_i> > 0 \f$
+    */
+    bool recentrage(double thres/**< [in] threshold parameter */,enum Pt::index idx_dir /**< [in] */);
+
+    
+    
+    private:
     ANNkd_tree* kdtree;/**< ANN kdtree to find efficiently the closest set of nodes to a physical point in the mesh  */
     ANNpointArray pts;/**< container for the building of the kdtree (handled by ANN library) */
     
 
-/**
-print some informations of fem container
-*/
-inline void infos(void) const
-{
-std::cout << "This is feeLLGood SHA1= " + std::string(SHAnumber) << std::endl;
-std::cout << "diam bounding box ="<< diam << std::endl;
-std::cout << "\t nodes\t\t\t" << node.size() << std::endl;
-std::cout << "\t faces\t\t\t" << fac.size() << std::endl;
-std::cout << "\t tetraedrons\t\t" << tet.size() << std::endl;
-std::cout << "\t Total surface\t\t"  << surf << std::endl;
-std::cout << "\t Total volume\t\t\t" << vol << std::endl;
-}
 
-/**
-reset the nodes struct to restart another step time simulation
-Undo the action of one or many "vsolve" runs in case of failure.
-Demagnetizing field and energies don't need to be reset, because they won't be updated if failure is detected.
-I don't know how to cleanly reset "fem.DW_vz". BC
-*/
-inline void reset(void) { std::for_each(node.begin(),node.end(),[](Nodes::Node &n) {n.reset();}); }
 
-/**
-time evolution : one step in time
-*/
-inline void evolution(void)
-{
-std::for_each(node.begin(), node.end(), [](Nodes::Node &n){ n.evolution();} );
-for (int e=0; e<4; e++) { E0[e] = E[e]; }
-Etot0 = Etot;
-}
+
+
+
 
 /**
 computes the hat functions for all containers
@@ -123,11 +184,12 @@ std::for_each(tet.begin(),tet.end(),[epsilon](Tetra::Tet &t) { t.init(epsilon); 
 /**
 computes an analytical initial magnetization distribution as a starting point for the simulation
 */
-inline void init_distrib(Settings &mySets /**< [in] */)
-	{ std::for_each( node.begin(),node.end(), [this,&mySets](Nodes::Node &n) 
+inline void init_distrib(Settings & mySets /**< [in] */)
+	{ std::for_each( node.begin(),node.end(), [this,&mySets](Nodes::Node & n) 
         {
         Pt::pt3D pNorm = Pt::pt3D( (n.p.x() - c.x())/l.x() , (n.p.y() - c.y())/l.y() , (n.p.z() - c.z())/l.z() );
-        n.u = mySets.getValue(pNorm);
+        n.u0 = mySets.getValue(pNorm);// u or u0?
+        n.u = n.u0;
         n.phi  = 0.;} 
     ); }
 
@@ -170,47 +232,12 @@ void femutil(Settings const& settings /**< [in] */);
 void direction(bool VERBOSE /**< [in] VERBOSE mode */,
                enum Pt::index idx_dir /**< [in] */);
 
-/** computes energies stored in E table */
-void energy(Settings const& settings /**< [in] */);
-
-/** recentering algorithm for the study of the motion of a micromagnetic object (domain wall). 
- 
-if \f$ D_i>0 \f$				        if  \f$ D_i<0 \f$
-
-<----------------|------->		------->|<----------------	\f$ m_i = < u_i > < 0 \f$
-
-or					or
-
----------------->|<-------		<-------|---------------->	\f$ m_i = <u_i> > 0 \f$
-*/
-bool recentrage(double thres/**< [in] threshold parameter */,enum Pt::index idx_dir /**< [in] */);
-
-/** saving function for a solution */
-void saver(Settings const& settings /**< [in] */, std::ofstream &fout /**< [out] */, const int nt /**< [in] */) const;
-
-/** text file (vtk) writing function for a solution */
-void savecfg_vtk(Settings const& settings /**< [in] */,const std::string fileName /**< [in] */) const;
-
-/** text file (tsv) writing function for a solution */
-void savesol(const std::string fileName /**< [in] */,const double s /**< [in] */) const;
-
-/** save the field values */
-void saveH(const std::string fileName /**< [in] */,const double scale /**< [in] */) const;
-
-/** 
-average component of either u or v through getter on the whole set of tetetrahedron
-*/
-double avg(std::function<double (Nodes::Node,Pt::index)> getter /**< [in] */,Pt::index d /**< [in] */) const
-{// syntaxe pénible avec opérateur binaire dans la lambda pour avoir un += sur la fonction voulue, with C++17 we should use reduce instead of accumulate here
-double sum = std::accumulate(tet.begin(),tet.end(),0.0, [&getter,&d](double &s,Tetra::Tet const& te)
-                            {
-                            double val[Tetra::NPI]; 
-                            te.interpolation(getter,d,val); 
-                            return (s + te.weightedScalarProd(val));    
-                            } );
-
-return sum/vol;
-}
 
 
-}; // end struct fem definition
+
+
+
+
+
+
+}; // end class fem definition

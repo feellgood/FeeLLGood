@@ -159,7 +159,9 @@ class Settings{
         parser.compile(sMz,expr_Mz);
         };
     
-    /** evaluation of the magnetization components through math expression, each component of the magnetization is a function of (x,y,z). */
+    /** evaluation of the magnetization components through math expression, each component of the magnetization is a function of (x,y,z). 
+     \return unit vector
+     */
     inline Pt::pt3D getValue(const Pt::pt3D &p)
         {
         x= p.x();

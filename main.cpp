@@ -34,7 +34,7 @@ if(mySettings.verbose) { std::cout << "Done  " << "(@Algorithm = " << counter.el
 int main(int argc,char* argv[])
 {
 Settings mySettings;
-Fem fem;
+
 FTic counter;
 OctreeClass *tree    = nullptr;
 KernelClass *kernels = nullptr; 
@@ -56,20 +56,10 @@ prompt();
 mySettings.read(fileJson);
 mySettings.infos();
 
-fem.readMesh(mySettings);
+Fem fem = Fem(mySettings);
+
 counter.tic();
-fem.femutil(mySettings);
-fem.chapeaux(mySettings.EPSILON);
 
-if (mySettings.restore)
-    { fem.readSol(mySettings.verbose,mySettings.getScale(), mySettings.restoreFileName); }
-else
-    {
-    std::cout<< "initial magnetization(x,y,z,t=0) :\nMx =" << mySettings.sMx << "\nMy =" << mySettings.sMy << "\nMz =" << mySettings.sMz <<endl; 
-    fem.init_distrib(mySettings);
-    }
-
-fem.direction(mySettings.verbose,Pt::IDX_Z);/* determination de la direction de propagation de la paroi */
 fem.t=0.;
 fem.infos();
 
