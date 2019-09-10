@@ -60,23 +60,17 @@ Fem fem = Fem(mySettings);
 
 counter.tic();
 
-fem.t=0.;
 fem.infos();
 
 //once fem containers are ok, linAlgebra object is built
 LinAlgebra linAlg(mySettings,fem.node,fem.tet,fem.fac);
+linAlg.set_Hext(fem.Hext[0],fem.Hext[1],fem.Hext[2]);
 
 fmm::init< CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings.verbose, mySettings.scalfmmNbTh, tree, kernels);
 
 cout << "init scalfmm done.\n" << endl;
 
 double dt0= mySettings.dt;
-
-fem.Hext[0] = nu0*mySettings.Bext[0];
-fem.Hext[1] = nu0*mySettings.Bext[1];
-fem.Hext[2] = nu0*mySettings.Bext[2]; 
-
-cout << "Bext : " << mySettings.Bext[0] << "\t" << mySettings.Bext[1] << "\t" << mySettings.Bext[2] << endl;
 
 string baseName = mySettings.r_path_output_dir + mySettings.getSimName();
 string str = baseName + ".evol";
@@ -93,9 +87,7 @@ fem.evolution();
 int flag  = 0;
 double dt = dt0;
 double t= fem.t;
-fem.vmax  = 0.0;
-fem.DW_vz = fem.DW_vz0 = 0.0;
-fem.DW_z  = 0.0;
+
 int nt = 0;
 
 fem.saver(mySettings,fout,nt);
@@ -111,7 +103,7 @@ while (t < mySettings.tf)
     /* changement de referentiel */
     fem.DW_vz += fem.DW_dir*fem.avg(Nodes::get_v_comp,Pt::IDX_Z)*fem.l.z()/2.;
     
-    linAlg.set_Hext(fem.Hext[0],fem.Hext[1],fem.Hext[2]);
+    
     linAlg.set_DW_vz(fem.DW_vz);
     linAlg.set_dt(dt);
     int err = linAlg.solver(nt);  
@@ -159,13 +151,9 @@ if (dt < mySettings.DTMIN)
 fem.saver(mySettings,fout,nt);
         
 counter.tac();
-cout << "\n  * iterations: " << nt << "\n  * total computing time: " << counter.elapsed() << " s\n" << endl;
+cout << "\n  * iterations: " << nt << "\n  * total computing time: " << counter.elapsed() << " s\n--- the end ---\n" << endl;
 fout.close();
-//      initialisation du temps pour l'iteration en champ suivante
-fem.t=0.;
-mySettings.dt=dt0;
     
-cout << "--- the end ---" << endl;
 delete tree;
 delete kernels;
 

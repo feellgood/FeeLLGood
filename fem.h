@@ -57,7 +57,14 @@ class Fem
                 }    
             direction(mySets.verbose,Pt::IDX_Z);/* determination de la direction de propagation de la paroi */
             t=0.;
-                
+            
+            Hext[0] = nu0*mySets.Bext[0];
+            Hext[1] = nu0*mySets.Bext[1];
+            Hext[2] = nu0*mySets.Bext[2]; 
+            
+            vmax  = 0.0;
+            DW_vz = DW_vz0 = 0.0;
+            DW_z  = 0.0;
             }
         
 	Pt::pt3D c;/**< center position */	
@@ -165,13 +172,6 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
     ANNkd_tree* kdtree;/**< ANN kdtree to find efficiently the closest set of nodes to a physical point in the mesh  */
     ANNpointArray pts;/**< container for the building of the kdtree (handled by ANN library) */
     
-
-
-
-
-
-
-
 /**
 computes the hat functions for all containers
 */
@@ -229,15 +229,5 @@ Indices and orientation convention :
 void femutil(Settings const& settings /**< [in] */);
 
 /** find direction of motion of DW */
-void direction(bool VERBOSE /**< [in] VERBOSE mode */,
-               enum Pt::index idx_dir /**< [in] */);
-
-
-
-
-
-
-
-
-
-}; // end class fem definition
+void direction(bool VERBOSE /**< [in] VERBOSE mode */, enum Pt::index idx_dir /**< [in] */);
+}; // end class

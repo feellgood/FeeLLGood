@@ -314,8 +314,8 @@ if (Hv) {
    }
 else {
 	s1 = Pt::pScal(node1.u,n);
-	s2 = Pt::pScal(node1.u,n);
-	s3 = Pt::pScal(node1.u,n);
+	s2 = Pt::pScal(node2.u,n);
+	s3 = Pt::pScal(node3.u,n);
    }
 
  double l = s1;
@@ -340,5 +340,5 @@ else {
 
  return Ms*pot;
 }
-}
+}//end namespace fmm
 #endif
