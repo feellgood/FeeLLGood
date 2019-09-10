@@ -24,33 +24,49 @@ this header is the interface to scalfmm. Its purpose is to prepare an octree for
 
 #include "fem.h"
 
-/** constant parameter for some scalfmm templates */
-static const int P = 9;
+
 
 /** double redefinition for the parametrization of some scalfmm templates */
 #define FReal double
 
-// pb avec ces templates : ils prennent un argument de plus en 1.5.0 et 1.4.148 //ct
-//typedef FTypedRotationCell<P>            CellClass; ct
-typedef FTypedRotationCell<FReal, P>            CellClass; /**< convenient typedef for the definition of cell type in scalfmm  */
 
-//typedef FP2PParticleContainerIndexed<>         ContainerClass; //ct
-typedef FP2PParticleContainerIndexed<FReal>         ContainerClass; /**< convenient typedef for the definition of container for scalfmm */
-
-typedef FTypedLeaf<FReal, ContainerClass >                      LeafClass;/**< convenient typedef for the definition of leaf for scalfmm  */
-
-typedef FOctree< FReal, CellClass, ContainerClass , LeafClass >  OctreeClass;/**< convenient typedef for the definition of the octree for scalfmm */
-
-typedef FRotationKernel< FReal, CellClass, ContainerClass, P >          KernelClass;/**< convenient typedef for the kernel for scalfmm */
-
-typedef FFmmAlgorithmThreadTsm<OctreeClass, CellClass, ContainerClass, KernelClass, LeafClass > FmmClass;/**< convenient typedef for handling altogether the differents scalfmm object templates used in feellgood  */
 
 /**
-\namespace fmm to grab altogether the templates and functions using scalfmm for the computation of the demag field 
+\namespace scal_fmm to grab altogether the templates and functions using scalfmm for the computation of the demag field 
 */
 
-namespace fmm{
+namespace scal_fmm{
+    
+    /** constant parameter for some scalfmm templates */
+    const int P = 9;
+    
+    // pb avec ces templates : ils prennent un argument de plus en 1.5.0 et 1.4.148 //ct
+    typedef FTypedRotationCell<FReal, P>            CellClass; /**< convenient typedef for the definition of cell type in scalfmm  */
 
+    typedef FP2PParticleContainerIndexed<FReal>         ContainerClass; /**< convenient typedef for the definition of container for scalfmm */
+
+    typedef FTypedLeaf<FReal, ContainerClass >                      LeafClass;/**< convenient typedef for the definition of leaf for scalfmm  */    
+
+    typedef FOctree< FReal, CellClass, ContainerClass , LeafClass >  OctreeClass;/**< convenient typedef for the definition of the octree for scalfmm */
+
+    typedef FRotationKernel< FReal, CellClass, ContainerClass, P >          KernelClass;/**< convenient typedef for the kernel for scalfmm */
+
+    typedef FFmmAlgorithmThreadTsm<OctreeClass, CellClass, ContainerClass, KernelClass, LeafClass > FmmClass;/**< convenient typedef for handling altogether the differents scalfmm object templates used in feellgood  */
+    
+    const int NbLevels = 8; 
+    const int SizeSubLevels = 6;
+    const double boxWidth=2.01;//2.01 ct
+    const FPoint<FReal> centerOfBox(0., 0., 0.);// manque le typename du template FPoint *ct*
+
+class fmm 
+    {
+    public:
+        inline fmm() {}
+        
+    private:
+        
+    };
+    
 /**
 initialization function for the building of an octree and a kernel passed to scalfmm to compute the demag field
 */
@@ -58,15 +74,10 @@ template <class CellClass, class ContainerClass, class LeafClass, class OctreeCl
 int init(Fem &fem,bool VERBOSE,const int ScalfmmNbThreads, OctreeClass* &tree, KernelClass* &kernels, Args... kernelPreArgs)
 {
     FTic counter;
-    const int NbLevels = 8; 
-    const int SizeSubLevels = 6;
     
     omp_set_num_threads(ScalfmmNbThreads);
     if(VERBOSE) { std::cout << "\n>> ScalFMM using " << ScalfmmNbThreads << " threads.\n" << std::endl; }
-
-    const double boxWidth=2.01;//2.01 ct
-    const FPoint<FReal> centerOfBox(0., 0., 0.);// manque le typename du template FPoint *ct*
-
+    
     // -----------------------------------------------------
     tree=new OctreeClass(NbLevels, SizeSubLevels, boxWidth, centerOfBox);
     if (!tree) SYSTEM_ERROR;
@@ -141,12 +152,6 @@ return 0;
 }
 
 /**
-computes correction on potential on facettes using fem struct
-*/
-template <int Hv> double potential(std::vector<Nodes::Node> const& myNode, Facette::Fac const& fac, int i);
-
-
-/**
 template to computes the demag field, first template parameter is either 0 or 1
 */
 template <int Hv, class CellClass, class ContainerClass, class LeafClass, class OctreeClass,
@@ -167,19 +172,20 @@ FReal *corr=(FReal*) new FReal[NOD]; if (!corr) SYSTEM_ERROR;
 memset(corr, 0, NOD*sizeof(FReal));
 
 int nsrc = 0;
+std::function<Pt::pt3D (Nodes::Node)> getter;
+
+if(Hv)
+    { getter = Nodes::get_v; }
+else
+    { getter = Nodes::get_u;}
 
 /*********************** TETRAS *********************/
-std::for_each(fem.tet.begin(),fem.tet.end(),
-[&nsrc,&srcDen,&settings,&fem](Tetra::Tet const& tet)              
+std::for_each(fem.tet.begin(),fem.tet.end(),[getter,&nsrc,&srcDen,&settings](Tetra::Tet const& tet)              
     {
     double Ms = nu0 * settings.paramTetra[tet.idxPrm].J;
    /*---------------- INTERPOLATION ---------------*/
     double dudx[DIM][Tetra::NPI], dudy[DIM][Tetra::NPI], dudz[DIM][Tetra::NPI];
- 
-    if(Hv)
-        {tet.interpolation(Nodes::get_v,dudx,dudy,dudz);}
-    else
-        {tet.interpolation(Nodes::get_u,dudx,dudy,dudz);}
+    tet.interpolation(getter,dudx,dudy,dudz);
     /*-----------------------------------------------*/
 
     for (int j=0; j<Tetra::NPI; j++, nsrc++)
@@ -190,17 +196,13 @@ std::for_each(fem.tet.begin(),fem.tet.end(),
 //      ************************ FACES **************************
 const bool pot_corr = settings.analytic_corr; 
 
-std::for_each(fem.fac.begin(),fem.fac.end(),
-[pot_corr,&nsrc,&srcDen,&corr,&fem](Facette::Fac const& fac)
+std::for_each(fem.fac.begin(),fem.fac.end(),[pot_corr,getter,&nsrc,&srcDen,&corr,&fem](Facette::Fac const& fac)
     {
     double Ms = fac.Ms;
     Pt::pt3D n = fac.n;
     double u[DIM][Facette::NPI];
     
-    if(Hv)
-        {fac.interpolation(Nodes::get_v,u);}
-    else
-        {fac.interpolation(Nodes::get_u,u);}
+    fac.interpolation(getter,u);
     
     for (int j=0; j<Facette::NPI; j++, nsrc++)
         { srcDen[nsrc] = Ms * ( u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z() ) * fac.weight[j]; }
@@ -211,26 +213,25 @@ std::for_each(fem.fac.begin(),fem.fac.end(),
         
         fac.interpolation(Nodes::get_p,gauss);
       // calc corr node by node
-      for (int i=0; i<Facette::N; i++)
-        {
-        int i_ = fac.ind[i];
-	    Pt::pt3D p_i_ = fem.node[i_].p;	      
-		for (int j=0; j<Facette::NPI; j++)
+        for (int i=0; i<Facette::N; i++)
             {
-            Pt::pt3D pg = Pt::pt3D(gauss[Pt::IDX_X][j], gauss[Pt::IDX_Y][j], gauss[Pt::IDX_Z][j]);
-            double rij = Pt::dist(p_i_,pg);
-            double sj = Ms* ( u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z() );
-            corr[i_]-= sj/rij * fac.weight[j];
+            int i_ = fac.ind[i];
+            Pt::pt3D p_i_ = fem.node[i_].p;	      
+            for (int j=0; j<Facette::NPI; j++)
+                {
+                Pt::pt3D pg = Pt::pt3D(gauss[Pt::IDX_X][j], gauss[Pt::IDX_Y][j], gauss[Pt::IDX_Z][j]);
+                double rij = Pt::dist(p_i_,pg);
+                double sj = Ms* ( u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z() );
+                corr[i_]-= sj/rij * fac.weight[j];
+                }
+            corr[i_]+= fac.potential(getter,i);//potential<Hv>(fem.node, fac, i);
             }
-        corr[i_]+= potential<Hv>(fem.node, fac, i);
         }
-      }
-   });// end for_each on fac
+    });// end for_each on fac
 
 fflush(NULL);
 
     { // reset potentials and forces - physicalValues[idxPart] = Q
-
     tree->forEachLeaf([NOD,SRC,&srcDen](LeafClass* leaf)
         {
         const int nbParticlesInLeaf = leaf->getSrc()->getNbParticles();
@@ -251,10 +252,8 @@ fflush(NULL);
 	const int nbParticlesInLeaf = leaf->getTargets()->getNbParticles();
 	memset(potentials, 0, nbParticlesInLeaf*sizeof(FReal));
         });
-
-
+    
     tree->forEachCell([](CellClass* cell){ cell->resetToInitialState(); });
-
     }// end reset
 
 algo.execute();
@@ -281,64 +280,5 @@ delete [] srcDen;
 delete [] corr;
 }
 
-template <int Hv>
-double potential(std::vector<Nodes::Node> const& myNode, Facette::Fac const& fac, int i) // template, mais Hv est utilisé comme un booleen 
-{
-  double Ms = fac.Ms;
-  Pt::pt3D n = fac.n;
-
- int ii  = (i+1)%3;
- int iii = (i+2)%3;
-
- int i_,ii_,iii_;
- i_=fac.ind[i];  ii_=fac.ind[ii];  iii_=fac.ind[iii];
-
-Nodes::Node const& node1 = myNode[i_];
-Nodes::Node const& node2 = myNode[ii_];
-Nodes::Node const& node3 = myNode[iii_];
-
-Pt::pt3D p1p2 = node2.p - node1.p;
-Pt::pt3D p1p3 = node3.p - node1.p;
-
-double b = p1p2.norm();
-double t = Pt::pScal(p1p2,p1p3);
-double h = 2.*fac.surf;
- t/=b;  h/=b;
- double a = t/h;  double c = (t-b)/h;
-
-double s1, s2, s3;
-if (Hv) {
-	s1 = Pt::pScal(node1.v,n);
-	s2 = Pt::pScal(node2.v,n);
-	s3 = Pt::pScal(node3.v,n);
-   }
-else {
-	s1 = Pt::pScal(node1.u,n);
-	s2 = Pt::pScal(node2.u,n);
-	s3 = Pt::pScal(node3.u,n);
-   }
-
- double l = s1;
- double j = (s2-s1)/b;
- double k = t/b/h*(s1-s2) + (s3-s1)/h;
-
- double cc1 = c*c+1;
- double r = sqrt(h*h + (c*h+b)*(c*h+b));
- double ll = log( (cc1*h + c*b + sqrt(cc1)*r) / (b*(c+sqrt(cc1))) );
-
- double pot1, pot2, pot3, pot;
- pot1 = b*b/pow(cc1,1.5)*ll + c*b*r/cc1 + h*r - c*b*b/cc1 - sqrt(a*a+1)*h*h;
- pot1*= j/2.;
-
- pot2 = -c*b*b/pow(cc1,1.5)*ll + b*r/cc1 - h*h/2. + h*h*log(c*h+b+r) - b*b/cc1;
- pot2*= k/2.;
-
- pot3 = h*log(c*h+b+r) - h + b/sqrt(cc1)*ll;
- pot3*= l;
-
- pot = pot1 + pot2 + pot3 + h*(k*h/2.+l)*(1-log(h*(a+sqrt(a*a+1)))) - k*h*h/4.;
-
- return Ms*pot;
-}
-}//end namespace fmm
+}//end namespace
 #endif

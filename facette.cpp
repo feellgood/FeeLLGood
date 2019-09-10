@@ -153,3 +153,53 @@ n = vec/norm;//fa.nx = vec.x()/norm,  fa.ny = vec.y()/norm,  fa.nz = vec.z()/nor
 surf = 0.5*norm;
 }
 
+double Fac::potential(std::function<Pt::pt3D (Nodes::Node)> getter, int i) const
+{
+int ii  = (i+1)%3;
+int iii = (i+2)%3;
+
+int i_,ii_,iii_;
+i_= ind[i];  ii_= ind[ii];  iii_= ind[iii];
+
+Nodes::Node const& node1 = (*refNode)[i_];
+Nodes::Node const& node2 = (*refNode)[ii_];
+Nodes::Node const& node3 = (*refNode)[iii_];
+
+Pt::pt3D p1p2 = node2.p - node1.p;
+Pt::pt3D p1p3 = node3.p - node1.p;
+
+double b = p1p2.norm();
+double t = Pt::pScal(p1p2,p1p3);
+double h = 2.*surf;
+ t/=b;  h/=b;
+ double a = t/h;  double c = (t-b)/h;
+
+double s1 = Pt::pScal(getter(node1),n);
+double s2 = Pt::pScal(getter(node2),n);
+double s3 = Pt::pScal(getter(node3),n);
+
+// formule dégueu à reécrire
+
+double l = s1;
+double j = (s2-s1)/b;
+double k = t/b/h*(s1-s2) + (s3-s1)/h;
+
+double cc1 = c*c+1;
+double r = sqrt(h*h + (c*h+b)*(c*h+b));
+double ll = log( (cc1*h + c*b + sqrt(cc1)*r) / (b*(c+sqrt(cc1))) );
+
+double pot1, pot2, pot3, pot;
+pot1 = b*b/pow(cc1,1.5)*ll + c*b*r/cc1 + h*r - c*b*b/cc1 - sqrt(a*a+1)*h*h;
+pot1*= j/2.;
+
+pot2 = -c*b*b/pow(cc1,1.5)*ll + b*r/cc1 - h*h/2. + h*h*log(c*h+b+r) - b*b/cc1;
+pot2*= k/2.;
+
+pot3 = h*log(c*h+b+r) - h + b/sqrt(cc1)*ll;
+pot3*= l;
+
+pot = pot1 + pot2 + pot3 + h*(k*h/2.+l)*(1-log(h*(a+sqrt(a*a+1)))) - k*h*h/4.;
+
+return Ms*pot;
+}
+

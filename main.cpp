@@ -18,14 +18,14 @@ std::cout <<   "\t └───────────────────�
 std::cout << "\t process\t\t" << getpid() << std::endl;
 }
 
-void calc_demag(Fem &fem,Settings &mySettings,OctreeClass *tree,KernelClass *kernels)
+void calc_demag(Fem &fem,Settings &mySettings,scal_fmm::OctreeClass *tree,scal_fmm::KernelClass *kernels)
 {
 if(mySettings.verbose) { std::cout << "\t magnetostatics ..................... "; }
 FTic counter;
 
 counter.tic();
-fmm::demag<0, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree, kernels); // Hd(u)
-fmm::demag<1, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings, tree, kernels); // Hd(v), second order contribution
+scal_fmm::demag<0, scal_fmm::CellClass, scal_fmm::ContainerClass, scal_fmm::LeafClass, scal_fmm::OctreeClass, scal_fmm::KernelClass, scal_fmm::FmmClass> (fem,mySettings, tree, kernels); // Hd(u)
+scal_fmm::demag<1, scal_fmm::CellClass, scal_fmm::ContainerClass, scal_fmm::LeafClass, scal_fmm::OctreeClass, scal_fmm::KernelClass, scal_fmm::FmmClass> (fem,mySettings, tree, kernels); // Hd(v), second order contribution
 counter.tac();
 if(mySettings.verbose) { std::cout << "Done  " << "(@Algorithm = " << counter.elapsed() << "s)." << std::endl; }
     
@@ -36,8 +36,8 @@ int main(int argc,char* argv[])
 Settings mySettings;
 
 FTic counter;
-OctreeClass *tree    = nullptr;
-KernelClass *kernels = nullptr; 
+scal_fmm::OctreeClass *tree    = nullptr;
+scal_fmm::KernelClass *kernels = nullptr; 
 string fileJson;
 
 if(argc<2)
@@ -66,7 +66,7 @@ fem.infos();
 LinAlgebra linAlg(mySettings,fem.node,fem.tet,fem.fac);
 linAlg.set_Hext(fem.Hext[0],fem.Hext[1],fem.Hext[2]);
 
-fmm::init< CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings.verbose, mySettings.scalfmmNbTh, tree, kernels);
+scal_fmm::init< scal_fmm::CellClass, scal_fmm::ContainerClass, scal_fmm::LeafClass, scal_fmm::OctreeClass, scal_fmm::KernelClass, scal_fmm::FmmClass> (fem,mySettings.verbose, mySettings.scalfmmNbTh, tree, kernels);
 
 cout << "init scalfmm done.\n" << endl;
 

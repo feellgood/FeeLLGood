@@ -175,14 +175,17 @@ class Fac{
         /** pointer to the nodes */
         inline void setRefNode(std::vector<Nodes::Node>  *_p_node /**< [in] */) {refNode = _p_node;}
         
-        
+        /**
+        computes correction on potential
+        */
+        double potential(std::function<Pt::pt3D (Nodes::Node)> getter, int i) const;
         
     private:
         int NOD;/**< number of nodes */
         std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
         gmm::dense_matrix <double> Ksp;/**< matrix initialized by constructor */
         std::vector <double> Lsp;/**< vector initialized by constructor */
-	};
+    };//end class Fac
 
 /*    
 inline bool operator< (const Fac &f1, const Fac &f2)
