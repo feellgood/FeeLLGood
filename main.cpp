@@ -18,26 +18,14 @@ std::cout <<   "\t └───────────────────�
 std::cout << "\t process\t\t" << getpid() << std::endl;
 }
 
-void calc_demag(Fem &fem,Settings &mySettings,scal_fmm::OctreeClass *tree,scal_fmm::KernelClass *kernels)
-{
-if(mySettings.verbose) { std::cout << "\t magnetostatics ..................... "; }
-FTic counter;
 
-counter.tic();
-scal_fmm::demag<0, scal_fmm::CellClass, scal_fmm::ContainerClass, scal_fmm::LeafClass, scal_fmm::OctreeClass, scal_fmm::KernelClass, scal_fmm::FmmClass> (fem,mySettings, tree, kernels); // Hd(u)
-scal_fmm::demag<1, scal_fmm::CellClass, scal_fmm::ContainerClass, scal_fmm::LeafClass, scal_fmm::OctreeClass, scal_fmm::KernelClass, scal_fmm::FmmClass> (fem,mySettings, tree, kernels); // Hd(v), second order contribution
-counter.tac();
-if(mySettings.verbose) { std::cout << "Done  " << "(@Algorithm = " << counter.elapsed() << "s)." << std::endl; }
-    
-}
 
 int main(int argc,char* argv[])
 {
 Settings mySettings;
 
 FTic counter;
-scal_fmm::OctreeClass *tree    = nullptr;
-scal_fmm::KernelClass *kernels = nullptr; 
+ 
 string fileJson;
 
 if(argc<2)
@@ -66,9 +54,10 @@ fem.infos();
 LinAlgebra linAlg(mySettings,fem.node,fem.tet,fem.fac);
 linAlg.set_Hext(fem.Hext[0],fem.Hext[1],fem.Hext[2]);
 
-scal_fmm::init< scal_fmm::CellClass, scal_fmm::ContainerClass, scal_fmm::LeafClass, scal_fmm::OctreeClass, scal_fmm::KernelClass, scal_fmm::FmmClass> (fem,mySettings.verbose, mySettings.scalfmmNbTh, tree, kernels);
+scal_fmm::fmm myFMM = scal_fmm::fmm(fem,mySettings.verbose,mySettings.scalfmmNbTh);
 
-cout << "init scalfmm done.\n" << endl;
+
+if(mySettings.verbose) { std::cout << "\n>> ScalFMM initialized, using " << mySettings.scalfmmNbTh << " threads.\n" << std::endl; }  
 
 double dt0= mySettings.dt;
 
@@ -78,7 +67,7 @@ string str = baseName + ".evol";
 ofstream fout(str);
 if (!fout) { cerr << "cannot open file "<< str << endl; SYSTEM_ERROR; }
 
-calc_demag(fem,mySettings, tree,kernels);
+myFMM.calc_demag(fem,mySettings);
    
 fem.DW_z  = 0.0;
 fem.energy(mySettings); 
@@ -119,7 +108,7 @@ while (t < mySettings.tf)
     if (dumax > mySettings.DUMAX)
         { flag++; dt*= 0.5; mySettings.dt=dt; continue;}
        
-    calc_demag(fem,mySettings, tree, kernels);
+    myFMM.calc_demag(fem,mySettings);
        
     fem.energy(mySettings);
     if (fem.evol > 0.0)
@@ -154,8 +143,5 @@ counter.tac();
 cout << "\n  * iterations: " << nt << "\n  * total computing time: " << counter.elapsed() << " s\n--- the end ---\n" << endl;
 fout.close();
     
-delete tree;
-delete kernels;
-
 return 0;
 }

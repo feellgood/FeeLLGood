@@ -65,6 +65,7 @@ class Fem
             vmax  = 0.0;
             DW_vz = DW_vz0 = 0.0;
             DW_z  = 0.0;
+            fmm_normalizer = 1./(2.*diam);
             }
         
 	Pt::pt3D c;/**< center position */	

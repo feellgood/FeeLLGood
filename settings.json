@@ -65,7 +65,7 @@
 
 "demagnetization field solver" :
     {
-    "nbThreads" : 16,
+    "nbThreads" : 32,
     "analytic corrections" : true
     },
 

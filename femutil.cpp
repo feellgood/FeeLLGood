@@ -7,12 +7,13 @@
 void Fem::infos(void) const
 {
 std::cout << "This is feeLLGood SHA1= " + std::string(SHAnumber) << std::endl;
-std::cout << "diam bounding box ="<< diam << std::endl;
+std::cout << "\t diam bounding box ="<< diam << std::endl;
 std::cout << "\t nodes\t\t\t" << node.size() << std::endl;
 std::cout << "\t faces\t\t\t" << fac.size() << std::endl;
 std::cout << "\t tetraedrons\t\t" << tet.size() << std::endl;
 std::cout << "\t Total surface\t\t"  << surf << std::endl;
 std::cout << "\t Total volume\t\t\t" << vol << std::endl;
+std::cout << "\t fmm_normalizer = " << fmm_normalizer << std::endl;
 }
 
 
