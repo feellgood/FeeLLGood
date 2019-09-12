@@ -2,7 +2,8 @@
 #include <set>
 #include <algorithm>
 #include <numeric>
-
+#include <iostream>
+#include <string>
 
 void Fem::infos(void) const
 {
@@ -117,4 +118,5 @@ std::for_each(fac.begin(),fac.end(),[this,&settings,&sf,nb_nod](Facette::Fac &fa
         }
     }); //end for_each
 }
+
 

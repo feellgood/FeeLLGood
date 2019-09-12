@@ -54,10 +54,8 @@ MESSAGE(STATUS "MAX_NB_THREADS=${MAX_NB_THREADS}")
 
 #===========================================================================
 # Compiler options
-# -msse4.2 -mfpmath=sse
+# -msse4.2 -mfpmath=sse (on X86 -mfpmath=sse is set by default )
 # -mavx
-#-mnative
-
 #===========================================================================
 
 set( CMAKE_CXX_FLAGS "-DNDEBUG -Wall -Wextra -std=c++11 -fopenmp -O3 -ffast-math -march=native" CACHE STRING "C++ compiler flags used during builds." FORCE )
@@ -66,7 +64,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
 
 SET( SOURCES config.h pt3D.h matBlocDiag.h tetra.h tetra.cpp facette.h facette.cpp feellgoodSettings.h node.h
 	linear_algebra.h linear_algebra.cpp main.cpp feellgoodSettings.cpp read.cpp femutil.cpp
-	recentering.cpp energy.cpp save.cpp solver.cpp tiny.h)
+	recentering.cpp energy.cpp save.cpp solver.cpp tiny.h time_integration.cpp)
 
 SET( HEADERS ${ANN_INCLUDE_DIR}/ANN.h ${SCALFMM_INCLUDE_DIR}/Kernels/Rotation/FRotationKernel.hpp ${EXPRTK_INCLUDE_DIR}/exprtk.hpp )
 

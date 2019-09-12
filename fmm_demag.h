@@ -76,12 +76,21 @@ class fmm
             kernels=new KernelClass( NbLevels, boxWidth, centerOfBox);// kernelPreArgs... , NbLevels, boxWidth, centerOfBox);
             if (!kernels) SYSTEM_ERROR;
             
+            srcDen = (FReal*) new FReal[SRC]; if (!srcDen) SYSTEM_ERROR;
+            corr=(FReal*) new FReal[NOD]; if (!corr) SYSTEM_ERROR;
+            
             norm = fem.fmm_normalizer;
             init(fem, VERBOSE);
             if(VERBOSE) { std::cout << "\n>> ScalFMM initialized, using " << ScalfmmNbThreads << " threads.\n" << std::endl; }  
             }
         /** destructor */
-        ~fmm () { delete tree; delete kernels; }
+        ~fmm ()
+            {
+            delete tree;
+            delete kernels; 
+            delete [] srcDen;
+            delete [] corr;    
+            }
         
         /**
         launch the calculation of the demag field with second order corrections
@@ -108,7 +117,10 @@ class fmm
         OctreeClass *tree    = nullptr;/**< tree initialized by init private member */
         KernelClass *kernels = nullptr;/**< kernel initialized by init private member */
         
-        double norm;
+        FReal *srcDen;/**< source buffer */
+        FReal *corr;/**< correction coefficients buffer */
+        
+        double norm;/**< normalization coefficient */
         
         /**
         initialization function for the building of an octree to compute the demag field
@@ -174,10 +186,11 @@ class fmm
         {
         FmmClass algo(tree, kernels);
         
-        FReal *srcDen=(FReal*) new FReal[SRC]; if (!srcDen) SYSTEM_ERROR;
+        //FReal *srcDen=(FReal*) new FReal[SRC]; if (!srcDen) SYSTEM_ERROR;
+        
         memset(srcDen, 0, SRC*sizeof(FReal));
 
-        FReal *corr=(FReal*) new FReal[NOD]; if (!corr) SYSTEM_ERROR;
+        //FReal *corr=(FReal*) new FReal[NOD]; if (!corr) SYSTEM_ERROR;
         memset(corr, 0, NOD*sizeof(FReal));
 
         int nsrc = 0;
@@ -189,7 +202,7 @@ class fmm
             { getter = Nodes::get_u;}
 
 // *********************** TETRAS ********************
-        std::for_each(fem.tet.begin(),fem.tet.end(),[getter,&nsrc,&srcDen,&settings](Tetra::Tet const& tet)              
+        std::for_each(fem.tet.begin(),fem.tet.end(),[this,getter,&nsrc,&settings](Tetra::Tet const& tet)              
             {
             double Ms = nu0 * settings.paramTetra[tet.idxPrm].J;
             /*---------------- INTERPOLATION ---------------*/
@@ -205,7 +218,7 @@ class fmm
 //      ************************ FACES **************************
         const bool pot_corr = settings.analytic_corr; 
 
-        std::for_each(fem.fac.begin(),fem.fac.end(),[pot_corr,getter,&nsrc,&srcDen,&corr,&fem](Facette::Fac const& fac)
+        std::for_each(fem.fac.begin(),fem.fac.end(),[this,&fem,pot_corr,getter,&nsrc](Facette::Fac const& fac)
             {
             double Ms = fac.Ms;
             Pt::pt3D n = fac.n;
@@ -241,7 +254,7 @@ class fmm
         fflush(NULL);
 
         { // reset potentials and forces - physicalValues[idxPart] = Q
-        tree->forEachLeaf([this,&srcDen](LeafClass* leaf)
+        tree->forEachLeaf([this](LeafClass* leaf)
             {
             const int nbParticlesInLeaf = leaf->getSrc()->getNbParticles();
             const FVector<long long>& indexes = leaf->getSrc()->getIndexes(); // pas int mais long long  *ct*
@@ -267,7 +280,7 @@ class fmm
 
         algo.execute();
 
-        tree->forEachLeaf([this,&fem,corr](LeafClass* leaf){
+        tree->forEachLeaf([this,&fem](LeafClass* leaf){
             const FReal*const potentials = leaf->getTargets()->getPotentials();
             const int nbParticlesInLeaf  = leaf->getTargets()->getNbParticles();
             //const FVector<int>& indexes  = leaf->getTargets()->getIndexes(); // *ct*
@@ -284,8 +297,8 @@ class fmm
                 }
             });
 
-        delete [] srcDen;
-        delete [] corr;
+        //delete [] srcDen;
+        //delete [] corr;
         }
     
 };//end class fmm
