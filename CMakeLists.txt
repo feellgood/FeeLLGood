@@ -54,9 +54,13 @@ MESSAGE(STATUS "MAX_NB_THREADS=${MAX_NB_THREADS}")
 
 #===========================================================================
 # Compiler options
+# -msse4.2 -mfpmath=sse
+# -mavx
+#-mnative
+
 #===========================================================================
 
-set( CMAKE_CXX_FLAGS "-DNDEBUG -Wall -Wextra -std=c++11 -fopenmp -O3 -ffast-math -msse4.2 -mfpmath=sse" CACHE STRING "C++ compiler flags used during builds." FORCE )
+set( CMAKE_CXX_FLAGS "-DNDEBUG -Wall -Wextra -std=c++11 -fopenmp -O3 -ffast-math -march=native" CACHE STRING "C++ compiler flags used during builds." FORCE )
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
 
