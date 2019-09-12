@@ -66,15 +66,22 @@ class fmm
     {
     public:
         /** constructor */
-        inline fmm(Fem &fem,bool VERBOSE,const int ScalfmmNbThreads)
+        inline fmm(Fem &fem,bool VERBOSE,const int ScalfmmNbThreads): NOD(fem.node.size()) ,FAC( fem.fac.size()) , TET( fem.tet.size()) , SRC( FAC * Facette::NPI + TET * Tetra::NPI)
             {
             omp_set_num_threads(ScalfmmNbThreads);
-              
-            init< CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem, VERBOSE);
+            
+            tree = new OctreeClass(NbLevels, SizeSubLevels, boxWidth, centerOfBox);
+            if (!tree) SYSTEM_ERROR;
+            
+            kernels=new KernelClass( NbLevels, boxWidth, centerOfBox);// kernelPreArgs... , NbLevels, boxWidth, centerOfBox);
+            if (!kernels) SYSTEM_ERROR;
+            
+            norm = fem.fmm_normalizer;
+            init(fem, VERBOSE);
             if(VERBOSE) { std::cout << "\n>> ScalFMM initialized, using " << ScalfmmNbThreads << " threads.\n" << std::endl; }  
             }
         /** destructor */
-        ~fmm () { std::cout<< "fmm destructor call\n" <<std::endl; delete tree; delete kernels; std::cout<< "tree & kernel deleted\n" <<std::endl; }
+        ~fmm () { delete tree; delete kernels; }
         
         /**
         launch the calculation of the demag field with second order corrections
@@ -85,28 +92,30 @@ class fmm
         FTic counter;
 
         counter.tic();
-        demag<0, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings); // Hd(u)
-        demag<1, CellClass, ContainerClass, LeafClass, OctreeClass, KernelClass, FmmClass> (fem,mySettings); // Hd(v), second order contribution
+        
+        demag<0> (fem,mySettings); // Hd(u)
+        demag<1> (fem,mySettings); // Hd(v), second order contribution
         counter.tac();
         if(mySettings.verbose) { std::cout << "Done  " << "(@Algorithm = " << counter.elapsed() << "s)." << std::endl; }
         }
         
     private:
+        const int NOD;/**< number of nodes */
+        const int FAC;/**< number of facettes */
+        const int TET;/**< number of tetrahedrons */
+        const int SRC;/**< number of charge sources */
+        
         OctreeClass *tree    = nullptr;/**< tree initialized by init private member */
         KernelClass *kernels = nullptr;/**< kernel initialized by init private member */
         
+        double norm;
+        
         /**
-        initialization function for the building of an octree and a kernel to compute the demag field
+        initialization function for the building of an octree to compute the demag field
         */
-        template <class CellClass, class ContainerClass, class LeafClass, class OctreeClass, class KernelClass, class FmmClass, typename... Args>
-        void init(Fem &fem,bool VERBOSE, Args... kernelPreArgs)
+        void init(Fem &fem,bool VERBOSE)
             {
             FTic counter;
-    
-            tree=new OctreeClass(NbLevels, SizeSubLevels, boxWidth, centerOfBox);
-            if (!tree) SYSTEM_ERROR;
-    
-            double norm= fem.fmm_normalizer;
 
             if(VERBOSE)
                 { std::cout << "Creating & Inserting particles ...\tHeight : " << NbLevels << " \t sub-height : " << SizeSubLevels << std::endl; }
@@ -115,7 +124,7 @@ class fmm
             Pt::pt3D c = fem.c;
             FSize idxPart=0;
 
-            std::for_each(fem.node.begin(),fem.node.end(),[this,c,norm,&idxPart](Nodes::Node const& n)
+            std::for_each(fem.node.begin(),fem.node.end(),[this,c,&idxPart](Nodes::Node const& n)
                 {
                 Pt::pt3D pTarget = n.p - c; pTarget *= norm;
                 const FPoint<FReal> particlePosition(pTarget.x(), pTarget.y(), pTarget.z());
@@ -125,7 +134,7 @@ class fmm
   
             if(VERBOSE) { std::cout << "Physical nodes inserted." << std::endl; }
 
-            std::for_each(fem.tet.begin(),fem.tet.end(),[this,&fem,c,norm,&idxPart](Tetra::Tet const& tet)              
+            std::for_each(fem.tet.begin(),fem.tet.end(),[this,c,&idxPart](Tetra::Tet const& tet)              
                 {       // sources de volume
                 double gauss[DIM][Tetra::NPI];
                 tet.interpolation(Nodes::get_p,gauss);
@@ -140,7 +149,7 @@ class fmm
 
             if(VERBOSE) { std::cout << "Volume charges inserted." << std::endl; }
     
-            std::for_each(fem.fac.begin(),fem.fac.end(),[this,&fem,c,norm,&idxPart](Facette::Fac const& fac)
+            std::for_each(fem.fac.begin(),fem.fac.end(),[this,c,&idxPart](Facette::Fac const& fac)
                 {        // sources de surface
                 double gauss[DIM][Facette::NPI];
                 fac.interpolation(Nodes::get_p,gauss);
@@ -154,29 +163,17 @@ class fmm
                 });//end for_each on fac
             counter.tac();
             if(VERBOSE)
-                { std::cout << "Done  " << "(@Creating and Inserting Particles = " << counter.elapsed() << "s).\nCreate kernel ..." << std::endl; }
-            counter.tic();
-
-            kernels=new KernelClass( kernelPreArgs... , NbLevels, boxWidth, centerOfBox);
-            if (!kernels) SYSTEM_ERROR;
-
-            counter.tac();
-            if(VERBOSE) { std::cout << "Done  " << " in " << counter.elapsed() << "s)." << std::endl; }
+                { std::cout << "Done  " << "(@Creating and Inserting Particles = " << counter.elapsed() << "s)." << std::endl; }
             }
         
     /**
-template to computes the demag field, first template parameter is either 0 or 1
-*/
-        template <int Hv, class CellClass, class ContainerClass, class LeafClass, class OctreeClass,class KernelClass, class FmmClass, typename... Args>
-        void demag(Fem &fem,Settings &settings, Args... kernelPreArgs)
+    template to computes the demag field, template parameter is either 0 or 1
+    */
+        template <int Hv>
+        void demag(Fem &fem,Settings &settings)
         {
         FmmClass algo(tree, kernels);
-
-        const int NOD = fem.node.size();
-        const int FAC = fem.fac.size();
-        const int TET = fem.tet.size();
-        const int SRC = FAC * Facette::NPI + TET * Tetra::NPI;
-
+        
         FReal *srcDen=(FReal*) new FReal[SRC]; if (!srcDen) SYSTEM_ERROR;
         memset(srcDen, 0, SRC*sizeof(FReal));
 
@@ -244,7 +241,7 @@ template to computes the demag field, first template parameter is either 0 or 1
         fflush(NULL);
 
         { // reset potentials and forces - physicalValues[idxPart] = Q
-        tree->forEachLeaf([NOD,SRC,&srcDen](LeafClass* leaf)
+        tree->forEachLeaf([this,&srcDen](LeafClass* leaf)
             {
             const int nbParticlesInLeaf = leaf->getSrc()->getNbParticles();
             const FVector<long long>& indexes = leaf->getSrc()->getIndexes(); // pas int mais long long  *ct*
@@ -270,9 +267,7 @@ template to computes the demag field, first template parameter is either 0 or 1
 
         algo.execute();
 
-        double norm = fem.fmm_normalizer;
-
-        tree->forEachLeaf([&fem,norm,corr](LeafClass* leaf){
+        tree->forEachLeaf([this,&fem,corr](LeafClass* leaf){
             const FReal*const potentials = leaf->getTargets()->getPotentials();
             const int nbParticlesInLeaf  = leaf->getTargets()->getNbParticles();
             //const FVector<int>& indexes  = leaf->getTargets()->getIndexes(); // *ct*
@@ -295,9 +290,5 @@ template to computes the demag field, first template parameter is either 0 or 1
     
 };//end class fmm
     
-
-
-
-
 }//end namespace
 #endif

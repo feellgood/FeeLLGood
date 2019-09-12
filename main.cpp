@@ -56,9 +56,6 @@ linAlg.set_Hext(fem.Hext[0],fem.Hext[1],fem.Hext[2]);
 
 scal_fmm::fmm myFMM = scal_fmm::fmm(fem,mySettings.verbose,mySettings.scalfmmNbTh);
 
-
-if(mySettings.verbose) { std::cout << "\n>> ScalFMM initialized, using " << mySettings.scalfmmNbTh << " threads.\n" << std::endl; }  
-
 double dt0= mySettings.dt;
 
 string baseName = mySettings.r_path_output_dir + mySettings.getSimName();

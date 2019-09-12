@@ -9,12 +9,6 @@
 
 #include "gmm/gmm_kernel.h"
 
-typedef gmm::wsvector <double>   write_vector;/**< gmm write vector */
-typedef gmm::rsvector <double>   read_vector; /**< gmm read vector */
-
-typedef gmm::row_matrix	<write_vector>   write_matrix; /**< gmm write sparse matrix */
-typedef gmm::row_matrix	<read_vector>    read_matrix; /**< gmm read sparse matrix */
-
 #include "config.h"
 #include "node.h"
 
