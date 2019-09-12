@@ -38,13 +38,14 @@ public:
     inline LinAlgebra(Settings & s /**< [in] */,
                       std::vector<Nodes::Node> & myNode /**< [in] */,
                       std::vector <Tetra::Tet> const& myTet /**< [in] */,
-                      std::vector <Facette::Fac> & myFace /**< [in] */) :  NbTH(s.solverNbTh),NOD(myNode.size()),refNode(&myNode),refFac(&myFace)
+                      std::vector <Facette::Fac> & myFace /**< [in] */,double _H[DIM] /**< applied field */) :  NbTH(s.solverNbTh),NOD(myNode.size()),refNode(&myNode),refFac(&myFace)
     {
     settings = s;
     my_lock = new std::mutex;
     tab_TH.resize(NbTH+1);
     refTet.resize(NbTH);
     deepCopyTet(myTet);
+    set_Hext(_H[0],_H[1],_H[2]);
     }
     
 	/** pointer to diagonal preconditionner  */
