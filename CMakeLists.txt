@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 2.8)
 #===========================================================================
 
 set(FEELLGOOD_MAJOR_VERSION 0)
-set(FEELLGOOD_MINOR_VERSION 5)
+set(FEELLGOOD_MINOR_VERSION 6)
 set(FEELLGOOD_PATCH_VERSION 0)
 
 ENABLE_LANGUAGE(CXX)
@@ -54,8 +54,7 @@ MESSAGE(STATUS "MAX_NB_THREADS=${MAX_NB_THREADS}")
 
 #===========================================================================
 # Compiler options
-# -msse4.2 -mfpmath=sse (on X86 -mfpmath=sse is set by default )
-# -mavx
+# -msse4.2 -mfpmath=sse (on X86 -mfpmath=sse is set by default ) or -mavx
 #===========================================================================
 
 set( CMAKE_CXX_FLAGS "-DNDEBUG -Wall -Wextra -std=c++11 -fopenmp -O3 -ffast-math -march=native" CACHE STRING "C++ compiler flags used during builds." FORCE )

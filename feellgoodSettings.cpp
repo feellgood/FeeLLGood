@@ -53,6 +53,14 @@ n1 = sub_tree.get<int>("save_energies",0);
 n2 = sub_tree.get<int>("take_photo",0);
 verbose = sub_tree.get<bool>("verbose",true);
 
+try {s_sub_tree = sub_tree.get_child("evol columns");}
+catch(std::exception &e)
+    { std::cout << e.what() << std::endl; }
+
+evol_columns.clear();
+for(boost::property_tree::ptree::value_type &cell :s_sub_tree)
+    { evol_columns.push_back( cell.second.get_value<std::string>() ); }
+    
 try { sub_tree = root.get_child("mesh"); }
     catch (std::exception &e)
         { std::cout << e.what() << std::endl; }

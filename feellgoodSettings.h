@@ -138,6 +138,9 @@ class Settings{
 	/** relative path for output files (to be implemented) */
 	std::string r_path_output_dir;
 	
+    /** contain the value names of the columns the user want in .evol file */
+    std::vector<std::string> evol_columns;
+    
 	/** \return index of the region in surface region container  */
 	inline int findFacetteRegionIdx(const int r /**< [in] */) const
 	{ 

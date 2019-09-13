@@ -16,9 +16,27 @@ if ((nt%n1)==0)
    // fout << boost::format("%8d %+20.10e %+20.10e %+20.10e") % nt % t % dt % dumax;
    // fout << boost::format("%+20.10e %+20.10e %+20.10e") % u_moy(fem,0) % u_moy(fem,1) % u_moy(fem,2);
    // fout << boost::format("%+20.10e %+20.10e %+20.10e %+20.10e %+20.10e %+20.10e %+20.10e")% Ee % Ea % Ed % Ez % Etot % DW_z % DW_vz<< endl;
-    fout << nt <<"\t" << t <<"\t" << settings.dt <<"\t" << vmax*settings.dt <<"\t";
-    fout << avg(Nodes::get_u_comp,Pt::IDX_X) <<"\t" << avg(Nodes::get_u_comp,Pt::IDX_Y) <<"\t" << avg(Nodes::get_u_comp,Pt::IDX_Z) <<"\t";
-    fout << E[0] <<"\t" << E[1] <<"\t" << E[2] <<"\t" << E[3] <<"\t" << Etot <<"\t" << DW_z <<"\t" << DW_vz <<"\t" << endl;
+    
+    for(unsigned int i = 0;i<settings.evol_columns.size();i++)
+        {std::string sep;
+        const std::string & keyVal = settings.evol_columns[i];
+        if(i == settings.evol_columns.size() - 1) {sep = "\n";} else {sep = "\t";}
+    
+        if(keyVal == "iter") { fout << nt << sep;}
+        if(keyVal == "t") { fout << t << sep;}
+        if(keyVal == "dt") { fout << settings.dt << sep;}
+        if(keyVal == "max dm") { fout << vmax*settings.dt << sep;}
+        if(keyVal == "<mx>") { fout << avg(Nodes::get_u_comp,Pt::IDX_X) << sep;}
+        if(keyVal == "<my>") { fout << avg(Nodes::get_u_comp,Pt::IDX_Y) << sep;}
+        if(keyVal == "<mz>") { fout << avg(Nodes::get_u_comp,Pt::IDX_Z) << sep;}
+        if(keyVal == "E_ex") { fout << E[0] << sep;}
+        if(keyVal == "E_aniso") { fout << E[1] << sep;}
+        if(keyVal == "E_demag") { fout << E[2] << sep;}
+        if(keyVal == "E_zeeman") { fout << E[3] << sep;}
+        if(keyVal == "E_tot") { fout << Etot << sep;}
+        if(keyVal == "DW_z") { fout << DW_z << sep;}
+        if(keyVal == "DW_dz") { fout << DW_vz <<  sep;}    
+        }
     }
 
     string baseName = settings.r_path_output_dir + settings.getSimName();
