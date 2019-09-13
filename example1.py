@@ -12,6 +12,6 @@ for Bz in myFields:
 	mySettings["outputs"]["directory"] = myDir
 	os.system("mkdir "+ myDir)
 	mySettings["Bext"] = [0.0,0.0,Bz]	
-	print("Bext is " + str(toto["Bext"]))
+	print("Bext is " + str(mySettings["Bext"]))
 	mySettings.write('mySettings.json')
 	os.system("./feellgood mySettings.json")
