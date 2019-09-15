@@ -2,7 +2,7 @@ PROJECT (FEELLGOOD)
 cmake_minimum_required(VERSION 2.8)
 
 #===========================================================================
-# FEELLGOOD version number.
+# FEELLGOOD version number
 #===========================================================================
 
 set(FEELLGOOD_MAJOR_VERSION 0)
@@ -14,7 +14,7 @@ ENABLE_LANGUAGE(CXX)
 MESSAGE(STATUS "CXX ${CMAKE_CXX_COMPILER_ID}")
 
 #===========================================================================
-# Path
+# include directory path
 #===========================================================================
 
 SET(EXPRTK_INCLUDE_DIR ../exprtk )
