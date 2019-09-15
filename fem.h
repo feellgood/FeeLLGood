@@ -109,14 +109,14 @@ class Fem
 	std::vector <Facette::Fac>  fac; /**< face container */
 	std::vector <Tetra::Tet>  tet; /**< tetrahedron container */
     
-    triple Hext;/**< external applied field direction (should be normalized) */
+    triple Hext;/**< external applied field */
     
     /**
     print some informations of fem container
     */
     void infos(void) const;
     
-    /** computes energies stored in E table */
+    /** computes all the energies */
     void energy(Settings const& settings /**< [in] */);
     
     /**
@@ -239,12 +239,13 @@ Indices and orientation convention :
                         ` w
 
 */
-void femutil(Settings const& settings /**< [in] */);
+        void femutil(Settings const& settings /**< [in] */);
 
-/** find direction of motion of DW */
-void direction(bool VERBOSE /**< [in] VERBOSE mode */, enum Pt::index idx_dir /**< [in] */);
+        /** find direction of motion of DW */
+        void direction(bool VERBOSE /**< [in] VERBOSE mode */, enum Pt::index idx_dir /**< [in] */);
 
-    private:
+
+        /** zeroing of all energies */
         inline void zeroEnergy(void) {
         E_exch = 0.0;
         E_aniso = 0.0;
@@ -253,6 +254,7 @@ void direction(bool VERBOSE /**< [in] VERBOSE mode */, enum Pt::index idx_dir /*
         Etot = 0.0;
         }
 
+        /** computes the sum of all energies */
         inline void calc_Etot(void) { Etot = E_exch + E_aniso + E_demag + E_zeeman; }
 
     }; // end class
