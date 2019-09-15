@@ -29,10 +29,10 @@ if ((nt%n1)==0)
         if(keyVal == "<mx>") { fout << avg(Nodes::get_u_comp,Pt::IDX_X) << sep;}
         if(keyVal == "<my>") { fout << avg(Nodes::get_u_comp,Pt::IDX_Y) << sep;}
         if(keyVal == "<mz>") { fout << avg(Nodes::get_u_comp,Pt::IDX_Z) << sep;}
-        if(keyVal == "E_ex") { fout << E[0] << sep;}
-        if(keyVal == "E_aniso") { fout << E[1] << sep;}
-        if(keyVal == "E_demag") { fout << E[2] << sep;}
-        if(keyVal == "E_zeeman") { fout << E[3] << sep;}
+        if(keyVal == "E_ex") { fout << E_exch << sep;}
+        if(keyVal == "E_aniso") { fout << E_aniso << sep;}
+        if(keyVal == "E_demag") { fout << E_demag << sep;}
+        if(keyVal == "E_zeeman") { fout << E_zeeman << sep;}
         if(keyVal == "E_tot") { fout << Etot << sep;}
         if(keyVal == "DW_z") { fout << DW_z << sep;}
         if(keyVal == "DW_dz") { fout << DW_vz <<  sep;}    

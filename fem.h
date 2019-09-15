@@ -66,6 +66,11 @@ class Fem
             DW_vz = DW_vz0 = 0.0;
             DW_z  = 0.0;
             fmm_normalizer = 1./(2.*diam);
+            E_exch0 = E_exch = 0.0;
+            E_aniso0 = E_aniso = 0.0;
+            E_demag0 = E_demag = 0.0;
+            E_zeeman0 = E_zeeman = 0.0;
+            Etot0 = Etot = 0.0;
             }
         
 	Pt::pt3D c;/**< center position */	
@@ -81,12 +86,16 @@ class Fem
 	
 	double vmax;/**< maximum speed of magnetization */
 
-	double E0[4];/**< table to store initial energy values <br> 
-index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
+	double E_exch0; /**< previous iteration exchange energy  */
+    double E_aniso0; /**< previous iteration anisotropy energy  */
+	double E_demag0; /**< previous iteration demagnetizing energy  */
+    double E_zeeman0; /**< previous iteration zeeman energy  */
 
-	double E[4]; /**< table to store energy values at time t <br>
-index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
-
+	double E_exch; /**< exchange energy */
+    double E_aniso; /**< anisotropy energy  */
+	double E_demag; /**< demagnetizing energy  */
+    double E_zeeman; /**< zeeman energy  */
+    
 	double DW_vz0;/**< initial speed of the domain wall */
 	double DW_vz;/**< speed of the domain wall along z */
 	double DW_dir;/**< direction of the domain wall */
@@ -116,7 +125,10 @@ index convention : 0-exchange 1-anisotropy 2-demagnetizing 3-applied */
     inline void evolution(void)
         {
         std::for_each(node.begin(), node.end(), [](Nodes::Node &n){ n.evolution();} );
-        for (int e=0; e<4; e++) { E0[e] = E[e]; }
+        E_exch0 = E_exch;
+        E_aniso0 = E_aniso;
+        E_demag0 = E_demag;
+        E_zeeman0 = E_zeeman;
         Etot0 = Etot;
         }
         
@@ -231,4 +243,16 @@ void femutil(Settings const& settings /**< [in] */);
 
 /** find direction of motion of DW */
 void direction(bool VERBOSE /**< [in] VERBOSE mode */, enum Pt::index idx_dir /**< [in] */);
-}; // end class
+
+    private:
+        inline void zeroEnergy(void) {
+        E_exch = 0.0;
+        E_aniso = 0.0;
+        E_demag = 0.0;
+        E_zeeman = 0.0;
+        Etot = 0.0;
+        }
+
+        inline void calc_Etot(void) { Etot = E_exch + E_aniso + E_demag + E_zeeman; }
+
+    }; // end class
