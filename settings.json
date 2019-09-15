@@ -12,7 +12,7 @@
     
 "mesh" :
     {
-    "filename" : "cyl_extruded.msh",
+    "filename" : "toto.msh",
     "scaling factor" : 1e-9,
     "epsilon" : 1e-40,
     "volume_regions" :
