@@ -18,6 +18,17 @@ if (!msh)
     SYSTEM_ERROR;
     }
 
+    string mshFormat;
+msh >> symb;
+    if(symb == "$MeshFormat")
+        {
+        msh >> mshFormat;
+        if(mshFormat == "2.2" )
+            std::cout << "mesh file format 2.2" << std::endl;
+        else { std::cout <<"mesh file format not supported : " << mshFormat << std::endl; SYSTEM_ERROR;}
+        }
+        
+    
 while(msh >> symb){
     if (symb == "$Nodes")
         break;
