@@ -213,6 +213,12 @@ void readSol(bool VERBOSE/**< [in] */,
              double scaling /**< [in] scaling factor for physical coordinates */,
              std::string fileName /**< [in] */ );
 
+/** read old mesh format 2.2 */
+void readOldMesh(Settings const& mySets,std::ifstream &msh);
+
+/** read old mesh format 4.1 */
+void readNewMesh(Settings const& mySets,std::ifstream &msh);
+
 /** reading mesh file function */
 void readMesh(Settings const& mySets);
 

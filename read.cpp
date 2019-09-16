@@ -4,30 +4,11 @@
 
 using namespace std;
 
-void Fem::readMesh(Settings const& mySets)
+
+void Fem::readOldMesh(Settings const& mySets,ifstream &msh)
 {
-int ELEM, tags, reg, TYP;
-string trash, symb;
-
-string str = mySets.getPbName();
-ifstream msh(str);   // ouverture du fichier probleme en lecture
-
-if (!msh)
-    {
-    if(mySets.verbose) { cerr << "cannot open file " << str << endl; } 
-    SYSTEM_ERROR;
-    }
-
-    string mshFormat;
-msh >> symb;
-    if(symb == "$MeshFormat")
-        {
-        msh >> mshFormat;
-        if(mshFormat == "2.2" )
-            std::cout << "mesh file format 2.2" << std::endl;
-        else { std::cout <<"mesh file format not supported : " << mshFormat << std::endl; SYSTEM_ERROR;}
-        }
-        
+    int tags, reg, TYP;
+    string symb,trash;
     
 while(msh >> symb){
     if (symb == "$Nodes")
@@ -69,7 +50,7 @@ if (msh.fail())
     SYSTEM_ERROR;
     }
 
-msh >> ELEM;        // lecture des elements
+msh >> trash;        // lecture des elements
 
 while(msh >> symb){
     if (symb == "$EndElements" || (symb=="$End"))
@@ -105,15 +86,37 @@ while(msh >> symb){
 	}
     }
 
-if (msh.fail()){
-#ifdef LIBRARY
-    throw runtime_error("error while reading elements");
-#else
-    cerr << "error while reading elements" << endl;
-    exit(1);
-#endif
+if (msh.fail())
+    {cerr << "error while reading elements" << endl;SYSTEM_ERROR;}
+}
+
+void Fem::readNewMesh(Settings const& mySets,ifstream &msh)
+{
+    std::cout <<"mesh file format 4.1 reading function coming soon."<< std::endl;
+    SYSTEM_ERROR;
+}
+
+void Fem::readMesh(Settings const& mySets)
+{
+string symb;
+ifstream msh( mySets.getPbName() );
+
+if (!msh)
+    {
+    if(mySets.verbose) { cerr << "cannot open file " << mySets.getPbName() << endl; } 
+    SYSTEM_ERROR;
     }
 
+msh >> symb;
+if(symb == "$MeshFormat")
+    {
+    string mshFormat;
+    msh >> mshFormat;
+    if(mshFormat == "2.2" ) { std::cout << "mesh file format 2.2" << std::endl; readOldMesh(mySets,msh); }
+    else if (mshFormat == "4.0") { std::cout <<"mesh file format 4.0 not supported, only 2.2 and 4.1 are feellgood readable."<< std::endl; SYSTEM_ERROR;}
+    else if (mshFormat == "4.1") { std::cout <<"mesh file format 4.1" << std::endl; readNewMesh(mySets,msh); }
+    }
+        
 msh.close();
 }
 
