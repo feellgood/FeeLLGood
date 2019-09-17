@@ -68,13 +68,10 @@ while(msh >> symb){
             break;
 	    }
         case 4:{
-            Tetra::Tet te(NOD);
-            te.reg = reg; 
-			te.idxPrm = mySets.findTetraRegionIdx(reg);
-            msh >> te.ind[0] >> te.ind[1] >> te.ind[2] >> te.ind[3];
-	    for (int i=0; i<4; i++)
-	    	te.ind[i]--;           // passage convention Matlab/msh a C++
-		
+            int i0,i1,i2,i3;
+            msh >> i0 >> i1 >> i2 >> i3;
+            
+            Tetra::Tet te(NOD,reg,mySets.findTetraRegionIdx(reg),i0,i1,i2,i3);
             tet.push_back(te);
             break;
 	    }
@@ -83,8 +80,7 @@ while(msh >> symb){
 	}
     }
 
-if (msh.fail())
-    {cerr << "error while reading elements" << endl;SYSTEM_ERROR;}
+if (msh.fail()) {cerr << "error while reading elements" << endl;SYSTEM_ERROR;}
 }
 
 void Fem::readNewMesh(Settings const& mySets,ifstream &msh)

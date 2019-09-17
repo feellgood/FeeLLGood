@@ -82,7 +82,7 @@ class Fac{
                    const int _idx /**< [in] region index in region vector */,
                    const int i0 /**< [in] node index */,
                    const int i1 /**< [in] node index */,
-                   const int i2 /**< [in] node index */) : idxPrm(_idx),NOD(_NOD),reg(_reg),Ksp(2*N,2*N), Lsp(2*N)  /**< constructor */
+                   const int i2 /**< [in] node index */) : idxPrm(_idx),NOD(_NOD),reg(_reg),Ksp(2*N,2*N), Lsp(2*N)
             {
                 ind[0] = i0; ind[1] = i1; ind[2] = i2;
                 

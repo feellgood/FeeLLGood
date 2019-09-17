@@ -138,7 +138,22 @@ class Tet{
     public:
 		inline Tet(int _NOD): NOD(_NOD), Kp(2*N,2*N), Lp(2*N) 
         { reg = 0; idxPrm=-1; treated = false;} /**< default constructor */
-		int reg;/**< .msh region number */
+		
+		/** constructor for readMesh */
+		inline Tet(const int _NOD /**< [in] total number of nodes */,
+                   const int _reg /**< [in] region number */,
+                   const int _idx /**< [in] region index in region vector */,
+                   const int i0 /**< [in] node index */,
+                   const int i1 /**< [in] node index */,
+                   const int i2 /**< [in] node index */,
+                   const int i3 /**< [in] node index */) : idxPrm(_idx),NOD(_NOD),reg(_reg), Kp(2*N,2*N), Lp(2*N) 
+            {
+            ind[0] = i0; ind[1] = i1; ind[2] = i2; ind[3] = i3;
+            for (int i=0; i<4; i++) ind[i]--;           // convention Matlab/msh -> C++
+            treated = false;
+            } 
+		
+		
 		int idxPrm;/**< index of the material parameters of the tetrahedron */		
 		double vol;/**< volume of the tetrahedron */
 		int ind[N];/**< indices to the nodes */
@@ -151,6 +166,7 @@ class Tet{
         
 		/** initializes weight and dad(x|y|z) */
 		void init(double epsilon);
+        
         
         /** weighted scalar product */
         inline double weightedScalarProd(const double X[NPI]) const
@@ -248,6 +264,9 @@ class Tet{
         /** getter for N */
 		inline int getN(void) {return N;}
 		
+		/** getter for region */
+		inline int getRegion(void) const {return reg;}
+		
         /** \return \f$ |J| \f$ build Jacobian \f$ J \f$ */
         double Jacobian(double J[DIM][DIM]);
         
@@ -259,6 +278,8 @@ class Tet{
         
     private:
         int NOD;/**< total number of nodes, also an offset for filling sparseMatrix */
+        int reg;/**< .msh region number */
+        
         std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
         
         
