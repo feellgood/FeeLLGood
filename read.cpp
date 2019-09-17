@@ -8,12 +8,9 @@ using namespace std;
 void Fem::readOldMesh(Settings const& mySets,ifstream &msh)
 {
     int tags, reg, TYP;
-    string symb,trash;
-    
-while(msh >> symb){
-    if (symb == "$Nodes")
-        break;
-    }
+    string symb = "";
+   
+while (symb != "$Nodes") {msh >> symb;}
 
 if (msh.fail())
     {
@@ -23,14 +20,13 @@ if (msh.fail())
 
 double scale = mySets.getScale();
 int NOD;    
-msh >> NOD;        // lecture des noeuds
+msh >> NOD;
 node.resize(NOD);
 
 for (int i=0; i<NOD; i++)
     {
-    msh >> trash >> node[i].p;
+    msh >> symb >> node[i].p;
 	node[i].p.rescale(scale);
-	//std::cout <<"scale=" << scale <<";" << trash << ";" << node[i].p << std::endl;
 	}
 
 if (msh.fail())
@@ -39,10 +35,7 @@ if (msh.fail())
     SYSTEM_ERROR;
     }
 
-while(msh >> symb){
-    if (symb == "$Elements")
-        break;
-    }
+while (symb != "$Elements") {msh >> symb;}
 
 if (msh.fail())
     {
@@ -50,37 +43,37 @@ if (msh.fail())
     SYSTEM_ERROR;
     }
 
-msh >> trash;        // lecture des elements
+msh >> symb; 
 
-while(msh >> symb){
-    if (symb == "$EndElements" || (symb=="$End"))
-        break;
+while ((symb != "$EndElements")&&(symb != "$End")&& !(msh.fail()) )
+    {
+    msh >> symb; 
     msh >> TYP >> tags >> reg;
     for (int i=1; i<tags; i++)
-        msh >> trash;
+        msh >> symb;
     switch (TYP){
         case 2:{
             int i0,i1,i2;
             msh >> i0 >> i1 >> i2;
             
-            Facette::Fac f( NOD, reg, mySets.findFacetteRegionIdx(reg), i0,i1,i2 );
-            fac.push_back(f);
+            fac.push_back( Facette::Fac(NOD,reg,mySets.findFacetteRegionIdx(reg),i0,i1,i2 ) );
             break;
 	    }
         case 4:{
             int i0,i1,i2,i3;
             msh >> i0 >> i1 >> i2 >> i3;
             
-            Tetra::Tet te(NOD,reg,mySets.findTetraRegionIdx(reg),i0,i1,i2,i3);
-            tet.push_back(te);
+            tet.push_back( Tetra::Tet(NOD,reg,mySets.findTetraRegionIdx(reg),i0,i1,i2,i3) );
             break;
 	    }
         default:
-            getline(msh,trash);
-	}
+            std::cout<< "unknown type in mesh $Elements" <<std::endl;
+        break;
+        }
     }
 
-if (msh.fail()) {cerr << "error while reading elements" << endl;SYSTEM_ERROR;}
+if ((symb != "$EndElements") && msh.fail()) 
+    {cerr << "error while reading elements; symb = " << symb << endl;SYSTEM_ERROR;}
 }
 
 void Fem::readNewMesh(Settings const& mySets,ifstream &msh)
