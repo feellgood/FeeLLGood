@@ -60,13 +60,10 @@ while(msh >> symb){
         msh >> trash;
     switch (TYP){
         case 2:{
-            Facette::Fac f(NOD);
-            f.reg = reg;
-			f.idxPrm = mySets.findFacetteRegionIdx(reg);
-            msh >> f.ind[0] >> f.ind[1] >> f.ind[2];
-	    for (int i=0; i<3; i++)
-	        f.ind[i]--;           // passage convention Matlab/msh a C++
-		
+            int i0,i1,i2;
+            msh >> i0 >> i1 >> i2;
+            
+            Facette::Fac f( NOD, reg, mySets.findFacetteRegionIdx(reg), i0,i1,i2 );
             fac.push_back(f);
             break;
 	    }

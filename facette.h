@@ -76,14 +76,28 @@ class Fac{
 		inline Fac(int _NOD /**< [in] */):NOD(_NOD),Ksp(2*N,2*N), Lsp(2*N)  /**< constructor */
             {reg = 0; treated = false;}
         
+        /** constructor used by readMesh */
+        inline Fac(const int _NOD /**< [in] total number of nodes */,
+                   const int _reg /**< [in] region number */,
+                   const int _idx /**< [in] region index in region vector */,
+                   const int i0 /**< [in] node index */,
+                   const int i1 /**< [in] node index */,
+                   const int i2 /**< [in] node index */) : idxPrm(_idx),NOD(_NOD),reg(_reg),Ksp(2*N,2*N), Lsp(2*N)  /**< constructor */
+            {
+                ind[0] = i0; ind[1] = i1; ind[2] = i2;
+                
+                for (int i=0; i<3; i++) ind[i]--; // to force index to start from 0 (C++) instead of Matlab/msh convention
+                treated = false;
+            }
+        
 		/** constructor from a region number and three indices */		
 		inline Fac(int r,int i0,int i1,int i2) {reg = r; ind[0]=i0;ind[1]=i1;ind[2]=i2;}
 		
 		/** constructor from a region number, idxPrm and three indices */		
 		inline Fac(int r,int idx,int i0,int i1,int i2) {reg = r; idxPrm=idx; ind[0]=i0;ind[1]=i1;ind[2]=i2;}
 		
-		int reg;/**< .msh region number */
-		int idxPrm;/**< index of the material parameters of the facette */		
+		int idxPrm;/**< index of the material parameters of the facette */	
+			
 		double surf; /**< surface of the face */
 		double Ms; /**< magnetization at saturation of the face */    
 		Pt::pt3D n;/**< normal vector to the face */	
@@ -182,6 +196,9 @@ class Fac{
         
     private:
         int NOD;/**< number of nodes */
+        int reg;/**< .msh region number */
+        
+        
         std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
         gmm::dense_matrix <double> Ksp;/**< matrix initialized by constructor */
         std::vector <double> Lsp;/**< vector initialized by constructor */
