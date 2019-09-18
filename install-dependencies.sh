@@ -25,6 +25,7 @@ tar xzf ann_1.1.2.tar.gz
 cd ann_1.1.2/
 make linux-g++
 sudo cp lib/libANN.a /usr/local/lib/
+sudo cp include/ANN/ANN.h /usr/local/include
 cd ..
 
 # Install exprtk.

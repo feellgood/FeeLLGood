@@ -19,15 +19,13 @@ MESSAGE(STATUS "CXX ${CMAKE_CXX_COMPILER_ID}")
 
 SET(EXPRTK_INCLUDE_DIR ../exprtk )
 
-SET(ANN_INCLUDE_DIR ../ann_1.1.2/include/ANN )
-
 SET(GMM_INCLUDE_DIR ../gmm-5.3/include)
 
 SET(SCALFMM_INCLUDE_DIR ../SCALFMM-1.4-148/Src )
 
 SET(SCALFMM_CFG /usr/local/include/Utils )
 
-INCLUDE_DIRECTORIES(${ANN_INCLUDE_DIR} ${GMM_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR} ${SCALFMM_CFG} ${EXPRTK_INCLUDE_DIR} )
+INCLUDE_DIRECTORIES(${GMM_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR} ${SCALFMM_CFG} ${EXPRTK_INCLUDE_DIR} )
 
 #===========================================================================
 # these parameters are used to build a config.h file 
@@ -65,7 +63,7 @@ SET( SOURCES config.h pt3D.h matBlocDiag.h tetra.h tetra.cpp facette.h facette.c
 	linear_algebra.h linear_algebra.cpp main.cpp feellgoodSettings.cpp read.cpp femutil.cpp
 	recentering.cpp energy.cpp save.cpp solver.cpp tiny.h time_integration.cpp)
 
-SET( HEADERS ${ANN_INCLUDE_DIR}/ANN.h ${SCALFMM_INCLUDE_DIR}/Kernels/Rotation/FRotationKernel.hpp ${EXPRTK_INCLUDE_DIR}/exprtk.hpp )
+SET( HEADERS ${SCALFMM_INCLUDE_DIR}/Kernels/Rotation/FRotationKernel.hpp ${EXPRTK_INCLUDE_DIR}/exprtk.hpp )
 
 
 configure_file(config.h.in ./config.h)
