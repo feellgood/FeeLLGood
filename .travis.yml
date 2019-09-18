@@ -1,0 +1,14 @@
+# Automatically test the build as code is pushed to GitHub.
+# This is the configuration file for Travis CI (travis-ci.org).
+
+# Test on Ubuntu 18.04 Bionic.
+os: linux
+dist: bionic
+language: cpp
+compiler: g++
+
+# Install the required dependencies.
+install: ./install-dependencies.sh
+
+# Build script.
+script: cmake . && make
