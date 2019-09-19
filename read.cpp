@@ -78,8 +78,89 @@ if ((symb != "$EndElements") && msh.fail())
 
 void Fem::readNewMesh(Settings const& mySets,ifstream &msh)
 {
-    std::cout <<"mesh file format 4.1 reading function coming soon."<< std::endl;
+string symb = "";
+   
+while (symb != "$Nodes") {msh >> symb;}
+
+if (msh.fail())
+    {
+    if(mySets.verbose) { cerr << "could not find $Nodes" << endl; }
     SYSTEM_ERROR;
+    }
+
+double scale = mySets.getScale();
+
+int NOD,numBloc,idx_begin,idx_end;
+msh >> numBloc >> NOD >> idx_begin >> idx_end;
+
+if (idx_end != NOD) {std::cout << "indexation not supported" << std::endl;SYSTEM_ERROR;}
+node.resize(NOD);
+
+int i=0;
+while (i<NOD)
+    {
+    int j=0;
+    while(j<numBloc)
+        {int TYP,nbNodBloc;
+        
+        msh >> TYP >> symb >> idx_begin >> idx_end;
+        if (TYP == 0)
+            {msh >>symb;msh >> node[i].p; node[i].p.rescale(scale);i++;}
+        else if ((TYP == 1)||(TYP == 2)||(TYP == 3))
+            {nbNodBloc = idx_end;
+            std::cout<< "bloc#"<< j <<std::endl;
+            for(int k=0;k<nbNodBloc;k++) {msh >> symb;std::cout << "symb=" << symb << std::endl;} // reading of the nodes index, we don't care
+            for(int k=0;k<nbNodBloc;k++) {msh >> node[i].p;std::cout << "node=" << node[i].p << std::endl; node[i].p.rescale(scale);i++;} //x,y,z of the nodes
+            }
+        else {std::cout<<"oulala"<<std::endl;SYSTEM_ERROR;}
+        j++;
+        }
+    }
+
+    msh >> symb;
+    std::cout << "symb=" << symb << std::endl;
+    if (symb != "$EndNodes") {std::cout << "error while reading nodes." << std::endl;SYSTEM_ERROR;}
+
+while (symb != "$Elements") {msh >> symb;}
+
+if (msh.fail())
+    {
+    if(mySets.verbose) {cerr << "could not find $Elements" << endl;}
+    SYSTEM_ERROR;
+    }
+    
+    std::cout << "to be continued..." << std::endl;
+    SYSTEM_ERROR;
+int TYP,tags,reg;
+while ((symb != "$EndElements")&&(symb != "$End")&& !(msh.fail()) )
+    {
+    msh >> symb; 
+    msh >> TYP >> tags >> reg;
+    for (int i=1; i<tags; i++)
+        msh >> symb;
+    switch (TYP){
+        case 2:{
+            int i0,i1,i2;
+            msh >> i0 >> i1 >> i2;
+            
+            fac.push_back( Facette::Fac(NOD,reg,mySets.findFacetteRegionIdx(reg),i0,i1,i2 ) );
+            break;
+	    }
+        case 4:{
+            int i0,i1,i2,i3;
+            msh >> i0 >> i1 >> i2 >> i3;
+            
+            tet.push_back( Tetra::Tet(NOD,reg,mySets.findTetraRegionIdx(reg),i0,i1,i2,i3) );
+            break;
+	    }
+        default:
+            std::cout<< "unknown type in mesh $Elements" <<std::endl;
+        break;
+        }
+    }
+
+if ((symb != "$EndElements") && msh.fail()) 
+    {cerr << "error while reading elements; symb = " << symb << endl;SYSTEM_ERROR;}
 }
 
 void Fem::readMesh(Settings const& mySets)
@@ -89,18 +170,19 @@ ifstream msh( mySets.getPbName() );
 
 if (!msh)
     {
-    if(mySets.verbose) { cerr << "cannot open file " << mySets.getPbName() << endl; } 
+    cerr << "cannot open file " << mySets.getPbName() << endl; 
     SYSTEM_ERROR;
-    }
+    } 
 
 msh >> symb;
 if(symb == "$MeshFormat")
     {
-    string mshFormat;
+    string mshFormat = "";
     msh >> mshFormat;
     if(mshFormat == "2.2" ) { std::cout << "mesh file format 2.2" << std::endl; readOldMesh(mySets,msh); }
     else if (mshFormat == "4.0") { std::cout <<"mesh file format 4.0 not supported, only 2.2 and 4.1 are feellgood readable."<< std::endl; SYSTEM_ERROR;}
-    else if (mshFormat == "4.1") { std::cout <<"mesh file format 4.1" << std::endl; readNewMesh(mySets,msh); }
+    else if (mshFormat == "4.1") { std::cout <<"mesh file format 4.1 not supported yet, coming soon" << std::endl; SYSTEM_ERROR;readNewMesh(mySets,msh); }
+    else { std::cout <<"mesh file format " << mshFormat << " not supported." << std::endl; SYSTEM_ERROR; }
     }
         
 msh.close();
@@ -109,12 +191,14 @@ msh.close();
 void Fem::readSol(bool VERBOSE,double scaling, string fileName)
 {
 ifstream fin(fileName, std::ifstream::in);
-if (!fin){
-    if(VERBOSE) { cerr << "cannot open .sol file: " << fileName << endl; }
-    SYSTEM_ERROR;}
+if (!fin)
+    {
+    cerr << "cannot open .sol file: " << fileName << endl;
+    SYSTEM_ERROR;
+    }
 
 string str;
-getline(fin, str); // 1eme ligne
+getline(fin, str);
 
 unsigned long idx = str.find(":");
 idx +=2;

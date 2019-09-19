@@ -168,15 +168,9 @@ class Fac{
         /** demagnetizing energy of the facette */
         double demagEnergy(const double u[DIM][NPI] /**< [in] */,const double phi[NPI] /**< [in] */) const;
         
-        /** compute projection of a face */
-        void projection(gmm::dense_matrix <double> const& A, std::vector <double> const& B,gmm::dense_matrix <double> &Ap, std::vector <double> &Bp) const;
-        
         /** compute projection of a face from inner object matrix */
         void projection(gmm::dense_matrix <double> const& A, std::vector <double> const& B);
         
-        /** assemblage of the matrix and vector elements */
-        void assemblage(const int NOD,gmm::dense_matrix <double> const& Ke, std::vector <double> const& Le,write_matrix &K,write_vector &L) const;
-		
         /** assemblage of the matrix and vector elements from inner matrix in facette object */
         void assemblage(write_matrix &K,write_vector &L) const;
         
