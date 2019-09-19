@@ -22,6 +22,7 @@ MESSAGE(STATUS "version = ${FEELLGOOD_VERSION}")
 
 execute_process(
     COMMAND git show-ref --head HEAD --hash
+    COMMAND uniq  # for some reason the above can output a duplicate line
     OUTPUT_VARIABLE SHAstr OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 set(SHAstr "\"${SHAstr}\"")  # add quotes
