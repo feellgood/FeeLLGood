@@ -25,12 +25,13 @@ tar xzf ann_1.1.2.tar.gz
 cd ann_1.1.2/
 make linux-g++
 sudo cp lib/libANN.a /usr/local/lib/
-sudo cp include/ANN/ANN.h /usr/local/include
+sudo cp include/ANN/ANN.h /usr/local/include/
 cd ..
 
 # Install exprtk.
 wget -nv http://www.partow.net/downloads/exprtk.zip
 unzip exprtk.zip
+sudo cp exprtk/exprtk.hpp /usr/local/include/
 
 # Install ScalFMM.
 wget -nv https://gforge.inria.fr/frs/download.php/file/35369/SCALFMM-1.4-148.tar.gz
