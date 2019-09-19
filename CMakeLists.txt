@@ -14,14 +14,6 @@ ENABLE_LANGUAGE(CXX)
 MESSAGE(STATUS "CXX ${CMAKE_CXX_COMPILER_ID}")
 
 #===========================================================================
-# include directory path
-#===========================================================================
-
-SET(SCALFMM_CFG /usr/local/include/Utils )
-
-INCLUDE_DIRECTORIES(${SCALFMM_CFG})
-
-#===========================================================================
 # these parameters are used to build a config.h file 
 #===========================================================================
 
