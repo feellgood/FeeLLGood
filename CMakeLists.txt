@@ -19,11 +19,9 @@ MESSAGE(STATUS "CXX ${CMAKE_CXX_COMPILER_ID}")
 
 SET(GMM_INCLUDE_DIR ../gmm-5.3/include)
 
-SET(SCALFMM_INCLUDE_DIR ../SCALFMM-1.4-148/Src )
-
 SET(SCALFMM_CFG /usr/local/include/Utils )
 
-INCLUDE_DIRECTORIES(${GMM_INCLUDE_DIR} ${SCALFMM_INCLUDE_DIR} ${SCALFMM_CFG})
+INCLUDE_DIRECTORIES(${GMM_INCLUDE_DIR} ${SCALFMM_CFG})
 
 #===========================================================================
 # these parameters are used to build a config.h file 
@@ -61,12 +59,10 @@ SET( SOURCES config.h pt3D.h matBlocDiag.h tetra.h tetra.cpp facette.h facette.c
 	linear_algebra.h linear_algebra.cpp main.cpp feellgoodSettings.cpp read.cpp femutil.cpp
 	recentering.cpp energy.cpp save.cpp solver.cpp tiny.h time_integration.cpp)
 
-SET( HEADERS ${SCALFMM_INCLUDE_DIR}/Kernels/Rotation/FRotationKernel.hpp)
-
 
 configure_file(config.h.in ./config.h)
 
-ADD_EXECUTABLE(feellgood ${SOURCES} ${HEADERS})
+ADD_EXECUTABLE(feellgood ${SOURCES})
 
 TARGET_LINK_LIBRARIES(feellgood scalfmm ANN)
 

@@ -33,11 +33,13 @@ wget -nv http://www.partow.net/downloads/exprtk.zip
 unzip exprtk.zip
 sudo cp exprtk/exprtk.hpp /usr/local/include/
 
-# Install ScalFMM.
+# Patch, build and install ScalFMM.
 wget -nv https://gforge.inria.fr/frs/download.php/file/35369/SCALFMM-1.4-148.tar.gz
 tar xzf SCALFMM-1.4-148.tar.gz
-mkdir SCALFMM-1.4-148/Build
-cd SCALFMM-1.4-148/Build
+cd SCALFMM-1.4-148/
+sed -i 's/ROtation/Rotation/' Src/CMakeLists.txt
+mkdir Build
+cd Build
 cmake ..
 make
 sudo make install
