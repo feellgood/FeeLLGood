@@ -16,8 +16,9 @@ set -ev
 sudo apt-get update -q
 sudo apt-get install -y cmake libboost-dev
 
-# Install the libraries in sibling directories of FeeLLGood.
-cd ..
+# Download and build the libraries here. This is the grandparent of the
+# current directory in a Travis build.
+cd $HOME/build/
 
 # Install ANN.
 wget -nv https://www.cs.umd.edu/~mount/ANN/Files/1.1.2/ann_1.1.2.tar.gz
