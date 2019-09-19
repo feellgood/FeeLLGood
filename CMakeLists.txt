@@ -18,23 +18,20 @@ MESSAGE(STATUS "CXX ${CMAKE_CXX_COMPILER_ID}")
 #===========================================================================
 
 set(FEELLGOOD_VERSION "\"${FEELLGOOD_MAJOR_VERSION}.${FEELLGOOD_MINOR_VERSION}.${FEELLGOOD_PATCH_VERSION}\"") 
-
-set(my_cmd "git")
-set(my_arg "show-ref")
-set(my_arg1 "--head")
-set(my_arg2 "HEAD")
-set(my_arg3 "--hash")
-
-execute_process(COMMAND ${my_cmd} ${my_arg} ${my_arg1} ${my_arg2} ${my_arg3} RESULT_VARIABLE git_result OUTPUT_VARIABLE git_var)
-
-string(REPLACE "\n" "" SHAstr "\"${git_var}\"") 
 MESSAGE(STATUS "version = ${FEELLGOOD_VERSION}")
-MESSAGE(STATUS "executable built with SHA1=${SHAstr}")
 
-set(my_cmd "getconf")
-set(my_arg "_NPROCESSORS_ONLN")
-execute_process(COMMAND ${my_cmd} ${my_arg} RESULT_VARIABLE getnbcpu_result OUTPUT_VARIABLE MAX_NB_THREADS)
-MESSAGE(STATUS "MAX_NB_THREADS=${MAX_NB_THREADS}")
+execute_process(
+    COMMAND git show-ref --head HEAD --hash
+    OUTPUT_VARIABLE SHAstr OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+set(SHAstr "\"${SHAstr}\"")  # add quotes
+MESSAGE(STATUS "executable built with SHA1 = ${SHAstr}")
+
+execute_process(
+    COMMAND getconf _NPROCESSORS_ONLN
+    OUTPUT_VARIABLE MAX_NB_THREADS OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+MESSAGE(STATUS "MAX_NB_THREADS = ${MAX_NB_THREADS}")
 
 #===========================================================================
 # Compiler options
