@@ -47,7 +47,7 @@ class Settings(object):
         recentering["threshold"] = 0.1
         self.mySets["recentering"] = recentering
 
-        self.mySets["Bext"] = [0.0,0.0,0.007]
+        self.mySets["Bext"] = [0.0,0.0,0.0]
 
         current = {}
         current["Uz"] = 0.0
