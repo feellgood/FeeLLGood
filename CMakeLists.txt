@@ -17,11 +17,9 @@ MESSAGE(STATUS "CXX ${CMAKE_CXX_COMPILER_ID}")
 # include directory path
 #===========================================================================
 
-SET(GMM_INCLUDE_DIR ../gmm-5.3/include)
-
 SET(SCALFMM_CFG /usr/local/include/Utils )
 
-INCLUDE_DIRECTORIES(${GMM_INCLUDE_DIR} ${SCALFMM_CFG})
+INCLUDE_DIRECTORIES(${SCALFMM_CFG})
 
 #===========================================================================
 # these parameters are used to build a config.h file 

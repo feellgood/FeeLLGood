@@ -48,3 +48,7 @@ cd ../..
 # Install GMM.
 wget -nv http://download-mirror.savannah.gnu.org/releases/getfem/stable/gmm-5.3.tar.gz
 tar xzf gmm-5.3.tar.gz
+cd gmm-5.3/
+./configure
+make
+sudo make install
