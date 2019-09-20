@@ -12,6 +12,15 @@
 # -v: print the lines being executed
 set -ev
 
+# XXX: Test the behavior of `git show-ref' on Travis.
+git show-ref
+git show-ref HEAD
+git show-ref --head HEAD
+git show-ref --head HEAD --hash
+
+# Force the build to fail early.
+exit 1
+
 # Install apt packages.
 sudo apt-get update -q
 sudo apt-get install -y cmake libboost-dev
