@@ -54,5 +54,4 @@ ADD_EXECUTABLE(feellgood ${SOURCES})
 
 TARGET_LINK_LIBRARIES(feellgood scalfmm ANN)
 
-install(TARGETS feellgood RUNTIME DESTINATION /usr/local/bin )
-
+install(TARGETS feellgood RUNTIME DESTINATION bin)
