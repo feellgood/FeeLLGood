@@ -6,6 +6,8 @@ this header is the interface to scalfmm. Its purpose is to prepare an octree for
 */
 
 // scalFMM includes
+// Some of these files generate spurious warnings.
+// We silence them with "#pragma GCC diagnostic {push,ignored,pop}".
 
 #include "Utils/FTic.hpp"
 #include "Utils/FParameters.hpp"
@@ -13,13 +15,19 @@ this header is the interface to scalfmm. Its purpose is to prepare an octree for
 #include "Components/FTypedLeaf.hpp"
 #include "Components/FParticleType.hpp"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshift-negative-value"
 #include "Containers/FOctree.hpp"
+#pragma GCC diagnostic pop
 #include "Containers/FVector.hpp"
 
 #include "Core/FFmmAlgorithmThreadTsm.hpp"
 
 #include "Kernels/P2P/FP2PParticleContainerIndexed.hpp"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include "Kernels/Rotation/FRotationKernel.hpp"
+#pragma GCC diagnostic pop
 #include "Kernels/Rotation/FRotationCell.hpp"
 
 #include "fem.h"
