@@ -21,8 +21,7 @@ set(FEELLGOOD_VERSION "\"${FEELLGOOD_MAJOR_VERSION}.${FEELLGOOD_MINOR_VERSION}.$
 MESSAGE(STATUS "version = ${FEELLGOOD_VERSION}")
 
 execute_process(
-    COMMAND git show-ref --head HEAD --hash
-    COMMAND uniq  # for some reason the above can output a duplicate line
+    COMMAND git show-ref --verify --head HEAD --hash
     OUTPUT_VARIABLE SHAstr OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 set(SHAstr "\"${SHAstr}\"")  # add quotes
