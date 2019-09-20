@@ -18,6 +18,10 @@ git show-ref HEAD
 git show-ref --head HEAD
 git show-ref --head HEAD --hash
 
+# Stricter ref matching with `--verify'.
+git show-ref --verify --head HEAD
+git show-ref --verify --head HEAD --hash
+
 # Force the build to fail early.
 exit 1
 
