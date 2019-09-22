@@ -109,7 +109,7 @@ class Fem
 	std::vector <Facette::Fac>  fac; /**< face container */
 	std::vector <Tetra::Tet>  tet; /**< tetrahedron container */
     
-    triple Hext;/**< external applied field */
+    triple Hext;/**<  field. Unit : SI (A/m) */
     
     /**
     print some informations of fem container

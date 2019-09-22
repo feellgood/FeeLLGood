@@ -32,7 +32,7 @@ class Settings(object):
 
         mesh["volume_regions"] = {"300" : vol300}
 
-        surf200 = {"Js" :"-1", "Ks" : 0.0, "uk" : [0.0, 0.0 ,1.0]}
+        surf200 = {"Js" : "1.0", "Ks" : 0.0, "uk" : [0.0, 0.0 ,1.0]}
         mesh["surface_regions"] = {"200" : surf200}
 
         self.mySets["mesh"] = mesh
@@ -68,7 +68,7 @@ class Settings(object):
         self.mySets["demagnetization field solver"] = DEMAGsolver
 
         timing = {}
-        timing["final_time"] = 1e-7
+        timing["final_time"] = 1e-6
         timing["theta"] = 0.5
         timing["min(du)"] = 1e-9
         timing["max(du)"] = 0.02

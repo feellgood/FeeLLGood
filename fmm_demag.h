@@ -186,15 +186,11 @@ class fmm
         {
         FmmClass algo(tree, kernels);
         
-        //FReal *srcDen=(FReal*) new FReal[SRC]; if (!srcDen) SYSTEM_ERROR;
-        
         memset(srcDen, 0, SRC*sizeof(FReal));
-
-        //FReal *corr=(FReal*) new FReal[NOD]; if (!corr) SYSTEM_ERROR;
         memset(corr, 0, NOD*sizeof(FReal));
 
         int nsrc = 0;
-        std::function<Pt::pt3D (Nodes::Node)> getter;
+        std::function<const Pt::pt3D (Nodes::Node)> getter;
 
         if(Hv)
             { getter = Nodes::get_v; }
@@ -296,12 +292,8 @@ class fmm
                     fem.node[indexPartOrig].phi  = (potentials[idxPart]*norm + corr[indexPartOrig])/(4*M_PI);
                 }
             });
-
-        //delete [] srcDen;
-        //delete [] corr;
         }
-    
-};//end class fmm
+    };//end class fmm
     
 }//end namespace
 #endif
