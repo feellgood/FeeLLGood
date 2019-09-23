@@ -32,7 +32,7 @@ class Settings(object):
 
         mesh["volume_regions"] = {"300" : vol300}
 
-        surf200 = {"Js" : "1.0", "Ks" : 0.0, "uk" : [0.0, 0.0 ,1.0]}
+        surf200 = {"Js" : 1.0, "Ks" : 0.0, "uk" : [0.0, 0.0 ,1.0]}
         mesh["surface_regions"] = {"200" : surf200}
 
         self.mySets["mesh"] = mesh

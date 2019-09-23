@@ -42,20 +42,21 @@ set( CMAKE_CXX_FLAGS "-DNDEBUG -Wall -Wextra -std=c++11 -fopenmp -O3 -ffast-math
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
 
-SET( SOURCES config.h pt3D.h matBlocDiag.h tetra.h tetra.cpp facette.h facette.cpp feellgoodSettings.h node.h
-	linear_algebra.h linear_algebra.cpp feellgoodSettings.cpp read.cpp femutil.cpp
+SET( HEADERS config.h pt3D.h matBlocDiag.h tetra.h facette.h feellgoodSettings.h node.h linear_algebra.h )
+
+SET( SOURCES tetra.cpp facette.cpp linear_algebra.cpp feellgoodSettings.cpp read.cpp femutil.cpp
 	recentering.cpp energy.cpp save.cpp solver.cpp tiny.h time_integration.cpp)
 
 configure_file(config.h.in ./config.h)
 
-ADD_EXECUTABLE(feellgood main.cpp ${SOURCES})
+ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES})
 
 TARGET_LINK_LIBRARIES(feellgood scalfmm ANN)
 
 if(DEFINED withSharedLib)
     MESSAGE( "Shared lib generation " ${withSharedLib} )
     if (withSharedLib)
-        ADD_LIBRARY( _feellgood SHARED ${SOURCES} )
+        ADD_LIBRARY( _feellgood SHARED ${HEADERS} ${SOURCES} )
         install(FILES feellgood_core.h DESTINATION include)
         install(TARGETS _feellgood DESTINATION lib)
     endif(withSharedLib)
