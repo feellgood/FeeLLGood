@@ -61,6 +61,8 @@ evol_columns.clear();
 for(boost::property_tree::ptree::value_type &cell :s_sub_tree)
     { evol_columns.push_back( cell.second.get_value<std::string>() ); }
     
+evol_header = sub_tree.get<bool>("evol header",false);
+
 try { sub_tree = root.get_child("mesh"); }
     catch (std::exception &e)
         { std::cout << e.what() << std::endl; }

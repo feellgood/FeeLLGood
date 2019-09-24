@@ -13,12 +13,17 @@ std::string str = baseName + ".evol";
 std::ofstream fout(str);
 if (!fout) { std::cerr << "cannot open file "<< str << std::endl; SYSTEM_ERROR; }
 
-double dt0= settings.dt;
+if(settings.evol_header)
+    {
+    fout << "# ";
+    for(unsigned int i=0; i < (settings.evol_columns.size()-1);i++) {fout << settings.evol_columns[i] << "\t";}
+    fout << settings.evol_columns[settings.evol_columns.size()-1] << "\n" << std::flush;
+    }
 
+double dt0= settings.dt;
 int flag  = 0;
 double dt = dt0;
 double my_t= fem.t;
-
 int nt = 0;
 
 fem.saver(settings,fout,nt);

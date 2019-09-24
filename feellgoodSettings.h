@@ -28,6 +28,7 @@ class Settings{
         verbose = true;
         withTsv=true;
         withVtk = false;
+        evol_header = false;
         theta=0.5;
         analytic_corr = true;
         MAXITER = 500;
@@ -140,6 +141,9 @@ class Settings{
 	
     /** contain the value names of the columns the user want in .evol file */
     std::vector<std::string> evol_columns;
+    
+    /**  if true the first line of .evol file is the title of each column tsv format, starting with \# */
+    bool evol_header;
     
 	/** \return index of the region in surface region container  */
 	inline int findFacetteRegionIdx(const int r /**< [in] */) const

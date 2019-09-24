@@ -37,6 +37,7 @@ if ((nt%n1)==0)
         if(keyVal == "DW_z") { fout << DW_z << sep;}
         if(keyVal == "DW_dz") { fout << DW_vz <<  sep;}    
         }
+    fout << std::flush;
     }
 
     string baseName = settings.r_path_output_dir + settings.getSimName();

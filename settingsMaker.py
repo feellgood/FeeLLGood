@@ -21,6 +21,7 @@ class Settings(object):
         outputs["take_photo"] = 5
         outputs["verbose"] = True
         outputs["evol columns"] = ["iter","t","dt","max dm","<mx>","<my>","<mz>","E_ex","E_aniso","E_demag","E_zeeman","E_tot","DW_z","DW_dz"]
+        outputs["evol header"] = True
 
         self.mySets["outputs"] = outputs
 
