@@ -77,21 +77,22 @@ class Fac{
             {reg = 0; treated = false;}
         
         /** constructor used by readMesh */
-        inline Fac(const int _NOD /**< [in] total number of nodes */,
+        inline Fac(const std::vector<Nodes::Node>  *_p_node /**< [in] pointer to the nodes */,
                    const int _reg /**< [in] region number */,
                    const int _idx /**< [in] region index in region vector */,
                    const int i0 /**< [in] node index */,
                    const int i1 /**< [in] node index */,
-                   const int i2 /**< [in] node index */) : idxPrm(_idx),NOD(_NOD),reg(_reg),Ksp(2*N,2*N), Lsp(2*N)
+                   const int i2 /**< [in] node index */) : idxPrm(_idx),reg(_reg),refNode(_p_node),Ksp(2*N,2*N), Lsp(2*N)
             {
-                if((0<i0)&&(i0<=_NOD)&&(0<i1)&&(i1<=_NOD)&&(0<i2)&&(i2<=_NOD))
+                NOD = refNode->size();
+                if((0<i0)&&(i0<=NOD)&&(0<i1)&&(i1<=NOD)&&(0<i2)&&(i2<=NOD))
                     {
                     ind[0] = i0; ind[1] = i1; ind[2] = i2;
                     for (int i=0; i<N; i++) ind[i]--; // to force index to start from 0 (C++) instead of Matlab/msh convention
                     treated = false;
+                    calc_surf();
                     }
                 else {std::cout<< "wrong indices in triangular facette." <<std::endl;SYSTEM_ERROR;}
-                
             }
         
 		/** constructor from a region number and three indices */		
@@ -181,12 +182,6 @@ class Fac{
         /** convenient getter for N */		
 		inline int getN(void) {return N;}	
 
-		/** computes normal vector n and surface surf		*/		
-		void calc_surf(void);
-        
-        /** pointer to the nodes */
-        inline void setRefNode(std::vector<Nodes::Node>  *_p_node /**< [in] */) {refNode = _p_node;}
-        
         /**
         computes correction on potential
         */
@@ -197,10 +192,13 @@ class Fac{
         int reg;/**< .msh region number */
         
         
-        std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
+        const std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
         gmm::dense_matrix <double> Ksp;/**< matrix initialized by constructor */
         std::vector <double> Lsp;/**< vector initialized by constructor */
-    };//end class Fac
+        
+        /** computes normal vector n and surface surf		*/		
+		void calc_surf(void);    
+};//end class Fac
 
 /*    
 inline bool operator< (const Fac &f1, const Fac &f2)

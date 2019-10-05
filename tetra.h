@@ -140,17 +140,19 @@ class Tet{
         { reg = 0; idxPrm=-1; treated = false;} /**< default constructor */
 		
 		/** constructor for readMesh */
-		inline Tet(const int _NOD /**< [in] total number of nodes */,
+		inline Tet(const std::vector<Nodes::Node>  *_p_node /**< [in] pointer to the nodes */,
                    const int _reg /**< [in] region number */,
                    const int _idx /**< [in] region index in region vector */,
                    const int i0 /**< [in] node index */,
                    const int i1 /**< [in] node index */,
                    const int i2 /**< [in] node index */,
-                   const int i3 /**< [in] node index */) : idxPrm(_idx),NOD(_NOD),reg(_reg), Kp(2*N,2*N), Lp(2*N) 
+                   const int i3 /**< [in] node index */) : idxPrm(_idx),reg(_reg),refNode(_p_node), Kp(2*N,2*N), Lp(2*N) 
             {
+            NOD = _p_node->size();
             ind[0] = i0; ind[1] = i1; ind[2] = i2; ind[3] = i3;
-            for (int i=0; i<4; i++) ind[i]--;           // convention Matlab/msh -> C++
+            for (int i=0; i<N; i++) ind[i]--;           // convention Matlab/msh -> C++
             treated = false;
+            calc_vol();
             } 
 		
 		
@@ -270,18 +272,14 @@ class Tet{
         /** \return \f$ |J| \f$ build Jacobian \f$ J \f$ */
         double Jacobian(double J[DIM][DIM]);
         
-		/** computes volume	of the tetrahedron */
-		void calc_vol(void);
-        
-        /** set pointer to the nodes */
-        inline void setRefNode(std::vector<Nodes::Node>  *_p_node) {refNode = _p_node;}
-        
     private:
         int NOD;/**< total number of nodes, also an offset for filling sparseMatrix */
         int reg;/**< .msh region number */
         
-        std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
+        const std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
         
+        /** computes volume	of the tetrahedron */
+		void calc_vol(void);
         
         /** getter to access and copy some vector parts of the node vector */
 		inline void getVecDataFromNode(std::function<Pt::pt3D (Nodes::Node)> getter,double vecData[DIM][N]) const

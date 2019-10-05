@@ -197,7 +197,7 @@ public:
      * example : pt3D p = pt3D(IDX_Y); <br>
      p will contain \f$ (x,y,z) = (0.0,1.0,0.0) \f$
      */
-    inline pt3D(enum index idx)
+    inline pt3D(const enum index idx)
         {_x = _y = _z = 0.0;if(idx==IDX_X) {_x=1.0;} else {if(idx==IDX_Y) {_y=1.0;} else _z=1.0;}}
     
     
@@ -249,7 +249,7 @@ public:
      * getter/setter by index
      @param i is an unsigned (0|1|2) use of IDX_X IDX_Y IDX_Z is recommended
      */
-    inline double& operator() (index i) { if(i==IDX_X) {return _x;} else {if(i==IDX_Y) {return _y;} else return _z;} }
+    inline double& operator() (const index i) { if(i==IDX_X) {return _x;} else {if(i==IDX_Y) {return _y;} else return _z;} }
     
     inline pt3D& operator=(pt3D const& p) {_x = p.x(); _y = p.y(); _z = p.z(); return *this;} /**< operator= */
     

@@ -44,33 +44,42 @@ class Fem
         /** constructor */
         inline Fem(Settings & mySets) //mySets cannot be passed const because of getValue method in init_distrib, to set x,y,z values
             {
+            t=0.;
+            vmax  = 0.0;
+            DW_vz = DW_vz0 = 0.0;
+            DW_z  = 0.0;
+            
+            E_exch0 = E_exch = 0.0;
+            E_aniso0 = E_aniso = 0.0;
+            E_demag0 = E_demag = 0.0;
+            E_zeeman0 = E_zeeman = 0.0;
+            Etot0 = Etot = 0.0;
+            evol = 0.0;
             readMesh(mySets);
-            femutil(mySets);
+            
+            pts= annAllocPts(node.size(), DIM);
+            kdtree = new ANNkd_tree(pts, node.size(), DIM);
+            if (!kdtree) SYSTEM_ERROR;
+
+            int i=0;
+            std::for_each(node.begin(),node.end(),[this,&i](Nodes::Node const& n)
+                { this->pts[i][0] = n.p.x();this->pts[i][1] = n.p.y();this->pts[i][2] = n.p.z();i++; } );
+            
+            femutil(mySets);// initialization of l,c,dim,fmm_normalizer
             chapeaux(mySets.EPSILON);
             
             if (mySets.restore)
                 { readSol(mySets.verbose,mySets.getScale(), mySets.restoreFileName); }
             else
                 {
-                std::cout<< "initial magnetization(x,y,z,t=0) :\nMx =" << mySets.sMx << "\nMy =" << mySets.sMy << "\nMz =" << mySets.sMz << std::endl; 
+                std::cout<< "initial magnetization M(x,y,z,t=0) = { " << mySets.sMx << "\t" << mySets.sMy << "\t" << mySets.sMz << " }\n" << std::endl; 
                 init_distrib(mySets);
                 }    
             direction(mySets.verbose,Pt::IDX_Z);/* determination de la direction de propagation de la paroi */
-            t=0.;
             
             Hext[0] = nu0*mySets.Bext[0];
             Hext[1] = nu0*mySets.Bext[1];
             Hext[2] = nu0*mySets.Bext[2]; 
-            
-            vmax  = 0.0;
-            DW_vz = DW_vz0 = 0.0;
-            DW_z  = 0.0;
-            fmm_normalizer = 1./(2.*diam);
-            E_exch0 = E_exch = 0.0;
-            E_aniso0 = E_aniso = 0.0;
-            E_demag0 = E_demag = 0.0;
-            E_zeeman0 = E_zeeman = 0.0;
-            Etot0 = Etot = 0.0;
             }
         
 	Pt::pt3D c;/**< center position */	
@@ -205,6 +214,20 @@ inline void init_distrib(Settings & mySets /**< [in] */)
         n.u = n.u0;
         n.phi  = 0.;} 
     ); }
+
+/** return the minimum of all nodes coordinate along coord axis */
+inline double minNodes(const Pt::index coord)
+{
+const auto minCoord = std::min_element(node.begin(),node.end(),[coord](Nodes::Node &n1,Nodes::Node &n2) {return (n1.p(coord)<n2.p(coord)); } );
+return minCoord->p(coord); 
+}
+
+/** return the maximum of all nodes coordinate along coord axis */
+inline double maxNodes(const Pt::index coord)
+{
+const auto maxCoord = std::max_element(node.begin(),node.end(),[coord](Nodes::Node &n1,Nodes::Node &n2) {return (n1.p(coord)<n2.p(coord)); } );
+return maxCoord->p(coord);
+}
 
 /**
 read a solution from a file (tsv formated) and initialize fem struct to restart computation from that distribution

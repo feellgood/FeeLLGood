@@ -57,13 +57,13 @@ while ((symb != "$EndElements") && (idxElem < nbElem) && !(msh.fail()) )
         case 2:{
             int i0,i1,i2;
             msh >> i0 >> i1 >> i2;
-            fac.push_back( Facette::Fac(NOD,reg,mySets.findFacetteRegionIdx(reg),i0,i1,i2 ) );
+            fac.push_back( Facette::Fac(&node,reg,mySets.findFacetteRegionIdx(reg),i0,i1,i2 ) );
             break;
 	    }
         case 4:{
             int i0,i1,i2,i3;
             msh >> i0 >> i1 >> i2 >> i3;
-            tet.push_back( Tetra::Tet(NOD,reg,mySets.findTetraRegionIdx(reg),i0,i1,i2,i3) );
+            tet.push_back( Tetra::Tet(&node,reg,mySets.findTetraRegionIdx(reg),i0,i1,i2,i3) );
             break;
 	    }
         default:
@@ -144,14 +144,14 @@ while ((symb != "$EndElements")&&(symb != "$End")&& !(msh.fail()) )
             int i0,i1,i2;
             msh >> i0 >> i1 >> i2;
             
-            fac.push_back( Facette::Fac(NOD,reg,mySets.findFacetteRegionIdx(reg),i0,i1,i2 ) );
+            fac.push_back( Facette::Fac(&node,reg,mySets.findFacetteRegionIdx(reg),i0,i1,i2 ) );
             break;
 	    }
         case 4:{
             int i0,i1,i2,i3;
             msh >> i0 >> i1 >> i2 >> i3;
             
-            tet.push_back( Tetra::Tet(NOD,reg,mySets.findTetraRegionIdx(reg),i0,i1,i2,i3) );
+            tet.push_back( Tetra::Tet(&node,reg,mySets.findTetraRegionIdx(reg),i0,i1,i2,i3) );
             break;
 	    }
         default:

@@ -17,57 +17,27 @@ std::cout << "\t Total volume\t\t\t" << vol << std::endl;
 std::cout << "\t fmm_normalizer = " << fmm_normalizer << std::endl;
 }
 
-
 void Fem::femutil(Settings const& settings)
 {
-const long nb_nod = node.size();
-    
-pts= annAllocPts(nb_nod, DIM);
-kdtree = new ANNkd_tree(pts, nb_nod, DIM);
-if (!kdtree) SYSTEM_ERROR;
+double xmin = minNodes(Pt::IDX_X);
+double xmax = maxNodes(Pt::IDX_X);
 
-int i=0;
-std::for_each(node.begin(),node.end(),
-[this,&i](Nodes::Node const& n) 
-	{ this->pts[i][0] = n.p.x();this->pts[i][1] = n.p.y();this->pts[i][2] = n.p.z();i++; } 
-);// end for_each
+double ymin = minNodes(Pt::IDX_Y);
+double ymax = maxNodes(Pt::IDX_Y);
 
-const auto minX = std::min_element(node.begin(),node.end(),[](Nodes::Node const& n1,Nodes::Node const& n2) {return (n1.p.x()<n2.p.x()); } );
-double xmin = minX->p.x(); 
-const auto maxX = std::max_element(node.begin(),node.end(),[](Nodes::Node const& n1,Nodes::Node const& n2) {return (n1.p.x()<n2.p.x()); } );
-double xmax = maxX->p.x();
-
-const auto minY = std::min_element(node.begin(),node.end(),[](Nodes::Node const& n1,Nodes::Node const& n2) {return (n1.p.y()<n2.p.y()); } );
-double ymin = minY->p.y();
-const auto maxY = std::max_element(node.begin(),node.end(),[](Nodes::Node const& n1,Nodes::Node const& n2) {return (n1.p.y()<n2.p.y()); } );
-double ymax = maxY->p.y();
-
-const auto minZ = std::min_element(node.begin(),node.end(),[](Nodes::Node const& n1,Nodes::Node const& n2) {return (n1.p.z()<n2.p.z()); } );
-double zmin = minZ->p.z();
-const auto maxZ = std::max_element(node.begin(),node.end(),[](Nodes::Node const& n1,Nodes::Node const& n2) {return (n1.p.z()<n2.p.z()); } );
-double zmax = maxZ->p.z();
+double zmin = minNodes(Pt::IDX_Z);
+double zmax = maxNodes(Pt::IDX_Z);
 
 // calcul du diametre et du centrage
 l = Pt::pt3D(xmax - xmin,ymax - ymin,zmax - zmin);
 diam = l.maxLength();
+fmm_normalizer = 1./(2.*diam);
 c = Pt::pt3D(0.5*(xmax + xmin),0.5*(ymax + ymin),0.5*(zmax + zmin));
-
-//ici on affecte refNode des tetraedres
-std::for_each(tet.begin(),tet.end(),[this](Tetra::Tet &te) {te.setRefNode( &(this->node) );} );
-
-//ici on calcule les volumes elementaires et on reoriente si besoin par une permutation d'indice
-std::for_each(tet.begin(),tet.end(),[](Tetra::Tet &te) {te.calc_vol();} );
 
 //volume total
 vol = std::accumulate(tet.begin(),tet.end(),0.0,[](double x,Tetra::Tet &te){return x+te.vol;} );
 
-//ici on affecte refNode des facettes
-std::for_each(fac.begin(),fac.end(),[this](Facette::Fac &fa) {fa.setRefNode( &(this->node) );} );
-
-//ici on calcule les normales et surfaces elementaires
-std::for_each(fac.begin(),fac.end(),[](Facette::Fac &fa) {fa.calc_surf();} );
-
-//ici la somme des surfaces elementaires = surface totale
+// somme des surfaces elementaires = surface totale
 surf = std::accumulate(fac.begin(),fac.end(),0.0,[](double x,Facette::Fac &fa){return x+fa.surf;} );
 
 //on construit un set de facettes avec l'ordre less_than
@@ -83,7 +53,7 @@ std::for_each(tet.begin(),tet.end(),[&sf](Tetra::Tet const& te)
     sf.insert( Facette::Fac(reg,te.idxPrm,ia,ib,id) ); 
 	});//fin for_each
 
-std::for_each(fac.begin(),fac.end(),[this,&settings,&sf,nb_nod](Facette::Fac &fa)
+std::for_each(fac.begin(),fac.end(),[this,&settings,&sf](Facette::Fac &fa)
     {
     fa.Ms = 0.;
     double Js = settings.paramFacette[fa.idxPrm].Js;
@@ -96,7 +66,7 @@ std::for_each(fac.begin(),fac.end(),[this,&settings,&sf,nb_nod](Facette::Fac &fa
             {
             for (int nrot=0; nrot<3; nrot++)
                 {
-                Facette::Fac fc(nb_nod);
+                Facette::Fac fc(node.size());
                 fc.ind[(0+nrot)%3]=i0; fc.ind[(1+nrot)%3]=i1; fc.ind[(2+nrot)%3]=i2;
                 it=sf.find(fc);
                 if (it!=sf.end()) break;
