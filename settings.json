@@ -13,7 +13,7 @@
     
 "mesh" :
     {
-    "filename" : "cyl_extruded_v2.msh",
+    "filename" : "wire_d70_L1000.msh",
     "scaling factor" : 1e-9,
     "epsilon" : 1e-40,
     "volume_regions" :
@@ -34,7 +34,7 @@
         {
         "200" : 
             {
-            "Js" : -1,
+            "Js" : 1,
             "Ks" : 0.0,
             "uk" : [0.0,0.0,1.0]
             }	
@@ -45,9 +45,9 @@
 "restore from file" : "sol.in",
 "initial magnetization" :
     {
-    "Mx": "1-z^2",
+    "Mx": "0",
     "My": "0",
-    "Mz": "tanh(z*20)"
+    "Mz": "1"
     },
 
 "recentering" :
@@ -57,7 +57,7 @@
     "threshold" : 0.1
     },
     
-"Bext" : [0.0, 0.0, 0.010],
+"Bext" : [0.0, 0.0, -0.1],
 
 "spin polarized current" :
     {

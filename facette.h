@@ -84,10 +84,14 @@ class Fac{
                    const int i1 /**< [in] node index */,
                    const int i2 /**< [in] node index */) : idxPrm(_idx),NOD(_NOD),reg(_reg),Ksp(2*N,2*N), Lsp(2*N)
             {
-                ind[0] = i0; ind[1] = i1; ind[2] = i2;
+                if((0<i0)&&(i0<=_NOD)&&(0<i1)&&(i1<=_NOD)&&(0<i2)&&(i2<=_NOD))
+                    {
+                    ind[0] = i0; ind[1] = i1; ind[2] = i2;
+                    for (int i=0; i<N; i++) ind[i]--; // to force index to start from 0 (C++) instead of Matlab/msh convention
+                    treated = false;
+                    }
+                else {std::cout<< "wrong indices in triangular facette." <<std::endl;SYSTEM_ERROR;}
                 
-                for (int i=0; i<3; i++) ind[i]--; // to force index to start from 0 (C++) instead of Matlab/msh convention
-                treated = false;
             }
         
 		/** constructor from a region number and three indices */		

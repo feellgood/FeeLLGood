@@ -39,15 +39,17 @@ while (symb != "$Elements") {msh >> symb;}
 
 if (msh.fail())
     {
-    if(mySets.verbose) {cerr << "could not find $Elements" << endl;}
+    if(mySets.verbose) {std::cerr << "could not find $Elements" << std::endl;}
     SYSTEM_ERROR;
     }
+    
+int nbElem;
+msh >> nbElem; 
 
-msh >> symb; 
-
-while ((symb != "$EndElements")&&(symb != "$End")&& !(msh.fail()) )
+int idxElem=1;
+while ((symb != "$EndElements") && (idxElem < nbElem) && !(msh.fail()) )    
     {
-    msh >> symb; 
+    msh >> idxElem;
     msh >> TYP >> tags >> reg;
     for (int i=1; i<tags; i++)
         msh >> symb;
@@ -55,25 +57,24 @@ while ((symb != "$EndElements")&&(symb != "$End")&& !(msh.fail()) )
         case 2:{
             int i0,i1,i2;
             msh >> i0 >> i1 >> i2;
-            
             fac.push_back( Facette::Fac(NOD,reg,mySets.findFacetteRegionIdx(reg),i0,i1,i2 ) );
             break;
 	    }
         case 4:{
             int i0,i1,i2,i3;
             msh >> i0 >> i1 >> i2 >> i3;
-            
             tet.push_back( Tetra::Tet(NOD,reg,mySets.findTetraRegionIdx(reg),i0,i1,i2,i3) );
             break;
 	    }
         default:
-            std::cout<< "unknown type in mesh $Elements" <<std::endl;
+            std::cerr<< "unknown type in mesh $Elements" <<std::endl;
         break;
         }
     }
 
+
 if ((symb != "$EndElements") && msh.fail()) 
-    {cerr << "error while reading elements; symb = " << symb << endl;SYSTEM_ERROR;}
+    {std::cerr << "error while reading elements; symb = " << symb << std::endl;SYSTEM_ERROR;}
 }
 
 void Fem::readNewMesh(Settings const& mySets,ifstream &msh)
