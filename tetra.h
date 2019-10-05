@@ -146,13 +146,14 @@ class Tet{
                    const int i0 /**< [in] node index */,
                    const int i1 /**< [in] node index */,
                    const int i2 /**< [in] node index */,
-                   const int i3 /**< [in] node index */) : idxPrm(_idx),reg(_reg),refNode(_p_node), Kp(2*N,2*N), Lp(2*N) 
+                   const int i3 /**< [in] node index */,const double epsilon) : idxPrm(_idx),reg(_reg),refNode(_p_node), Kp(2*N,2*N), Lp(2*N) 
             {
             NOD = _p_node->size();
             ind[0] = i0; ind[1] = i1; ind[2] = i2; ind[3] = i3;
             for (int i=0; i<N; i++) ind[i]--;           // convention Matlab/msh -> C++
             treated = false;
             calc_vol();
+            init(epsilon);
             } 
 		
 		
@@ -166,7 +167,7 @@ class Tet{
         
         bool treated;/**< flag */
         
-		/** initializes weight and dad(x|y|z) */
+		/** initializes weight hat function and dad(x|y|z) if \f$ | detJ | < \epsilon \f$ jacobian is considered degenerated */
 		void init(double epsilon);
         
         

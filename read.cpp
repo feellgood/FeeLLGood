@@ -63,7 +63,7 @@ while ((symb != "$EndElements") && (idxElem < nbElem) && !(msh.fail()) )
         case 4:{
             int i0,i1,i2,i3;
             msh >> i0 >> i1 >> i2 >> i3;
-            tet.push_back( Tetra::Tet(&node,reg,mySets.findTetraRegionIdx(reg),i0,i1,i2,i3) );
+            tet.push_back( Tetra::Tet(&node,reg,mySets.findTetraRegionIdx(reg),i0,i1,i2,i3,mySets.EPSILON) );
             break;
 	    }
         default:
@@ -151,7 +151,7 @@ while ((symb != "$EndElements")&&(symb != "$End")&& !(msh.fail()) )
             int i0,i1,i2,i3;
             msh >> i0 >> i1 >> i2 >> i3;
             
-            tet.push_back( Tetra::Tet(&node,reg,mySets.findTetraRegionIdx(reg),i0,i1,i2,i3) );
+            tet.push_back( Tetra::Tet(&node,reg,mySets.findTetraRegionIdx(reg),i0,i1,i2,i3,mySets.EPSILON) );
             break;
 	    }
         default:

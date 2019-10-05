@@ -91,6 +91,7 @@ class Fac{
                     for (int i=0; i<N; i++) ind[i]--; // to force index to start from 0 (C++) instead of Matlab/msh convention
                     treated = false;
                     calc_surf();
+                    init();
                     }
                 else {std::cout<< "wrong indices in triangular facette." <<std::endl;SYSTEM_ERROR;}
             }
@@ -111,9 +112,7 @@ class Fac{
 		
 		bool treated;/**< flag */
 		
-        /** initialize weight  */
-        inline void init(void)
-            {for (int j=0; j<NPI; j++) {weight[j] = 2.*surf*pds[j]; }}// detJ = 2*surf;
+        
     
         /** weighted scalar product : factorized formulation */
         inline double weightedScalarProd(const double X[NPI] /**< [in] */) const
@@ -197,7 +196,11 @@ class Fac{
         std::vector <double> Lsp;/**< vector initialized by constructor */
         
         /** computes normal vector n and surface surf		*/		
-		void calc_surf(void);    
+		void calc_surf(void);
+        
+        /** initialize weight hat function */
+        inline void init(void)
+            {for (int j=0; j<NPI; j++) {weight[j] = 2.*surf*pds[j]; }}// detJ = 2*surf;
 };//end class Fac
 
 /*    

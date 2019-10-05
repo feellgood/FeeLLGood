@@ -66,7 +66,6 @@ class Fem
                 { this->pts[i][0] = n.p.x();this->pts[i][1] = n.p.y();this->pts[i][2] = n.p.z();i++; } );
             
             femutil(mySets);// initialization of l,c,dim,fmm_normalizer
-            chapeaux(mySets.EPSILON);
             
             if (mySets.restore)
                 { readSol(mySets.verbose,mySets.getScale(), mySets.restoreFileName); }
@@ -194,26 +193,15 @@ class Fem
     ANNkd_tree* kdtree;/**< ANN kdtree to find efficiently the closest set of nodes to a physical point in the mesh  */
     ANNpointArray pts;/**< container for the building of the kdtree (handled by ANN library) */
     
-/**
-computes the hat functions for all containers
-*/
-inline void chapeaux(double epsilon /**< [in] if \f$ | detJ | < \epsilon \f$ jacobian is considered degenerated */) 
-{
-std::for_each(fac.begin(),fac.end(),[](Facette::Fac &f) {f.init();});
-
-std::for_each(tet.begin(),tet.end(),[epsilon](Tetra::Tet &t) { t.init(epsilon); });
-}
-/**
-computes an analytical initial magnetization distribution as a starting point for the simulation
-*/
-inline void init_distrib(Settings & mySets /**< [in] */)
-	{ std::for_each( node.begin(),node.end(), [this,&mySets](Nodes::Node & n) 
-        {
-        Pt::pt3D pNorm = Pt::pt3D( (n.p.x() - c.x())/l.x() , (n.p.y() - c.y())/l.y() , (n.p.z() - c.z())/l.z() );
-        n.u0 = mySets.getValue(pNorm);// u or u0?
-        n.u = n.u0;
-        n.phi  = 0.;} 
-    ); }
+    /** computes an analytical initial magnetization distribution as a starting point for the simulation */
+    inline void init_distrib(Settings & mySets /**< [in] */)
+        { std::for_each( node.begin(),node.end(), [this,&mySets](Nodes::Node & n) 
+            {
+            Pt::pt3D pNorm = Pt::pt3D( (n.p.x() - c.x())/l.x() , (n.p.y() - c.y())/l.y() , (n.p.z() - c.z())/l.z() );
+            n.u0 = mySets.getValue(pNorm);// u or u0?
+            n.u = n.u0;
+            n.phi  = 0.;} 
+        ); }
 
 /** return the minimum of all nodes coordinate along coord axis */
 inline double minNodes(const Pt::index coord)
