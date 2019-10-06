@@ -123,6 +123,25 @@ class fmm
         double norm;/**< normalization coefficient */
         
         /**
+        function template to insert volume or surface charges in tree for demag computation. class T is Tet or Fac, it must have interpolation method, second template parameter is NPI of the namespace containing class T 
+        */
+        template <class T,const int NPI> void insertCharges(const std::vector<T> container,FSize &idx,const Pt::pt3D c)
+            {
+            std::for_each(container.begin(),container.end(),[this,c,&idx](T const& elem)              
+                {       // sources de volume
+                double gauss[DIM][NPI];
+                elem.interpolation(Nodes::get_p,gauss);
+        
+                for (int j=0; j<NPI; j++, idx++)
+                    {
+                    Pt::pt3D pSource = Pt::pt3D(gauss[0][j],gauss[1][j],gauss[2][j]) - c; pSource *= norm;
+                    const FPoint<FReal> particlePosition(pSource.x(), pSource.y(), pSource.z());
+                    tree->insert(particlePosition, FParticleTypeSource, idx, 0.0);
+                    }
+                });//end for_each    
+            }
+        
+        /**
         initialization function for the building of an octree to compute the demag field
         */
         void init(Fem &fem,bool VERBOSE)
@@ -143,39 +162,16 @@ class fmm
                 tree->insert(particlePosition, FParticleTypeTarget, idxPart, 0.0);//ct 1 pour target    
                 idxPart++;
                 });//end for_each sur node
-  
             if(VERBOSE) { std::cout << "Physical nodes inserted." << std::endl; }
-
-            std::for_each(fem.tet.begin(),fem.tet.end(),[this,c,&idxPart](Tetra::Tet const& tet)              
-                {       // sources de volume
-                double gauss[DIM][Tetra::NPI];
-                tet.interpolation(Nodes::get_p,gauss);
-        
-                for (int j=0; j<Tetra::NPI; j++, idxPart++)
-                    {
-                    Pt::pt3D pSource = Pt::pt3D(gauss[0][j],gauss[1][j],gauss[2][j]) - c; pSource *= norm;
-                    const FPoint<FReal> particlePosition(pSource.x(), pSource.y(), pSource.z());
-                    tree->insert(particlePosition, FParticleTypeSource, idxPart, 0.0);
-                    }
-                });//end for_each on tet
-
+            
+            insertCharges<Tetra::Tet,Tetra::NPI>(fem.tet,idxPart,c);
             if(VERBOSE) { std::cout << "Volume charges inserted." << std::endl; }
-    
-            std::for_each(fem.fac.begin(),fem.fac.end(),[this,c,&idxPart](Facette::Fac const& fac)
-                {        // sources de surface
-                double gauss[DIM][Facette::NPI];
-                fac.interpolation(Nodes::get_p,gauss);
-        
-                for (int j=0; j<Facette::NPI; j++, idxPart++)
-                    {
-                    Pt::pt3D pSource = Pt::pt3D(gauss[0][j],gauss[1][j],gauss[2][j]) - c; pSource *= norm;
-                    const FPoint<FReal> particlePosition(pSource.x(), pSource.y(), pSource.z());
-                    tree->insert(particlePosition, FParticleTypeSource, idxPart, 0.0);
-                    }
-                });//end for_each on fac
+            
+            insertCharges<Facette::Fac,Facette::NPI>(fem.fac,idxPart,c);
+            if(VERBOSE) { std::cout << "Surface charges inserted." << std::endl; }
+            
             counter.tac();
-            if(VERBOSE)
-                { std::cout << "Done  " << "(@Creating and Inserting Particles = " << counter.elapsed() << "s)." << std::endl; }
+            if(VERBOSE) { std::cout << "Done (@Creating and Inserting Particles = " << counter.elapsed() << "s)." << std::endl; }
             }
         
     /**
@@ -238,9 +234,8 @@ class fmm
                     for (int j=0; j<Facette::NPI; j++)
                         {
                         Pt::pt3D pg = Pt::pt3D(gauss[Pt::IDX_X][j], gauss[Pt::IDX_Y][j], gauss[Pt::IDX_Z][j]);
-                        double rij = Pt::dist(p_i_,pg);
                         double sj = Ms* ( u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z() );
-                        corr[i_]-= sj/rij * fac.weight[j];
+                        corr[i_]-= sj*fac.weight[j]/Pt::dist(p_i_,pg);
                         }
                     corr[i_]+= fac.potential(getter,i);//potential<Hv>(fem.node, fac, i);
                     }
@@ -258,8 +253,7 @@ class fmm
             memset(physicalValues, 0, nbParticlesInLeaf*sizeof(FReal));
 
             for(int idxPart = 0 ; idxPart < nbParticlesInLeaf ; ++idxPart){
-                const int indexPartOrig = indexes[idxPart];
-                const int nsrc = indexPartOrig-NOD;
+                const int nsrc = indexes[idxPart] - NOD;
                 assert((nsrc>=0) && (nsrc<SRC));
                 physicalValues[idxPart]=srcDen[nsrc];
                 }
@@ -277,7 +271,7 @@ class fmm
         algo.execute();
 
         tree->forEachLeaf([this,&fem](LeafClass* leaf){
-            const FReal*const potentials = leaf->getTargets()->getPotentials();
+            const FReal* const potentials = leaf->getTargets()->getPotentials();
             const int nbParticlesInLeaf  = leaf->getTargets()->getNbParticles();
             //const FVector<int>& indexes  = leaf->getTargets()->getIndexes(); // *ct*
             const FVector<long long>& indexes  = leaf->getTargets()->getIndexes(); // int -> long long *ct*

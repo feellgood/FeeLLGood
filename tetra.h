@@ -265,7 +265,10 @@ class Tet{
         void assemblage(write_matrix &K,write_vector &L) const;
         
         /** getter for N */
-		inline int getN(void) {return N;}
+		inline int getN(void) const {return N;}
+		
+		/** getter for NPI */
+		inline int getNPI(void) const {return NPI;}
 		
 		/** getter for region */
 		inline int getRegion(void) const {return reg;}

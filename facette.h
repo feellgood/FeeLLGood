@@ -178,9 +178,12 @@ class Fac{
         /** assemblage of the matrix and vector elements from inner matrix in facette object */
         void assemblage(write_matrix &K,write_vector &L) const;
         
-        /** convenient getter for N */		
-		inline int getN(void) {return N;}	
+        /** getter for N */		
+		inline int getN(void) const {return N;}	
 
+		/** getter for NPI */		
+		inline int getNPI(void) const {return NPI;}	
+		
         /**
         computes correction on potential
         */
