@@ -164,3 +164,25 @@ pot = pot1 + pot2 + pot3 + h*(k*h/2.+l)*(1-log(h*(a+sqrt(a*a+1)))) - k*h*h/4.;
 return Ms*pot;
 }
 
+void Fac::calcCorr(std::function<const Pt::pt3D (Nodes::Node)> getter,double *corr,double u[DIM][NPI]) const
+{
+// calc coord gauss
+double gauss[DIM][NPI];
+        
+interpolation(Nodes::get_p,gauss);
+// calc corr node by node
+for (int i=0; i<N; i++)
+    {
+    int i_ = ind[i];
+    Pt::pt3D p_i_ = (*refNode)[i_].p;	      
+    for (int j=0; j<NPI; j++)
+        {
+        Pt::pt3D pg = Pt::pt3D(gauss[Pt::IDX_X][j], gauss[Pt::IDX_Y][j], gauss[Pt::IDX_Z][j]);
+        double sj = Ms* ( u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z() );
+        corr[i_]-= sj*weight[j]/Pt::dist(p_i_,pg);
+        }
+    corr[i_]+= potential(getter,i);//potential<Hv>(fem.node, fac, i);
+    }
+}
+
+

@@ -189,6 +189,8 @@ class Fac{
         */
         double potential(std::function<Pt::pt3D (Nodes::Node)> getter, int i) const;
         
+        void calcCorr(std::function<const Pt::pt3D (Nodes::Node)> getter,double *corr,double u[DIM][NPI]) const;
+        
     private:
         int NOD;/**< number of nodes */
         int reg;/**< .msh region number */

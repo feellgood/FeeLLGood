@@ -30,15 +30,14 @@ fem.saver(settings,fout,nt);
 
 while (my_t < settings.tf)
     {
-    std::cout << "\n ------------------------------\n";
-    if (flag) std::cout << "    t  : same (" << flag << ")" << std::endl;
-    else std::cout << "nt = " << nt << ", t = " << my_t << std::endl; // *ct*
-    std::cout << "dt = " << dt << std::endl;
+    std::cout << " ------------------------------\n";
+    if (flag) std::cout << "    t  : same (" << flag << ")";
+    else std::cout << "nt = " << nt << ", t = " << my_t;
+    std::cout << ", dt = " << dt << std::endl;
     if (dt < settings.DTMIN) { fem.reset();break; }
 
     /* changement de referentiel */
     fem.DW_vz += fem.DW_dir*fem.avg(Nodes::get_v_comp,Pt::IDX_Z)*fem.l.z()/2.;
-    
     
     linAlg.set_DW_vz(fem.DW_vz);
     linAlg.set_dt(dt);
@@ -81,8 +80,7 @@ while (my_t < settings.tf)
     settings.dt=dt;
     }//endwhile
 
-if (dt < settings.DTMIN)
-    { std::cout << " aborted:  dt < DTMIN"; }
+if (dt < settings.DTMIN) { std::cout << " aborted:  dt < DTMIN"; }
         
 fem.saver(settings,fout,nt);
 fout.close();

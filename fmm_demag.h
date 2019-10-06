@@ -24,23 +24,16 @@ this header is the interface to scalfmm. Its purpose is to prepare an octree for
 
 #include "fem.h"
 
-
-
-/** double redefinition for the parametrization of some scalfmm templates */
-#define FReal double
-
-
-
 /**
 \namespace scal_fmm to grab altogether the templates and functions using scalfmm for the computation of the demag field 
 */
 
 namespace scal_fmm{
     
-    /** constant parameter for some scalfmm templates */
-    const int P = 9;
+    const int P = 9;/**< constant parameter for some scalfmm templates */
     
-    // pb avec ces templates : ils prennent un argument de plus en 1.5.0 et 1.4.148 //ct
+    typedef double FReal; /**< parameter of scalfmm templates */
+    
     typedef FTypedRotationCell<FReal, P>            CellClass; /**< convenient typedef for the definition of cell type in scalfmm  */
 
     typedef FP2PParticleContainerIndexed<FReal>         ContainerClass; /**< convenient typedef for the definition of container for scalfmm */
@@ -65,7 +58,7 @@ to initialize a tree and a kernel for the computation of the demagnetizing field
 class fmm 
     {
     public:
-        /** constructor */
+        /** constructor, initialize memory for tree, kernel, sources corrections, initialize all sources */
         inline fmm(Fem &fem,bool VERBOSE,const int ScalfmmNbThreads): NOD(fem.node.size()) ,FAC( fem.fac.size()) , TET( fem.tet.size()) , SRC( FAC * Facette::NPI + TET * Tetra::NPI)
             {
             omp_set_num_threads(ScalfmmNbThreads);
@@ -80,8 +73,36 @@ class fmm
             corr=(FReal*) new FReal[NOD]; if (!corr) SYSTEM_ERROR;
             
             norm = fem.fmm_normalizer;
-            init(fem, VERBOSE);
-            if(VERBOSE) { std::cout << "\n>> ScalFMM initialized, using " << ScalfmmNbThreads << " threads.\n" << std::endl; }  
+            
+            FTic counter;
+
+            if(VERBOSE)
+                { std::cout << "Creating & Inserting particles ...\tHeight : " << NbLevels << " \t sub-height : " << SizeSubLevels << std::endl; }
+            counter.tic();
+
+            Pt::pt3D c = fem.c;
+            FSize idxPart=0;
+
+            std::for_each(fem.node.begin(),fem.node.end(),[this,c,&idxPart](Nodes::Node const& n)
+                {
+                Pt::pt3D pTarget = n.p - c; pTarget *= norm;
+                const FPoint<FReal> particlePosition(pTarget.x(), pTarget.y(), pTarget.z());
+                tree->insert(particlePosition, FParticleTypeTarget, idxPart, 0.0);//ct 1 pour target    
+                idxPart++;
+                });//end for_each sur node
+            if(VERBOSE) { std::cout << "Physical nodes inserted." << std::endl; }
+            
+            insertCharges<Tetra::Tet,Tetra::NPI>(fem.tet,idxPart,c);
+            if(VERBOSE) { std::cout << "Volume charges inserted." << std::endl; }
+            
+            insertCharges<Facette::Fac,Facette::NPI>(fem.fac,idxPart,c);
+            if(VERBOSE) { std::cout << "Surface charges inserted." << std::endl; }
+            
+            counter.tac();
+            if(VERBOSE) 
+                { std::cout << "Done (Creating and Inserting Particles = " 
+                    << counter.elapsed() << "s).\n>> ScalFMM initialized, using " 
+                    << ScalfmmNbThreads << " threads.\n" << std::endl; }  
             }
         /** destructor */
         ~fmm ()
@@ -125,60 +146,26 @@ class fmm
         /**
         function template to insert volume or surface charges in tree for demag computation. class T is Tet or Fac, it must have interpolation method, second template parameter is NPI of the namespace containing class T 
         */
-        template <class T,const int NPI> void insertCharges(const std::vector<T> container,FSize &idx,const Pt::pt3D c)
-            {
-            std::for_each(container.begin(),container.end(),[this,c,&idx](T const& elem)              
-                {       // sources de volume
-                double gauss[DIM][NPI];
-                elem.interpolation(Nodes::get_p,gauss);
+    template <class T,const int NPI> void insertCharges(const std::vector<T> container,FSize &idx,const Pt::pt3D c)
+        {
+        std::for_each(container.begin(),container.end(),[this,c,&idx](T const& elem)              
+            {  
+            double gauss[DIM][NPI];
+            elem.interpolation(Nodes::get_p,gauss);
         
-                for (int j=0; j<NPI; j++, idx++)
-                    {
-                    Pt::pt3D pSource = Pt::pt3D(gauss[0][j],gauss[1][j],gauss[2][j]) - c; pSource *= norm;
-                    const FPoint<FReal> particlePosition(pSource.x(), pSource.y(), pSource.z());
-                    tree->insert(particlePosition, FParticleTypeSource, idx, 0.0);
-                    }
-                });//end for_each    
-            }
-        
-        /**
-        initialization function for the building of an octree to compute the demag field
-        */
-        void init(Fem &fem,bool VERBOSE)
-            {
-            FTic counter;
-
-            if(VERBOSE)
-                { std::cout << "Creating & Inserting particles ...\tHeight : " << NbLevels << " \t sub-height : " << SizeSubLevels << std::endl; }
-            counter.tic();
-
-            Pt::pt3D c = fem.c;
-            FSize idxPart=0;
-
-            std::for_each(fem.node.begin(),fem.node.end(),[this,c,&idxPart](Nodes::Node const& n)
+            for (int j=0; j<NPI; j++, idx++)
                 {
-                Pt::pt3D pTarget = n.p - c; pTarget *= norm;
-                const FPoint<FReal> particlePosition(pTarget.x(), pTarget.y(), pTarget.z());
-                tree->insert(particlePosition, FParticleTypeTarget, idxPart, 0.0);//ct 1 pour target    
-                idxPart++;
-                });//end for_each sur node
-            if(VERBOSE) { std::cout << "Physical nodes inserted." << std::endl; }
-            
-            insertCharges<Tetra::Tet,Tetra::NPI>(fem.tet,idxPart,c);
-            if(VERBOSE) { std::cout << "Volume charges inserted." << std::endl; }
-            
-            insertCharges<Facette::Fac,Facette::NPI>(fem.fac,idxPart,c);
-            if(VERBOSE) { std::cout << "Surface charges inserted." << std::endl; }
-            
-            counter.tac();
-            if(VERBOSE) { std::cout << "Done (@Creating and Inserting Particles = " << counter.elapsed() << "s)." << std::endl; }
-            }
+                Pt::pt3D pSource = Pt::pt3D(gauss[0][j],gauss[1][j],gauss[2][j]) - c; pSource *= norm;
+                const FPoint<FReal> particlePosition(pSource.x(), pSource.y(), pSource.z());
+                tree->insert(particlePosition, FParticleTypeSource, idx, 0.0);
+                }
+            });//end for_each    
+        }
         
     /**
     template to computes the demag field, template parameter is either 0 or 1
     */
-        template <int Hv>
-        void demag(Fem &fem,Settings &settings)
+    template <int Hv> void demag(Fem &fem,Settings &settings)
         {
         FmmClass algo(tree, kernels);
         
@@ -197,49 +184,25 @@ class fmm
         std::for_each(fem.tet.begin(),fem.tet.end(),[this,getter,&nsrc,&settings](Tetra::Tet const& tet)              
             {
             double Ms = nu0 * settings.paramTetra[tet.idxPrm].J;
-            /*---------------- INTERPOLATION ---------------*/
             double dudx[DIM][Tetra::NPI], dudy[DIM][Tetra::NPI], dudz[DIM][Tetra::NPI];
             tet.interpolation(getter,dudx,dudy,dudz);
-            /*-----------------------------------------------*/
-
+            
             for (int j=0; j<Tetra::NPI; j++, nsrc++)
                 { srcDen[nsrc] = -Ms * ( dudx[0][j] + dudy[1][j] + dudz[2][j] ) * tet.weight[j]; }
             });//end for_each on tet
 
 
 //      ************************ FACES **************************
-        const bool pot_corr = settings.analytic_corr; 
-
-        std::for_each(fem.fac.begin(),fem.fac.end(),[this,&fem,pot_corr,getter,&nsrc](Facette::Fac const& fac)
+        std::for_each(fem.fac.begin(),fem.fac.end(),[this,getter,&nsrc,&settings](Facette::Fac const& fac)
             {
-            double Ms = fac.Ms;
             Pt::pt3D n = fac.n;
             double u[DIM][Facette::NPI];
-    
             fac.interpolation(getter,u);
     
             for (int j=0; j<Facette::NPI; j++, nsrc++)
-                { srcDen[nsrc] = Ms * ( u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z() ) * fac.weight[j]; }
+                { srcDen[nsrc] = fac.Ms * ( u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z() ) * fac.weight[j]; }
 
-            if (pot_corr)
-                {// calc coord gauss
-                double gauss[DIM][Facette::NPI];
-        
-                fac.interpolation(Nodes::get_p,gauss);
-                // calc corr node by node
-                for (int i=0; i<Facette::N; i++)
-                    {
-                    int i_ = fac.ind[i];
-                    Pt::pt3D p_i_ = fem.node[i_].p;	      
-                    for (int j=0; j<Facette::NPI; j++)
-                        {
-                        Pt::pt3D pg = Pt::pt3D(gauss[Pt::IDX_X][j], gauss[Pt::IDX_Y][j], gauss[Pt::IDX_Z][j]);
-                        double sj = Ms* ( u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z() );
-                        corr[i_]-= sj*fac.weight[j]/Pt::dist(p_i_,pg);
-                        }
-                    corr[i_]+= fac.potential(getter,i);//potential<Hv>(fem.node, fac, i);
-                    }
-                }
+            if (settings.analytic_corr) { fac.calcCorr(getter,corr,u); }
             });// end for_each on fac
 
         fflush(NULL);
