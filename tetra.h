@@ -26,9 +26,10 @@ inline double sq(double x /**< [in] */ ) {return x*x;}
 inline void normalize(triple &a /**< [in,out] */)
 {
 double norme=sqrt(sq(a[0])+sq(a[1])+sq(a[2]));
-a[0]/= norme;a[1]/= norme;a[2]/= norme;
+if(norme>0)
+    { a[0]/= norme;a[1]/= norme;a[2]/= norme; }
+else {std::cerr<< "division by zero : normalize." <<std::endl;}
 }
-
 
 /** \namespace Tetra
  to grab altogether some constants for struct Tet

@@ -65,7 +65,9 @@ class Fem
             std::for_each(node.begin(),node.end(),[this,&i](Nodes::Node const& n)
                 { this->pts[i][0] = n.p.x();this->pts[i][1] = n.p.y();this->pts[i][2] = n.p.z();i++; } );
             
-            femutil(mySets);// initialization of l,c,dim,fmm_normalizer
+            femutil(mySets);// reordering of index nodes for facette orientation, also some modifications on fac::Ms
+            
+            geometry();// initialization of l,c,diam,vol,surf
             
             if (mySets.restore)
                 { readSol(mySets.verbose,mySets.getScale(), mySets.restoreFileName); }
@@ -87,8 +89,6 @@ class Fem
 	double diam;/**< max of l coordinates, to define a bounding box */
 	double surf;/**< total surface */
 	double vol;/**< total volume of the mesh */
-	
-	double fmm_normalizer;/**< normalizing geometrical constant for the computation of the demag field */
 	
 	double t;/**< physical current time of the simulation */
 	
@@ -233,7 +233,7 @@ void readNewMesh(Settings const& mySets,std::ifstream &msh);
 /** reading mesh file function */
 void readMesh(Settings const& mySets);
 
-/**  utilitary function to initialize pts,kdtree,l,c,diam, computes the surfaces and volumes and reorientation of the tetrahedrons if needed in fem struct; definition of Ms on facette elements <br>
+/**  utilitary function to initialize pts,kdtree, reorientation of the tetrahedrons if needed; definition of Ms on facette elements <br>
 Indices and orientation convention : 
 
                         v
@@ -258,6 +258,9 @@ Indices and orientation convention :
 */
         void femutil(Settings const& settings /**< [in] */);
 
+        /** find center and length along coordinates and diameter = max(l(x|y|z)), computes vol,surf */
+        void geometry(void);
+        
         /** find direction of motion of DW */
         void direction(bool VERBOSE /**< [in] VERBOSE mode */, enum Pt::index idx_dir /**< [in] */);
 

@@ -72,7 +72,7 @@ class fmm
             srcDen = (FReal*) new FReal[SRC]; if (!srcDen) SYSTEM_ERROR;
             corr=(FReal*) new FReal[NOD]; if (!corr) SYSTEM_ERROR;
             
-            norm = fem.fmm_normalizer;
+            norm = 1./(2.*fem.diam);
             
             FTic counter;
 
