@@ -2,8 +2,8 @@
 #define pt3D_h
 
 /** \file pt3D.h
- * \brief class pt2D and pt3D and their algebra
- * header containing pt2D and pt3D class, some functions to operate algebric operations;  << >> and
+ * \brief class pt3D and its algebra
+ * header containing pt3D class, some functions to operate algebric operations;  << >> and
  * a template to write text files from std::vector<>
  */
 
@@ -38,132 +38,6 @@ inline double sign(double x) {if (x>0) return 1.0; else return -1.0; }
 \return \f$ x^2 \f$
 */
 inline double sq(double x) {return x*x;}
-
-/** \class pt2D
-\brief convenient class to perform geometrical operations on \f$ \mathbb{R}^2 \f$ points
- */
-class pt2D
-{
-    
-public:
-    /**
-     * default constructor : initialization by zero values
-     */
-    inline pt2D() {_x = _y = 0.0;}
-    
-    /**
-     * constructor by values
-     */
-    inline pt2D(double a,double b) {_x=a; _y=b;}
-
-    /**
-     * returns a unit vector built by coordinate index, usefull to buid basis
-     * example : pt2D p = pt2D(IDX_Y); //p will contain (x,y) = (0.0,1.0)
-     */
-    inline pt2D(enum index idx) {_x = _y = 0.0;if(idx==0) {_x=1.0;} else {_y=1.0;}}
-    
-    /**
-     * constructor copy
-    */
-     inline pt2D(const pt2D & p) { _x=p.x(); _y=p.y(); }
-    
-    /**
-     * getter for x coordinate : example : double x0 = pt.x();
-     */
-    inline double x(void) const {return _x;}
-    
-    /**
-     * getter for y coordinate  : example : double y0 = pt.y();
-     */
-    inline double y(void) const {return _y;}
-    
-    /**
-    * setter for x coordinate : example : pt.x(0.707);
-     */
-     inline void x(double a) {_x = a;}
-    
-    /**
-     * setter for y coordinate : example : pt.y(3.14);
-     */
-    inline void y(double b) {_y = b;}
-    
-    /**
-     * setter/getter by index : example : p(IDX_X) = 3.14; is equivalent to p.x(3.14);
-     */
-    inline double& operator() (const unsigned i) { if(i==0) {return _x;} else return _y; }
-    
-    /**
-     * algebric += components by components
-     */
-    inline pt2D& operator+=(const pt2D& a) { _x += a.x(); _y += a.y(); return *this; }
-    
-    /**
-     * algebric -= components by components
-     */
-    inline pt2D& operator-=(const pt2D& a) { _x -= a.x(); _y -= a.y(); return *this; }
-    
-    /**
-     * algebric /= , if a is zero do nothing and send a message on cerr
-     */
-    inline pt2D& operator/=(const double& a)
-    { if (a!=0) { _x /= a;_y /= a; } else std::cerr << "division by zero in pt2D::operator/=" << std::endl;
-    return *this; }
-    
-    /**
-     * algebric 2D normalization : divide each components x and y by the norm R^2 in place
-     */
-    inline void normalize(void)
-    { double r = sqrt(_x*_x + _y*_y);
-        if (r > 0.0) { _x /= r; _y /= r; }
-    return; }
-    
-    /**
-     * printing function, called by operator<<
-     */
-    inline void affiche(std::ostream &flux) const { flux << _x << "\t" << _y ;}
-    
-private:
-    double _x;/**< rectangular X coordinate */
-    double _y;/**< rectangular Y coordinate */
-};
-
-/** operator<< for pt2D */
-inline std::ostream &operator<<(std::ostream &flux, pt2D const& p) { p.affiche(flux);return flux; }
-
-    /** operator>> for pt2D */
-inline std::istream &operator>>(std::istream &flux,pt2D & p) { double a,b; flux >> a >> b; p.x(a); p.y(b); return flux;}
-
-/**
- * algebra : +
- */
-inline pt2D operator+(pt2D const& a,pt2D const& b) { pt2D r = pt2D(a); r += b; return r; }
-
-/**
- * algebra : -
- */
-inline pt2D operator-(pt2D const& a,pt2D const& b) { pt2D r = pt2D(a); r -= b; return r; }
-
-/**
-* algebra : left scalar product
-*/
- inline pt2D operator*(double const& a,pt2D const& b) { return pt2D(a*b.x(),a*b.y()); }
-
-/**
- * algebra : division by a scalar on the right
- */
-inline pt2D operator/(pt2D const & a,double const& b) { return pt2D(a.x()/b,a.y()/b); }
-
-/**
- * algebra : euclidian scalar product
- */
-inline double pScal(pt2D const& a,pt2D const& b) { return( a.x()*b.x() + a.y()*b.y() ); }
-
-/** 
- * algebra : returns euclidian norm <br>
- The norm of \f$(x,y)\f$ is \f$\sqrt{x^2+y^2}\f$.
- */
-inline double norme(pt2D const & p) {return sqrt(p.x()*p.x() + p.y()*p.y() );}
-
 
 
 /** \class pt3D
@@ -247,9 +121,11 @@ public:
     
     /**
      * getter/setter by index
-     @param i is an unsigned (0|1|2) use of IDX_X IDX_Y IDX_Z is recommended
+     @param i is an enum IDX_X IDX_Y IDX_Z
      */
     inline double& operator() (const index i) { if(i==IDX_X) {return _x;} else {if(i==IDX_Y) {return _y;} else return _z;} }
+    
+    inline double operator() (const index i) const { if(i==IDX_X) {return _x;} else {if(i==IDX_Y) {return _y;} else return _z;} }
     
     inline pt3D& operator=(pt3D const& p) {_x = p.x(); _y = p.y(); _z = p.z(); return *this;} /**< operator= */
     
@@ -281,11 +157,11 @@ public:
 	inline double norm(void) {return sqrt(_x*_x + _y*_y + _z*_z);}
 
     /**
-     * algebric 3D normalization : divide each components x,y and z by the norm \f$ \mathcal{R}^3 \f$ in place
+     * normalization : divide each components x,y and z by the norm \f$ \mathcal{R}^3 \f$ in place without safety
      */
     inline void normalize(void)
-    { double r = sqrt(_x*_x + _y*_y + _z*_z);
-    if (r > 0.0) { _x /= r; _y /= r; _z /= r; }
+    { double inv_r = 1.0/sqrt(_x*_x + _y*_y + _z*_z);
+    _x *= inv_r; _y *= inv_r; _z *= inv_r;
     return; }
     
     /**
@@ -348,6 +224,11 @@ inline pt3D operator/(pt3D const & a,double const& b) { return pt3D(a.x()/b,a.y(
 algebra : R^3 scalar product
  */
 inline double pScal(pt3D const& a,pt3D const& b) { return( a.x()*b.x() + a.y()*b.y() + a.z()*b.z() ); }
+
+/**
+algebra : R^3 scalar triple product
+ */
+inline double pTriple(pt3D const& a,pt3D const& b,pt3D const& c) { return pScal( a*b , c ); }
 
 
 /**

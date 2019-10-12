@@ -201,7 +201,6 @@ try { sub_tree = root.get_child("demagnetization field solver"); }
 catch (std::exception &e)
     { std::cout << e.what() << std::endl; }
 scalfmmNbTh = sub_tree.get<int>("nbThreads",8);
-analytic_corr = sub_tree.get<bool>("analytic corrections",true);
 
 try { sub_tree = root.get_child("finite element solver"); }
 catch (std::exception &e)

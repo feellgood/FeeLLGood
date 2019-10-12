@@ -1,5 +1,6 @@
 #include "fem.h"
 
+
 void Fem::energy(Settings const& settings)
 {
 double uz_drift=2.*DW_z/l.z()*DW_dir;
@@ -16,9 +17,12 @@ std::for_each(tet.begin(),tet.end(),[this,settings,uz_drift](Tetra::Tet const& t
     te.interpolation(Nodes::get_phi,phi);
     
     E_exch += te.exchangeEnergy(param,dudx,dudy,dudz);
+    
     E_demag += te.demagEnergy(param,dudx,dudy,dudz,phi);
+    
     if((param.K != 0.0)||(param.K3 != 0.0))
         { E_aniso += te.anisotropyEnergy(param,u); }
+    
     E_zeeman += te.zeemanEnergy(param,uz_drift,Hext,u);
     }
 );

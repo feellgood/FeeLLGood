@@ -34,11 +34,11 @@ execute_process(
 MESSAGE(STATUS "MAX_NB_THREADS = ${MAX_NB_THREADS}")
 
 #===========================================================================
-# Compiler options
+# Compiler options -ffast-math
 # -msse4.2 -mfpmath=sse (on X86 -mfpmath=sse is set by default ) or -mavx
 #===========================================================================
 
-set( CMAKE_CXX_FLAGS "-DNDEBUG -Wall -Wextra -std=c++11 -fopenmp -O3 -ffast-math -march=native" CACHE STRING "C++ compiler flags used during builds." FORCE )
+set( CMAKE_CXX_FLAGS "-DNDEBUG -Wall -Wextra -std=c++11 -fopenmp -O3 -march=native" CACHE STRING "C++ compiler flags used during builds." FORCE )
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
 

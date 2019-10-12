@@ -165,7 +165,7 @@ class Fem
     */
     double avg(std::function<double (Nodes::Node,Pt::index)> getter /**< [in] */,Pt::index d /**< [in] */) const
     {// syntaxe pénible avec opérateur binaire dans la lambda pour avoir un += sur la fonction voulue, with C++17 we should use reduce instead of accumulate here
-    double sum = std::accumulate(tet.begin(),tet.end(),0.0, [&getter,&d](double &s,Tetra::Tet const& te)
+    double sum = std::accumulate(tet.begin(),tet.end(),0.0, [getter,&d](double &s,Tetra::Tet const& te)
                             {
                             double val[Tetra::NPI]; 
                             te.interpolation(getter,d,val); 
@@ -198,9 +198,11 @@ class Fem
         { std::for_each( node.begin(),node.end(), [this,&mySets](Nodes::Node & n) 
             {
             Pt::pt3D pNorm = Pt::pt3D( (n.p.x() - c.x())/l.x() , (n.p.y() - c.y())/l.y() , (n.p.z() - c.z())/l.z() );
-            n.u0 = mySets.getValue(pNorm);// u or u0?
+            n.u0 = mySets.getValue(pNorm);
             n.u = n.u0;
-            n.phi  = 0.;} 
+            n.phi  = 0.;
+            n.phiv = 0.;
+            } 
         ); }
 
 /** return the minimum of all nodes coordinate along coord axis */
@@ -256,17 +258,27 @@ Indices and orientation convention :
                         ` w
 
 */
-        void femutil(Settings const& settings /**< [in] */);
 
-        /** find center and length along coordinates and diameter = max(l(x|y|z)), computes vol,surf */
-        void geometry(void);
+/** check phi values for debug */
+inline void checkNodes(void)
+{
+int k=0;
+for(unsigned int i=0;i<node.size();i++) { if (std::isnan(node[i].phi)) {std::cout << "#" << i<<std::endl; node[i].phi = 0;k++;}  }
+std::cout << "total nb of NaN in node[].phi ="<< k << std::endl;
+}
+
+/** redefine orientation of triangular faces in accordance with the tetrahedron */
+void femutil(Settings const& settings /**< [in] */);
+
+/** find center and length along coordinates and diameter = max(l(x|y|z)), computes vol,surf */
+void geometry(void);
         
-        /** find direction of motion of DW */
-        void direction(bool VERBOSE /**< [in] VERBOSE mode */, enum Pt::index idx_dir /**< [in] */);
+/** find direction of motion of DW */
+void direction(bool VERBOSE /**< [in] VERBOSE mode */, enum Pt::index idx_dir /**< [in] */);
 
 
-        /** zeroing of all energies */
-        inline void zeroEnergy(void) {
+/** zeroing of all energies */
+inline void zeroEnergy(void) {
         E_exch = 0.0;
         E_aniso = 0.0;
         E_demag = 0.0;
@@ -274,7 +286,7 @@ Indices and orientation convention :
         Etot = 0.0;
         }
 
-        /** computes the sum of all energies */
-        inline void calc_Etot(void) { Etot = E_exch + E_aniso + E_demag + E_zeeman; }
+/** computes the sum of all energies */
+inline void calc_Etot(void) { Etot = E_exch + E_aniso + E_demag + E_zeeman; }
 
-    }; // end class
+}; // end class

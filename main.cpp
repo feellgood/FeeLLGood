@@ -52,12 +52,12 @@ fem.infos();
 
 //once fem containers are ok, linAlgebra object is built
 LinAlgebra linAlg(mySettings,fem.node,fem.tet,fem.fac,fem.Hext);
-//linAlg.set_Hext(fem.Hext[0],fem.Hext[1],fem.Hext[2]);
 
 scal_fmm::fmm myFMM = scal_fmm::fmm(fem,mySettings.verbose,mySettings.scalfmmNbTh);
 
 myFMM.calc_demag(fem,mySettings);
-   
+std::cout << "first calc demag done." << std::endl;
+
 int nt = time_integration(fem,mySettings,linAlg,myFMM);
         
 counter.tac();

@@ -72,10 +72,10 @@ inline const Pt::pt3D get_u(Node const& n /**< [in] */) {return n.u;}
 inline const Pt::pt3D get_v(Node const& n /**< [in] */) {return n.v;}
 
 /** getter for u component */
-inline double get_u_comp(Node n /**< [in] */, Pt::index idx /**< [in] */) {return n.u(idx);}
+inline double get_u_comp(Node const& n /**< [in] */, Pt::index idx /**< [in] */) {return n.u(idx);}
 
 /** getter for v component */
-inline double get_v_comp(Node n /**< [in] */ ,Pt::index idx /**< [in] */) {return n.v(idx);}
+inline double get_v_comp(Node const& n /**< [in] */ ,Pt::index idx /**< [in] */) {return n.v(idx);}
 
 
 /** getter for phi */
@@ -86,6 +86,13 @@ inline double get_phi0(Node const& n /**< [in] */) {return n.phi0;}
 
 /** getter for phiv0 */
 inline double get_phiv0(Node const& n /**< [in] */) {return n.phiv0;}
+
+/** setter for phi */
+inline void set_phi(Node & n,double val) {n.phi = val;}
+
+/** setter for phi_v */
+inline void set_phiv(Node & n,double val) {n.phiv = val;}
+
 
 
 } //end namespace Nodes

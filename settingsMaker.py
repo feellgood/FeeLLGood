@@ -64,8 +64,7 @@ class Settings(object):
 
         DEMAGsolver = {}
         DEMAGsolver["nbThreads"] = 16
-        DEMAGsolver["analytic corrections"] = True
-
+        
         self.mySets["demagnetization field solver"] = DEMAGsolver
 
         timing = {}

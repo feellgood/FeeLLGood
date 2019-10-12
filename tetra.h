@@ -238,9 +238,22 @@ class Tet{
         tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result);
         }
 		
-		/** basic region infos */		
-		inline void infos(){std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2]<< "\t"<< ind[3] <<std::endl;};
+		/** basic infos */		
+		inline void infos() const {std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2]<< "\t"<< ind[3] <<std::endl;};
 		
+        /** more infos */		
+		inline void infos(Nodes::index idx) const 
+            {
+            std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2]<< "\t"<< ind[3] <<std::endl;
+            switch(idx)
+                {
+                case Nodes::IDX_p : for(int i=0;i<N;i++) {std::cout<<"p_" << i<<  ((*refNode)[ ind[i] ]).p  <<std::endl;} break;
+                case Nodes::IDX_u : for(int i=0;i<N;i++) {std::cout<<"m_" << i<< ((*refNode)[ ind[i] ]).u  <<std::endl;} break;
+                case Nodes::IDX_phi : for(int i=0;i<N;i++) {std::cout<<"phi" << i<< ((*refNode)[ ind[i] ]).phi  <<std::endl;} break;
+                default:break;
+                }
+            };
+        
 		/** computes the integral contribution of the tetrahedron to the evolution of the magnetization */		
 		void integrales(std::vector<Tetra::prm> const& params,double Hext[DIM],double Vz,double theta,double dt,double tau_r,gmm::dense_matrix <double> &AE, std::vector <double> &BE)  const;
 
@@ -252,6 +265,9 @@ class Tet{
         
         /** anisotropy energy of the tetrahedron */
         double anisotropyEnergy(Tetra::prm const& param,const double u[DIM][NPI]) const;
+        
+        /** volume charges  */
+        void charges(std::function<Pt::pt3D (Nodes::Node)> getter,double *srcDen,int &nsrc,double Ms) const;
         
         /** demagnetizing energy of the tetrahedron */
         double demagEnergy(Tetra::prm const& param,const double dudx[DIM][NPI],const double dudy[DIM][NPI],const double dudz[DIM][NPI],const double phi[NPI]) const;
@@ -303,20 +319,14 @@ class Tet{
 		inline void getScalDataFromNode(std::function<double (Nodes::Node)> getter,double scalData[N]) const
 		{
         for (int i=0; i<N; i++)
-            {
-            Nodes::Node const& n = (*refNode)[ ind[i] ];
-            scalData[i] =  getter(n);
-            }    
+            { scalData[i] =  getter( (*refNode)[ ind[i] ] ); }    
         }
 		
 		/** getter to access and copy some scalar parts (vector components) of the node vector */
 		inline void getScalDataFromNode(std::function<double (Nodes::Node,Pt::index)> getter,Pt::index idx,double scalData[N]) const
 		{
         for (int i=0; i<N; i++)
-            {
-            Nodes::Node const& n = (*refNode)[ ind[i] ];
-            scalData[i] =  getter(n,idx);
-            }    
+            { scalData[i] =  getter( (*refNode)[ ind[i] ] ,idx); }    
         }
         
         gmm::dense_matrix <double> Kp;/**< Kp(2*N,2*N) initialized by constructor */

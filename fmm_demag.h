@@ -120,13 +120,12 @@ class fmm
         {
         if(mySettings.verbose) { std::cout << "\t magnetostatics ..................... "; }
         FTic counter;
-
         counter.tic();
         
         demag<0> (fem,mySettings); // Hd(u)
-        demag<1> (fem,mySettings); // Hd(v), second order contribution
+        demag<1> (fem,mySettings); // Hd(v)
         counter.tac();
-        if(mySettings.verbose) { std::cout << "Done  " << "(@Algorithm = " << counter.elapsed() << "s)." << std::endl; }
+        if(mySettings.verbose) { std::cout << "Done in " << counter.elapsed() << " s." << std::endl; }
         }
         
     private:
@@ -139,7 +138,7 @@ class fmm
         KernelClass *kernels = nullptr;/**< kernel initialized by init private member */
         
         FReal *srcDen;/**< source buffer */
-        FReal *corr;/**< correction coefficients buffer */
+        FReal *corr = nullptr;/**< correction coefficients buffer */
         
         double norm;/**< normalization coefficient */
         
@@ -174,36 +173,22 @@ class fmm
 
         int nsrc = 0;
         std::function<const Pt::pt3D (Nodes::Node)> getter;
-
+        std::function<void (Nodes::Node &,const double)> setter;
+        
         if(Hv)
-            { getter = Nodes::get_v; }
+            { getter = Nodes::get_v; setter = Nodes::set_phiv;}
         else
-            { getter = Nodes::get_u;}
+            { getter = Nodes::get_u; setter = Nodes::set_phi;}
+        
 
 // *********************** TETRAS ********************
         std::for_each(fem.tet.begin(),fem.tet.end(),[this,getter,&nsrc,&settings](Tetra::Tet const& tet)              
-            {
-            double Ms = nu0 * settings.paramTetra[tet.idxPrm].J;
-            double dudx[DIM][Tetra::NPI], dudy[DIM][Tetra::NPI], dudz[DIM][Tetra::NPI];
-            tet.interpolation(getter,dudx,dudy,dudz);
-            
-            for (int j=0; j<Tetra::NPI; j++, nsrc++)
-                { srcDen[nsrc] = -Ms * ( dudx[0][j] + dudy[1][j] + dudz[2][j] ) * tet.weight[j]; }
-            });//end for_each on tet
+            { tet.charges(getter,srcDen,nsrc, nu0 * settings.paramTetra[tet.idxPrm].J ); });//end for_each on tet
 
 
 //      ************************ FACES **************************
         std::for_each(fem.fac.begin(),fem.fac.end(),[this,getter,&nsrc,&settings](Facette::Fac const& fac)
-            {
-            Pt::pt3D n = fac.n;
-            double u[DIM][Facette::NPI];
-            fac.interpolation(getter,u);
-    
-            for (int j=0; j<Facette::NPI; j++, nsrc++)
-                { srcDen[nsrc] = fac.Ms * ( u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z() ) * fac.weight[j]; }
-
-            if (settings.analytic_corr) { fac.calcCorr(getter,corr,u); }
-            });// end for_each on fac
+            { fac.charges(getter,srcDen,corr,nsrc); });// end for_each on fac
 
         fflush(NULL);
 
@@ -211,15 +196,10 @@ class fmm
         tree->forEachLeaf([this](LeafClass* leaf)
             {
             const int nbParticlesInLeaf = leaf->getSrc()->getNbParticles();
-            const FVector<long long>& indexes = leaf->getSrc()->getIndexes(); // pas int mais long long  *ct*
+            const FVector<long long>& indexes = leaf->getSrc()->getIndexes();
             FReal* const physicalValues = leaf->getSrc()->getPhysicalValues();
             memset(physicalValues, 0, nbParticlesInLeaf*sizeof(FReal));
-
-            for(int idxPart = 0 ; idxPart < nbParticlesInLeaf ; ++idxPart){
-                const int nsrc = indexes[idxPart] - NOD;
-                assert((nsrc>=0) && (nsrc<SRC));
-                physicalValues[idxPart]=srcDen[nsrc];
-                }
+            for(int idxPart = 0 ; idxPart < nbParticlesInLeaf ; ++idxPart){ physicalValues[idxPart]=srcDen[ indexes[idxPart] - NOD ]; }
             });
 
         tree->forEachLeaf([](LeafClass* leaf){
@@ -233,20 +213,15 @@ class fmm
 
         algo.execute();
 
-        tree->forEachLeaf([this,&fem](LeafClass* leaf){
+        tree->forEachLeaf([this,&fem,setter](LeafClass* leaf){
             const FReal* const potentials = leaf->getTargets()->getPotentials();
             const int nbParticlesInLeaf  = leaf->getTargets()->getNbParticles();
-            //const FVector<int>& indexes  = leaf->getTargets()->getIndexes(); // *ct*
-            const FVector<long long>& indexes  = leaf->getTargets()->getIndexes(); // int -> long long *ct*
+            const FVector<long long>& indexes  = leaf->getTargets()->getIndexes();
 
             for(int idxPart = 0 ; idxPart < nbParticlesInLeaf ; ++idxPart)
                 {
                 const int indexPartOrig = indexes[idxPart];
-
-                if (Hv) 
-                    fem.node[indexPartOrig].phiv = (potentials[idxPart]*norm + corr[indexPartOrig])/(4*M_PI);
-                else 
-                    fem.node[indexPartOrig].phi  = (potentials[idxPart]*norm + corr[indexPartOrig])/(4*M_PI);
+                setter(fem.node[indexPartOrig], (potentials[idxPart]*norm + corr[indexPartOrig])/(4*M_PI));
                 }
             });
         }

@@ -30,7 +30,6 @@ class Settings{
         withVtk = false;
         evol_header = false;
         theta=0.5;
-        analytic_corr = true;
         MAXITER = 500;
         REFRESH_PRC = 20;
         recenter = false;
@@ -97,9 +96,6 @@ class Settings{
 	/** for time integration \f$ \theta \f$ scheme  */
 	double theta;
 	
-    /** analytical corrections to the potential, extra contribution from surface charges */
-    bool analytic_corr;
-    
 /** \f$ \epsilon \f$ is a small value, used to modify slightly J in (tet|facette).integrales */
     double EPSILON;
 

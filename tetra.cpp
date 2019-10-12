@@ -250,7 +250,16 @@ for (int npi=0; npi<NPI; npi++)
 
 return weightedScalarProd(dens);
 }
-        
+
+void Tet::charges(std::function<Pt::pt3D (Nodes::Node)> getter,double *srcDen,int &nsrc,double Ms) const
+{
+double dudx[DIM][NPI], dudy[DIM][NPI], dudz[DIM][NPI];
+interpolation(getter,dudx,dudy,dudz);
+            
+for (int j=0; j<NPI; j++, nsrc++)
+    { srcDen[nsrc] = -Ms * ( dudx[0][j] + dudy[1][j] + dudz[2][j] ) * weight[j]; }
+}
+
 double Tet::demagEnergy(Tetra::prm const& param,const double dudx[DIM][NPI],const double dudy[DIM][NPI],const double dudz[DIM][NPI],const double phi[NPI]) const
 {
 double dens[NPI];
@@ -310,10 +319,10 @@ for (int i=0; i < N; i++)
 
 double Tet::Jacobian(double J[DIM][DIM])
 {
-Pt::pt3D p0 = (*refNode)[ ind[0] ].p;
-Pt::pt3D p1 = (*refNode)[ ind[1] ].p;
-Pt::pt3D p2 = (*refNode)[ ind[2] ].p;
-Pt::pt3D p3 = (*refNode)[ ind[3] ].p;
+Pt::pt3D const & p0 = (*refNode)[ ind[0] ].p;
+Pt::pt3D const & p1 = (*refNode)[ ind[1] ].p;
+Pt::pt3D const & p2 = (*refNode)[ ind[2] ].p;
+Pt::pt3D const & p3 = (*refNode)[ ind[3] ].p;
 J[0][0] = p1.x()-p0.x(); J[0][1] = p2.x()-p0.x(); J[0][2] = p3.x()-p0.x();   
 J[1][0] = p1.y()-p0.y(); J[1][1] = p2.y()-p0.y(); J[1][2] = p3.y()-p0.y();
 J[2][0] = p1.z()-p0.z(); J[2][1] = p2.z()-p0.z(); J[2][2] = p3.z()-p0.z();
@@ -324,19 +333,15 @@ return Pt::det(J);
 
 void Tet::calc_vol(void)
 {
-int i0,i1,i2,i3;
-i0=ind[0];   i1=ind[1];   i2=ind[2];   i3=ind[3];
-   
-Pt::pt3D p0 = (*refNode)[i0].p;
-Pt::pt3D p1 = (*refNode)[i1].p;
-Pt::pt3D p2 = (*refNode)[i2].p;
-Pt::pt3D p3 = (*refNode)[i3].p;
-Pt::pt3D vec = (p1-p0)*(p2-p0);
+Pt::pt3D const & p0 = (*refNode)[ ind[0] ].p;
+Pt::pt3D const & p1 = (*refNode)[ ind[1] ].p;
+Pt::pt3D const & p2 = (*refNode)[ ind[2] ].p;
+Pt::pt3D const & p3 = (*refNode)[ ind[3] ].p;
 
-vol  = 1./6.* pScal(vec,p3-p0);
-   if (vol<0.) {
-      ind[3]=i2; ind[2]=i3;
-      vol *= -1;
-      //if(VERBOSE) { std::cout << "ill-oriented tetrahedron, now corrected!"<< std::endl; }
-      }
+vol  = Pt::pTriple(p1-p0,p2-p0,p3-p0)/6.0;
+if (vol<0.)
+    {
+    std::swap(ind[2],ind[3]); 
+    vol *= -1;
+    }
 }
