@@ -16,7 +16,7 @@ mySettings["outputs"]["directory"] = "test_data_out/"
 
 mySettings["mesh"]["filename"] = "ellipsoid.msh"
 
-mySettings["Bext"] = [0.1,0.0,-1.0]
+mySettings["Bext"] = [1.0,0.0,-1.0]
 mySettings["mesh"]["volume_regions"]["300"]["alpha"] = 0.02
 
 mySettings["time integration"]["final_time"] = 1e-6
