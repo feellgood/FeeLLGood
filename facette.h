@@ -26,6 +26,7 @@ const double pds[NPI] = {-27/96., 25/96., 25/96., 25/96.};/**< some constant wei
 /** hat function constants */
 constexpr double a[N][NPI] = {{1.-u[0]-v[0],1.-u[1]-v[1],1.-u[2]-v[2],1.-u[3]-v[3]},{u[0],u[1],u[2],u[3]},{v[0],v[1],v[2],v[3]}};
 
+/** return \f$ x^2 \f$ */
 inline double sq(const double x) {return x*x;}
 
 /** \class prm
@@ -197,6 +198,7 @@ class Fac{
         */
         double potential(std::function<Pt::pt3D (Nodes::Node)> getter, int i) const;
         
+        /** computes correction values */
         void calcCorr(std::function<const Pt::pt3D (Nodes::Node)> getter,double *corr,double u[DIM][NPI]) const;
         
     private:

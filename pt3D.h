@@ -125,6 +125,9 @@ public:
      */
     inline double& operator() (const index i) { if(i==IDX_X) {return _x;} else {if(i==IDX_Y) {return _y;} else return _z;} }
     
+    /**
+    getter by index
+    */
     inline double operator() (const index i) const { if(i==IDX_X) {return _x;} else {if(i==IDX_Y) {return _y;} else return _z;} }
     
     inline pt3D& operator=(pt3D const& p) {_x = p.x(); _y = p.y(); _z = p.z(); return *this;} /**< operator= */
