@@ -51,18 +51,18 @@ public:
     /**
      * default constructor : initialization by zero values
      */
-    inline pt3D() : _x(0),_y(0),_z(0) {}
+    inline pt3D() {memset(_x,0,DIM);}
     
     /** constructor by values, cartesian coordinates */
-    inline pt3D(const double a,const double b,const double c) : _x(a),_y(b),_z(c) {}
+    inline pt3D(const double a,const double b,const double c) {_x[IDX_X] =a; _x[IDX_Y]=b; _x[IDX_Z]=c; }
     
     /** unit vector constructor by values, spherical coordinates \f$ (r=1,\theta \in [0,\pi],\phi \in [0,2 \pi]) \f$ */
     inline pt3D(const double theta,const double phi)
         {
         double si_t = sin(theta);
-        _x = si_t*cos(phi);
-        _y = si_t*sin(phi);
-        _z = cos(theta);
+        _x[IDX_X] = si_t*cos(phi);
+        _x[IDX_Y] = si_t*sin(phi);
+        _x[IDX_Z] = cos(theta);
         }
     
     
@@ -72,118 +72,116 @@ public:
      p will contain \f$ (x,y,z) = (0.0,1.0,0.0) \f$
      */
     inline pt3D(const enum index idx)
-        {_x = _y = _z = 0.0;if(idx==IDX_X) {_x=1.0;} else {if(idx==IDX_Y) {_y=1.0;} else _z=1.0;}}
+        {memset(_x,0,DIM);_x[idx] = 1.0;}
     
     
-     inline pt3D(const pt3D & p) { _x=p.x(); _y=p.y(); _z=p.z(); }
+     inline pt3D(const pt3D & p) { memcpy(_x,p._x,sizeof _x); }
     /**< constructor copy */
     
     
     /**
      * getter for x coordinate : example : double x0 = pt.x();
      */
-    inline double x(void) const {return _x;}
+    inline double x(void) const {return _x[IDX_X];}
     
     /**
      * getter for y coordinate : example : double y0 = pt.y();
      */
-    inline double y(void) const {return _y;}
+    inline double y(void) const {return _x[IDX_Y];}
     
     /**
      * getter for z coordinate : example : double z0 = pt.z();
      */
-    inline double z(void) const {return _z;}
+    inline double z(void) const {return _x[IDX_Z];}
     
     /**
      * \return \f$ \rho \f$ in cylindrical coordinates \f$ (\rho,\theta,z) \f$
      */
-    inline double rho(void) const {return sqrt(_x*_x + _y*_y);}
+    inline double rho(void) const {return sqrt(_x[IDX_X]*_x[IDX_X] + _x[IDX_Y]*_x[IDX_Y]);}
     
     /**
      \return \f$ \theta \f$ in cylindrical cordinates \f$ (\rho,\theta,z) \f$
      */
-    inline double theta(void) const {return atan2(_y,_x);}
+    inline double theta(void) const {return atan2(_x[IDX_Y],_x[IDX_X]);}
     
     /**
      * setter for x coordinate : example : pt.x(0.707);
      */
-    inline void x(double a) {_x = a;}
+    inline void x(double a) {_x[IDX_X] = a;}
     
     /**
      * setter for y coordinate : example : pt.y(0.707);
      */
-    inline void y(double b) {_y = b;}
+    inline void y(double b) {_x[IDX_Y] = b;}
     
     /**
      * setter for z coordinate : example : pt.z(0.707);
      */
-    inline void z(double c) {_z = c;}
+    inline void z(double c) {_x[IDX_Z] = c;}
     
     /**
      * getter/setter by index
      @param i is an enum IDX_X IDX_Y IDX_Z
      */
-    inline double& operator() (const index i) { if(i==IDX_X) {return _x;} else {if(i==IDX_Y) {return _y;} else return _z;} }
+    inline double& operator() (const index i) { return _x[i]; }
     
     /**
     getter by index
     */
-    inline double operator() (const index i) const { if(i==IDX_X) {return _x;} else {if(i==IDX_Y) {return _y;} else return _z;} }
+    inline double operator() (const index i) const { return _x[i]; }
     
-    inline pt3D& operator=(pt3D const& p) {_x = p.x(); _y = p.y(); _z = p.z(); return *this;} /**< operator= */
+    inline pt3D& operator=(pt3D const& p) {_x[IDX_X] = p.x(); _x[IDX_Y] = p.y(); _x[IDX_Z] = p.z(); return *this;} /**< operator= */
     
     /**
      * algebric += components by components
      */
-    inline pt3D& operator+=(const pt3D& a) { _x += a.x(); _y += a.y(); _z += a.z(); return *this; }
+    inline pt3D& operator+=(const pt3D& a) { _x[IDX_X] += a.x(); _x[IDX_Y] += a.y(); _x[IDX_Z] += a.z(); return *this; }
     
     /**
      * algebric -= components by components
      */
-    inline pt3D& operator-=(const pt3D& a) { _x -= a.x(); _y -= a.y(); _z -= a.z(); return *this; }
+    inline pt3D& operator-=(const pt3D& a) { _x[IDX_X] -= a.x(); _x[IDX_Y] -= a.y(); _x[IDX_Z] -= a.z(); return *this; }
     
 
 /** algebric *= with a double */
-    inline pt3D& operator*=(const double& a) { _x *= a;_y *= a;_z *= a; return *this; }    
+    inline pt3D& operator*=(const double& a) { _x[IDX_X] *= a;_x[IDX_Y] *= a;_x[IDX_Z] *= a; return *this; }    
 
 /**
      * algebric /= , if a is zero do nothing and send a message on cerr
      */
     inline pt3D& operator/=(const double& a)
-    { if (a!=0) { _x /= a;_y /= a;_z /= a; }
+    { if (a!=0) { _x[IDX_X] /= a;_x[IDX_Y] /= a;_x[IDX_Z] /= a; }
     else std::cerr << "division by zero in pt3D::operator/=" << std::endl;
     return *this; }
     
 	/**
      * return algebric norm \f$ \mathcal{R}^3 \f$
      */
-	inline double norm(void) {return sqrt(_x*_x + _y*_y + _z*_z);}
+	inline double norm(void) {return sqrt(_x[IDX_X]*_x[IDX_X] + _x[IDX_Y]*_x[IDX_Y] + _x[IDX_Z]*_x[IDX_Z]);}
 
     /**
      * normalization : divide each components x,y and z by the norm \f$ \mathcal{R}^3 \f$ in place without safety
      */
     inline void normalize(void)
-    { double inv_r = 1.0/sqrt(_x*_x + _y*_y + _z*_z);
-    _x *= inv_r; _y *= inv_r; _z *= inv_r;
+    { double inv_r = 1.0/norm();
+    _x[IDX_X] *= inv_r; _x[IDX_Y] *= inv_r; _x[IDX_Z] *= inv_r;
     return; }
     
     /**
      * printing function, called by operator<<
      */
-    inline void affiche(std::ostream &flux) const { flux << _x << "\t" << _y << "\t" << _z ; }
+    inline void affiche(std::ostream &flux) const { flux << _x[IDX_X] << "\t" << _x[IDX_Y] << "\t" << _x[IDX_Z] ; }
 
     /**
      scaling factor mainly for writing files in user units
      */
-    inline void rescale(double scaling) {_x *= scaling; _y *= scaling; _z *= scaling; }
+    inline void rescale(double scaling) {_x[IDX_X] *= scaling; _x[IDX_Y] *= scaling; _x[IDX_Z] *= scaling; }
    
     /** \return max length coordinate */
-    inline double maxLength(void) {return std::max(_z,std::max(_y,_x));}   
+    inline double maxLength(void) {return std::max(_x[IDX_X],std::max(_x[IDX_Y],_x[IDX_Z]));}   
    
 private:
-    double _x;/**< rectangular X coordinate */
-    double _y;/**< rectangular Y coordinate */
-    double _z;/**< rectangular Z coordinate */
+    double _x[DIM];/**< rectangular coordinates */
 };
 
 /** operator<< for pt3D, coordinates are tab separated */
