@@ -51,10 +51,10 @@ if(val.returncode==0):
 	my = float(data[2])
 	mz = float(data[3])
 	print("mag= ",mx,';',my,';',mz)
-	X = 0.597871
-	Y = -0.00969841
-	Z = -0.801533
-	if(sqrt((X-mx)**2+(Y-my)**2+(Z-mz)**2) < 1e-6):
+	X = 0.599777
+	Y = -0.001447
+	Z = -0.800166
+	if(sqrt((X-mx)**2+(Y-my)**2+(Z-mz)**2) < 5e-5):
 		valRet = 0
 	else:
 		valRet = 1
