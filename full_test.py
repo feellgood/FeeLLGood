@@ -37,7 +37,7 @@ else:
 	os.system("mkdir " + mySettings["outputs"]["directory"])
 
 print("FeeLLGood running...")
-val = subprocess.run(["./feellgood","mySettings.json"],capture_output=True)
+val = subprocess.run(["./feellgood","mySettings.json"])
 
 if(val.returncode==0):
 	print("FeeLLGood terminated correctly")
