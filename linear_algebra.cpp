@@ -1,25 +1,19 @@
 #include "linear_algebra.h"
 
-
-void LinAlgebra::deepCopyTet(std::vector <Tetra::Tet> const& myTet)
+void LinAlgebra::prepareItTet(std::vector <Tetra::Tet> &myTet)
 {
 const unsigned long block_size = std::distance(myTet.begin(),myTet.end())/NbTH;
+std::vector<Tetra::Tet>::iterator it = myTet.begin();
 
-std::vector<Tetra::Tet>::const_iterator it_begin = myTet.begin();
-
-for(int i=0;i<(NbTH-1);i++) 
+std::for_each(refTetIt.begin(),refTetIt.end(),[&it,myTet,block_size] (std::pair<std::vector<Tetra::Tet>::iterator,std::vector<Tetra::Tet>::iterator> & p_it)
     {
-    std::vector<Tetra::Tet>::const_iterator it_end = it_begin;
-    std::advance(it_end,block_size);
-    refTet[i].resize(block_size,Tetra::Tet(NOD));
-    std::copy( it_begin, it_end, refTet[i].begin() );
-    it_begin = it_end;
+    p_it.first = it;
+    std::advance(it,block_size);
+    p_it.second = it;            
     }
-const unsigned long last_block_size = std::distance(it_begin,myTet.end());
-refTet[NbTH-1].resize(last_block_size,Tetra::Tet(NOD));
-std::copy( it_begin, myTet.end(), refTet[NbTH-1].begin() );    
+    );
+refTetIt[NbTH-1].second = std::prev(myTet.end());
 }
-
 
 void LinAlgebra::base_projection(void)
 {

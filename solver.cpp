@@ -23,7 +23,7 @@ for(int i=0;i<NbTH;i++)
             thread_local gmm::dense_matrix <double> K(3*Tetra::N,3*Tetra::N);
             thread_local std::vector <double> L(3*Tetra::N);
             
-            std::for_each(refTet[i].begin(),refTet[i].end(), [this,&K_TH,&L_TH](Tetra::Tet & tet)
+            std::for_each(refTetIt[i].first,refTetIt[i].second, [this,&K_TH,&L_TH](Tetra::Tet & tet)
                 {
                 tet.integrales(settings.paramTetra,Hext,DW_vz,settings.theta,dt,settings.TAUR,K, L);     
                 tet.projection( K, L);
@@ -65,7 +65,7 @@ tab_TH[NbTH] = std::thread( [this,&K_TH,&L_TH]()
 for(int i=0;i<(NbTH+1);i++) {tab_TH[i].join();}
 
 for(int i=0;i<(NbTH);i++)
-    { std::for_each(refTet[i].begin(),refTet[i].end(),[&K_TH,&L_TH](Tetra::Tet const& tet){if(!tet.treated) tet.assemblage(K_TH,L_TH);}); }
+    { std::for_each(refTetIt[i].first,refTetIt[i].second,[&K_TH,&L_TH](Tetra::Tet const& tet){if(!tet.treated) tet.assemblage(K_TH,L_TH);}); }
 
 std::for_each( (*refFac).begin(), (*refFac).end(), [&K_TH,&L_TH](Facette::Fac const& fac){if(!fac.treated) fac.assemblage(K_TH,L_TH); } );    
 

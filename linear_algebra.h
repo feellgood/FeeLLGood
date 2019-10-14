@@ -37,14 +37,15 @@ public:
 	/** constructor */	
     inline LinAlgebra(Settings & s /**< [in] */,
                       std::vector<Nodes::Node> & myNode /**< [in] */,
-                      std::vector <Tetra::Tet> const& myTet /**< [in] */,
+                      std::vector <Tetra::Tet> &myTet /**< [in] */,
                       std::vector <Facette::Fac> & myFace /**< [in] */,double _H[DIM] /**< applied field */) :  NbTH(s.solverNbTh),NOD(myNode.size()),refNode(&myNode),refFac(&myFace)
     {
     settings = s;
     my_lock = new std::mutex;
     tab_TH.resize(NbTH+1);
-    refTet.resize(NbTH);
-    deepCopyTet(myTet);
+    refTetIt.resize(NbTH);
+    prepareItTet(myTet);
+    
     set_Hext(_H[0],_H[1],_H[2]);
     }
     
@@ -74,7 +75,8 @@ private:
     std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
 	std::vector <Facette::Fac> *refFac; /**< direct access to the faces */
 	
-	std::vector < std::vector <Tetra::Tet> > refTet; /**< splitted copy of the tetrahedrons for multithreading */
+    /** vector of pair of iterators for the tetrahedrons for multithreading */
+	std::vector < std::pair<std::vector<Tetra::Tet>::iterator,std::vector<Tetra::Tet>::iterator> > refTetIt; 
 	
 	double Hext[DIM];/**< applied field */
     double dt;/**< timestep */
@@ -94,8 +96,8 @@ private:
     /** will be used to obtain a seed for the random number generator engine */
     std::random_device rd;
     
-    /** deep copy of all the tetrahedrons to refTet container, used by constructor */
-    void deepCopyTet(std::vector <Tetra::Tet> const& myTet);
+    /** prepare refTetIt pairs, used by constructor */
+    void prepareItTet(std::vector <Tetra::Tet> &myTet);
     
     /** computes the local vector basis {ep,eq} in the tangeant plane for projection on the elements */
     void base_projection(void);
