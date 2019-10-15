@@ -284,8 +284,8 @@ return ( -Js*weightedScalarProd(dens) );
 
 void Tet::projection(gmm::dense_matrix <double> const& A,  std::vector <double> const& B)
 {
-thread_local gmm::dense_matrix <double> P(2*N,3*N);
-thread_local gmm::dense_matrix <double> PA(2*N,3*N);
+gmm::dense_matrix <double> P(2*N,3*N);
+gmm::dense_matrix <double> PA(2*N,3*N);
 
 for (int i=0; i<N; i++){
     Nodes::Node const& n = (*refNode)[ind[i]];
@@ -300,7 +300,7 @@ gmm::mult(PA, gmm::transposed(P), Kp);
 gmm::mult(P,B,Lp);
 }
 
-void Tet::assemblage(write_matrix &K,write_vector &L) const
+void Tet::assemblage_mat(write_matrix &K) const
 {
 for (int i=0; i < N; i++)
     {
@@ -312,10 +312,18 @@ for (int i=0; i < N; i++)
         K(NOD+i_,j_) += Kp(i,j);      K(NOD+i_, NOD+j_) += Kp(  i,N+j);
         K(    i_,j_) += Kp(N+i,j);    K(    i_, NOD+j_) += Kp(N+i,N+j);
         }
-    L[NOD+i_] += Lp[i];
-    L[i_] += Lp[N+i];
     }    
 }
+
+void Tet::assemblage_vect(write_vector &L) const
+{
+for (int i=0; i < N; i++)
+    {
+    L[NOD+ind[i]] += Lp[i];
+    L[ind[i]] += Lp[N+i];
+    }    
+}
+
 
 double Tet::Jacobian(double J[DIM][DIM])
 {

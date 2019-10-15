@@ -184,8 +184,11 @@ class Fac{
         /** compute projection of a face from inner object matrix */
         void projection(gmm::dense_matrix <double> const& A, std::vector <double> const& B);
         
-        /** assemblage of the matrix and vector elements from inner matrix in facette object */
-        void assemblage(write_matrix &K,write_vector &L) const;
+        /** assemblage of the matrix elements from inner matrix in facette object */
+        void assemblage_mat(write_matrix &K) const;
+        
+        /** assemblage of the vector elements from inner matrix in facette object */
+        void assemblage_vect(write_vector &L) const;
         
         /** getter for N */		
 		inline int getN(void) const {return N;}	

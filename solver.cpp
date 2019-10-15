@@ -14,24 +14,25 @@ base_projection();
 write_matrix K_TH(2*NOD, 2*NOD);
 write_vector L_TH(2*NOD);
 
-std::cout << "solver iteration nt#" << nt <<  ", starting matrix assembly..." << std::endl;
+std::cout << ", starting matrix assembly...";
 
 for(int i=0;i<NbTH;i++) 
     {
     tab_TH[i] = std::thread( [this,&K_TH,&L_TH,i]() 
         {
-            thread_local gmm::dense_matrix <double> K(3*Tetra::N,3*Tetra::N);
-            thread_local std::vector <double> L(3*Tetra::N);
+            gmm::dense_matrix <double> K(3*Tetra::N,3*Tetra::N);//thread_local 
+            std::vector <double> L(3*Tetra::N);
             
-            std::for_each(refTetIt[i].first,refTetIt[i].second, [this,&K_TH,&L_TH](Tetra::Tet & tet)
+            std::for_each(refTetIt[i].first,refTetIt[i].second, [this,&K_TH,&L_TH,&K,&L](Tetra::Tet & tet)
                 {
                 tet.integrales(settings.paramTetra,Hext,DW_vz,settings.theta,dt,settings.TAUR,K, L);     
                 tet.projection( K, L);
-                if(my_lock->try_lock())
+                if(my_mutex.try_lock())
                     {
-                    tet.assemblage(K_TH, L_TH);
+                    tet.assemblage_mat(K_TH);
+                    tet.assemblage_vect(L_TH);
                     tet.treated = true;
-                    my_lock->unlock();    
+                    my_mutex.unlock();    
                     return;
                     }
                 else { tet.treated = false;}
@@ -41,19 +42,20 @@ for(int i=0;i<NbTH;i++)
     
 tab_TH[NbTH] = std::thread( [this,&K_TH,&L_TH]()
     {
-    thread_local gmm::dense_matrix <double> Ks(3*Facette::N,3*Facette::N);
-    thread_local std::vector <double> Ls(3*Facette::N);
+    gmm::dense_matrix <double> Ks(3*Facette::N,3*Facette::N);
+    std::vector <double> Ls(3*Facette::N);
     
-    std::for_each(refFac->begin(),refFac->end(), [this,&K_TH,&L_TH](Facette::Fac & fac)
+    std::for_each(refFac->begin(),refFac->end(), [this,&K_TH,&L_TH,&Ks,&Ls](Facette::Fac & fac)
         {
         fac.integrales(settings.paramFacette, Ls);     
         fac.projection( Ks, Ls);
         
-        if(my_lock->try_lock())
+        if(my_mutex.try_lock())
             {
-            fac.assemblage(K_TH,L_TH);
+            fac.assemblage_mat(K_TH);
+            fac.assemblage_vect(L_TH);
             fac.treated =true;
-            my_lock->unlock();    
+            my_mutex.unlock();    
             return;
             }
         else { fac.treated = false; }
@@ -65,13 +67,17 @@ tab_TH[NbTH] = std::thread( [this,&K_TH,&L_TH]()
 for(int i=0;i<(NbTH+1);i++) {tab_TH[i].join();}
 
 for(int i=0;i<(NbTH);i++)
-    { std::for_each(refTetIt[i].first,refTetIt[i].second,[&K_TH,&L_TH](Tetra::Tet const& tet){if(!tet.treated) tet.assemblage(K_TH,L_TH);}); }
+    { std::for_each(refTetIt[i].first,refTetIt[i].second,[&K_TH,&L_TH](Tetra::Tet const& tet)
+        {
+        if(!tet.treated) {tet.assemblage_mat(K_TH);tet.assemblage_vect(L_TH);} 
+        }); }
 
-std::for_each( (*refFac).begin(), (*refFac).end(), [&K_TH,&L_TH](Facette::Fac const& fac){if(!fac.treated) fac.assemblage(K_TH,L_TH); } );    
+std::for_each( (*refFac).begin(), (*refFac).end(), [&K_TH,&L_TH](Facette::Fac const& fac)
+        {if(!fac.treated) {fac.assemblage_mat(K_TH);fac.assemblage_vect(L_TH);} } );    
 
 counter.tac();
 
-if(settings.verbose) { std::cout << "Matrix assembly done, elapsed time = " << counter.elapsed() << "s" << std::endl; }
+if(settings.verbose) { std::cout << " ..matrix assembly done in " << counter.elapsed() << "s" << std::endl; }
 
 read_matrix Kr(2*NOD,2*NOD);    gmm::copy(K_TH, Kr);
 read_vector Lr(2*NOD);          gmm::copy(L_TH, Lr);

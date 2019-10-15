@@ -73,8 +73,8 @@ return weightedScalarProd(dens);
 
 void Fac::projection(gmm::dense_matrix <double> const& A, std::vector <double> const& B)
 {
-thread_local gmm::dense_matrix <double> P(2*N,3*N);
-thread_local gmm::dense_matrix <double> PA(2*N,3*N);
+gmm::dense_matrix <double> P(2*N,3*N);
+gmm::dense_matrix <double> PA(2*N,3*N);
 
 for (int i=0; i<N; i++){
     Nodes::Node const& n = (*refNode)[ind[i]];
@@ -90,7 +90,7 @@ gmm::mult(P,B,Lsp);
 
 }
 
-void Fac::assemblage(write_matrix &K,write_vector &L) const
+void Fac::assemblage_mat(write_matrix &K) const
 {
     for (int i=0; i < N; i++)
         {
@@ -102,11 +102,16 @@ void Fac::assemblage(write_matrix &K,write_vector &L) const
             K(NOD+i_,j_) += Ksp(i,j);      K(NOD+i_, NOD+j_) += Ksp(  i,N+j);
             K(    i_,j_) += Ksp(N+i,j);    K(    i_, NOD+j_) += Ksp(N+i,N+j);
             }
-        L[NOD+i_] += Lsp[i];
-        L[i_] += Lsp[N+i];
-        
         }
-    
+}
+
+void Fac::assemblage_vect(write_vector &L) const
+{
+    for (int i=0; i < N; i++)
+        {
+        L[NOD+ind[i]] += Lsp[i];
+        L[ind[i]] += Lsp[N+i];
+        }
 }
 
 void Fac::calc_surf(void)

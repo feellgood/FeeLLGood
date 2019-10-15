@@ -39,7 +39,7 @@ for (double t_target = fem.t; t_target <  settings.tf+t_step/2; t_target += t_st
         std::cout << " ------------------------------\n";
         if (flag) std::cout << "    t  : same (" << flag << ")";
         else std::cout << "nt_output = " << nt_output << ", nt = " << nt << ", t = " << my_t;
-        std::cout << ", dt = " << dt << std::endl;
+        std::cout << ", dt = " << dt ;
         if (dt < settings.DTMIN) { fem.reset();break; }
 
         /* changement de referentiel */

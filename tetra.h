@@ -279,8 +279,11 @@ class Tet{
         /** computes projection of a tetrahedron using inner matrix in tetra object */
         void projection(gmm::dense_matrix <double> const& A,  std::vector <double> const& B);
         
-        /** matrix and vector assembly using inner matrix in tetra */
-        void assemblage(write_matrix &K,write_vector &L) const;
+        /** matrix assembly using inner matrix in tetra */
+        void assemblage_mat(write_matrix &K) const;
+        
+        /** vector assembly using inner matrix in tetra */
+        void assemblage_vect(write_vector &L) const;
         
         /** getter for N */
 		inline int getN(void) const {return N;}

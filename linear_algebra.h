@@ -41,7 +41,6 @@ public:
                       std::vector <Facette::Fac> & myFace /**< [in] */,double _H[DIM] /**< applied field */) :  NbTH(s.solverNbTh),NOD(myNode.size()),refNode(&myNode),refFac(&myFace)
     {
     settings = s;
-    my_lock = new std::mutex;
     tab_TH.resize(NbTH+1);
     refTetIt.resize(NbTH);
     prepareItTet(myTet);
@@ -85,7 +84,7 @@ private:
     double v_max;/**< maximum speed */
 	
 	/** mutex to avoid improper access to sparse matrix */
-    std::mutex *my_lock;
+    std::mutex my_mutex;
     
     /** buffer fr facette::Obj when try_lock fail */
     std::queue<Facette::Obj> buff_fac;

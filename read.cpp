@@ -45,11 +45,9 @@ if (msh.fail())
     
 int nbElem;
 msh >> nbElem; 
-
-int idxElem=1;
-while ((symb != "$EndElements") && (idxElem < nbElem) && !(msh.fail()) )    
+if(mySets.verbose) {std::cout <<"nb Elem: "<< nbElem <<std::endl;}
+while((msh >> symb)&&(symb != "$EndElements")&&(! msh.fail() ) ) 
     {
-    msh >> idxElem;
     msh >> TYP >> tags >> reg;
     for (int i=1; i<tags; i++)
         msh >> symb;
