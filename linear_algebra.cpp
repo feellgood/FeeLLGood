@@ -2,17 +2,17 @@
 
 void LinAlgebra::prepareItTet(std::vector <Tetra::Tet> &myTet)
 {
-const unsigned long block_size = std::distance(myTet.begin(),myTet.end())/NbTH;
+const size_t block_size = myTet.size()/NbTH;
+const int extra_blocks = myTet.size()%NbTH;
 std::vector<Tetra::Tet>::iterator it = myTet.begin();
 
-std::for_each(refTetIt.begin(),refTetIt.end(),[&it,myTet,block_size] (std::pair<std::vector<Tetra::Tet>::iterator,std::vector<Tetra::Tet>::iterator> & p_it)
+for (int i = 0; i < NbTH; i++)
     {
-    p_it.first = it;
-    std::advance(it,block_size);
-    p_it.second = it;            
+    refTetIt[i].first = it;
+    std::advance(it, block_size + (i<extra_blocks ? 1 : 0));
+    refTetIt[i].second = it;
     }
-    );
-refTetIt[NbTH-1].second = std::prev(myTet.end());
+assert(refTetIt[NbTH-1].second == myTet.end());
 }
 
 void LinAlgebra::base_projection(void)
