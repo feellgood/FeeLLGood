@@ -16,8 +16,8 @@ std::cout << "\t simulation name : "<< simName << std::endl;
 std::cout << "\t mesh file name: " << pbName << " with scaling factor " << getScale() << std::endl;
 std::cout << "\t final time of the simulation\t\t" << tf << std::endl;
 std::cout << "\t initial time step\t" << dt << std::endl << std::endl;
-std::cout << "\t save energy values every " << n1 << " iterations" << std::endl;
-std::cout << "\t snapshot of the magnetization configuration every " << n2 << " iterations" << std::endl;
+std::cout << "\t save energy values every " << time_step << " seconds" << std::endl;
+std::cout << "\t snapshot of the magnetization configuration every " << save_period << " time steps" << std::endl;
 if (restore)
     { std::cout << "\t restore initial magnetization distribution from file : " << restoreFileName <<std::endl; }
 else
@@ -49,8 +49,8 @@ try { sub_tree = root.get_child("outputs"); }
 r_path_output_dir = sub_tree.get<std::string>("directory");
 simName = sub_tree.get<std::string>("file basename");
 withVtk = sub_tree.get<bool>("vtk file",0);
-n1 = sub_tree.get<int>("save_energies",0);
-n2 = sub_tree.get<int>("take_photo",0);
+time_step = sub_tree.get<double>("evol time step",1e-7);
+save_period = sub_tree.get<int>("take_photo",0);
 verbose = sub_tree.get<bool>("verbose",true);
 
 try {s_sub_tree = sub_tree.get_child("evol columns");}

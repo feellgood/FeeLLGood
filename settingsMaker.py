@@ -17,7 +17,7 @@ class Settings(object):
         outputs["directory"] = "data_out/"
         outputs["file basename"] = "tom"
         outputs["vtk file"] = False
-        outputs["save_energies"] = 3
+        outputs["evol time step"] = 1e-7
         outputs["take_photo"] = 5
         outputs["verbose"] = True
         outputs["evol columns"] = ["iter","t","dt","max dm","<mx>","<my>","<mz>","E_ex","E_aniso","E_demag","E_zeeman","E_tot","DW_z","DW_dz"]

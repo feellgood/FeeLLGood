@@ -4,7 +4,7 @@
     "directory" : "data_out/",
     "file basename" : "paf_le_chien",
     "vtk file" : false,
-    "save_energies" : 3,
+    "evol time step" : 1e-7,
     "take_photo" : 5,
     "verbose" : true,
     "evol columns" : ["iter","t","dt","max dm","<mx>","<my>","<mz>","E_ex","E_aniso","E_demag","E_zeeman","E_tot","DW_z","DW_dz"],

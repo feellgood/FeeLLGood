@@ -71,8 +71,8 @@ class Settings{
 
 	bool verbose;/**< if true the user gets many printing feedback in terminal */
 	
-	int n1;/**< energy saved every n1 iterations */
-	int n2;/**< magnetic configuration saved every n2 iterations */
+	double time_step;/**< energy saved every time_step */
+	int save_period;/**< magnetic configuration saved every save_period time steps */
 	bool restore;/**< usefull to run a simulation from a previous calculation  */
     
     bool recenter;/**< to recenter DW or not */

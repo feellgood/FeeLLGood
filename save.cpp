@@ -8,41 +8,37 @@ using namespace std;
 
 void Fem::saver(Settings const& settings, ofstream &fout,const int nt) const
 {
-int n1 = settings.n1;
-int n2 = settings.n2;
+int save_period = settings.save_period;
 
-if ((nt%n1)==0)
-    {
-   // fout << boost::format("%8d %+20.10e %+20.10e %+20.10e") % nt % t % dt % dumax;
-   // fout << boost::format("%+20.10e %+20.10e %+20.10e") % u_moy(fem,0) % u_moy(fem,1) % u_moy(fem,2);
-   // fout << boost::format("%+20.10e %+20.10e %+20.10e %+20.10e %+20.10e %+20.10e %+20.10e")% Ee % Ea % Ed % Ez % Etot % DW_z % DW_vz<< endl;
-    
-    for(unsigned int i = 0;i<settings.evol_columns.size();i++)
-        {std::string sep;
-        const std::string & keyVal = settings.evol_columns[i];
-        if(i == settings.evol_columns.size() - 1) {sep = "\n";} else {sep = "\t";}
-    
-        if(keyVal == "iter") { fout << nt << sep;}
-        if(keyVal == "t") { fout << t << sep;}
-        if(keyVal == "dt") { fout << settings.dt << sep;}
-        if(keyVal == "max dm") { fout << vmax*settings.dt << sep;}
-        if(keyVal == "<mx>") { fout << avg(Nodes::get_u_comp,Pt::IDX_X) << sep;}
-        if(keyVal == "<my>") { fout << avg(Nodes::get_u_comp,Pt::IDX_Y) << sep;}
-        if(keyVal == "<mz>") { fout << avg(Nodes::get_u_comp,Pt::IDX_Z) << sep;}
-        if(keyVal == "E_ex") { fout << E_exch << sep;}
-        if(keyVal == "E_aniso") { fout << E_aniso << sep;}
-        if(keyVal == "E_demag") { fout << E_demag << sep;}
-        if(keyVal == "E_zeeman") { fout << E_zeeman << sep;}
-        if(keyVal == "E_tot") { fout << Etot << sep;}
-        if(keyVal == "DW_z") { fout << DW_z << sep;}
-        if(keyVal == "DW_dz") { fout << DW_vz <<  sep;}    
-        }
-    fout << std::flush;
+// fout << boost::format("%8d %+20.10e %+20.10e %+20.10e") % nt % t % dt % dumax;
+// fout << boost::format("%+20.10e %+20.10e %+20.10e") % u_moy(fem,0) % u_moy(fem,1) % u_moy(fem,2);
+// fout << boost::format("%+20.10e %+20.10e %+20.10e %+20.10e %+20.10e %+20.10e %+20.10e")% Ee % Ea % Ed % Ez % Etot % DW_z % DW_vz<< endl;
+
+for(unsigned int i = 0;i<settings.evol_columns.size();i++)
+    {std::string sep;
+    const std::string & keyVal = settings.evol_columns[i];
+    if(i == settings.evol_columns.size() - 1) {sep = "\n";} else {sep = "\t";}
+
+    if(keyVal == "iter") { fout << nt << sep;}
+    if(keyVal == "t") { fout << t << sep;}
+    if(keyVal == "dt") { fout << settings.dt << sep;}
+    if(keyVal == "max dm") { fout << vmax*settings.dt << sep;}
+    if(keyVal == "<mx>") { fout << avg(Nodes::get_u_comp,Pt::IDX_X) << sep;}
+    if(keyVal == "<my>") { fout << avg(Nodes::get_u_comp,Pt::IDX_Y) << sep;}
+    if(keyVal == "<mz>") { fout << avg(Nodes::get_u_comp,Pt::IDX_Z) << sep;}
+    if(keyVal == "E_ex") { fout << E_exch << sep;}
+    if(keyVal == "E_aniso") { fout << E_aniso << sep;}
+    if(keyVal == "E_demag") { fout << E_demag << sep;}
+    if(keyVal == "E_zeeman") { fout << E_zeeman << sep;}
+    if(keyVal == "E_tot") { fout << Etot << sep;}
+    if(keyVal == "DW_z") { fout << DW_z << sep;}
+    if(keyVal == "DW_dz") { fout << DW_vz <<  sep;}    
     }
+fout << std::flush;
 
-    string baseName = settings.r_path_output_dir + settings.getSimName();
+string baseName = settings.r_path_output_dir + settings.getSimName();
     
-if ((nt%n2)==0) 
+if ((nt%save_period)==0) 
     {
     if (settings.withVtk)
         {
