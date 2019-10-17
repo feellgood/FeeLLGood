@@ -28,7 +28,6 @@ class Settings{
         withTsv=true;
         withVtk = false;
         evol_header = false;
-        theta=0.5;
         MAXITER = 500;
         REFRESH_PRC = 20;
         recenter = false;
@@ -86,9 +85,6 @@ class Settings{
     std::string sMz;/**< string for analytical definition of Mz */
     
     std::string restoreFileName;/**< input file name for continuing a calculation (sol.in) */
-	
-	/** for time integration \f$ \theta \f$ scheme  */
-	double theta;
 	
 /** \f$ \epsilon \f$ is a small value, used to modify slightly J in (tet|facette).integrales */
     double EPSILON;

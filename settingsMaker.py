@@ -69,7 +69,6 @@ class Settings(object):
 
         timing = {}
         timing["final_time"] = 1e-6
-        timing["theta"] = 0.5
         timing["min(du)"] = 1e-9
         timing["max(du)"] = 0.02
         timing["min(dt)"] = 1e-14

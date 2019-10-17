@@ -39,5 +39,6 @@ const double mu0 = 4.*M_PI*1e-7;/**< \f$ \mu_0 = 4 \pi 10^{-7} \f$ */
 const double nu0 = 1./mu0;/**< \f$ \nu_0 = 1/\mu_0 \f$ */
 
 #define RAND_DETERMINIST true
+#define THETA 0.5
 
 #endif //CONFIG_H

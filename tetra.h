@@ -256,7 +256,7 @@ class Tet{
             };
         
 		/** computes the integral contribution of the tetrahedron to the evolution of the magnetization */		
-		void integrales(std::vector<Tetra::prm> const& params,const double Hext[DIM],double Vz,double theta,double dt,double tau_r,gmm::dense_matrix <double> &AE, std::vector <double> &BE)  const;
+		void integrales(std::vector<Tetra::prm> const& params,const double Hext[DIM],double Vz,double dt,double tau_r,gmm::dense_matrix <double> &AE, std::vector <double> &BE)  const;
 
         /** exchange energy of the tetrahedron */
         double exchangeEnergy(Tetra::prm const& param,const double dudx[DIM][NPI],const double dudy[DIM][NPI],const double dudz[DIM][NPI]) const;

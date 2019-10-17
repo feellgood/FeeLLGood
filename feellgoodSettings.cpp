@@ -213,7 +213,6 @@ REFRESH_PRC = sub_tree.get<int>("refresh preconditionner every",20);
 try { sub_tree = root.get_child("time integration"); }
 catch (std::exception &e)
     { std::cout << e.what() << std::endl; }
-theta = sub_tree.get<double>("theta",0.5);
 DUMIN = sub_tree.get<double>("min(du)",1e-9);
 DUMAX = sub_tree.get<double>("max(du)",0.02);
 DTMIN = sub_tree.get<double>("min(dt)",1e-14);

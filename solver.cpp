@@ -25,7 +25,7 @@ for(int i=0;i<NbTH;i++)
             gmm::dense_matrix <double> K(3*Tetra::N,3*Tetra::N);//thread_local 
             std::vector <double> L(3*Tetra::N);
             
-            tet.integrales(settings.paramTetra,settings.Hext,DW_vz,settings.theta,dt,settings.TAUR,K, L);     
+            tet.integrales(settings.paramTetra,settings.Hext,DW_vz,dt,settings.TAUR,K, L);     
             tet.projection( K, L);
             tet.treated = false;
                 
@@ -66,23 +66,8 @@ tab_TH[NbTH] = std::thread( [this,&K_TH,&L_TH]()
 for(int i=0;i<(NbTH+1);i++) {tab_TH[i].join();}
 
 
-std::for_each( (*refTet).begin(), (*refTet).end(), [&K_TH,&L_TH](Tetra::Tet & tet)
-        {
-        if(!tet.treated) {tet.assemblage_mat(K_TH);tet.assemblage_vect(L_TH);tet.treated = true;} 
-        } ); 
-
-/*
-for(int i=0;i<(NbTH);i++)
-    { std::for_each(refTetIt[i].first,refTetIt[i].second,[&K_TH,&L_TH](Tetra::Tet & tet)
-        {
-        if(!tet.treated) {tet.assemblage_mat(K_TH);tet.assemblage_vect(L_TH);tet.treated = true;} 
-        }); }
-*/
-
-std::for_each( (*refFac).begin(), (*refFac).end(), [&K_TH,&L_TH](Facette::Fac & fac)
-        {
-        if(!fac.treated) {fac.assemblage_mat(K_TH);fac.assemblage_vect(L_TH);fac.treated = true;}
-        } );    
+insertCoeff<Tetra::Tet>(*refTet,K_TH,L_TH);
+insertCoeff<Facette::Fac>(*refFac,K_TH,L_TH);
 
 counter.tac();
 

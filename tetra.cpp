@@ -34,8 +34,7 @@ for (int j=0; j<NPI; j++)
     }    
 }
 
-void Tet::integrales(std::vector<Tetra::prm> const& params,const double Hext[DIM],double Vz,
-                     double theta,double dt,double tau_r,gmm::dense_matrix <double> &AE, std::vector <double> &BE) const
+void Tet::integrales(std::vector<Tetra::prm> const& params, const double Hext[DIM], double Vz, double dt, double tau_r, gmm::dense_matrix <double> &AE, std::vector <double> &BE) const
 {
 double alpha = params[idxPrm].alpha;
 double A = params[idxPrm].A;
@@ -57,11 +56,10 @@ double uk22 = params[idxPrm].uk[2][2];
 double Uz = params[idxPrm].Uz;
 double beta = params[idxPrm].beta;
 
-/* ces constantes permettent de factoriser beaucoup d'expressions  */
 double Abis = 2.0*A/J;
 double Kbis = 2.0*K/J;
 double K3bis = 2.0*K3/J;
-double s_dt = theta*dt;//theta du theta schema
+double s_dt = THETA*dt;//theta from theta scheme in config.h.in
 
 /*-------------------- INTERPOLATION --------------------*/
 double u_nod[DIM][N]; 
@@ -74,12 +72,7 @@ double Hvx[NPI], Hvy[NPI], Hvz[NPI];
 
 // u_nod(u0) is required for lumping in AE matrix
 getVecDataFromNode(Nodes::get_u0,u_nod);
-/*
-for (int i=0; i<N; i++){
-    Nodes::Node const& node = (*refNode)[ ind[i] ];
-    u_nod[Pt::IDX_X][i]  = node.u0.x(); u_nod[Pt::IDX_Y][i] = node.u0.y(); u_nod[Pt::IDX_Z][i]  = node.u0.z();
-    }
-*/
+
 interpolation(Nodes::get_u0,u,dudx,dudy,dudz);
 interpolation(Nodes::get_v0,v,dvdx,dvdy,dvdz);
 interpolation(Nodes::get_phi0,Hdx,Hdy,Hdz);
