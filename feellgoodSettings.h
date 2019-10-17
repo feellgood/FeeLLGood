@@ -8,8 +8,7 @@
 #include <cmath>
 #include <string>
 
-#include "exprtk.hpp"
-
+#include "mag_parser.h"
 #include "pt3D.h"
 #include "tetra.h"
 #include "facette.h"
@@ -38,11 +37,6 @@ class Settings{
         
         solverNbTh = 8;
         scalfmmNbTh = 8;
-        
-        s_table.add_variable("x",x);
-        s_table.add_variable("y",y);
-        s_table.add_variable("z",z);
-        s_table.add_constants();
         } /**< default constructor */
 	
 	void infos(void);/**< some prints sent to terminal  */	
@@ -152,14 +146,7 @@ class Settings{
     /** parser magnetization compiler */
     inline void doCompile(void)
         {
-        exprtk::parser<double> parser;
-            
-        expr_Mx.register_symbol_table(s_table);
-        expr_My.register_symbol_table(s_table);
-        expr_Mz.register_symbol_table(s_table);
-        parser.compile(sMx,expr_Mx);
-        parser.compile(sMy,expr_My);
-        parser.compile(sMz,expr_Mz);
+        mag_parser.set_expressions(sMx, sMy, sMz);
         };
     
     /** evaluation of the magnetization components through math expression, each component of the magnetization is a function of (x,y,z). 
@@ -167,16 +154,7 @@ class Settings{
      */
     inline Pt::pt3D getValue(const Pt::pt3D &p)
         {
-        x= p.x();
-        y= p.y();
-        z= p.z();
-        
-        double mx = expr_Mx.value();
-        double my = expr_My.value();
-        double mz = expr_Mz.value();
-        Pt::pt3D mag = Pt::pt3D(mx,my,mz);
-        mag.normalize();
-        return mag;
+        return mag_parser.get_magnetization(p);
         }
     
 	private:
@@ -184,15 +162,7 @@ class Settings{
 	double _scale;/**< scaling factor from gmsh files to feellgood */
 	std::string simName;/**< simulation name */
 	std::string pbName;     /**< mesh file, gmsh file format */
-	
-	double x;/**< working variable x for exprtk parser function f(x,y,z) */
-	double y;/**< working variable y for exprtk parser function f(x,y,z) */
-    double z;/**< working variable z for exprtk parser function f(x,y,z) */
-	
-	exprtk::symbol_table<double> s_table; /**< symbol table for exprtk math parser  */
-	exprtk::expression<double> expr_Mx;/**< Mx expression */
-    exprtk::expression<double> expr_My;/**< My expression */
-    exprtk::expression<double> expr_Mz;/**< Mz expression */
+    MagnetizationParser mag_parser;  /**< parser for the magnetization expressions */
 };
 
 #endif /* feellgoodSettings_h */
