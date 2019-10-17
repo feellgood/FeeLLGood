@@ -96,12 +96,11 @@ private:
     /** computes the local vector basis {ep,eq} in the tangeant plane for projection on the elements */
     void base_projection(bool determinist);
     
+    /** template to insert coeff in sparse matrix K_TH and vector L_TH, T is Tetra or Facette */
     template <class T> void insertCoeff(std::vector<T> container, write_matrix &K_TH, write_vector &L_TH)
     {
     std::for_each( container.begin(), container.end(), [&K_TH,&L_TH](T & my_elem)
-        {
-        if(!my_elem.treated) {my_elem.assemblage_mat(K_TH);my_elem.assemblage_vect(L_TH);my_elem.treated = true;} 
-        } ); 
+        { if(!my_elem.treated) {my_elem.assemblage_mat(K_TH);my_elem.assemblage_vect(L_TH);my_elem.treated = true;} } ); 
     }
     
 }; // fin class linAlgebra
