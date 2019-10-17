@@ -38,9 +38,8 @@ public:
     inline LinAlgebra(Settings & s /**< [in] */,
                       std::vector<Nodes::Node> & myNode /**< [in] */,
                       std::vector <Tetra::Tet> &myTet /**< [in] */,
-                      std::vector <Facette::Fac> & myFace /**< [in] */,double _H[DIM] /**< applied field */) :  NbTH(s.solverNbTh),NOD(myNode.size()),refNode(&myNode),refFac(&myFace)
+                      std::vector <Facette::Fac> & myFace /**< [in] */,double _H[DIM] /**< applied field */) :  NbTH(s.solverNbTh),NOD(myNode.size()),refNode(&myNode),refFac(&myFace),settings(s)
     {
-    settings = s;
     tab_TH.resize(NbTH+1);
     refTetIt.resize(NbTH);
     prepareItTet(myTet);
@@ -80,7 +79,7 @@ private:
 	double Hext[DIM];/**< applied field */
     double dt;/**< timestep */
     double DW_vz;/**< speed of the domain wall */
-	Settings settings;/**< settings */
+	const Settings &settings;/**< settings */
     double v_max;/**< maximum speed */
 	
 	/** mutex to avoid improper access to sparse matrix */
