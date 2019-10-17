@@ -14,6 +14,7 @@
 #include <math.h>
 #include <fstream>
 #include <algorithm>
+#include <cstring>
 
 /**
  \namespace Pt
