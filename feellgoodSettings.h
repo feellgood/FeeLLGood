@@ -76,7 +76,7 @@ class Settings{
 	int solverNbTh;/**< nb of threads for the finite element solver */
 	int scalfmmNbTh;/**< nb of threads for the computation of the demag field with scalfmm */
     
-    triple Bext;/**< applied external field. Unit : Tesla (T) */
+    triple Hext;/**< applied external field. Unit : SI (A/m) */
     
     double Uz;/**< spin transfert torque adiabatic prefactor along z direction */
     double beta;/**< spin transfert torque non-adiabatic prefactor along z direction */

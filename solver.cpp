@@ -10,7 +10,7 @@ FTic counter;
 
 counter.tic();
 
-base_projection();
+base_projection(!RAND_DETERMINIST);
 write_matrix K_TH(2*NOD, 2*NOD);
 write_vector L_TH(2*NOD);
 
@@ -20,35 +20,36 @@ for(int i=0;i<NbTH;i++)
     {
     tab_TH[i] = std::thread( [this,&K_TH,&L_TH,i]() 
         {
+        std::for_each(refTetIt[i].first,refTetIt[i].second, [this,&K_TH,&L_TH](Tetra::Tet & tet)
+            {
             gmm::dense_matrix <double> K(3*Tetra::N,3*Tetra::N);//thread_local 
             std::vector <double> L(3*Tetra::N);
             
-            std::for_each(refTetIt[i].first,refTetIt[i].second, [this,&K_TH,&L_TH,&K,&L](Tetra::Tet & tet)
+            tet.integrales(settings.paramTetra,settings.Hext,DW_vz,settings.theta,dt,settings.TAUR,K, L);     
+            tet.projection( K, L);
+            tet.treated = false;
+                
+            if(my_mutex.try_lock())
                 {
-                tet.integrales(settings.paramTetra,Hext,DW_vz,settings.theta,dt,settings.TAUR,K, L);     
-                tet.projection( K, L);
-                if(my_mutex.try_lock())
-                    {
-                    tet.assemblage_mat(K_TH);
-                    tet.assemblage_vect(L_TH);
-                    tet.treated = true;
-                    my_mutex.unlock();    
-                    return;
-                    }
-                else { tet.treated = false;}
-                });//end for_each
+                tet.assemblage_mat(K_TH);
+                tet.assemblage_vect(L_TH);
+                tet.treated = true;
+                my_mutex.unlock();    
+                }
+            else { tet.treated = false;}
+            });//end for_each
         }); //end thread
     }
     
 tab_TH[NbTH] = std::thread( [this,&K_TH,&L_TH]()
     {
-    gmm::dense_matrix <double> Ks(3*Facette::N,3*Facette::N);
-    std::vector <double> Ls(3*Facette::N);
-    
-    std::for_each(refFac->begin(),refFac->end(), [this,&K_TH,&L_TH,&Ks,&Ls](Facette::Fac & fac)
+    std::for_each(refFac->begin(),refFac->end(), [this,&K_TH,&L_TH](Facette::Fac & fac)
         {
+        gmm::dense_matrix <double> Ks(3*Facette::N,3*Facette::N);
+        std::vector <double> Ls(3*Facette::N);
         fac.integrales(settings.paramFacette, Ls);     
         fac.projection( Ks, Ls);
+        fac.treated = false;
         
         if(my_mutex.try_lock())
             {
@@ -56,28 +57,36 @@ tab_TH[NbTH] = std::thread( [this,&K_TH,&L_TH]()
             fac.assemblage_vect(L_TH);
             fac.treated =true;
             my_mutex.unlock();    
-            return;
             }
         else { fac.treated = false; }
-        }
-        );
+        });
     }
 );//end thread
 
 for(int i=0;i<(NbTH+1);i++) {tab_TH[i].join();}
 
-for(int i=0;i<(NbTH);i++)
-    { std::for_each(refTetIt[i].first,refTetIt[i].second,[&K_TH,&L_TH](Tetra::Tet const& tet)
-        {
-        if(!tet.treated) {tet.assemblage_mat(K_TH);tet.assemblage_vect(L_TH);} 
-        }); }
 
-std::for_each( (*refFac).begin(), (*refFac).end(), [&K_TH,&L_TH](Facette::Fac const& fac)
-        {if(!fac.treated) {fac.assemblage_mat(K_TH);fac.assemblage_vect(L_TH);} } );    
+std::for_each( (*refTet).begin(), (*refTet).end(), [&K_TH,&L_TH](Tetra::Tet & tet)
+        {
+        if(!tet.treated) {tet.assemblage_mat(K_TH);tet.assemblage_vect(L_TH);tet.treated = true;} 
+        } ); 
+
+/*
+for(int i=0;i<(NbTH);i++)
+    { std::for_each(refTetIt[i].first,refTetIt[i].second,[&K_TH,&L_TH](Tetra::Tet & tet)
+        {
+        if(!tet.treated) {tet.assemblage_mat(K_TH);tet.assemblage_vect(L_TH);tet.treated = true;} 
+        }); }
+*/
+
+std::for_each( (*refFac).begin(), (*refFac).end(), [&K_TH,&L_TH](Facette::Fac & fac)
+        {
+        if(!fac.treated) {fac.assemblage_mat(K_TH);fac.assemblage_vect(L_TH);fac.treated = true;}
+        } );    
 
 counter.tac();
 
-if(settings.verbose) { std::cout << " ..matrix assembly done in " << counter.elapsed() << "s" << std::endl; }
+if(settings.verbose) { std::cout << "..matrix assembly done in " << counter.elapsed() << "s" << std::endl; }
 
 read_matrix Kr(2*NOD,2*NOD);    gmm::copy(K_TH, Kr);
 read_vector Lr(2*NOD);          gmm::copy(L_TH, Lr);

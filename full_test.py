@@ -9,8 +9,8 @@ mySettings = Settings()
 MaxNbThreads = int(subprocess.check_output(["getconf","_NPROCESSORS_ONLN"]))
 print("Max Nb Threads = " + str(MaxNbThreads))
 
-mySettings["finite element solver"]["nbThreads"] = 8 #MaxNbThreads
-mySettings["demagnetization field solver"]["nbThreads"] = 8 #MaxNbThreads
+mySettings["finite element solver"]["nbThreads"] = 4 #MaxNbThreads
+mySettings["demagnetization field solver"]["nbThreads"] = 4 #MaxNbThreads
 
 mySettings["outputs"]["evol columns"] = ["t","<mx>","<my>","<mz>","E_ex","E_demag","E_tot"]
 mySettings["outputs"]["take_photo"] = 100
@@ -23,9 +23,10 @@ mySettings["Bext"] = [1.0,0.0,-1.0]
 mySettings["mesh"]["volume_regions"]["300"]["alpha"] = 0.5
 
 mySettings["time integration"]["final_time"] = 1.5e-5
-mySettings["time integration"]["min(dt)"] = 1e-16
+mySettings["time integration"]["min(dt)"] = 1e-14
+mySettings["time integration"]["max(dt)"] = 1e-6
 
-mySettings["time integration"]["max(du)"] = 0.5
+mySettings["time integration"]["max(du)"] = 0.1
 
 mySettings["initial magnetization"] = {"Mx":"0","My":"0","Mz":"1"}
 

@@ -38,13 +38,12 @@ public:
     inline LinAlgebra(Settings & s /**< [in] */,
                       std::vector<Nodes::Node> & myNode /**< [in] */,
                       std::vector <Tetra::Tet> &myTet /**< [in] */,
-                      std::vector <Facette::Fac> & myFace /**< [in] */,double _H[DIM] /**< applied field */) :  NbTH(s.solverNbTh),NOD(myNode.size()),refNode(&myNode),refFac(&myFace),settings(s)
+                      std::vector <Facette::Fac> & myFace /**< [in] */) :  NbTH(s.solverNbTh),NOD(myNode.size()),refNode(&myNode),refFac(&myFace),refTet(&myTet),settings(s)
     {
     tab_TH.resize(NbTH+1);
     refTetIt.resize(NbTH);
     prepareItTet(myTet);
-    
-    set_Hext(_H[0],_H[1],_H[2]);
+    base_projection(!RAND_DETERMINIST);
     }
     
 	/** pointer to diagonal preconditionner  */
@@ -59,9 +58,6 @@ public:
     /** setter for DW_dz */
     inline void set_DW_vz(double vz /**< [in] */){DW_vz = vz;}    
 
-    /** setter for Hext */
-    inline void set_Hext(double Hx /**< [in] */,double Hy /**< [in] */,double Hz /**< [in] */){Hext[0]=Hx;Hext[1]=Hy;Hext[2]=Hz;}
-
     /** getter for v_max */
     inline double get_v_max(void) {return v_max;}
     
@@ -72,12 +68,12 @@ private:
     const int NOD;/**< total number of nodes, also an offset for filling sparseMatrix, initialized by constructor */
     std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
 	std::vector <Facette::Fac> *refFac; /**< direct access to the faces */
+	std::vector <Tetra::Tet> *refTet; /**< direct access to the tet */
 	
     /** vector of pair of iterators for the tetrahedrons for multithreading */
 	std::vector < std::pair<std::vector<Tetra::Tet>::iterator,std::vector<Tetra::Tet>::iterator> > refTetIt; 
 	
-	double Hext[DIM];/**< applied field */
-    double dt;/**< timestep */
+	double dt;/**< timestep */
     double DW_vz;/**< speed of the domain wall */
 	const Settings &settings;/**< settings */
     double v_max;/**< maximum speed */
@@ -98,7 +94,7 @@ private:
     void prepareItTet(std::vector <Tetra::Tet> &myTet);
     
     /** computes the local vector basis {ep,eq} in the tangeant plane for projection on the elements */
-    void base_projection(void);
+    void base_projection(bool determinist);
 	
 }; // fin class linAlgebra
 

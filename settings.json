@@ -72,7 +72,7 @@
 
 "finite element solver" :
     {
-    "nbThreads" : 24,
+    "nbThreads" : 32,
     "max(iter)" : 500,
     "refresh preconditionner every" : 20
     },

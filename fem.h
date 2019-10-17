@@ -77,10 +77,6 @@ class Fem
                 init_distrib(mySets);
                 }    
             direction(mySets.verbose,Pt::IDX_Z);/* determination de la direction de propagation de la paroi */
-            
-            Hext[0] = nu0*mySets.Bext[0];
-            Hext[1] = nu0*mySets.Bext[1];
-            Hext[2] = nu0*mySets.Bext[2]; 
             }
         
 	Pt::pt3D c;/**< center position */	
@@ -116,8 +112,6 @@ class Fem
 	std::vector <Nodes::Node> node; /**< node container */
 	std::vector <Facette::Fac>  fac; /**< face container */
 	std::vector <Tetra::Tet>  tet; /**< tetrahedron container */
-    
-    triple Hext;/**<  field. Unit : SI (A/m) */
     
     /**
     print some informations of fem container

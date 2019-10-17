@@ -23,7 +23,7 @@ if (restore)
 else
     { std::cout << "\t initial magnetization distribution from math expression" << std::endl; }
 
-std::cout << "\t applied field Bext = [ " << Bext[0] << ",\t" << Bext[1] << ",\t" << Bext[2] << " ] T" << std::endl;
+std::cout << "\t applied field Hext = [ " << Hext[0] << ",\t" << Hext[1] << ",\t" << Hext[2] << " ] A/m" << std::endl;
 
 for(unsigned int i=0;i<paramTetra.size();i++) {paramTetra[i].infos();}
 for(unsigned int i=0;i<paramFacette.size();i++) {paramFacette[i].infos();}
@@ -187,7 +187,7 @@ catch(std::exception &e)
 int j=0;    
 for(boost::property_tree::ptree::value_type &cell :sub_tree)
     {
-    Bext[j] = cell.second.get_value<double>();
+    Hext[j] = nu0 * cell.second.get_value<double>();
     j++;
     }
 

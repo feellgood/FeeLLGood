@@ -23,7 +23,7 @@ std::for_each(tet.begin(),tet.end(),[this,&settings,uz_drift](Tetra::Tet const& 
     if((param.K != 0.0)||(param.K3 != 0.0))
         { E_aniso += te.anisotropyEnergy(param,u); }
     
-    E_zeeman += te.zeemanEnergy(param,uz_drift,Hext,u);
+    E_zeeman += te.zeemanEnergy(param,uz_drift,settings.Hext,u);
     }
 );
 

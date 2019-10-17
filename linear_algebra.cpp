@@ -15,17 +15,33 @@ for (int i = 0; i < NbTH; i++)
 assert(refTetIt[NbTH-1].second == myTet.end());
 }
 
-void LinAlgebra::base_projection(void)
+void LinAlgebra::base_projection(bool determinist)
 {
+if(!determinist)
+    {    
     std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
     std::uniform_real_distribution<> distrib(0.0,1.0);
+    
     std::for_each(refNode->begin(),refNode->end(),[&gen,&distrib](Nodes::Node &n) 
     { 
         double theta = M_PI * distrib(gen);
         double phi = M_2_PI * distrib(gen);
         n.ep = Pt::pt3D(theta,phi)*n.u0;
-        n.ep.normalize(); // required because u0 is not necessarily unit vector ?? to check wilth initial expression with exprTK       
+        n.ep.normalize();    
         n.eq = n.u0*n.ep; 
-        n.eq.normalize();
+        //n.eq.normalize(); //because ?
     }); 
+    }
+else
+    {
+    std::for_each(refNode->begin(),refNode->end(),[](Nodes::Node &n) 
+    { 
+        double theta = M_PI * rand() / (RAND_MAX+1.);
+        double phi = M_2_PI * rand() / (RAND_MAX+1.);
+        n.ep = Pt::pt3D(theta,phi)*n.u0;
+        n.ep.normalize();    
+        n.eq = n.u0*n.ep; 
+        //n.eq.normalize(); //because ?
+    }); 
+    }
 }

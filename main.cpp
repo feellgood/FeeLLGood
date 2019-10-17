@@ -51,7 +51,7 @@ counter.tic();
 fem.infos();
 
 //once fem containers are ok, linAlgebra object is built
-LinAlgebra linAlg(mySettings,fem.node,fem.tet,fem.fac,fem.Hext);
+LinAlgebra linAlg(mySettings,fem.node,fem.tet,fem.fac);
 
 scal_fmm::fmm myFMM = scal_fmm::fmm(fem,mySettings.verbose,mySettings.scalfmmNbTh);
 

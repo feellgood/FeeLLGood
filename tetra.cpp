@@ -34,7 +34,7 @@ for (int j=0; j<NPI; j++)
     }    
 }
 
-void Tet::integrales(std::vector<Tetra::prm> const& params,double Hext[DIM],double Vz,
+void Tet::integrales(std::vector<Tetra::prm> const& params,const double Hext[DIM],double Vz,
                      double theta,double dt,double tau_r,gmm::dense_matrix <double> &AE, std::vector <double> &BE) const
 {
 double alpha = params[idxPrm].alpha;
