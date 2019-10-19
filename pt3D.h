@@ -52,7 +52,7 @@ public:
     /**
      * default constructor : initialization by zero values
      */
-    inline pt3D() {memset(_x,0,DIM);}
+    inline pt3D() {memset(_x,0,sizeof _x);}
     
     /** constructor by values, cartesian coordinates */
     inline pt3D(const double a,const double b,const double c) {_x[IDX_X] =a; _x[IDX_Y]=b; _x[IDX_Z]=c; }
@@ -73,7 +73,7 @@ public:
      p will contain \f$ (x,y,z) = (0.0,1.0,0.0) \f$
      */
     inline pt3D(const enum index idx)
-        {memset(_x,0,DIM);_x[idx] = 1.0;}
+        {memset(_x,0,sizeof _x);_x[idx] = 1.0;}
     
     
      inline pt3D(const pt3D & p) { memcpy(_x,p._x,sizeof _x); }
