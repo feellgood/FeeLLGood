@@ -12,6 +12,9 @@
 # -v: print the lines being executed
 set -ev
 
+# Number of make jobs to run concurrently.
+job_count=$(getconf _NPROCESSORS_ONLN)
+
 # Install apt packages.
 sudo apt-get update -q
 sudo apt-get install -y cmake libboost-dev
@@ -24,7 +27,7 @@ cd $HOME/build/
 wget -nv https://www.cs.umd.edu/~mount/ANN/Files/1.1.2/ann_1.1.2.tar.gz
 tar xzf ann_1.1.2.tar.gz
 cd ann_1.1.2/
-make linux-g++
+make -j $job_count linux-g++
 sudo cp lib/libANN.a /usr/local/lib/
 sudo cp include/ANN/ANN.h /usr/local/include/
 cd ..
@@ -42,7 +45,7 @@ sed -i 's/ROtation/Rotation/' Src/CMakeLists.txt
 mkdir Build
 cd Build
 cmake ..
-make
+make -j $job_count
 sudo make install
 cd ../..
 
@@ -51,5 +54,5 @@ wget -nv http://download-mirror.savannah.gnu.org/releases/getfem/stable/gmm-5.3.
 tar xzf gmm-5.3.tar.gz
 cd gmm-5.3/
 ./configure
-make
+make -j $job_count
 sudo make install

@@ -42,10 +42,12 @@ set( CMAKE_CXX_FLAGS "-DNDEBUG -Wall -Wextra -std=c++11 -fopenmp -O3 -march=nati
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
 
-SET( HEADERS config.h pt3D.h matBlocDiag.h tetra.h facette.h feellgoodSettings.h node.h linear_algebra.h mag_parser.h time_integration.h )
+SET(HEADERS config.h pt3D.h node.h matBlocDiag.h mag_parser.h
+    time_integration.h feellgoodSettings.h tetra.h facette.h linear_algebra.h)
 
-SET( SOURCES tetra.cpp facette.cpp linear_algebra.cpp feellgoodSettings.cpp read.cpp femutil.cpp
-	recentering.cpp energy.cpp save.cpp solver.cpp tiny.h time_integration.cpp mag_parser.cpp)
+SET(SOURCES mag_parser.cpp time_integration.cpp feellgoodSettings.cpp
+    solver.cpp tetra.cpp facette.cpp read.cpp save.cpp
+    linear_algebra.cpp femutil.cpp energy.cpp recentering.cpp tiny.h)
 
 configure_file(config.h.in ./config.h)
 
