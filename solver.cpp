@@ -46,7 +46,7 @@ tab_TH[NbTH] = std::thread( [this,&K_TH,&L_TH]()
     std::for_each(refFac->begin(),refFac->end(), [this,&K_TH,&L_TH](Facette::Fac & fac)
         {
         gmm::dense_matrix <double> Ks(3*Facette::N,3*Facette::N);
-        std::vector <double> Ls(3*Facette::N);
+        std::vector <double> Ls(3*Facette::N,0);
         fac.integrales(settings.paramFacette, Ls);     
         fac.projection( Ks, Ls);
         fac.treated = false;

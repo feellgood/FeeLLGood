@@ -81,9 +81,6 @@ private:
 	/** mutex to avoid improper access to sparse matrix */
     std::mutex my_mutex;
     
-    /** buffer fr facette::Obj when try_lock fail */
-    std::queue<Facette::Obj> buff_fac;
-    
     /** thread vector */
     std::vector<std::thread> tab_TH;
     

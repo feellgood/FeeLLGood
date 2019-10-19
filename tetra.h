@@ -96,20 +96,6 @@ struct prm
 		};	
 	};
 
-    /** \class Obj
-     container for buffering the projection(Tetrahedron) matrix results when mutex is locked
-     */
-    class Obj
-    {
-    public:
-        /** constructor */
-        inline Obj(const int _idx)
-        {
-        idx = _idx;  
-        }
-    int idx;/**< index of the corresponding tetrahedron */
-    };
-    
     
 /** \class Tet
 Tet is a tetrahedron, containing the index references to nodes, must not be flat <br>

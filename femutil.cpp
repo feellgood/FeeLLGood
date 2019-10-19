@@ -38,7 +38,7 @@ void Fem::femutil(Settings const& settings)
 {
 //facettes set with order less_than
 std::set<Facette::Fac, Facette::less_than> sf;
-
+    
 std::for_each(tet.begin(),tet.end(),[&sf](Tetra::Tet const& te)
 	{
 	int ia=te.ind[0];int ib=te.ind[1];int ic=te.ind[2];int id=te.ind[3];

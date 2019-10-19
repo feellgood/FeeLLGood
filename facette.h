@@ -54,23 +54,6 @@ struct prm
 		
 	};
 
-    /** \class Obj
-     container for buffering the projection(facettes) matrix results when mutex is locked
-     */
-    
-class Obj
-    {
-    public:
-        /** constructor */
-        inline Obj(const int _idx)
-        {
-        idx = _idx;   
-        }
-        
-        int idx;/**< index of the corresponding facette */
-     };
-    
-    
 /** \class Fac
 Face is a class containing the index references to nodes, it has a triangular shape and should not be degenerated 
 */
@@ -204,10 +187,19 @@ class Fac{
         /** computes correction values */
         void calcCorr(std::function<const Pt::pt3D (Nodes::Node)> getter,double *corr,double u[DIM][NPI]) const;
         
+        /** lexicographic order on indices */
+        inline bool operator< (const Fac &f) const
+            {
+            if (this->ind[0] < f.ind[0]) return true;
+            else if ((this->ind[0] == f.ind[0]) && (this->ind[1] < f.ind[1])) return true;
+                else if ((this->ind[0] == f.ind[0]) && (this->ind[1] == f.ind[1]) && (this->ind[2] < f.ind[2])) return true;
+
+            return false;
+            }
+        
     private:
         int NOD;/**< number of nodes */
         int reg;/**< .msh region number */
-        
         
         const std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
         gmm::dense_matrix <double> Ksp;/**< matrix initialized by constructor */
@@ -221,37 +213,10 @@ class Fac{
             {for (int j=0; j<NPI; j++) {weight[j] = 2.*surf*pds[j]; }}// detJ = 2*surf;
 };//end class Fac
 
-/*    
-inline bool operator< (const Fac &f1, const Fac &f2)
-    {
-    if (f1.ind[0]<f2.ind[0]) return true;
-    else
-        if ((f1.ind[0]==f2.ind[0]) && (f1.ind[1]<f2.ind[1])) return true;
-        else
-            if ((f1.ind[0]==f2.ind[0]) && (f1.ind[1]==f2.ind[1]) && (f1.ind[2]<f2.ind[2])) return true;
 
-    return false;
-    }
-*/
+/** operator less_than for the orientation of the facette, lexicographic order from Fac::operator< */
+struct less_than { inline bool operator()(const Fac &f1, const Fac &f2) const {return (f1<f2);} };
 
-/** operator less_than for the orientation of the facette, lexicographic order */
-struct less_than
-{
-/** operator() for the comparison of two faces with lexicographical order */
-
-bool operator()(const Fac &f1, const Fac &f2) const
-  {
-  if (f1.ind[0]<f2.ind[0]) return true;
-  else
-     if ((f1.ind[0]==f2.ind[0]) && (f1.ind[1]<f2.ind[1])) return true;
-     else
-        if ((f1.ind[0]==f2.ind[0]) && (f1.ind[1]==f2.ind[1]) && (f1.ind[2]<f2.ind[2])) return true;
-
-  return false;
-  }
-};
-
-
-}
+}//end namespace
 
 #endif /* facette_h */
