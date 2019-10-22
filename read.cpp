@@ -187,7 +187,7 @@ if(symb == "$MeshFormat")
 msh.close();
 }
 
-void Fem::readSol(bool VERBOSE,double scaling, string fileName)
+double Fem::readSol(bool VERBOSE,double scaling, string fileName)
 {
 ifstream fin(fileName, std::ifstream::in);
 if (!fin)
@@ -202,7 +202,7 @@ getline(fin, str);
 unsigned long idx = str.find(":");
 idx +=2;
 
-t = stod(str.substr(idx));
+double t = stod(str.substr(idx));
 
 if(VERBOSE) { cout << ".sol file: " << str << " @ time t = " << t << endl; }
 
@@ -229,5 +229,7 @@ for (int i=0; i<NOD; i++)
         }
     }
 fin.close();    			     
+
+return t;
 }
 

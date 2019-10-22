@@ -23,10 +23,11 @@ mySettings["Bext"] = [1.0,0.0,-1.0]
 mySettings["mesh"]["volume_regions"]["300"]["alpha"] = 0.5
 
 mySettings["time integration"]["final_time"] = 1.5e-5
-mySettings["time integration"]["min(dt)"] = 1e-14
-mySettings["time integration"]["max(dt)"] = 1e-6
+mySettings["time integration"]["min(dt)"] = 1e-9
+mySettings["time integration"]["max(dt)"] = 1e-5
+mySettings["time integration"]["initial dt"] = 1e-7
 
-mySettings["time integration"]["max(du)"] = 0.1
+mySettings["time integration"]["max(du)"] = 0.2
 
 mySettings["initial magnetization"] = {"Mx":"0","My":"0","Mz":"1"}
 

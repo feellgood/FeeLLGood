@@ -14,8 +14,7 @@ void Settings::infos()
 {
 std::cout << "\t simulation name : "<< simName << std::endl;
 std::cout << "\t mesh file name: " << pbName << " with scaling factor " << getScale() << std::endl;
-std::cout << "\t final time of the simulation\t\t" << tf << std::endl;
-std::cout << "\t initial time step\t" << dt << std::endl << std::endl;
+
 std::cout << "\t save energy values every " << time_step << " seconds" << std::endl;
 std::cout << "\t snapshot of the magnetization configuration every " << save_period << " time steps" << std::endl;
 if (restore)
@@ -23,7 +22,7 @@ if (restore)
 else
     { std::cout << "\t initial magnetization distribution from math expression" << std::endl; }
 
-std::cout << "\t applied field Hext = [ " << Hext[0] << ",\t" << Hext[1] << ",\t" << Hext[2] << " ] A/m" << std::endl;
+std::cout << "\t applied field Hext = [ " << Hext(Pt::IDX_X) << ",\t" << Hext(Pt::IDX_Y) << ",\t" << Hext(Pt::IDX_Z) << " ] A/m" << std::endl;
 
 for(unsigned int i=0;i<paramTetra.size();i++) {paramTetra[i].infos();}
 for(unsigned int i=0;i<paramFacette.size();i++) {paramFacette[i].infos();}
@@ -32,7 +31,7 @@ std::cout << solverNbTh+1 << " threads for assembling matrix." << std::endl;
 }
 
 
-void Settings::read(std::string fileJson)
+void Settings::read(timing &t_prm,std::string fileJson)
 {
 boost::property_tree::ptree root;
 boost::property_tree::ptree sub_tree,s_sub_tree;
@@ -184,13 +183,15 @@ threshold = sub_tree.get<double>("threshold",0.1);
 try {sub_tree = root.get_child("Bext");}
 catch(std::exception &e)
     { std::cout << e.what() << std::endl; }
-int j=0;    
-for(boost::property_tree::ptree::value_type &cell :sub_tree)
-    {
-    Hext[j] = nu0 * cell.second.get_value<double>();
-    j++;
-    }
 
+std::vector<double> val_vect;
+for(boost::property_tree::ptree::value_type &cell :sub_tree)
+    { val_vect.push_back( nu0 * cell.second.get_value<double>() ); }
+
+if(val_vect.size() != DIM) {std::cout<<"wrong number of field components"<<std::endl;}
+else
+    { Hext = Pt::pt3D(val_vect[0],val_vect[1],val_vect[2]); }
+    
 try {sub_tree = root.get_child("spin polarized current");}
 catch(std::exception &e)
     { std::cout << e.what() << std::endl; }
@@ -213,11 +214,12 @@ REFRESH_PRC = sub_tree.get<int>("refresh preconditionner every",20);
 try { sub_tree = root.get_child("time integration"); }
 catch (std::exception &e)
     { std::cout << e.what() << std::endl; }
+    
 DUMIN = sub_tree.get<double>("min(du)",1e-9);
 DUMAX = sub_tree.get<double>("max(du)",0.02);
-DTMIN = sub_tree.get<double>("min(dt)",1e-14);
-DTMAX = sub_tree.get<double>("max(dt)",1e-7);
-TAUR = 100.*DTMAX; // pourquoi 100 ?
-dt = sub_tree.get<double>("initial dt",1e-9);
-tf = sub_tree.get<double>("final_time",0);
+t_prm.DTMIN = sub_tree.get<double>("min(dt)",1e-14);
+t_prm.DTMAX = sub_tree.get<double>("max(dt)",1e-7);
+t_prm.TAUR = 100.* t_prm.DTMAX; // pourquoi 100 ?
+t_prm.dt = sub_tree.get<double>("initial dt",1e-9);
+t_prm.tf = sub_tree.get<double>("final_time",0);
 }

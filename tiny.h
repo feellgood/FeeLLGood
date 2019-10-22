@@ -58,8 +58,21 @@ template <typename T, int M, int N> inline void neg_transposed_mult(const T X[M]
        }
    }
    
+/** mat Transpose(mat) multiplication
+\return \f$ C = A B^{\dagger}  \f$
+*/
+template <typename T, int M, int N, int P> inline void direct_transposed_mult(T A[M][N],T B[P][N], T C[M][P]) {
+   for (int i=0; i<M; i++) 
+   for (int k=0; k<P; k++) {
+       T v=T(0);
+       for (int j=0; j<N; j++) 
+           v+= A[i][j]*B[k][j];
+       C[i][k]=v;
+       }
+   }
+
    
-/** const mat const mat multiplication <br>
+/** mat mat multiplication
 \return \f$ C = A B \f$
 */
 template <typename T, int M, int N, int P> inline void mult(const T A[M][N],const T B[N][P], T C[M][P]) {

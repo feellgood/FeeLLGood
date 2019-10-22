@@ -11,25 +11,12 @@
 
 #include "config.h"
 #include "node.h"
-
 #include "tiny.h"
-
-/** a 3D point */
-typedef double triple[DIM];
 
 /** 
 \return square of a number \f$ x^2 \f$
 */
 inline double sq(double x /**< [in] */ ) {return x*x;}
-
-/** in place normalizing function of triple a */
-inline void normalize(triple &a /**< [in,out] */)
-{
-double norme=sqrt(sq(a[0])+sq(a[1])+sq(a[2]));
-if(norme>0)
-    { a[0]/= norme;a[1]/= norme;a[2]/= norme; }
-else {std::cerr<< "division by zero : normalize." <<std::endl;}
-}
 
 /** \namespace Tetra
  to grab altogether some constants for struct Tet
@@ -123,7 +110,7 @@ indices convention is<br>
 */
 class Tet{
     public:
-		inline Tet(int _NOD): NOD(_NOD), Kp(2*N,2*N), Lp(2*N) 
+		inline Tet(int _NOD): NOD(_NOD)//, Kp(2*N,2*N), Lp(2*N) 
         { reg = 0; idxPrm=-1; treated = false;} /**< default constructor */
 		
 		/** constructor for readMesh */
@@ -134,8 +121,10 @@ class Tet{
                    const int i1 /**< [in] node index */,
                    const int i2 /**< [in] node index */,
                    const int i3 /**< [in] node index */,
-                    const double epsilon/**< for degeneracy test */) : idxPrm(_idx),reg(_reg),refNode(_p_node), Kp(2*N,2*N), Lp(2*N) 
+                    const double epsilon/**< for degeneracy test */) : idxPrm(_idx),reg(_reg),refNode(_p_node)//, Kp(2*N,2*N), Lp(2*N) 
             {
+            Kp[2*N][2*N] = {0};
+            Lp[2*N] = {0};
             NOD = _p_node->size();
             ind[0] = i0; ind[1] = i1; ind[2] = i2; ind[3] = i3;
             for (int i=0; i<N; i++) ind[i]--;           // convention Matlab/msh -> C++
@@ -242,7 +231,7 @@ class Tet{
             };
         
 		/** computes the integral contribution of the tetrahedron to the evolution of the magnetization */		
-		void integrales(std::vector<Tetra::prm> const& params,const double Hext[DIM],double Vz,double dt,double tau_r,gmm::dense_matrix <double> &AE, std::vector <double> &BE)  const;
+		void integrales(std::vector<Tetra::prm> const& params /**< [in] */,double dt,Pt::pt3D const& Hext,double tau_r,double Vz,double AE[3*N][3*N], double BE[3*N])  const;
 
         /** exchange energy of the tetrahedron */
         double exchangeEnergy(Tetra::prm const& param,const double dudx[DIM][NPI],const double dudy[DIM][NPI],const double dudz[DIM][NPI]) const;
@@ -257,16 +246,16 @@ class Tet{
         double demagEnergy(Tetra::prm const& param,const double dudx[DIM][NPI],const double dudy[DIM][NPI],const double dudz[DIM][NPI],const double phi[NPI]) const;
         
         /** zeeman energy of the tetrahedron */
-        double zeemanEnergy(Tetra::prm const& param,double uz_drift,const double Hext[DIM],const double u[DIM][NPI]) const;
+        double zeemanEnergy(Tetra::prm const& param,double uz_drift,Pt::pt3D const& Hext,const double u[DIM][NPI]) const;
         
         /** computes projection of a tetrahedron using inner matrix in tetra object */
-        void projection(gmm::dense_matrix <double> const& A,  std::vector <double> const& B);
+        void projection(double A[3*N][3*N], double B[3*N]);
         
         /** matrix assembly using inner matrix in tetra */
         void assemblage_mat(write_matrix &K) const;
         
-        /** vector assembly using inner matrix in tetra */
-        void assemblage_vect(write_vector &L) const;
+        /** vector assembly using inner vector in tetra */
+        void assemblage_vect(double L[]) const;
         
         /** getter for N */
 		inline int getN(void) const {return N;}
@@ -316,8 +305,10 @@ class Tet{
             { scalData[i] =  getter( (*refNode)[ ind[i] ] ,idx); }    
         }
         
-        gmm::dense_matrix <double> Kp;/**< Kp(2*N,2*N) initialized by constructor */
-        std::vector <double>  Lp;/**< Lp(2*N) initialized by constructor  */
+        //gmm::dense_matrix <double> Kp;/**< Kp(2*N,2*N) initialized by constructor */
+        double Kp[2*N][2*N];
+        //std::vector <double> Lp;/**< Lp(2*N) initialized by constructor  */
+        double Lp[2*N];
 };//end class Tetra
 }//end namespace Tetra
 

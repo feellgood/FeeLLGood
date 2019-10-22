@@ -13,6 +13,8 @@
 #include "tetra.h"
 #include "facette.h"
 
+#include "time_integration.h"
+
 #ifndef feellgoodSettings_h
 #define feellgoodSettings_h
 
@@ -40,7 +42,7 @@ class Settings{
 	
 	void infos(void);/**< some prints sent to terminal  */	
 	
-	void read(std::string fileJson);/**< read settings from a json file */
+	void read(timing &t_prm,std::string fileJson);/**< read settings from a json file */
 	
 	inline void setPbName(std::string str) {pbName = str;} /**< setter for .msh file name  */
 	inline std::string getPbName(void) const {return pbName;}/**< getter for problem file name */
@@ -59,9 +61,7 @@ class Settings{
 	
 	bool withTsv;/**< boolean flag to mention if you want output in txt tsv file format  */
 	bool withVtk;/**< boolean flag to mention if you want output in txt vtk file format (readable by paraview) */
-	double tf;/**< end time of the simulation */
-	double dt;/**< step time of the simulation */
-
+	
 	bool verbose;/**< if true the user gets many printing feedback in terminal */
 	
 	double time_step;/**< energy saved every time_step */
@@ -75,7 +75,7 @@ class Settings{
 	int solverNbTh;/**< nb of threads for the finite element solver */
 	int scalfmmNbTh;/**< nb of threads for the computation of the demag field with scalfmm */
     
-    triple Hext;/**< applied external field. Unit : SI (A/m) */
+    Pt::pt3D Hext;/**< applied external field. Unit : SI (A/m) */
     
     double Uz;/**< spin transfert torque adiabatic prefactor along z direction */
     double beta;/**< spin transfert torque non-adiabatic prefactor along z direction */
@@ -95,14 +95,7 @@ class Settings{
 /** maximum value for du step */
     double DUMAX; // 0.1 en stat; 0.02 en dynamique
 
-/** minimum step time for time integrator */
-    double DTMIN; //1e-14;
 
-/** maximum step time for time integrator */
-    double DTMAX;//  1e-5 en stat ;  1e-7 en dynamique;
-
-/** reduced \f$ \tau_r = 100 DT_{\mathrm{max}} \f$ */
-    double TAUR;//    = 100.*DTMAX;
     
     int MAXITER;/**< maximum number of iteration for biconjugate gradient algorithm */
     

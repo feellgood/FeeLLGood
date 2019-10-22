@@ -6,7 +6,12 @@
 #include "linear_algebra.h"
 #include "fmm_demag.h"
 
+#include "time_integration.h"
+
 using namespace std;
+
+
+int time_integration(Fem &fem,Settings &settings /**< [in] */,LinAlgebra &linAlg /**< [in] */,scal_fmm::fmm &myFMM  /**< [in] */,timing &t_prm);
 
 void prompt(void)
 {
@@ -17,8 +22,6 @@ std::cout <<   "\t │      cnrs Grenoble-INP     │\n";
 std::cout <<   "\t └────────────────────────────┘\n";
 std::cout << "\t process\t\t" << getpid() << std::endl;
 }
-
-int time_integration(Fem &fem,Settings &settings /**< [in] */,LinAlgebra &linAlg /**< [in] */,scal_fmm::fmm &myFMM  /**< [in] */);
 
 int main(int argc,char* argv[])
 {
@@ -40,16 +43,16 @@ else
 	}
 
 prompt();
-	
-mySettings.read(fileJson);
+
+timing t_prm;
+mySettings.read(t_prm,fileJson);
+Fem fem = Fem(mySettings,t_prm);
+
 mySettings.infos();
-
-Fem fem = Fem(mySettings);
-
-counter.tic();
-
+t_prm.infos();
 fem.infos();
 
+counter.tic();
 //once fem containers are ok, linAlgebra object is built
 LinAlgebra linAlg(mySettings,fem.node,fem.tet,fem.fac);
 
@@ -58,7 +61,7 @@ scal_fmm::fmm myFMM = scal_fmm::fmm(fem,mySettings.verbose,mySettings.scalfmmNbT
 myFMM.calc_demag(fem,mySettings);
 std::cout << "first calc demag done." << std::endl;
 
-int nt = time_integration(fem,mySettings,linAlg,myFMM);
+int nt = time_integration(fem,mySettings,linAlg,myFMM,t_prm);
         
 counter.tac();
 cout << "\n  * iterations: " << nt << "\n  * total computing time: " << counter.elapsed() << " s\n--- the end ---\n" << endl;

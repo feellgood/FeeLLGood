@@ -2,11 +2,12 @@
 
 #include "fem.h"
 #include "config.h"
+#include "time_integration.h"
 
 //#include <boost/format.hpp>
 using namespace std;
 
-void Fem::saver(Settings const& settings, ofstream &fout,const int nt) const
+void Fem::saver(Settings const& settings,timing const& t_prm, ofstream &fout,const int nt) const
 {
 int save_period = settings.save_period;
 
@@ -20,9 +21,9 @@ for(unsigned int i = 0;i<settings.evol_columns.size();i++)
     if(i == settings.evol_columns.size() - 1) {sep = "\n";} else {sep = "\t";}
 
     if(keyVal == "iter") { fout << nt << sep;}
-    if(keyVal == "t") { fout << t << sep;}
-    if(keyVal == "dt") { fout << settings.dt << sep;}
-    if(keyVal == "max dm") { fout << vmax*settings.dt << sep;}
+    if(keyVal == "t") { fout << t_prm.t << sep;}
+    if(keyVal == "dt") { fout << t_prm.dt << sep;}
+    if(keyVal == "max dm") { fout << vmax*t_prm.dt << sep;}
     if(keyVal == "<mx>") { fout << avg(Nodes::get_u_comp,Pt::IDX_X) << sep;}
     if(keyVal == "<my>") { fout << avg(Nodes::get_u_comp,Pt::IDX_Y) << sep;}
     if(keyVal == "<mz>") { fout << avg(Nodes::get_u_comp,Pt::IDX_Z) << sep;}
@@ -43,19 +44,19 @@ if ((nt%save_period)==0)
     if (settings.withVtk)
         {
         string str = baseName + "_iter" + to_string(nt) + ".vtk";
-        savecfg_vtk(settings,str);
+        savecfg_vtk(settings,t_prm,str);
         }
     
     string str = baseName + "_iter" + to_string(nt) + ".sol";
  
     if(settings.verbose) { cout << " " << str << endl; }    
-    savesol(str,settings.getScale());
+    savesol(str,t_prm,settings.getScale());
     if(settings.verbose) { cout << "all nodes written." << endl; }
     //    saveH(str);
     }
 }
 
-void Fem::savecfg_vtk(Settings const& settings,const string fileName) const
+void Fem::savecfg_vtk(Settings const& settings,timing const& t_prm,const string fileName) const
 {
     const int TET = tet.size();
     const int NOD = node.size();
@@ -70,7 +71,7 @@ if (!fout)
     }
 
 fout << "# vtk DataFile Version 2.0" << endl;
-fout << "time : " << t << endl; // boost::format(" time : %+20.10e") % fem.t;
+fout << "time : " << t_prm.t << endl; // boost::format(" time : %+20.10e") % fem.t;
 fout << "ASCII" << endl;
 fout << "DATASET UNSTRUCTURED_GRID" << endl;
 fout << "POINTS "<< NOD << " float" << endl;
@@ -102,7 +103,7 @@ std::for_each(node.begin(),node.end(),[&fout](Nodes::Node const& n){fout << n.u 
 //fout << boost::format("%+20.10e %+20.10e %+20.10e") % u1 % u2 % u3 << endl;
 }
 
-void Fem::savesol(const string fileName, const double s) const
+void Fem::savesol(const string fileName,timing const& t_prm, const double s) const
 {
 ofstream fout(fileName, ios::out);
 if (!fout)
@@ -111,7 +112,7 @@ if (!fout)
     SYSTEM_ERROR;
     }
 //fout << boost::format("#time : %+20.10e ") % fem.t << endl;
-fout << "#time : " << t << endl;
+fout << "#time : " << t_prm.t << endl;
 
 // fout << boost::format("%8d %+20.10f %+20.10f %+20.10f %+20.10f %+20.10f %+20.10f %+20.10e") % i % x % y % z % u1 % u2 % u3 % phi << endl;}
 
@@ -127,7 +128,7 @@ std::for_each(node.begin(),node.end(),[&i,s,&fout](Nodes::Node const&n)
 fout.close();
 }
 
-void Fem::saveH(const string fileName,const double scale) const
+void Fem::saveH(const string fileName,const double t,const double scale) const
 {
 cout << " " << fileName << endl <<" -------------------" << endl << endl;
 

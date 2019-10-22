@@ -1,8 +1,8 @@
 #include "facette.h"
-
+#include "tiny.h"
 using namespace Facette;
 
-void Fac::integrales(std::vector<Facette::prm> const& params, std::vector <double> &BE) const
+void Fac::integrales(std::vector<Facette::prm> const& params, double BE[3*N]) const
 {
 double Js = params[idxPrm].Js;
 double Ks = params[idxPrm].Ks;
@@ -71,22 +71,26 @@ for (int npi=0; npi<NPI; npi++)
 return weightedScalarProd(dens);
 }
 
-void Fac::projection(gmm::dense_matrix <double> const& A, std::vector <double> const& B)
+void Fac::projection(double A[3*N][3*N], double B[3*N])
 {
-gmm::dense_matrix <double> P(2*N,3*N);
-gmm::dense_matrix <double> PA(2*N,3*N);
+double P[2*N][3*N] = { {0} };
+double PA[2*N][3*N] = { {0} };
 
 for (int i=0; i<N; i++){
     Nodes::Node const& n = (*refNode)[ind[i]];
-    P(i,i)  = n.ep.x();  P(i,N+i)  = n.ep.y();  P(i,2*N+i)  = n.ep.z();
-    P(N+i,i)= n.eq.x();  P(N+i,N+i)= n.eq.y();  P(N+i,2*N+i)= n.eq.z();
+    P[i][i]  = n.ep.x();  P[i][N+i]  = n.ep.y();  P[i][2*N+i]  = n.ep.z();
+    P[N+i][i]= n.eq.x();  P[N+i][N+i]= n.eq.y();  P[N+i][2*N+i]= n.eq.z();
     }
 
 //Ap = (P*A)*trans(P); Bp = P*B;
-gmm::mult(P,A,PA);
-gmm::mult(PA, gmm::transposed(P), Ksp);
+//gmm::mult(P,A,PA);
+//gmm::mult(PA, gmm::transposed(P), Ksp);
+//gmm::mult(P,B,Lsp);
 
-gmm::mult(P,B,Lsp);
+tiny::mult<double,2*N,3*N,3*N>(P,A,PA);
+
+tiny::direct_transposed_mult<double,2*N,3*N,2*N>(PA,P,Ksp);
+tiny::mult<double,2*N,3*N>(P,B,Lsp);
 
 }
 
@@ -99,13 +103,13 @@ void Fac::assemblage_mat(write_matrix &K) const
         for (int j=0; j < N; j++)
             {
             int j_= ind[j];
-            K(NOD+i_,j_) += Ksp(i,j);      K(NOD+i_, NOD+j_) += Ksp(  i,N+j);
-            K(    i_,j_) += Ksp(N+i,j);    K(    i_, NOD+j_) += Ksp(N+i,N+j);
+            K(NOD+i_,j_) += Ksp[i][j];      K(NOD+i_, NOD+j_) += Ksp[  i][N+j];
+            K(    i_,j_) += Ksp[N+i][j];    K(    i_, NOD+j_) += Ksp[N+i][N+j];
             }
         }
 }
 
-void Fac::assemblage_vect(write_vector &L) const
+void Fac::assemblage_vect(double L[]) const
 {
     for (int i=0; i < N; i++)
         {

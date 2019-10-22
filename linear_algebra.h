@@ -50,11 +50,8 @@ public:
 	gmm::diagonal_precond <read_matrix> *prc;
 
     /** solver, uses bicgstab and gmres */
-	int  solver(long nt /**< [in] */);
+	int  solver(timing const& t_prm /**< [in] */,long nt /**< [in] */);
 
-    /** setter for dt */
-    inline void set_dt(double _dt /**< [in] */){dt = _dt;}
-    
     /** setter for DW_dz */
     inline void set_DW_vz(double vz /**< [in] */){DW_vz = vz;}    
 
@@ -73,8 +70,7 @@ private:
     /** vector of pair of iterators for the tetrahedrons for multithreading */
 	std::vector < std::pair<std::vector<Tetra::Tet>::iterator,std::vector<Tetra::Tet>::iterator> > refTetIt; 
 	
-	double dt;/**< timestep */
-    double DW_vz;/**< speed of the domain wall */
+	double DW_vz;/**< speed of the domain wall */
 	const Settings &settings;/**< settings */
     double v_max;/**< maximum speed */
 	
@@ -94,7 +90,7 @@ private:
     void base_projection(bool determinist);
     
     /** template to insert coeff in sparse matrix K_TH and vector L_TH, T is Tetra or Facette */
-    template <class T> void insertCoeff(std::vector<T> container, write_matrix &K_TH, write_vector &L_TH)
+    template <class T> void insertCoeff(std::vector<T> container, write_matrix &K_TH, double *L_TH)
     {
     std::for_each( container.begin(), container.end(), [&K_TH,&L_TH](T & my_elem)
         { if(!my_elem.treated) {my_elem.assemblage_mat(K_TH);my_elem.assemblage_vect(L_TH);my_elem.treated = true;} } ); 

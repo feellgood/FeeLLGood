@@ -59,7 +59,7 @@ Face is a class containing the index references to nodes, it has a triangular sh
 */
 class Fac{
 	public:
-		inline Fac(int _NOD /**< [in] */):NOD(_NOD),Ksp(2*N,2*N), Lsp(2*N)  /**< constructor */
+		inline Fac(int _NOD /**< [in] */):NOD(_NOD)//,Ksp(2*N,2*N), Lsp(2*N)  /**< constructor */
             {reg = 0; treated = false;}
         
         /** constructor used by readMesh */
@@ -68,8 +68,10 @@ class Fac{
                    const int _idx /**< [in] region index in region vector */,
                    const int i0 /**< [in] node index */,
                    const int i1 /**< [in] node index */,
-                   const int i2 /**< [in] node index */) : idxPrm(_idx),reg(_reg),refNode(_p_node),Ksp(2*N,2*N), Lsp(2*N)
+                   const int i2 /**< [in] node index */) : idxPrm(_idx),reg(_reg),refNode(_p_node)//,Ksp(2*N,2*N), Lsp(2*N)
             {
+		Ksp[2*N][2*N] = {0};                
+		Lsp[2*N] = {0};
                 NOD = refNode->size();
                 if((0<i0)&&(i0<=NOD)&&(0<i1)&&(i1<=NOD)&&(0<i2)&&(i2<=NOD))
                     {
@@ -153,7 +155,7 @@ class Fac{
 		inline void infos() const {std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2] <<std::endl;};
         
 		/** computes the integral contribution of the triangular face */
-		void integrales(std::vector<Facette::prm> const& params /**< [in] */, std::vector <double> &BE /**< [out] */) const;
+		void integrales(std::vector<Facette::prm> const& params /**< [in] */, double BE[3*N] /**< [out] */) const;
 		
         /** anisotropy energy of the facette */
         double anisotropyEnergy(Facette::prm const& param /**< [in] */,const double u[DIM][NPI] /**< [in] */) const;
@@ -165,13 +167,13 @@ class Fac{
         double demagEnergy(const double u[DIM][NPI] /**< [in] */,const double phi[NPI] /**< [in] */) const;
         
         /** compute projection of a face from inner object matrix */
-        void projection(gmm::dense_matrix <double> const& A, std::vector <double> const& B);
+        void projection(double A[3*N][3*N], double B[3*N]);
         
         /** assemblage of the matrix elements from inner matrix in facette object */
         void assemblage_mat(write_matrix &K) const;
         
         /** assemblage of the vector elements from inner matrix in facette object */
-        void assemblage_vect(write_vector &L) const;
+        void assemblage_vect(double L[]) const;
         
         /** getter for N */		
 		inline int getN(void) const {return N;}	
@@ -202,8 +204,10 @@ class Fac{
         int reg;/**< .msh region number */
         
         const std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
-        gmm::dense_matrix <double> Ksp;/**< matrix initialized by constructor */
-        std::vector <double> Lsp;/**< vector initialized by constructor */
+        //gmm::dense_matrix <double> Ksp;/**< matrix initialized by constructor */
+        //std::vector <double> Lsp;/**< vector initialized by constructor */
+	double Ksp[2*N][2*N];        
+	double Lsp[2*N];
         
         /** computes normal vector n and surface surf		*/		
 		void calc_surf(void);
@@ -214,8 +218,11 @@ class Fac{
 };//end class Fac
 
 
-/** operator less_than for the orientation of the facette, lexicographic order from Fac::operator< */
-struct less_than { inline bool operator()(const Fac &f1, const Fac &f2) const {return (f1<f2);} };
+/** operator less_than for the orientation of the facette, lexicographic order */
+struct less_than 
+{
+    bool operator()(const Fac &f1, const Fac &f2) const {return (f1<f2);} 
+};
 
 }//end namespace
 

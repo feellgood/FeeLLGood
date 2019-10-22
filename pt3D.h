@@ -73,7 +73,9 @@ public:
      p will contain \f$ (x,y,z) = (0.0,1.0,0.0) \f$
      */
     inline pt3D(const enum index idx)
-        {memset(_x,0,sizeof _x);_x[idx] = 1.0;}
+        {
+        _x[IDX_X] = 0;_x[IDX_Y] = 0;_x[IDX_Z] = 0;
+        _x[idx] = 1.0;}
     
     
      inline pt3D(const pt3D & p) { memcpy(_x,p._x,sizeof _x); }
@@ -237,7 +239,6 @@ inline double pTriple(pt3D const& a,pt3D const& b,pt3D const& c) { return pScal(
 algebra : R^3 euclidian distance
  */
 inline double dist(pt3D const& a,pt3D const& b) { return sqrt( sq(a.x()-b.x()) + sq(a.y()-b.y()) + sq(a.z()-b.z()) ); }
-
 
 /**
 algebra : returns square of the R^3 norm

@@ -1,9 +1,11 @@
+#ifndef fem_h
+#define fem_h
+
 /** \file fem.h
 \brief principal header, contains the struct fem
 This file is called by many source files in feellgood.
 It does also contains the definition of many constants for the solver, and for scalfmm 
 */
-
 #include <iomanip>
 #include <iostream>
 #include <fstream>
@@ -23,7 +25,7 @@ It does also contains the definition of many constants for the solver, and for s
 
 #include "config.h"
 #include "feellgoodSettings.h"
-
+#include "time_integration.h"
 #include "ANN.h" // ANN declarations
 
 #include "pt3D.h"
@@ -42,9 +44,8 @@ class Fem
     {
     public:
         /** constructor */
-        inline Fem(Settings & mySets) //mySets cannot be passed const because of getValue method in init_distrib, to set x,y,z values
+        inline Fem(Settings & mySets,timing &t_prm) //mySets cannot be passed const because of getValue method in init_distrib, to set x,y,z values
             {
-            t=0.;
             vmax  = 0.0;
             DW_vz = DW_vz0 = 0.0;
             DW_z  = 0.0;
@@ -70,7 +71,7 @@ class Fem
             geometry();// initialization of l,c,diam,vol,surf
             
             if (mySets.restore)
-                { readSol(mySets.verbose,mySets.getScale(), mySets.restoreFileName); }
+                { t_prm.t = readSol(mySets.verbose,mySets.getScale(), mySets.restoreFileName); }
             else
                 {
                 std::cout<< "initial magnetization M(x,y,z,t=0) = { " << mySets.sMx << "\t" << mySets.sMy << "\t" << mySets.sMz << " }\n" << std::endl; 
@@ -85,8 +86,6 @@ class Fem
 	double diam;/**< max of l coordinates, to define a bounding box */
 	double surf;/**< total surface */
 	double vol;/**< total volume of the mesh */
-	
-	double t;/**< physical current time of the simulation */
 	
 	double vmax;/**< maximum speed of magnetization */
 
@@ -143,16 +142,16 @@ class Fem
     inline void reset(void) { std::for_each(node.begin(),node.end(),[](Nodes::Node &n) {n.reset();}); }    
     
     /** saving function for a solution */
-    void saver(Settings const& settings /**< [in] */, std::ofstream &fout /**< [out] */, const int nt /**< [in] */) const;
+    void saver(Settings const& settings /**< [in] */,timing const& t_prm /**< [in] */, std::ofstream &fout /**< [out] */, const int nt /**< [in] */) const;
 
     /** text file (vtk) writing function for a solution */
-    void savecfg_vtk(Settings const& settings /**< [in] */,const std::string fileName /**< [in] */) const;
+    void savecfg_vtk(Settings const& settings /**< [in] */,timing const& t_prm /**< [in] */,const std::string fileName /**< [in] */) const;
 
     /** text file (tsv) writing function for a solution */
-    void savesol(const std::string fileName /**< [in] */,const double s /**< [in] */) const;
+    void savesol(const std::string fileName /**< [in] */,timing const& t_prm /**< [in] */,const double s /**< [in] */) const;
 
     /** save the field values */
-    void saveH(const std::string fileName /**< [in] */,const double scale /**< [in] */) const;
+    void saveH(const std::string fileName /**< [in] */,const double t/**< [in] */,const double scale /**< [in] */) const;
     
     /** 
     average component of either u or v through getter on the whole set of tetetrahedron
@@ -214,9 +213,9 @@ return maxCoord->p(coord);
 }
 
 /**
-read a solution from a file (tsv formated) and initialize fem struct to restart computation from that distribution
+read a solution from a file (tsv formated) and initialize fem struct to restart computation from that distribution, return time
 */
-void readSol(bool VERBOSE/**< [in] */,
+double readSol(bool VERBOSE/**< [in] */,
              double scaling /**< [in] scaling factor for physical coordinates */,
              std::string fileName /**< [in] */ );
 
@@ -284,3 +283,6 @@ inline void zeroEnergy(void) {
 inline void calc_Etot(void) { Etot = E_exch + E_aniso + E_demag + E_zeeman; }
 
 }; // end class
+
+#endif
+
