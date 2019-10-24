@@ -70,9 +70,7 @@ class Fac{
                    const int i1 /**< [in] node index */,
                    const int i2 /**< [in] node index */) : idxPrm(_idx),reg(_reg),refNode(_p_node)//,Ksp(2*N,2*N), Lsp(2*N)
             {
-		Ksp[2*N][2*N] = {0};                
-		Lsp[2*N] = {0};
-                NOD = refNode->size();
+		NOD = refNode->size();
                 if((0<i0)&&(i0<=NOD)&&(0<i1)&&(i1<=NOD)&&(0<i2)&&(i2<=NOD))
                     {
                     ind[0] = i0; ind[1] = i1; ind[2] = i2;
@@ -181,7 +179,7 @@ class Fac{
 		/** getter for NPI */		
 		inline int getNPI(void) const {return NPI;}	
 		
-        /**
+		/**
         computes correction on potential
         */
         double potential(std::function<Pt::pt3D (Nodes::Node)> getter, int i) const;
@@ -199,15 +197,17 @@ class Fac{
             return false;
             }
         
+        //gmm::dense_matrix <double> Ksp;/**< matrix initialized by constructor */
+        //std::vector <double> Lsp;/**< vector initialized by constructor */
+	double Kp[2*N][2*N];        
+	double Lp[2*N];
+    
     private:
         int NOD;/**< number of nodes */
         int reg;/**< .msh region number */
         
         const std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
-        //gmm::dense_matrix <double> Ksp;/**< matrix initialized by constructor */
-        //std::vector <double> Lsp;/**< vector initialized by constructor */
-	double Ksp[2*N][2*N];        
-	double Lsp[2*N];
+        
         
         /** computes normal vector n and surface surf		*/		
 		void calc_surf(void);

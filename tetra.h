@@ -123,8 +123,6 @@ class Tet{
                    const int i3 /**< [in] node index */,
                     const double epsilon/**< for degeneracy test */) : idxPrm(_idx),reg(_reg),refNode(_p_node)//, Kp(2*N,2*N), Lp(2*N) 
             {
-            Kp[2*N][2*N] = {0};
-            Lp[2*N] = {0};
             NOD = _p_node->size();
             ind[0] = i0; ind[1] = i1; ind[2] = i2; ind[3] = i3;
             for (int i=0; i<N; i++) ind[i]--;           // convention Matlab/msh -> C++
@@ -266,8 +264,13 @@ class Tet{
 		/** getter for region */
 		inline int getRegion(void) const {return reg;}
 		
-        /** \return \f$ |J| \f$ build Jacobian \f$ J \f$ */
+		/** \return \f$ |J| \f$ build Jacobian \f$ J \f$ */
         double Jacobian(double J[DIM][DIM]);
+        
+        //gmm::dense_matrix <double> Kp;/**< Kp(2*N,2*N) initialized by constructor */
+        double Kp[2*N][2*N];
+        //std::vector <double> Lp;/**< Lp(2*N) initialized by constructor  */
+        double Lp[2*N];
         
     private:
         int NOD;/**< total number of nodes, also an offset for filling sparseMatrix */
@@ -305,10 +308,7 @@ class Tet{
             { scalData[i] =  getter( (*refNode)[ ind[i] ] ,idx); }    
         }
         
-        //gmm::dense_matrix <double> Kp;/**< Kp(2*N,2*N) initialized by constructor */
-        double Kp[2*N][2*N];
-        //std::vector <double> Lp;/**< Lp(2*N) initialized by constructor  */
-        double Lp[2*N];
+        
 };//end class Tetra
 }//end namespace Tetra
 

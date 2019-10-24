@@ -89,8 +89,8 @@ for (int i=0; i<N; i++){
 
 tiny::mult<double,2*N,3*N,3*N>(P,A,PA);
 
-tiny::direct_transposed_mult<double,2*N,3*N,2*N>(PA,P,Ksp);
-tiny::mult<double,2*N,3*N>(P,B,Lsp);
+tiny::direct_transposed_mult<double,2*N,3*N,2*N>(PA,P,Kp);
+tiny::mult<double,2*N,3*N>(P,B,Lp);
 
 }
 
@@ -103,8 +103,8 @@ void Fac::assemblage_mat(write_matrix &K) const
         for (int j=0; j < N; j++)
             {
             int j_= ind[j];
-            K(NOD+i_,j_) += Ksp[i][j];      K(NOD+i_, NOD+j_) += Ksp[  i][N+j];
-            K(    i_,j_) += Ksp[N+i][j];    K(    i_, NOD+j_) += Ksp[N+i][N+j];
+            K(NOD+i_,j_) += Kp[i][j];      K(NOD+i_, NOD+j_) += Kp[  i][N+j];
+            K(    i_,j_) += Kp[N+i][j];    K(    i_, NOD+j_) += Kp[N+i][N+j];
             }
         }
 }
@@ -113,8 +113,8 @@ void Fac::assemblage_vect(double L[]) const
 {
     for (int i=0; i < N; i++)
         {
-        L[NOD+ind[i]] += Lsp[i];
-        L[ind[i]] += Lsp[N+i];
+        L[NOD+ind[i]] += Lp[i];
+        L[ind[i]] += Lp[N+i];
         }
 }
 

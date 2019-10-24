@@ -28,7 +28,8 @@ for(int i=0;i<NbTH;i++)
                 double L[3*Tetra::N] = {0};
                 
             tet.integrales(settings.paramTetra,t_prm.dt,settings.Hext,DW_vz,t_prm.TAUR,K, L);     
-            tet.projection( K, L);
+            projection<Tetra::Tet,Tetra::N>(tet,K,L);
+            //tet.projection( K, L);
             tet.treated = false;
             if(my_mutex.try_lock())
                 {
@@ -51,8 +52,9 @@ tab_TH[NbTH] = std::thread( [this,&K_TH,&L_TH]()
         double Ks[3*Facette::N][3*Facette::N] = { {0} };
         double Ls[3*Facette::N] = {0};
         
-            fac.integrales(settings.paramFacette,Ls);     
-        fac.projection( Ks, Ls);
+        fac.integrales(settings.paramFacette,Ls);     
+        projection<Facette::Fac,Facette::N>(fac,Ks,Ls);
+        //fac.projection( Ks, Ls);
         fac.treated = false;
         if(my_mutex.try_lock())
             {

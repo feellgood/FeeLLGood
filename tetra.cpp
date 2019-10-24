@@ -251,27 +251,17 @@ return ( -Js*weightedScalarProd(dens) );
 
 void Tet::projection(double A[3*N][3*N],  double B[3*N])
 {
-//gmm::dense_matrix <double> P(2*N,3*N);
-//gmm::dense_matrix <double> PA(2*N,3*N);
-double P[2*N][3*N] = { {0} };
-double PA[2*N][3*N] = { {0} };
+double P[2*N][3*N] = { {0} }; // P must be filled with zero
+double PA[2*N][3*N]; // no need to initialize with zeros
 
 for (int i=0; i<N; i++){
     Nodes::Node const& n = (*refNode)[ind[i]];
-    //P(i,i)  = n.ep.x();  P(i,N+i)  = n.ep.y();  P(i,2*N+i)  = n.ep.z();
-    //P(N+i,i)= n.eq.x();  P(N+i,N+i)= n.eq.y();  P(N+i,2*N+i)= n.eq.z();
 	P[i][i]  = n.ep.x();  P[i][N+i]  = n.ep.y();  P[i][2*N+i]  = n.ep.z();
 	P[N+i][i]= n.eq.x();  P[N+i][N+i]= n.eq.y();  P[N+i][2*N+i]= n.eq.z();
     }
-
-//gmm::mult(P,A,PA);
 //Ap = (P*A)*trans(P);
 //Bp = P*B;
-//gmm::mult(PA, gmm::transposed(P), Kp);
-
-//gmm::mult(P,B,Lp);
 tiny::mult<double,2*N,3*N,3*N>(P,A,PA);
-
 tiny::direct_transposed_mult<double,2*N,3*N,2*N>(PA,P,Kp);
 tiny::mult<double,2*N,3*N>(P,B,Lp);
 }

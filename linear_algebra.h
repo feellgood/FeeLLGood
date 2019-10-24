@@ -89,6 +89,24 @@ private:
     /** computes the local vector basis {ep,eq} in the tangeant plane for projection on the elements */
     void base_projection(bool determinist);
     
+/** template to make projection for T, tetra or facette*/
+	template <class T,int N> void projection(T &x,double A[3*N][3*N],  double B[3*N])
+	{
+	double P[2*N][3*N] = { {0} }; // P must be filled with zero
+	double PA[2*N][3*N]; // no need to initialize with zeros
+
+	for (int i=0; i<N; i++){
+  	  Nodes::Node const& n = (*refNode)[x.ind[i]];
+	P[i][i]  = n.ep.x();  P[i][N+i]  = n.ep.y();  P[i][2*N+i]  = n.ep.z();
+	P[N+i][i]= n.eq.x();  P[N+i][N+i]= n.eq.y();  P[N+i][2*N+i]= n.eq.z();
+    	}
+//Ap = (P*A)*trans(P);
+//Bp = P*B;
+	tiny::mult<double,2*N,3*N,3*N>(P,A,PA);
+	tiny::direct_transposed_mult<double,2*N,3*N,2*N>(PA,P,x.Kp);
+	tiny::mult<double,2*N,3*N>(P,B,x.Lp);
+	}
+
     /** template to insert coeff in sparse matrix K_TH and vector L_TH, T is Tetra or Facette */
     template <class T> void insertCoeff(std::vector<T> container, write_matrix &K_TH, double *L_TH)
     {
