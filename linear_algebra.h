@@ -89,23 +89,72 @@ private:
     /** computes the local vector basis {ep,eq} in the tangeant plane for projection on the elements */
     void base_projection(bool determinist);
     
-/** template to make projection for T, tetra or facette*/
-	template <class T,int N> void projection(T &x,double A[3*N][3*N],  double B[3*N])
-	{
+    template<class T,int N> double Pcoeff(T const& x,int i,int j) 
+    {
+    double val = 0;
+    int node_i = i%N;
+    
+    /*
 	double P[2*N][3*N] = { {0} }; // P must be filled with zero
-	double PA[2*N][3*N]; // no need to initialize with zeros
-
-	for (int i=0; i<N; i++){
+	
+    for (int i=0; i<N; i++){
   	  Nodes::Node const& n = (*refNode)[x.ind[i]];
 	P[i][i]  = n.ep.x();  P[i][N+i]  = n.ep.y();  P[i][2*N+i]  = n.ep.z();
 	P[N+i][i]= n.eq.x();  P[N+i][N+i]= n.eq.y();  P[N+i][2*N+i]= n.eq.z();
     	}
-//Ap = (P*A)*trans(P);
-//Bp = P*B;
-	tiny::mult<double,2*N,3*N,3*N>(P,A,PA);
-	tiny::direct_transposed_mult<double,2*N,3*N,2*N>(PA,P,x.Kp);
-	tiny::mult<double,2*N,3*N>(P,B,x.Lp);
-	}
+    */
+    
+    if(node_i == (j%N))
+        {
+        if(i<N)
+            {//ep
+            Nodes::Node const& n = (*refNode)[x.ind[node_i]];    
+            val = n.ep(j/N);    
+            }
+        else
+            {//eq
+            Nodes::Node const& n = (*refNode)[x.ind[node_i]];
+            val = n.eq(j/N);
+            }
+        }
+    return val;
+    }
+    
+/** template to make projection for T, tetra or facette. It computes Ap = (P*A)*trans(P) and Bp = P*B and stores resuls in inner matrix Kp and vector Lp of class T*/
+	template <class T,int N> void projection(T &x,double A[3*N][3*N],  double B[3*N])
+	{
+    double PA[2*N][3*N]; // no need to initialize with zeros
+//tiny::mult<double,2*N,3*N,3*N>(P,A,PA);
+	for (int i=0; i<(2*N); i++) 
+        {
+        x.Lp[i] = 0;
+            
+        for (int k=0; k<(3*N); k++)
+            {
+            x.Lp[i] += Pcoeff<T,N>(x,i,k)*B[k]; 
+        
+            PA[i][k]=0;
+            for (int j=0; j<(3*N); j++) { PA[i][k] += Pcoeff<T,N>(x,i,j)*A[j][k]; }
+            }
+        }
+    
+//tiny::mult<double,2*N,3*N>(P,B,x.Lp);
+/*
+    for (int i=0; i<(2*N); i++)
+        {
+        x.Lp[i] = 0;
+        for (int k=0; k<(3*N); k++) { x.Lp[i] += Pcoeff<T,N>(x,i,k)*B[k]; }
+        }
+  */
+
+//tiny::direct_transposed_mult<double,2*N,3*N,2*N>(PA,P,x.Kp);
+   for (int i=0; i<(2*N); i++) 
+        for (int k=0; k<(2*N); k++)
+        {
+       x.Kp[i][k] = 0;
+       for (int j=0; j<(3*N); j++) { x.Kp[i][k] += PA[i][j]* Pcoeff<T,N>(x,k,j); }
+       }
+    }
 
     /** template to insert coeff in sparse matrix K_TH and vector L_TH, T is Tetra or Facette */
     template <class T> void insertCoeff(std::vector<T> container, write_matrix &K_TH, double *L_TH)
