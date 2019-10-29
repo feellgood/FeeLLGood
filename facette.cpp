@@ -1,8 +1,10 @@
 #include "facette.h"
 #include "tiny.h"
-using namespace Facette;
 
-void Fac::integrales(std::vector<Facette::prm> const& params, double BE[3*N]) const
+using namespace Facette;
+using namespace Pt;
+
+void Fac::integrales(std::vector<Facette::prm> const& params, double *BE) const
 {
 double Js = params[idxPrm].Js;
 double Ks = params[idxPrm].Ks;
@@ -106,15 +108,6 @@ void Fac::assemblage_mat(write_matrix &K) const
             K(NOD+i_,j_) += Kp[i][j];      K(NOD+i_, NOD+j_) += Kp[  i][N+j];
             K(    i_,j_) += Kp[N+i][j];    K(    i_, NOD+j_) += Kp[N+i][N+j];
             }
-        }
-}
-
-void Fac::assemblage_vect(double L[]) const
-{
-    for (int i=0; i < N; i++)
-        {
-        L[NOD+ind[i]] += Lp[i];
-        L[ind[i]] += Lp[N+i];
         }
 }
 

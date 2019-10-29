@@ -224,7 +224,7 @@ for (int i=0; i<NOD; i++)
     else
         {
         node_.p.rescale(scaling);
-        if (( Pt::norme2(n.p - node_.p) > sq(diam * 1e-9))&&VERBOSE) 
+        if (( Pt::norme2(n.p - node_.p) > Pt::sq(diam * 1e-9))&&VERBOSE) 
             { cerr << "WARNING difference in node positions"  << i  << "\t" << n.p << endl << i_ << "\t" << node_.p << endl; }
         }
     }

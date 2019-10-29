@@ -149,7 +149,7 @@ class fmm
         {
         std::for_each(container.begin(),container.end(),[this,c,&idx](T const& elem)              
             {  
-            double gauss[DIM][NPI];
+            double gauss[Pt::DIM][NPI];
             elem.interpolation(Nodes::get_p,gauss);
         
             for (int j=0; j<NPI; j++, idx++)

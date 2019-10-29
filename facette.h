@@ -37,7 +37,7 @@ struct prm
 	int reg;/**< region number */	
 	double Js;/**< surface exchange */
 	double Ks;/**< uniaxial surface anisotropy constant */	
-	double uk[DIM]; /**< anisotropy axis */	
+	double uk[Pt::DIM]; /**< anisotropy axis */	
 	
 	/** print the struct parameters */
 	inline void infos()
@@ -106,9 +106,9 @@ class Fac{
             //{return (X[0]*weight[0] + X[1]*weight[1] + X[2]*weight[2] + X[3]*weight[3] );}
         
         /** interpolation for 3D vector field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
-        inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter /**< [in] */,double result[DIM][NPI] /**< [out] */) const
+        inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter /**< [in] */,double result[Pt::DIM][NPI] /**< [out] */) const
         {
-        double vec_nod[DIM][N];
+        double vec_nod[Pt::DIM][N];
         for (int i=0; i<N; i++)
             {
             Nodes::Node const& node = (*refNode)[ ind[i] ];
@@ -153,16 +153,16 @@ class Fac{
 		inline void infos() const {std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2] <<std::endl;};
         
 		/** computes the integral contribution of the triangular face */
-		void integrales(std::vector<Facette::prm> const& params /**< [in] */, double BE[3*N] /**< [out] */) const;
+		void integrales(std::vector<Facette::prm> const& params /**< [in] */, double *BE /**< [out] */) const;
 		
         /** anisotropy energy of the facette */
-        double anisotropyEnergy(Facette::prm const& param /**< [in] */,const double u[DIM][NPI] /**< [in] */) const;
+        double anisotropyEnergy(Facette::prm const& param /**< [in] */,const double u[Pt::DIM][NPI] /**< [in] */) const;
         
         /** surface charges  */
         void charges(std::function<Pt::pt3D (Nodes::Node)> getter,double *srcDen,double *corr,int &nsrc) const;
         
         /** demagnetizing energy of the facette */
-        double demagEnergy(const double u[DIM][NPI] /**< [in] */,const double phi[NPI] /**< [in] */) const;
+        double demagEnergy(const double u[Pt::DIM][NPI] /**< [in] */,const double phi[NPI] /**< [in] */) const;
         
         /** compute projection of a face from inner object matrix */
         void projection(double A[3*N][3*N], double B[3*N]);
@@ -171,7 +171,8 @@ class Fac{
         void assemblage_mat(write_matrix &K) const;
         
         /** assemblage of the vector elements from inner matrix in facette object */
-        void assemblage_vect(double L[]) const;
+        inline void assemblage_vect(std::vector<double> &L) const
+            { for (int i=0; i < N; i++) { L[NOD+ind[i]] += Lp[i]; L[ind[i]] += Lp[N+i]; } }
         
         /** getter for N */		
 		inline int getN(void) const {return N;}	
@@ -185,7 +186,7 @@ class Fac{
         double potential(std::function<Pt::pt3D (Nodes::Node)> getter, int i) const;
         
         /** computes correction values */
-        void calcCorr(std::function<const Pt::pt3D (Nodes::Node)> getter,double *corr,double u[DIM][NPI]) const;
+        void calcCorr(std::function<const Pt::pt3D (Nodes::Node)> getter,double *corr,double u[Pt::DIM][NPI]) const;
         
         /** lexicographic order on indices */
         inline bool operator< (const Fac &f) const

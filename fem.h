@@ -58,8 +58,8 @@ class Fem
             evol = 0.0;
             readMesh(mySets);
             
-            pts= annAllocPts(node.size(), DIM);
-            kdtree = new ANNkd_tree(pts, node.size(), DIM);
+            pts= annAllocPts(node.size(), Pt::DIM);
+            kdtree = new ANNkd_tree(pts, node.size(), Pt::DIM);
             if (!kdtree) SYSTEM_ERROR;
 
             int i=0;

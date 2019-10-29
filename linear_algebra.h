@@ -107,15 +107,9 @@ private:
     if(node_i == (j%N))
         {
         if(i<N)
-            {//ep
-            Nodes::Node const& n = (*refNode)[x.ind[node_i]];    
-            val = n.ep(j/N);    
-            }
+            { val = (*refNode)[x.ind[node_i]].ep(j/N); }
         else
-            {//eq
-            Nodes::Node const& n = (*refNode)[x.ind[node_i]];
-            val = n.eq(j/N);
-            }
+            { val = (*refNode)[x.ind[node_i]].eq(j/N); }
         }
     return val;
     }
@@ -154,10 +148,12 @@ private:
        x.Kp[i][k] = 0;
        for (int j=0; j<(3*N); j++) { x.Kp[i][k] += PA[i][j]* Pcoeff<T,N>(x,k,j); }
        }
+    
+    x.treated = false;
     }
 
     /** template to insert coeff in sparse matrix K_TH and vector L_TH, T is Tetra or Facette */
-    template <class T> void insertCoeff(std::vector<T> container, write_matrix &K_TH, double *L_TH)
+    template <class T> void insertCoeff(std::vector<T> & container, write_matrix &K_TH, std::vector<double> &L_TH)
     {
     std::for_each( container.begin(), container.end(), [&K_TH,&L_TH](T & my_elem)
         { if(!my_elem.treated) {my_elem.assemblage_mat(K_TH);my_elem.assemblage_vect(L_TH);my_elem.treated = true;} } ); 

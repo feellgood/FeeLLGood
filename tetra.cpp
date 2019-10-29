@@ -10,31 +10,9 @@
 #include "matBlocDiag.h"
 
 using namespace Tetra;
+using namespace Pt;
 
-void Tet::init(double epsilon)
-{
-double J[Pt::DIM][Pt::DIM];
-double detJ = Jacobian(J);
-double da[N][Pt::DIM];
-    
-if (fabs(detJ) < epsilon)
-    {
-    std::cerr << "Singular jacobian in tetrahedron" << std::endl;
-    infos();
-    SYSTEM_ERROR;
-    }
-Pt::inverse(J,detJ);
-tiny::mult<double, N, Pt::DIM, Pt::DIM> (Tetra::dadu, J, da);
-    
-for (int j=0; j<NPI; j++)
-    {
-    for (int i=0; i<N; i++)
-        { dadx[i][j]=da[i][0]; dady[i][j]=da[i][1]; dadz[i][j]=da[i][2]; }
-    weight[j]    = detJ * Tetra::pds[j];
-    }    
-}
-
-void Tet::integrales(std::vector<Tetra::prm> const& params,double dt,Pt::pt3D const& Hext,double tau_r,double Vz, double AE[3*N][3*N], double BE[3*N]) const
+void Tet::integrales(std::vector<Tetra::prm> const& params,double dt,Pt::pt3D const& Hext,double tau_r,double Vz, double AE[3*N][3*N], double *BE) const
 {
 double alpha = params[idxPrm].alpha;
 double A = params[idxPrm].A;
@@ -63,7 +41,7 @@ double s_dt = THETA*dt;//theta from theta scheme in config.h.in
 
 /*-------------------- INTERPOLATION --------------------*/
 double u_nod[DIM][N]; 
-double u[DIM][NPI], dudx[DIM][NPI], dudy[DIM][NPI], dudz[DIM][NPI];//should be Pt::pt3D X[NPI]
+double u[DIM][NPI], dudx[DIM][NPI], dudy[DIM][NPI], dudz[DIM][NPI];
 double Hdx[NPI], Hdy[NPI], Hdz[NPI];
 
 double v[DIM][NPI];
@@ -79,16 +57,15 @@ interpolation(Nodes::get_phi0,Hdx,Hdy,Hdz);
 interpolation(Nodes::get_phiv0,Hvx,Hvy,Hvz);
 
 for (int npi=0; npi<NPI; npi++){
-    double ai, ai_w, dai_dx, dai_dy, dai_dz, Dai_Du0, Dai_Du1, Dai_Du2, contrib;
+    double ai, ai_w, Dai_Du0, Dai_Du1, Dai_Du2, contrib;
     
-	double w = weight[npi];
-    double uk0_u = uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi]; 
-    double uk1_u = uk10*u[0][npi] + uk11*u[1][npi] + uk12*u[2][npi]; 
-    double uk2_u = uk20*u[0][npi] + uk21*u[1][npi] + uk22*u[2][npi]; 
-
-    double uk0_v = uk00*v[0][npi] + uk01*v[1][npi] + uk02*v[2][npi]; 
-    double uk1_v = uk10*v[0][npi] + uk11*v[1][npi] + uk12*v[2][npi]; 
-    double uk2_v = uk20*v[0][npi] + uk21*v[1][npi] + uk22*v[2][npi]; 
+	pt3D uk_u = pt3D(uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi],
+                        uk10*u[0][npi] + uk11*u[1][npi] + uk12*u[2][npi],
+                        uk20*u[0][npi] + uk21*u[1][npi] + uk22*u[2][npi]);
+    
+    pt3D uk_v = pt3D(uk00*v[0][npi] + uk01*v[1][npi] + uk02*v[2][npi], 
+                        uk10*v[0][npi] + uk11*v[1][npi] + uk12*v[2][npi], 
+                        uk20*v[0][npi] + uk21*v[1][npi] + uk22*v[2][npi]); 
 
     double Du2 = sq(dudx[0][npi]) + sq(dudy[0][npi]) + sq(dudz[0][npi]) +
                      sq(dudx[1][npi]) + sq(dudy[1][npi]) + sq(dudz[1][npi]) +
@@ -97,43 +74,23 @@ for (int npi=0; npi<NPI; npi++){
     double uHext= u[0][npi]*Hext(Pt::IDX_X)  + u[1][npi]*Hext(Pt::IDX_Y)  + u[2][npi]*Hext(Pt::IDX_Z);
     double uHdu = u[0][npi]*Hdx[npi] + u[1][npi]*Hdy[npi] + u[2][npi]*Hdz[npi];
 
-    double uHau = Kbis*sq(uk0_u);
-    double uk0_uuu = (1 - sq(uk0_u))*uk0_u;
-    double uk1_uuu = (1 - sq(uk1_u))*uk1_u;
-    double uk2_uuu = (1 - sq(uk2_u))*uk2_u;
+    Pt::pt3D uk_uuu = pDirect(pt3D( 1 - sq(uk_u(0)), 1 - sq(uk_u(1)), 1 - sq(uk_u(2))), uk_u);
     
-    double uHa3u = -K3bis*(uk0_u*uk0_uuu + uk1_u*uk1_uuu + uk2_u*uk2_uuu);
-    
-    double uHeff = -Abis*Du2 +uHext +uHdu +uHau +uHa3u;
+    double uHeff = -Abis*Du2 +uHext +uHdu + Kbis*sq(uk_u(0)) - K3bis*pScal(uk_u,uk_uuu);
 
-    double alfa=alpha; // seulement pour l'ordre 1 en temps
-    double R=0.;
+    double alfa=calc_alpha_eff(alpha,dt,uHeff);
 
-//second order corrections
-double r = 0.1;	     			
-double M = 2.*alpha*r/dt;  			
-R = dt/tau_r*abs(log(dt/tau_r));    	
-
-    if (uHeff>0.){ 
-       if (uHeff>M) alfa=alpha+dt/2.*M;
-       else alfa=alpha+dt/2.*uHeff;
-       }
-    else{
-       if (uHeff<-M) alfa=alpha/(1.+dt/(2.*alpha)*M);
-       else alfa=alpha/(1.-dt/(2.*alpha)*uHeff);
-       }
-// end second order corrections
-
+    double w = weight[npi];
     for (int i=0; i<N; i++){
         ai = a[i][npi];
-        dai_dx= dadx[i][npi];  dai_dy= dady[i][npi];  dai_dz= dadz[i][npi];
-        Dai_Du0 = dai_dx * dudx[0][npi] + dai_dy * dudy[0][npi] + dai_dz * dudz[0][npi];
-        Dai_Du1 = dai_dx * dudx[1][npi] + dai_dy * dudy[1][npi] + dai_dz * dudz[1][npi];
-        Dai_Du2 = dai_dx * dudx[2][npi] + dai_dy * dudy[2][npi] + dai_dz * dudz[2][npi];
+        pt3D dai = pt3D(dadx[i][npi], dady[i][npi], dadz[i][npi]);
+        Dai_Du0 = dai(0) * dudx[0][npi] + dai(1) * dudy[0][npi] + dai(2) * dudz[0][npi];
+        Dai_Du1 = dai(0) * dudx[1][npi] + dai(1) * dudy[1][npi] + dai(2) * dudz[1][npi];
+        Dai_Du2 = dai(0) * dudx[2][npi] + dai(1) * dudy[2][npi] + dai(2) * dudz[2][npi];
 
-        BE[i]    += (-Abis* Dai_Du0 + ( Kbis* uk0_u*uk00 -K3bis*( uk0_uuu*uk00 + uk1_uuu*uk10 + uk2_uuu*uk20 ) + Hdx[npi] + Hext(Pt::IDX_X) )*ai) *w;
-        BE[N+i]  += (-Abis* Dai_Du1 + ( Kbis* uk0_u*uk01 -K3bis*( uk0_uuu*uk01 + uk1_uuu*uk11 + uk2_uuu*uk21 ) + Hdy[npi] + Hext(Pt::IDX_Y) )*ai) *w;
-        BE[2*N+i]+= (-Abis* Dai_Du2 + ( Kbis* uk0_u*uk02 -K3bis*( uk0_uuu*uk02 + uk1_uuu*uk12 + uk2_uuu*uk22 ) + Hdz[npi] + Hext(Pt::IDX_Z) )*ai) *w;
+        BE[i]    += (-Abis* Dai_Du0 + ( Kbis* uk_u(0)*uk00 -K3bis*( uk_uuu(0)*uk00 + uk_uuu(1)*uk10 + uk_uuu(2)*uk20 ) + Hdx[npi] + Hext(Pt::IDX_X) )*ai) *w;
+        BE[N+i]  += (-Abis* Dai_Du1 + ( Kbis* uk_u(0)*uk01 -K3bis*( uk_uuu(0)*uk01 + uk_uuu(1)*uk11 + uk_uuu(2)*uk21 ) + Hdy[npi] + Hext(Pt::IDX_Y) )*ai) *w;
+        BE[2*N+i]+= (-Abis* Dai_Du2 + ( Kbis* uk_u(0)*uk02 -K3bis*( uk_uuu(0)*uk02 + uk_uuu(1)*uk12 + uk_uuu(2)*uk22 ) + Hdz[npi] + Hext(Pt::IDX_Z) )*ai) *w;
         
         ai_w = ai*w;
 /* changement de referentiel, second membre pour les termes de courant polarise en spin pour une paroi */
@@ -142,10 +99,10 @@ R = dt/tau_r*abs(log(dt/tau_r));
         BE[2*N+i]+= ( (Vz-Uz)*(u[0][npi]*dudz[1][npi]-u[1][npi]*dudz[0][npi])+(alpha*Vz - beta*Uz)*dudz[2][npi])*ai_w;
         
 //second order corrections
-        double Ht[DIM]; //derivee de Hr : y a t'il une erreur ? on dirait que ce devrait etre Kbis*uk{0|1|2}_v et pas Kbis*ok0_v
-        Ht[0]= Hvx[npi] + (Kbis* uk0_v - K3bis* uk0_v*(1-3*uk0_u*uk0_u) )*uk00;   
-        Ht[1]= Hvy[npi] + (Kbis* uk0_v - K3bis* uk1_v*(1-3*uk1_u*uk1_u) )*uk01;   
-        Ht[2]= Hvz[npi] + (Kbis* uk0_v - K3bis* uk2_v*(1-3*uk2_u*uk2_u) )*uk02; 
+        double Ht[DIM]; //derivee de Hr : y a t'il une erreur ? on dirait que ce devrait etre Kbis*uk_v({0|1|2}) et pas Kbis*uk_v(0)
+        Ht[0]= Hvx[npi] + (Kbis* uk_v(0) - K3bis* uk_v(0)*(1-3*sq(uk_u(0))) )*uk00;   
+        Ht[1]= Hvy[npi] + (Kbis* uk_v(0) - K3bis* uk_v(1)*(1-3*sq(uk_u(1))) )*uk01;   
+        Ht[2]= Hvz[npi] + (Kbis* uk_v(0) - K3bis* uk_v(2)*(1-3*sq(uk_u(2))) )*uk02; 
 
 /* changement de referentiel; second membre pour les termes de courant polarise en spin pour une paroi  pour ordre 2 en temps*/
 BE[i]    += (Ht[0] + (Vz-Uz)*(u[1][npi]*dvdz[2][npi]-u[2][npi]*dvdz[1][npi]+v[1][npi]*dudz[2][npi]-v[2][npi]*dudz[1][npi])+(alpha*Vz - beta*Uz)*dvdz[0][npi])*ai_w*s_dt;
@@ -157,22 +114,24 @@ BE[2*N+i]+= (Ht[2] + (Vz-Uz)*(u[0][npi]*dvdz[1][npi]-u[1][npi]*dvdz[0][npi]+v[0]
         AE[  N+i][  N+i] +=  alfa* ai_w;
         AE[2*N+i][2*N+i] +=  alfa* ai_w;
 
-        AE[0*N+i][2*N+i] += +u_nod[1][i]* ai_w; //lumping
-        AE[0*N+i][1*N+i] += -u_nod[2][i]* ai_w;
-        AE[1*N+i][0*N+i] += +u_nod[2][i]* ai_w;
-        AE[1*N+i][2*N+i] += -u_nod[0][i]* ai_w;
-        AE[2*N+i][1*N+i] += +u_nod[0][i]* ai_w;
-        AE[2*N+i][0*N+i] += -u_nod[1][i]* ai_w;
+        AE[0*N+i][2*N+i] += ai_w*u_nod[1][i]; //lumping
+        AE[0*N+i][1*N+i] += -ai_w*u_nod[2][i];
+        AE[1*N+i][0*N+i] += ai_w*u_nod[2][i];
+        AE[1*N+i][2*N+i] += -ai_w*u_nod[0][i];
+        AE[2*N+i][1*N+i] += ai_w*u_nod[0][i];
+        AE[2*N+i][0*N+i] += -ai_w*u_nod[1][i];
 
         for (int j=0; j<N; j++)
             {
-            contrib = s_dt*(1.+R)* Abis* (dai_dx*dadx[j][npi] + dai_dy*dady[j][npi] + dai_dz*dadz[j][npi]) *w;
+            contrib = s_dt*(1.+ dt/tau_r*abs(log(dt/tau_r)))* Abis* (dai(0)*dadx[j][npi] + dai(1)*dady[j][npi] + dai(2)*dadz[j][npi]) *w;
             AE[i][j]        +=  contrib;
             AE[N+i][N+j]    +=  contrib;
             AE[2*N+i][2*N+j] +=  contrib;
             }
         }
     }
+
+//std::cout<<"\nfin integrale mat0,0:" << AE[0][0] << std::endl;
 }
 
 double Tet::exchangeEnergy(Tetra::prm const& param,const double dudx[DIM][NPI],const double dudy[DIM][NPI],const double dudz[DIM][NPI]) const
@@ -280,16 +239,6 @@ for (int i=0; i < N; i++)
         }
     }    
 }
-
-void Tet::assemblage_vect(double L[]) const
-{
-for (int i=0; i < N; i++)
-    {
-    L[NOD+ind[i]] += Lp[i];
-    L[ind[i]] += Lp[N+i];
-    }    
-}
-
 
 double Tet::Jacobian(double J[DIM][DIM])
 {

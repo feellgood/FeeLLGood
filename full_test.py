@@ -12,7 +12,7 @@ print("Max Nb Threads = " + str(MaxNbThreads))
 mySettings["finite element solver"]["nbThreads"] = 4 #MaxNbThreads
 mySettings["demagnetization field solver"]["nbThreads"] = 4 #MaxNbThreads
 
-mySettings["outputs"]["evol columns"] = ["t","<mx>","<my>","<mz>","E_ex","E_demag","E_tot"]
+mySettings["outputs"]["evol columns"] = ["t","<mx>","<my>","<mz>","E_ex","E_demag","E_zeeman","E_tot"]
 mySettings["outputs"]["take_photo"] = 100
 mySettings["outputs"]["directory"] = "test_data_out/"
 
@@ -22,8 +22,8 @@ mySettings["mesh"]["scaling factor"] = 1e-10
 mySettings["Bext"] = [1.0,0.0,-1.0]
 mySettings["mesh"]["volume_regions"]["300"]["alpha"] = 0.5
 
-mySettings["time integration"]["final_time"] = 1.5e-5
-mySettings["time integration"]["min(dt)"] = 1e-9
+mySettings["time integration"]["final_time"] = 1.0e-5
+mySettings["time integration"]["min(dt)"] = 1e-8
 mySettings["time integration"]["max(dt)"] = 1e-5
 mySettings["time integration"]["initial dt"] = 1e-7
 

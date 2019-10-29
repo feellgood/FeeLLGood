@@ -235,6 +235,12 @@ algebra : R^3 scalar product
 inline double pScal(pt3D const& a,pt3D const& b) { return( a.x()*b.x() + a.y()*b.y() + a.z()*b.z() ); }
 
 /**
+algebra : R^3 direct (component to component) product
+ */
+inline pt3D pDirect(pt3D const& a,pt3D const& b) { return pt3D( a.x()*b.x() , a.y()*b.y() , a.z()*b.z() ); }
+
+
+/**
 algebra : R^3 scalar triple product
  */
 inline double pTriple(pt3D const& a,pt3D const& b,pt3D const& c) { return pScal( a*b , c ); }

@@ -143,7 +143,7 @@ std::for_each(tet.begin(),tet.end(),[&idx_tet,&fout,scale](Tetra::Tet const &te)
     {
     
     /*------------------- INTERPOL --------------------*/
-    double gauss[DIM][Tetra::NPI];
+    double gauss[Pt::DIM][Tetra::NPI];
     double Hdx[Tetra::NPI], Hdy[Tetra::NPI], Hdz[Tetra::NPI];
 
     te.interpolation(Nodes::get_p,gauss);

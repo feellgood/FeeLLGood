@@ -188,7 +188,7 @@ std::vector<double> val_vect;
 for(boost::property_tree::ptree::value_type &cell :sub_tree)
     { val_vect.push_back( nu0 * cell.second.get_value<double>() ); }
 
-if(val_vect.size() != DIM) {std::cout<<"wrong number of field components"<<std::endl;}
+if(val_vect.size() != Pt::DIM) {std::cout<<"wrong number of field components"<<std::endl;}
 else
     { Hext = Pt::pt3D(val_vect[0],val_vect[1],val_vect[2]); }
     

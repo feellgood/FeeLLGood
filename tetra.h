@@ -13,10 +13,6 @@
 #include "node.h"
 #include "tiny.h"
 
-/** 
-\return square of a number \f$ x^2 \f$
-*/
-inline double sq(double x /**< [in] */ ) {return x*x;}
 
 /** \namespace Tetra
  to grab altogether some constants for struct Tet
@@ -37,7 +33,7 @@ const double w[NPI]   = {A,B,C,B,B};/**< some constants to build hat functions *
 const double pds[NPI] = {D,E,E,E,E};/**< some constant weights to build hat functions */
 
 /** constant matrix */
-const double dadu[N][DIM] = {{-1.,-1.,-1.},{1.,0.,0.},{0.,1.,0.},{0.,0.,1.}};
+const double dadu[N][Pt::DIM] = {{-1.,-1.,-1.},{1.,0.,0.},{0.,1.,0.},{0.,0.,1.}};
 
 
 /** constant matrix \f$ j:0..4 \f$
@@ -61,7 +57,7 @@ struct prm
 	double J;/**< \f$ M_s = \nu_0 J \f$ */
 	double K;/**< uniaxial anisotropy constant */	
 	double K3;/**< third order uniaxial anisotropy constant */	
-	double uk[DIM][DIM]; /**< anisotropy tensor 3*3 */	
+	double uk[Pt::DIM][Pt::DIM]; /**< anisotropy tensor 3*3 */	
 	double Uz;/**< for spin polarized current */
 	double beta;/**< non adiabatic constant \f$ \beta \f$ for spin polarization current */	
 	
@@ -121,14 +117,32 @@ class Tet{
                    const int i1 /**< [in] node index */,
                    const int i2 /**< [in] node index */,
                    const int i3 /**< [in] node index */,
-                    const double epsilon/**< for degeneracy test */) : idxPrm(_idx),reg(_reg),refNode(_p_node)//, Kp(2*N,2*N), Lp(2*N) 
+                    const double epsilon/**< for degeneracy test */) : idxPrm(_idx),NOD(_p_node->size()),reg(_reg),refNode(_p_node)//, Kp(2*N,2*N), Lp(2*N) 
             {
-            NOD = _p_node->size();
+            //NOD = _p_node->size();
             ind[0] = i0; ind[1] = i1; ind[2] = i2; ind[3] = i3;
             for (int i=0; i<N; i++) ind[i]--;           // convention Matlab/msh -> C++
             treated = false;
             calc_vol();
-            init(epsilon);
+            
+            double J[Pt::DIM][Pt::DIM];
+            double detJ = Jacobian(J);
+            double da[N][Pt::DIM];
+    
+            if (fabs(detJ) < epsilon)
+                {
+                std::cerr << "Singular jacobian in tetrahedron" << std::endl;
+                infos();
+                SYSTEM_ERROR;
+                }
+            Pt::inverse(J,detJ);
+            tiny::mult<double, N, Pt::DIM, Pt::DIM> (Tetra::dadu, J, da);
+    
+            for (int j=0; j<NPI; j++)
+                {
+                for (int i=0; i<N; i++) { dadx[i][j]=da[i][0]; dady[i][j]=da[i][1]; dadz[i][j]=da[i][2]; }
+                weight[j]    = detJ * Tetra::pds[j];
+                }   
             } 
 		
 		
@@ -153,37 +167,36 @@ class Tet{
 		
 		
 		/** interpolation for 3D vector field: the getter function is given as a parameter in order to know what part of the node you want to interpolate */
-		inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double result[DIM][NPI]) const
+		inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double result[Pt::DIM][NPI]) const
         {
-        double vec_nod[DIM][N];
+        double vec_nod[Pt::DIM][N];
         getVecDataFromNode(getter,vec_nod);
         
-        tiny::mult<double, DIM, N, NPI> (vec_nod, a, result);
+        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, a, result);
         }
 		
 		/** interpolation for a tensor : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
-        inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double Tx[DIM][NPI],double Ty[DIM][NPI],double Tz[DIM][NPI]) const
+        inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double Tx[Pt::DIM][NPI],double Ty[Pt::DIM][NPI],double Tz[Pt::DIM][NPI]) const
         {
-        double vec_nod[DIM][N];
+        double vec_nod[Pt::DIM][N];
         getVecDataFromNode(getter,vec_nod);
         
-        tiny::mult<double, DIM, N, NPI> (vec_nod, dadx, Tx);
-        tiny::mult<double, DIM, N, NPI> (vec_nod, dady, Ty);
-        tiny::mult<double, DIM, N, NPI> (vec_nod, dadz, Tz);
+        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, dadx, Tx);
+        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, dady, Ty);
+        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, dadz, Tz);
         }
 		
-		
 		/** interpolation for 3D vector field and a tensor : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
-        inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double result[DIM][NPI],
-                                  double Tx[DIM][NPI],double Ty[DIM][NPI],double Tz[DIM][NPI]) const
+        inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double result[Pt::DIM][NPI],
+                                  double Tx[Pt::DIM][NPI],double Ty[Pt::DIM][NPI],double Tz[Pt::DIM][NPI]) const
         {
-        double vec_nod[DIM][N];
+        double vec_nod[Pt::DIM][N];
         getVecDataFromNode(getter,vec_nod);
         
-        tiny::mult<double, DIM, N, NPI> (vec_nod, a, result);
-        tiny::mult<double, DIM, N, NPI> (vec_nod, dadx, Tx);
-        tiny::mult<double, DIM, N, NPI> (vec_nod, dady, Ty);
-        tiny::mult<double, DIM, N, NPI> (vec_nod, dadz, Tz);
+        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, a, result);
+        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, dadx, Tx);
+        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, dady, Ty);
+        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, dadz, Tz);
         }
 		
 		/** interpolation for components of a field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
@@ -229,22 +242,22 @@ class Tet{
             };
         
 		/** computes the integral contribution of the tetrahedron to the evolution of the magnetization */		
-		void integrales(std::vector<Tetra::prm> const& params /**< [in] */,double dt,Pt::pt3D const& Hext,double tau_r,double Vz,double AE[3*N][3*N], double BE[3*N])  const;
+		void integrales(std::vector<Tetra::prm> const& params /**< [in] */,double dt,Pt::pt3D const& Hext,double tau_r,double Vz,double AE[3*N][3*N], double *BE)  const;
 
         /** exchange energy of the tetrahedron */
-        double exchangeEnergy(Tetra::prm const& param,const double dudx[DIM][NPI],const double dudy[DIM][NPI],const double dudz[DIM][NPI]) const;
+        double exchangeEnergy(Tetra::prm const& param,const double dudx[Pt::DIM][NPI],const double dudy[Pt::DIM][NPI],const double dudz[Pt::DIM][NPI]) const;
         
         /** anisotropy energy of the tetrahedron */
-        double anisotropyEnergy(Tetra::prm const& param,const double u[DIM][NPI]) const;
+        double anisotropyEnergy(Tetra::prm const& param,const double u[Pt::DIM][NPI]) const;
         
         /** volume charges  */
         void charges(std::function<Pt::pt3D (Nodes::Node)> getter,double *srcDen,int &nsrc,double Ms) const;
         
         /** demagnetizing energy of the tetrahedron */
-        double demagEnergy(Tetra::prm const& param,const double dudx[DIM][NPI],const double dudy[DIM][NPI],const double dudz[DIM][NPI],const double phi[NPI]) const;
+        double demagEnergy(Tetra::prm const& param,const double dudx[Pt::DIM][NPI],const double dudy[Pt::DIM][NPI],const double dudz[Pt::DIM][NPI],const double phi[NPI]) const;
         
         /** zeeman energy of the tetrahedron */
-        double zeemanEnergy(Tetra::prm const& param,double uz_drift,Pt::pt3D const& Hext,const double u[DIM][NPI]) const;
+        double zeemanEnergy(Tetra::prm const& param,double uz_drift,Pt::pt3D const& Hext,const double u[Pt::DIM][NPI]) const;
         
         /** computes projection of a tetrahedron using inner matrix in tetra object */
         void projection(double A[3*N][3*N], double B[3*N]);
@@ -253,7 +266,8 @@ class Tet{
         void assemblage_mat(write_matrix &K) const;
         
         /** vector assembly using inner vector in tetra */
-        void assemblage_vect(double L[]) const;
+        inline void assemblage_vect(std::vector<double> &L) const
+            { for (int i=0; i < N; i++) { L[NOD+ind[i]] += Lp[i]; L[ind[i]] += Lp[N+i]; } }
         
         /** getter for N */
 		inline int getN(void) const {return N;}
@@ -265,7 +279,7 @@ class Tet{
 		inline int getRegion(void) const {return reg;}
 		
 		/** \return \f$ |J| \f$ build Jacobian \f$ J \f$ */
-        double Jacobian(double J[DIM][DIM]);
+        double Jacobian(double J[Pt::DIM][Pt::DIM]);
         
         //gmm::dense_matrix <double> Kp;/**< Kp(2*N,2*N) initialized by constructor */
         double Kp[2*N][2*N];
@@ -273,7 +287,7 @@ class Tet{
         double Lp[2*N];
         
     private:
-        int NOD;/**< total number of nodes, also an offset for filling sparseMatrix */
+        const int NOD;/**< total number of nodes, also an offset for filling sparseMatrix */
         int reg;/**< .msh region number */
         
         const std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
@@ -282,15 +296,19 @@ class Tet{
 		void calc_vol(void);
         
         /** getter to access and copy some vector parts of the node vector */
-		inline void getVecDataFromNode(std::function<Pt::pt3D (Nodes::Node)> getter,double vecData[DIM][N]) const
+		inline void getVecDataFromNode(std::function<Pt::pt3D (Nodes::Node)> getter,Pt::pt3D vecData[N]) const
+            { for (int i=0; i<N; i++) vecData[i] = getter((*refNode)[ ind[i] ]); }
+        
+        /** getter to access and copy some vector parts of the node vector */
+		inline void getVecDataFromNode(std::function<Pt::pt3D (Nodes::Node)> getter,double vecData[Pt::DIM][N]) const
 		{
         for (int i=0; i<N; i++)
             {
-            Nodes::Node const& node = (*refNode)[ ind[i] ];
+            Pt::pt3D const& p = getter((*refNode)[ ind[i] ]);
     
-            vecData[Pt::IDX_X][i]   = getter(node).x();
-            vecData[Pt::IDX_Y][i]   = getter(node).y();
-            vecData[Pt::IDX_Z][i]   = getter(node).z();
+            vecData[Pt::IDX_X][i]   = p.x();
+            vecData[Pt::IDX_Y][i]   = p.y();
+            vecData[Pt::IDX_Z][i]   = p.z();
             }
         }
 		
@@ -308,8 +326,25 @@ class Tet{
             { scalData[i] =  getter( (*refNode)[ ind[i] ] ,idx); }    
         }
         
-        
-};//end class Tetra
+    };//end class Tetra
+
+    /** to perform some second order corrections, an effective \f$ \alpha \f$ is computed here with a piecewise formula */
+    inline double calc_alpha_eff(double alpha,double dt,double h)
+        {
+        double a_eff = alpha;
+        double r = 0.1;	     			
+        double M = 2.*alpha*r/dt;  			
+
+        if (h>0.){ 
+            if (h>M) a_eff = alpha+dt/2.*M;
+            else a_eff = alpha+dt/2.*h;
+            }
+        else{
+            if (h<-M) a_eff = alpha/(1.+dt/(2.*alpha)*M);
+            else a_eff = alpha/(1.-dt/(2.*alpha)*h);
+            }
+        return a_eff;
+        }
 }//end namespace Tetra
 
 #endif /* tetra_h */

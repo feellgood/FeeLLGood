@@ -10,7 +10,7 @@ zeroEnergy();
 std::for_each(tet.begin(),tet.end(),[this,&settings,uz_drift](Tetra::Tet const& te) 
     {
     Tetra::prm const& param = settings.paramTetra[te.idxPrm];
-    double u[DIM][Tetra::NPI],dudx[DIM][Tetra::NPI], dudy[DIM][Tetra::NPI], dudz[DIM][Tetra::NPI];
+    double u[Pt::DIM][Tetra::NPI],dudx[Pt::DIM][Tetra::NPI], dudy[Pt::DIM][Tetra::NPI], dudz[Pt::DIM][Tetra::NPI];
     double phi[Tetra::NPI];
 
     te.interpolation(Nodes::get_u,u,dudx,dudy,dudz);
@@ -31,7 +31,7 @@ std::for_each(fac.begin(),fac.end(),[this,&settings](Facette::Fac const& fa)
     {
     Facette::prm const& param = settings.paramFacette[fa.idxPrm];    
     double phi[Facette::NPI];
-    double u[DIM][Facette::NPI];
+    double u[Pt::DIM][Facette::NPI];
 
     fa.interpolation(Nodes::get_u,u);
     fa.interpolation(Nodes::get_phi,phi);
