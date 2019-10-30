@@ -199,6 +199,23 @@ class Tet{
         tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, dadz, Tz);
         }
 		
+		
+		/** interpolation for components of a field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
+        inline void interpolation(std::function<double (Nodes::Node)> getter,Pt::pt3D X[NPI]) const
+        {
+        double scalar_nod[N];    
+        getScalDataFromNode(getter,scalar_nod);
+        
+        //same as tiny::neg_transposed_mult
+        for (int j=0; j<NPI; j++)
+            {
+            X[j] = Pt::pt3D(0,0,0);
+            for (int i=0; i<N; i++) 
+                { X[j] -= ( scalar_nod[i] * Pt::pt3D(dadx[i][j],dady[i][j],dadz[i][j]) ); }
+            }
+        }
+		
+		
 		/** interpolation for components of a field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
         inline void interpolation(std::function<double (Nodes::Node)> getter,double Xx[NPI],double Xy[NPI],double Xz[NPI]) const
         {

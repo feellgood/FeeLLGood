@@ -42,22 +42,22 @@ double s_dt = THETA*dt;//theta from theta scheme in config.h.in
 /*-------------------- INTERPOLATION --------------------*/
 double u_nod[DIM][N]; 
 double u[DIM][NPI], dudx[DIM][NPI], dudy[DIM][NPI], dudz[DIM][NPI];
-double Hdx[NPI], Hdy[NPI], Hdz[NPI];
+pt3D Hd[NPI];
 
 double v[DIM][NPI];
 double dvdx[DIM][NPI], dvdy[DIM][NPI], dvdz[DIM][NPI];
-double Hvx[NPI], Hvy[NPI], Hvz[NPI];
+pt3D Hv[NPI];
 
 // u_nod(u0) is required for lumping in AE matrix
 getVecDataFromNode(Nodes::get_u0,u_nod);
 
 interpolation(Nodes::get_u0,u,dudx,dudy,dudz);
 interpolation(Nodes::get_v0,v,dvdx,dvdy,dvdz);
-interpolation(Nodes::get_phi0,Hdx,Hdy,Hdz);
-interpolation(Nodes::get_phiv0,Hvx,Hvy,Hvz);
+interpolation(Nodes::get_phi0,Hd);
+interpolation(Nodes::get_phiv0,Hv);
 
 for (int npi=0; npi<NPI; npi++){
-    double ai, ai_w, Dai_Du0, Dai_Du1, Dai_Du2, contrib;
+    double ai, ai_w, contrib;
     
 	pt3D uk_u = pt3D(uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi],
                         uk10*u[0][npi] + uk11*u[1][npi] + uk12*u[2][npi],
@@ -72,7 +72,7 @@ for (int npi=0; npi<NPI; npi++){
                      sq(dudx[2][npi]) + sq(dudy[2][npi]) + sq(dudz[2][npi]) ;
 
     double uHext= u[0][npi]*Hext(Pt::IDX_X)  + u[1][npi]*Hext(Pt::IDX_Y)  + u[2][npi]*Hext(Pt::IDX_Z);
-    double uHdu = u[0][npi]*Hdx[npi] + u[1][npi]*Hdy[npi] + u[2][npi]*Hdz[npi];
+    double uHdu = u[0][npi]*Hd[npi](0) + u[1][npi]*Hd[npi](1) + u[2][npi]*Hd[npi](2);
 
     Pt::pt3D uk_uuu = pDirect(pt3D( 1 - sq(uk_u(0)), 1 - sq(uk_u(1)), 1 - sq(uk_u(2))), uk_u);
     
@@ -84,13 +84,13 @@ for (int npi=0; npi<NPI; npi++){
     for (int i=0; i<N; i++){
         ai = a[i][npi];
         pt3D dai = pt3D(dadx[i][npi], dady[i][npi], dadz[i][npi]);
-        Dai_Du0 = dai(0) * dudx[0][npi] + dai(1) * dudy[0][npi] + dai(2) * dudz[0][npi];
-        Dai_Du1 = dai(0) * dudx[1][npi] + dai(1) * dudy[1][npi] + dai(2) * dudz[1][npi];
-        Dai_Du2 = dai(0) * dudx[2][npi] + dai(1) * dudy[2][npi] + dai(2) * dudz[2][npi];
-
-        BE[i]    += (-Abis* Dai_Du0 + ( Kbis* uk_u(0)*uk00 -K3bis*( uk_uuu(0)*uk00 + uk_uuu(1)*uk10 + uk_uuu(2)*uk20 ) + Hdx[npi] + Hext(Pt::IDX_X) )*ai) *w;
-        BE[N+i]  += (-Abis* Dai_Du1 + ( Kbis* uk_u(0)*uk01 -K3bis*( uk_uuu(0)*uk01 + uk_uuu(1)*uk11 + uk_uuu(2)*uk21 ) + Hdy[npi] + Hext(Pt::IDX_Y) )*ai) *w;
-        BE[2*N+i]+= (-Abis* Dai_Du2 + ( Kbis* uk_u(0)*uk02 -K3bis*( uk_uuu(0)*uk02 + uk_uuu(1)*uk12 + uk_uuu(2)*uk22 ) + Hdz[npi] + Hext(Pt::IDX_Z) )*ai) *w;
+        pt3D Dai_Du = pt3D(dai(0) * dudx[0][npi] + dai(1) * dudy[0][npi] + dai(2) * dudz[0][npi],
+                            dai(0) * dudx[1][npi] + dai(1) * dudy[1][npi] + dai(2) * dudz[1][npi],
+                            dai(0) * dudx[2][npi] + dai(1) * dudy[2][npi] + dai(2) * dudz[2][npi] );
+            
+        BE[i]    += (-Abis* Dai_Du(0) + ( Kbis* uk_u(0)*uk00 -K3bis*( uk_uuu(0)*uk00 + uk_uuu(1)*uk10 + uk_uuu(2)*uk20 ) + Hd[npi](0) + Hext(Pt::IDX_X) )*ai) *w;
+        BE[N+i]  += (-Abis* Dai_Du(1) + ( Kbis* uk_u(0)*uk01 -K3bis*( uk_uuu(0)*uk01 + uk_uuu(1)*uk11 + uk_uuu(2)*uk21 ) + Hd[npi](1) + Hext(Pt::IDX_Y) )*ai) *w;
+        BE[2*N+i]+= (-Abis* Dai_Du(2) + ( Kbis* uk_u(0)*uk02 -K3bis*( uk_uuu(0)*uk02 + uk_uuu(1)*uk12 + uk_uuu(2)*uk22 ) + Hd[npi](2) + Hext(Pt::IDX_Z) )*ai) *w;
         
         ai_w = ai*w;
 /* changement de referentiel, second membre pour les termes de courant polarise en spin pour une paroi */
@@ -99,15 +99,17 @@ for (int npi=0; npi<NPI; npi++){
         BE[2*N+i]+= ( (Vz-Uz)*(u[0][npi]*dudz[1][npi]-u[1][npi]*dudz[0][npi])+(alpha*Vz - beta*Uz)*dudz[2][npi])*ai_w;
         
 //second order corrections
-        double Ht[DIM]; //derivee de Hr : y a t'il une erreur ? on dirait que ce devrait etre Kbis*uk_v({0|1|2}) et pas Kbis*uk_v(0)
-        Ht[0]= Hvx[npi] + (Kbis* uk_v(0) - K3bis* uk_v(0)*(1-3*sq(uk_u(0))) )*uk00;   
-        Ht[1]= Hvy[npi] + (Kbis* uk_v(0) - K3bis* uk_v(1)*(1-3*sq(uk_u(1))) )*uk01;   
-        Ht[2]= Hvz[npi] + (Kbis* uk_v(0) - K3bis* uk_v(2)*(1-3*sq(uk_u(2))) )*uk02; 
-
+        pt3D Ht(Hv[npi]); 
+        
+        //derivee de Hr : y a t'il une erreur ? on dirait que ce devrait etre Kbis*uk_v({0|1|2}) et pas Kbis*uk_v(0)
+        Ht += pt3D( (Kbis* uk_v(0) - K3bis* uk_v(0)*(1-3*sq(uk_u(0))) )*uk00, 
+                    (Kbis* uk_v(0) - K3bis* uk_v(1)*(1-3*sq(uk_u(1))) )*uk01,
+                    (Kbis* uk_v(0) - K3bis* uk_v(2)*(1-3*sq(uk_u(2))) )*uk02);   
+        
 /* changement de referentiel; second membre pour les termes de courant polarise en spin pour une paroi  pour ordre 2 en temps*/
-BE[i]    += (Ht[0] + (Vz-Uz)*(u[1][npi]*dvdz[2][npi]-u[2][npi]*dvdz[1][npi]+v[1][npi]*dudz[2][npi]-v[2][npi]*dudz[1][npi])+(alpha*Vz - beta*Uz)*dvdz[0][npi])*ai_w*s_dt;
-BE[N+i]  += (Ht[1] + (Vz-Uz)*(u[2][npi]*dvdz[0][npi]-u[0][npi]*dvdz[2][npi]+v[2][npi]*dudz[0][npi]-v[0][npi]*dudz[2][npi])+(alpha*Vz - beta*Uz)*dvdz[1][npi])*ai_w*s_dt;
-BE[2*N+i]+= (Ht[2] + (Vz-Uz)*(u[0][npi]*dvdz[1][npi]-u[1][npi]*dvdz[0][npi]+v[0][npi]*dudz[1][npi]-v[1][npi]*dudz[0][npi])+(alpha*Vz - beta*Uz)*dvdz[2][npi])*ai_w*s_dt;
+BE[i]    += (Ht(0) + (Vz-Uz)*(u[1][npi]*dvdz[2][npi]-u[2][npi]*dvdz[1][npi]+v[1][npi]*dudz[2][npi]-v[2][npi]*dudz[1][npi])+(alpha*Vz - beta*Uz)*dvdz[0][npi])*ai_w*s_dt;
+BE[N+i]  += (Ht(1) + (Vz-Uz)*(u[2][npi]*dvdz[0][npi]-u[0][npi]*dvdz[2][npi]+v[2][npi]*dudz[0][npi]-v[0][npi]*dudz[2][npi])+(alpha*Vz - beta*Uz)*dvdz[1][npi])*ai_w*s_dt;
+BE[2*N+i]+= (Ht(2) + (Vz-Uz)*(u[0][npi]*dvdz[1][npi]-u[1][npi]*dvdz[0][npi]+v[0][npi]*dudz[1][npi]-v[1][npi]*dudz[0][npi])+(alpha*Vz - beta*Uz)*dvdz[2][npi])*ai_w*s_dt;
     
     
         AE[    i][    i] +=  alfa* ai_w;  //lumping
