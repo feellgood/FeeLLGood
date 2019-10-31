@@ -187,6 +187,30 @@ class Tet{
         }
 		
 		/** interpolation for 3D vector field and a tensor : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
+        inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,Pt::pt3D result[NPI],
+                                  Pt::pt3D Tx[NPI],Pt::pt3D Ty[NPI],Pt::pt3D Tz[NPI]) const
+        {
+		double u[Pt::DIM][NPI];
+        double dudx[Pt::DIM][NPI], dudy[Pt::DIM][NPI], dudz[Pt::DIM][NPI];
+        
+		double vec_nod[Pt::DIM][N];
+        getVecDataFromNode(getter,vec_nod);
+        
+        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, a, u);
+        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, dadx, dudx);
+        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, dady, dudy);
+        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, dadz, dudz);
+        
+        for(int npi=0;npi<NPI;npi++) 
+            {
+            result[npi] = Pt::pt3D(u[0][npi],u[1][npi],u[2][npi]);
+            Tx[npi] = Pt::pt3D(dudx[0][npi],dudx[1][npi],dudx[2][npi]);
+            Ty[npi] = Pt::pt3D(dudy[0][npi],dudy[1][npi],dudy[2][npi]);
+            Tz[npi] = Pt::pt3D(dudz[0][npi],dudz[1][npi],dudz[2][npi]);
+            } // copie qui pourrait être évitée : à améliorer
+        }
+		
+		/** interpolation for 3D vector field and a tensor : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
         inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double result[Pt::DIM][NPI],
                                   double Tx[Pt::DIM][NPI],double Ty[Pt::DIM][NPI],double Tz[Pt::DIM][NPI]) const
         {

@@ -21,6 +21,12 @@ double J = params[idxPrm].J;
 double K = params[idxPrm].K;
 double K3 = params[idxPrm].K3;
 
+pt3D uk[DIM];
+uk[0] = pt3D(params[idxPrm].uk[0][0], params[idxPrm].uk[0][1], params[idxPrm].uk[0][2]);
+uk[1] = pt3D(params[idxPrm].uk[1][0], params[idxPrm].uk[1][1], params[idxPrm].uk[1][2]);
+uk[2] = pt3D(params[idxPrm].uk[2][0], params[idxPrm].uk[2][1], params[idxPrm].uk[2][2]);
+
+/*
 double uk00 = params[idxPrm].uk[0][0];
 double uk01 = params[idxPrm].uk[0][1];
 double uk02 = params[idxPrm].uk[0][2];
@@ -30,7 +36,7 @@ double uk12 = params[idxPrm].uk[1][2];
 double uk20 = params[idxPrm].uk[2][0];
 double uk21 = params[idxPrm].uk[2][1];
 double uk22 = params[idxPrm].uk[2][2];
-
+*/
 double Uz = params[idxPrm].Uz;
 double beta = params[idxPrm].beta;
 
@@ -41,77 +47,61 @@ double s_dt = THETA*dt;//theta from theta scheme in config.h.in
 
 /*-------------------- INTERPOLATION --------------------*/
 double u_nod[DIM][N]; 
-double u[DIM][NPI], dudx[DIM][NPI], dudy[DIM][NPI], dudz[DIM][NPI];
-pt3D Hd[NPI];
+//double u[DIM][NPI];
+//double dudx[DIM][NPI], dudy[DIM][NPI], dudz[DIM][NPI];
+pt3D Hd[NPI], dUdx[NPI], dUdy[NPI], dUdz[NPI];
 
-double v[DIM][NPI];
-double dvdx[DIM][NPI], dvdy[DIM][NPI], dvdz[DIM][NPI];
-pt3D Hv[NPI];
+//double v[DIM][NPI];
+//double dvdx[DIM][NPI], dvdy[DIM][NPI], dvdz[DIM][NPI];
+pt3D Hv[NPI], dVdx[NPI], dVdy[NPI], dVdz[NPI];
 
 // u_nod(u0) is required for lumping in AE matrix
 getVecDataFromNode(Nodes::get_u0,u_nod);
 
-interpolation(Nodes::get_u0,u,dudx,dudy,dudz);
-interpolation(Nodes::get_v0,v,dvdx,dvdy,dvdz);
+pt3D U[NPI],V[NPI];
+interpolation(Nodes::get_u0,U,dUdx,dUdy,dUdz);
+interpolation(Nodes::get_v0,V,dVdx,dVdy,dVdz);
 interpolation(Nodes::get_phi0,Hd);
 interpolation(Nodes::get_phiv0,Hv);
 
+
+
+
 for (int npi=0; npi<NPI; npi++){
-    double ai, ai_w, contrib;
+    pt3D uk_u = pt3D(pScal(uk[0],U[npi]), pScal(uk[1],U[npi]), pScal(uk[2],U[npi]));
     
-	pt3D uk_u = pt3D(uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi],
-                        uk10*u[0][npi] + uk11*u[1][npi] + uk12*u[2][npi],
-                        uk20*u[0][npi] + uk21*u[1][npi] + uk22*u[2][npi]);
+    pt3D uk_v = pt3D(pScal(uk[0],V[npi]), pScal(uk[1],V[npi]), pScal(uk[2],V[npi]));
+
+    double Du2 = norme2(dUdx[npi]) + norme2(dUdy[npi]) + norme2(dUdz[npi]);
     
-    pt3D uk_v = pt3D(uk00*v[0][npi] + uk01*v[1][npi] + uk02*v[2][npi], 
-                        uk10*v[0][npi] + uk11*v[1][npi] + uk12*v[2][npi], 
-                        uk20*v[0][npi] + uk21*v[1][npi] + uk22*v[2][npi]); 
-
-    double Du2 = sq(dudx[0][npi]) + sq(dudy[0][npi]) + sq(dudz[0][npi]) +
-                     sq(dudx[1][npi]) + sq(dudy[1][npi]) + sq(dudz[1][npi]) +
-                     sq(dudx[2][npi]) + sq(dudy[2][npi]) + sq(dudz[2][npi]) ;
-
-    double uHext= u[0][npi]*Hext(Pt::IDX_X)  + u[1][npi]*Hext(Pt::IDX_Y)  + u[2][npi]*Hext(Pt::IDX_Z);
-    double uHdu = u[0][npi]*Hd[npi](0) + u[1][npi]*Hd[npi](1) + u[2][npi]*Hd[npi](2);
-
     Pt::pt3D uk_uuu = pDirect(pt3D( 1 - sq(uk_u(0)), 1 - sq(uk_u(1)), 1 - sq(uk_u(2))), uk_u);
     
-    double uHeff = -Abis*Du2 +uHext +uHdu + Kbis*sq(uk_u(0)) - K3bis*pScal(uk_u,uk_uuu);
+    double uHeff = -Abis*Du2 + pScal(U[npi], Hext + Hd[npi]) + Kbis*sq(uk_u(0)) - K3bis*pScal(uk_u,uk_uuu);
 
     double alfa=calc_alpha_eff(alpha,dt,uHeff);
-
+        
+    //second order corrections,Ht = derivee de Hr : y a t'il une erreur ? on dirait que ce devrait etre Kbis*uk_v({0|1|2}) et pas Kbis*uk_v(0)
+    pt3D truc = Kbis*pt3D(uk_v(0),uk_v(0),uk_v(0)) -K3bis*pDirect(uk_v,pt3D(1-3*sq(uk_u(0)),1-3*sq(uk_u(1)),1-3*sq(uk_u(2))));
+    pt3D Ht = Hv[npi] + pDirect(truc,uk[0]);
+    
     double w = weight[npi];
     for (int i=0; i<N; i++){
-        ai = a[i][npi];
+        double ai = a[i][npi];
+        double ai_w = ai*w;
         pt3D dai = pt3D(dadx[i][npi], dady[i][npi], dadz[i][npi]);
-        pt3D Dai_Du = pt3D(dai(0) * dudx[0][npi] + dai(1) * dudy[0][npi] + dai(2) * dudz[0][npi],
-                            dai(0) * dudx[1][npi] + dai(1) * dudy[1][npi] + dai(2) * dudz[1][npi],
-                            dai(0) * dudx[2][npi] + dai(1) * dudy[2][npi] + dai(2) * dudz[2][npi] );
-            
-        BE[i]    += (-Abis* Dai_Du(0) + ( Kbis* uk_u(0)*uk00 -K3bis*( uk_uuu(0)*uk00 + uk_uuu(1)*uk10 + uk_uuu(2)*uk20 ) + Hd[npi](0) + Hext(Pt::IDX_X) )*ai) *w;
-        BE[N+i]  += (-Abis* Dai_Du(1) + ( Kbis* uk_u(0)*uk01 -K3bis*( uk_uuu(0)*uk01 + uk_uuu(1)*uk11 + uk_uuu(2)*uk21 ) + Hd[npi](1) + Hext(Pt::IDX_Y) )*ai) *w;
-        BE[2*N+i]+= (-Abis* Dai_Du(2) + ( Kbis* uk_u(0)*uk02 -K3bis*( uk_uuu(0)*uk02 + uk_uuu(1)*uk12 + uk_uuu(2)*uk22 ) + Hd[npi](2) + Hext(Pt::IDX_Z) )*ai) *w;
+        pt3D Dai_Du = dai(0)*dUdx[npi] + dai(1)*dUdy[npi] + dai(2)*dUdz[npi];
         
-        ai_w = ai*w;
-/* changement de referentiel, second membre pour les termes de courant polarise en spin pour une paroi */
-        BE[i]    += ( (Vz-Uz)*(u[1][npi]*dudz[2][npi]-u[2][npi]*dudz[1][npi])+(alpha*Vz - beta*Uz)*dudz[0][npi])*ai_w;
-        BE[N+i]  += ( (Vz-Uz)*(u[2][npi]*dudz[0][npi]-u[0][npi]*dudz[2][npi])+(alpha*Vz - beta*Uz)*dudz[1][npi])*ai_w;
-        BE[2*N+i]+= ( (Vz-Uz)*(u[0][npi]*dudz[1][npi]-u[1][npi]*dudz[0][npi])+(alpha*Vz - beta*Uz)*dudz[2][npi])*ai_w;
+        pt3D pseudoH = w*(ai*(Kbis*uk_u(0)*uk[0] - K3bis*( uk_uuu(0)*uk[0] + uk_uuu(1)*uk[1] + uk_uuu(2)*uk[2] ) + Hd[npi] + Hext) - Abis*Dai_Du);
         
-//second order corrections
-        pt3D Ht(Hv[npi]); 
+        pt3D pseudoDrift = pseudoH + ai_w*(alpha*Vz - beta*Uz)*dUdz[npi] + ai_w*(Vz-Uz)*U[npi]*dUdz[npi]; // carefull, last term is a vector product
         
-        //derivee de Hr : y a t'il une erreur ? on dirait que ce devrait etre Kbis*uk_v({0|1|2}) et pas Kbis*uk_v(0)
-        Ht += pt3D( (Kbis* uk_v(0) - K3bis* uk_v(0)*(1-3*sq(uk_u(0))) )*uk00, 
-                    (Kbis* uk_v(0) - K3bis* uk_v(1)*(1-3*sq(uk_u(1))) )*uk01,
-                    (Kbis* uk_v(0) - K3bis* uk_v(2)*(1-3*sq(uk_u(2))) )*uk02);   
+        /* changement de referentiel; second membre pour les termes de courant polarise en spin pour une paroi  pour ordre 2 en temps*/
+        pt3D pseudoHo2 = ai_w*(Ht + (Vz-Uz)*(U[npi]*dVdz[npi] +V[npi]*dUdz[npi]) +(alpha*Vz - beta*Uz)*dVdz[npi])*s_dt;
         
-/* changement de referentiel; second membre pour les termes de courant polarise en spin pour une paroi  pour ordre 2 en temps*/
-BE[i]    += (Ht(0) + (Vz-Uz)*(u[1][npi]*dvdz[2][npi]-u[2][npi]*dvdz[1][npi]+v[1][npi]*dudz[2][npi]-v[2][npi]*dudz[1][npi])+(alpha*Vz - beta*Uz)*dvdz[0][npi])*ai_w*s_dt;
-BE[N+i]  += (Ht(1) + (Vz-Uz)*(u[2][npi]*dvdz[0][npi]-u[0][npi]*dvdz[2][npi]+v[2][npi]*dudz[0][npi]-v[0][npi]*dudz[2][npi])+(alpha*Vz - beta*Uz)*dvdz[1][npi])*ai_w*s_dt;
-BE[2*N+i]+= (Ht(2) + (Vz-Uz)*(u[0][npi]*dvdz[1][npi]-u[1][npi]*dvdz[0][npi]+v[0][npi]*dudz[1][npi]-v[1][npi]*dudz[0][npi])+(alpha*Vz - beta*Uz)*dvdz[2][npi])*ai_w*s_dt;
-    
-    
+        BE[i]    += pseudoDrift(0) + pseudoHo2(0);
+        BE[N+i]  += pseudoDrift(1) + pseudoHo2(1);
+        BE[2*N+i]+= pseudoDrift(2) + pseudoHo2(2);
+        
         AE[    i][    i] +=  alfa* ai_w;  //lumping
         AE[  N+i][  N+i] +=  alfa* ai_w;
         AE[2*N+i][2*N+i] +=  alfa* ai_w;
@@ -125,7 +115,7 @@ BE[2*N+i]+= (Ht(2) + (Vz-Uz)*(u[0][npi]*dvdz[1][npi]-u[1][npi]*dvdz[0][npi]+v[0]
 
         for (int j=0; j<N; j++)
             {
-            contrib = s_dt*(1.+ dt/tau_r*abs(log(dt/tau_r)))* Abis* (dai(0)*dadx[j][npi] + dai(1)*dady[j][npi] + dai(2)*dadz[j][npi]) *w;
+            double contrib = s_dt*(1.+ dt/tau_r*abs(log(dt/tau_r)))* Abis* (dai(0)*dadx[j][npi] + dai(1)*dady[j][npi] + dai(2)*dadz[j][npi]) *w;
             AE[i][j]        +=  contrib;
             AE[N+i][N+j]    +=  contrib;
             AE[2*N+i][2*N+j] +=  contrib;
