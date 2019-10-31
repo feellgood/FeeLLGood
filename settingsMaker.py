@@ -57,7 +57,7 @@ class Settings(object):
 
         FEMsolver = {}
         FEMsolver["nbThreads"] = 16
-        FEMsolver["max(iter)"] = 50
+        FEMsolver["max(iter)"] = 500
         FEMsolver["refresh preconditionner every"] = 20
 
         self.mySets["finite element solver"] = FEMsolver

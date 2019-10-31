@@ -8,7 +8,7 @@
 class timing
 {
     public:
-        inline timing():t(0),dt(1e-9),tf(0),DTMIN(1e-14),DTMAX(1e-7) {TAUR= 100.*DTMAX;}
+        inline timing():t(0),dt(1e-9),tf(0),DTMIN(1e-14),DTMAX(1e-7),TAUR(100.*DTMAX) {}
     
     double t;/**< physical current time of the simulation */
     double dt;/**< time-step */

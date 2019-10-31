@@ -14,11 +14,14 @@ base_projection(!RAND_DETERMINIST);
 write_matrix K_TH(2*NOD, 2*NOD);
 std::vector<double> L_TH(2*NOD,0);
 
+double dt = t_prm.dt;
+double tau_r = t_prm.TAUR;
+
 for(int i=0;i<NbTH;i++) 
     {
-    tab_TH[i] = std::thread( [this,&t_prm,&K_TH,&L_TH,i]() 
+    tab_TH[i] = std::thread( [this,&dt,&tau_r,&K_TH,&L_TH,i]() 
         {
-        std::for_each(refTetIt[i].first,refTetIt[i].second, [this,&t_prm,&K_TH,&L_TH](Tetra::Tet & tet)
+        std::for_each(refTetIt[i].first,refTetIt[i].second, [this,&dt,&tau_r,&K_TH,&L_TH](Tetra::Tet & tet)
             {
             //gmm::dense_matrix <double> K(3*Tetra::N,3*Tetra::N); 
             double K[3*Tetra::N][3*Tetra::N] = { {0} }; 
@@ -26,7 +29,7 @@ for(int i=0;i<NbTH;i++)
             //std::vector <double> L(3*Tetra::N);
             double L[3*Tetra::N] = {0};
                 
-            tet.integrales(settings.paramTetra,t_prm.dt,settings.Hext,DW_vz,t_prm.TAUR,K, L);
+            tet.integrales(settings.paramTetra,dt,settings.Hext,tau_r,DW_vz,K, L);
             
             projection<Tetra::Tet,Tetra::N>(tet,K,L);
             //tet.projection( K, L);
@@ -78,12 +81,8 @@ counter.tac();
 
 if(settings.verbose) { std::cout << "..matrix assembly done in " << counter.elapsed() << "s" << std::endl; }
 
-std::cout<<"\nK_TH :"<< K_TH(0,0) <<";"<<K_TH(2*NOD-1,2*NOD-1) <<std::endl;
-
-
 read_matrix Kr(2*NOD,2*NOD);
 gmm::copy(K_TH, Kr);
-
 
 std::vector<double> Xw(2*NOD);// filled with zero by default
 
@@ -91,8 +90,8 @@ gmm::iteration bicg_iter(1e-6);
 gmm::iteration gmr_iter(1e-6);
 bicg_iter.set_maxiter(settings.MAXITER);
 gmr_iter.set_maxiter(settings.MAXITER);
-bicg_iter.set_noisy(true);//VERBOSE
-gmr_iter.set_noisy(true);//VERBOSE
+bicg_iter.set_noisy(false);//VERBOSE
+gmr_iter.set_noisy(false);//VERBOSE
 
 if (!nt) 
     { prc = new gmm::diagonal_precond <read_matrix> (Kr); }

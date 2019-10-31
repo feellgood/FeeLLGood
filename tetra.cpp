@@ -64,12 +64,8 @@ interpolation(Nodes::get_v0,V,dVdx,dVdy,dVdz);
 interpolation(Nodes::get_phi0,Hd);
 interpolation(Nodes::get_phiv0,Hv);
 
-
-
-
 for (int npi=0; npi<NPI; npi++){
     pt3D uk_u = pt3D(pScal(uk[0],U[npi]), pScal(uk[1],U[npi]), pScal(uk[2],U[npi]));
-    
     pt3D uk_v = pt3D(pScal(uk[0],V[npi]), pScal(uk[1],V[npi]), pScal(uk[2],V[npi]));
 
     double Du2 = norme2(dUdx[npi]) + norme2(dUdy[npi]) + norme2(dUdz[npi]);
@@ -84,23 +80,22 @@ for (int npi=0; npi<NPI; npi++){
     pt3D truc = Kbis*pt3D(uk_v(0),uk_v(0),uk_v(0)) -K3bis*pDirect(uk_v,pt3D(1-3*sq(uk_u(0)),1-3*sq(uk_u(1)),1-3*sq(uk_u(2))));
     pt3D Ht = Hv[npi] + pDirect(truc,uk[0]);
     
+    pt3D Heff = Kbis*uk_u(0)*uk[0] - K3bis*( uk_uuu(0)*uk[0] + uk_uuu(1)*uk[1] + uk_uuu(2)*uk[2] ) + Hd[npi] + Hext;
+    
     double w = weight[npi];
+    double prefactor_contrib = w*s_dt*(1.+ dt/tau_r*abs(log(dt/tau_r)))* Abis;
+    
     for (int i=0; i<N; i++){
-        double ai = a[i][npi];
-        double ai_w = ai*w;
-        pt3D dai = pt3D(dadx[i][npi], dady[i][npi], dadz[i][npi]);
-        pt3D Dai_Du = dai(0)*dUdx[npi] + dai(1)*dUdy[npi] + dai(2)*dUdz[npi];
+        double ai_w = w*a[i][npi];
+        pt3D Dai_Du = dadx[i][npi]*dUdx[npi] + dady[i][npi]*dUdy[npi] + dadz[i][npi]*dUdz[npi];
         
-        pt3D pseudoH = w*(ai*(Kbis*uk_u(0)*uk[0] - K3bis*( uk_uuu(0)*uk[0] + uk_uuu(1)*uk[1] + uk_uuu(2)*uk[2] ) + Hd[npi] + Hext) - Abis*Dai_Du);
+        pt3D X =  -w*Abis*Dai_Du + ai_w*(alpha*Vz - beta*Uz)*(dUdz[npi] + dVdz[npi]*s_dt) ;
         
-        pt3D pseudoDrift = pseudoH + ai_w*(alpha*Vz - beta*Uz)*dUdz[npi] + ai_w*(Vz-Uz)*U[npi]*dUdz[npi]; // carefull, last term is a vector product
+        X += ai_w*(Heff + Ht*s_dt + (Vz-Uz)*(U[npi]*(dUdz[npi]+dVdz[npi]*s_dt) +V[npi]*dUdz[npi]*s_dt) );
         
-        /* changement de referentiel; second membre pour les termes de courant polarise en spin pour une paroi  pour ordre 2 en temps*/
-        pt3D pseudoHo2 = ai_w*(Ht + (Vz-Uz)*(U[npi]*dVdz[npi] +V[npi]*dUdz[npi]) +(alpha*Vz - beta*Uz)*dVdz[npi])*s_dt;
-        
-        BE[i]    += pseudoDrift(0) + pseudoHo2(0);
-        BE[N+i]  += pseudoDrift(1) + pseudoHo2(1);
-        BE[2*N+i]+= pseudoDrift(2) + pseudoHo2(2);
+        BE[i]    += X(0);
+        BE[N+i]  += X(1);
+        BE[2*N+i]+= X(2);
         
         AE[    i][    i] +=  alfa* ai_w;  //lumping
         AE[  N+i][  N+i] +=  alfa* ai_w;
@@ -115,7 +110,8 @@ for (int npi=0; npi<NPI; npi++){
 
         for (int j=0; j<N; j++)
             {
-            double contrib = s_dt*(1.+ dt/tau_r*abs(log(dt/tau_r)))* Abis* (dai(0)*dadx[j][npi] + dai(1)*dady[j][npi] + dai(2)*dadz[j][npi]) *w;
+            double contrib = prefactor_contrib*(dadx[i][npi]*dadx[j][npi] + dady[i][npi]*dady[j][npi] + dadz[i][npi]*dadz[j][npi]);
+            
             AE[i][j]        +=  contrib;
             AE[N+i][N+j]    +=  contrib;
             AE[2*N+i][2*N+j] +=  contrib;
