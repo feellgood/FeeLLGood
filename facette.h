@@ -59,7 +59,7 @@ Face is a class containing the index references to nodes, it has a triangular sh
 */
 class Fac{
 	public:
-		inline Fac(int _NOD /**< [in] */):NOD(_NOD)//,Ksp(2*N,2*N), Lsp(2*N)  /**< constructor */
+		inline Fac(int _NOD /**< [in] */):NOD(_NOD)  /**< constructor */
             {reg = 0; treated = false;}
         
         /** constructor used by readMesh */
@@ -68,7 +68,7 @@ class Fac{
                    const int _idx /**< [in] region index in region vector */,
                    const int i0 /**< [in] node index */,
                    const int i1 /**< [in] node index */,
-                   const int i2 /**< [in] node index */) : idxPrm(_idx),reg(_reg),refNode(_p_node)//,Ksp(2*N,2*N), Lsp(2*N)
+                   const int i2 /**< [in] node index */) : idxPrm(_idx),reg(_reg),refNode(_p_node)
             {
 		NOD = refNode->size();
                 if((0<i0)&&(i0<=NOD)&&(0<i1)&&(i1<=NOD)&&(0<i2)&&(i2<=NOD))
@@ -197,11 +197,12 @@ class Fac{
 
             return false;
             }
-        
-        //gmm::dense_matrix <double> Ksp;/**< matrix initialized by constructor */
-        //std::vector <double> Lsp;/**< vector initialized by constructor */
+    
+	/** small matrix for integrales */
 	double Kp[2*N][2*N];        
-	double Lp[2*N];
+	
+    /** small vector for integrales */
+    double Lp[2*N];
     
     private:
         int NOD;/**< number of nodes */
@@ -222,6 +223,7 @@ class Fac{
 /** operator less_than for the orientation of the facette, lexicographic order */
 struct less_than 
 {
+    /** operator () for ordering facettes with operator< overloaded */
     bool operator()(const Fac &f1, const Fac &f2) const {return (f1<f2);} 
 };
 

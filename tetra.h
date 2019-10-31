@@ -283,7 +283,7 @@ class Tet{
             };
         
 		/** computes the integral contribution of the tetrahedron to the evolution of the magnetization */		
-		void integrales(std::vector<Tetra::prm> const& params /**< [in] */,double dt,Pt::pt3D const& Hext,double tau_r,double Vz,double AE[3*N][3*N], double *BE)  const;
+		void integrales(std::vector<Tetra::prm> const& params, double dt, Pt::pt3D const& Hext, double tau_r, double Vz, double AE[3*N][3*N], double *BE)  const;
 
         /** exchange energy of the tetrahedron */
         double exchangeEnergy(Tetra::prm const& param,const double dudx[Pt::DIM][NPI],const double dudy[Pt::DIM][NPI],const double dudz[Pt::DIM][NPI]) const;
@@ -322,9 +322,10 @@ class Tet{
 		/** \return \f$ |J| \f$ build Jacobian \f$ J \f$ */
         double Jacobian(double J[Pt::DIM][Pt::DIM]);
         
-        //gmm::dense_matrix <double> Kp;/**< Kp(2*N,2*N) initialized by constructor */
+        /** small matrix for integrales */
         double Kp[2*N][2*N];
-        //std::vector <double> Lp;/**< Lp(2*N) initialized by constructor  */
+        
+        /** small vector for integrales */
         double Lp[2*N];
         
     private:

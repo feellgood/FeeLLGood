@@ -23,6 +23,7 @@ class timing
 /** reduced \f$ \tau_r = 100 DT_{\mathrm{max}} \f$ */
     double TAUR;
     
+    /** some informations */
     inline void infos()
     {
     std::cout << "\t final time of the simulation\t\t" << tf << std::endl;

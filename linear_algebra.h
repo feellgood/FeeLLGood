@@ -89,6 +89,8 @@ private:
     /** computes the local vector basis {ep,eq} in the tangeant plane for projection on the elements */
     void base_projection(bool determinist);
     
+    
+    /** template function to provide P matrix coefficients, with respect to its block diagonal structure */
     template<class T,int N> double Pcoeff(T const& x,int i,int j) 
     {
     double val = 0;
