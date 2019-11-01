@@ -59,8 +59,8 @@ Face is a class containing the index references to nodes, it has a triangular sh
 */
 class Fac{
 	public:
-		inline Fac(int _NOD /**< [in] */):NOD(_NOD)  /**< constructor */
-            {reg = 0; treated = false;}
+		inline Fac(int _NOD /**< [in] */):NOD(_NOD),reg(0)  /**< constructor */
+            { treated = false; }
         
         /** constructor used by readMesh */
         inline Fac(const std::vector<Nodes::Node>  *_p_node /**< [in] pointer to the nodes */,
@@ -68,29 +68,26 @@ class Fac{
                    const int _idx /**< [in] region index in region vector */,
                    const int i0 /**< [in] node index */,
                    const int i1 /**< [in] node index */,
-                   const int i2 /**< [in] node index */) : idxPrm(_idx),reg(_reg),refNode(_p_node)
+                   const int i2 /**< [in] node index */) : idxPrm(_idx),NOD(_p_node->size()),reg(_reg),refNode(_p_node)
             {
-		NOD = refNode->size();
-                if((0<i0)&&(i0<=NOD)&&(0<i1)&&(i1<=NOD)&&(0<i2)&&(i2<=NOD))
-                    {
-                    ind[0] = i0; ind[1] = i1; ind[2] = i2;
-                    for (int i=0; i<N; i++) ind[i]--; // to force index to start from 0 (C++) instead of Matlab/msh convention
-                    treated = false;
-                    calc_surf();
-                    init();
-                    }
-                else {std::cout<< "wrong indices in triangular facette." <<std::endl;SYSTEM_ERROR;}
+		ind[0] = i0; ind[1] = i1; ind[2] = i2;
+                for (int i=0; i<N; i++) ind[i]--; // to force index to start from 0 (C++) instead of Matlab/msh convention
+                treated = false;
+		calc_norm();
+                double surf = calc_surf();
+                for (int j=0; j<NPI; j++) {weight[j] = 2.*surf*pds[j]; }
             }
         
 		/** constructor from a region number and three indices */		
-		inline Fac(int r,int i0,int i1,int i2) {reg = r; ind[0]=i0;ind[1]=i1;ind[2]=i2;}
+		inline Fac(int r,int i0,int i1,int i2): NOD(0),reg(r)
+		{ind[0]=i0;ind[1]=i1;ind[2]=i2;}
 		
 		/** constructor from a region number, idxPrm and three indices */		
-		inline Fac(int r,int idx,int i0,int i1,int i2) {reg = r; idxPrm=idx; ind[0]=i0;ind[1]=i1;ind[2]=i2;}
+		inline Fac(int r,int idx,int i0,int i1,int i2): NOD(0),reg(r) 
+		{idxPrm=idx; ind[0]=i0;ind[1]=i1;ind[2]=i2;}
 		
 		int idxPrm;/**< index of the material parameters of the facette */	
 			
-		double surf; /**< surface of the face */
 		double Ms; /**< magnetization at saturation of the face */    
 		Pt::pt3D n;/**< normal vector to the face */	
 		int ind[N];/**< indices table of the nodes */
@@ -98,8 +95,6 @@ class Fac{
 		
 		bool treated;/**< flag */
 		
-        
-    
         /** weighted scalar product : factorized formulation */
         inline double weightedScalarProd(const double X[NPI] /**< [in] */) const
             {return ( X[0]*weight[0] + (X[1] +X[2] + X[3])*weight[1] );}
@@ -201,22 +196,21 @@ class Fac{
 	/** small matrix for integrales */
 	double Kp[2*N][2*N];        
 	
-    /** small vector for integrales */
-    double Lp[2*N];
+    	/** small vector for integrales */
+    	double Lp[2*N];
+
+	/** computes the norm to the face */
+	void calc_norm(void);
+
+	/** computes surface of the face		*/		
+	double calc_surf(void) const;
     
     private:
-        int NOD;/**< number of nodes */
-        int reg;/**< .msh region number */
+        const int NOD;/**< number of nodes */
+        const int reg;/**< .msh region number */
         
         const std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
         
-        
-        /** computes normal vector n and surface surf		*/		
-		void calc_surf(void);
-        
-        /** initialize weight hat function */
-        inline void init(void)
-            {for (int j=0; j<NPI; j++) {weight[j] = 2.*surf*pds[j]; }}// detJ = 2*surf;
 };//end class Fac
 
 

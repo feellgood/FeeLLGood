@@ -123,8 +123,7 @@ class Tet{
             for (int i=0; i<N; i++) ind[i]--;           // convention Matlab/msh -> C++
             treated = false;
             
-            if (calc_vol() < 0.)
-                { std::swap(ind[2],ind[3]); }
+            if (calc_vol() < 0.) { std::swap(ind[2],ind[3]); }
             
             double J[Pt::DIM][Pt::DIM];//we have to rebuild the jacobian in case of ill oriented tetrahedron 
             double detJ = Jacobian(J);

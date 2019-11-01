@@ -111,7 +111,18 @@ void Fac::assemblage_mat(write_matrix &K) const
         }
 }
 
-void Fac::calc_surf(void)
+void Fac::calc_norm(void)
+{
+Pt::pt3D p0 = (*refNode)[ ind[0] ].p;
+Pt::pt3D p1 = (*refNode)[ ind[1] ].p;
+Pt::pt3D p2 = (*refNode)[ ind[2] ].p;
+
+n = (p1-p0)*(p2-p0);
+double norm = n.norm();
+n /= norm;
+}
+
+double Fac::calc_surf(void) const
 {
 Pt::pt3D p0 = (*refNode)[ ind[0] ].p;
 Pt::pt3D p1 = (*refNode)[ ind[1] ].p;
@@ -119,9 +130,7 @@ Pt::pt3D p2 = (*refNode)[ ind[2] ].p;
 
 Pt::pt3D vec = (p1-p0)*(p2-p0);
 
-double norm = vec.norm();
-n = vec/norm;
-surf = 0.5*norm;
+return 0.5*vec.norm();
 }
 
 double Fac::potential(std::function<Pt::pt3D (Nodes::Node)> getter, int i) const
@@ -138,7 +147,7 @@ Pt::pt3D p1p3 = node3.p - node1.p;
 
 double b = p1p2.norm();
 double t = Pt::pScal(p1p2,p1p3)/b;
-double h = 2.*surf/b;
+double h = 2.*calc_surf()/b;
 double a = t/h;  
 double c = (t-b)/h;
 double cc1 = 1.0 + sq(c);
