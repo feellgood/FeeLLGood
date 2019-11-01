@@ -6,46 +6,33 @@ using namespace Pt;
 
 void Fac::integrales(std::vector<Facette::prm> const& params, double *BE) const
 {
-double Js = params[idxPrm].Js;
-double Ks = params[idxPrm].Ks;
-
-if(Ks!=0.)
-{
-double uk00 = params[idxPrm].uk[0];
-double uk01 = params[idxPrm].uk[1];
-double uk02 = params[idxPrm].uk[2];
-double Kbis = 2.0*Ks/Js;
+Pt::pt3D const & uk = params[idxPrm].uk;
+double Kbis = 2.0*(params[idxPrm].Ks)/(params[idxPrm].Js);
 
 double u[DIM][NPI];
 interpolation(Nodes::get_u0,u);
 
-    for (int npi=0; npi<NPI; npi++)
-        {
-        double Kbis_ai;
-        double w_uk0_u = weight[npi]*(uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi]); 
+for (int npi=0; npi<NPI; npi++)
+	{
+        double w_uk_u = weight[npi]*(uk(0)*u[0][npi] + uk(1)*u[1][npi] + uk(2)*u[2][npi]); 
 
         for (int i=0; i<N; i++)
             {
-            Kbis_ai = Kbis*a[i][npi];
-            BE[i]    += (Kbis_ai* w_uk0_u*uk00);
-            BE[N+i]  += (Kbis_ai* w_uk0_u*uk01);
-            BE[2*N+i]+= (Kbis_ai* w_uk0_u*uk02);
+            double Kbis_ai = Kbis*a[i][npi];
+            BE[i]    += (Kbis_ai* w_uk_u*uk(0));
+            BE[N+i]  += (Kbis_ai* w_uk_u*uk(1));
+            BE[2*N+i]+= (Kbis_ai* w_uk_u*uk(2));
             }
         }
-    }
 }
 
 double Fac::anisotropyEnergy(Facette::prm const& param,const double u[DIM][NPI]) const
 {
-double uk00 = param.uk[0];
-double uk01 = param.uk[1];
-double uk02 = param.uk[2];    
-
 double dens[NPI];
 for (int npi=0; npi<NPI; npi++)
     {// cosinus directeurs
-    double al0=uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi];
-    dens[npi] = -param.Ks*al0*al0;      // uniaxe
+    double al0= Pt::sq(param.uk(0)*u[0][npi] + param.uk(0)*u[1][npi] + param.uk(0)*u[2][npi]);
+    dens[npi] = -param.Ks*al0;      // uniaxe
     }
 return weightedScalarProd(dens);
 }

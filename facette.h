@@ -26,9 +26,6 @@ const double pds[NPI] = {-27/96., 25/96., 25/96., 25/96.};/**< some constant wei
 /** hat function constants */
 constexpr double a[N][NPI] = {{1.-u[0]-v[0],1.-u[1]-v[1],1.-u[2]-v[2],1.-u[3]-v[3]},{u[0],u[1],u[2],u[3]},{v[0],v[1],v[2],v[3]}};
 
-/** return \f$ x^2 \f$ */
-inline double sq(const double x) {return x*x;}
-
 /** \class prm
 region number and material constants
 */
@@ -37,7 +34,7 @@ struct prm
 	int reg;/**< region number */	
 	double Js;/**< surface exchange */
 	double Ks;/**< uniaxial surface anisotropy constant */	
-	double uk[Pt::DIM]; /**< anisotropy axis */	
+	Pt::pt3D uk; /**< anisotropy axis */	
 	
 	/** print the struct parameters */
 	inline void infos()
@@ -46,9 +43,7 @@ struct prm
 		std::cout<< "Js = " << Js <<std::endl;
 		
 		if(Ks!=0)
-			{std::cout<< "Ks = " << Ks <<std::endl;
-			std::cout<< "a = [ " << uk[0] << "," << uk[1] <<"," << uk[2] << "]" << std::endl;
-			}
+			{ std::cout<< "Ks*a = "<<Ks << "*[ " << uk << "]" << std::endl; }
 		else std::cout << "no surface anisotropy" << std::endl;
 		};	
 		
