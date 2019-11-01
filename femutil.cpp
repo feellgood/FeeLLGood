@@ -74,7 +74,7 @@ std::for_each(fac.begin(),fac.end(),[this,&settings,&sf](Facette::Fac &fa)
                 Pt::pt3D p2 = node[ it->ind[2] ].p;
                 
                 //fa.Ms will have the magnitude of first arg of copysign, with the sign of second arg
-                fa.Ms = std::copysign(nu0*settings.paramTetra[it->idxPrm].J , Pt::pTriple( p1-p0 , p2-p0 ,fa.n) );
+                fa.Ms = std::copysign(nu0*settings.paramTetra[it->idxPrm].J , Pt::pTriple( p1-p0 , p2-p0 ,fa.calc_norm()) );
                 }
             std::swap(i1,i2);
             }//end perm

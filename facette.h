@@ -73,8 +73,7 @@ class Fac{
 		ind[0] = i0; ind[1] = i1; ind[2] = i2;
                 for (int i=0; i<N; i++) ind[i]--; // to force index to start from 0 (C++) instead of Matlab/msh convention
                 treated = false;
-		calc_norm();
-                double surf = calc_surf();
+		double surf = calc_surf();
                 for (int j=0; j<NPI; j++) {weight[j] = 2.*surf*pds[j]; }
             }
         
@@ -89,7 +88,6 @@ class Fac{
 		int idxPrm;/**< index of the material parameters of the facette */	
 			
 		double Ms; /**< magnetization at saturation of the face */    
-		Pt::pt3D n;/**< normal vector to the face */	
 		int ind[N];/**< indices table of the nodes */
 		double weight[NPI];/**< weights table */
 		
@@ -145,10 +143,10 @@ class Fac{
         }
         
         /** basic infos */		
-		inline void infos() const {std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2] <<std::endl;};
+	inline void infos() const {std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2] <<std::endl;};
         
-		/** computes the integral contribution of the triangular face */
-		void integrales(std::vector<Facette::prm> const& params /**< [in] */, double *BE /**< [out] */) const;
+	/** computes the integral contribution of the triangular face */
+	void integrales(std::vector<Facette::prm> const& params /**< [in] */, double *BE /**< [out] */) const;
 		
         /** anisotropy energy of the facette */
         double anisotropyEnergy(Facette::prm const& param /**< [in] */,const double u[Pt::DIM][NPI] /**< [in] */) const;
@@ -170,14 +168,12 @@ class Fac{
             { for (int i=0; i < N; i++) { L[NOD+ind[i]] += Lp[i]; L[ind[i]] += Lp[N+i]; } }
         
         /** getter for N */		
-		inline int getN(void) const {return N;}	
+	inline int getN(void) const {return N;}	
 
-		/** getter for NPI */		
-		inline int getNPI(void) const {return NPI;}	
+	/** getter for NPI */		
+	inline int getNPI(void) const {return NPI;}	
 		
-		/**
-        computes correction on potential
-        */
+	/** computes correction on potential*/
         double potential(std::function<Pt::pt3D (Nodes::Node)> getter, int i) const;
         
         /** computes correction values */
@@ -200,7 +196,7 @@ class Fac{
     	double Lp[2*N];
 
 	/** computes the norm to the face */
-	void calc_norm(void);
+	Pt::pt3D calc_norm(void) const;
 
 	/** computes surface of the face		*/		
 	double calc_surf(void) const;

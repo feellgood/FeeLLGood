@@ -54,7 +54,8 @@ void Fac::charges(std::function<Pt::pt3D (Nodes::Node)> getter,double *srcDen,do
 {
 double u[DIM][NPI];
 interpolation(getter,u);
-    
+Pt::pt3D n = calc_norm();
+
 for (int j=0; j<NPI; j++, nsrc++)
     { srcDen[nsrc] = Ms * ( u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z() ) * weight[j]; }
 
@@ -64,6 +65,7 @@ calcCorr(getter,corr,u);
 double Fac::demagEnergy(const double u[DIM][NPI],const double phi[NPI]) const
 {
 double q[NPI];
+Pt::pt3D n = calc_norm();
 
 for (int npi=0; npi<NPI; npi++)
         { q[npi] = Ms * (u[0][npi]*n.x() + u[1][npi]*n.y() + u[2][npi]*n.z()); }
@@ -111,15 +113,15 @@ void Fac::assemblage_mat(write_matrix &K) const
         }
 }
 
-void Fac::calc_norm(void)
+Pt::pt3D Fac::calc_norm(void) const
 {
 Pt::pt3D p0 = (*refNode)[ ind[0] ].p;
 Pt::pt3D p1 = (*refNode)[ ind[1] ].p;
 Pt::pt3D p2 = (*refNode)[ ind[2] ].p;
 
-n = (p1-p0)*(p2-p0);
-double norm = n.norm();
-n /= norm;
+Pt::pt3D n = (p1-p0)*(p2-p0);
+n.normalize();
+return n;
 }
 
 double Fac::calc_surf(void) const
@@ -155,6 +157,8 @@ double r = sqrt( sq(h) + sq(c*h+b));
 double log_1 = log( (cc1*h + c*b + sqrt(cc1)*r) / (b*(c+sqrt(cc1))) );
 double log_2 = log(c*h+b+r);
 
+Pt::pt3D n = calc_norm();
+
 double s1 = Pt::pScal(getter(node1),n);
 double s2 = Pt::pScal(getter(node2),n);
 double s3 = Pt::pScal(getter(node3),n);
@@ -180,6 +184,8 @@ double gauss[DIM][NPI];
         
 interpolation(Nodes::get_p,gauss);
 // calc corr node by node
+Pt::pt3D n = calc_norm();
+
 for (int i=0; i<N; i++)
     {
     int i_ = ind[i];
