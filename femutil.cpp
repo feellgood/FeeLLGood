@@ -30,7 +30,7 @@ double zmax = maxNodes(Pt::IDX_Z);
 l = Pt::pt3D(xmax - xmin,ymax - ymin,zmax - zmin);
 diam = l.maxLength();
 c = Pt::pt3D(0.5*(xmax + xmin),0.5*(ymax + ymin),0.5*(zmax + zmin));
-vol = std::accumulate(tet.begin(),tet.end(),0.0,[](double x,Tetra::Tet const& te){return x+te.vol;} );
+vol = std::accumulate(tet.begin(),tet.end(),0.0,[](double x,Tetra::Tet const& te){return x + te.calc_vol();} );
 surf = std::accumulate(fac.begin(),fac.end(),0.0,[](double x,Facette::Fac const& fa){return x+fa.surf;} );
 }
 

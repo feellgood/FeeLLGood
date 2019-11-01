@@ -106,8 +106,8 @@ indices convention is<br>
 */
 class Tet{
     public:
-		inline Tet(int _NOD): NOD(_NOD)//, Kp(2*N,2*N), Lp(2*N) 
-        { reg = 0; idxPrm=-1; treated = false;} /**< default constructor */
+		inline Tet(int _NOD): NOD(_NOD),reg(0)
+        { idxPrm=-1; treated = false;} /**< default constructor */
 		
 		/** constructor for readMesh */
 		inline Tet(const std::vector<Nodes::Node>  *_p_node /**< [in] pointer to the nodes */,
@@ -117,15 +117,16 @@ class Tet{
                    const int i1 /**< [in] node index */,
                    const int i2 /**< [in] node index */,
                    const int i3 /**< [in] node index */,
-                    const double epsilon/**< for degeneracy test */) : idxPrm(_idx),NOD(_p_node->size()),reg(_reg),refNode(_p_node)//, Kp(2*N,2*N), Lp(2*N) 
+                    const double epsilon/**< for degeneracy test */) : idxPrm(_idx),NOD(_p_node->size()),reg(_reg),refNode(_p_node)
             {
-            //NOD = _p_node->size();
             ind[0] = i0; ind[1] = i1; ind[2] = i2; ind[3] = i3;
             for (int i=0; i<N; i++) ind[i]--;           // convention Matlab/msh -> C++
             treated = false;
-            calc_vol();
             
-            double J[Pt::DIM][Pt::DIM];
+            if (calc_vol() < 0.)
+                { std::swap(ind[2],ind[3]); }
+            
+            double J[Pt::DIM][Pt::DIM];//we have to rebuild the jacobian in case of ill oriented tetrahedron 
             double detJ = Jacobian(J);
             double da[N][Pt::DIM];
     
@@ -147,7 +148,6 @@ class Tet{
 		
 		
 		int idxPrm;/**< index of the material parameters of the tetrahedron */		
-		double vol;/**< volume of the tetrahedron */
 		int ind[N];/**< indices to the nodes */
 		double weight[NPI];/**< weights \f$ w_i = |J| p_i  \f$ with  \f$ p_i = pds[i] = (D,E,E,E,E) \f$ */
 		double dadx[N][NPI];/**< variations of hat function along x directions */
@@ -328,14 +328,17 @@ class Tet{
         /** small vector for integrales */
         double Lp[2*N];
         
+        /** computes volume	of the tetrahedron */
+		double calc_vol(void) const;
+        
+        
     private:
         const int NOD;/**< total number of nodes, also an offset for filling sparseMatrix */
-        int reg;/**< .msh region number */
+        const int reg;/**< .msh region number */
         
         const std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
         
-        /** computes volume	of the tetrahedron */
-		void calc_vol(void);
+        
         
         /** getter to access and copy some vector parts of the node vector */
 		inline void getVecDataFromNode(std::function<Pt::pt3D (Nodes::Node)> getter,Pt::pt3D vecData[N]) const

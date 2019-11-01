@@ -241,18 +241,12 @@ J[2][0] = p1.z()-p0.z(); J[2][1] = p2.z()-p0.z(); J[2][2] = p3.z()-p0.z();
 return Pt::det(J);
 }
 
-
-void Tet::calc_vol(void)
+double Tet::calc_vol(void) const
 {
 Pt::pt3D const & p0 = (*refNode)[ ind[0] ].p;
 Pt::pt3D const & p1 = (*refNode)[ ind[1] ].p;
 Pt::pt3D const & p2 = (*refNode)[ ind[2] ].p;
 Pt::pt3D const & p3 = (*refNode)[ ind[3] ].p;
 
-vol  = Pt::pTriple(p1-p0,p2-p0,p3-p0)/6.0;
-if (vol<0.)
-    {
-    std::swap(ind[2],ind[3]); 
-    vol *= -1;
-    }
+return Pt::pTriple(p1-p0,p2-p0,p3-p0)/6.0;
 }
