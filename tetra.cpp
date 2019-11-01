@@ -15,44 +15,18 @@ using namespace Pt;
 void Tet::integrales(std::vector<Tetra::prm> const& params,double dt,Pt::pt3D const& Hext,double tau_r,double Vz, double AE[3*N][3*N], double *BE) const
 {
 double alpha = params[idxPrm].alpha;
-double A = params[idxPrm].A;
-double J = params[idxPrm].J;
-
-double K = params[idxPrm].K;
-double K3 = params[idxPrm].K3;
-
-pt3D uk[DIM];
-uk[0] = pt3D(params[idxPrm].uk[0][0], params[idxPrm].uk[0][1], params[idxPrm].uk[0][2]);
-uk[1] = pt3D(params[idxPrm].uk[1][0], params[idxPrm].uk[1][1], params[idxPrm].uk[1][2]);
-uk[2] = pt3D(params[idxPrm].uk[2][0], params[idxPrm].uk[2][1], params[idxPrm].uk[2][2]);
-
-/*
-double uk00 = params[idxPrm].uk[0][0];
-double uk01 = params[idxPrm].uk[0][1];
-double uk02 = params[idxPrm].uk[0][2];
-double uk10 = params[idxPrm].uk[1][0];
-double uk11 = params[idxPrm].uk[1][1];
-double uk12 = params[idxPrm].uk[1][2];
-double uk20 = params[idxPrm].uk[2][0];
-double uk21 = params[idxPrm].uk[2][1];
-double uk22 = params[idxPrm].uk[2][2];
-*/
+pt3D uk[DIM] = params[idxPrm].uk; 
 double Uz = params[idxPrm].Uz;
 double beta = params[idxPrm].beta;
 
-double Abis = 2.0*A/J;
-double Kbis = 2.0*K/J;
-double K3bis = 2.0*K3/J;
+double Abis = 2.0*(params[idxPrm].A)/(params[idxPrm].J);
+double Kbis = 2.0*(params[idxPrm].K)/(params[idxPrm].J);
+double K3bis = 2.0*(params[idxPrm].K3)/(params[idxPrm].J);
 double s_dt = THETA*dt;//theta from theta scheme in config.h.in
 
 /*-------------------- INTERPOLATION --------------------*/
 double u_nod[DIM][N]; 
-//double u[DIM][NPI];
-//double dudx[DIM][NPI], dudy[DIM][NPI], dudz[DIM][NPI];
 pt3D Hd[NPI], dUdx[NPI], dUdy[NPI], dUdz[NPI];
-
-//double v[DIM][NPI];
-//double dvdx[DIM][NPI], dvdy[DIM][NPI], dvdz[DIM][NPI];
 pt3D Hv[NPI], dVdx[NPI], dVdy[NPI], dVdz[NPI];
 
 // u_nod(u0) is required for lumping in AE matrix
@@ -68,17 +42,16 @@ for (int npi=0; npi<NPI; npi++){
     pt3D uk_u = pt3D(pScal(uk[0],U[npi]), pScal(uk[1],U[npi]), pScal(uk[2],U[npi]));
     pt3D uk_v = pt3D(pScal(uk[0],V[npi]), pScal(uk[1],V[npi]), pScal(uk[2],V[npi]));
 
-    double Du2 = norme2(dUdx[npi]) + norme2(dUdy[npi]) + norme2(dUdz[npi]);
+Pt::pt3D uk_uuu = pDirect(pt3D(1,1,1) - pDirect(uk_u,uk_u), uk_u);
     
-    Pt::pt3D uk_uuu = pDirect(pt3D( 1 - sq(uk_u(0)), 1 - sq(uk_u(1)), 1 - sq(uk_u(2))), uk_u);
-    
-    double uHeff = -Abis*Du2 + pScal(U[npi], Hext + Hd[npi]) + Kbis*sq(uk_u(0)) - K3bis*pScal(uk_u,uk_uuu);
+    double uHeff = -Abis*(norme2(dUdx[npi]) + norme2(dUdy[npi]) + norme2(dUdz[npi])); 
+	uHeff +=  pScal(U[npi], Hext + Hd[npi]) + Kbis*sq(uk_u(0)) - K3bis*pScal(uk_u,uk_uuu);
 
     double alfa=calc_alpha_eff(alpha,dt,uHeff);
         
     //second order corrections,Ht = derivee de Hr : y a t'il une erreur ? on dirait que ce devrait etre Kbis*uk_v({0|1|2}) et pas Kbis*uk_v(0)
-    pt3D truc = Kbis*pt3D(uk_v(0),uk_v(0),uk_v(0)) -K3bis*pDirect(uk_v,pt3D(1-3*sq(uk_u(0)),1-3*sq(uk_u(1)),1-3*sq(uk_u(2))));
-    pt3D Ht = Hv[npi] + pDirect(truc,uk[0]);
+    pt3D truc = Kbis*uk_v(0)*pt3D(1,1,1) -K3bis*pDirect(uk_v , pt3D(1,1,1)-3*pDirect(uk_u,uk_u));
+    pt3D Ht = s_dt*(Hv[npi] + pDirect(truc,uk[0]));
     
     pt3D Heff = Kbis*uk_u(0)*uk[0] - K3bis*( uk_uuu(0)*uk[0] + uk_uuu(1)*uk[1] + uk_uuu(2)*uk[2] ) + Hd[npi] + Hext;
     
@@ -91,7 +64,7 @@ for (int npi=0; npi<NPI; npi++){
         
         pt3D X =  -w*Abis*Dai_Du + ai_w*(alpha*Vz - beta*Uz)*(dUdz[npi] + dVdz[npi]*s_dt) ;
         
-        X += ai_w*(Heff + Ht*s_dt + (Vz-Uz)*(U[npi]*(dUdz[npi]+dVdz[npi]*s_dt) +V[npi]*dUdz[npi]*s_dt) );
+        X += ai_w*(Heff + Ht + (Vz-Uz)*(U[npi]*(dUdz[npi]+dVdz[npi]*s_dt) +V[npi]*dUdz[npi]*s_dt) );
         
         BE[i]    += X(0);
         BE[N+i]  += X(1);
@@ -142,15 +115,15 @@ double dens[NPI];
 double K = param.K;
 double K3 = param.K3;
 
-double uk00 = param.uk[0][0];
-double uk01 = param.uk[0][1];
-double uk02 = param.uk[0][2];
-double uk10 = param.uk[1][0];
-double uk11 = param.uk[1][1];
-double uk12 = param.uk[1][2];
-double uk20 = param.uk[2][0];
-double uk21 = param.uk[2][1];
-double uk22 = param.uk[2][2];   
+double uk00 = param.uk[0](0);
+double uk01 = param.uk[0](1);
+double uk02 = param.uk[0](2);
+double uk10 = param.uk[1](0);
+double uk11 = param.uk[1](1);
+double uk12 = param.uk[1](2);
+double uk20 = param.uk[2](0);
+double uk21 = param.uk[2](1);
+double uk22 = param.uk[2](2);   
 
 for (int npi=0; npi<NPI; npi++)
     {

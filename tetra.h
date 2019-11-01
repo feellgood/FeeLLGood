@@ -57,7 +57,7 @@ struct prm
 	double J;/**< \f$ M_s = \nu_0 J \f$ */
 	double K;/**< uniaxial anisotropy constant */	
 	double K3;/**< third order uniaxial anisotropy constant */	
-	double uk[Pt::DIM][Pt::DIM]; /**< anisotropy tensor 3*3 */	
+	Pt::pt3D uk[Pt::DIM]; /**< anisotropy tensor 3*3 */	
 	double Uz;/**< for spin polarized current */
 	double beta;/**< non adiabatic constant \f$ \beta \f$ for spin polarization current */	
 	
@@ -70,10 +70,10 @@ struct prm
 		std::cout<< "J = " << J <<std::endl;
 		
 		if(K!=0)
-			{std::cout<< "K = " << K <<std::endl;
-			std::cout<< "a = [ [ " << uk[0][0] << "," << uk[0][1] <<"," << uk[0][2] << "]" << std::endl;
-			std::cout<< "      [ " << uk[1][0] << "," << uk[1][1] <<"," << uk[1][2] << "]" << std::endl;
-			std::cout<< "      [ " << uk[2][0] << "," << uk[2][1] <<"," << uk[2][2] << "] ]" << std::endl;
+			{
+			std::cout<< "K*a ="<< K <<"*[ [ " << uk[0] << "]" << std::endl;
+			std::cout<< "      [ " << uk[1] << "]" << std::endl;
+			std::cout<< "      [ " << uk[2] << "] ]" << std::endl;
 			}
 		else std::cout << "no anisotropy" << std::endl;
 		};	

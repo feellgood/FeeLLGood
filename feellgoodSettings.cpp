@@ -103,18 +103,22 @@ for (boost::property_tree::ptree::value_type &s : s_sub_tree)
                 }
             if (sub_k.first == "a")
                 {int i=0;
+		double uk[Pt::DIM][Pt::DIM];
                 for(boost::property_tree::ptree::value_type &row : sub_k.second)
                     {
                     int j=0;
                     for(boost::property_tree::ptree::value_type &coeff : row.second)
                         {
-                        p.uk[i][j] = coeff.second.get_value<double>();	
+                        uk[i][j] = coeff.second.get_value<double>();	
                         j++;
                         }
                     i++;	
                     }
-                }
-			if (sub_k.first == "Js") {p.J = sub_k.second.get_value<double>();}
+		p.uk[0] = Pt::pt3D(uk[0][0], uk[0][1], uk[0][2]);
+		p.uk[1] = Pt::pt3D(uk[1][0], uk[1][1], uk[1][2]);
+		p.uk[2] = Pt::pt3D(uk[2][0], uk[2][1], uk[2][2]);                
+		}
+		if (sub_k.first == "Js") {p.J = sub_k.second.get_value<double>();}
             }
         paramTetra.push_back(p);
         //p.infos();	

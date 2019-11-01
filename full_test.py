@@ -24,12 +24,12 @@ mySettings["mesh"]["scaling factor"] = 1e-10
 mySettings["Bext"] = [1.0,0.0,-1.0]
 mySettings["mesh"]["volume_regions"]["300"]["alpha"] = 0.5
 
-mySettings["time integration"]["final_time"] = 1.0e-5
-mySettings["time integration"]["min(dt)"] = 1e-10
+mySettings["time integration"]["final_time"] = 2.0e-5
+mySettings["time integration"]["min(dt)"] = 1e-12
 mySettings["time integration"]["max(dt)"] = 1e-7
 mySettings["time integration"]["initial dt"] = 1e-8
 
-mySettings["time integration"]["max(du)"] = 0.2
+mySettings["time integration"]["max(du)"] = 0.1
 
 mySettings["initial magnetization"] = {"Mx":"0","My":"0","Mz":"1"}
 
