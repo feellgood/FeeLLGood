@@ -108,10 +108,12 @@ private:
     
     if(node_i == (j%N))
         {
+        Nodes::Node const& n = (*refNode)[x.ind[i]];
+            
         if(i<N)
-            { val = (*refNode)[x.ind[node_i]].ep(j/N); }
+            { val = n.ep(j/N); }
         else
-            { val = (*refNode)[x.ind[node_i]].eq(j/N); }
+            { val = n.calc_eq()(j/N); }
         }
     return val;
     }

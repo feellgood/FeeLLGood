@@ -300,7 +300,7 @@ class Tet{
         double zeemanEnergy(Tetra::prm const& param,double uz_drift,Pt::pt3D const& Hext,const double u[Pt::DIM][NPI]) const;
         
         /** computes projection of a tetrahedron using inner matrix in tetra object */
-        void projection(double A[3*N][3*N], double B[3*N]);
+        //void projection(double A[3*N][3*N], double B[3*N]);
         
         /** matrix assembly using inner matrix in tetra */
         void assemblage_mat(write_matrix &K) const;

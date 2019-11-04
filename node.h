@@ -30,11 +30,13 @@ Pt::pt3D v0;/**< initial or reset value, used to store previous value for time e
 Pt::pt3D u;/**< magnetization value */
 Pt::pt3D v;/**< magnetization speed */
 Pt::pt3D ep;/**< base vector */
-Pt::pt3D eq;/**< second base vector */
+//Pt::pt3D eq;/**< second base vector */
 double phi0;/**< scalar potential initial or reset value, used to store previous value for time evolution */
 double phi;/**< scalar potential value */
 double phiv0;/**< initial or reset value, used to store previous value for time evolution */
 double phiv;/**< no idea */
+
+inline Pt::pt3D calc_eq() const {return u0*ep; } // vector product 
 
 /**
 reset the node magnetization, speed, phi, and phiv
@@ -50,7 +52,7 @@ inline void evolution(void) { u0=u; v0=v; phi0 = phi; phiv0 = phiv; }
 integration of the evolution of the magnetization for time step dt
 */
 inline void make_evol(double vp /**< [in] */,double vq /**< [in] */,double dt /**< [in] */) {
-	v = vp*ep + vq*eq;
+	v = vp*ep + vq*calc_eq();
 	u = u0 + dt*v;
 	u.normalize();}
 

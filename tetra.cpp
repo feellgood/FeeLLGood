@@ -169,6 +169,7 @@ for (int npi=0; npi<NPI; npi++)
 return ( -Js*weightedScalarProd(dens) );
 }
 
+/*
 void Tet::projection(double A[3*N][3*N],  double B[3*N])
 {
 double P[2*N][3*N] = { {0} }; // P must be filled with zero
@@ -185,6 +186,7 @@ tiny::mult<double,2*N,3*N,3*N>(P,A,PA);
 tiny::direct_transposed_mult<double,2*N,3*N,2*N>(PA,P,Kp);
 tiny::mult<double,2*N,3*N>(P,B,Lp);
 }
+*/
 
 void Tet::assemblage_mat(write_matrix &K) const
 {

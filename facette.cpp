@@ -62,6 +62,7 @@ for (int npi=0; npi<NPI; npi++)
 return weightedScalarProd(dens);
 }
 
+/*
 void Fac::projection(double A[3*N][3*N], double B[3*N])
 {
 double P[2*N][3*N] = { {0} };
@@ -82,8 +83,8 @@ tiny::mult<double,2*N,3*N,3*N>(P,A,PA);
 
 tiny::direct_transposed_mult<double,2*N,3*N,2*N>(PA,P,Kp);
 tiny::mult<double,2*N,3*N>(P,B,Lp);
-
 }
+*/
 
 void Fac::assemblage_mat(write_matrix &K) const
 {
