@@ -11,4 +11,6 @@ compiler: g++
 install: ./install-dependencies.sh
 
 # Build script.
-script: cmake . && make
+script:
+    - cmake .
+    - make -j $(getconf _NPROCESSORS_ONLN)
