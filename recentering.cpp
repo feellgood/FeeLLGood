@@ -104,8 +104,8 @@ for (int i=0; i<NOD; i++){
     tgt_node.u0 = node[ns].u;     
     tgt_node.v  = Pt::pt3D(0.,0.,0.);     
     }
-
-delete queryPt;
+    
+annDeallocPt(queryPt);
 delete [] nnIdx;
 delete [] dists;
 

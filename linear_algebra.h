@@ -46,8 +46,12 @@ public:
     base_projection(!RAND_DETERMINIST);
     }
     
+    /** destructor */
+    ~LinAlgebra ()
+        { if (prc != nullptr) {delete prc;} }
+    
 	/** pointer to diagonal preconditionner  */
-	gmm::diagonal_precond <read_matrix> *prc;
+	gmm::diagonal_precond <read_matrix> *prc = nullptr;
 
     /** solver, uses bicgstab and gmres */
 	int  solver(timing const& t_prm /**< [in] */,long nt /**< [in] */);
