@@ -79,7 +79,11 @@ class Fem
                 }    
             direction(Pt::IDX_Z);/* determination de la direction de propagation de la paroi */
             }
-        
+    
+    /** destructor */
+    ~Fem ()
+        { annDeallocPts(pts); delete kdtree; }
+    
 	Pt::pt3D c;/**< center position */	
 	Pt::pt3D l;/**< lengths along x,y,z axis */	
 	
