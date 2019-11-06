@@ -77,7 +77,7 @@ class Fem
                 std::cout<< "initial magnetization M(x,y,z,t=0) = { " << mySets.sMx << "\t" << mySets.sMy << "\t" << mySets.sMz << " }\n" << std::endl; 
                 init_distrib(mySets);
                 }    
-            direction(mySets.verbose,Pt::IDX_Z);/* determination de la direction de propagation de la paroi */
+            direction(Pt::IDX_Z);/* determination de la direction de propagation de la paroi */
             }
         
 	Pt::pt3D c;/**< center position */	
@@ -267,7 +267,7 @@ void femutil(Settings const& settings /**< [in] */);
 void geometry(void);
         
 /** find direction of motion of DW */
-void direction(bool VERBOSE /**< [in] VERBOSE mode */, enum Pt::index idx_dir /**< [in] */);
+void direction( enum Pt::index idx_dir /**< [in] */);
 
 
 /** zeroing of all energies */

@@ -91,7 +91,7 @@ private:
     
     
     /** template function to provide P matrix coefficients, with respect to its block diagonal structure */
-    template<class T,int N> double Pcoeff(T const& x,int i,int j) 
+    template<class T,int N> double Pcoeff(T const& x,int i,int j) const
     {
     double val = 0;
     int node_i = i%N;
@@ -108,13 +108,14 @@ private:
     
     if(node_i == (j%N))
         {
-        Nodes::Node const& n = (*refNode)[x.ind[i]];
+        Nodes::Node const& n = (*refNode)[x.ind[node_i]];
             
         if(i<N)
             { val = n.ep(j/N); }
         else
             { val = n.calc_eq()(j/N); }
         }
+    //std::cout <<"("<< i<<"; "<< j<<"):"<<val <<"\t";
     return val;
     }
     
@@ -125,25 +126,21 @@ private:
 //tiny::mult<double,2*N,3*N,3*N>(P,A,PA);
 	for (int i=0; i<(2*N); i++) 
         {
-        x.Lp[i] = 0;
-            
         for (int k=0; k<(3*N); k++)
             {
-            x.Lp[i] += Pcoeff<T,N>(x,i,k)*B[k]; 
-        
             PA[i][k]=0;
             for (int j=0; j<(3*N); j++) { PA[i][k] += Pcoeff<T,N>(x,i,j)*A[j][k]; }
             }
         }
-    
+        
 //tiny::mult<double,2*N,3*N>(P,B,x.Lp);
-/*
+
     for (int i=0; i<(2*N); i++)
         {
         x.Lp[i] = 0;
         for (int k=0; k<(3*N); k++) { x.Lp[i] += Pcoeff<T,N>(x,i,k)*B[k]; }
         }
-  */
+  
 
 //tiny::direct_transposed_mult<double,2*N,3*N,2*N>(PA,P,x.Kp);
    for (int i=0; i<(2*N); i++) 

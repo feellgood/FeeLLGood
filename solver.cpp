@@ -11,12 +11,30 @@ FTic counter;
 counter.tic();
 
 base_projection(!RAND_DETERMINIST);
+
 write_matrix K_TH(2*NOD, 2*NOD);
 std::vector<double> L_TH(2*NOD,0);
 
 double dt = t_prm.dt;
 double tau_r = t_prm.TAUR;
 
+for(int i=0;i<NbTH;i++) 
+    {
+    std::for_each(refTetIt[i].first,refTetIt[i].second, [this,&dt,&tau_r,&K_TH,&L_TH](Tetra::Tet & tet)
+        {
+        double K[3*Tetra::N][3*Tetra::N] = { {0} }; 
+            
+        double L[3*Tetra::N] = {0};
+                
+        tet.integrales(settings.paramTetra,dt,settings.Hext,tau_r,DW_vz,K, L);
+        projection<Tetra::Tet,Tetra::N>(tet,K,L);
+        
+        tet.assemblage_mat(K_TH);tet.assemblage_vect(L_TH);tet.treated = true;
+        });//end for_each
+    }
+
+
+    /*
 for(int i=0;i<NbTH;i++) 
     {
     tab_TH[i] = std::thread( [this,&dt,&tau_r,&K_TH,&L_TH,i]() 
@@ -30,22 +48,34 @@ for(int i=0;i<NbTH;i++)
             double L[3*Tetra::N] = {0};
                 
             tet.integrales(settings.paramTetra,dt,settings.Hext,tau_r,DW_vz,K, L);
-            
+            std::cout << "vois moi!" <<std::endl;
             projection<Tetra::Tet,Tetra::N>(tet,K,L);
-            //tet.projection( K, L);
-            //tet.treated = false;
+            
             if(my_mutex.try_lock())
                 {
-                tet.assemblage_mat(K_TH);
-                tet.assemblage_vect(L_TH);
-                //for (int k=0; k < Tetra::N; k++) { L_TH[NOD+tet.ind[k]] += tet.Lp[k]; L_TH[tet.ind[k]] += tet.Lp[Tetra::N+k]; }
-                tet.treated = true;
+                tet.assemblage_mat(K_TH);tet.assemblage_vect(L_TH);tet.treated = true;
                 my_mutex.unlock();    
                 }
             });//end for_each
         }); //end thread
     }
+*/
     
+//for(int i=0;i<(NbTH);i++) {tab_TH[i].join();}
+    
+    std::for_each(refFac->begin(),refFac->end(), [this,&K_TH,&L_TH](Facette::Fac & fac)
+        {
+        //gmm::dense_matrix <double> Ks(3*Facette::N,3*Facette::N);
+        //std::vector <double> Ls(3*Facette::N);
+        double Ks[3*Facette::N][3*Facette::N] = { {0} };
+        double Ls[3*Facette::N] = {0};
+        
+        fac.integrales(settings.paramFacette,Ls);     
+        projection<Facette::Fac,Facette::N>(fac,Ks,Ls);
+        fac.assemblage_mat(K_TH);fac.assemblage_vect(L_TH);fac.treated =true;
+        });
+    
+    /*
 tab_TH[NbTH] = std::thread( [this,&K_TH,&L_TH]()
     {
     std::for_each(refFac->begin(),refFac->end(), [this,&K_TH,&L_TH](Facette::Fac & fac)
@@ -57,22 +87,19 @@ tab_TH[NbTH] = std::thread( [this,&K_TH,&L_TH]()
         
         fac.integrales(settings.paramFacette,Ls);     
         projection<Facette::Fac,Facette::N>(fac,Ks,Ls);
-        //fac.projection( Ks, Ls);
-        //fac.treated = false;
+        
         if(my_mutex.try_lock())
             {
-            fac.assemblage_mat(K_TH);
-            fac.assemblage_vect(L_TH);
-            //for (int k=0; k < Facette::N; k++) { L_TH[NOD+fac.ind[k]] += fac.Lp[k]; L_TH[fac.ind[k]] += fac.Lp[Facette::N+k]; }
-            fac.treated =true;
+            fac.assemblage_mat(K_TH);fac.assemblage_vect(L_TH);fac.treated =true;
             my_mutex.unlock();    
             }
         });
     }
 );//end thread
 
-for(int i=0;i<(NbTH+1);i++) {tab_TH[i].join();}
+*/
 
+//for(int i=0;i<(NbTH+1);i++) {tab_TH[i].join();}
 
 insertCoeff<Tetra::Tet>(*refTet,K_TH,L_TH);
 insertCoeff<Facette::Fac>(*refFac,K_TH,L_TH);

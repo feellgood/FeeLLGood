@@ -4,43 +4,36 @@
 
 using namespace Pt;
 
-void Fem::direction(bool VERBOSE,enum index idx_dir)
+void Fem::direction(enum index idx_dir)
 {
-if(VERBOSE) { std::cout << "direction " << std::endl; }
 const int NPS=1;
 
 ANNidxArray nnIdx = new ANNidx[NPS];    if(!nnIdx) SYSTEM_ERROR;
 ANNdistArray dists = new ANNdist[NPS];  if(!dists) SYSTEM_ERROR;
 ANNpoint queryPt= annAllocPt(Pt::DIM);
 
-pt3D p_dir = pt3D(idx_dir);//unit vector
+pt3D qPt = c - 0.5*pDirect( pt3D(idx_dir),l);
 
-/* bord gauche */
-queryPt[0]=c.x()-0.5*pScal(p_dir,l);
-queryPt[1]=c.y()-0.5*pScal(p_dir,l);
-queryPt[2]=c.z()-0.5*pScal(p_dir,l);
+/* left */
+queryPt[0]=c.x(); queryPt[1]=c.y(); queryPt[2]=c.z();
 
 kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 int ns=nnIdx[0];
-if(VERBOSE) { std::cout << "ns : " << ns << std::endl; }
 
 double u2L= node[ns].u(idx_dir);
-if(VERBOSE) { std::cout << "left: " << queryPt[idx_dir] << " mag : "<< node[ns].u << std::endl; }
 
-/* bord droit */
-queryPt[0]=c.x()+0.5*pScal(p_dir,l);
-queryPt[1]=c.y()+0.5*pScal(p_dir,l);
-queryPt[2]=c.z()+0.5*pScal(p_dir,l);
+/* right */
+qPt = c + 0.5*pDirect( pt3D(idx_dir),l);
+queryPt[0]=c.x(); queryPt[1]=c.y(); queryPt[2]=c.z();
 
 kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 ns=nnIdx[0];
 double u2R= node[ns].u(idx_dir);
-if(VERBOSE) { std::cout << "right: " << queryPt[idx_dir] << " mag : "<< node[ns].u << std::endl; }
 
-if ((u2L*u2R>0.)&&VERBOSE){ std::cout << "Warning apparently no DW!" << std::endl; }
-
-DW_dir=(u2L>0? 1.: -1.); /* sens de deplacement de la paroi +Oz ou -Oz */
-if(VERBOSE) {std::cout << "DW dir: " << DW_dir << std::endl; }
+if (u2L*u2R>0.) DW_dir = 0.0; else DW_dir=(u2L>0? 1.: -1.); /* sens de deplacement de la paroi +Oz ou -Oz */
+delete[] dists;
+delete[] nnIdx;
+annDeallocPt(queryPt);
 }
 
 
