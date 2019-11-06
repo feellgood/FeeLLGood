@@ -17,7 +17,7 @@ std::vector<double> L_TH(2*NOD,0);
 
 double dt = t_prm.dt;
 double tau_r = t_prm.TAUR;
-
+/*
 for(int i=0;i<NbTH;i++) 
     {
     std::for_each(refTetIt[i].first,refTetIt[i].second, [this,&dt,&tau_r,&K_TH,&L_TH](Tetra::Tet & tet)
@@ -32,9 +32,9 @@ for(int i=0;i<NbTH;i++)
         tet.assemblage_mat(K_TH);tet.assemblage_vect(L_TH);tet.treated = true;
         });//end for_each
     }
+*/
 
-
-    /*
+    
 for(int i=0;i<NbTH;i++) 
     {
     tab_TH[i] = std::thread( [this,&dt,&tau_r,&K_TH,&L_TH,i]() 
@@ -48,7 +48,6 @@ for(int i=0;i<NbTH;i++)
             double L[3*Tetra::N] = {0};
                 
             tet.integrales(settings.paramTetra,dt,settings.Hext,tau_r,DW_vz,K, L);
-            std::cout << "vois moi!" <<std::endl;
             projection<Tetra::Tet,Tetra::N>(tet,K,L);
             
             if(my_mutex.try_lock())
@@ -59,10 +58,11 @@ for(int i=0;i<NbTH;i++)
             });//end for_each
         }); //end thread
     }
-*/
+
     
 //for(int i=0;i<(NbTH);i++) {tab_TH[i].join();}
-    
+  
+  /*
     std::for_each(refFac->begin(),refFac->end(), [this,&K_TH,&L_TH](Facette::Fac & fac)
         {
         //gmm::dense_matrix <double> Ks(3*Facette::N,3*Facette::N);
@@ -74,8 +74,9 @@ for(int i=0;i<NbTH;i++)
         projection<Facette::Fac,Facette::N>(fac,Ks,Ls);
         fac.assemblage_mat(K_TH);fac.assemblage_vect(L_TH);fac.treated =true;
         });
+    */
+  
     
-    /*
 tab_TH[NbTH] = std::thread( [this,&K_TH,&L_TH]()
     {
     std::for_each(refFac->begin(),refFac->end(), [this,&K_TH,&L_TH](Facette::Fac & fac)
@@ -97,9 +98,9 @@ tab_TH[NbTH] = std::thread( [this,&K_TH,&L_TH]()
     }
 );//end thread
 
-*/
 
-//for(int i=0;i<(NbTH+1);i++) {tab_TH[i].join();}
+
+for(int i=0;i<(NbTH+1);i++) {tab_TH[i].join();}
 
 insertCoeff<Tetra::Tet>(*refTet,K_TH,L_TH);
 insertCoeff<Facette::Fac>(*refFac,K_TH,L_TH);
