@@ -178,9 +178,22 @@ if(symb == "$MeshFormat")
     {
     string mshFormat = "";
     msh >> mshFormat;
-    if(mshFormat == "2.2" ) { std::cout << "mesh file format 2.2" << std::endl; readOldMesh(mySets,msh); }
-    else if (mshFormat == "4.0") { std::cout <<"mesh file format 4.0 not supported, only 2.2 and 4.1 are feellgood readable."<< std::endl; SYSTEM_ERROR;}
-    else if (mshFormat == "4.1") { std::cout <<"mesh file format 4.1 not supported yet, coming soon" << std::endl; SYSTEM_ERROR;readNewMesh(mySets,msh); }
+    if(mshFormat == "2.2" ) 
+        {
+        if(mySets.verbose) {std::cout << "mesh file format 2.2" << std::endl;} 
+        readOldMesh(mySets,msh);
+        }
+    else if (mshFormat == "4.0")
+        {
+        if(mySets.verbose)  {std::cout <<"mesh file format 4.0 not supported, only 2.2 and 4.1 are feellgood readable."<< std::endl; } 
+        SYSTEM_ERROR;
+        }
+    else if (mshFormat == "4.1") 
+        {
+        if (mySets.verbose) {std::cout <<"mesh file format 4.1 not supported yet, coming soon" << std::endl; }
+        SYSTEM_ERROR;
+        readNewMesh(mySets,msh); 
+        }
     else { std::cout <<"mesh file format " << mshFormat << " not supported." << std::endl; SYSTEM_ERROR; }
     }
         

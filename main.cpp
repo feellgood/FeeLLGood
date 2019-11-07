@@ -48,10 +48,13 @@ timing t_prm;
 mySettings.read(t_prm,fileJson);
 Fem fem = Fem(mySettings,t_prm);
 
-mySettings.infos();
-t_prm.infos();
-fem.infos();
-
+if(mySettings.verbose)
+    {
+    mySettings.infos();
+    t_prm.infos();
+    fem.infos();
+    }
+    
 counter.tic();
 //once fem containers are ok, linAlgebra object is built
 LinAlgebra linAlg(mySettings,fem.node,fem.tet,fem.fac);
@@ -59,12 +62,11 @@ LinAlgebra linAlg(mySettings,fem.node,fem.tet,fem.fac);
 scal_fmm::fmm myFMM = scal_fmm::fmm(fem,mySettings.verbose,mySettings.scalfmmNbTh);
 
 myFMM.calc_demag(fem,mySettings);
-std::cout << "first calc demag done." << std::endl;
 
 int nt = time_integration(fem,mySettings,linAlg,myFMM,t_prm);
         
 counter.tac();
-cout << "\n  * iterations: " << nt << "\n  * total computing time: " << counter.elapsed() << " s\n--- the end ---\n" << endl;
+cout << "\n  * iterations: " << nt << "\n  * total computing time: " << counter.elapsed() << " s\n" << endl;
     
 return 0;
 }

@@ -38,10 +38,13 @@ for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_ste
     // Loop over the integration time steps within a visible step.
     while (my_t < t_target)
         {
-        std::cout << " ------------------------------\n";
-        if (flag) std::cout << "    t  : same (" << flag << ")";
-        else std::cout << "nt_output = " << nt_output << ", nt = " << nt << ", t = " << my_t;
-        std::cout << ", dt = " << dt ;
+        if(settings.verbose)
+            {
+            std::cout << " ------------------------------\n";
+            if (flag) std::cout << "    t  : same (" << flag << ")";
+            else std::cout << "nt_output = " << nt_output << ", nt = " << nt << ", t = " << my_t;
+            std::cout << ", dt = " << dt ;
+            }
         if (dt < t_prm.DTMIN) { fem.reset();break; }
 
         /* changement de referentiel */
@@ -55,7 +58,7 @@ for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_ste
             { std::cout << "err : " << err << std::endl;flag++; dt*= 0.5; t_prm.dt=dt; continue;}
 
         double dumax = dt*fem.vmax;
-        std::cout << "\t dumax = " << dumax << ",  vmax = "<< fem.vmax << std::endl;
+        if(settings.verbose) { std::cout << "\t dumax = " << dumax << ",  vmax = "<< fem.vmax << std::endl; }
         if (dumax < settings.DUMIN) break; 
                 
         if (dumax > settings.DUMAX)
@@ -76,7 +79,7 @@ for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_ste
         myFMM.calc_demag(fem,settings);
            
         fem.energy(settings);
-        if (fem.evol > 0.0)
+        if (settings.verbose && (fem.evol > 0.0))
             { std::cout << "Warning energy increases! : " << fem.evol << std::endl; }
 
         fem.DW_vz0 = fem.DW_vz;/* mise a jour de la vitesse du dernier referentiel et deplacement de paroi */ 

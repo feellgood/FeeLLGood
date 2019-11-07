@@ -17,6 +17,7 @@ mySettings["demagnetization field solver"]["nbThreads"] = 4 #MaxNbThreads
 mySettings["outputs"]["evol columns"] = ["t","<mx>","<my>","<mz>","E_ex","E_demag","E_zeeman","E_tot"]
 mySettings["outputs"]["take_photo"] = 100
 mySettings["outputs"]["directory"] = "test_data_out/"
+mySettings["outputs"]["verbose"] = False
 
 mySettings["mesh"]["filename"] = "ellipsoid.msh"
 mySettings["mesh"]["scaling factor"] = 1e-10
@@ -65,6 +66,6 @@ if(val.returncode==0):
 else:
 	print("FeeLLGood terminated before final time")
 	valRet = 1
-print("return " + str(valRet) + " ;dist = ",sqrt((X-mx)**2+(Y-my)**2+(Z-mz)**2))
+print("return " + str(valRet) + " ;dist = %.2e"% sqrt((X-mx)**2+(Y-my)**2+(Z-mz)**2))
 sys.exit(valRet)
 

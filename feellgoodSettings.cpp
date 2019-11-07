@@ -38,9 +38,6 @@ boost::property_tree::ptree sub_tree,s_sub_tree;
     
 boost::property_tree::read_json(fileJson,root);
 	
-std::cout << "\nparsing "<< fileJson <<" :" << std::endl;
-	
-    
 try { sub_tree = root.get_child("outputs"); }
     catch (std::exception &e)
         { std::cout << e.what() << std::endl; }
@@ -77,9 +74,6 @@ if (s <= 0.0)
     }
 setScale(s);
     
-std::cout << "\tvolumic regions..." << std::endl;
-
-
 try { s_sub_tree = sub_tree.get_child("volume_regions"); }
 catch (std::exception &e)
     { std::cout << e.what() << std::endl; }
@@ -99,7 +93,7 @@ for (boost::property_tree::ptree::value_type &s : s_sub_tree)
             if (sub_k.first == "Ka")
                 {
                 p.K = sub_k.second.get_value<double>();
-                if (p.K == 0) { std::cout<< "\tKa is zero, flag NO_ANISOTROPY to true" << std::endl;}
+                //if (p.K == 0) { std::cout<< "\tKa is zero, flag NO_ANISOTROPY to true" << std::endl;}
                 }
             if (sub_k.first == "a")
                 {int i=0;
@@ -125,8 +119,6 @@ for (boost::property_tree::ptree::value_type &s : s_sub_tree)
         }
     }
 		
-std::cout << "\tsurface regions..." << std::endl;
-
 try { s_sub_tree = sub_tree.get_child("surface_regions"); }
 catch (std::exception &e)
     { std::cout << e.what() << std::endl; }
@@ -144,7 +136,7 @@ for (boost::property_tree::ptree::value_type &s : s_sub_tree)
             if (sub_k.first == "Ks")
                 {
                 p.Ks = sub_k.second.get_value<double>();
-                if (p.Ks == 0) { std::cout<< "\tKs is zero, flag NO_SURF_ANISOTROPY to true" << std::endl;}
+                //if (p.Ks == 0) { std::cout<< "\tKs is zero, flag NO_SURF_ANISOTROPY to true" << std::endl;}
                 }
             if (sub_k.first == "uk")
                 {double X[Pt::DIM];

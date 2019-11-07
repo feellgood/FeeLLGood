@@ -74,7 +74,8 @@ class Fem
                 { t_prm.t = readSol(mySets.verbose,mySets.getScale(), mySets.restoreFileName); }
             else
                 {
-                std::cout<< "initial magnetization M(x,y,z,t=0) = { " << mySets.sMx << "\t" << mySets.sMy << "\t" << mySets.sMz << " }\n" << std::endl; 
+                if(mySets.verbose)
+                    { std::cout<< "initial magnetization M(x,y,z,t=0) = { " << mySets.sMx << "\t" << mySets.sMy << "\t" << mySets.sMz << " }\n"; } 
                 init_distrib(mySets);
                 }    
             direction(Pt::IDX_Z);/* determination de la direction de propagation de la paroi */
