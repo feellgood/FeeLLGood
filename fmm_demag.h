@@ -87,7 +87,7 @@ class fmm
                 {
                 Pt::pt3D pTarget = n.p - c; pTarget *= norm;
                 const FPoint<FReal> particlePosition(pTarget.x(), pTarget.y(), pTarget.z());
-                tree->insert(particlePosition, FParticleTypeTarget, idxPart, 0.0);//ct 1 pour target    
+                tree->insert(particlePosition, FParticleType::FParticleTypeTarget, idxPart, 0.0);//ct 1 pour target    
                 idxPart++;
                 });//end for_each sur node
             if(VERBOSE) { std::cout << "Physical nodes inserted." << std::endl; }
@@ -156,7 +156,7 @@ class fmm
                 {
                 Pt::pt3D pSource = Pt::pt3D(gauss[0][j],gauss[1][j],gauss[2][j]) - c; pSource *= norm;
                 const FPoint<FReal> particlePosition(pSource.x(), pSource.y(), pSource.z());
-                tree->insert(particlePosition, FParticleTypeSource, idx, 0.0);
+                tree->insert(particlePosition, FParticleType::FParticleTypeSource, idx, 0.0);
                 }
             });//end for_each    
         }

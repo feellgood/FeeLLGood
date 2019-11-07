@@ -38,11 +38,10 @@ unzip exprtk.zip
 sudo cp exprtk/exprtk.hpp /usr/local/include/
 
 # Patch, build and install ScalFMM.
-wget -nv https://gforge.inria.fr/frs/download.php/file/35369/SCALFMM-1.4-148.tar.gz
-tar xzf SCALFMM-1.4-148.tar.gz
-cd SCALFMM-1.4-148/
+wget -nv https://gitlab.inria.fr/solverstack/ScalFMM/-/archive/V1.5.1/ScalFMM-V1.5.1.tar.gz
+tar xzf ScalFMM-V1.5.1.tar.gz
+cd ScalFMM-V1.5.1/
 sed -i 's/ROtation/Rotation/' Src/CMakeLists.txt
-mkdir Build
 cd Build
 cmake ..
 make -j $job_count
