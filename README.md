@@ -9,7 +9,7 @@ The code is being modified without any warranty it works. A dedicated website ca
 * C++ 11 and STL
 * [ANN][] 1.1.2 version recommended
 * [GMM][] 5.x version recommended (should be fine with 4.x too)
-* [ScalFMM][] on branch release_1.5 tag v1.5.0 (version recommended)
+* [ScalFMM][] 1.5.1 (git tag: "V1.5.1")
 * [GSL][] (optional)
 
 [here]: http://feellgood.neel.cnrs.fr/
