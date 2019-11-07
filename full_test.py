@@ -9,7 +9,7 @@ mySettings = Settings()
 MaxNbThreads = int(subprocess.check_output(["getconf","_NPROCESSORS_ONLN"]))
 print("Max Nb Threads = " + str(MaxNbThreads))
 
-mySettings["finite element solver"]["nbThreads"] = 4 #MaxNbThreads
+mySettings["finite element solver"]["nbThreads"] = 8 #MaxNbThreads
 mySettings["finite element solver"]["max(iter)"] = 700
 
 mySettings["demagnetization field solver"]["nbThreads"] = 4 #MaxNbThreads
@@ -24,7 +24,7 @@ mySettings["mesh"]["scaling factor"] = 1e-10
 mySettings["Bext"] = [1.0,0.0,-1.0]
 mySettings["mesh"]["volume_regions"]["300"]["alpha"] = 0.5
 
-mySettings["time integration"]["final_time"] = 2.0e-5
+mySettings["time integration"]["final_time"] = 1.5e-5
 mySettings["time integration"]["min(dt)"] = 1e-12
 mySettings["time integration"]["max(dt)"] = 1e-7
 mySettings["time integration"]["initial dt"] = 1e-8
@@ -55,10 +55,10 @@ if(val.returncode==0):
 	my = float(data[2])
 	mz = float(data[3])
 	print("mag= ",mx,';',my,';',mz)
-	X = 0.599620
-	Y = -0.000982
-	Z = -0.800284
-	if(sqrt((X-mx)**2+(Y-my)**2+(Z-mz)**2) < 5e-5):
+	X = 0.60033
+	Y = -0.00058281
+	Z = -0.799752
+	if(sqrt((X-mx)**2+(Y-my)**2+(Z-mz)**2) < 1e-6):
 		valRet = 0
 	else:
 		valRet = 1
