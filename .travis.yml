@@ -16,5 +16,7 @@ script:
     - cmake .
     - make -j $(getconf _NPROCESSORS_ONLN)
 
-# Show ccache stats.
-after_script: ccache --show-stats
+# Show ccache stats, clear for next time.
+after_script:
+    - ccache --show-stats
+    - ccache --zero-stats
