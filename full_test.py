@@ -9,10 +9,10 @@ mySettings = Settings()
 MaxNbThreads = int(subprocess.check_output(["getconf","_NPROCESSORS_ONLN"]))
 print("Max Nb Threads = " + str(MaxNbThreads))
 
-mySettings["finite element solver"]["nbThreads"] = 8 #MaxNbThreads
+mySettings["finite element solver"]["nbThreads"] = MaxNbThreads
 mySettings["finite element solver"]["max(iter)"] = 700
 
-mySettings["demagnetization field solver"]["nbThreads"] = 4 #MaxNbThreads
+mySettings["demagnetization field solver"]["nbThreads"] = MaxNbThreads
 
 mySettings["outputs"]["evol columns"] = ["t","<mx>","<my>","<mz>","E_ex","E_demag","E_zeeman","E_tot"]
 mySettings["outputs"]["take_photo"] = 100

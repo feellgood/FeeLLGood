@@ -28,8 +28,6 @@ if(!determinist)
         double phi = M_2_PI * distrib(gen);
         n.ep = Pt::pt3D(theta,phi)*n.u0;
         n.ep.normalize();    
-        //n.eq = n.u0*n.ep; 
-        //n.eq.normalize(); //because ?
     }); 
     }
 else
@@ -40,8 +38,6 @@ else
         double phi = M_2_PI * rand() / (RAND_MAX+1.);
         n.ep = Pt::pt3D(theta,phi)*n.u0;
         n.ep.normalize();    
-        //n.eq = n.u0*n.ep; 
-        //n.eq.normalize(); //because ?
     }); 
     }
 }

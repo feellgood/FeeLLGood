@@ -17,7 +17,7 @@ namespace Nodes
      *convenient enum mainly to access some data values in calculations, used by some templates 
      */
     enum index 
-        {IDX_p = 0,IDX_u0 = 1,IDX_v0 = 2,IDX_u = 3,IDX_v = 4,IDX_ep = 5,IDX_eq = 6,IDX_phi0 = 7,IDX_phi = 8,IDX_phiv0 = 9,IDX_phiv = 10};
+        {IDX_p = 0,IDX_u0 = 1,IDX_v0 = 2,IDX_u = 3,IDX_v = 4,IDX_ep = 5,IDX_phi0 = 6,IDX_phi = 7,IDX_phiv0 = 8,IDX_phiv = 9};
 
 /** \struct Node
 Node is containing physical point of coordinates \f$ p = (x,y,z) \f$, magnetization value at \f$ m(p,t) \f$. 
@@ -30,13 +30,15 @@ Pt::pt3D v0;/**< initial or reset value, used to store previous value for time e
 Pt::pt3D u;/**< magnetization value */
 Pt::pt3D v;/**< magnetization speed */
 Pt::pt3D ep;/**< base vector */
-//Pt::pt3D eq;/**< second base vector */
 double phi0;/**< scalar potential initial or reset value, used to store previous value for time evolution */
 double phi;/**< scalar potential value */
 double phiv0;/**< initial or reset value, used to store previous value for time evolution */
 double phiv;/**< no idea */
 
-inline Pt::pt3D calc_eq() const {return u0*ep; } // vector product 
+/**
+vector eq is computed when needed, it is the third vector of a base composed of u0,ep,eq = u0*ep , vector product 
+ */
+inline Pt::pt3D calc_eq() const {return u0*ep; }
 
 /**
 reset the node magnetization, speed, phi, and phiv
