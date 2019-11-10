@@ -7,7 +7,6 @@ from settingsMaker import Settings
 mySettings = Settings()
 
 MaxNbThreads = int(subprocess.check_output(["getconf","_NPROCESSORS_ONLN"]))
-print("Max Nb Threads = " + str(MaxNbThreads))
 
 mySettings["finite element solver"]["nbThreads"] = MaxNbThreads
 mySettings["finite element solver"]["max(iter)"] = 700
@@ -41,7 +40,6 @@ if(os.path.exists(mySettings["outputs"]["directory"]) and os.path.isdir(mySettin
 else:
 	os.system("mkdir " + mySettings["outputs"]["directory"])
 
-print("FeeLLGood running...")
 val = subprocess.run(["./feellgood","mySettings.json"])
 
 if(val.returncode==0):

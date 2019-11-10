@@ -10,17 +10,25 @@
 
 using namespace std;
 
+inline string spaceString(int nbSpace)
+{string S;
+    for(int i=0;i<nbSpace;i++) {S += " ";}
+return S;
+}
 
 int time_integration(Fem &fem,Settings &settings /**< [in] */,LinAlgebra &linAlg /**< [in] */,scal_fmm::fmm &myFMM  /**< [in] */,timing &t_prm);
 
 void prompt(void)
 {
+    stringstream SsId;
+    SsId << getpid();
 std::cout << "\n\t ┌────────────────────────────┐\n";
 std::cout <<   "\t │         FeeLLGood          │\n";
-std::cout <<   "\t │        version " << feellgood_version << "       │\n";
+std::cout <<   "\t │        version " << feellgood_version << spaceString(28-16-feellgood_version.length() ) <<"│\n";
 std::cout <<   "\t │      cnrs Grenoble-INP     │\n";
+std::cout <<   "\t │____________________________│\n";
+std::cout <<   "\t │      process "<< SsId.str() <<  spaceString(28-14-SsId.str().length() ) <<"│\n";
 std::cout <<   "\t └────────────────────────────┘\n";
-std::cout << "\t process\t\t" << getpid() << std::endl;
 }
 
 int main(int argc,char* argv[])
@@ -30,6 +38,8 @@ Settings mySettings;
 FTic counter;
  
 string fileJson;
+
+prompt();
 
 if(argc<2)
 	{
@@ -41,8 +51,6 @@ else
 	fileJson = argv[1]; // argv[0] is "./feellgood"
 	cout << "using loaded settings from " << fileJson << " JSON file." <<endl;	
 	}
-
-prompt();
 
 timing t_prm;
 mySettings.read(t_prm,fileJson);
