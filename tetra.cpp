@@ -15,7 +15,7 @@ using namespace Pt;
 void Tet::integrales(std::vector<Tetra::prm> const& params,double dt,Pt::pt3D const& Hext,double tau_r,double Vz, double AE[3*N][3*N], double *BE) const
 {
 double alpha = params[idxPrm].alpha;
-pt3D uk[DIM] = params[idxPrm].uk; 
+pt3D uk[DIM] = { params[idxPrm].uk[0], params[idxPrm].uk[1], params[idxPrm].uk[2]}; 
 double Uz = params[idxPrm].Uz;
 double beta = params[idxPrm].beta;
 
@@ -91,8 +91,6 @@ Pt::pt3D uk_uuu = pDirect(pt3D(1,1,1) - pDirect(uk_u,uk_u), uk_u);
             }
         }
     }
-
-//std::cout<<"\nfin integrale mat0,0:" << AE[0][0] << std::endl;
 }
 
 double Tet::exchangeEnergy(Tetra::prm const& param,const double dudx[DIM][NPI],const double dudy[DIM][NPI],const double dudz[DIM][NPI]) const
