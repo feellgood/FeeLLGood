@@ -12,6 +12,39 @@
 using namespace Tetra;
 using namespace Pt;
 
+void Tet::lumping(int const& npi,double alpha_eff,double prefactor, double AE[3*N][3*N]) const
+{
+double w = weight[npi];
+
+for (int i=0; i<N; i++)
+    {
+    double ai_w = w*a[i][npi];
+    double ai_w_u0_X_i = ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_X,i);
+    double ai_w_u0_Y_i = ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_Y,i);
+    double ai_w_u0_Z_i = ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_Z,i);
+
+    AE[    i][    i] +=  alpha_eff * ai_w;
+    AE[  N+i][  N+i] +=  alpha_eff * ai_w;
+    AE[2*N+i][2*N+i] +=  alpha_eff * ai_w;
+
+    AE[0*N+i][2*N+i] += ai_w_u0_Y_i;//ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_Y,i); //u_nod[1][i];
+    AE[0*N+i][1*N+i] -= ai_w_u0_Z_i;//ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_Z,i);//u_nod[2][i];
+    AE[1*N+i][0*N+i] += ai_w_u0_Z_i;//ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_Z,i);//u_nod[2][i];
+    AE[1*N+i][2*N+i] -= ai_w_u0_X_i;//ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_X,i);//u_nod[0][i];
+    AE[2*N+i][1*N+i] += ai_w_u0_X_i;//ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_X,i);//u_nod[0][i];
+    AE[2*N+i][0*N+i] -= ai_w_u0_Y_i;//ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_Y,i);//u_nod[1][i];
+
+    for (int j=0; j<N; j++)
+        {
+        double contrib = w*prefactor*(dadx[i][npi]*dadx[j][npi] + dady[i][npi]*dady[j][npi] + dadz[i][npi]*dadz[j][npi]);
+            
+        AE[i][j]        +=  contrib;
+        AE[N+i][N+j]    +=  contrib;
+        AE[2*N+i][2*N+j] +=  contrib;
+        }
+    }
+}
+
 void Tet::integrales(std::vector<Tetra::prm> const& params,double dt,Pt::pt3D const& Hext,double tau_r,double Vz, double AE[3*N][3*N], double *BE) const
 {
 double alpha = params[idxPrm].alpha;
@@ -25,18 +58,20 @@ double K3bis = 2.0*(params[idxPrm].K3)/(params[idxPrm].J);
 double s_dt = THETA*dt;//theta from theta scheme in config.h.in
 
 /*-------------------- INTERPOLATION --------------------*/
-double u_nod[DIM][N]; 
+//double u_nod[DIM][N]; 
 pt3D Hd[NPI], dUdx[NPI], dUdy[NPI], dUdz[NPI];
 pt3D Hv[NPI], dVdx[NPI], dVdy[NPI], dVdz[NPI];
 
 // u_nod(u0) is required for lumping in AE matrix
-getVecDataFromNode(Nodes::get_u0,u_nod);
+//getVecDataFromNode(Nodes::get_u0,u_nod);
 
 pt3D U[NPI],V[NPI];
 interpolation(Nodes::get_u0,U,dUdx,dUdy,dUdz);
 interpolation(Nodes::get_v0,V,dVdx,dVdy,dVdz);
 interpolation(Nodes::get_phi0,Hd);
 interpolation(Nodes::get_phiv0,Hv);
+
+double prefactor = s_dt*(1.+ dt/tau_r*abs(log(dt/tau_r)))* Abis;
 
 for (int npi=0; npi<NPI; npi++){
     pt3D uk_u = pt3D(pScal(uk[0],U[npi]), pScal(uk[1],U[npi]), pScal(uk[2],U[npi]));
@@ -56,7 +91,8 @@ Pt::pt3D uk_uuu = pDirect(pt3D(1,1,1) - pDirect(uk_u,uk_u), uk_u);
     pt3D Heff = Kbis*uk_u(0)*uk[0] - K3bis*( uk_uuu(0)*uk[0] + uk_uuu(1)*uk[1] + uk_uuu(2)*uk[2] ) + Hd[npi] + Hext;
     
     double w = weight[npi];
-    double prefactor_contrib = w*s_dt*(1.+ dt/tau_r*abs(log(dt/tau_r)))* Abis;
+    lumping(npi,alfa,prefactor,AE);
+    //double prefactor_contrib = w*s_dt*(1.+ dt/tau_r*abs(log(dt/tau_r)))* Abis;
     
     for (int i=0; i<N; i++){
         double ai_w = w*a[i][npi];
@@ -69,7 +105,7 @@ Pt::pt3D uk_uuu = pDirect(pt3D(1,1,1) - pDirect(uk_u,uk_u), uk_u);
         BE[i]    += X(0);
         BE[N+i]  += X(1);
         BE[2*N+i]+= X(2);
-        
+        /*
         AE[    i][    i] +=  alfa* ai_w;  //lumping
         AE[  N+i][  N+i] +=  alfa* ai_w;
         AE[2*N+i][2*N+i] +=  alfa* ai_w;
@@ -89,6 +125,8 @@ Pt::pt3D uk_uuu = pDirect(pt3D(1,1,1) - pDirect(uk_u,uk_u), uk_u);
             AE[N+i][N+j]    +=  contrib;
             AE[2*N+i][2*N+j] +=  contrib;
             }
+        
+        */
         }
     }
 }

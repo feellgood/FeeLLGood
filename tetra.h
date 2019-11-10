@@ -281,6 +281,9 @@ class Tet{
                 }
             };
         
+        /** matrix filling */
+        void lumping(int const& npi,double alpha_eff,double prefactor, double AE[3*N][3*N]) const;
+            
 		/** computes the integral contribution of the tetrahedron to the evolution of the magnetization */		
 		void integrales(std::vector<Tetra::prm> const& params, double dt, Pt::pt3D const& Hext, double tau_r, double Vz, double AE[3*N][3*N], double *BE)  const;
 
@@ -355,6 +358,10 @@ class Tet{
             vecData[Pt::IDX_Z][i]   = p.z();
             }
         }
+		
+		/** getter to access and copy some single component of a vector of the node vector */
+		inline double getVecDataFromNode(std::function<Pt::pt3D (Nodes::Node)> getter,Pt::index idx,int i) const
+            { return getter((*refNode)[ ind[i] ])(idx); }
 		
 		/** getter to access and copy some scalar parts of the node vector */
 		inline void getScalDataFromNode(std::function<double (Nodes::Node)> getter,double scalData[N]) const
