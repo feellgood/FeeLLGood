@@ -1,5 +1,25 @@
 #include "linear_algebra.h"
 
+void LinAlgebra::updateNodes(std::vector<double> const& X,const double dt)
+{
+double v2max = 0.0;
+
+int i=0;
+std::for_each(refNode->begin(),refNode->end(),
+    [this,&v2max,&i,&dt,&X](Nodes::Node &n)
+        {
+        double vp = X[i];
+        double vq = X[NOD+i];
+        double v2 = vp*vp + vq*vq;
+        if (v2>v2max) { v2max = v2; }
+        n.make_evol(vp,vq,dt);    
+        i++;    
+        }
+);//end for_each
+
+v_max = sqrt(v2max);
+}
+
 void LinAlgebra::prepareItTet(std::vector <Tetra::Tet> &myTet)
 {
 const size_t block_size = myTet.size()/NbTH;

@@ -53,7 +53,10 @@ public:
 	/** pointer to diagonal preconditionner  */
 	gmm::diagonal_precond <read_matrix> *prc = nullptr;
 
-    /** solver, uses bicgstab and gmres */
+    /** mono thread solver , debug only */ 
+    int monoThreadSolver(timing const& t_prm,long nt);
+    
+    /**  solver, uses bicgstab and gmres, sparse matrix and vector are filled with multiThreading */
 	int  solver(timing const& t_prm /**< [in] */,long nt /**< [in] */);
 
     /** setter for DW_dz */
@@ -86,6 +89,9 @@ private:
     
     /** will be used to obtain a seed for the random number generator engine */
     std::random_device rd;
+    
+    /** update nodes.u and v values and find the maximum speed value  */
+    void updateNodes(std::vector<double> const& X,const double dt);
     
     /** prepare refTetIt pairs, used by constructor */
     void prepareItTet(std::vector <Tetra::Tet> &myTet);

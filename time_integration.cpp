@@ -51,6 +51,7 @@ for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_ste
         fem.DW_vz += fem.DW_dir*fem.avg(Nodes::get_v_comp,Pt::IDX_Z)*fem.l.z()/2.;
         
         linAlg.set_DW_vz(fem.DW_vz);
+        //int err = linAlg.monoThreadSolver(t_prm,nt);
         int err = linAlg.solver(t_prm,nt);  
         fem.vmax = linAlg.get_v_max();
         

@@ -16,7 +16,7 @@ mySettings["demagnetization field solver"]["nbThreads"] = MaxNbThreads
 mySettings["outputs"]["evol columns"] = ["t","<mx>","<my>","<mz>","E_ex","E_demag","E_zeeman","E_tot"]
 mySettings["outputs"]["take_photo"] = 100
 mySettings["outputs"]["directory"] = "test_data_out/"
-mySettings["outputs"]["verbose"] = False
+mySettings["outputs"]["verbose"] = True
 
 mySettings["mesh"]["filename"] = "ellipsoid.msh"
 mySettings["mesh"]["scaling factor"] = 1e-10
