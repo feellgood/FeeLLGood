@@ -285,7 +285,7 @@ class Tet{
         void lumping(int const& npi,double alpha_eff,double prefactor, double AE[3*N][3*N]) const;
             
 		/** computes the integral contribution of the tetrahedron to the evolution of the magnetization */		
-		void integrales(std::vector<Tetra::prm> const& params, double dt, Pt::pt3D const& Hext, double tau_r, double Vz, double AE[3*N][3*N], double *BE)  const;
+		void integrales(std::vector<Tetra::prm> const& params, double dt, Pt::pt3D const& Hext, double tau_r, double Vz, double AE[3*N][3*N], Pt::pt3D BE[N])  const;
 
         /** exchange energy of the tetrahedron */
         double exchangeEnergy(Tetra::prm const& param,const double dudx[Pt::DIM][NPI],const double dudy[Pt::DIM][NPI],const double dudz[Pt::DIM][NPI]) const;

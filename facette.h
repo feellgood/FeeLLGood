@@ -141,7 +141,7 @@ class Fac{
 	inline void infos() const {std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2] <<std::endl;};
         
 	/** computes the integral contribution of the triangular face */
-	void integrales(std::vector<Facette::prm> const& params /**< [in] */, double *BE /**< [out] */) const;
+	void integrales(std::vector<Facette::prm> const& params /**< [in] */, Pt::pt3D BE[N] /**< [out] */) const;
 		
         /** anisotropy energy of the facette */
         double anisotropyEnergy(Facette::prm const& param /**< [in] */,const double u[Pt::DIM][NPI] /**< [in] */) const;

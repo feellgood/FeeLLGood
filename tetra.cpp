@@ -45,7 +45,7 @@ for (int i=0; i<N; i++)
     }
 }
 
-void Tet::integrales(std::vector<Tetra::prm> const& params,double dt,Pt::pt3D const& Hext,double tau_r,double Vz, double AE[3*N][3*N], double *BE) const
+void Tet::integrales(std::vector<Tetra::prm> const& params,double dt,Pt::pt3D const& Hext,double tau_r,double Vz, double AE[3*N][3*N], Pt::pt3D BE[N]) const
 {
 double alpha = params[idxPrm].alpha;
 pt3D uk[DIM] = { params[idxPrm].uk[0], params[idxPrm].uk[1], params[idxPrm].uk[2]}; 
@@ -96,15 +96,16 @@ Pt::pt3D uk_uuu = pDirect(pt3D(1,1,1) - pDirect(uk_u,uk_u), uk_u);
     
     for (int i=0; i<N; i++){
         double ai_w = w*a[i][npi];
-        pt3D Dai_Du = dadx[i][npi]*dUdx[npi] + dady[i][npi]*dUdy[npi] + dadz[i][npi]*dUdz[npi];
+        BE[i] -= w*Abis*(dadx[i][npi]*dUdx[npi] + dady[i][npi]*dUdy[npi] + dadz[i][npi]*dUdz[npi]);
         
-        pt3D X =  -w*Abis*Dai_Du + ai_w*(alpha*Vz - beta*Uz)*(dUdz[npi] + dVdz[npi]*s_dt) ;
+        BE[i] += ai_w*(alpha*Vz - beta*Uz)*(dUdz[npi] + dVdz[npi]*s_dt) ;
         
-        X += ai_w*(Heff + Ht + (Vz-Uz)*(U[npi]*(dUdz[npi]+dVdz[npi]*s_dt) +V[npi]*dUdz[npi]*s_dt) );
+        BE[i] += ai_w*(Heff + Ht + (Vz-Uz)*(U[npi]*(dUdz[npi]+dVdz[npi]*s_dt) +V[npi]*dUdz[npi]*s_dt) );
         
-        BE[i]    += X(0);
-        BE[N+i]  += X(1);
-        BE[2*N+i]+= X(2);
+        //BE[i] += X;
+        //BE[i]    += X(0);
+        //BE[N+i]  += X(1);
+        //BE[2*N+i]+= X(2);
         /*
         AE[    i][    i] +=  alfa* ai_w;  //lumping
         AE[  N+i][  N+i] +=  alfa* ai_w;

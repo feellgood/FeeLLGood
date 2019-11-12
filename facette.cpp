@@ -4,7 +4,7 @@
 using namespace Facette;
 using namespace Pt;
 
-void Fac::integrales(std::vector<Facette::prm> const& params, double *BE) const
+void Fac::integrales(std::vector<Facette::prm> const& params, Pt::pt3D BE[N]) const
 {
 Pt::pt3D const & uk = params[idxPrm].uk;
 double Kbis = 2.0*(params[idxPrm].Ks)/(params[idxPrm].Js);
@@ -16,13 +16,7 @@ for (int npi=0; npi<NPI; npi++)
 	{
         double w_uk_u = weight[npi]*(uk(0)*u[0][npi] + uk(1)*u[1][npi] + uk(2)*u[2][npi]); 
 
-        for (int i=0; i<N; i++)
-            {
-            double Kbis_ai = Kbis*a[i][npi];
-            BE[i]    += (Kbis_ai* w_uk_u*uk(0));
-            BE[N+i]  += (Kbis_ai* w_uk_u*uk(1));
-            BE[2*N+i]+= (Kbis_ai* w_uk_u*uk(2));
-            }
+        for (int i=0; i<N; i++) { BE[i] += Kbis*a[i][npi]*w_uk_u*uk; }
         }
 }
 
