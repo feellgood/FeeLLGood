@@ -152,9 +152,6 @@ class Fac{
         /** demagnetizing energy of the facette */
         double demagEnergy(const double u[Pt::DIM][NPI] /**< [in] */,const double phi[NPI] /**< [in] */) const;
         
-        /** compute projection of a face from inner object matrix */
-        //void projection(double A[3*N][3*N], double B[3*N]);
-        
         /** assemblage of the matrix elements from inner matrix in facette object */
         void assemblage_mat(write_matrix &K) const;
         

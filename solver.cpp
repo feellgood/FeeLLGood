@@ -24,7 +24,6 @@ for(int i=0;i<NbTH;i++)
     std::for_each(refTetIt[i].first,refTetIt[i].second, [this,&dt,&tau_r,&K_TH,&L_TH](Tetra::Tet & tet)
         {
         double K[3*Tetra::N][3*Tetra::N] = { {0} }; 
-        //double L[3*Tetra::N] = {0};
         Pt::pt3D L[Tetra::N];
         
         tet.integrales(settings.paramTetra,dt,settings.Hext,tau_r,DW_vz,K, L);
@@ -37,7 +36,6 @@ for(int i=0;i<NbTH;i++)
     std::for_each(refFac->begin(),refFac->end(), [this,&K_TH,&L_TH](Facette::Fac & fac)
         {
         double Ks[3*Facette::N][3*Facette::N] = { {0} };
-        //double Ls[3*Facette::N] = {0};
         Pt::pt3D Ls[Facette::N];
         
         fac.integrales(settings.paramFacette,Ls);     
@@ -126,7 +124,6 @@ for(int i=0;i<NbTH;i++)
         std::for_each(refTetIt[i].first,refTetIt[i].second, [this,&dt,&tau_r,&K_TH,&L_TH](Tetra::Tet & tet)
             {
             double K[3*Tetra::N][3*Tetra::N] = { {0} }; 
-            //double L[3*Tetra::N] = {0};
             Pt::pt3D L[Tetra::N];
             
             tet.integrales(settings.paramTetra,dt,settings.Hext,tau_r,DW_vz,K, L);
@@ -146,7 +143,6 @@ tab_TH[NbTH] = std::thread( [this,&K_TH,&L_TH]()
     std::for_each(refFac->begin(),refFac->end(), [this,&K_TH,&L_TH](Facette::Fac & fac)
         {
         double Ks[3*Facette::N][3*Facette::N] = { {0} };
-        //double Ls[3*Facette::N] = {0};
         Pt::pt3D Ls[Facette::N];
         
         fac.integrales(settings.paramFacette,Ls);     

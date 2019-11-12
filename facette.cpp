@@ -14,10 +14,10 @@ interpolation(Nodes::get_u0,u);
 
 for (int npi=0; npi<NPI; npi++)
 	{
-        double w_uk_u = weight[npi]*(uk(0)*u[0][npi] + uk(1)*u[1][npi] + uk(2)*u[2][npi]); 
+    double w_uk_u = weight[npi]*(uk(0)*u[0][npi] + uk(1)*u[1][npi] + uk(2)*u[2][npi]); 
 
-        for (int i=0; i<N; i++) { BE[i] += Kbis*a[i][npi]*w_uk_u*uk; }
-        }
+    for (int i=0; i<N; i++) { BE[i] += Kbis*a[i][npi]*w_uk_u*uk; }
+    }
 }
 
 double Fac::anisotropyEnergy(Facette::prm const& param,const double u[DIM][NPI]) const
@@ -55,30 +55,6 @@ for (int npi=0; npi<NPI; npi++)
     { dens[npi] = 0.5*mu0*q[npi]*phi[npi]; }
 return weightedScalarProd(dens);
 }
-
-/*
-void Fac::projection(double A[3*N][3*N], double B[3*N])
-{
-double P[2*N][3*N] = { {0} };
-double PA[2*N][3*N] = { {0} };
-
-for (int i=0; i<N; i++){
-    Nodes::Node const& n = (*refNode)[ind[i]];
-    P[i][i]  = n.ep.x();  P[i][N+i]  = n.ep.y();  P[i][2*N+i]  = n.ep.z();
-    P[N+i][i]= n.eq.x();  P[N+i][N+i]= n.eq.y();  P[N+i][2*N+i]= n.eq.z();
-    }
-
-//Ap = (P*A)*trans(P); Bp = P*B;
-//gmm::mult(P,A,PA);
-//gmm::mult(PA, gmm::transposed(P), Ksp);
-//gmm::mult(P,B,Lsp);
-
-tiny::mult<double,2*N,3*N,3*N>(P,A,PA);
-
-tiny::direct_transposed_mult<double,2*N,3*N,2*N>(PA,P,Kp);
-tiny::mult<double,2*N,3*N>(P,B,Lp);
-}
-*/
 
 void Fac::assemblage_mat(write_matrix &K) const
 {

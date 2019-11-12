@@ -19,20 +19,20 @@ double w = weight[npi];
 for (int i=0; i<N; i++)
     {
     double ai_w = w*a[i][npi];
-    double ai_w_u0_X_i = ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_X,i);
-    double ai_w_u0_Y_i = ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_Y,i);
-    double ai_w_u0_Z_i = ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_Z,i);
+    double ai_w_u0_X_i = ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_X,i);//u_nod[0][i];
+    double ai_w_u0_Y_i = ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_Y,i);//u_nod[1][i];
+    double ai_w_u0_Z_i = ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_Z,i);//u_nod[2][i];
 
     AE[    i][    i] +=  alpha_eff * ai_w;
     AE[  N+i][  N+i] +=  alpha_eff * ai_w;
     AE[2*N+i][2*N+i] +=  alpha_eff * ai_w;
 
-    AE[0*N+i][2*N+i] += ai_w_u0_Y_i;//ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_Y,i); //u_nod[1][i];
-    AE[0*N+i][1*N+i] -= ai_w_u0_Z_i;//ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_Z,i);//u_nod[2][i];
-    AE[1*N+i][0*N+i] += ai_w_u0_Z_i;//ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_Z,i);//u_nod[2][i];
-    AE[1*N+i][2*N+i] -= ai_w_u0_X_i;//ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_X,i);//u_nod[0][i];
-    AE[2*N+i][1*N+i] += ai_w_u0_X_i;//ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_X,i);//u_nod[0][i];
-    AE[2*N+i][0*N+i] -= ai_w_u0_Y_i;//ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_Y,i);//u_nod[1][i];
+    AE[0*N+i][2*N+i] += ai_w_u0_Y_i;
+    AE[0*N+i][1*N+i] -= ai_w_u0_Z_i;
+    AE[1*N+i][0*N+i] += ai_w_u0_Z_i;
+    AE[1*N+i][2*N+i] -= ai_w_u0_X_i;
+    AE[2*N+i][1*N+i] += ai_w_u0_X_i;
+    AE[2*N+i][0*N+i] -= ai_w_u0_Y_i;
 
     for (int j=0; j<N; j++)
         {
@@ -58,14 +58,10 @@ double K3bis = 2.0*(params[idxPrm].K3)/(params[idxPrm].J);
 double s_dt = THETA*dt;//theta from theta scheme in config.h.in
 
 /*-------------------- INTERPOLATION --------------------*/
-//double u_nod[DIM][N]; 
 pt3D Hd[NPI], dUdx[NPI], dUdy[NPI], dUdz[NPI];
 pt3D Hv[NPI], dVdx[NPI], dVdy[NPI], dVdz[NPI];
-
-// u_nod(u0) is required for lumping in AE matrix
-//getVecDataFromNode(Nodes::get_u0,u_nod);
-
 pt3D U[NPI],V[NPI];
+
 interpolation(Nodes::get_u0,U,dUdx,dUdy,dUdz);
 interpolation(Nodes::get_v0,V,dVdx,dVdy,dVdz);
 interpolation(Nodes::get_phi0,Hd);
@@ -92,42 +88,13 @@ Pt::pt3D uk_uuu = pDirect(pt3D(1,1,1) - pDirect(uk_u,uk_u), uk_u);
     
     double w = weight[npi];
     lumping(npi,alfa,prefactor,AE);
-    //double prefactor_contrib = w*s_dt*(1.+ dt/tau_r*abs(log(dt/tau_r)))* Abis;
     
-    for (int i=0; i<N; i++){
+    for (int i=0; i<N; i++)
+        {
         double ai_w = w*a[i][npi];
         BE[i] -= w*Abis*(dadx[i][npi]*dUdx[npi] + dady[i][npi]*dUdy[npi] + dadz[i][npi]*dUdz[npi]);
-        
         BE[i] += ai_w*(alpha*Vz - beta*Uz)*(dUdz[npi] + dVdz[npi]*s_dt) ;
-        
         BE[i] += ai_w*(Heff + Ht + (Vz-Uz)*(U[npi]*(dUdz[npi]+dVdz[npi]*s_dt) +V[npi]*dUdz[npi]*s_dt) );
-        
-        //BE[i] += X;
-        //BE[i]    += X(0);
-        //BE[N+i]  += X(1);
-        //BE[2*N+i]+= X(2);
-        /*
-        AE[    i][    i] +=  alfa* ai_w;  //lumping
-        AE[  N+i][  N+i] +=  alfa* ai_w;
-        AE[2*N+i][2*N+i] +=  alfa* ai_w;
-
-        AE[0*N+i][2*N+i] += ai_w*u_nod[1][i]; //lumping
-        AE[0*N+i][1*N+i] += -ai_w*u_nod[2][i];
-        AE[1*N+i][0*N+i] += ai_w*u_nod[2][i];
-        AE[1*N+i][2*N+i] += -ai_w*u_nod[0][i];
-        AE[2*N+i][1*N+i] += ai_w*u_nod[0][i];
-        AE[2*N+i][0*N+i] += -ai_w*u_nod[1][i];
-
-        for (int j=0; j<N; j++)
-            {
-            double contrib = prefactor_contrib*(dadx[i][npi]*dadx[j][npi] + dady[i][npi]*dady[j][npi] + dadz[i][npi]*dadz[j][npi]);
-            
-            AE[i][j]        +=  contrib;
-            AE[N+i][N+j]    +=  contrib;
-            AE[2*N+i][2*N+j] +=  contrib;
-            }
-        
-        */
         }
     }
 }
@@ -205,25 +172,6 @@ for (int npi=0; npi<NPI; npi++)
     }
 return ( -Js*weightedScalarProd(dens) );
 }
-
-/*
-void Tet::projection(double A[3*N][3*N],  double B[3*N])
-{
-double P[2*N][3*N] = { {0} }; // P must be filled with zero
-double PA[2*N][3*N]; // no need to initialize with zeros
-
-for (int i=0; i<N; i++){
-    Nodes::Node const& n = (*refNode)[ind[i]];
-	P[i][i]  = n.ep.x();  P[i][N+i]  = n.ep.y();  P[i][2*N+i]  = n.ep.z();
-	P[N+i][i]= n.eq.x();  P[N+i][N+i]= n.eq.y();  P[N+i][2*N+i]= n.eq.z();
-    }
-//Ap = (P*A)*trans(P);
-//Bp = P*B;
-tiny::mult<double,2*N,3*N,3*N>(P,A,PA);
-tiny::direct_transposed_mult<double,2*N,3*N,2*N>(PA,P,Kp);
-tiny::mult<double,2*N,3*N>(P,B,Lp);
-}
-*/
 
 void Tet::assemblage_mat(write_matrix &K) const
 {
