@@ -16,8 +16,10 @@ set -ev
 job_count=$(getconf _NPROCESSORS_ONLN)
 
 # Install apt packages.
-sudo apt-get update -q
-sudo apt-get install -y cmake libboost-dev
+if [[ $TRAVIS_OS_NAME != osx ]]; then
+    sudo apt-get update -q
+    sudo apt-get install -y cmake libboost-dev
+fi
 
 # Download and build the libraries here. This is the grandparent of the
 # current directory in a Travis build.
