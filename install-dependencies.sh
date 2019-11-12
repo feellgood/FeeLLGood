@@ -29,6 +29,7 @@ cd $HOME/build/
 wget -nv https://www.cs.umd.edu/~mount/ANN/Files/1.1.2/ann_1.1.2.tar.gz
 tar xzf ann_1.1.2.tar.gz
 cd ann_1.1.2/
+sed -i 's/^main/int main/' ann2fig/ann2fig.cpp
 make -j $job_count linux-g++
 sudo cp lib/libANN.a /usr/local/lib/
 sudo cp include/ANN/ANN.h /usr/local/include/
