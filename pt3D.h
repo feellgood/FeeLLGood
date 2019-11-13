@@ -52,7 +52,7 @@ public:
     /**
      * default constructor : initialization by zero values
      */
-    inline pt3D() {memset(_x,0,sizeof _x);}
+    inline pt3D() {std::fill_n(_x,DIM,0);}
     
     /** constructor by values, cartesian coordinates */
     inline pt3D(const double a,const double b,const double c) {_x[IDX_X] =a; _x[IDX_Y]=b; _x[IDX_Z]=c; }

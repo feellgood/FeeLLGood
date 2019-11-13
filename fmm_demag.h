@@ -83,11 +83,11 @@ class fmm
             Pt::pt3D c = fem.c;
             FSize idxPart=0;
 
-            std::for_each(fem.node.begin(),fem.node.end(),[this,c,&idxPart](Nodes::Node const& n)
+            std::for_each(fem.node.begin(),fem.node.end(),[this,&c,&idxPart](Nodes::Node const& n)
                 {
-                Pt::pt3D pTarget = n.p - c; pTarget *= norm;
+                Pt::pt3D pTarget = norm*(n.p - c);
                 const FPoint<FReal> particlePosition(pTarget.x(), pTarget.y(), pTarget.z());
-                tree->insert(particlePosition, FParticleType::FParticleTypeTarget, idxPart, 0.0);//ct 1 pour target    
+                tree->insert(particlePosition, FParticleType::FParticleTypeTarget, idxPart, 0.0);
                 idxPart++;
                 });//end for_each sur node
             if(VERBOSE) { std::cout << "Physical nodes inserted." << std::endl; }
@@ -134,10 +134,10 @@ class fmm
         const int TET;/**< number of tetrahedrons */
         const int SRC;/**< number of charge sources */
         
-        OctreeClass *tree    = nullptr;/**< tree initialized by init private member */
-        KernelClass *kernels = nullptr;/**< kernel initialized by init private member */
+        OctreeClass *tree    = nullptr;/**< tree initialized by constructor */
+        KernelClass *kernels = nullptr;/**< kernel initialized by constructor */
         
-        FReal *srcDen;/**< source buffer */
+        FReal *srcDen = nullptr;/**< source buffer */
         FReal *corr = nullptr;/**< correction coefficients buffer */
         
         double norm;/**< normalization coefficient */
@@ -145,7 +145,7 @@ class fmm
         /**
         function template to insert volume or surface charges in tree for demag computation. class T is Tet or Fac, it must have interpolation method, second template parameter is NPI of the namespace containing class T 
         */
-    template <class T,const int NPI> void insertCharges(const std::vector<T> container,FSize &idx,const Pt::pt3D c)
+    template <class T,const int NPI> void insertCharges(std::vector<T> const& container,FSize &idx,Pt::pt3D const& c)
         {
         std::for_each(container.begin(),container.end(),[this,c,&idx](T const& elem)              
             {  
@@ -154,7 +154,7 @@ class fmm
         
             for (int j=0; j<NPI; j++, idx++)
                 {
-                Pt::pt3D pSource = Pt::pt3D(gauss[0][j],gauss[1][j],gauss[2][j]) - c; pSource *= norm;
+                Pt::pt3D pSource = norm*(Pt::pt3D(gauss[0][j],gauss[1][j],gauss[2][j]) - c);
                 const FPoint<FReal> particlePosition(pSource.x(), pSource.y(), pSource.z());
                 tree->insert(particlePosition, FParticleType::FParticleTypeSource, idx, 0.0);
                 }
@@ -168,9 +168,9 @@ class fmm
         {
         FmmClass algo(tree, kernels);
         
-        memset(srcDen, 0, SRC*sizeof(FReal));
-        memset(corr, 0, NOD*sizeof(FReal));
-
+        std::fill_n(srcDen,SRC,0);
+        std::fill_n(corr,NOD,0);
+        
         int nsrc = 0;
         std::function<const Pt::pt3D (Nodes::Node)> getter;
         std::function<void (Nodes::Node &,const double)> setter;
@@ -180,13 +180,9 @@ class fmm
         else
             { getter = Nodes::get_u; setter = Nodes::set_phi;}
         
-
-// *********************** TETRAS ********************
         std::for_each(fem.tet.begin(),fem.tet.end(),[this,getter,&nsrc,&settings](Tetra::Tet const& tet)              
             { tet.charges(getter,srcDen,nsrc, nu0 * settings.paramTetra[tet.idxPrm].J ); });//end for_each on tet
 
-
-//      ************************ FACES **************************
         std::for_each(fem.fac.begin(),fem.fac.end(),[this,getter,&nsrc,&settings](Facette::Fac const& fac)
             { fac.charges(getter,srcDen,corr,nsrc); });// end for_each on fac
 
@@ -198,16 +194,12 @@ class fmm
             const int nbParticlesInLeaf = leaf->getSrc()->getNbParticles();
             const FVector<long long>& indexes = leaf->getSrc()->getIndexes();
             FReal* const physicalValues = leaf->getSrc()->getPhysicalValues();
-            memset(physicalValues, 0, nbParticlesInLeaf*sizeof(FReal));
-            for(int idxPart = 0 ; idxPart < nbParticlesInLeaf ; ++idxPart){ physicalValues[idxPart]=srcDen[ indexes[idxPart] - NOD ]; }
+            for(int idxPart = 0 ; idxPart < nbParticlesInLeaf ; ++idxPart)
+                { physicalValues[idxPart]=srcDen[ indexes[idxPart] - NOD ]; }
+            
+            std::fill_n(leaf->getTargets()->getPotentials(),leaf->getTargets()->getNbParticles(),0);    
             });
 
-        tree->forEachLeaf([](LeafClass* leaf){
-        FReal*const potentials = leaf->getTargets()->getPotentials();
-        const int nbParticlesInLeaf = leaf->getTargets()->getNbParticles();
-        memset(potentials, 0, nbParticlesInLeaf*sizeof(FReal));
-        });
-    
         tree->forEachCell([](CellClass* cell){ cell->resetToInitialState(); });
         }// end reset
 
