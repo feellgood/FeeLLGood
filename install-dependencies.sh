@@ -26,11 +26,11 @@ cd $HOME/build/
 # Install ANN.
 wget -nv https://www.cs.umd.edu/~mount/ANN/Files/1.1.2/ann_1.1.2.tar.gz
 tar xzf ann_1.1.2.tar.gz
-cd ann_1.1.2/
+cd ann_1.1.2/src/
 make -j $job_count linux-g++
-sudo cp lib/libANN.a /usr/local/lib/
-sudo cp include/ANN/ANN.h /usr/local/include/
-cd ..
+sudo cp ../lib/libANN.a /usr/local/lib/
+sudo cp ../include/ANN/ANN.h /usr/local/include/
+cd ../..
 
 # Install exprtk.
 wget -nv http://www.partow.net/downloads/exprtk.zip
