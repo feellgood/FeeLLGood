@@ -100,9 +100,9 @@ class fmm
         FTic counter;
         counter.tic();
         
-        demag<0> (fem,mySettings); // Hd(u)
-        demag<1> (fem,mySettings); // Hd(v)
-        
+        demag(Nodes::get_u, Nodes::set_phi, fem, mySettings);
+        demag(Nodes::get_v, Nodes::set_phiv, fem, mySettings);
+
         counter.tac();
         if(mySettings.verbose) { std::cout << "Magnetostatics done in " << counter.elapsed() << " s." << std::endl; }
         }
@@ -140,9 +140,9 @@ class fmm
         }
         
     /**
-    template to computes the demag field, template parameter is either 0 or 1
+    computes the demag field, with (getter  = u,setter = phi) or (getter = v,setter = phi_v)
     */
-    template <int Hv> void demag(Fem &fem,Settings &settings)
+    void demag(std::function<const Pt::pt3D (Nodes::Node)> getter,std::function<void (Nodes::Node &,const double)> setter,Fem &fem,Settings &settings)
         {
         FmmClass algo(&tree, &kernels);
         
@@ -150,18 +150,10 @@ class fmm
         std::fill_n(corr,NOD,0);
         
         int nsrc = 0;
-        std::function<const Pt::pt3D (Nodes::Node)> getter;
-        std::function<void (Nodes::Node &,const double)> setter;
-        
-        if(Hv)
-            { getter = Nodes::get_v; setter = Nodes::set_phiv;}
-        else
-            { getter = Nodes::get_u; setter = Nodes::set_phi;}
-        
         std::for_each(fem.tet.begin(),fem.tet.end(),[this,getter,&nsrc,&settings](Tetra::Tet const& tet)              
             { tet.charges(getter,srcDen,nsrc, nu0 * settings.paramTetra[tet.idxPrm].J ); });//end for_each on tet
 
-        std::for_each(fem.fac.begin(),fem.fac.end(),[this,getter,&nsrc,&settings](Facette::Fac const& fac)
+        std::for_each(fem.fac.begin(),fem.fac.end(),[this,getter,&nsrc](Facette::Fac const& fac)
             { fac.charges(getter,srcDen,corr,nsrc); });// end for_each on fac
 
         // reset potentials and forces - physicalValues[idxPart] = Q
