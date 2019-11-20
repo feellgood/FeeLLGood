@@ -67,7 +67,7 @@ counter.tic();
 //once fem containers are ok, linAlgebra object is built
 LinAlgebra linAlg(mySettings,fem.node,fem.tet,fem.fac);
 
-scal_fmm::fmm myFMM = scal_fmm::fmm(fem,mySettings.verbose,mySettings.scalfmmNbTh);
+scal_fmm::fmm myFMM(fem,mySettings.verbose,mySettings.scalfmmNbTh);
 
 myFMM.calc_demag(fem,mySettings);
 

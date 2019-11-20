@@ -49,7 +49,7 @@ namespace scal_fmm{
     const int NbLevels = 8; /**< number of levels in the tree */
     const int SizeSubLevels = 6; /**< size of the sub levels  */
     const double boxWidth=2.01;/**< bounding box max dimension */
-    const FPoint<FReal> centerOfBox(0., 0., 0.);/**< center of the bounding box */
+    const FPoint<FReal> boxCenter(0., 0., 0.);/**< center of the bounding box */
 
 /**
 \class fmm 
@@ -59,56 +59,35 @@ class fmm
     {
     public:
         /** constructor, initialize memory for tree, kernel, sources corrections, initialize all sources */
-        inline fmm(Fem &fem,bool VERBOSE,const int ScalfmmNbThreads): NOD(fem.node.size()) ,FAC( fem.fac.size()) , TET( fem.tet.size()) , SRC( FAC * Facette::NPI + TET * Tetra::NPI)
+        inline fmm(Fem &fem,bool VERBOSE,const int ScalfmmNbThreads): NOD(fem.node.size()) ,FAC( fem.fac.size()) , TET( fem.tet.size()) , SRC( FAC * Facette::NPI + TET * Tetra::NPI) , tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels( NbLevels, boxWidth, boxCenter)
             {
             omp_set_num_threads(ScalfmmNbThreads);
             
-            tree = new OctreeClass(NbLevels, SizeSubLevels, boxWidth, centerOfBox);
-            if (!tree) SYSTEM_ERROR;
-            
-            kernels=new KernelClass( NbLevels, boxWidth, centerOfBox);// kernelPreArgs... , NbLevels, boxWidth, centerOfBox);
-            if (!kernels) SYSTEM_ERROR;
-            
             srcDen = (FReal*) new FReal[SRC]; if (!srcDen) SYSTEM_ERROR;
             corr=(FReal*) new FReal[NOD]; if (!corr) SYSTEM_ERROR;
-            
             norm = 1./(2.*fem.diam);
             
             FTic counter;
-
-            if(VERBOSE)
-                { std::cout << "Creating & Inserting particles ...\tHeight : " << NbLevels << " \t sub-height : " << SizeSubLevels << std::endl; }
             counter.tic();
 
-            Pt::pt3D c = fem.c;
             FSize idxPart=0;
-
-            std::for_each(fem.node.begin(),fem.node.end(),[this,&c,&idxPart](Nodes::Node const& n)
+            for(idxPart=0; idxPart< NOD; ++idxPart)
                 {
-                Pt::pt3D pTarget = norm*(n.p - c);
-                const FPoint<FReal> particlePosition(pTarget.x(), pTarget.y(), pTarget.z());
-                tree->insert(particlePosition, FParticleType::FParticleTypeTarget, idxPart, 0.0);
-                idxPart++;
-                });//end for_each sur node
-            if(VERBOSE) { std::cout << "Physical nodes inserted." << std::endl; }
+                Pt::pt3D pTarget = norm*(fem.node[idxPart].p - fem.c);
+                tree.insert( FPoint<FReal>(pTarget.x(), pTarget.y(), pTarget.z()) , FParticleType::FParticleTypeTarget, idxPart);//, 0.0);    
+                }
             
-            insertCharges<Tetra::Tet,Tetra::NPI>(fem.tet,idxPart,c);
-            if(VERBOSE) { std::cout << "Volume charges inserted." << std::endl; }
-            
-            insertCharges<Facette::Fac,Facette::NPI>(fem.fac,idxPart,c);
-            if(VERBOSE) { std::cout << "Surface charges inserted." << std::endl; }
+            insertCharges<Tetra::Tet,Tetra::NPI>(fem.tet,idxPart,fem.c);
+            insertCharges<Facette::Fac,Facette::NPI>(fem.fac,idxPart,fem.c);
             
             counter.tac();
             if(VERBOSE) 
-                { std::cout << "Done (Creating and Inserting Particles = " 
-                    << counter.elapsed() << "s).\n>> ScalFMM initialized, using " 
-                    << ScalfmmNbThreads << " threads.\n" << std::endl; }  
+                { std::cout << "Nodes, volume & surface charges inserted.\nDone (Creating and Inserting Particles = " 
+                    << counter.elapsed() << "s), using " << ScalfmmNbThreads << " threads.\n" << std::endl; }  
             }
         /** destructor */
         ~fmm ()
             {
-            delete tree;
-            delete kernels; 
             delete [] srcDen;
             delete [] corr;    
             }
@@ -118,14 +97,14 @@ class fmm
         */
         void calc_demag(Fem &fem,Settings &mySettings)
         {
-        if(mySettings.verbose) { std::cout << "\t magnetostatics ..................... "; }
         FTic counter;
         counter.tic();
         
         demag<0> (fem,mySettings); // Hd(u)
         demag<1> (fem,mySettings); // Hd(v)
+        
         counter.tac();
-        if(mySettings.verbose) { std::cout << "Done in " << counter.elapsed() << " s." << std::endl; }
+        if(mySettings.verbose) { std::cout << "Magnetostatics done in " << counter.elapsed() << " s." << std::endl; }
         }
         
     private:
@@ -134,8 +113,8 @@ class fmm
         const int TET;/**< number of tetrahedrons */
         const int SRC;/**< number of charge sources */
         
-        OctreeClass *tree    = nullptr;/**< tree initialized by constructor */
-        KernelClass *kernels = nullptr;/**< kernel initialized by constructor */
+        OctreeClass tree;/**< tree initialized by constructor */
+        KernelClass kernels;/**< kernel initialized by constructor */
         
         FReal *srcDen = nullptr;/**< source buffer */
         FReal *corr = nullptr;/**< correction coefficients buffer */
@@ -155,8 +134,7 @@ class fmm
             for (int j=0; j<NPI; j++, idx++)
                 {
                 Pt::pt3D pSource = norm*(Pt::pt3D(gauss[0][j],gauss[1][j],gauss[2][j]) - c);
-                const FPoint<FReal> particlePosition(pSource.x(), pSource.y(), pSource.z());
-                tree->insert(particlePosition, FParticleType::FParticleTypeSource, idx, 0.0);
+                tree.insert( FPoint<FReal>(pSource.x(), pSource.y(), pSource.z()) , FParticleType::FParticleTypeSource, idx, 0.0);
                 }
             });//end for_each    
         }
@@ -166,7 +144,7 @@ class fmm
     */
     template <int Hv> void demag(Fem &fem,Settings &settings)
         {
-        FmmClass algo(tree, kernels);
+        FmmClass algo(&tree, &kernels);
         
         std::fill_n(srcDen,SRC,0);
         std::fill_n(corr,NOD,0);
@@ -186,10 +164,8 @@ class fmm
         std::for_each(fem.fac.begin(),fem.fac.end(),[this,getter,&nsrc,&settings](Facette::Fac const& fac)
             { fac.charges(getter,srcDen,corr,nsrc); });// end for_each on fac
 
-        fflush(NULL);
-
-        { // reset potentials and forces - physicalValues[idxPart] = Q
-        tree->forEachLeaf([this](LeafClass* leaf)
+        // reset potentials and forces - physicalValues[idxPart] = Q
+        tree.forEachLeaf([this](LeafClass* leaf)
             {
             const int nbParticlesInLeaf = leaf->getSrc()->getNbParticles();
             const FVector<long long>& indexes = leaf->getSrc()->getIndexes();
@@ -200,12 +176,11 @@ class fmm
             std::fill_n(leaf->getTargets()->getPotentials(),leaf->getTargets()->getNbParticles(),0);    
             });
 
-        tree->forEachCell([](CellClass* cell){ cell->resetToInitialState(); });
-        }// end reset
-
+        tree.forEachCell([](CellClass* cell){ cell->resetToInitialState(); });
+        
         algo.execute();
 
-        tree->forEachLeaf([this,&fem,setter](LeafClass* leaf){
+        tree.forEachLeaf([this,&fem,setter](LeafClass* leaf){
             const FReal* const potentials = leaf->getTargets()->getPotentials();
             const int nbParticlesInLeaf  = leaf->getTargets()->getNbParticles();
             const FVector<long long>& indexes  = leaf->getTargets()->getIndexes();
