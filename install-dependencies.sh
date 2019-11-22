@@ -43,6 +43,7 @@ tar xzf ScalFMM-V1.5.1.tar.gz
 cd ScalFMM-V1.5.1/
 sed -i 's/ROtation/Rotation/' Src/CMakeLists.txt
 sed -i 's/~0x00LL/~0ULL/' Src/Containers/F{,Sub}Octree.hpp
+sed -i 's/memcpy/if (nbParticles != 0) memcpy/' Src/Components/FBasicParticleContainer.hpp
 cd Build
 cmake ..
 make -j $job_count
