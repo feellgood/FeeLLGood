@@ -142,7 +142,7 @@ for (int npi=0; npi<NPI; npi++)
 return weightedScalarProd(dens);
 }
 
-void Tet::charges(std::function<Pt::pt3D (Nodes::Node)> getter,double *srcDen,int &nsrc,double Ms) const
+void Tet::charges(std::function<Pt::pt3D (Nodes::Node)> getter,std::vector<double> &srcDen,int &nsrc,double Ms) const
 {
 double dudx[DIM][NPI], dudy[DIM][NPI], dudz[DIM][NPI];
 interpolation(getter,dudx,dudy,dudz);

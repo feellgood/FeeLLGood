@@ -31,7 +31,7 @@ for (int npi=0; npi<NPI; npi++)
 return weightedScalarProd(dens);
 }
 
-void Fac::charges(std::function<Pt::pt3D (Nodes::Node)> getter,double *srcDen,double *corr,int &nsrc) const
+void Fac::charges(std::function<Pt::pt3D (Nodes::Node)> getter,std::vector<double> &srcDen,std::vector<double> &corr,int &nsrc) const
 {
 double u[DIM][NPI];
 interpolation(getter,u);
@@ -135,7 +135,7 @@ double pot = 0.5*(j*pot1 + k*pot2) + s1*pot3 + h*(k*h/2.+s1)*(1-log(h*(a+sqrt(a*
 return Ms*pot;
 }
 
-void Fac::calcCorr(std::function<const Pt::pt3D (Nodes::Node)> getter,double *corr,double u[DIM][NPI]) const
+void Fac::calcCorr(std::function<const Pt::pt3D (Nodes::Node)> getter,std::vector<double> &corr,double u[DIM][NPI]) const
 {
 // calc coord gauss
 double gauss[DIM][NPI];

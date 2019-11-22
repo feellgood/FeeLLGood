@@ -147,7 +147,7 @@ class Fac{
         double anisotropyEnergy(Facette::prm const& param /**< [in] */,const double u[Pt::DIM][NPI] /**< [in] */) const;
         
         /** surface charges  */
-        void charges(std::function<Pt::pt3D (Nodes::Node)> getter,double *srcDen,double *corr,int &nsrc) const;
+        void charges(std::function<Pt::pt3D (Nodes::Node)> getter,std::vector<double> &srcDen,std::vector<double> &corr,int &nsrc) const;
         
         /** demagnetizing energy of the facette */
         double demagEnergy(const double u[Pt::DIM][NPI] /**< [in] */,const double phi[NPI] /**< [in] */) const;
@@ -169,7 +169,7 @@ class Fac{
         double potential(std::function<Pt::pt3D (Nodes::Node)> getter, int i) const;
         
         /** computes correction values */
-        void calcCorr(std::function<const Pt::pt3D (Nodes::Node)> getter,double *corr,double u[Pt::DIM][NPI]) const;
+        void calcCorr(std::function<const Pt::pt3D (Nodes::Node)> getter,std::vector<double> &corr,double u[Pt::DIM][NPI]) const;
         
         /** lexicographic order on indices */
         inline bool operator< (const Fac &f) const

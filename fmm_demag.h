@@ -62,9 +62,6 @@ class fmm
         inline fmm(Fem &fem,bool VERBOSE,const int ScalfmmNbThreads): NOD(fem.node.size()) ,FAC( fem.fac.size()) , TET( fem.tet.size()) , SRC( FAC * Facette::NPI + TET * Tetra::NPI) , tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels( NbLevels, boxWidth, boxCenter)
             {
             omp_set_num_threads(ScalfmmNbThreads);
-            
-            srcDen = (FReal*) new FReal[SRC]; if (!srcDen) SYSTEM_ERROR;
-            corr=(FReal*) new FReal[NOD]; if (!corr) SYSTEM_ERROR;
             norm = 1./(2.*fem.diam);
             
             FTic counter;
@@ -84,12 +81,6 @@ class fmm
             if(VERBOSE) 
                 { std::cout << "Nodes, volume & surface charges inserted.\nDone (Creating and Inserting Particles = " 
                     << counter.elapsed() << "s), using " << ScalfmmNbThreads << " threads.\n" << std::endl; }  
-            }
-        /** destructor */
-        ~fmm ()
-            {
-            delete [] srcDen;
-            delete [] corr;    
             }
         
         /**
@@ -115,9 +106,6 @@ class fmm
         
         OctreeClass tree;/**< tree initialized by constructor */
         KernelClass kernels;/**< kernel initialized by constructor */
-        
-        FReal *srcDen = nullptr;/**< source buffer */
-        FReal *corr = nullptr;/**< correction coefficients buffer */
         
         double norm;/**< normalization coefficient */
         
@@ -146,18 +134,18 @@ class fmm
         {
         FmmClass algo(&tree, &kernels);
         
-        std::fill_n(srcDen,SRC,0);
-        std::fill_n(corr,NOD,0);
+        std::vector<double> srcDen(SRC,0);
+        std::vector<double> corr(NOD,0);
         
         int nsrc = 0;
-        std::for_each(fem.tet.begin(),fem.tet.end(),[this,getter,&nsrc,&settings](Tetra::Tet const& tet)              
+        std::for_each(fem.tet.begin(),fem.tet.end(),[&srcDen,getter,&nsrc,&settings](Tetra::Tet const& tet)              
             { tet.charges(getter,srcDen,nsrc, nu0 * settings.paramTetra[tet.idxPrm].J ); });//end for_each on tet
 
-        std::for_each(fem.fac.begin(),fem.fac.end(),[this,getter,&nsrc](Facette::Fac const& fac)
+        std::for_each(fem.fac.begin(),fem.fac.end(),[&srcDen,&corr,getter,&nsrc](Facette::Fac const& fac)
             { fac.charges(getter,srcDen,corr,nsrc); });// end for_each on fac
 
         // reset potentials and forces - physicalValues[idxPart] = Q
-        tree.forEachLeaf([this](LeafClass* leaf)
+        tree.forEachLeaf([this,&srcDen](LeafClass* leaf)
             {
             const int nbParticlesInLeaf = leaf->getSrc()->getNbParticles();
             const FVector<long long>& indexes = leaf->getSrc()->getIndexes();
@@ -172,7 +160,7 @@ class fmm
         
         algo.execute();
 
-        tree.forEachLeaf([this,&fem,setter](LeafClass* leaf){
+        tree.forEachLeaf([this,&corr,&fem,setter](LeafClass* leaf){
             const FReal* const potentials = leaf->getTargets()->getPotentials();
             const int nbParticlesInLeaf  = leaf->getTargets()->getNbParticles();
             const FVector<long long>& indexes  = leaf->getTargets()->getIndexes();

@@ -294,7 +294,7 @@ class Tet{
         double anisotropyEnergy(Tetra::prm const& param,const double u[Pt::DIM][NPI]) const;
         
         /** volume charges  */
-        void charges(std::function<Pt::pt3D (Nodes::Node)> getter,double *srcDen,int &nsrc,double Ms) const;
+        void charges(std::function<Pt::pt3D (Nodes::Node)> getter,std::vector<double> &srcDen,int &nsrc,double Ms) const;
         
         /** demagnetizing energy of the tetrahedron */
         double demagEnergy(Tetra::prm const& param,const double dudx[Pt::DIM][NPI],const double dudy[Pt::DIM][NPI],const double dudz[Pt::DIM][NPI],const double phi[NPI]) const;
