@@ -21,7 +21,7 @@ mySettings["outputs"]["verbose"] = False
 mySettings["mesh"]["filename"] = "ellipsoid.msh"
 mySettings["mesh"]["scaling factor"] = 1e-10
 
-mySettings["Bext"] = [1.0,0.0,-1.0]
+mySettings["Bext"] = {"Bx" : "1", "By" : "0" , "Bz": "-1"}
 mySettings["mesh"]["volume_regions"]["300"]["alpha"] = 0.5
 
 mySettings["time integration"]["final_time"] = 1.5e-5

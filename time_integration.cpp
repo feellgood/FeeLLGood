@@ -52,6 +52,7 @@ for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_ste
         
         linAlg.set_DW_vz(fem.DW_vz);
         //int err = linAlg.monoThreadSolver(t_prm,nt);
+        settings.Hext = settings.getValue(my_t); // carefull here ! is it really my_t ?
         int err = linAlg.solver(t_prm,nt);  
         fem.vmax = linAlg.get_v_max();
         
