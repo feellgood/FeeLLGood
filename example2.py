@@ -8,10 +8,10 @@ mySettings = Settings()
 
 MaxNbThreads = int(subprocess.check_output(["getconf","_NPROCESSORS_ONLN"]))
 
-mySettings["finite element solver"]["nbThreads"] = MaxNbThreads
+mySettings["finite element solver"]["nbThreads"] = 4 # MaxNbThreads
 mySettings["finite element solver"]["max(iter)"] = 700
 
-mySettings["demagnetization field solver"]["nbThreads"] = MaxNbThreads
+mySettings["demagnetization field solver"]["nbThreads"] = 4 # MaxNbThreads
 
 mySettings["outputs"]["evol columns"] = ["t","<mx>","<my>","<mz>","E_ex","E_demag","E_zeeman","E_tot"]
 mySettings["outputs"]["take_photo"] = 100
@@ -21,7 +21,7 @@ mySettings["outputs"]["verbose"] = False
 mySettings["mesh"]["filename"] = "ellipsoid.msh"
 mySettings["mesh"]["scaling factor"] = 1e-10
 
-mySettings["Bext"] = {"Bx" : "1", "By" : "0" , "Bz": "-1"}
+mySettings["Bext"] = {"Bx" : "0.05*cos(2*Pi*1000000*t)", "By" : "0.05*sin(2*Pi*1000000*t)" , "Bz": "0"}
 mySettings["mesh"]["volume_regions"]["300"]["alpha"] = 0.5
 
 mySettings["time integration"]["final_time"] = 1.5e-5
