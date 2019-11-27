@@ -123,7 +123,7 @@ class Fem
     void infos(void) const;
     
     /** computes all the energies */
-    void energy(Settings const& settings /**< [in] */);
+    void energy(double const t, Settings & settings /**< [in] */);
     
     /**
     time evolution : one step in time

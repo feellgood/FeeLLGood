@@ -22,7 +22,7 @@ if (restore)
 else
     { std::cout << "\t initial magnetization distribution from math expression" << std::endl; }
 
-std::cout << "\t applied field Hext = [ " << Hext(Pt::IDX_X) << ",\t" << Hext(Pt::IDX_Y) << ",\t" << Hext(Pt::IDX_Z) << " ] A/m" << std::endl;
+std::cout << "\t applied field Bext = [ " << sBx << ",\t" << sBy << ",\t" << sBz << " ] A/m" << std::endl;
 
 for(unsigned int i=0;i<paramTetra.size();i++) {paramTetra[i].infos();}
 for(unsigned int i=0;i<paramFacette.size();i++) {paramFacette[i].infos();}
