@@ -7,7 +7,7 @@
 //#include <boost/format.hpp>
 using namespace std;
 
-void Fem::saver(Settings const& settings,timing const& t_prm, ofstream &fout,const int nt) const
+void Fem::saver(Settings & settings,timing const& t_prm, ofstream &fout,const int nt) const
 {
 int save_period = settings.save_period;
 
@@ -27,13 +27,19 @@ for(unsigned int i = 0;i<settings.evol_columns.size();i++)
     if(keyVal == "<mx>") { fout << avg(Nodes::get_u_comp,Pt::IDX_X) << sep;}
     if(keyVal == "<my>") { fout << avg(Nodes::get_u_comp,Pt::IDX_Y) << sep;}
     if(keyVal == "<mz>") { fout << avg(Nodes::get_u_comp,Pt::IDX_Z) << sep;}
+    if(keyVal == "<dmx/dt>") { fout << avg(Nodes::get_v_comp,Pt::IDX_X) << sep;}
+    if(keyVal == "<dmy/dt>") { fout << avg(Nodes::get_v_comp,Pt::IDX_Y) << sep;}
+    if(keyVal == "<dmz/dt>") { fout << avg(Nodes::get_v_comp,Pt::IDX_Z) << sep;}
     if(keyVal == "E_ex") { fout << E_exch << sep;}
     if(keyVal == "E_aniso") { fout << E_aniso << sep;}
     if(keyVal == "E_demag") { fout << E_demag << sep;}
     if(keyVal == "E_zeeman") { fout << E_zeeman << sep;}
     if(keyVal == "E_tot") { fout << Etot << sep;}
     if(keyVal == "DW_z") { fout << DW_z << sep;}
-    if(keyVal == "DW_dz") { fout << DW_vz <<  sep;}    
+    if(keyVal == "DW_dz") { fout << DW_vz <<  sep;}
+    if(keyVal == "Hx") { fout << settings.getValue(t_prm.t).x() << sep;}
+    if(keyVal == "Hy") { fout << settings.getValue(t_prm.t).y() << sep;}
+    if(keyVal == "Hz") { fout << settings.getValue(t_prm.t).z() << sep;}
     }
 fout << std::flush;
 

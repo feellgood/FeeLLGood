@@ -92,4 +92,4 @@ class Settings(object):
     # this method write a json file from the dictionary built by the creator
     def write(self,fileName):
         with open(fileName,'w') as outfile:
-            json.dump(self.mySets,outfile)
+            json.dump(self.mySets,outfile,indent = 4)
