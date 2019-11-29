@@ -45,20 +45,29 @@ private:
     std::unique_ptr<Impl3Dprm> pimpl3Dprm; /**< Pointer to the internal implementation. */
 };
 
+/**
+ * \brief Parse and evaluate the expressions that give the components of
+ * the time dependant applied field as a function of time t.
+ *
+ * This class **cannot be copied**, as it holds a `unique_ptr`.
+ */
+
 class TimeDepFieldParser {
 public:
     TimeDepFieldParser();
     ~TimeDepFieldParser();
 
+    /** setter for the expressions of applied field B */
     void set_expressions(
             const std::string &Bx,
             const std::string &By,
             const std::string &Bz);
 
+    /** getter for time dependant field value */
     Pt::pt3D get_timeDepField(const double t_val);
 private:
     class Impl1Dprm;
-    std::unique_ptr<Impl1Dprm> pimpl1Dprm;
+    std::unique_ptr<Impl1Dprm> pimpl1Dprm;/**< internal implementation pointer */ 
 };
 
 #endif /* mag_parser_h */

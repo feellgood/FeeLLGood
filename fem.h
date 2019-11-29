@@ -123,7 +123,8 @@ class Fem
     void infos(void) const;
     
     /** computes all the energies */
-    void energy(double const t, Settings & settings /**< [in] */);
+    void energy(double const t /**< [in] time in second, used to compute zeeman contribution if applied field is time dependant */,
+                Settings & settings /**< [in] */);
     
     /**
     time evolution : one step in time
