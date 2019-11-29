@@ -24,7 +24,7 @@ if(settings.evol_header)
 
 int flag  = 0;
 double dt = t_prm.dt;
-double my_t= t_prm.t;
+//double my_t= t_prm.t;
 int nt_output = 0;  // visible iteration count
 int nt = 0;         // total iteration count
 double t_step = settings.time_step;
@@ -35,13 +35,13 @@ double reachable_dt = dt;
 for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_step)
     {
     // Loop over the integration time steps within a visible step.
-    while (my_t < t_target)
+    while (t_prm.t < t_target)
         {
         if(settings.verbose)
             {
             std::cout << " ------------------------------\n";
             if (flag) std::cout << "    t  : same (" << flag << ")";
-            else std::cout << "nt_output = " << nt_output << ", nt = " << nt << ", t = " << my_t;
+            else std::cout << "nt_output = " << nt_output << ", nt = " << nt << ", t = " << t_prm.t;
             std::cout << ", dt = " << dt ;
             }
         if (dt < t_prm.DTMIN) { fem.reset();break; }
@@ -68,12 +68,12 @@ for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_ste
         // Adjust the final steps to exactly reach the target time.
         bool last_step = false;
         reachable_dt = dt;
-        if (my_t + dt >= t_target) {
-            dt = t_target - my_t;
+        if (t_prm.t + dt >= t_target) {
+            dt = t_target - t_prm.t;
             t_prm.dt = dt;
             last_step = true;
-        } else if (my_t + dt + t_prm.DTMIN > t_target) {
-            dt = (t_target - my_t) / 2;
+        } else if (t_prm.t + dt + t_prm.DTMIN > t_target) {
+            dt = (t_target - t_prm.t) / 2;
             t_prm.dt = dt;
         }
 
@@ -89,10 +89,9 @@ for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_ste
 
         // Prevent rounding errors from making us miss the target.
         if (last_step)
-            my_t = t_target;
+            t_prm.t = t_target;
         else
-            my_t += dt;
-        t_prm.t = my_t;
+            t_prm.t += dt;
 
         if(settings.recenter)
             {
