@@ -22,9 +22,8 @@ if(settings.evol_header)
     fout << settings.evol_columns[settings.evol_columns.size()-1] << "\n" << std::flush;
     }
 
-double dt0= t_prm.dt;
 int flag  = 0;
-double dt = dt0;
+double dt = t_prm.dt;
 double my_t= t_prm.t;
 int nt_output = 0;  // visible iteration count
 int nt = 0;         // total iteration count
