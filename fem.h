@@ -123,7 +123,7 @@ class Fem
     void infos(void) const;
     
     /** computes all the energies */
-    void energy(Settings const& settings /**< [in] */);
+    void energy(double const t, Settings & settings /**< [in] */);
     
     /**
     time evolution : one step in time
@@ -147,7 +147,7 @@ class Fem
     inline void reset(void) { std::for_each(node.begin(),node.end(),[](Nodes::Node &n) {n.reset();}); }    
     
     /** saving function for a solution */
-    void saver(Settings const& settings /**< [in] */,timing const& t_prm /**< [in] */, std::ofstream &fout /**< [out] */, const int nt /**< [in] */) const;
+    void saver(Settings & settings /**< [in] */,timing const& t_prm /**< [in] */, std::ofstream &fout /**< [out] */, const int nt /**< [in] */) const;
 
     /** text file (vtk) writing function for a solution */
     void savecfg_vtk(Settings const& settings /**< [in] */,timing const& t_prm /**< [in] */,const std::string fileName /**< [in] */) const;

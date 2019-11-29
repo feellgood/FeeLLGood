@@ -75,7 +75,7 @@ class Settings{
 	int solverNbTh;/**< nb of threads for the finite element solver */
 	int scalfmmNbTh;/**< nb of threads for the computation of the demag field with scalfmm */
     
-    Pt::pt3D Hext;/**< applied external field. Unit : SI (A/m) */
+    //Pt::pt3D Hext;/**< applied external field. Unit : SI (A/m) */
     
     double Uz;/**< spin transfert torque adiabatic prefactor along z direction */
     double beta;/**< spin transfert torque non-adiabatic prefactor along z direction */
@@ -83,6 +83,10 @@ class Settings{
 	std::string sMx;/**< string for analytical definition of Mx */
 	std::string sMy;/**< string for analytical definition of My */
     std::string sMz;/**< string for analytical definition of Mz */
+    
+    std::string sBx;/**< string for analytical definition of Bx */
+	std::string sBy;/**< string for analytical definition of By */
+    std::string sBz;/**< string for analytical definition of Bz */
     
     std::string restoreFileName;/**< input file name for continuing a calculation (sol.in) */
 	
@@ -133,18 +137,25 @@ class Settings{
 	};
 	
     /** parser magnetization compiler */
-    inline void doCompile(void)
-        {
-        mag_parser.set_expressions(sMx, sMy, sMz);
-        };
+    inline void doCompile3Dprm(void)
+        { mag_parser.set_expressions(sMx, sMy, sMz); };
     
+    /** parser time dependant field compiler */
+    inline void doCompile1Dprm(void)
+        { field_parser.set_expressions(sBx, sBy, sBz); };
+    
+        
     /** evaluation of the magnetization components through math expression, each component of the magnetization is a function of (x,y,z). 
      \return unit vector
      */
     inline Pt::pt3D getValue(const Pt::pt3D &p)
-        {
-        return mag_parser.get_magnetization(p);
-        }
+        { return mag_parser.get_magnetization(p); }
+    
+    /** evaluation of the field components through math expression, each component of the field is a function of (t). 
+     */
+    inline Pt::pt3D getValue(const double t_val)
+        { return nu0*(field_parser.get_timeDepField(t_val)); }
+    
     
 	private:
 	
@@ -152,6 +163,7 @@ class Settings{
 	std::string simName;/**< simulation name */
 	std::string pbName;     /**< mesh file, gmsh file format */
     MagnetizationParser mag_parser;  /**< parser for the magnetization expressions */
+    TimeDepFieldParser field_parser; /**< parser for the time dependant applied field expressions */
 };
 
 #endif /* feellgoodSettings_h */

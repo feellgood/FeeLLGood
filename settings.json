@@ -57,7 +57,12 @@
     "threshold" : 0.1
     },
     
-"Bext" : [0.0, 0.0, -0.1],
+"Bext" : 
+    {
+    "Bx": "0.1*cos(2*Pi*(1e-9)*t)",
+    "By": "0.1*sin(2*Pi*(1e-9)*t)",
+    "Bz": "0"
+    },
 
 "spin polarized current" :
     {

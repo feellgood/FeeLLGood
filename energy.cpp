@@ -1,13 +1,15 @@
 #include "fem.h"
 
 
-void Fem::energy(Settings const& settings)
+void Fem::energy(double const t,Settings & settings)
 {
 double uz_drift=2.*DW_z/l.z()*DW_dir;
 
 zeroEnergy();
 
-std::for_each(tet.begin(),tet.end(),[this,&settings,uz_drift](Tetra::Tet const& te) 
+const Pt::pt3D Hext = settings.getValue(t);
+
+std::for_each(tet.begin(),tet.end(),[this,&Hext,&settings,uz_drift](Tetra::Tet const& te) 
     {
     Tetra::prm const& param = settings.paramTetra[te.idxPrm];
     double u[Pt::DIM][Tetra::NPI],dudx[Pt::DIM][Tetra::NPI], dudy[Pt::DIM][Tetra::NPI], dudz[Pt::DIM][Tetra::NPI];
@@ -23,7 +25,7 @@ std::for_each(tet.begin(),tet.end(),[this,&settings,uz_drift](Tetra::Tet const& 
     if((param.K != 0.0)||(param.K3 != 0.0))
         { E_aniso += te.anisotropyEnergy(param,u); }
     
-    E_zeeman += te.zeemanEnergy(param,uz_drift,settings.Hext,u);
+    E_zeeman += te.zeemanEnergy(param,uz_drift,Hext,u);
     }
 );
 

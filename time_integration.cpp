@@ -29,7 +29,7 @@ public:
 int time_integration(Fem &fem,Settings &settings /**< [in] */,LinAlgebra &linAlg /**< [in] */,scal_fmm::fmm &myFMM  /**< [in] */,timing &t_prm)
 {
 fem.DW_z  = 0.0;
-fem.energy(settings); 
+fem.energy(t_prm.t,settings); 
 fem.evolution();
 
 std::string baseName = settings.r_path_output_dir + settings.getSimName();
@@ -47,7 +47,6 @@ if(settings.evol_header)
 
 int flag  = 0;
 double dt = t_prm.dt;
-double my_t= t_prm.t;
 int nt_output = 0;  // visible iteration count
 int nt = 0;         // total iteration count
 double t_step = settings.time_step;
@@ -58,7 +57,7 @@ TimeStepper stepper(dt, t_prm.DTMAX);
 for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_step)
     {
     // Loop over the integration time steps within a visible step.
-    while (my_t < t_target)
+    while (t_prm.t < t_target)
         {
         t_prm.dt = dt = stepper(t_target - t_prm.t);
         bool last_step = (dt == t_target - t_prm.t);
@@ -67,7 +66,7 @@ for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_ste
             {
             std::cout << " ------------------------------\n";
             if (flag) std::cout << "    t  : same (" << flag << ")";
-            else std::cout << "nt_output = " << nt_output << ", nt = " << nt << ", t = " << my_t;
+            else std::cout << "nt_output = " << nt_output << ", nt = " << nt << ", t = " << t_prm.t;
             std::cout << ", dt = " << dt ;
             }
         if (dt < t_prm.DTMIN) { fem.reset();break; }
@@ -77,7 +76,8 @@ for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_ste
         
         linAlg.set_DW_vz(fem.DW_vz);
         //int err = linAlg.monoThreadSolver(t_prm,nt);
-        int err = linAlg.solver(t_prm,nt);  
+        Pt::pt3D Hext = settings.getValue(t_prm.t);
+        int err = linAlg.solver(Hext,t_prm,nt);  
         fem.vmax = linAlg.get_v_max();
         
         if (err)
@@ -96,9 +96,10 @@ for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_ste
         if (dumax > settings.DUMAX)
             { flag++; continue;}
 
+
         myFMM.calc_demag(fem,settings);
            
-        fem.energy(settings);
+        fem.energy(t_prm.t,settings);
         if (settings.verbose && (fem.evol > 0.0))
             { std::cout << "Warning energy increases! : " << fem.evol << std::endl; }
 
@@ -108,10 +109,9 @@ for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_ste
 
         // Prevent rounding errors from making us miss the target.
         if (last_step)
-            my_t = t_target;
+            t_prm.t = t_target;
         else
-            my_t += dt;
-        t_prm.t = my_t;
+            t_prm.t += dt;
 
         if(settings.recenter)
             {

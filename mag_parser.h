@@ -41,8 +41,24 @@ public:
     Pt::pt3D get_magnetization(const Pt::pt3D &p);
 
 private:
-    class Impl;
-    std::unique_ptr<Impl> pimpl; /**< Pointer to the internal implementation. */
+    class Impl3Dprm;
+    std::unique_ptr<Impl3Dprm> pimpl3Dprm; /**< Pointer to the internal implementation. */
+};
+
+class TimeDepFieldParser {
+public:
+    TimeDepFieldParser();
+    ~TimeDepFieldParser();
+
+    void set_expressions(
+            const std::string &Bx,
+            const std::string &By,
+            const std::string &Bz);
+
+    Pt::pt3D get_timeDepField(const double t_val);
+private:
+    class Impl1Dprm;
+    std::unique_ptr<Impl1Dprm> pimpl1Dprm;
 };
 
 #endif /* mag_parser_h */

@@ -22,7 +22,7 @@ if (restore)
 else
     { std::cout << "\t initial magnetization distribution from math expression" << std::endl; }
 
-std::cout << "\t applied field Hext = [ " << Hext(Pt::IDX_X) << ",\t" << Hext(Pt::IDX_Y) << ",\t" << Hext(Pt::IDX_Z) << " ] A/m" << std::endl;
+std::cout << "\t applied field Bext = [ " << sBx << ",\t" << sBy << ",\t" << sBz << " ] A/m" << std::endl;
 
 for(unsigned int i=0;i<paramTetra.size();i++) {paramTetra[i].infos();}
 for(unsigned int i=0;i<paramFacette.size();i++) {paramFacette[i].infos();}
@@ -164,7 +164,7 @@ else
     sMx = sub_tree.get<std::string>("Mx");
     sMy = sub_tree.get<std::string>("My");
     sMz = sub_tree.get<std::string>("Mz");
-    doCompile();
+    doCompile3Dprm();
     }
 
 try { sub_tree = root.get_child("recentering"); }
@@ -179,6 +179,12 @@ try {sub_tree = root.get_child("Bext");}
 catch(std::exception &e)
     { std::cout << e.what() << std::endl; }
 
+sBx = sub_tree.get<std::string>("Bx");
+sBy = sub_tree.get<std::string>("By");
+sBz = sub_tree.get<std::string>("Bz");
+doCompile1Dprm();
+    
+/*
 std::vector<double> val_vect;
 for(boost::property_tree::ptree::value_type &cell :sub_tree)
     { val_vect.push_back( nu0 * cell.second.get_value<double>() ); }
@@ -186,6 +192,7 @@ for(boost::property_tree::ptree::value_type &cell :sub_tree)
 if(val_vect.size() != Pt::DIM) {std::cout<<"wrong number of field components"<<std::endl;}
 else
     { Hext = Pt::pt3D(val_vect[0],val_vect[1],val_vect[2]); }
+*/
     
 try {sub_tree = root.get_child("spin polarized current");}
 catch(std::exception &e)
