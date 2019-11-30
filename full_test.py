@@ -8,17 +8,17 @@ mySettings = Settings()
 
 MaxNbThreads = int(subprocess.check_output(["getconf","_NPROCESSORS_ONLN"]))
 
-mySettings["finite element solver"]["nbThreads"] = 4 #MaxNbThreads
-mySettings["finite element solver"]["max(iter)"] = 700
+mySettings["finite element solver"]["nbThreads"] = MaxNbThreads
+mySettings["finite element solver"]["max(iter)"] = 500
 
-mySettings["demagnetization field solver"]["nbThreads"] = 4 #MaxNbThreads
+mySettings["demagnetization field solver"]["nbThreads"] = MaxNbThreads
 
 mySettings["outputs"]["evol columns"] = ["t","<mx>","<my>","<mz>","E_ex","E_demag","E_zeeman","E_tot"]
 mySettings["outputs"]["take_photo"] = 100
 mySettings["outputs"]["directory"] = "test_data_out/"
 mySettings["outputs"]["verbose"] = False
 
-mySettings["outputs"]["evol time step"] = 5e-8
+mySettings["outputs"]["evol time step"] = 1e-7
 
 mySettings["mesh"]["filename"] = "ellipsoid.msh"
 mySettings["mesh"]["scaling factor"] = 1e-10
@@ -27,9 +27,9 @@ mySettings["Bext"] = {"Bx" : "1", "By" : "0" , "Bz": "-1"}
 mySettings["mesh"]["volume_regions"]["300"]["alpha"] = 0.5
 
 mySettings["time integration"]["final_time"] = 1.5e-5
-mySettings["time integration"]["min(dt)"] = 1e-12
-mySettings["time integration"]["max(dt)"] = 1e-7
-mySettings["time integration"]["initial dt"] = 1e-8
+mySettings["time integration"]["min(dt)"] = 1e-11
+mySettings["time integration"]["max(dt)"] = 0.5e-7
+mySettings["time integration"]["initial dt"] = 0.5e-8
 
 mySettings["time integration"]["max(du)"] = 0.1
 
@@ -56,10 +56,10 @@ if(val.returncode==0):
 	my = float(data[2])
 	mz = float(data[3])
 	print("mag= ",mx,';',my,';',mz)
-	X = 0.600569
-	Y = -0.00194172
-	Z = -0.799571
-	if(sqrt((X-mx)**2+(Y-my)**2+(Z-mz)**2) < 1e-6):
+	X = 0.600567
+	Y = -0.00193922
+	Z = -0.799572
+	if(sqrt((X-mx)**2+(Y-my)**2+(Z-mz)**2) < 2e-6):
 		valRet = 0
 	else:
 		valRet = 1

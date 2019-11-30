@@ -38,8 +38,18 @@ annDeallocPt(queryPt);
 
 
 
-bool Fem::recentrage(double thres,enum index idx_dir)
+bool Fem::recenter(double thres,char recentering_direction)
 {
+enum index idx_dir;
+    
+switch(recentering_direction)
+    {
+    case 'X':idx_dir = Pt::IDX_X;break;
+    case 'Y':idx_dir = Pt::IDX_Y;break;
+    case 'Z':idx_dir = Pt::IDX_Z;break;
+    default:idx_dir = Pt::IDX_Z;break;
+    }
+            
 thres = abs(thres);
 double m_i = Fem::avg(Nodes::get_u_comp,idx_dir);
 if (fabs(m_i)<thres) return false;

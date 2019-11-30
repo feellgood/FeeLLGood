@@ -69,8 +69,6 @@ LinAlgebra linAlg(mySettings,fem.node,fem.tet,fem.fac);
 
 scal_fmm::fmm myFMM(fem,mySettings.verbose,mySettings.scalfmmNbTh);
 
-myFMM.calc_demag(fem,mySettings);
-
 int nt = time_integration(fem,mySettings,linAlg,myFMM,t_prm);
         
 counter.tac();

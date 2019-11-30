@@ -26,11 +26,18 @@ public:
     }
 };
 
+void compute_all(Fem &fem,Settings &settings,scal_fmm::fmm &myFMM,double t)
+{
+myFMM.calc_demag(fem,settings);
+fem.energy(t,settings);
+fem.evolution();
+}
+
 int time_integration(Fem &fem,Settings &settings /**< [in] */,LinAlgebra &linAlg /**< [in] */,scal_fmm::fmm &myFMM  /**< [in] */,timing &t_prm)
 {
 fem.DW_z  = 0.0;
-fem.energy(t_prm.t,settings); 
-fem.evolution();
+
+compute_all(fem,settings,myFMM,t_prm.t);
 
 std::string baseName = settings.r_path_output_dir + settings.getSimName();
 std::string str = baseName + ".evol";
@@ -81,7 +88,7 @@ for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_ste
         
         if (err)
             {
-            std::cout << "err : " << err << std::endl;
+            std::cout << "solver error #" << err << ": you might need to adapt time step, max(du), and/or the refreshing period of the preconditionner" << std::endl;
             flag++;
             stepper.set_soft_limit(t_prm.dt);
             continue;
@@ -95,16 +102,9 @@ for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_ste
         if (dumax > settings.DUMAX)
             { flag++; continue;}
 
-
-        myFMM.calc_demag(fem,settings);
-           
-        fem.energy(t_prm.t,settings);
-        if (settings.verbose && (fem.evol > 0.0))
-            { std::cout << "Warning energy increases! : " << fem.evol << std::endl; }
-
-        fem.DW_vz0 = fem.DW_vz;/* mise a jour de la vitesse du dernier referentiel et deplacement de paroi */ 
-        fem.DW_z  += fem.DW_vz*t_prm.dt;
-        fem.evolution(); nt++; flag=0;
+        compute_all(fem,settings,myFMM,t_prm.t);
+        
+        nt++; flag=0;
 
         // Prevent rounding errors from making us miss the target.
         if (last_step)
@@ -112,17 +112,10 @@ for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_ste
         else
             t_prm.t += t_prm.dt;
 
-        if(settings.recenter)
-            {
-            switch(settings.recentering_direction)
-                {
-                case 'X':fem.recentrage( settings.threshold,Pt::IDX_X);break;
-                case 'Y':fem.recentrage( settings.threshold,Pt::IDX_Y);break;
-                case 'Z':fem.recentrage( settings.threshold,Pt::IDX_Z);break;
-                default: std::cout << "unknown recentering direction"<< std::endl; break;
-                }
+        fem.DW_vz0 = fem.DW_vz;/* mise a jour de la vitesse du dernier referentiel et deplacement de paroi */ 
+        fem.DW_z  += fem.DW_vz*t_prm.dt;
+        if(settings.recenter) fem.recenter(settings.threshold,settings.recentering_direction);
             
-            }
         }//endwhile
     fem.saver(settings,t_prm,fout,nt_output++);
     }// end for

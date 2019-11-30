@@ -55,7 +55,7 @@ class Fem
             E_demag0 = E_demag = 0.0;
             E_zeeman0 = E_zeeman = 0.0;
             Etot0 = Etot = 0.0;
-            evol = 0.0;
+            
             readMesh(mySets);
             
             pts= annAllocPts(node.size(), Pt::DIM);
@@ -111,7 +111,6 @@ class Fem
 	
 	double Etot0;/**< initial total energy */
 	double Etot;/**< total energy */
-	double evol;/**< increment dE for dt */
 	
 	std::vector <Nodes::Node> node; /**< node container */
 	std::vector <Facette::Fac>  fac; /**< face container */
@@ -174,7 +173,7 @@ class Fem
     return sum/vol;
     }
     
-    /** recentering algorithm for the study of the motion of a micromagnetic object (domain wall). 
+    /** recentering algorithm for the study of the motion of a domain wall. 
  
     if \f$ D_i>0 \f$				        if  \f$ D_i<0 \f$
 
@@ -184,10 +183,10 @@ class Fem
 
     ---------------->|<-------		<-------|---------------->	\f$ m_i = <u_i> > 0 \f$
     */
-    bool recentrage(double thres/**< [in] threshold parameter */,enum Pt::index idx_dir /**< [in] */);
+    
+    
+    bool recenter(double thres/**< [in] threshold parameter */,char recentering_direction /**< [in] X|Y|Z */);
 
-    
-    
     private:
     ANNkd_tree* kdtree;/**< ANN kdtree to find efficiently the closest set of nodes to a physical point in the mesh  */
     ANNpointArray pts;/**< container for the building of the kdtree (handled by ANN library) */

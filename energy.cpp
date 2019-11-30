@@ -46,5 +46,6 @@ std::for_each(fac.begin(),fac.end(),[this,&settings](Facette::Fac const& fa)
 
 calc_Etot();
 
-evol = Etot-Etot0;
+if (settings.verbose && (Etot > Etot0))
+    { std::cout << "Warning energy increases! : Etot= " << Etot << " ; Etot0 = "<< Etot0 << std::endl; }
 }

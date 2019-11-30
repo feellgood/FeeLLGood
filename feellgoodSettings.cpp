@@ -173,6 +173,10 @@ catch (std::exception &e)
 
 recenter = sub_tree.get<bool>("recenter",false);
 recentering_direction = sub_tree.get<char>("direction",'Z');
+
+if((recentering_direction != 'X') && (recentering_direction != 'Y') && (recentering_direction != 'Z'))
+    { std::cout << "unknown recentering direction !"<< std::endl; }
+
 threshold = sub_tree.get<double>("threshold",0.1);
 
 try {sub_tree = root.get_child("Bext");}
