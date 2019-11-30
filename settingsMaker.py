@@ -48,7 +48,7 @@ class Settings(object):
         recentering["threshold"] = 0.1
         self.mySets["recentering"] = recentering
 
-        self.mySets["Bext"] = {"Bx" : "cos(2*Pi*0.000000001*t)", "By" : "sin(2*Pi*0.000000001*t)" , "Bz": "0"}
+        self.mySets["Bext"] = {"Bx" : "cos(2*Pi*42*t)", "By" : "sin(2*Pi*42*t)" , "Bz": "0"}
 
         current = {}
         current["Uz"] = 0.0

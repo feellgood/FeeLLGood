@@ -44,20 +44,16 @@ if(!determinist)
     
     std::for_each(refNode->begin(),refNode->end(),[&gen,&distrib](Nodes::Node &n) 
     { 
-        double theta = M_PI * distrib(gen);
-        double phi = M_2_PI * distrib(gen);
-        n.ep = Pt::pt3D(theta,phi)*n.u0;
-        n.ep.normalize();    
+        n.theta_sph = M_PI * distrib(gen);
+        n.phi_sph = M_2_PI * distrib(gen);
     }); 
     }
 else
     {
     std::for_each(refNode->begin(),refNode->end(),[](Nodes::Node &n) 
     { 
-        double theta = M_PI * rand() / (RAND_MAX+1.);
-        double phi = M_2_PI * rand() / (RAND_MAX+1.);
-        n.ep = Pt::pt3D(theta,phi)*n.u0;
-        n.ep.normalize();    
-    }); 
+        n.theta_sph = M_PI * rand() / (RAND_MAX+1.);
+        n.phi_sph = M_2_PI * rand() / (RAND_MAX+1.);
+    });
     }
 }

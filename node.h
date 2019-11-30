@@ -17,11 +17,12 @@ namespace Nodes
      *convenient enum mainly to access some data values in calculations, used by some templates 
      */
     enum index 
-        {IDX_p = 0,IDX_u0 = 1,IDX_v0 = 2,IDX_u = 3,IDX_v = 4,IDX_ep = 5,IDX_phi0 = 6,IDX_phi = 7,IDX_phiv0 = 8,IDX_phiv = 9};
+        {IDX_p = 0,IDX_u0 = 1,IDX_v0 = 2,IDX_u = 3,IDX_v = 4,IDX_theta_sph = 5,IDX_phi_sph = 6,IDX_phi0 = 7,IDX_phi = 8,IDX_phiv0 = 9,IDX_phiv = 10};
 
 /** \struct Node
 Node is containing physical point of coordinates \f$ p = (x,y,z) \f$, magnetization value at \f$ m(p,t) \f$. 
 Many other values for the computation of the scalar potential \f$ \phi \f$
+Angles theta_sph and phi_sph are defining a unit vector to build a local base u0,ep = u0*e(theta_sph,phi_sph), eq = u0*ep
 */
 struct Node {
 Pt::pt3D p;/**< Physical position p=(x,y,z)  of the node */
@@ -29,16 +30,25 @@ Pt::pt3D u0;/**< magnetization initial or reset value, used to store previous va
 Pt::pt3D v0;/**< initial or reset value, used to store previous value for time evolution */
 Pt::pt3D u;/**< magnetization value */
 Pt::pt3D v;/**< magnetization speed */
-Pt::pt3D ep;/**< base vector */
+
+double theta_sph;/**< unit vector theta angle in spherical coordinates  */
+double phi_sph;/**< unit vector phi angle in spherical coordinates  */
+
 double phi0;/**< scalar potential initial or reset value, used to store previous value for time evolution */
 double phi;/**< scalar potential value */
 double phiv0;/**< initial or reset value, used to store previous value for time evolution */
 double phiv;/**< no idea */
 
 /**
+vector ep is computed when needed, it is the second vector of a base composed of u0,ep,eq = u0*ep , vector product 
+ */
+inline Pt::pt3D calc_ep() const {Pt::pt3D ep = Pt::pt3D(theta_sph,phi_sph)*u0; ep.normalize(); return ep; }
+
+
+/**
 vector eq is computed when needed, it is the third vector of a base composed of u0,ep,eq = u0*ep , vector product 
  */
-inline Pt::pt3D calc_eq() const {return u0*ep; }
+inline Pt::pt3D calc_eq() const {return u0*calc_ep(); }
 
 /**
 reset the node magnetization, speed, phi, and phiv
@@ -54,7 +64,8 @@ inline void evolution(void) { u0=u; v0=v; phi0 = phi; phiv0 = phiv; }
 integration of the evolution of the magnetization for time step dt
 */
 inline void make_evol(double vp /**< [in] */,double vq /**< [in] */,double dt /**< [in] */) {
-	v = vp*ep + vq*calc_eq();
+	Pt::pt3D ep = calc_ep(); 
+    v = vp*ep + vq*u0*ep;
 	u = u0 + dt*v;
 	u.normalize();}
 

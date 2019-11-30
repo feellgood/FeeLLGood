@@ -8,15 +8,17 @@ mySettings = Settings()
 
 MaxNbThreads = int(subprocess.check_output(["getconf","_NPROCESSORS_ONLN"]))
 
-mySettings["finite element solver"]["nbThreads"] = MaxNbThreads
+mySettings["finite element solver"]["nbThreads"] = 4 #MaxNbThreads
 mySettings["finite element solver"]["max(iter)"] = 700
 
-mySettings["demagnetization field solver"]["nbThreads"] = MaxNbThreads
+mySettings["demagnetization field solver"]["nbThreads"] = 4 #MaxNbThreads
 
 mySettings["outputs"]["evol columns"] = ["t","<mx>","<my>","<mz>","E_ex","E_demag","E_zeeman","E_tot"]
 mySettings["outputs"]["take_photo"] = 100
 mySettings["outputs"]["directory"] = "test_data_out/"
 mySettings["outputs"]["verbose"] = False
+
+mySettings["outputs"]["evol time step"] = 5e-8
 
 mySettings["mesh"]["filename"] = "ellipsoid.msh"
 mySettings["mesh"]["scaling factor"] = 1e-10

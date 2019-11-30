@@ -119,13 +119,12 @@ private:
     if(node_i == (j%N))
         {
         Nodes::Node const& n = (*refNode)[x.ind[node_i]];
-            
+        Pt::pt3D ep = n.calc_ep();    
         if(i<N)
-            { val = n.ep(j/N); }
+            { val = ep(j/N); }
         else
-            { val = n.calc_eq()(j/N); }
+            { val = (n.u0*ep)(j/N); }// equivalent to calc_eq
         }
-    //std::cout <<"("<< i<<"; "<< j<<"):"<<val <<"\t";
     return val;
     }
     
