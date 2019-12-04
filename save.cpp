@@ -23,13 +23,13 @@ for(unsigned int i = 0;i<settings.evol_columns.size();i++)
     if(keyVal == "iter") { fout << nt << sep;}
     if(keyVal == "t") { fout << t_prm.t << sep;}
     if(keyVal == "dt") { fout << t_prm.dt << sep;}
-    if(keyVal == "max dm") { fout << vmax*t_prm.dt << sep;}
-    if(keyVal == "<mx>") { fout << avg(Nodes::get_u_comp,Pt::IDX_X) << sep;}
-    if(keyVal == "<my>") { fout << avg(Nodes::get_u_comp,Pt::IDX_Y) << sep;}
-    if(keyVal == "<mz>") { fout << avg(Nodes::get_u_comp,Pt::IDX_Z) << sep;}
-    if(keyVal == "<dmx/dt>") { fout << avg(Nodes::get_v_comp,Pt::IDX_X) << sep;}
-    if(keyVal == "<dmy/dt>") { fout << avg(Nodes::get_v_comp,Pt::IDX_Y) << sep;}
-    if(keyVal == "<dmz/dt>") { fout << avg(Nodes::get_v_comp,Pt::IDX_Z) << sep;}
+    if(keyVal == "max_dm") { fout << vmax*t_prm.dt << sep;}
+    if(keyVal == "<Mx>") { fout << avg(Nodes::get_u_comp,Pt::IDX_X) << sep;}
+    if(keyVal == "<My>") { fout << avg(Nodes::get_u_comp,Pt::IDX_Y) << sep;}
+    if(keyVal == "<Mz>") { fout << avg(Nodes::get_u_comp,Pt::IDX_Z) << sep;}
+    if(keyVal == "<dMx/dt>") { fout << avg(Nodes::get_v_comp,Pt::IDX_X) << sep;}
+    if(keyVal == "<dMy/dt>") { fout << avg(Nodes::get_v_comp,Pt::IDX_Y) << sep;}
+    if(keyVal == "<dMz/dt>") { fout << avg(Nodes::get_v_comp,Pt::IDX_Z) << sep;}
     if(keyVal == "E_ex") { fout << E_exch << sep;}
     if(keyVal == "E_aniso") { fout << E_aniso << sep;}
     if(keyVal == "E_demag") { fout << E_demag << sep;}

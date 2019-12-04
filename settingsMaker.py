@@ -15,19 +15,19 @@ class Settings(object):
 
         outputs = {}
         outputs["directory"] = "data_out/"
-        outputs["file basename"] = "tom"
-        outputs["vtk file"] = False
-        outputs["evol time step"] = 1e-7
+        outputs["file_basename"] = "tom"
+        outputs["vtk_file"] = False
+        outputs["evol_time_step"] = 1e-7
         outputs["take_photo"] = 5
         outputs["verbose"] = True
-        outputs["evol columns"] = ["iter","t","dt","max dm","<mx>","<my>","<mz>","E_ex","E_aniso","E_demag","E_zeeman","E_tot","DW_z","DW_dz"]
-        outputs["evol header"] = True
+        outputs["evol_columns"] = ["iter","t","dt","max_dm","<Mx>","<My>","<Mz>","E_ex","E_aniso","E_demag","E_zeeman","E_tot","DW_z","DW_dz"]
+        outputs["evol_header"] = True
 
         self.mySets["outputs"] = outputs
 
         mesh = {}
         mesh["filename"] = "wire_d70_L1000.msh"
-        mesh["scaling factor"] = 1e-9
+        mesh["scaling_factor"] = 1e-9
         mesh["epsilon"] = 1e-40
         vol300 = {"Ae":1e-11, "Js":1.0, "Ka":0.0, "a" : [[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,1.0]], "alpha":0.05}
 
@@ -39,8 +39,8 @@ class Settings(object):
         self.mySets["mesh"] = mesh
 
         self.mySets["restore"] = False
-        self.mySets["restore from file"] = "sol.in"
-        self.mySets["initial magnetization"] = {"Mx" : "1-z^2", "My" : "0" , "Mz": "tanh(z*20)"}
+        self.mySets["restore_from_file"] = "sol.in"
+        self.mySets["initial_magnetization"] = {"Mx" : "1-z^2", "My" : "0" , "Mz": "tanh(z*20)"}
 
         recentering = {}
         recentering["recenter"] = False
@@ -50,22 +50,16 @@ class Settings(object):
 
         self.mySets["Bext"] = {"Bx" : "cos(2*Pi*42*t)", "By" : "sin(2*Pi*42*t)" , "Bz": "0"}
 
-        current = {}
-        current["Uz"] = 0.0
-        current["beta"] = 0.0
-        self.mySets["spin polarized current"] = current
+        self.mySets["spin_polarized_current"] = {"Uz" : 0.0, "beta" : 0.0}
 
         FEMsolver = {}
-        FEMsolver["nbThreads"] = 16
+        FEMsolver["nb_threads"] = 16
         FEMsolver["max(iter)"] = 500
-        FEMsolver["refresh preconditionner every"] = 20
+        FEMsolver["refresh_preconditionner_every"] = 20
 
-        self.mySets["finite element solver"] = FEMsolver
+        self.mySets["finite_element_solver"] = FEMsolver
 
-        DEMAGsolver = {}
-        DEMAGsolver["nbThreads"] = 16
-        
-        self.mySets["demagnetization field solver"] = DEMAGsolver
+        self.mySets["demagnetization_field_solver"] = { "nb_threads" : 16}
 
         timing = {}
         timing["final_time"] = 1e-6
@@ -73,9 +67,9 @@ class Settings(object):
         timing["max(du)"] = 0.02
         timing["min(dt)"] = 1e-14
         timing["max(dt)"] = 1e-7
-        timing["initial dt"] = 1e-9
+        timing["initial_dt"] = 1e-9
         
-        self.mySets["time integration"] = timing
+        self.mySets["time_integration"] = timing
     
     ## \brief getter
     # standard getter

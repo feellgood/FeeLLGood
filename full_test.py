@@ -8,32 +8,32 @@ mySettings = Settings()
 
 MaxNbThreads = int(subprocess.check_output(["getconf","_NPROCESSORS_ONLN"]))
 
-mySettings["finite element solver"]["nbThreads"] = MaxNbThreads
-mySettings["finite element solver"]["max(iter)"] = 500
+mySettings["finite_element_solver"]["nb_threads"] = MaxNbThreads
+mySettings["finite_element_solver"]["max(iter)"] = 500
 
-mySettings["demagnetization field solver"]["nbThreads"] = MaxNbThreads
+mySettings["demagnetization_field_solver"]["nb_threads"] = MaxNbThreads
 
-mySettings["outputs"]["evol columns"] = ["t","<mx>","<my>","<mz>","E_ex","E_demag","E_zeeman","E_tot"]
+mySettings["outputs"]["evol_columns"] = ["t","<Mx>","<My>","<Mz>","E_ex","E_demag","E_zeeman","E_tot"]
 mySettings["outputs"]["take_photo"] = 100
 mySettings["outputs"]["directory"] = "test_data_out/"
 mySettings["outputs"]["verbose"] = False
 
-mySettings["outputs"]["evol time step"] = 1e-7
+mySettings["outputs"]["evol_time_step"] = 1e-7
 
 mySettings["mesh"]["filename"] = "ellipsoid.msh"
-mySettings["mesh"]["scaling factor"] = 1e-10
+mySettings["mesh"]["scaling_factor"] = 1e-10
 
 mySettings["Bext"] = {"Bx" : "1", "By" : "0" , "Bz": "-1"}
 mySettings["mesh"]["volume_regions"]["300"]["alpha"] = 0.5
 
-mySettings["time integration"]["final_time"] = 1.5e-5
-mySettings["time integration"]["min(dt)"] = 1e-11
-mySettings["time integration"]["max(dt)"] = 0.5e-7
-mySettings["time integration"]["initial dt"] = 0.5e-8
+mySettings["time_integration"]["final_time"] = 1.5e-5
+mySettings["time_integration"]["min(dt)"] = 1e-11
+mySettings["time_integration"]["max(dt)"] = 0.5e-7
+mySettings["time_integration"]["initial_dt"] = 0.5e-8
 
-mySettings["time integration"]["max(du)"] = 0.1
+mySettings["time_integration"]["max(du)"] = 0.1
 
-mySettings["initial magnetization"] = {"Mx":"0","My":"0","Mz":"1"}
+mySettings["initial_magnetization"] = {"Mx":"0","My":"0","Mz":"1"}
 
 mySettings.write('mySettings.json')
 
@@ -46,7 +46,7 @@ val = subprocess.run(["./feellgood","mySettings.json"])
 
 if(val.returncode==0):
 	print("FeeLLGood terminated correctly")
-	with open(mySettings["outputs"]["directory"] + mySettings["outputs"]["file basename"] + ".evol","r") as f:
+	with open(mySettings["outputs"]["directory"] + mySettings["outputs"]["file_basename"] + ".evol","r") as f:
 		for line in f:
 			pass
 		lastLine = line

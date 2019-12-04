@@ -43,13 +43,13 @@ try { sub_tree = root.get_child("outputs"); }
         { std::cout << e.what() << std::endl; }
 
 r_path_output_dir = sub_tree.get<std::string>("directory");
-simName = sub_tree.get<std::string>("file basename");
-withVtk = sub_tree.get<bool>("vtk file",0);
-time_step = sub_tree.get<double>("evol time step",1e-7);
+simName = sub_tree.get<std::string>("file_basename");
+withVtk = sub_tree.get<bool>("vtk_file",0);
+time_step = sub_tree.get<double>("evol_time_step",1e-7);
 save_period = sub_tree.get<int>("take_photo",0);
 verbose = sub_tree.get<bool>("verbose",true);
 
-try {s_sub_tree = sub_tree.get_child("evol columns");}
+try {s_sub_tree = sub_tree.get_child("evol_columns");}
 catch(std::exception &e)
     { std::cout << e.what() << std::endl; }
 
@@ -57,14 +57,14 @@ evol_columns.clear();
 for(boost::property_tree::ptree::value_type &cell :s_sub_tree)
     { evol_columns.push_back( cell.second.get_value<std::string>() ); }
     
-evol_header = sub_tree.get<bool>("evol header",false);
+evol_header = sub_tree.get<bool>("evol_header",false);
 
 try { sub_tree = root.get_child("mesh"); }
     catch (std::exception &e)
         { std::cout << e.what() << std::endl; }
 
 pbName = sub_tree.get<std::string>("filename");
-double s = sub_tree.get<double>("scaling factor",0.0);
+double s = sub_tree.get<double>("scaling_factor",0.0);
 EPSILON = sub_tree.get<double>("epsilon",1e-16);
 
 if (s <= 0.0)
@@ -154,10 +154,10 @@ for (boost::property_tree::ptree::value_type &s : s_sub_tree)
 
 restore = root.get<bool>("restore",0);
 if (restore)
-    { restoreFileName = root.get<std::string>("restore from file"); }
+    { restoreFileName = root.get<std::string>("restore_from_file"); }
 else
     {
-    try { sub_tree = root.get_child("initial magnetization"); }
+    try { sub_tree = root.get_child("initial_magnetization"); }
     catch (std::exception &e)
         { std::cout << e.what() << std::endl; }
 
@@ -198,26 +198,26 @@ else
     { Hext = Pt::pt3D(val_vect[0],val_vect[1],val_vect[2]); }
 */
     
-try {sub_tree = root.get_child("spin polarized current");}
+try {sub_tree = root.get_child("spin_polarized_current");}
 catch(std::exception &e)
     { std::cout << e.what() << std::endl; }
 Uz = sub_tree.get<double>("Uz",0.0);
 beta = sub_tree.get<double>("beta",0.0);
 
-try { sub_tree = root.get_child("demagnetization field solver"); }
+try { sub_tree = root.get_child("demagnetization_field_solver"); }
 catch (std::exception &e)
     { std::cout << e.what() << std::endl; }
-scalfmmNbTh = sub_tree.get<int>("nbThreads",8);
+scalfmmNbTh = sub_tree.get<int>("nb_threads",8);
 
-try { sub_tree = root.get_child("finite element solver"); }
+try { sub_tree = root.get_child("finite_element_solver"); }
 catch (std::exception &e)
     { std::cout << e.what() << std::endl; }
-solverNbTh = sub_tree.get<int>("nbThreads",8);
+solverNbTh = sub_tree.get<int>("nb_threads",8);
 
 MAXITER = sub_tree.get<int>("max(iter)",500);
-REFRESH_PRC = sub_tree.get<int>("refresh preconditionner every",20);
+REFRESH_PRC = sub_tree.get<int>("refresh_preconditionner_every",20);
 
-try { sub_tree = root.get_child("time integration"); }
+try { sub_tree = root.get_child("time_integration"); }
 catch (std::exception &e)
     { std::cout << e.what() << std::endl; }
     
