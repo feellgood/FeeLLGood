@@ -1,7 +1,7 @@
 import os
 import sys
 import subprocess
-from math import sqrt
+from math import sqrt,pi
 from settingsMaker import Settings
 
 mySettings = Settings()
@@ -23,20 +23,22 @@ mySettings["outputs"]["evol_time_step"] = 0.1e-9
 mySettings["mesh"]["filename"] = "ellipsoid.msh"
 mySettings["mesh"]["scaling_factor"] = 1e-10
 
-A = 0.01
-f = 5e8
-
-mySettings["Bext"] = {"Bx" : str(A) + "*cos(2*Pi*" + str(f) + "*t)", "By" : str(A) + "*sin(2*Pi*"  + str(f) +  "*t)" , "Bz": "10"}
+A = 0.1
+freq=1e9
+omega = 2*pi*freq
+print("omega =" + str(omega))
+mySettings["Bext"] = {"Bx" : str(A) + "*cos(" + str(omega) + "*t)", "By" : str(A) + "*sin("  + str(omega) +  "*t)" , "Bz": "0"}
+print("applied field" + mySettings["Bext"]["Bx"] + ";" + mySettings["Bext"]["By"] +  ";" + mySettings["Bext"]["Bz"] )
 mySettings["mesh"]["volume_regions"]["300"]["alpha"] = 0.05
 
-mySettings["time_integration"]["final_time"] = 5.0e-7
-mySettings["time_integration"]["min(dt)"] = 1e-12
-mySettings["time_integration"]["max(dt)"] = 5e-9
-mySettings["time_integration"]["initial_dt"] = 0.5e-10
+mySettings["time_integration"]["final_time"] = 0.2e-7
+mySettings["time_integration"]["min(dt)"] = 0.1e-10
+mySettings["time_integration"]["max(dt)"] = 0.1e-9
+mySettings["time_integration"]["initial_dt"] = 0.1e-9
 
 mySettings["time_integration"]["max(du)"] = 0.1
 
-mySettings["initial_magnetization"] = {"Mx":"1","My":"1","Mz":"1"}
+mySettings["initial_magnetization"] = {"Mx":"0.01","My":"0","Mz":"0.99"}
 
 mySettings.write('mySettings.json')
 
@@ -49,16 +51,32 @@ val = subprocess.run(["./feellgood","mySettings.json"])
 
 if(val.returncode==0):
 	print("FeeLLGood terminated correctly")
+	minMx = 1
+	maxMx = -1
+	minMy = 1
+	maxMy = -1
 	with open(mySettings["outputs"]["directory"] + mySettings["outputs"]["file_basename"] + ".evol","r") as f:
 		for line in f:
-			pass
-		lastLine = line
+			lastLine = line
+			data = lastLine.split()
+			if (data[0] != "#"):
+				t = float(data[0])		
+				mx = float(data[1])
+				my = float(data[2])
+				#print("values= " + str(t) +";"+ str(mx) +";"+ str(my))
+				if(t>1e-8):
+					if(minMx>mx):
+						minMx = mx
+					if(maxMx<mx):
+						maxMx = mx
+			
+					if(minMy>my):
+						minMy = my
+					if(maxMy<my):
+						maxMy = my
 	f.close()
-	data = lastLine.split()
-	mx = float(data[1])
-	my = float(data[2])
-	mz = float(data[3])
-	print("mag= ",mx,';',my,';',mz)
-	print("m_rho = %.2e"% sqrt((mx)**2+(my)**2))
+	amplitudeX = maxMx - minMx
+	amplitudeY = maxMy - minMy
+	print("f=" +str(freq) + " amplitudeX= " + str(amplitudeX) + " amplitudeY= " + str(amplitudeY))
 sys.exit(0)
 

@@ -312,6 +312,6 @@ int writeToFile(std::string fileName,std::vector<T> v)
     return 0;
     }
 
-} // fin namespace Pt
+} // end namespace Pt
 
 #endif /* pt3D_h */

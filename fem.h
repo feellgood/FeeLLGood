@@ -23,19 +23,7 @@ It does also contains the definition of many constants for the solver, and for s
 #include <sys/times.h>
 #include <unistd.h>
 
-#include "config.h"
 #include "feellgoodSettings.h"
-#include "time_integration.h"
-#include "ANN.h" // ANN declarations
-
-#include "pt3D.h"
-#include "tetra.h"
-#include "facette.h"
-
-#include "node.h"
-
-const bool U = true;/**< used as a template parameter */
-const bool V = false;/**< used as a template parameter */
 
 /** \class Fem
 class container to grab altogether all parameters of a simulation, including mesh geometry, containers for the mesh
@@ -84,6 +72,9 @@ class Fem
     /** destructor */
     ~Fem ()
         { annDeallocPts(pts); delete kdtree; }
+    
+    
+    
     
 	Pt::pt3D c;/**< center position */	
 	Pt::pt3D l;/**< lengths along x,y,z axis */	

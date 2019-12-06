@@ -9,11 +9,7 @@
 #include <string>
 
 #include "mag_parser.h"
-#include "pt3D.h"
-#include "tetra.h"
-#include "facette.h"
-
-#include "time_integration.h"
+#include "feellgood_core.h"
 
 #ifndef feellgoodSettings_h
 #define feellgoodSettings_h
@@ -40,7 +36,12 @@ class Settings{
         scalfmmNbTh = 8;
         } /**< default constructor */
 	
-	void infos(void);/**< some prints sent to terminal  */	
+	/** 
+     *convenient enum to define what quantity is written in output file .evol
+     */
+    enum OUTPUTS {iter, t, dt, max_dm, avg_Mx, avg_My, avg_Mz, avg_Vx, avg_Vy, avg_Vz, E_ex, E_aniso, E_demag, E_zeeman, E_tot, DW_z, DW_dz, Hx, Hy, Hz};
+    
+    void infos(void);/**< some prints sent to terminal  */	
 	
 	void read(timing &t_prm,std::string fileJson);/**< read settings from a json file */
 	
@@ -124,6 +125,9 @@ class Settings{
 	
     /** contain the value names of the columns the user want in .evol file */
     std::vector<std::string> evol_columns;
+    
+    /** contain a vector of enum defining what to write in .evol file  */
+    std::vector<OUTPUTS> whatToWrite;
     
     /**  if true the first line of .evol file is the title of each column tsv format, starting with \# */
     bool evol_header;
