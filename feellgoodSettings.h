@@ -20,6 +20,7 @@ container class to store many setting parameters, such as file names, parameters
 */
 class Settings{
 	public:
+        /** default constructor */
 	inline Settings() 
         {
         verbose = true;
@@ -34,16 +35,16 @@ class Settings{
         
         solverNbTh = 8;
         scalfmmNbTh = 8;
-        } /**< default constructor */
+        }
 	
-	/** 
-     *convenient enum to define what quantity is written in output file .evol
-     */
+	/** convenient enum to define what quantity is written in output file .evol */
     enum OUTPUTS {iter, t, dt, max_dm, avg_Mx, avg_My, avg_Mz, avg_Vx, avg_Vy, avg_Vz, E_ex, E_aniso, E_demag, E_zeeman, E_tot, DW_z, DW_dz, Hx, Hy, Hz};
     
-    void infos(void);/**< some prints sent to terminal  */	
+    /** some prints sent to terminal */	
+    void infos(void);
 	
-	void read(timing &t_prm,std::string fileJson);/**< read settings from a json file */
+    /** read settings from a json file */
+	void read(timing &t_prm,std::string fileJson);
 	
 	inline void setPbName(std::string str) {pbName = str;} /**< setter for .msh file name  */
 	inline std::string getPbName(void) const {return pbName;}/**< getter for problem file name */
