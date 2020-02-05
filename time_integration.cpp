@@ -1,3 +1,4 @@
+#include <cfloat>
 #include "fem.h"
 #include "linear_algebra.h"
 #include "fmm_demag.h"
@@ -5,11 +6,13 @@
 
 /** Logic for finding a reasonable time step. */
 class TimeStepper {
+    const double hard_min;  /**< never go below **/
     const double hard_max;  /**< never exceed **/
     double soft_max;        /**< too large for this specific time step */
 public:
     /** Create a TimeStepper initialized with the given initial and maximum time steps. */
-    TimeStepper(double initial, double max) : hard_max(max), soft_max(2*initial) {}
+    TimeStepper(double initial, double min, double max)
+    : hard_min(min), hard_max(max * (1 + FLT_EPSILON)), soft_max(initial) {}
 
     /** Update soft_max to be no larger than max. */
     void set_soft_limit(double max) {
@@ -19,10 +22,12 @@ public:
     /** Return a reasonable time step. `stride' is distance to the next
      * time we want to hit exactly. */
     double operator()(double stride) {
-        double target_dt = soft_max/2;
-        int steps = ceil(stride / target_dt);
-        soft_max = std::min(soft_max * 1.1, hard_max);
-        return stride / steps;
+        double step = std::min(stride, soft_max);
+        if (step > stride - 2*hard_min && step < stride) {
+            step = stride - 2*hard_min;
+        }
+        soft_max = std::max(soft_max, std::min(step * 1.1, hard_max));
+        return step;
     }
 };
 
@@ -56,7 +61,7 @@ int flag  = 0;
 int nt_output = 0;  // visible iteration count
 int nt = 0;         // total iteration count
 double t_step = settings.time_step;
-TimeStepper stepper(t_prm.dt, t_prm.DTMAX);
+TimeStepper stepper(t_prm.dt, t_prm.DTMIN, t_prm.DTMAX);
 
 // Loop over the visible time steps,
 // i.e. those that will appear on the output file.
@@ -90,7 +95,7 @@ for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_ste
             {
             std::cout << "solver error #" << err << ": you might need to adapt time step, max(du), and/or the refreshing period of the preconditionner" << std::endl;
             flag++;
-            stepper.set_soft_limit(t_prm.dt);
+            stepper.set_soft_limit(t_prm.dt / 2);
             continue;
             }
 
@@ -98,7 +103,7 @@ for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_ste
         if(settings.verbose) { std::cout << "\t dumax = " << dumax << ",  vmax = "<< fem.vmax << std::endl; }
         if (dumax < settings.DUMIN) break; 
                 
-        stepper.set_soft_limit(settings.DUMAX / fem.vmax);
+        stepper.set_soft_limit(settings.DUMAX / fem.vmax / 2);
         if (dumax > settings.DUMAX)
             { flag++; continue;}
 
