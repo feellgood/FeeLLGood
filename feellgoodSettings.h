@@ -1,3 +1,6 @@
+#ifndef feellgoodSettings_h
+#define feellgoodSettings_h
+
 /** \file feellgoodSettings.h
 \brief many settings to give some parameters to the solver, boundary conditions for the problem, the output file format wanted by the user. This is done mainly with the class Settings. 
 */
@@ -9,11 +12,9 @@
 #include <string>
 
 #include "mag_parser.h"
-#include "feellgood_core.h"
-
-#ifndef feellgoodSettings_h
-#define feellgoodSettings_h
-
+#include "time_integration.h"
+#include "tetra.h"
+#include "facette.h"
 
 /** \class Settings
 container class to store many setting parameters, such as file names, parameters for the solver, output file format. It also handles text user interation through terminal, and some parsing functions. 

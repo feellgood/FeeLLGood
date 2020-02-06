@@ -1,3 +1,6 @@
+#ifndef linear_algebra_h
+#define linear_algebra_h
+
 /** \file linear_algebra.h
 \brief secondary header, it grabs altogether the linear algebra by the solver to apply fem method  <br>
 It encapsulates the calls to GMM, the assemblage and projection of the matrix for all elements <br> 
@@ -22,10 +25,6 @@ projection and matrix assembly is multithreaded for tetrahedron, monothread for 
 #include "tetra.h"
 #include "facette.h"
 #include "node.h"
-
-
-#ifndef linear_algebra_h
-#define linear_algebra_h
 
 
 /** \class LinAlgebra

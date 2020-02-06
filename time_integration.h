@@ -1,7 +1,7 @@
-#include <iostream>
-
 #ifndef time_integration_h
 #define time_integration_h
+
+#include <iostream>
 
 /** all timing parameters for integrating in time LLG with adaptative time-step */
 

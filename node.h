@@ -1,9 +1,9 @@
+#ifndef node_h
+#define node_h
+
 /** \file node.h
 \brief header to define struct Node 
 */
-
-#ifndef node_h
-#define node_h
 
 #include "pt3D.h"
 

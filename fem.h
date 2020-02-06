@@ -24,6 +24,7 @@ It does also contains the definition of many constants for the solver, and for s
 #include <unistd.h>
 
 #include "feellgoodSettings.h"
+#include "ANN.h"
 
 /** \class Fem
 class container to grab altogether all parameters of a simulation, including mesh geometry, containers for the mesh
