@@ -101,8 +101,6 @@ class Settings{
 
 /** maximum value for du step */
     double DUMAX; // 0.1 en stat; 0.02 en dynamique
-
-
     
     int MAXITER;/**< maximum number of iteration for biconjugate gradient algorithm */
     

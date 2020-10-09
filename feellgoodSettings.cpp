@@ -90,27 +90,36 @@ for (boost::property_tree::ptree::value_type &s : s_sub_tree)
             if (sub_k.first == "Ae") {p.A = sub_k.second.get_value<double>();}
             if (sub_k.first == "alpha") {p.alpha = sub_k.second.get_value<double>();}
             
-            if (sub_k.first == "Ka")
+            if (sub_k.first == "K")
+                { p.K = sub_k.second.get_value<double>(); }
+            
+            if (sub_k.first == "uk")
                 {
-                p.K = sub_k.second.get_value<double>();
-                //if (p.K == 0) { std::cout<< "\tKa is zero, flag NO_ANISOTROPY to true" << std::endl;}
+                double X[Pt::DIM];
+                int i=0;
+                for(boost::property_tree::ptree::value_type &row : sub_k.second) { X[i] = row.second.get_value<double>();i++; }
+                p.uk = Pt::pt3D(X[0],X[1],X[2]);
                 }
-            if (sub_k.first == "a")
+            
+            if (sub_k.first == "K3")
+                { p.K3 = sub_k.second.get_value<double>(); }
+            
+            if (sub_k.first == "uk3")
                 {int i=0;
-		double uk[Pt::DIM][Pt::DIM];
+		double uk3[Pt::DIM][Pt::DIM];
                 for(boost::property_tree::ptree::value_type &row : sub_k.second)
                     {
                     int j=0;
                     for(boost::property_tree::ptree::value_type &coeff : row.second)
                         {
-                        uk[i][j] = coeff.second.get_value<double>();	
+                        uk3[i][j] = coeff.second.get_value<double>();	
                         j++;
                         }
                     i++;	
                     }
-		p.uk[0] = Pt::pt3D(uk[0][0], uk[0][1], uk[0][2]);
-		p.uk[1] = Pt::pt3D(uk[1][0], uk[1][1], uk[1][2]);
-		p.uk[2] = Pt::pt3D(uk[2][0], uk[2][1], uk[2][2]);                
+		p.uk3[0] = Pt::pt3D(uk3[0][0], uk3[0][1], uk3[0][2]);
+		p.uk3[1] = Pt::pt3D(uk3[1][0], uk3[1][1], uk3[1][2]);
+		p.uk3[2] = Pt::pt3D(uk3[2][0], uk3[2][1], uk3[2][2]);                
 		}
 		if (sub_k.first == "Js") {p.J = sub_k.second.get_value<double>();}
             }

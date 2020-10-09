@@ -29,7 +29,7 @@ class Settings(object):
         mesh["filename"] = "wire_d70_L1000.msh"
         mesh["scaling_factor"] = 1e-9
         mesh["epsilon"] = 1e-40
-        vol300 = {"Ae":1e-11, "Js":1.0, "Ka":0.0, "a" : [[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,1.0]], "alpha":0.05}
+        vol300 = {"Ae":1e-11, "Js":1.0, "K":0.0, "uk":[0.0,0.0,0.0],"K3":0.0, "uk3":[[0.0,0.0,0.0],[0.0,0.0,0.0],[0.0,0.0,0.0]], "alpha":0.05}
 
         mesh["volume_regions"] = {"300" : vol300}
 

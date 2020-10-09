@@ -55,9 +55,11 @@ struct prm
 	double alpha;/**< \f$ \alpha \f$ damping parameter */
 	double A;/**< exchange constant stiffness */
 	double J;/**< \f$ M_s = \nu_0 J \f$ */
-	double K;/**< uniaxial anisotropy constant */	
-	double K3;/**< third order uniaxial anisotropy constant */	
-	Pt::pt3D uk[Pt::DIM]; /**< anisotropy tensor 3*3 */	
+	double K;/**< uniaxial anisotropy constant */
+	Pt::pt3D uk;/**< uniaxial anisotropy axis */
+	
+	double K3;/**< cubic anisotropy constant */	
+	Pt::pt3D uk3[Pt::DIM]; /**< cosine director 3*3 */	
 	double Uz;/**< for spin polarized current */
 	double beta;/**< non adiabatic constant \f$ \beta \f$ for spin polarization current */	
 	
@@ -69,11 +71,14 @@ struct prm
 		std::cout<< "A = " << A <<std::endl;
 		std::cout<< "J = " << J <<std::endl;
 		
-		if(K!=0)
+        if(K!=0)
+            { std::cout << "K*uk =" << K << "*[ " << uk << "]" << std::endl; }
+        
+		if(K3!=0)
 			{
-			std::cout<< "K*a ="<< K <<"*[ [ " << uk[0] << "]" << std::endl;
-			std::cout<< "      [ " << uk[1] << "]" << std::endl;
-			std::cout<< "      [ " << uk[2] << "] ]" << std::endl;
+			std::cout<< "K3*a ="<< K <<"*[ [ " << a[0] << "]" << std::endl;
+			std::cout<< "      [ " << a[1] << "]" << std::endl;
+			std::cout<< "      [ " << a[2] << "] ]" << std::endl;
 			}
 		else std::cout << "no anisotropy" << std::endl;
 		};	
@@ -285,7 +290,7 @@ class Tet{
         void lumping(int const& npi,double alpha_eff,double prefactor, double AE[3*N][3*N]) const;
             
 		/** computes the integral contribution of the tetrahedron to the evolution of the magnetization */		
-		void integrales(std::vector<Tetra::prm> const& params, double dt, Pt::pt3D const& Hext, double tau_r, double Vz, double AE[3*N][3*N], Pt::pt3D BE[N])  const;
+		void integrales(std::vector<Tetra::prm> const& params, const double dt, Pt::pt3D const& Hext, double tau_r, double Vz, double AE[3*N][3*N], Pt::pt3D BE[N])  const;
 
         /** exchange energy of the tetrahedron */
         double exchangeEnergy(Tetra::prm const& param,const double dudx[Pt::DIM][NPI],const double dudy[Pt::DIM][NPI],const double dudz[Pt::DIM][NPI]) const;
@@ -380,11 +385,11 @@ class Tet{
     };//end class Tetra
 
     /** to perform some second order corrections, an effective \f$ \alpha \f$ is computed here with a piecewise formula */
-    inline double calc_alpha_eff(double alpha,double dt,double h)
+    inline double calc_alpha_eff(const double alpha,const double dt,const double h)
         {
         double a_eff = alpha;
-        double r = 0.1;	     			
-        double M = 2.*alpha*r/dt;  			
+        const double r = 0.1;//what is that constant, where does it come from ?
+        const double M = 2.*alpha*r/dt;
 
         if (h>0.){ 
             if (h>M) a_eff = alpha+dt/2.*M;
