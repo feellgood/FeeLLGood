@@ -13,12 +13,34 @@ pts = np.array([[phi,1,0], [phi,-1,0], [-phi,1,0], [-phi,-1,0],
 [1,0,phi], [1,0,-phi], [-1,0,phi], [-1,0,-phi],
 [0,phi,1], [0,phi,-1], [0,-phi,1], [0,-phi,-1]])
 
+zero = np.array( [0,0,0] )
+
 r1 = [ pts[0], pts[2], pts[3], pts[1] ] 
-r2 = [ pts[4], pts[6], pts[7], pts[5] ]
+r2 = [ pts[4], pts[5], pts[7], pts[6] ]
 r3 = [ pts[8], pts[10], pts[11], pts[9] ]
 
-p3D = [r1,r2,r3]
-#print('p3D=',p3D)
+triangle3D = []
+triangle3D.append( [pts[0], pts[8], pts[4] ] )
+triangle3D.append( [pts[0], pts[4], pts[1] ] )
+triangle3D.append( [pts[0], pts[1], pts[5] ] )
+triangle3D.append( [pts[0], pts[5], pts[9] ] )
+triangle3D.append( [pts[0], pts[9], pts[8] ] )
+triangle3D.append( [pts[8], pts[9], pts[2] ] )
+triangle3D.append( [pts[8], pts[2], pts[6] ] )
+triangle3D.append( [pts[8], pts[6], pts[4] ] )
+triangle3D.append( [pts[6], pts[10], pts[4] ] )
+triangle3D.append( [pts[6], pts[3], pts[10] ] )
+triangle3D.append( [pts[6], pts[2], pts[3] ] )
+triangle3D.append( [pts[10], pts[3], pts[11]] )
+triangle3D.append( [pts[10], pts[11], pts[1]] )
+triangle3D.append( [pts[10], pts[1], pts[4]] )
+triangle3D.append( [pts[1], pts[11], pts[5]] )
+triangle3D.append( [pts[11], pts[3], pts[7]] )
+triangle3D.append( [pts[11], pts[7], pts[5]] )
+triangle3D.append( [pts[3], pts[2], pts[7]] )
+triangle3D.append( [pts[3], pts[6], pts[2]] )
+triangle3D.append( [pts[5], pts[7], pts[9]] )
+
 fig = plt.figure()
 #ax = plt.axes(projection='3d')
 #x = []
@@ -43,8 +65,14 @@ ax.set_ylim3d(-2, 2)
 ax.set_zlabel('Z')
 ax.set_zlim3d(-2, 2)
 
+fc = []
+for i in range(1,21):
+	fc.append( (i/20,0,0,0.2) )
 
-fc = [(1,0,0,0.2),(0,1,0,0.2),(0,0,1,0.2)]
-ax.add_collection3d( Poly3DCollection( p3D, facecolors=fc, linewidths=1))
+#fc.append( (1,1,0,0.4) )
+#fc.append( (0,1,0,0.4) )
+#fc.append( (0,0,1,0.4) )
+#print(fc)
+ax.add_collection3d( Poly3DCollection( triangle3D, facecolors=fc, linewidths=1))
 plt.show()
 
