@@ -76,9 +76,9 @@ struct prm
         
 		if(K3!=0)
 			{
-			std::cout<< "K3*a ="<< K <<"*[ [ " << a[0] << "]" << std::endl;
-			std::cout<< "      [ " << a[1] << "]" << std::endl;
-			std::cout<< "      [ " << a[2] << "] ]" << std::endl;
+			std::cout<< "K3*uk3 ="<< K <<"*[ [ " << uk3[0] << "]" << std::endl;
+			std::cout<< "      [ " << uk3[1] << "]" << std::endl;
+			std::cout<< "      [ " << uk3[2] << "] ]" << std::endl;
 			}
 		else std::cout << "no anisotropy" << std::endl;
 		};	
