@@ -38,7 +38,7 @@ triangle3D.append( [pts[1], pts[11], pts[5]] )
 triangle3D.append( [pts[11], pts[3], pts[7]] )
 triangle3D.append( [pts[11], pts[7], pts[5]] )
 triangle3D.append( [pts[3], pts[2], pts[7]] )
-triangle3D.append( [pts[3], pts[6], pts[2]] )
+triangle3D.append( [pts[7], pts[9], pts[2]] )
 triangle3D.append( [pts[5], pts[7], pts[9]] )
 
 fig = plt.figure()
