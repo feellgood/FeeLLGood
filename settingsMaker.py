@@ -13,60 +13,32 @@ class Settings(object):
         # to what is expected by feellgood is just ignored.
         self.mySets = {}
 
-        outputs = {}
-        outputs["directory"] = "data_out/"
-        outputs["file_basename"] = "tom"
-        outputs["vtk_file"] = False
-        outputs["evol_time_step"] = 1e-7
-        outputs["take_photo"] = 5
-        outputs["verbose"] = True
-        outputs["evol_columns"] = ["iter","t","dt","max_dm","<Mx>","<My>","<Mz>","E_ex","E_aniso","E_demag","E_zeeman","E_tot","DW_z","DW_dz"]
-        outputs["evol_header"] = True
+        self.mySets["outputs"] = {"directory" : "data_out/",
+        "file_basename" : "tom",
+        "vtk_file" : False,
+        "evol_time_step" : 1e-7,
+        "take_photo" : 5,
+        "verbose" : True,
+        "evol_columns" : ["iter","t","dt","max_dm","<Mx>","<My>","<Mz>","E_ex","E_aniso","E_demag","E_zeeman","E_tot","DW_z","DW_dz"],
+        "evol_header" : True }
 
-        self.mySets["outputs"] = outputs
-
-        mesh = {}
-        mesh["filename"] = "wire_d70_L1000.msh"
-        mesh["scaling_factor"] = 1e-9
-        mesh["epsilon"] = 1e-40
-        mesh["volume_regions"] = {}
-
-        mesh["surface_regions"] = {}
-
-        self.mySets["mesh"] = mesh
+        self.mySets["mesh"] = {"filename" : "wire_d70_L1000.msh", "scaling_factor" : 1e-9, "epsilon" : 1e-40, "volume_regions" : {}, "surface_regions" : {} }
 
         self.mySets["restore"] = False
         self.mySets["restore_from_file"] = "sol.in"
         self.mySets["initial_magnetization"] = {"Mx" : "1-z^2", "My" : "0" , "Mz": "tanh(z*20)"}
 
-        recentering = {}
-        recentering["recenter"] = False
-        recentering["direction"] = 'Z'
-        recentering["threshold"] = 0.1
-        self.mySets["recentering"] = recentering
+        self.mySets["recentering"] = {"recenter" : False, "direction" : 'Z', "threshold" : 0.1}
 
         self.mySets["Bext"] = {"Bx" : "cos(2*Pi*42*t)", "By" : "sin(2*Pi*42*t)" , "Bz": "0"}
 
         self.mySets["spin_polarized_current"] = {"Uz" : 0.0, "beta" : 0.0}
 
-        FEMsolver = {}
-        FEMsolver["nb_threads"] = 16
-        FEMsolver["max(iter)"] = 500
-        FEMsolver["refresh_preconditionner_every"] = 20
+        self.mySets["finite_element_solver"] = {"nb_threads" : 16, "max(iter)" : 500, "refresh_preconditionner_every": 20}
 
-        self.mySets["finite_element_solver"] = FEMsolver
+        self.mySets["demagnetization_field_solver"] = {"nb_threads" : 16}
 
-        self.mySets["demagnetization_field_solver"] = { "nb_threads" : 16}
-
-        timing = {}
-        timing["final_time"] = 1e-6
-        timing["min(du)"] = 1e-9
-        timing["max(du)"] = 0.02
-        timing["min(dt)"] = 1e-14
-        timing["max(dt)"] = 1e-7
-        timing["initial_dt"] = 1e-9
-        
-        self.mySets["time_integration"] = timing
+        self.mySets["time_integration"] = {"final_time" : 1e-6, "min(du)" : 1e-9, "max(du)" : 0.02, "min(dt)" : 1e-14, "max(dt)" : 1e-7, "initial_dt" : 1e-9}
     
     ## \brief getter
     # standard getter
