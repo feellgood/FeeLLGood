@@ -29,12 +29,9 @@ class Settings(object):
         mesh["filename"] = "wire_d70_L1000.msh"
         mesh["scaling_factor"] = 1e-9
         mesh["epsilon"] = 1e-40
-        vol300 = {"Ae":1e-11, "Js":1.0, "K":0.0, "uk":[0.0,0.0,0.0],"K3":0.0, "uk3":[[0.0,0.0,0.0],[0.0,0.0,0.0],[0.0,0.0,0.0]], "alpha":0.05}
+        mesh["volume_regions"] = {}
 
-        mesh["volume_regions"] = {"300" : vol300}
-
-        surf200 = {"Js" : 1.0, "Ks" : 0.0, "uk" : [0.0, 0.0 ,1.0]}
-        mesh["surface_regions"] = {"200" : surf200}
+        mesh["surface_regions"] = {}
 
         self.mySets["mesh"] = mesh
 
@@ -81,7 +78,19 @@ class Settings(object):
     # (key,value) setter
     def __setitem__(self,key,value):
         self.mySets[key] = value
-    
+
+    ## \brief create a new volume region
+    # (key) , initialized with def values
+    def createVolRegion(self,key):
+        if key not in self.mySets["mesh"]["volume_regions"]:
+            self.mySets["mesh"]["volume_regions"].update( { key : {"Ae":1e-11, "Js":1.0, "K":0.0, "uk":[0.0,0.0,0.0],"K3":0.0, "uk3":[[0.0,0.0,0.0],[0.0,0.0,0.0],[0.0,0.0,0.0]], "alpha":0.05} } )
+
+    ## \brief create a new surface region
+    # (key) , initialized with def values
+    def createSurfRegion(self,key):
+        if key not in self.mySets["mesh"]["surface_regions"]:
+            self.mySets["mesh"]["surface_regions"].update( { key : {"Js" : 1.0, "Ks" : 0.0, "uk" : [0.0, 0.0 ,1.0]} } )
+
     ## \brief write json file
     # this method write a json file from the dictionary built by the creator
     def write(self,fileName):

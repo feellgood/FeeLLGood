@@ -2,6 +2,8 @@ import os
 from settingsMaker import Settings
 
 mySettings = Settings()
+mySettings.createVolRegion( "300" )
+mySettings.createSurfRegion( "200" )
 
 print("output directory is " + mySettings["outputs"]["directory"] )
 

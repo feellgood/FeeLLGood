@@ -5,6 +5,8 @@ from math import sqrt,pi
 from settingsMaker import Settings
 
 mySettings = Settings()
+mySettings.createVolRegion( "300" )
+mySettings.createSurfRegion( "200" )
 
 MaxNbThreads = int(subprocess.check_output(["getconf","_NPROCESSORS_ONLN"]))
 
