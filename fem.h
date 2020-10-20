@@ -59,14 +59,15 @@ class Fem
             
             geometry();// initialization of l,c,diam,vol,surf
             
-            if (mySets.restore)
-                { t_prm.t = readSol(mySets.verbose,mySets.getScale(), mySets.restoreFileName); }
-            else
+            if (mySets.restoreFileName == "")
                 {
                 if(mySets.verbose)
                     { std::cout<< "initial magnetization M(x,y,z,t=0) = { " << mySets.sMx << "\t" << mySets.sMy << "\t" << mySets.sMz << " }\n"; } 
                 init_distrib(mySets);
-                }    
+                }
+            else
+                { t_prm.t = readSol(mySets.verbose,mySets.getScale(), mySets.restoreFileName); }
+                    
             direction(Pt::IDX_Z);/* determination de la direction de propagation de la paroi */
             }
     

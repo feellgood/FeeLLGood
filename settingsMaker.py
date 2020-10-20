@@ -24,8 +24,6 @@ class Settings(object):
 
         self.mySets["mesh"] = {"filename" : "wire_d70_L1000.msh", "scaling_factor" : 1e-9, "epsilon" : 1e-40, "volume_regions" : {}, "surface_regions" : {} }
 
-        self.mySets["restore"] = False
-        self.mySets["restore_from_file"] = "sol.in"
         self.mySets["initial_magnetization"] = {"Mx" : "1-z^2", "My" : "0" , "Mz": "tanh(z*20)"}
 
         self.mySets["recentering"] = {"recenter" : False, "direction" : 'Z', "threshold" : 0.1}

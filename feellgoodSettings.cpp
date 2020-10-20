@@ -17,7 +17,7 @@ std::cout << "\t mesh file name: " << pbName << " with scaling factor " << getSc
 
 std::cout << "\t save energy values every " << time_step << " seconds" << std::endl;
 std::cout << "\t snapshot of the magnetization configuration every " << save_period << " time steps" << std::endl;
-if (restore)
+if (restoreFileName != "")
     { std::cout << "\t restore initial magnetization distribution from file : " << restoreFileName <<std::endl; }
 else
     { std::cout << "\t initial magnetization distribution from math expression" << std::endl; }
@@ -161,21 +161,24 @@ for (boost::property_tree::ptree::value_type &s : s_sub_tree)
         }
     }
 
-restore = root.get<bool>("restore",0);
-if (restore)
-    { restoreFileName = root.get<std::string>("restore_from_file"); }
-else
+restoreFileName = root.get("initial_magnetization","");
+if(restoreFileName == "")
     {
-    try { sub_tree = root.get_child("initial_magnetization"); }
-    catch (std::exception &e)
-        { std::cout << e.what() << std::endl; }
+        try { sub_tree = root.get_child("initial_magnetization"); }
+            catch (std::exception &e)
+                { std::cout << e.what() << std::endl; }
 
-    sMx = sub_tree.get<std::string>("Mx");
-    sMy = sub_tree.get<std::string>("My");
-    sMz = sub_tree.get<std::string>("Mz");
-    doCompile3Dprm();
+        sMx = sub_tree.get<std::string>("Mx");
+        sMy = sub_tree.get<std::string>("My");
+        sMz = sub_tree.get<std::string>("Mz");
+        doCompile3Dprm();
+        
+        std::cout << "initial magnetization defined from a math expression" << std::endl;
     }
-
+else 
+    { std::cout<< "initial magnetization defined from file :" << restoreFileName <<std::endl; }    
+    
+        
 try { sub_tree = root.get_child("recentering"); }
 catch (std::exception &e)
         { std::cout << e.what() << std::endl; }

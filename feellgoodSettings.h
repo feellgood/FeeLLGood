@@ -34,6 +34,8 @@ class Settings{
         recentering_direction = 'Z';
         threshold = 0.1;
         
+        restoreFileName = "";
+        
         solverNbTh = 8;
         scalfmmNbTh = 8;
         }
@@ -69,8 +71,7 @@ class Settings{
 	
 	double time_step;/**< energy saved every time_step */
 	int save_period;/**< magnetic configuration saved every save_period time steps */
-	bool restore;/**< usefull to run a simulation from a previous calculation  */
-    
+	
     bool recenter;/**< to recenter DW or not */
 	char recentering_direction;/**< recentering direction, should be 'X'|'Y'|'Z' */
 	double threshold;/**< threshold value to recenter or not versus avg(M_recentering_direction) */

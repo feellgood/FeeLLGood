@@ -205,7 +205,7 @@ double Fem::readSol(bool VERBOSE,double scaling, string fileName)
 ifstream fin(fileName, std::ifstream::in);
 if (!fin)
     {
-    cerr << "cannot open .sol file: " << fileName << endl;
+    cerr << "cannot open file: " << fileName << endl;
     SYSTEM_ERROR;
     }
 
