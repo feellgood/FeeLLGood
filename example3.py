@@ -13,7 +13,8 @@ meshFileName = 'icosahedron.msh'
 
 mySettings = Settings(meshFileName)
 
-mySettings["outputs"]["file_basename"] = "ico" 
+mySettings["outputs"]["file_basename"] = "ico"
+mySettings["outputs"]["evol_time_step"] = 0.2e-8 
 mySettings["outputs"]["evol_columns"] = [ "iter", "t", "dt", "<Mx>", "<My>", "<Mz>", "E_ex", "E_aniso", "E_demag", "E_tot" ]
 mySettings["mesh"]["filename"] = meshFileName
 
@@ -24,11 +25,13 @@ surf_region_name = "200"
 mySettings.createVolRegion( vol_region_name )
 mySettings.createSurfRegion( surf_region_name )
 
-# cubic anisotropy for volume region "300"
-mySettings["mesh"]["volume_regions"]["300"]["K3"] = 1.5
+# cubic anisotropy for volume region "300" (Fe : K3 = 4.2e4 J/m^3)
+mySettings["mesh"]["volume_regions"]["300"]["K3"] = 4.2e4
 
 #cosine directions [alpha,beta,gamma]
 mySettings["mesh"]["volume_regions"]["300"]["uk3"] = [[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,1.0]]
+
+mySettings["initial_magnetization"] = {"Mx":"1","My":"1","Mz":"1"}
 
 
 mySettings.write('ico_test.json')

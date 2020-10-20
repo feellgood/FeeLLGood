@@ -28,7 +28,7 @@ class Settings(object):
 
         self.mySets["recentering"] = {"recenter" : False, "direction" : 'Z', "threshold" : 0.1}
 
-        self.mySets["Bext"] = {"Bx" : "cos(2*Pi*42*t)", "By" : "sin(2*Pi*42*t)" , "Bz": "0"}
+        self.mySets["Bext"] = {"Bx" : "0", "By" : "0" , "Bz": "0"}
 
         self.mySets["spin_polarized_current"] = {"Uz" : 0.0, "beta" : 0.0}
 
@@ -36,7 +36,7 @@ class Settings(object):
 
         self.mySets["demagnetization_field_solver"] = {"nb_threads" : 16}
 
-        self.mySets["time_integration"] = {"final_time" : 1e-6, "min(du)" : 1e-9, "max(du)" : 0.02, "min(dt)" : 1e-14, "max(dt)" : 1e-7, "initial_dt" : 1e-9}
+        self.mySets["time_integration"] = {"final_time" : 1e-6, "min(du)" : 1e-9, "max(du)" : 0.02, "min(dt)" : 1e-11, "max(dt)" : 1e-7, "initial_dt" : 1e-9}
     
     ## \brief getter
     # standard getter
