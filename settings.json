@@ -42,8 +42,7 @@
             }	
         }
     },
-    
-"restore from file" : "sol.in",
+
 "initial magnetization" :
     {
     "Mx": "0",
