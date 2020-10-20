@@ -4,7 +4,7 @@ import subprocess
 from math import sqrt,pi
 from settingsMaker import Settings
 
-mySettings = Settings()
+mySettings = Settings("ellipsoid.msh")
 mySettings.createVolRegion( "300" )
 mySettings.createSurfRegion( "200" )
 

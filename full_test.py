@@ -4,7 +4,7 @@ import subprocess
 from math import sqrt
 from settingsMaker import Settings
 
-mySettings = Settings()
+mySettings = Settings("ellipsoid.msh")
 
 MaxNbThreads = int(subprocess.check_output(["getconf","_NPROCESSORS_ONLN"]))
 
@@ -20,11 +20,17 @@ mySettings["outputs"]["verbose"] = False
 
 mySettings["outputs"]["evol_time_step"] = 1e-7
 
-mySettings["mesh"]["filename"] = "ellipsoid.msh"
 mySettings["mesh"]["scaling_factor"] = 1e-10
 
 mySettings["Bext"] = {"Bx" : "1", "By" : "0" , "Bz": "-1"}
-mySettings["mesh"]["volume_regions"]["300"]["alpha"] = 0.5
+
+#carefull here, volume and region names must be stringified integers
+vol_region_name = "300"
+surf_region_name = "200"
+
+mySettings.createVolRegion( vol_region_name )
+mySettings.createSurfRegion( surf_region_name )
+mySettings["mesh"]["volume_regions"][vol_region_name]["alpha"] = 0.5
 
 mySettings["time_integration"]["final_time"] = 1.5e-5
 mySettings["time_integration"]["min(dt)"] = 1e-11

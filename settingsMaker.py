@@ -7,7 +7,7 @@ class Settings(object):
 
     ## \brief creator
     # this is creator to build a nested dictionary to mimmic json settings
-    def __init__(self):
+    def __init__(self,mshFileName):
         ## \brief dictionary
         # mySets is the strict equivalent to the json file needed by executable feellgood to run a simulation, any (key,value) not corresponding
         # to what is expected by feellgood is just ignored.
@@ -22,7 +22,7 @@ class Settings(object):
         "evol_columns" : ["iter","t","dt","max_dm","<Mx>","<My>","<Mz>","E_ex","E_aniso","E_demag","E_zeeman","E_tot","DW_z","DW_dz"],
         "evol_header" : True }
 
-        self.mySets["mesh"] = {"filename" : "wire_d70_L1000.msh", "scaling_factor" : 1e-9, "epsilon" : 1e-40, "volume_regions" : {}, "surface_regions" : {} }
+        self.mySets["mesh"] = {"filename" : mshFileName, "scaling_factor" : 1e-9, "epsilon" : 1e-40, "volume_regions" : {}, "surface_regions" : {} }
 
         self.mySets["initial_magnetization"] = {"Mx" : "1-z^2", "My" : "0" , "Mz": "tanh(z*20)"}
 
