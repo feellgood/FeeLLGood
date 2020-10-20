@@ -24,6 +24,13 @@ surf_region_name = "200"
 mySettings.createVolRegion( vol_region_name )
 mySettings.createSurfRegion( surf_region_name )
 
+# cubic anisotropy for volume region "300"
+mySettings["mesh"]["volume_regions"]["300"]["K3"] = 1.5
+
+#cosine directions [alpha,beta,gamma]
+mySettings["mesh"]["volume_regions"]["300"]["uk3"] = [[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,1.0]]
+
+
 mySettings.write('ico_test.json')
 
 # https://fr.wikipedia.org/wiki/Icosa%C3%A8dre
