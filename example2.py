@@ -18,7 +18,6 @@ mySettings["demagnetization_field_solver"]["nb_threads"] = 4 # MaxNbThreads
 mySettings["outputs"]["evol_columns"] = ["t","<Mx>","<My>","<Mz>","<dMx/dt>","<dMy/dt>","<dMz/dt>","Hx","Hy","Hz","E_ex","E_demag","E_zeeman","E_tot"]
 mySettings["outputs"]["take_photo"] = 500
 mySettings["outputs"]["directory"] = "test_data_out/"
-mySettings["outputs"]["verbose"] = False
 
 mySettings["outputs"]["evol_time_step"] = 0.1e-9
 
@@ -57,8 +56,10 @@ for i in range(0,nbStepsFrequency) :
 	mySettings["Bext"] = {"Bx" : str(A) + "*cos(" + str(omega) + "*t)", "By" : str(A) + "*sin("  + str(omega) +  "*t)" , "Bz": "0"}
 	
 	mySettings.write('mySettings.json')
-	val = subprocess.run(["./feellgood","mySettings.json"])
+	val = subprocess.run(["./feellgood","-v","mySettings.json"])
 
+	amplitudeX = 0
+	amplitudeY = 0
 	if(val.returncode==0):
 		print("FeeLLGood terminated correctly")
 		minMx = 1

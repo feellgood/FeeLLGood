@@ -16,7 +16,6 @@ mySettings["demagnetization_field_solver"]["nb_threads"] = MaxNbThreads
 mySettings["outputs"]["evol_columns"] = ["t","<Mx>","<My>","<Mz>","E_ex","E_demag","E_zeeman","E_tot"]
 mySettings["outputs"]["take_photo"] = 100
 mySettings["outputs"]["directory"] = "test_data_out/"
-mySettings["outputs"]["verbose"] = False
 
 mySettings["outputs"]["evol_time_step"] = 1e-7
 

@@ -47,7 +47,6 @@ simName = sub_tree.get<std::string>("file_basename");
 withVtk = sub_tree.get<bool>("vtk_file",0);
 time_step = sub_tree.get<double>("evol_time_step",1e-7);
 save_period = sub_tree.get<int>("take_photo",0);
-verbose = sub_tree.get<bool>("verbose",true);
 
 try {s_sub_tree = sub_tree.get_child("evol_columns");}
 catch(std::exception &e)
@@ -173,12 +172,10 @@ if(restoreFileName == "")
         sMz = sub_tree.get<std::string>("Mz");
         doCompile3Dprm();
         
-        std::cout << "initial magnetization defined from a math expression" << std::endl;
+        if (verbose) { std::cout << "initial magnetization defined from a math expression" << std::endl; }
     }
-else 
-    { std::cout<< "initial magnetization defined from file :" << restoreFileName <<std::endl; }    
-    
-        
+else if (verbose) { std::cout<< "initial magnetization defined from file :" << restoreFileName <<std::endl; }    
+
 try { sub_tree = root.get_child("recentering"); }
 catch (std::exception &e)
         { std::cout << e.what() << std::endl; }

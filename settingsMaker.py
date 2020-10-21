@@ -18,7 +18,6 @@ class Settings(object):
         "vtk_file" : False,
         "evol_time_step" : 1e-7,
         "take_photo" : 5,
-        "verbose" : True,
         "evol_columns" : ["iter","t","dt","max_dm","<Mx>","<My>","<Mz>","E_ex","E_aniso","E_demag","E_zeeman","E_tot","DW_z","DW_dz"],
         "evol_header" : True }
 

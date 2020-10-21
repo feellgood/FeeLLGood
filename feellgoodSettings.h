@@ -24,7 +24,7 @@ class Settings{
         /** default constructor */
 	inline Settings() 
         {
-        verbose = true;
+        verbose = false;
         withTsv=true;
         withVtk = false;
         evol_header = false;

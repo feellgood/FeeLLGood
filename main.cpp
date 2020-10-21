@@ -32,26 +32,41 @@ std::cout <<   "\t │      process "<< SsId.str() <<  spaceString(28-14-SsId.st
 std::cout <<   "\t └────────────────────────────┘\n";
 }
 
-int main(int argc,char* argv[])
+std::string parseOptions(Settings &settings,int argc,char* argv[])
 {
-Settings mySettings;
-
-FTic counter;
- 
 string fileJson;
-
-prompt();
+std::cout << "parsing options..." << std::endl;
 
 if(argc<2)
 	{
 	cout << "no JSON file provided, see FeeLLGood online documentation to create some settings using Python script settingsMaker.py" <<endl; 
 	exit(1);
     }
-else 
-	{
-	fileJson = argv[1]; // argv[0] is "./feellgood"
-	cout << "using loaded settings from " << fileJson << " JSON file." <<endl;	
-	}
+else if (argc == 2)
+        {
+        fileJson = argv[1]; // argv[0] is "./feellgood"
+        std::cout << "using loaded settings from " << fileJson << " JSON file.\n";	
+        }
+    else if ((argc == 3)&&( strcmp(argv[1],"-v") == 0))
+        {
+            std::cout << "carefull entering dev mode ;-)"  << std::endl;
+            for (int i=0;i<argc;i++) { std::cout<< "argv["<< i << "]=" << argv[i] << std::endl; }
+            settings.verbose = true;
+            std::cout << "verbose mode true\n";
+            fileJson = argv[2];
+        }
+return fileJson;
+}
+
+int main(int argc,char* argv[])
+{
+Settings mySettings;
+
+FTic counter;
+
+prompt();
+
+string fileJson = parseOptions(mySettings,argc,argv);
 
 timing t_prm;
 mySettings.read(t_prm,fileJson);
@@ -63,7 +78,8 @@ if(mySettings.verbose)
     t_prm.infos();
     fem.infos();
     }
-    
+
+std::cout<<"start computing..."<<std::endl;
 counter.tic();
 //once fem containers are ok, linAlgebra object is built
 LinAlgebra linAlg(mySettings,fem.node,fem.tet,fem.fac);
