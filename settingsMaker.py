@@ -25,8 +25,6 @@ class Settings(object):
 
         self.mySets["initial_magnetization"] = {"Mx" : "1-z^2", "My" : "0" , "Mz": "tanh(z*20)"}
 
-        self.mySets["recentering"] = {"recenter" : False, "direction" : 'Z', "threshold" : 0.1}
-
         self.mySets["Bext"] = {"Bx" : "0", "By" : "0" , "Bz": "0"}
 
         self.mySets["spin_polarized_current"] = {"Uz" : 0.0, "beta" : 0.0}
@@ -47,6 +45,11 @@ class Settings(object):
     # (key,value) setter
     def __setitem__(self,key,value):
         self.mySets[key] = value
+
+    ## \brief define recentering
+    # direction and threshold input paramaters defining recentering
+    def recentering(self,direction,threshold):
+        self.mySets["recentering"] = {"direction" : direction, "threshold" : threshold}
 
     ## \brief create a new volume region
     # (key) , initialized with def values

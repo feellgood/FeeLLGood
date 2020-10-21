@@ -12,4 +12,3 @@ mySettings["outputs"]["evol_columns"] = ["t","<Mx>","<My>","<Mz>","E_tot"]
 mySettings.write('mySettings.json')
 os.system("./feellgood mySettings.json")
 
-	

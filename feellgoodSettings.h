@@ -72,7 +72,7 @@ class Settings{
 	double time_step;/**< energy saved every time_step */
 	int save_period;/**< magnetic configuration saved every save_period time steps */
 	
-    bool recenter;/**< to recenter DW or not */
+    bool recenter;/**< to recenter magnetization distribution or not */
 	char recentering_direction;/**< recentering direction, should be 'X'|'Y'|'Z' */
 	double threshold;/**< threshold value to recenter or not versus avg(M_recentering_direction) */
 	

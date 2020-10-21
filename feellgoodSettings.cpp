@@ -24,6 +24,8 @@ else
 
 std::cout << "\t applied field Bext = [ " << sBx << ",\t" << sBy << ",\t" << sBz << " ] A/m" << std::endl;
 
+std::cout << "recentering along " << recentering_direction << " with threshold = " << threshold << std::endl;
+
 for(unsigned int i=0;i<paramTetra.size();i++) {paramTetra[i].infos();}
 for(unsigned int i=0;i<paramFacette.size();i++) {paramFacette[i].infos();}
 
@@ -176,17 +178,20 @@ if(restoreFileName == "")
     }
 else if (verbose) { std::cout<< "initial magnetization defined from file :" << restoreFileName <<std::endl; }    
 
-try { sub_tree = root.get_child("recentering"); }
-catch (std::exception &e)
+recenter = ("" == root.get("recentering",""));
+if (recenter)
+    {
+    try { sub_tree = root.get_child("recentering"); }
+    catch (std::exception &e)
         { std::cout << e.what() << std::endl; }
 
-recenter = sub_tree.get<bool>("recenter",false);
-recentering_direction = sub_tree.get<char>("direction",'Z');
+    recentering_direction = sub_tree.get<char>("direction",'Z');
 
-if((recentering_direction != 'X') && (recentering_direction != 'Y') && (recentering_direction != 'Z'))
-    { std::cout << "unknown recentering direction !"<< std::endl; }
+    if((recentering_direction != 'X') && (recentering_direction != 'Y') && (recentering_direction != 'Z'))
+        { std::cout << "unknown recentering direction !"<< std::endl; exit(1); }
+    threshold = sub_tree.get<double>("threshold",0.1);
+    }
 
-threshold = sub_tree.get<double>("threshold",0.1);
 
 try {sub_tree = root.get_child("Bext");}
 catch(std::exception &e)
