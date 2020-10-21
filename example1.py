@@ -16,4 +16,4 @@ for B in myFields:
 	mySettings["Bext"] = {"Bx" : "0.0", "By" : "0.0" , "Bz": str(myFields[B])}	
 	print("Bext is " + str(mySettings["Bext"]))
 	mySettings.write('mySettings.json')
-	#os.system("./feellgood mySettings.json")
+	os.system("./feellgood mySettings.json")

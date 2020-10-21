@@ -22,7 +22,6 @@ mySettings["outputs"]["verbose"] = False
 
 mySettings["outputs"]["evol_time_step"] = 0.1e-9
 
-mySettings["mesh"]["filename"] = "ellipsoid.msh"
 mySettings["mesh"]["scaling_factor"] = 1e-10
 
 mySettings["mesh"]["volume_regions"]["300"]["alpha"] = 0.05

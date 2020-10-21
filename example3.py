@@ -16,7 +16,6 @@ mySettings = Settings(meshFileName)
 mySettings["outputs"]["file_basename"] = "ico"
 mySettings["outputs"]["evol_time_step"] = 0.2e-8 
 mySettings["outputs"]["evol_columns"] = [ "iter", "t", "dt", "<Mx>", "<My>", "<Mz>", "E_ex", "E_aniso", "E_demag", "E_tot" ]
-mySettings["mesh"]["filename"] = meshFileName
 
 #carefull here, volume and region names must be stringified integers
 vol_region_name = "300"
