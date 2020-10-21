@@ -28,10 +28,11 @@ mySettings.createSurfRegion( surf_region_name )
 mySettings["mesh"]["volume_regions"]["300"]["K3"] = 4.2e4
 
 #cosine directions [alpha,beta,gamma]
-mySettings["mesh"]["volume_regions"]["300"]["uk3"] = [[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,1.0]]
+mySettings["mesh"]["volume_regions"]["300"]["alpha"] = [1.0,0.0,0.0]
+mySettings["mesh"]["volume_regions"]["300"]["beta"] = [0.0,1.0,0.0]
+mySettings["mesh"]["volume_regions"]["300"]["gamma"] = [0.0,0.0,1.0]
 
 mySettings["initial_magnetization"] = {"Mx":"1","My":"1","Mz":"1"}
-
 
 mySettings.write('ico_test.json')
 

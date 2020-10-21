@@ -55,7 +55,7 @@ class Settings(object):
     # (key) , initialized with def values
     def createVolRegion(self,key):
         if key not in self.mySets["mesh"]["volume_regions"]:
-            self.mySets["mesh"]["volume_regions"].update( { key : {"Ae":1e-11, "Js":1.0, "K":0.0, "uk":[0.0,0.0,0.0],"K3":0.0, "uk3":[[0.0,0.0,0.0],[0.0,0.0,0.0],[0.0,0.0,0.0]], "alpha":0.05} } )
+            self.mySets["mesh"]["volume_regions"].update( { key : {"Ae":1e-11, "Js":1.0, "K":0.0, "uk":[0.0,0.0,0.0],"K3":0.0, "alpha":[0.0,0.0,0.0], "beta":[0.0,0.0,0.0], "gamma":[0.0,0.0,0.0], "alpha_LLG":0.05} } )
 
     ## \brief create a new surface region
     # (key) , initialized with def values

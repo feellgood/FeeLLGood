@@ -47,10 +47,13 @@ for (int i=0; i<N; i++)
 
 void Tet::integrales(std::vector<Tetra::prm> const& params,const double dt,Pt::pt3D const& Hext,double tau_r,double Vz, double AE[3*N][3*N], Pt::pt3D BE[N]) const
 {
-double alpha = params[idxPrm].alpha;
-pt3D uk3[DIM] = { params[idxPrm].uk3[0], params[idxPrm].uk3[1], params[idxPrm].uk3[2]};
+double alpha_LLG = params[idxPrm].alpha_LLG;
+pt3D alpha = params[idxPrm].alpha;
+pt3D beta = params[idxPrm].beta;
+pt3D gamma = params[idxPrm].gamma;
+
 double Uz = params[idxPrm].Uz;
-double beta = params[idxPrm].beta;
+double beta_sc = params[idxPrm].beta_sc;
 
 double Abis = 2.0*(params[idxPrm].A)/(params[idxPrm].J);
 double Kbis = 2.0*(params[idxPrm].K)/(params[idxPrm].J);
@@ -70,17 +73,15 @@ interpolation(Nodes::get_phiv0,Hv);
 double prefactor = s_dt*(1.+ dt/tau_r*abs(log(dt/tau_r)))* Abis;
 
 for (int npi=0; npi<NPI; npi++){
-    pt3D uk_u = pt3D(pScal(uk3[0],U[npi]), pScal(uk3[1],U[npi]), pScal(uk3[2],U[npi]));
-    pt3D uk_v = pt3D(pScal(uk3[0],V[npi]), pScal(uk3[1],V[npi]), pScal(uk3[2],V[npi]));
+    pt3D uk_u = pt3D(pScal(alpha,U[npi]), pScal(beta,U[npi]), pScal(gamma,U[npi]));
+    pt3D uk_v = pt3D(pScal(alpha,V[npi]), pScal(beta,V[npi]), pScal(gamma,V[npi]));
 
 Pt::pt3D uk_uuu = pDirect(pt3D(1,1,1) - pDirect(uk_u,uk_u), uk_u);
     
     double uHeff = -Abis*(norme2(dUdx[npi]) + norme2(dUdy[npi]) + norme2(dUdz[npi])); 
 	uHeff +=  pScal(U[npi], Hext + Hd[npi]) + Kbis*sq(pScal(params[idxPrm].uk,U[npi])) - K3bis*pScal(uk_u,uk_uuu);
 
-    //double alfa=calc_alpha_eff(alpha,dt,uHeff);
-    //lumping(npi,alfa,prefactor,AE);
-    lumping(npi,calc_alpha_eff(alpha,dt,uHeff),prefactor,AE);
+    lumping(npi,calc_alpha_eff(alpha_LLG,dt,uHeff),prefactor,AE);
     
     pt3D truc = Kbis*pScal(params[idxPrm].uk,V[npi])*pt3D(1,1,1);
     pt3D truc2 = -K3bis*pDirect(uk_v , pt3D(1,1,1)-3*pDirect(uk_u,uk_u));
@@ -88,10 +89,8 @@ Pt::pt3D uk_uuu = pDirect(pt3D(1,1,1) - pDirect(uk_u,uk_u), uk_u);
     pt3D Ht = s_dt*(Hv[npi] + pDirect(truc,params[idxPrm].uk) + pDirect(truc2,uk_u) ); // DEBUG !  must check, we are mixing different anisotropy contributions here
     
     pt3D Heff = Kbis*pScal(params[idxPrm].uk,U[npi])*params[idxPrm].uk;
-    Heff += -K3bis*( uk_uuu(0)*uk3[0] + uk_uuu(1)*uk3[1] + uk_uuu(2)*uk3[2] ) + Hd[npi] + Hext;
-    
-    
-    
+    Heff += -K3bis*( uk_uuu(0)*alpha + uk_uuu(1)*beta + uk_uuu(2)*gamma ) + Hd[npi] + Hext;
+
     for (int i=0; i<N; i++)
         {
         const double ai_w = weight[npi]*a[i][npi];
@@ -119,25 +118,15 @@ double Tet::anisotropyEnergy(Tetra::prm const& param,const double u[DIM][NPI]) c
 {
 double dens[NPI];
 
-const double uk00 = param.uk3[0](0);
-const double uk01 = param.uk3[0](1);
-const double uk02 = param.uk3[0](2);
-const double uk10 = param.uk3[1](0);
-const double uk11 = param.uk3[1](1);
-const double uk12 = param.uk3[1](2);
-const double uk20 = param.uk3[2](0);
-const double uk21 = param.uk3[2](1);
-const double uk22 = param.uk3[2](2);   
-
 for (int npi=0; npi<NPI; npi++)
     {
     // uniaxial magnectocrystalline anisotropy constant K, anisotropy axis uk 
     dens[npi] = -param.K*sq( Pt::pScal( param.uk, Pt::pt3D(u[0][npi],u[1][npi],u[2][npi]) ) );
         
         // cosinus directeurs
-    double al0=uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi];
-    double al1=uk10*u[0][npi] + uk11*u[1][npi] + uk12*u[2][npi];
-    double al2=uk20*u[0][npi] + uk21*u[1][npi] + uk22*u[2][npi];
+    double al0= param.alpha(0)*u[0][npi] + param.alpha(1)*u[1][npi] + param.alpha(2)*u[2][npi];
+    double al1= param.beta(0)*u[0][npi] + param.beta(1)*u[1][npi] + param.beta(2)*u[2][npi];
+    double al2= param.gamma(0)*u[0][npi] + param.gamma(1)*u[1][npi] + param.gamma(2)*u[2][npi];
     
     dens[npi] += param.K3*(sq(al0*al1) + sq(al1*al2) + sq(al2*al0)); // cubic anisotropy (K3)
     }

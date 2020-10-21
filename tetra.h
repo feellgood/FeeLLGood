@@ -52,22 +52,24 @@ region number and material constants
 struct prm
 	{
 	int reg;/**< region number */	
-	double alpha;/**< \f$ \alpha \f$ damping parameter */
+	double alpha_LLG;/**< \f$ \alpha \f$ damping parameter */
 	double A;/**< exchange constant stiffness */
 	double J;/**< \f$ M_s = \nu_0 J \f$ */
 	double K;/**< uniaxial anisotropy constant */
 	Pt::pt3D uk;/**< uniaxial anisotropy axis */
 	
 	double K3;/**< cubic anisotropy constant */	
-	Pt::pt3D uk3[Pt::DIM]; /**< cosine director 3*3 */	
+	Pt::pt3D alpha; /**< cosine director alpha (for cubic anisotropy) */
+	Pt::pt3D beta; /**< cosine director beta (for cubic anisotropy) */
+	Pt::pt3D gamma; /**< cosine director gamma (for cubic anisotropy) */
 	double Uz;/**< for spin polarized current */
-	double beta;/**< non adiabatic constant \f$ \beta \f$ for spin polarization current */	
+	double beta_sc;/**< non adiabatic constant \f$ \beta \f$ for spin polarization current */	
 	
 	/** print the struct parameters */
 	inline void infos()
 		{
 		std::cout<< "volume region number = " << reg <<std::endl;
-		std::cout<< "alpha = " << alpha <<std::endl;
+		std::cout<< "alpha_LLG = " << alpha_LLG <<std::endl;
 		std::cout<< "A = " << A <<std::endl;
 		std::cout<< "J = " << J <<std::endl;
 		
@@ -75,12 +77,7 @@ struct prm
             { std::cout << "K*uk =" << K << "*[ " << uk << "]" << std::endl; }
         
 		if(K3!=0)
-			{
-			std::cout<< "K3*uk3 ="<< K <<"*[ [ " << uk3[0] << "]" << std::endl;
-			std::cout<< "      [ " << uk3[1] << "]" << std::endl;
-			std::cout<< "      [ " << uk3[2] << "] ]" << std::endl;
-			}
-		else std::cout << "no anisotropy" << std::endl;
+            { std::cout << "K3 = " << K3 << "; alpha=[ " << alpha << "], beta=[" << beta << "], gamma=[" << gamma << "]\n"; }
 		};	
 	};
 
