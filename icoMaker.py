@@ -8,8 +8,9 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 import numpy as np
 
-# this script contains two functions
-# makeIco builds a mesh of an icosahedron generated from scrap, each tetrahedron is a face of the icosahedron linked to its center.
+# Ico class contains two methods
+# make builds a mesh of an icosahedron format2.2, each tetrahedron is a face of the icosahedron linked to its center.
+# show is a 3D view of the icosahedron
 # https://fr.wikipedia.org/wiki/Icosa%C3%A8dre
 
 class Ico(object):
