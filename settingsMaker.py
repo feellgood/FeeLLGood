@@ -68,3 +68,4 @@ class Settings(object):
     def write(self,fileName):
         with open(fileName,'w') as outfile:
             json.dump(self.mySets,outfile,indent = 4)
+        print("json file " + fileName + " generated.")
