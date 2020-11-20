@@ -30,6 +30,7 @@ class timing
     std::cout << "\t initial time step\t" << dt << std::endl << std::endl;
     }
 
+    /** initialize variable time step with geometric average of DTMIN and DTMAX */
     inline void set_dt_init() {dt = sqrt(DTMIN*DTMAX);}
     };
 
