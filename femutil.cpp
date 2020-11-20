@@ -52,9 +52,11 @@ std::for_each(tet.begin(),tet.end(),[&sf](Tetra::Tet const& te)
 std::for_each(fac.begin(),fac.end(),[this,&settings,&sf](Facette::Fac &fa)
     {
     fa.Ms = 0.;
-    if ( settings.paramFacette[fa.idxPrm].Js >= 0.)  // we ignore faces with Js<0
+    if ( !(settings.paramFacette[fa.idxPrm].suppress_charges) )
         {
-        int i0 = fa.ind[0],  i1 = fa.ind[1],  i2 = fa.ind[2];
+        int i0 = fa.ind[0];
+        int i1 = fa.ind[1];
+        int i2 = fa.ind[2];
 
         std::set< Facette::Fac, Facette::less_than >::iterator it=sf.end();
         for (int perm=0; perm<2; perm++) 
@@ -69,9 +71,9 @@ std::for_each(fac.begin(),fac.end(),[this,&settings,&sf](Facette::Fac &fa)
       
             if (it!=sf.end()) 
                 { // found
-                Pt::pt3D p0 = node[ it->ind[0] ].p; 
-                Pt::pt3D p1 = node[ it->ind[1] ].p;
-                Pt::pt3D p2 = node[ it->ind[2] ].p;
+                const Pt::pt3D & p0 = node[ it->ind[0] ].p;
+                const Pt::pt3D & p1 = node[ it->ind[1] ].p;
+                const Pt::pt3D & p2 = node[ it->ind[2] ].p;
                 
                 //fa.Ms will have the magnitude of first arg of copysign, with the sign of second arg
                 fa.Ms = std::copysign(nu0*settings.paramTetra[it->idxPrm].J , Pt::pTriple( p1-p0 , p2-p0 ,fa.calc_norm()) );

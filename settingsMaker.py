@@ -71,7 +71,7 @@ class Settings(object):
     # (key) , initialized with def values
     def createSurfRegion(self,key):
         if key not in self.mySets["mesh"]["surface_regions"]:
-            self.mySets["mesh"]["surface_regions"].update( { key : {"Js" : 1.0, "Ks" : 0.0, "uk" : [0.0, 0.0 ,1.0]} } )
+            self.mySets["mesh"]["surface_regions"].update( { key : {"suppress_charges" : False, "Ks" : 0.0, "uk" : [0.0, 0.0 ,1.0]} } )
 
     ## \brief write json file
     # this method write a json file from the dictionary built by the creator

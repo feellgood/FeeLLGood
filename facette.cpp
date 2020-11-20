@@ -7,7 +7,7 @@ using namespace Pt;
 void Fac::integrales(std::vector<Facette::prm> const& params, Pt::pt3D BE[N]) const
 {
 Pt::pt3D const & uk = params[idxPrm].uk;
-double Kbis = 2.0*(params[idxPrm].Ks)/(params[idxPrm].Js);
+double Kbis = 2.0*(params[idxPrm].Ks)/Ms; // carefull Ms of the facette here (could lead to div by zero ?)
 
 double u[DIM][NPI];
 interpolation(Nodes::get_u0,u);
@@ -21,13 +21,10 @@ for (int npi=0; npi<NPI; npi++)
 }
 
 double Fac::anisotropyEnergy(Facette::prm const& param,const double u[DIM][NPI]) const
-{
+{//surface Neel anisotropy (uk is a uniaxial easy axis)
 double dens[NPI];
 for (int npi=0; npi<NPI; npi++)
-    {// cosinus directeurs
-    double al0= Pt::sq(param.uk(0)*u[0][npi] + param.uk(0)*u[1][npi] + param.uk(0)*u[2][npi]);
-    dens[npi] = -param.Ks*al0;      // uniaxe
-    }
+    { dens[npi] = -param.Ks*Pt::sq(param.uk(0)*u[0][npi] + param.uk(1)*u[1][npi] + param.uk(2)*u[2][npi]); }
 return weightedScalarProd(dens);
 }
 

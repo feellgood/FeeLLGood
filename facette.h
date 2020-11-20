@@ -32,15 +32,14 @@ region number and material constants
 struct prm
 	{
 	int reg;/**< region number */	
-	double Js;/**< surface exchange */
+	bool suppress_charges; /**< suppress charges if true */
 	double Ks;/**< uniaxial surface anisotropy constant */	
 	Pt::pt3D uk; /**< anisotropy axis */	
 	
 	/** print the struct parameters */
 	inline void infos()
 		{
-		std::cout<< "surface region number = " << reg <<std::endl;
-		std::cout<< "Js = " << Js <<std::endl;
+		std::cout<< "surface region number = " << reg << "suppress charges = " << suppress_charges <<std::endl;
 		
 		if(Ks!=0)
 			{ std::cout<< "Ks*a = "<<Ks << "*[ " << uk << "]" << std::endl; }

@@ -152,7 +152,6 @@ for (boost::property_tree::ptree::value_type &s : s_sub_tree)
             if (sub_k.first == "Ks")
                 {
                 p.Ks = sub_k.second.get_value<double>();
-                //if (p.Ks == 0) { std::cout<< "\tKs is zero, flag NO_SURF_ANISOTROPY to true" << std::endl;}
                 }
             if (sub_k.first == "uk")
                 {double X[Pt::DIM];
@@ -161,7 +160,7 @@ for (boost::property_tree::ptree::value_type &s : s_sub_tree)
                     { X[i] = row.second.get_value<double>();i++; }
 		p.uk = Pt::pt3D(X[0],X[1],X[2]);                
 		}
-	if (sub_k.first == "Js") {p.Js = sub_k.second.get_value<double>();}	
+	if (sub_k.first == "suppress_charges") {p.suppress_charges = sub_k.second.get_value<bool>();}
             }
         paramFacette.push_back(p);
         //p.infos();	
