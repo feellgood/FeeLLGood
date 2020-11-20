@@ -28,7 +28,6 @@ mySettings["mesh"]["volume_regions"]["300"]["alpha"] = 0.05
 mySettings["time_integration"]["final_time"] = 0.2e-7
 mySettings["time_integration"]["min(dt)"] = 0.1e-11
 mySettings["time_integration"]["max(dt)"] = 0.5e-10
-mySettings["time_integration"]["initial_dt"] = 0.1e-10
 
 mySettings["time_integration"]["max(du)"] = 0.1
 

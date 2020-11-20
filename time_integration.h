@@ -8,7 +8,7 @@
 class timing
 {
     public:
-        inline timing():t(0),dt(1e-9),tf(0),DTMIN(1e-14),DTMAX(1e-7),TAUR(100.*DTMAX) {}
+        inline timing():t(0),tf(0),DTMIN(1e-14),DTMAX(1e-7),TAUR(100.*DTMAX) {set_dt_init();}
     
     double t;/**< physical current time of the simulation */
     double dt;/**< time-step */
@@ -29,8 +29,9 @@ class timing
     std::cout << "\t final time of the simulation\t\t" << tf << std::endl;
     std::cout << "\t initial time step\t" << dt << std::endl << std::endl;
     }
-};
 
+    inline void set_dt_init() {dt = sqrt(DTMIN*DTMAX);}
+    };
 
 
 

@@ -33,7 +33,7 @@ class Settings(object):
 
         self.mySets["demagnetization_field_solver"] = {"nb_threads" : 16}
 
-        self.mySets["time_integration"] = {"final_time" : 1e-6, "min(du)" : 1e-9, "max(du)" : 0.02, "min(dt)" : 1e-11, "max(dt)" : 1e-7, "initial_dt" : 1e-9}
+        self.mySets["time_integration"] = {"final_time" : 1e-6, "min(du)" : 1e-9, "max(du)" : 0.02, "min(dt)" : 1e-11, "max(dt)" : 1e-7}
     
     ## \brief getter
     # standard getter
@@ -55,8 +55,18 @@ class Settings(object):
     # (key) , initialized with def values
     def createVolRegion(self,key):
         if key not in self.mySets["mesh"]["volume_regions"]:
-            self.mySets["mesh"]["volume_regions"].update( { key : {"Ae":1e-11, "Js":1.0, "K":0.0, "uk":[0.0,0.0,0.0],"K3":0.0, "alpha":[0.0,0.0,0.0], "beta":[0.0,0.0,0.0], "gamma":[0.0,0.0,0.0], "alpha_LLG":0.05} } )
+            self.mySets["mesh"]["volume_regions"].update( { key : {"Ae":1e-11, "Js":1, "K":0.0, "uk":[0.0,0.0,0.0],"K3":0.0, "alpha":[0.0,0.0,0.0], "beta":[0.0,0.0,0.0], "gamma":[0.0,0.0,0.0], "alpha_LLG":0.05} } )
 
+    ## \brief set material constants exchange , magnetization at saturation and alpha_LLG for region 'key', create if if key does not exists
+    # (key) , initialized with def values
+    def setMaterialRegion(self,key,cst_exch,mag_sat,cst_alpha):
+        if key not in self.mySets["mesh"]["volume_regions"]:
+            self.mySets["mesh"]["volume_regions"].update( { key : {"Ae":cst_exch, "Js":mag_sat, "K":0.0, "uk":[0.0,0.0,0.0],"K3":0.0, "alpha":[0.0,0.0,0.0], "beta":[0.0,0.0,0.0], "gamma":[0.0,0.0,0.0], "alpha_LLG":cst_alpha} } )
+        else:
+            self.mySets["mesh"]["volume_regions"][key]["Ae"] = cst_exch
+            self.mySets["mesh"]["volume_regions"][key]["Js"] = mag_sat
+            self.mySets["mesh"]["volume_regions"][key]["alpha_LLG"] = cst_alpha
+        
     ## \brief create a new surface region
     # (key) , initialized with def values
     def createSurfRegion(self,key):

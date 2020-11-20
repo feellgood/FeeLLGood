@@ -1,8 +1,9 @@
 #include <cfloat>
 #include "fem.h"
+#include "time_integration.h"
+
 #include "linear_algebra.h"
 #include "fmm_demag.h"
-#include "time_integration.h"
 
 /** Logic for finding a reasonable time step. */
 class TimeStepper {

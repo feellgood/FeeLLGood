@@ -3,20 +3,21 @@
 
 #include "Utils/FTic.hpp"//for counter from scalfmm
 
+
+#include "fem.h"
 #include "linear_algebra.h"
 #include "fmm_demag.h"
-
 #include "time_integration.h"
 
 using namespace std;
+
+int time_integration(Fem &fem,Settings &settings /**< [in] */,LinAlgebra &linAlg /**< [in] */,scal_fmm::fmm &myFMM  /**< [in] */,timing &t_prm);
 
 inline string spaceString(int nbSpace)
 {string S;
     for(int i=0;i<nbSpace;i++) {S += " ";}
 return S;
 }
-
-int time_integration(Fem &fem,Settings &settings /**< [in] */,LinAlgebra &linAlg /**< [in] */,scal_fmm::fmm &myFMM  /**< [in] */,timing &t_prm);
 
 void prompt(void)
 {
@@ -49,10 +50,8 @@ else if (argc == 2)
         }
     else if ((argc == 3)&&( strcmp(argv[1],"-v") == 0))
         {
-            std::cout << "carefull entering dev mode ;-)"  << std::endl;
-            for (int i=0;i<argc;i++) { std::cout<< "argv["<< i << "]=" << argv[i] << std::endl; }
+            std::cout << "verbose mode active\n"  << std::endl;
             settings.verbose = true;
-            std::cout << "verbose mode true\n";
             fileJson = argv[2];
         }
 return fileJson;

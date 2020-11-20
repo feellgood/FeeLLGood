@@ -245,6 +245,6 @@ DUMAX = sub_tree.get<double>("max(du)",0.02);
 t_prm.DTMIN = sub_tree.get<double>("min(dt)",1e-14);
 t_prm.DTMAX = sub_tree.get<double>("max(dt)",1e-7);
 t_prm.TAUR = 100.* t_prm.DTMAX; // pourquoi 100 ?
-t_prm.dt = sub_tree.get<double>("initial_dt",1e-9);
+t_prm.set_dt_init();
 t_prm.tf = sub_tree.get<double>("final_time",0);
 }

@@ -29,28 +29,28 @@ surf_region_name = "200"
 
 mySettings.createVolRegion( vol_region_name )
 mySettings.createSurfRegion( surf_region_name )
-mySettings["mesh"]["volume_regions"][vol_region_name]["alpha"] = 0.5
+mySettings["mesh"]["volume_regions"][vol_region_name]["alpha_LLG"] = 0.5
 
 mySettings["time_integration"]["final_time"] = 1.5e-5
 mySettings["time_integration"]["min(dt)"] = 1e-11
 mySettings["time_integration"]["max(dt)"] = 0.5e-7
-mySettings["time_integration"]["initial_dt"] = 0.5e-8
 
 mySettings["time_integration"]["max(du)"] = 0.1
 
 mySettings["initial_magnetization"] = {"Mx":"0","My":"0","Mz":"1"}
 
-mySettings.write('mySettings.json')
+JSON_fileName = 'full_test_settings.json'
+mySettings.write(JSON_fileName)
 
 if(os.path.exists(mySettings["outputs"]["directory"]) and os.path.isdir(mySettings["outputs"]["directory"]) ):
 	print("directory " + mySettings["outputs"]["directory"] + " already exists.")
 else:
 	os.system("mkdir " + mySettings["outputs"]["directory"])
 
-val = subprocess.run(["./feellgood","mySettings.json"])
+val = subprocess.run(["./feellgood","-v",JSON_fileName])
 
 if(val.returncode==0):
-	print("FeeLLGood terminated correctly")
+	print("FeeLLGood terminated correctly with " + JSON_fileName + " input file.")
 	with open(mySettings["outputs"]["directory"] + mySettings["outputs"]["file_basename"] + ".evol","r") as f:
 		for line in f:
 			pass
