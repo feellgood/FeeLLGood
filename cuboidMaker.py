@@ -1,10 +1,10 @@
-# python -m pip install -U pip
-# sudo python -m pip install -U matplotlib
-
 import numpy as np
 
 class Cuboid(object):
     def __init__ (self,pt_min,pt_max,nbX,nbY,nbZ):
+        """ 
+            constructor, inits nodes lists, and builds tetrahedrons and outer surface mesh of the cuboid in the volume defined by pt_min,pt_max
+        """
         idx = 1
         self.nbX = nbX
         self.nbY = nbY
@@ -84,6 +84,7 @@ class Cuboid(object):
         return( (self.nbZ+1)*(self.nbY+1)*i +  (self.nbZ+1)*j + k)
 
     def make(self,meshFileName,volRegionName,surfRegionName):
+        """ write mesh file in gmsh 2.2 format """
         meshFile = open(meshFileName,'w')
         meshFile.write("$MeshFormat\n2.2\t0\t8\n$EndMeshFormat\n$Nodes\n")
         meshFile.write(str(len(self.pts))+"\n")
@@ -103,8 +104,4 @@ class Cuboid(object):
         meshFile.write("$EndElements\n")
         meshFile.close()
         print("mesh file " + meshFileName + " generated.")
-
-rectangle = Cuboid([-1,-2,-3],[1,2,3],4,4,2)
-rectangle.make("rectangle.msh","300","200")
-
 
