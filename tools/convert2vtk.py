@@ -98,9 +98,6 @@ def main():
     ugrid.SetPoints(points)
     for i in range(0,len(msh.Tet)):
         ugrid.InsertNextCell(vtk.VTK_TETRA,4,msh.Tet[i])
-    ugrid.Modified()# usefull ?
-
-
 
     ugrid.GetPointData().SetVectors(data.Mag)
     ugrid.Modified()# usefull ?
@@ -112,64 +109,5 @@ def main():
     writer.SetDataModeToAscii() #only if XML
     writer.Write()
     
-    arrow = vtk.vtkArrowSource()
-    arrow.SetTipResolution(16)
-    arrow.SetTipLength(0.3)
-    arrow.SetTipRadius(0.1)
-
-    glyph = vtk.vtkGlyph3D()
-    glyph.SetInputData(ugrid)
-    glyph.SetSourceConnection(arrow.GetOutputPort())
-    glyph.SetVectorModeToUseVector()
-    glyph.SetColorModeToColorByVector()
-    glyph.OrientOn()
-    glyph.Update()
-
-    mbds = vtk.vtkMultiBlockDataSet()
-    mbds.SetNumberOfBlocks(2)
-    mbds.SetBlock(0, ugrid)
-    mbds.SetBlock(1, glyph.GetOutput())
-
-    mapper = vtk.vtkCompositePolyDataMapper2()
-    mapper.SetInputDataObject(mbds)
-    cdsa = vtk.vtkCompositeDataDisplayAttributes()
-    mapper.SetCompositeDataDisplayAttributes(cdsa)
-
-
-#    ugridMapper = vtk.vtkPolyDataMapper() #vtk.vtkDataSetMapper()
-#    ugridMapper.SetInputConnection(glyph.GetOutputPort()) #SetInputData(ugrid)
-#    ugridMapper.ScalarVisibilityOn()
-#    ugridMapper.SetScalarModeToUsePointData()
-#    ugridMapper.SetScalarRange(ugrid.GetPointData().GetVectors().GetRange(-1))
-
-    ugridActor = vtk.vtkActor()
-    ugridActor.SetMapper(mapper)#(ugridMapper)
-    colors = vtk.vtkNamedColors()
-    ugridActor.GetProperty().SetColor(colors.GetColor3d("Peacock"))
-    ugridActor.GetProperty().EdgeVisibilityOn()
-
-    renderer = vtk.vtkRenderer()
-    renderer.AddActor(ugridActor)
-    
-    renderer.SetBackground(colors.GetColor3d("Beige"))
-
-    renderer.ResetCamera()
-    renderer.GetActiveCamera().Elevation(60.0)
-    renderer.GetActiveCamera().Azimuth(30.0)
-    renderer.GetActiveCamera().Dolly(1.2)
-
-    
-
-    renWin = vtk.vtkRenderWindow()
-    renWin.AddRenderer(renderer)
-    iren = vtk.vtkRenderWindowInteractor()
-    iren.SetRenderWindow(renWin)
-    renWin.SetSize(640, 480)
-    renWin.SetWindowName(FileNames[0])
-    # Interact with the data.
-    renWin.Render()
-
-    iren.Start()
-
 if __name__ == "__main__":
     main()
