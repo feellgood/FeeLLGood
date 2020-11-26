@@ -48,16 +48,16 @@ class mesh(object):
 
 class mag(object):
     def __init__(self,fileName):
-        self.Mag = []
+        self.Mag = vtk.vtkFloatArray()
+        self.Mag.SetNumberOfComponents(3)
         magFile = open(fileName,'r')
-        current_line = magFile.readline()
-        while True:
-            current_line = magFile.readline()
-            ls = current_line.strip().split('\t')
-            if len(ls) >= 7:
-                self.Mag.append([float(ls[4]),float(ls[5]),float(ls[6])])
-            if not current_line:
-                break
+        lines = magFile.readlines()        
+        nb_values =len(lines) # first .sol line is always "#t = xxx"
+        self.Mag.SetNumberOfTuples(nb_values)
+        
+        for i in range(1,nb_values):
+            ls = lines[i].strip().split('\t')
+            self.Mag.SetTuple3(i-1,float(ls[4]),float(ls[5]),float(ls[6]))
         magFile.close()
 
 def get_params():
@@ -100,13 +100,9 @@ def main():
         ugrid.InsertNextCell(vtk.VTK_TETRA,4,msh.Tet[i])
     ugrid.Modified()# usefull ?
 
-    vects = vtk.vtkFloatArray()
-    vects.SetNumberOfComponents(3)
-    vects.SetNumberOfTuples(len(data.Mag))
-    for i in range(0,len(data.Mag)):
-        vects.SetTuple3(i,data.Mag[i][0],data.Mag[i][1],data.Mag[i][2])
 
-    ugrid.GetPointData().SetVectors(vects)
+
+    ugrid.GetPointData().SetVectors(data.Mag)
     ugrid.Modified()# usefull ?
 
     writer = vtk.vtkXMLUnstructuredGridWriter()# to replace by vtkGenericDataObjectWriter ? or vtkDataSetWriter ? eventually non XML ?
