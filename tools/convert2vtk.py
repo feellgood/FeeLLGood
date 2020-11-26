@@ -53,7 +53,7 @@ class mag(object):
         magFile = open(fileName,'r')
         lines = magFile.readlines()        
         nb_values =len(lines) # first .sol line is always "#t = xxx"
-        self.Mag.SetNumberOfTuples(nb_values)
+        self.Mag.SetNumberOfTuples(nb_values-1)
         
         for i in range(1,nb_values):
             ls = lines[i].strip().split('\t')
@@ -96,10 +96,15 @@ def main():
     ugrid = vtk.vtkUnstructuredGrid()
     #ugrid.Allocate(len(msh.Tet))
     ugrid.SetPoints(points)
+
+# here we insert all the tetraherons, in some append mode, so no need to call ugrid.Allocate
     for i in range(0,len(msh.Tet)):
         ugrid.InsertNextCell(vtk.VTK_TETRA,4,msh.Tet[i])
 
-    ugrid.GetPointData().SetVectors(data.Mag)
+    ugrid.Modified()
+    ugrid.GetPointData().SetVectors(data.Mag) # with unstructured grid unclear if we have to associate data to cell or point
+    #ugrid.GetCellData().SetVectors(data.Mag)
+
     ugrid.Modified()# usefull ?
 
     writer = vtk.vtkXMLUnstructuredGridWriter()# to replace by vtkGenericDataObjectWriter ? or vtkDataSetWriter ? eventually non XML ?

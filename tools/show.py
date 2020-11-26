@@ -18,58 +18,74 @@ def get_params():
     return args.vtkFileName
 
 def main():
-    print("This is show python script, using vtk version " + vtk.vtkVersion.GetVTKVersion())
     fileName = get_params()
+    print("This is show python script, using vtk version " + vtk.vtkVersion.GetVTKVersion()," rendering ", fileName)
     path, ext = os.path.splitext(fileName)
     ext = ext.lower()
-    if ext == '.vtk':
-        print("input file is ", fileName)
-    else:
+    if ext != '.vtk':
         print(ext, " unsupported.")
         sys.exit(1)
 
     reader = vtk.vtkXMLUnstructuredGridReader()
     reader.SetFileName(fileName)
     reader.Update()
+    output = reader.GetOutput()
+#    scalar_range = output.GetScalarRange()
+
+#    ugrid = vtk.vtkUnstructuredGrid()
+
+#    it = reader.GetOutput().NewCellIterator()
+#    it.InitTraversal()
+#    while not it.IsDoneWithTraversal():
+#        cell = vtk.vtkGenericCell()
+#        it.GetCell(cell)
+        
+#        cellName = vtk.vtkCellTypes.GetClassNameFromTypeId(cell.GetCellType())
+#        print(cellName, "NumberOfPoints:", cell.GetNumberOfPoints(), "CellDimension:", cell.GetCellDimension())
+#        print("cell_pts = ",cell.GetPoints())
+#        if cell.GetNumberOfPoints() == 4:
+#            ugrid.InsertNextCell(vtk.VTK_TETRA,4,cell.GetPoints()) # ouch le cast sur tetraèdre
+#        it.GoToNextCell()
 
     arrow = vtk.vtkArrowSource()
     arrow.SetTipResolution(16)
     arrow.SetTipLength(0.3)
     arrow.SetTipRadius(0.1)
+    arrow.SetShaftResolution(16)
+    arrow.SetShaftRadius(0.03)
 
     glyph = vtk.vtkGlyph3D()
-    glyph.SetInputData(ugrid)
+    glyph.SetInputData(reader.GetOutput())#(ugrid)
     glyph.SetSourceConnection(arrow.GetOutputPort())
-    glyph.SetVectorModeToUseVector()
-    glyph.SetColorModeToColorByVector()
+    glyph.SetVectorModeToUseVector() # to use the vector input data
+    glyph.SetColorModeToColorByVector() #SetColorModeToColorByScalar()
+    glyph.SetScaleModeToDataScalingOff()
     glyph.OrientOn()
     glyph.Update()
 
-    mbds = vtk.vtkMultiBlockDataSet()
-    mbds.SetNumberOfBlocks(2)
-    mbds.SetBlock(0, ugrid)
-    mbds.SetBlock(1, glyph.GetOutput())
+#    mbds = vtk.vtkMultiBlockDataSet()
+#    mbds.SetNumberOfBlocks(2)
+#    mbds.SetBlock(0, ugrid)
+#    mbds.SetBlock(1, glyph.GetOutput())
 
-    mapper = vtk.vtkCompositePolyDataMapper2()
-    mapper.SetInputDataObject(mbds)
-    cdsa = vtk.vtkCompositeDataDisplayAttributes()
-    mapper.SetCompositeDataDisplayAttributes(cdsa)
+#    mapper = vtk.vtkDataSetMapper()
+#    mapper.SetInputDataObject(output)#(mbds)
 
 
-#    ugridMapper = vtk.vtkPolyDataMapper() #vtk.vtkDataSetMapper()
-#    ugridMapper.SetInputConnection(glyph.GetOutputPort()) #SetInputData(ugrid)
-#    ugridMapper.ScalarVisibilityOn()
-#    ugridMapper.SetScalarModeToUsePointData()
-#    ugridMapper.SetScalarRange(ugrid.GetPointData().GetVectors().GetRange(-1))
+    mapper = vtk.vtkPolyDataMapper() #vtk.vtkDataSetMapper()
+    mapper.SetInputConnection(glyph.GetOutputPort()) #SetInputData(ugrid)
+    mapper.ScalarVisibilityOn()
+    mapper.SetScalarModeToUsePointData()
+#    mapper.SetScalarRange(ugrid.GetPointData().GetVectors().GetRange(-1))
 
-    ugridActor = vtk.vtkActor()
-    ugridActor.SetMapper(mapper)#(ugridMapper)
+    actor = vtk.vtkActor()
+    actor.SetMapper(mapper)#(ugridMapper)
     colors = vtk.vtkNamedColors()
-    ugridActor.GetProperty().SetColor(colors.GetColor3d("Peacock"))
-    ugridActor.GetProperty().EdgeVisibilityOn()
+    actor.GetProperty().SetColor(colors.GetColor3d("Peacock"))
+    actor.GetProperty().EdgeVisibilityOn()
 
     renderer = vtk.vtkRenderer()
-    renderer.AddActor(ugridActor)
+    renderer.AddActor(actor)
     
     renderer.SetBackground(colors.GetColor3d("Beige"))
 
@@ -83,7 +99,7 @@ def main():
     iren = vtk.vtkRenderWindowInteractor()
     iren.SetRenderWindow(renWin)
     renWin.SetSize(640, 480)
-    renWin.SetWindowName(FileNames[0])
+    renWin.SetWindowName(fileName)
     # Interact with the data.
     renWin.Render()
 
