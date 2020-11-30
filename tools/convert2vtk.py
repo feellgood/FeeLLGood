@@ -68,8 +68,8 @@ def get_params():
    '''
     parser = argparse.ArgumentParser(description=description, epilog=epilogue,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('mshFileName', help='truc.msh')
-    parser.add_argument('solFileName', help='truc.sol')
+    parser.add_argument('mshFileName', help='myMeshFile.msh')
+    parser.add_argument('solFileName', help='myNumSolution.sol')
     args = parser.parse_args()
     return [args.mshFileName,args.solFileName]
 
@@ -108,7 +108,9 @@ def main():
     ugrid.Modified()# usefull ?
 
     writer = vtk.vtkXMLUnstructuredGridWriter()# to replace by vtkGenericDataObjectWriter ? or vtkDataSetWriter ? eventually non XML ?
-    writer.SetFileName('toto.vtk')
+    newFileName = FileNames[1].split(".")[0]
+    newFileName += ".vtk"
+    writer.SetFileName(newFileName)
     writer.SetInputData(ugrid)
     writer.Update()# usefull ?
     writer.SetDataModeToAscii() #only if XML
