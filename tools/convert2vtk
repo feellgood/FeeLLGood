@@ -5,6 +5,7 @@ import vtk
 import sys
 import os
 import numpy as np
+import re
 
 class mesh(object):
     def __init__ (self,fileName):
@@ -25,19 +26,23 @@ class mesh(object):
 
         while current_line.strip() != '$Nodes':
             current_line = mshFile.readline()
+            
+        print("readind nodes...")
         current_line = mshFile.readline()
-        
+
         while current_line.strip() != '$EndNodes':
             current_line = mshFile.readline()
-            ls = current_line.strip().split("\t")
+            ls = re.sub('\s+','\t',current_line).strip().split("\t")
             if len(ls) == 4:
                 self.Nodes.append( [float(ls[1]),float(ls[2]),float(ls[3]) ])
+            else:
+                print("wrong number of elements, split line = ",ls)
         current_line = mshFile.readline()
         current_line = mshFile.readline()
         
         while current_line.strip() != '$EndElements':
             current_line = mshFile.readline()
-            ls = current_line.strip().split("\t")
+            ls = re.sub('\s+','\t',current_line).strip().split("\t") 
             if len(ls) == 9: # we only consider tetrahedrons, assuming there is no other objects than triangles and tetrahedrons in the Elements list
                 self.Tet.append( [int(ls[5])-1,int(ls[6])-1,int(ls[7])-1,int(ls[8])-1 ])
         mshFile.close()
@@ -54,8 +59,13 @@ class data(object):
         lines = magFile.readlines()        
         # first .sol line is always "#t = xxx", so it is skipped starting from i=1
         for i in range(1,len(lines)):
-            ls = lines[i].strip().split('\t')
-            self.Mag.InsertNextTuple([float(ls[4]),float(ls[5]),float(ls[6])])
+            ls = lines[i]
+            filtered_ls = re.sub('\s+','\t',ls)
+            ls = filtered_ls.strip().split('\t')# the separator is either a '\t' or a spaces, because some people may post-treat .sol files
+            if len(ls)>6 :
+                self.Mag.InsertNextTuple([float(ls[4]),float(ls[5]),float(ls[6])])
+            else:
+                print("problem with line #",i," = ",ls)
         magFile.close()
 
 def get_params():
