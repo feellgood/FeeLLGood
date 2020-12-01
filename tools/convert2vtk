@@ -27,19 +27,19 @@ class mesh(object):
         while current_line.strip() != '$Nodes':
             current_line = mshFile.readline()
             
-        print("readind nodes...")
         current_line = mshFile.readline()
+        print("reading " + current_line[0:len(current_line)-1] + " nodes...")
 
         while current_line.strip() != '$EndNodes':
             current_line = mshFile.readline()
             ls = re.sub('\s+','\t',current_line).strip().split("\t")
             if len(ls) == 4:
                 self.Nodes.append( [float(ls[1]),float(ls[2]),float(ls[3]) ])
-            else:
-                print("wrong number of elements, split line = ",ls)
+
         current_line = mshFile.readline()
         current_line = mshFile.readline()
-        
+        print("reading " + current_line[0:len(current_line)-1] + " tetrahedrons...")
+ 
         while current_line.strip() != '$EndElements':
             current_line = mshFile.readline()
             ls = re.sub('\s+','\t',current_line).strip().split("\t") 
@@ -92,7 +92,7 @@ def main():
     print("input sol file name =", FileNames[1])
     
     msh = mesh(FileNames[0])
-    msh.infos()
+    #msh.infos()
 
     my_data = data(FileNames[1])
     
@@ -113,7 +113,7 @@ def main():
     ugrid.GetPointData().SetVectors(my_data.Mag) 
 
     writer = vtk.vtkXMLUnstructuredGridWriter()
-    newFileName = FileNames[1].split(".")[0]
+    newFileName = FileNames[1][0:FileNames[1].rfind('.')]
     newFileName += ".vtu"
     writer.SetFileName(newFileName)
     writer.SetInputData(ugrid)
