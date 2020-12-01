@@ -12,3 +12,6 @@ The file mysol.vtu can be directly opened with paraview, it is also readable usi
 
 Some possible use of .vtu files in paraview:
 to make some iso-surface of a component of the magnetization field, use the filter 'ExtractComponent' and build the iso-surface using the filter 'Contour' on the extracted component. 
+
+
+sudo chmod +x /usr/local/bin/convert2vtk
