@@ -1,4 +1,10 @@
 Those two python scripts use VTK, convert2vtk.py is a command line tool to convert a feellgood .sol output file to a .vtu file. You need to provide the mesh file.
+To install VTK for python, type in a terminal:
+
+python -m pip install --upgrade --user vtk
+
+
+How to use the script:
 Example:
 python convert2vtk.py mymesh.msh mysol.sol
 The script will generate a file named mysol.vtu, using XML format and binary for the datas.

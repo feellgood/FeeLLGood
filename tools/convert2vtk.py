@@ -1,5 +1,4 @@
-# to install vtk for python type the following command:
-# python -m pip install --upgrade --user vtk
+#!/usr/bin/env python
 
 import vtk
 #from vtk.numpy_interface import dataset_adapter as dsa
