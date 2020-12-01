@@ -7,22 +7,22 @@ import os
 
 def get_params():
     import argparse
-    description = 'make a rendering of a .vtk file'
+    description = 'make a rendering of a .vtu file'
     epilogue = '''
- render a .vtk file, assuming blablabla
+ render a .vtu file assuming the input file is a XML unstructured grid file
    '''
     parser = argparse.ArgumentParser(description=description, epilog=epilogue,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('vtkFileName', help='truc.vtk')
+    parser.add_argument('vtkFileName', help='truc.vtu')
     args = parser.parse_args()
     return args.vtkFileName
 
 def main():
     fileName = get_params()
-    print("This is show python script, using vtk version " + vtk.vtkVersion.GetVTKVersion()," rendering ", fileName)
+    print("This is show python script, using VTK version " + vtk.vtkVersion.GetVTKVersion()," rendering ", fileName)
     path, ext = os.path.splitext(fileName)
     ext = ext.lower()
-    if ext != '.vtk':
+    if ext != '.vtu':
         print(ext, " unsupported.")
         sys.exit(1)
 
@@ -30,22 +30,22 @@ def main():
     reader.SetFileName(fileName)
     reader.Update()
     output = reader.GetOutput()
-#    scalar_range = output.GetScalarRange()
 
-#    ugrid = vtk.vtkUnstructuredGrid()
+#    contour = vtk.vtkContourFilter()
+#    contour.SetInputData(output)
+#    contour.ComputeNormalsOn()
+#    contour.SetValue(0,0.0)
+#    contour.Update()
 
-#    it = reader.GetOutput().NewCellIterator()
-#    it.InitTraversal()
-#    while not it.IsDoneWithTraversal():
-#        cell = vtk.vtkGenericCell()
-#        it.GetCell(cell)
-        
-#        cellName = vtk.vtkCellTypes.GetClassNameFromTypeId(cell.GetCellType())
-#        print(cellName, "NumberOfPoints:", cell.GetNumberOfPoints(), "CellDimension:", cell.GetCellDimension())
-#        print("cell_pts = ",cell.GetPoints())
-#        if cell.GetNumberOfPoints() == 4:
-#            ugrid.InsertNextCell(vtk.VTK_TETRA,4,cell.GetPoints()) # ouch le cast sur tetraèdre
-#        it.GoToNextCell()
+#    isoMapper = vtk.vtkPolyDataMapper()
+#    isoMapper.SetInputData(contour.GetOutput())
+#    isoMapper.ScalarVisibilityOn()
+
+# Take the isosurface data and create geometry
+#actorIso = vtk.vtkLODActor()
+#actorIso.SetNumberOfCloudPoints( 1000000 )
+#actorIso.SetMapper( isoMapper )
+#actorIso.GetProperty().SetColor( 1, 1, 1 ) 
 
     arrow = vtk.vtkArrowSource()
     arrow.SetTipResolution(16)
@@ -73,7 +73,7 @@ def main():
 
 
     mapper = vtk.vtkPolyDataMapper() #vtk.vtkDataSetMapper()
-    mapper.SetInputConnection(glyph.GetOutputPort()) #SetInputData(ugrid)
+    mapper.SetInputConnection(glyph.GetOutputPort())#(contour.GetOutputPort())
     mapper.ScalarVisibilityOn()
     mapper.SetScalarModeToUsePointData()
 #    mapper.SetScalarRange(ugrid.GetPointData().GetVectors().GetRange(-1))
@@ -98,7 +98,7 @@ def main():
     renWin.AddRenderer(renderer)
     iren = vtk.vtkRenderWindowInteractor()
     iren.SetRenderWindow(renWin)
-    renWin.SetSize(640, 480)
+    renWin.SetSize(1000, 1000)
     renWin.SetWindowName(fileName)
     # Interact with the data.
     renWin.Render()

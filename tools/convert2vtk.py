@@ -2,6 +2,7 @@
 # python -m pip install --upgrade --user vtk
 
 import vtk
+#from vtk.numpy_interface import dataset_adapter as dsa
 import sys
 import os
 import numpy as np
@@ -44,20 +45,18 @@ class mesh(object):
         print("mesh read from file " + fileName)
 
     def infos(self):
-        print("nb Nodes: ",len(self.Nodes),"\nnb Tetrahedrons: ",len(self.Tet))
+        print("nb Nodes: ",len(self.Nodes),"\tnb Tetrahedrons: ",len(self.Tet))
 
-class mag(object):
+class data(object):
     def __init__(self,fileName):
         self.Mag = vtk.vtkFloatArray()
         self.Mag.SetNumberOfComponents(3)
         magFile = open(fileName,'r')
         lines = magFile.readlines()        
-        nb_values =len(lines) # first .sol line is always "#t = xxx"
-        self.Mag.SetNumberOfTuples(nb_values-1)
-        
-        for i in range(1,nb_values):
+        # first .sol line is always "#t = xxx", so it is skipped starting from i=1
+        for i in range(1,len(lines)):
             ls = lines[i].strip().split('\t')
-            self.Mag.SetTuple3(i-1,float(ls[4]),float(ls[5]),float(ls[6]))
+            self.Mag.InsertNextTuple([float(ls[4]),float(ls[5]),float(ls[6])])
         magFile.close()
 
 def get_params():
@@ -86,35 +85,33 @@ def main():
     msh = mesh(FileNames[0])
     msh.infos()
 
-    data = mag(FileNames[1])
-
+    my_data = data(FileNames[1])
+    
     points = vtk.vtkPoints()
     points.SetNumberOfPoints(len(msh.Nodes))
 
     for i in range(0,len(msh.Nodes)):
         points.InsertPoint(i,msh.Nodes[i])
+    
     ugrid = vtk.vtkUnstructuredGrid()
-    #ugrid.Allocate(len(msh.Tet))
     ugrid.SetPoints(points)
 
 # here we insert all the tetraherons, in some append mode, so no need to call ugrid.Allocate
     for i in range(0,len(msh.Tet)):
         ugrid.InsertNextCell(vtk.VTK_TETRA,4,msh.Tet[i])
 
-    ugrid.Modified()
-    ugrid.GetPointData().SetVectors(data.Mag) # with unstructured grid unclear if we have to associate data to cell or point
-    #ugrid.GetCellData().SetVectors(data.Mag)
+    #the vectors are fixed on each nodes, so we have to associate them to ugrid as Points, not to the cells = tetrahedrons
+    ugrid.GetPointData().SetVectors(my_data.Mag) 
 
-    ugrid.Modified()# usefull ?
-
-    writer = vtk.vtkXMLUnstructuredGridWriter()# to replace by vtkGenericDataObjectWriter ? or vtkDataSetWriter ? eventually non XML ?
+    writer = vtk.vtkXMLUnstructuredGridWriter()
     newFileName = FileNames[1].split(".")[0]
-    newFileName += ".vtk"
+    newFileName += ".vtu"
     writer.SetFileName(newFileName)
     writer.SetInputData(ugrid)
-    writer.Update()# usefull ?
-    writer.SetDataModeToAscii() #only if XML
-    writer.Write()
     
+    #writer.SetDataModeToAscii() #only if XML
+    writer.Write()
+    print("VTK file " + newFileName + " written.")
+
 if __name__ == "__main__":
     main()
