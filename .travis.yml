@@ -1,9 +1,9 @@
 # Automatically test the build as code is pushed to GitHub.
 # This is the configuration file for Travis CI (travis-ci.org).
 
-# Test on Ubuntu 18.04 Bionic.
+# Test on Ubuntu 20.04 Focal.
 os: linux
-dist: bionic
+dist: focal
 language: cpp
 compiler: g++
 cache: ccache
