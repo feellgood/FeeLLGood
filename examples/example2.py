@@ -2,9 +2,11 @@ import os
 import sys
 import subprocess
 from math import sqrt,pi
+
+sys.path.insert(0,'../tools')
 from settingsMaker import Settings
 
-mySettings = Settings("ellipsoid.msh")
+mySettings = Settings("../ellipsoid.msh")
 mySettings.createVolRegion( "300" )
 mySettings.createSurfRegion( "200" )
 
@@ -55,7 +57,7 @@ for i in range(0,nbStepsFrequency) :
 	mySettings["Bext"] = {"Bx" : str(A) + "*cos(" + str(omega) + "*t)", "By" : str(A) + "*sin("  + str(omega) +  "*t)" , "Bz": "0"}
 	
 	mySettings.write('mySettings.json')
-	val = subprocess.run(["./feellgood","-v","mySettings.json"])
+	val = subprocess.run(["../feellgood","-v","mySettings.json"])
 
 	amplitudeX = 0
 	amplitudeY = 0

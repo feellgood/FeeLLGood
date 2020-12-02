@@ -2,6 +2,8 @@ import os
 import sys
 import subprocess
 from math import sqrt
+
+sys.path.insert(0,'./tools')
 from settingsMaker import Settings
 
 mySettings = Settings("ellipsoid.msh")

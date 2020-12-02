@@ -1,7 +1,10 @@
 import os
+import sys
+
+sys.path.insert(0,'../tools')
 from settingsMaker import Settings
 
-mySettings = Settings("ellipsoid.msh")
+mySettings = Settings("../ellipsoid.msh")
 mySettings.createVolRegion( "300" )
 mySettings.createSurfRegion( "200" )
 
@@ -16,4 +19,4 @@ for B in myFields:
 	mySettings["Bext"] = {"Bx" : "0.0", "By" : "0.0" , "Bz": str(myFields[B])}	
 	print("Bext is " + str(mySettings["Bext"]))
 	mySettings.write('mySettings.json')
-	os.system("./feellgood mySettings.json")
+	os.system("../feellgood mySettings.json")
