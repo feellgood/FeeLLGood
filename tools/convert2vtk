@@ -28,7 +28,7 @@ class mesh(object):
             current_line = mshFile.readline()
             
         current_line = mshFile.readline()
-        print("reading " + current_line[0:len(current_line)-1] + " nodes...")
+        print("\treading " + current_line[0:len(current_line)-1] + " nodes...")
 
         while current_line.strip() != '$EndNodes':
             current_line = mshFile.readline()
@@ -38,7 +38,7 @@ class mesh(object):
 
         current_line = mshFile.readline()
         current_line = mshFile.readline()
-        print("reading " + current_line[0:len(current_line)-1] + " tetrahedrons...")
+        print("\treading " + current_line[0:len(current_line)-1] + " Elements...")
  
         while current_line.strip() != '$EndElements':
             current_line = mshFile.readline()
@@ -46,27 +46,38 @@ class mesh(object):
             if len(ls) == 9: # we only consider tetrahedrons, assuming there is no other objects than triangles and tetrahedrons in the Elements list
                 self.Tet.append( [int(ls[5])-1,int(ls[6])-1,int(ls[7])-1,int(ls[8])-1 ])
         mshFile.close()
-        print("mesh read from file " + fileName)
 
     def infos(self):
         print("nb Nodes: ",len(self.Nodes),"\tnb Tetrahedrons: ",len(self.Tet))
 
 class data(object):
-    def __init__(self,fileName):
+    def __init__(self,fileName,list_idx):
         self.Mag = vtk.vtkFloatArray()
-        self.Mag.SetNumberOfComponents(3)
         magFile = open(fileName,'r')
-        lines = magFile.readlines()        
+        lines = magFile.readlines()
+        magFile.close()
+        self.check_idx(lines[1],list_idx)
+        self.Mag.SetNumberOfComponents(len(list_idx))
+
         # first .sol line is always "#t = xxx", so it is skipped starting from i=1
         for i in range(1,len(lines)):
-            ls = lines[i]
-            filtered_ls = re.sub('\s+','\t',ls)
-            ls = filtered_ls.strip().split('\t')# the separator is either a '\t' or a spaces, because some people may post-treat .sol files
-            if len(ls)>6 :
-                self.Mag.InsertNextTuple([float(ls[4]),float(ls[5]),float(ls[6])])
-            else:
-                print("problem with line #",i," = ",ls)
-        magFile.close()
+            ls = self.filter(lines[i])
+            vector = []
+            for idx in list_idx:
+                vector.append(float(ls[idx]))
+            self.Mag.InsertNextTuple(vector)
+                
+    def filter(self,line):# the separator is either a '\t' or a spaces, because some people may post-treat .sol files
+        filtered_line = re.sub('\s+','\t',line)
+        return filtered_line.strip().split('\t')
+
+    def check_idx(self,line,list_idx):
+        ls = self.filter(line)
+        for i in list_idx:
+            if (i > len(ls))or i<0:
+                print("error: index out of bounds.")
+                sys.exit(1)
+
 
 def get_params():
     import argparse
@@ -76,25 +87,34 @@ def get_params():
    '''
     parser = argparse.ArgumentParser(description=description, epilog=epilogue,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('mshFileName', help='myMeshFile.msh')
-    parser.add_argument('solFileName', help='myNumSolution.sol')
+    parser.add_argument('mshFileName', help='a mesh file in gmsh 2.2 text format with .msh extension')
+    parser.add_argument('solFileName', help='a .sol feellgood file')
+    parser.add_argument('integers',metavar='N',type=int, nargs='*', help='indices of the column to copy into output .vtu file')
     args = parser.parse_args()
-    return [args.mshFileName,args.solFileName]
+    indices = []
+    if len(args.integers)>0:
+        indices = args.integers
+    else:
+        indices = [4,5,6]
+
+    return [args.mshFileName,args.solFileName,indices]
 
 def main():
     print("This is convert2vtk python script, using vtk version " + vtk.vtkVersion.GetVTKVersion())
-    FileNames = get_params()
-    path, ext = os.path.splitext(FileNames[0])
+    [meshFileName, solFileName, indices] = get_params()
+
+    path, ext = os.path.splitext(meshFileName)
     ext = ext.lower()
     if ext == '.msh':
-        print("input mesh file is ", FileNames[0])
+        print("input mesh file is ", meshFileName)
+    else:
+        print("extension " + ext + "not recognized.")
+        sys.exit(1)
     
-    print("input sol file name =", FileNames[1])
-    
-    msh = mesh(FileNames[0])
+    msh = mesh(meshFileName)
     #msh.infos()
 
-    my_data = data(FileNames[1])
+    my_data = data(solFileName,indices)
     
     points = vtk.vtkPoints()
     points.SetNumberOfPoints(len(msh.Nodes))
@@ -110,15 +130,20 @@ def main():
         ugrid.InsertNextCell(vtk.VTK_TETRA,4,msh.Tet[i])
 
     #the vectors are fixed on each nodes, so we have to associate them to ugrid as Points, not to the cells = tetrahedrons
-    ugrid.GetPointData().SetVectors(my_data.Mag) 
+    if len(indices) == 3:
+        print("save data as 3D vectors, using ", indices ," columns")
+        ugrid.GetPointData().SetVectors(my_data.Mag)
+    else:
+        print("save data as " + str(len(indices)) + "D scalars, using ", indices ," columns")
+        ugrid.GetPointData().SetScalars(my_data.Mag)
 
     writer = vtk.vtkXMLUnstructuredGridWriter()
-    newFileName = FileNames[1][0:FileNames[1].rfind('.')]
+    newFileName = solFileName[0:solFileName.rfind('.')]
     newFileName += ".vtu"
     writer.SetFileName(newFileName)
     writer.SetInputData(ugrid)
     
-    #writer.SetDataModeToAscii() #only if XML
+    #writer.SetDataModeToAscii() #available only if XML
     writer.Write()
     print("VTK file " + newFileName + " written.")
 
