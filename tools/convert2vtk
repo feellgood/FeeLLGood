@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import vtk
 #from vtk.numpy_interface import dataset_adapter as dsa
