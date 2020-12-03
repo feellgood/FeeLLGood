@@ -66,5 +66,5 @@ if(DEFINED withSharedLib)
 endif(DEFINED withSharedLib)
 
 install(TARGETS feellgood RUNTIME DESTINATION bin)
-install(FILES ./tools/convert2vtk DESTINATION bin)
+install(PROGRAMS ./tools/convert2vtk DESTINATION bin)
 
