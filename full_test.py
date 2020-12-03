@@ -49,7 +49,7 @@ if(os.path.exists(mySettings["outputs"]["directory"]) and os.path.isdir(mySettin
 else:
 	os.system("mkdir " + mySettings["outputs"]["directory"])
 
-val = subprocess.run(["./feellgood","-v",JSON_fileName])
+val = subprocess.run(["./feellgood",JSON_fileName])
 
 if(val.returncode==0):
 	print("FeeLLGood terminated correctly with " + JSON_fileName + " input file.")

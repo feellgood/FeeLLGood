@@ -27,8 +27,6 @@ class Settings(object):
 
         self.mySets["Bext"] = {"Bx" : "0", "By" : "0" , "Bz": "0"}
 
-        self.mySets["spin_polarized_current"] = {"Uz" : 0.0, "beta" : 0.0}
-
         self.mySets["finite_element_solver"] = {"nb_threads" : 16, "max(iter)" : 500, "refresh_preconditionner_every": 20}
 
         self.mySets["demagnetization_field_solver"] = {"nb_threads" : 16}
@@ -46,8 +44,13 @@ class Settings(object):
     def __setitem__(self,key,value):
         self.mySets[key] = value
 
+    ## \brief define spin_polarized_current
+    # uk and beta input parameters defining spin transfert torque
+    def spin_polarized_current(self,Uz,beta):
+        self.mySets["spin_polarized_current"] = {"Uz" : Uz, "beta" : beta}
+
     ## \brief define recentering
-    # direction and threshold input paramaters defining recentering
+    # direction and threshold input parameters defining recentering
     def recentering(self,direction,threshold):
         self.mySets["recentering"] = {"direction" : direction, "threshold" : threshold}
 

@@ -215,11 +215,15 @@ else
     { Hext = Pt::pt3D(val_vect[0],val_vect[1],val_vect[2]); }
 */
     
-try {sub_tree = root.get_child("spin_polarized_current");}
+try
+    {
+    sub_tree = root.get_child("spin_polarized_current");
+    Uz = sub_tree.get<double>("Uz",0.0);
+    beta = sub_tree.get<double>("beta",0.0);
+    }
 catch(std::exception &e)
-    { std::cout << e.what() << std::endl; }
-Uz = sub_tree.get<double>("Uz",0.0);
-beta = sub_tree.get<double>("beta",0.0);
+    { std::cout << "no spin polarized" << std::endl; }
+
 
 try { sub_tree = root.get_child("demagnetization_field_solver"); }
 catch (std::exception &e)
