@@ -66,7 +66,6 @@ try { sub_tree = root.get_child("mesh"); }
 
 pbName = sub_tree.get<std::string>("filename");
 double s = sub_tree.get<double>("scaling_factor",0.0);
-EPSILON = sub_tree.get<double>("epsilon",1e-16);
 
 if (s <= 0.0)
     {

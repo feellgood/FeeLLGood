@@ -93,9 +93,6 @@ class Settings{
     std::string sBz;/**< string for analytical definition of Bz */
     
     std::string restoreFileName;/**< input file name for continuing a calculation (sol.in) */
-	
-/** \f$ \epsilon \f$ is a small value, used to modify slightly J in (tet|facette).integrales */
-    double EPSILON;
 
 /** minimum value for du step */
     double DUMIN;	//1e-6 ; 1e-9 en dynamique

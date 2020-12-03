@@ -21,7 +21,7 @@ class Settings(object):
         "evol_columns" : ["iter","t","dt","max_dm","<Mx>","<My>","<Mz>","E_ex","E_aniso","E_demag","E_zeeman","E_tot","DW_z","DW_dz"],
         "evol_header" : True }
 
-        self.mySets["mesh"] = {"filename" : mshFileName, "scaling_factor" : 1e-9, "epsilon" : 1e-40, "volume_regions" : {}, "surface_regions" : {} }
+        self.mySets["mesh"] = {"filename" : mshFileName, "scaling_factor" : 1e-9, "volume_regions" : {}, "surface_regions" : {} }
 
         self.mySets["initial_magnetization"] = {"Mx" : "1-z^2", "My" : "0" , "Mz": "tanh(z*20)"}
 

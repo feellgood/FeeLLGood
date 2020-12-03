@@ -43,4 +43,8 @@ const double nu0 = 1./mu0;/**< \f$ \nu_0 = 1/\mu_0 \f$ */
 /** theta of the theta integration scheme in time */
 #define THETA 0.5
 
+/** this constant is depending on the mesh, \f$ \epsilon \f$ is a small value, used to modify slightly J in (tet|facette).integrales */
+#define EPSILON 1e-40
+//should not be fixed but computed with an analysis of the mesh
+
 #endif //CONFIG_H
