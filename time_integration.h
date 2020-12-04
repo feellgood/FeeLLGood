@@ -8,12 +8,11 @@
 class timing
 {
     public:
-        inline timing():t(0),tf(0),DTMIN(1e-14),DTMAX(1e-7),TAUR(100.*DTMAX) {set_dt_init();}
-        inline timing(const double _t,const double _tf,const double _dtmin,const double _dtmax):t(_t),tf(_tf),DTMIN(_dtmin),DTMAX(_dtmax),TAUR(100.*DTMAX) {set_dt_init();}
+        /** constructor : fully initializes the timing parameters */
+        inline timing(const double _t,const double _tf,const double _dtmin,const double _dtmax):tf(_tf),DTMIN(_dtmin),DTMAX(_dtmax),TAUR(100.*DTMAX),t(_t) {set_dt_init();}
     
-    double t;/**< physical current time of the simulation */
-    
-    double tf;/**< final time of the simulation */
+    /** final time of the simulation */
+    const double tf;
 
     /** minimum step time for time integrator */
     const double DTMIN; //1e-14;
@@ -36,16 +35,30 @@ class timing
 
     /** getter for time step dt */
     inline double get_dt() const {return dt;}
-    
+
     /** setter for time step dt : prefactor is computed from the new dt value to maintain synchronization of dt and prefactor */
     inline void set_dt(double _dt) {dt=_dt;set_prefactor();}
-    
+
+    /** basic test to know if dt is too small */
+    inline bool is_dt_TooSmall() const { return(dt < DTMIN);}
+
+    /** increment time t with time step dt */
+    inline void inc_t() { t += dt; }
+
+    /** getter for t */
+    inline double get_t() const { return t; }
+
+    /** setter for t */
+    inline void set_t(double _t) { t=_t; }
+
     private:
+        double t;/**< physical current time of the simulation */
+
         double dt;/**< time-step */
-        
+
         /** initialize variable time step with geometric average of DTMIN and DTMAX */
         inline void set_dt_init() {set_dt( sqrt(DTMIN*DTMAX) );}
-        
+
         /** prefactor setter */
         inline void set_prefactor() {prefactor = (1.+ dt/TAUR*abs(log(dt/TAUR)));}
     };

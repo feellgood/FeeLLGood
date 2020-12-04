@@ -66,7 +66,10 @@ class Fem
                 init_distrib(mySets);
                 }
             else
-                { t_prm.t = readSol(mySets.verbose,mySets.getScale(), mySets.restoreFileName); }
+                {
+                double _t = readSol(mySets.verbose,mySets.getScale(), mySets.restoreFileName);
+                t_prm.set_t(_t);    
+                }
                     
             direction(Pt::IDX_Z);/* determination de la direction de propagation de la paroi */
             }

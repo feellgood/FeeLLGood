@@ -21,7 +21,7 @@ for(unsigned int i = 0;i<settings.evol_columns.size();i++)
     if(i == settings.evol_columns.size() - 1) {sep = "\n";} else {sep = "\t";}
 
     if(keyVal == "iter") { fout << nt << sep;}
-    if(keyVal == "t") { fout << t_prm.t << sep;}
+    if(keyVal == "t") { fout << t_prm.get_t() << sep;}
     if(keyVal == "dt") { fout << t_prm.get_dt() << sep;}
     if(keyVal == "max_dm") { fout << vmax*t_prm.get_dt() << sep;}
     if(keyVal == "<Mx>") { fout << avg(Nodes::get_u_comp,Pt::IDX_X) << sep;}
@@ -37,9 +37,9 @@ for(unsigned int i = 0;i<settings.evol_columns.size();i++)
     if(keyVal == "E_tot") { fout << Etot << sep;}
     if(keyVal == "DW_z") { fout << DW_z << sep;}
     if(keyVal == "DW_dz") { fout << DW_vz <<  sep;}
-    if(keyVal == "Hx") { fout << settings.getValue(t_prm.t).x() << sep;}
-    if(keyVal == "Hy") { fout << settings.getValue(t_prm.t).y() << sep;}
-    if(keyVal == "Hz") { fout << settings.getValue(t_prm.t).z() << sep;}
+    if(keyVal == "Hx") { fout << settings.getValue(t_prm.get_t()).x() << sep;}
+    if(keyVal == "Hy") { fout << settings.getValue(t_prm.get_t()).y() << sep;}
+    if(keyVal == "Hz") { fout << settings.getValue(t_prm.get_t()).z() << sep;}
     }
 fout << std::flush;
 
@@ -77,7 +77,7 @@ if (!fout)
     }
 
 fout << "# vtk DataFile Version 2.0" << endl;
-fout << "time : " << t_prm.t << endl; // boost::format(" time : %+20.10e") % fem.t;
+fout << "time : " << t_prm.get_t() << endl; // boost::format(" time : %+20.10e") % fem.t;
 fout << "ASCII" << endl;
 fout << "DATASET UNSTRUCTURED_GRID" << endl;
 fout << "POINTS "<< NOD << " float" << endl;
@@ -118,7 +118,7 @@ if (!fout)
     SYSTEM_ERROR;
     }
 //fout << boost::format("#time : %+20.10e ") % fem.t << endl;
-fout << "#time : " << t_prm.t << endl;
+fout << "#time : " << t_prm.get_t() << endl;
 
 // fout << boost::format("%8d %+20.10f %+20.10f %+20.10f %+20.10f %+20.10f %+20.10f %+20.10e") % i % x % y % z % u1 % u2 % u3 % phi << endl;}
 

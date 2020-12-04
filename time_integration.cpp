@@ -43,7 +43,7 @@ int time_integration(Fem &fem,Settings &settings /**< [in] */,LinAlgebra &linAlg
 {
 fem.DW_z  = 0.0;
 
-compute_all(fem,settings,myFMM,t_prm.t);
+compute_all(fem,settings,myFMM,t_prm.get_t());
 
 std::string baseName = settings.r_path_output_dir + settings.getSimName();
 std::string str = baseName + ".evol";
@@ -66,29 +66,29 @@ TimeStepper stepper(t_prm.get_dt(), t_prm.DTMIN, t_prm.DTMAX);
 
 // Loop over the visible time steps,
 // i.e. those that will appear on the output file.
-for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_step)
+for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target += t_step)
     {
     // Loop over the integration time steps within a visible step.
-    while (t_prm.t < t_target)
+    while (t_prm.get_t() < t_target)
         {
-        t_prm.set_dt( stepper(t_target - t_prm.t) );
-        bool last_step = (t_prm.get_dt() == t_target - t_prm.t);
+        t_prm.set_dt( stepper(t_target - t_prm.get_t()) );
+        bool last_step = (t_prm.get_dt() == t_target - t_prm.get_t());
 
         if(settings.verbose)
             {
             std::cout << " ------------------------------\n";
             if (flag) std::cout << "    t  : same (" << flag << ")";
-            else std::cout << "nt_output = " << nt_output << ", nt = " << nt << ", t = " << t_prm.t;
+            else std::cout << "nt_output = " << nt_output << ", nt = " << nt << ", t = " << t_prm.get_t();
             std::cout << ", dt = " << t_prm.get_dt() ;
             }
-        if (t_prm.get_dt() < t_prm.DTMIN) { fem.reset();break; }
+        if (t_prm.is_dt_TooSmall()) { fem.reset();break; }
 
         /* changement de referentiel */
         fem.DW_vz += fem.DW_dir*fem.avg(Nodes::get_v_comp,Pt::IDX_Z)*fem.l.z()/2.;
         
         linAlg.set_DW_vz(fem.DW_vz);
         //int err = linAlg.monoThreadSolver(t_prm,nt);
-        Pt::pt3D Hext = settings.getValue(t_prm.t);
+        Pt::pt3D Hext = settings.getValue(t_prm.get_t());
         int err = linAlg.solver(Hext,t_prm,nt);  
         fem.vmax = linAlg.get_v_max();
         
@@ -108,15 +108,15 @@ for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_ste
         if (dumax > settings.DUMAX)
             { flag++; continue;}
 
-        compute_all(fem,settings,myFMM,t_prm.t);
+        compute_all(fem,settings,myFMM,t_prm.get_t());
         
         nt++; flag=0;
 
         // Prevent rounding errors from making us miss the target.
         if (last_step)
-            t_prm.t = t_target;
+            t_prm.set_t(t_target);
         else
-            t_prm.t += t_prm.get_dt();
+            t_prm.inc_t();
 
         fem.DW_vz0 = fem.DW_vz;/* mise a jour de la vitesse du dernier referentiel et deplacement de paroi */ 
         fem.DW_z  += fem.DW_vz*t_prm.get_dt();
@@ -126,7 +126,7 @@ for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_ste
     fem.saver(settings,t_prm,fout,nt_output++);
     }// end for
 
-if (t_prm.get_dt() < t_prm.DTMIN) { std::cout << " aborted:  dt < DTMIN"; }
+if (t_prm.is_dt_TooSmall()) { std::cout << " aborted:  dt < DTMIN"; }
         
 fout.close();
 return nt;
