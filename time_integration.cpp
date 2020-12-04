@@ -32,12 +32,13 @@ public:
     }
 };
 
-void compute_all(Fem &fem,Settings &settings,scal_fmm::fmm &myFMM,double t)
-{
-myFMM.calc_demag(fem,settings);
-fem.energy(t,settings);
-fem.evolution();
-}
+/** compute all quantitites at time t */
+inline void compute_all(Fem &fem,Settings &settings,scal_fmm::fmm &myFMM,double t)
+    {
+    myFMM.calc_demag(fem,settings);
+    fem.energy(t,settings);
+    fem.evolution();
+    }
 
 int time_integration(Fem &fem,Settings &settings /**< [in] */,LinAlgebra &linAlg /**< [in] */,scal_fmm::fmm &myFMM  /**< [in] */,timing &t_prm)
 {

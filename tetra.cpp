@@ -11,6 +11,7 @@
 using namespace Tetra;
 using namespace Pt;
 
+
 void Tet::lumping(int const& npi,double alpha_eff,double prefactor, double AE[3*N][3*N]) const
 {
 const double w = weight[npi];
@@ -18,20 +19,18 @@ const double w = weight[npi];
 for (int i=0; i<N; i++)
     {
     const double ai_w = w*a[i][npi];
-    double ai_w_u0_X_i = ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_X,i);//u_nod[0][i];
-    double ai_w_u0_Y_i = ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_Y,i);//u_nod[1][i];
-    double ai_w_u0_Z_i = ai_w*getVecDataFromNode(Nodes::get_u0,Pt::IDX_Z,i);//u_nod[2][i];
+    const pt3D ai_w_u0 = ai_w*Nodes::get_u0((*refNode)[ ind[i] ]);
 
     AE[    i][    i] +=  alpha_eff * ai_w;
     AE[  N+i][  N+i] +=  alpha_eff * ai_w;
     AE[2*N+i][2*N+i] +=  alpha_eff * ai_w;
 
-    AE[0*N+i][2*N+i] += ai_w_u0_Y_i;
-    AE[0*N+i][1*N+i] -= ai_w_u0_Z_i;
-    AE[1*N+i][0*N+i] += ai_w_u0_Z_i;
-    AE[1*N+i][2*N+i] -= ai_w_u0_X_i;
-    AE[2*N+i][1*N+i] += ai_w_u0_X_i;
-    AE[2*N+i][0*N+i] -= ai_w_u0_Y_i;
+    AE[0*N+i][2*N+i] += ai_w_u0(Pt::IDX_Y);
+    AE[0*N+i][1*N+i] -= ai_w_u0(Pt::IDX_Z);
+    AE[1*N+i][0*N+i] += ai_w_u0(Pt::IDX_Z);
+    AE[1*N+i][2*N+i] -= ai_w_u0(Pt::IDX_X);
+    AE[2*N+i][1*N+i] += ai_w_u0(Pt::IDX_X);
+    AE[2*N+i][0*N+i] -= ai_w_u0(Pt::IDX_Y);
 
     for (int j=0; j<N; j++)
         {
@@ -44,7 +43,7 @@ for (int i=0; i<N; i++)
     }
 }
 
-//void Tet::integrales(std::vector<Tetra::prm> const& params,const double dt,Pt::pt3D const& Hext,double tau_r,double Vz, double AE[3*N][3*N], Pt::pt3D BE[N]) const
+
 void Tet::integrales(std::vector<Tetra::prm> const& params, timing const& prm_t,Pt::pt3D const& Hext,double Vz, double AE[3*N][3*N], Pt::pt3D BE[N]) const
 {
 double alpha_LLG = params[idxPrm].alpha_LLG;
@@ -70,16 +69,17 @@ interpolation(Nodes::get_v0,V,dVdx,dVdy,dVdz);
 interpolation(Nodes::get_phi0,Hd);
 interpolation(Nodes::get_phiv0,Hv);
 
-for (int npi=0; npi<NPI; npi++){
+for (int npi=0; npi<NPI; npi++)
+    {
     pt3D uk_u = pt3D(pScal(alpha,U[npi]), pScal(beta,U[npi]), pScal(gamma,U[npi]));
     pt3D uk_v = pt3D(pScal(alpha,V[npi]), pScal(beta,V[npi]), pScal(gamma,V[npi]));
 
-Pt::pt3D uk_uuu = pDirect(pt3D(1,1,1) - pDirect(uk_u,uk_u), uk_u);
+    Pt::pt3D uk_uuu = pDirect(pt3D(1,1,1) - pDirect(uk_u,uk_u), uk_u);
     
     double uHeff = -Abis*(norme2(dUdx[npi]) + norme2(dUdy[npi]) + norme2(dUdz[npi])); 
 	uHeff +=  pScal(U[npi], Hext + Hd[npi]) + Kbis*sq(pScal(params[idxPrm].uk,U[npi])) - K3bis*pScal(uk_u,uk_uuu);
 
-    lumping(npi,calc_alpha_eff(alpha_LLG,prm_t.get_dt(),uHeff),prm_t.prefactor*s_dt*Abis,AE);
+    lumping(npi, prm_t.calc_alpha_eff(alpha_LLG,uHeff), prm_t.prefactor*s_dt*Abis, AE);
     
     pt3D truc = Kbis*pScal(params[idxPrm].uk,V[npi])*pt3D(1,1,1);
     pt3D truc2 = -K3bis*pDirect(uk_v , pt3D(1,1,1)-3*pDirect(uk_u,uk_u));

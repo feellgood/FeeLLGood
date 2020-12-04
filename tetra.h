@@ -287,7 +287,8 @@ class Tet{
         
         /** matrix filling */
         void lumping(int const& npi,double alpha_eff,double prefactor, double AE[3*N][3*N]) const;
-            
+        
+        
 		/** computes the integral contribution of the tetrahedron to the evolution of the magnetization */		
 		//void integrales(std::vector<Tetra::prm> const& params, const double dt, Pt::pt3D const& Hext, double tau_r, double Vz, double AE[3*N][3*N], Pt::pt3D BE[N])  const;
         void integrales(std::vector<Tetra::prm> const& params, timing const& prm_t, Pt::pt3D const& Hext, double Vz, double AE[3*N][3*N], Pt::pt3D BE[N])  const;
@@ -345,8 +346,6 @@ class Tet{
         
         const std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
         
-        
-        
         /** getter to access and copy some vector parts of the node vector */
 		inline void getVecDataFromNode(std::function<Pt::pt3D (Nodes::Node)> getter,Pt::pt3D vecData[N]) const
             { for (int i=0; i<N; i++) vecData[i] = getter((*refNode)[ ind[i] ]); }
@@ -381,26 +380,7 @@ class Tet{
         for (int i=0; i<N; i++)
             { scalData[i] =  getter( (*refNode)[ ind[i] ] ,idx); }    
         }
-        
     };//end class Tetra
-
-    /** to perform some second order corrections, an effective \f$ \alpha \f$ is computed here with a piecewise formula */
-    inline double calc_alpha_eff(const double alpha,const double dt,const double h)
-        {
-        double a_eff = alpha;
-        const double r = 0.1;//what is that constant, where does it come from ?
-        const double M = 2.*alpha*r/dt;
-
-        if (h>0.){ 
-            if (h>M) a_eff = alpha+dt/2.*M;
-            else a_eff = alpha+dt/2.*h;
-            }
-        else{
-            if (h<-M) a_eff = alpha/(1.+dt/(2.*alpha)*M);
-            else a_eff = alpha/(1.-dt/(2.*alpha)*h);
-            }
-        return a_eff;
-        }
 }//end namespace Tetra
 
 #endif /* tetra_h */
