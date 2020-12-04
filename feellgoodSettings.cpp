@@ -33,7 +33,7 @@ std::cout << solverNbTh+1 << " threads for assembling matrix." << std::endl;
 }
 
 
-void Settings::read(timing &t_prm,std::string fileJson)
+timing Settings::read(std::string fileJson)
 {
 boost::property_tree::ptree root;
 boost::property_tree::ptree sub_tree,s_sub_tree;
@@ -244,9 +244,12 @@ catch (std::exception &e)
     
 DUMIN = sub_tree.get<double>("min(du)",1e-9);
 DUMAX = sub_tree.get<double>("max(du)",0.02);
-t_prm.DTMIN = sub_tree.get<double>("min(dt)",1e-14);
-t_prm.DTMAX = sub_tree.get<double>("max(dt)",1e-7);
-t_prm.TAUR = 100.* t_prm.DTMAX; // pourquoi 100 ?
-t_prm.set_dt_init();
-t_prm.tf = sub_tree.get<double>("final_time",0);
+
+double dt_min = sub_tree.get<double>("min(dt)",1e-14);
+double dt_max = sub_tree.get<double>("max(dt)",1e-7);
+double tf = sub_tree.get<double>("final_time",dt_max);
+
+timing t_prm = timing(0.0,tf,dt_min,dt_max);
+
+return(t_prm);
 }

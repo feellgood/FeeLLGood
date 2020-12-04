@@ -22,8 +22,8 @@ for(unsigned int i = 0;i<settings.evol_columns.size();i++)
 
     if(keyVal == "iter") { fout << nt << sep;}
     if(keyVal == "t") { fout << t_prm.t << sep;}
-    if(keyVal == "dt") { fout << t_prm.dt << sep;}
-    if(keyVal == "max_dm") { fout << vmax*t_prm.dt << sep;}
+    if(keyVal == "dt") { fout << t_prm.get_dt() << sep;}
+    if(keyVal == "max_dm") { fout << vmax*t_prm.get_dt() << sep;}
     if(keyVal == "<Mx>") { fout << avg(Nodes::get_u_comp,Pt::IDX_X) << sep;}
     if(keyVal == "<My>") { fout << avg(Nodes::get_u_comp,Pt::IDX_Y) << sep;}
     if(keyVal == "<Mz>") { fout << avg(Nodes::get_u_comp,Pt::IDX_Z) << sep;}

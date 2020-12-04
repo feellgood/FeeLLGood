@@ -47,7 +47,7 @@ class Settings{
     void infos(void);
 	
     /** read settings from a json file */
-	void read(timing &t_prm,std::string fileJson);
+	timing read(std::string fileJson);
 	
 	inline void setPbName(std::string str) {pbName = str;} /**< setter for .msh file name  */
 	inline std::string getPbName(void) const {return pbName;}/**< getter for problem file name */

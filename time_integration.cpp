@@ -62,7 +62,7 @@ int flag  = 0;
 int nt_output = 0;  // visible iteration count
 int nt = 0;         // total iteration count
 double t_step = settings.time_step;
-TimeStepper stepper(t_prm.dt, t_prm.DTMIN, t_prm.DTMAX);
+TimeStepper stepper(t_prm.get_dt(), t_prm.DTMIN, t_prm.DTMAX);
 
 // Loop over the visible time steps,
 // i.e. those that will appear on the output file.
@@ -71,17 +71,17 @@ for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_ste
     // Loop over the integration time steps within a visible step.
     while (t_prm.t < t_target)
         {
-        t_prm.dt = stepper(t_target - t_prm.t);
-        bool last_step = (t_prm.dt == t_target - t_prm.t);
+        t_prm.set_dt( stepper(t_target - t_prm.t) );
+        bool last_step = (t_prm.get_dt() == t_target - t_prm.t);
 
         if(settings.verbose)
             {
             std::cout << " ------------------------------\n";
             if (flag) std::cout << "    t  : same (" << flag << ")";
             else std::cout << "nt_output = " << nt_output << ", nt = " << nt << ", t = " << t_prm.t;
-            std::cout << ", dt = " << t_prm.dt ;
+            std::cout << ", dt = " << t_prm.get_dt() ;
             }
-        if (t_prm.dt < t_prm.DTMIN) { fem.reset();break; }
+        if (t_prm.get_dt() < t_prm.DTMIN) { fem.reset();break; }
 
         /* changement de referentiel */
         fem.DW_vz += fem.DW_dir*fem.avg(Nodes::get_v_comp,Pt::IDX_Z)*fem.l.z()/2.;
@@ -96,11 +96,11 @@ for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_ste
             {
             std::cout << "solver warning #" << err << ": you might need to adapt time step, max(du), and/or the refreshing period of the preconditionner" << std::endl;
             flag++;
-            stepper.set_soft_limit(t_prm.dt / 2);
+            stepper.set_soft_limit(t_prm.get_dt() / 2);
             continue;
             }
 
-        double dumax = t_prm.dt*fem.vmax;
+        double dumax = t_prm.get_dt()*fem.vmax;
         if(settings.verbose) { std::cout << "\t dumax = " << dumax << ",  vmax = "<< fem.vmax << std::endl; }
         if (dumax < settings.DUMIN) break; 
                 
@@ -116,17 +116,17 @@ for (double t_target = t_prm.t; t_target <  t_prm.tf+t_step/2; t_target += t_ste
         if (last_step)
             t_prm.t = t_target;
         else
-            t_prm.t += t_prm.dt;
+            t_prm.t += t_prm.get_dt();
 
         fem.DW_vz0 = fem.DW_vz;/* mise a jour de la vitesse du dernier referentiel et deplacement de paroi */ 
-        fem.DW_z  += fem.DW_vz*t_prm.dt;
+        fem.DW_z  += fem.DW_vz*t_prm.get_dt();
         if(settings.recenter) fem.recenter(settings.threshold,settings.recentering_direction);
             
         }//endwhile
     fem.saver(settings,t_prm,fout,nt_output++);
     }// end for
 
-if (t_prm.dt < t_prm.DTMIN) { std::cout << " aborted:  dt < DTMIN"; }
+if (t_prm.get_dt() < t_prm.DTMIN) { std::cout << " aborted:  dt < DTMIN"; }
         
 fout.close();
 return nt;

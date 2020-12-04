@@ -16,18 +16,15 @@ base_projection(!RAND_DETERMINIST);
 write_matrix K_TH(2*NOD, 2*NOD);
 std::vector<double> L_TH(2*NOD,0);
 
-double dt = t_prm.dt;
-double tau_r = t_prm.TAUR;
-
 
 for(int i=0;i<NbTH;i++) 
     {
-    std::for_each(refTetIt[i].first,refTetIt[i].second, [this,&Hext,&dt,&tau_r,&K_TH,&L_TH](Tetra::Tet & tet)
+    std::for_each(refTetIt[i].first,refTetIt[i].second, [this,&Hext,&t_prm,&K_TH,&L_TH](Tetra::Tet & tet)
         {
         double K[3*Tetra::N][3*Tetra::N] = { {0} }; 
         Pt::pt3D L[Tetra::N];
         
-        tet.integrales(settings.paramTetra,dt,Hext,tau_r,DW_vz,K, L);
+        tet.integrales(settings.paramTetra,t_prm,Hext,DW_vz,K, L);
         projection_mat<Tetra::Tet,Tetra::N>(tet,K);
         projection_vect<Tetra::Tet,Tetra::N>(tet,L);
         tet.assemblage_mat(K_TH);tet.assemblage_vect(L_TH);tet.treated = true;
@@ -99,7 +96,7 @@ else
     }
 
 read_vector Xr(2*NOD);    gmm::copy(Xw, Xr);
-updateNodes(Xw,dt);
+updateNodes(Xw,t_prm.get_dt());
 return 0;
 }
 
@@ -115,19 +112,16 @@ base_projection(!RAND_DETERMINIST);
 write_matrix K_TH(2*NOD, 2*NOD);
 std::vector<double> L_TH(2*NOD,0);
 
-double dt = t_prm.dt;
-double tau_r = t_prm.TAUR;
-
 for(int i=0;i<NbTH;i++) 
     {
-    tab_TH[i] = std::thread( [this,&Hext,&dt,&tau_r,&K_TH,&L_TH,i]() 
+    tab_TH[i] = std::thread( [this,&Hext,&t_prm,&K_TH,&L_TH,i]() 
         {
-        std::for_each(refTetIt[i].first,refTetIt[i].second, [this,&Hext,&dt,&tau_r,&K_TH,&L_TH](Tetra::Tet & tet)
+        std::for_each(refTetIt[i].first,refTetIt[i].second, [this,&Hext,&t_prm,&K_TH,&L_TH](Tetra::Tet & tet)
             {
             double K[3*Tetra::N][3*Tetra::N] = { {0} }; 
             Pt::pt3D L[Tetra::N];
             
-            tet.integrales(settings.paramTetra,dt,Hext,tau_r,DW_vz,K, L);
+            tet.integrales(settings.paramTetra,t_prm,Hext,DW_vz,K, L);
             projection_mat<Tetra::Tet,Tetra::N>(tet,K);
             projection_vect<Tetra::Tet,Tetra::N>(tet,L);
             if(my_mutex.try_lock())
@@ -217,7 +211,7 @@ else
 << counter.elapsed() << " s" << std::endl; }
     }
 
-updateNodes(X,dt);
+updateNodes(X,t_prm.get_dt());
 return 0;
 }
 

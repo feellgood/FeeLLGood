@@ -12,6 +12,7 @@
 #include "config.h"
 #include "node.h"
 #include "tiny.h"
+#include "time_integration.h"
 
 
 /** \namespace Tetra
@@ -21,6 +22,8 @@ namespace Tetra
 {
 const int N = 4;/**< number of sommits */
 const int NPI = 5;/**< number of weights  */
+
+const double epsilon = EPSILON;/**< this constant is defined from a macro in config.h.in, it is used to check the validity of the tetrahedreon, a degeneracy test */
 
 const double A=1./4.;/**< some constant to build hat functions */
 const double B=1./6.;/**< some constant to build hat functions */
@@ -118,8 +121,7 @@ class Tet{
                    const int i0 /**< [in] node index */,
                    const int i1 /**< [in] node index */,
                    const int i2 /**< [in] node index */,
-                   const int i3 /**< [in] node index */,
-                    const double epsilon/**< for degeneracy test */) : idxPrm(_idx),NOD(_p_node->size()),reg(_reg),refNode(_p_node)
+                   const int i3 /**< [in] node index */) : idxPrm(_idx),NOD(_p_node->size()),reg(_reg),refNode(_p_node)
             {
             ind[0] = i0; ind[1] = i1; ind[2] = i2; ind[3] = i3;
             for (int i=0; i<N; i++) ind[i]--;           // convention Matlab/msh -> C++
@@ -131,7 +133,7 @@ class Tet{
             double detJ = Jacobian(J);
             double da[N][Pt::DIM];
     
-            if (fabs(detJ) < epsilon)
+            if (fabs(detJ) < Tetra::epsilon)
                 {
                 std::cerr << "Singular jacobian in tetrahedron" << std::endl;
                 infos();
@@ -287,8 +289,9 @@ class Tet{
         void lumping(int const& npi,double alpha_eff,double prefactor, double AE[3*N][3*N]) const;
             
 		/** computes the integral contribution of the tetrahedron to the evolution of the magnetization */		
-		void integrales(std::vector<Tetra::prm> const& params, const double dt, Pt::pt3D const& Hext, double tau_r, double Vz, double AE[3*N][3*N], Pt::pt3D BE[N])  const;
-
+		//void integrales(std::vector<Tetra::prm> const& params, const double dt, Pt::pt3D const& Hext, double tau_r, double Vz, double AE[3*N][3*N], Pt::pt3D BE[N])  const;
+        void integrales(std::vector<Tetra::prm> const& params, timing const& prm_t, Pt::pt3D const& Hext, double Vz, double AE[3*N][3*N], Pt::pt3D BE[N])  const;
+		
         /** exchange energy of the tetrahedron */
         double exchangeEnergy(Tetra::prm const& param,const double dudx[Pt::DIM][NPI],const double dudy[Pt::DIM][NPI],const double dudz[Pt::DIM][NPI]) const;
         

@@ -67,8 +67,7 @@ prompt();
 
 string fileJson = parseOptions(mySettings,argc,argv);
 
-timing t_prm;
-mySettings.read(t_prm,fileJson);
+timing t_prm = mySettings.read(fileJson);
 Fem fem = Fem(mySettings,t_prm);
 
 if(mySettings.verbose)

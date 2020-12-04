@@ -2,12 +2,11 @@
   Elementary matrix Calculation for a tetrahedron element 
  */ 
 
-#include "config.h" //pour macro if_verbose
-
 #include "tetra.h"
 #include "pt3D.h"
 #include "tiny.h"
 #include "matBlocDiag.h"
+#include "time_integration.h"
 
 using namespace Tetra;
 using namespace Pt;
@@ -45,7 +44,8 @@ for (int i=0; i<N; i++)
     }
 }
 
-void Tet::integrales(std::vector<Tetra::prm> const& params,const double dt,Pt::pt3D const& Hext,double tau_r,double Vz, double AE[3*N][3*N], Pt::pt3D BE[N]) const
+//void Tet::integrales(std::vector<Tetra::prm> const& params,const double dt,Pt::pt3D const& Hext,double tau_r,double Vz, double AE[3*N][3*N], Pt::pt3D BE[N]) const
+void Tet::integrales(std::vector<Tetra::prm> const& params, timing const& prm_t,Pt::pt3D const& Hext,double Vz, double AE[3*N][3*N], Pt::pt3D BE[N]) const
 {
 double alpha_LLG = params[idxPrm].alpha_LLG;
 pt3D alpha = params[idxPrm].alpha;
@@ -58,7 +58,7 @@ double Uz = params[idxPrm].Uz;
 double Abis = 2.0*(params[idxPrm].A)/(params[idxPrm].J);
 double Kbis = 2.0*(params[idxPrm].K)/(params[idxPrm].J);
 double K3bis = 2.0*(params[idxPrm].K3)/(params[idxPrm].J);
-const double s_dt = THETA*dt;//theta from theta scheme in config.h.in
+const double s_dt = THETA*prm_t.get_dt();//theta from theta scheme in config.h.in
 
 /*-------------------- INTERPOLATION --------------------*/
 pt3D Hd[NPI], dUdx[NPI], dUdy[NPI], dUdz[NPI];
@@ -70,8 +70,6 @@ interpolation(Nodes::get_v0,V,dVdx,dVdy,dVdz);
 interpolation(Nodes::get_phi0,Hd);
 interpolation(Nodes::get_phiv0,Hv);
 
-double prefactor = s_dt*(1.+ dt/tau_r*abs(log(dt/tau_r)))* Abis;
-
 for (int npi=0; npi<NPI; npi++){
     pt3D uk_u = pt3D(pScal(alpha,U[npi]), pScal(beta,U[npi]), pScal(gamma,U[npi]));
     pt3D uk_v = pt3D(pScal(alpha,V[npi]), pScal(beta,V[npi]), pScal(gamma,V[npi]));
@@ -81,7 +79,7 @@ Pt::pt3D uk_uuu = pDirect(pt3D(1,1,1) - pDirect(uk_u,uk_u), uk_u);
     double uHeff = -Abis*(norme2(dUdx[npi]) + norme2(dUdy[npi]) + norme2(dUdz[npi])); 
 	uHeff +=  pScal(U[npi], Hext + Hd[npi]) + Kbis*sq(pScal(params[idxPrm].uk,U[npi])) - K3bis*pScal(uk_u,uk_uuu);
 
-    lumping(npi,calc_alpha_eff(alpha_LLG,dt,uHeff),prefactor,AE);
+    lumping(npi,calc_alpha_eff(alpha_LLG,prm_t.get_dt(),uHeff),prm_t.prefactor*s_dt*Abis,AE);
     
     pt3D truc = Kbis*pScal(params[idxPrm].uk,V[npi])*pt3D(1,1,1);
     pt3D truc2 = -K3bis*pDirect(uk_v , pt3D(1,1,1)-3*pDirect(uk_u,uk_u));
