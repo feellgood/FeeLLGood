@@ -49,6 +49,20 @@ constexpr double a[N][NPI] = {{1.-u[0]-v[0]-w[0],1.-u[1]-v[1]-w[1],1.-u[2]-v[2]-
 {u[0],u[1],u[2],u[3],u[4]}, {v[0],v[1],v[2],v[3],v[4]}, {w[0],w[1],w[2],w[3],w[4]}};
 
 
+/*
+void node_mult_a(Pt::pt3D const vec[N],Pt::pt3D result[NPI])
+        {
+        for (int k=0; k<NPI; k++) 
+            {
+            result[k] = Pt::pt3D(0,0,0);
+                for(int j=0; j<N; j++)
+                {
+                result[k] += vec[j]*a[j][k];
+                }
+            }
+        }
+*/
+        
 /** \class prm
 region number and material constants
 */
@@ -169,20 +183,27 @@ class Tet{
 		
 		
 		
+		
 		/** interpolation for 3D vector field: the getter function is given as a parameter in order to know what part of the node you want to interpolate */
-		inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double result[Pt::DIM][NPI]) const
+		inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,Pt::pt3D result[NPI]) const
         {
-        double vec_nod[Pt::DIM][N];
+        //double vec_nod[Pt::DIM][N];
+        //getVecDataFromNode(getter,vec_nod);
+        Pt::pt3D vec_nod[N];
         getVecDataFromNode(getter,vec_nod);
         
+        //node_mult_a(vec_nod,result);
         tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, a, result);
         }
 		
 		/** interpolation for a tensor : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
         inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double Tx[Pt::DIM][NPI],double Ty[Pt::DIM][NPI],double Tz[Pt::DIM][NPI]) const
         {
-        double vec_nod[Pt::DIM][N];
+        //double vec_nod[Pt::DIM][N];
+        //getVecDataFromNode(getter,vec_nod);
+        Pt::pt3D vec_nod[N];
         getVecDataFromNode(getter,vec_nod);
+
         
         tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, dadx, Tx);
         tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, dady, Ty);
@@ -196,7 +217,9 @@ class Tet{
 		double u[Pt::DIM][NPI];
         double dudx[Pt::DIM][NPI], dudy[Pt::DIM][NPI], dudz[Pt::DIM][NPI];
         
-		double vec_nod[Pt::DIM][N];
+		//double vec_nod[Pt::DIM][N];
+        //getVecDataFromNode(getter,vec_nod);
+        Pt::pt3D vec_nod[N];
         getVecDataFromNode(getter,vec_nod);
         
         tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, a, u);
@@ -217,7 +240,9 @@ class Tet{
         inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double result[Pt::DIM][NPI],
                                   double Tx[Pt::DIM][NPI],double Ty[Pt::DIM][NPI],double Tz[Pt::DIM][NPI]) const
         {
-        double vec_nod[Pt::DIM][N];
+        //double vec_nod[Pt::DIM][N];
+        //getVecDataFromNode(getter,vec_nod);
+        Pt::pt3D vec_nod[N];
         getVecDataFromNode(getter,vec_nod);
         
         tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, a, result);
@@ -351,7 +376,8 @@ class Tet{
             { for (int i=0; i<N; i++) vecData[i] = getter((*refNode)[ ind[i] ]); }
         
         /** getter to access and copy some vector parts of the node vector */
-		inline void getVecDataFromNode(std::function<Pt::pt3D (Nodes::Node)> getter,double vecData[Pt::DIM][N]) const
+/*
+        inline void getVecDataFromNode(std::function<Pt::pt3D (Nodes::Node)> getter,double vecData[Pt::DIM][N]) const
 		{
         for (int i=0; i<N; i++)
             {
@@ -362,7 +388,8 @@ class Tet{
             vecData[Pt::IDX_Z][i]   = p.z();
             }
         }
-		
+*/
+
 		/** getter to access and copy some single component of a vector of the node vector */
 		inline double getVecDataFromNode(std::function<Pt::pt3D (Nodes::Node)> getter,Pt::index idx,int i) const
             { return getter((*refNode)[ ind[i] ])(idx); }

@@ -9,44 +9,48 @@ void Fac::integrales(std::vector<Facette::prm> const& params, Pt::pt3D BE[N]) co
 Pt::pt3D const & uk = params[idxPrm].uk;
 double Kbis = 2.0*(params[idxPrm].Ks)/Ms; // carefull Ms of the facette here (could lead to div by zero ?)
 
-double u[DIM][NPI];
+Pt::pt3D u[NPI];
 interpolation(Nodes::get_u0,u);
 
 for (int npi=0; npi<NPI; npi++)
 	{
-    double w_uk_u = weight[npi]*(uk(0)*u[0][npi] + uk(1)*u[1][npi] + uk(2)*u[2][npi]); 
+    double w_uk_u = weight[npi]*pScal(uk,u[npi]);//(uk(0)*u[0][npi] + uk(1)*u[1][npi] + uk(2)*u[2][npi]); 
 
     for (int i=0; i<N; i++) { BE[i] += Kbis*a[i][npi]*w_uk_u*uk; }
     }
 }
 
-double Fac::anisotropyEnergy(Facette::prm const& param,const double u[DIM][NPI]) const
+double Fac::anisotropyEnergy(Facette::prm const& param,const Pt::pt3D u[NPI]) const
 {//surface Neel anisotropy (uk is a uniaxial easy axis)
 double dens[NPI];
 for (int npi=0; npi<NPI; npi++)
-    { dens[npi] = -param.Ks*Pt::sq(param.uk(0)*u[0][npi] + param.uk(1)*u[1][npi] + param.uk(2)*u[2][npi]); }
+    { dens[npi] = -param.Ks*Pt::sq(pScal(param.uk,u[npi])); }
 return weightedScalarProd(dens);
 }
 
 void Fac::charges(std::function<Pt::pt3D (Nodes::Node)> getter,std::vector<double> &srcDen,std::vector<double> &corr,int &nsrc) const
 {
-double u[DIM][NPI];
+Pt::pt3D u[NPI];
 interpolation(getter,u);
 Pt::pt3D n = calc_norm();
 
 for (int j=0; j<NPI; j++, nsrc++)
-    { srcDen[nsrc] = Ms * ( u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z() ) * weight[j]; }
+    { 
+    srcDen[nsrc] = Ms * weight[j] * pScal(u[j],n);//( u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z() ) ; 
+    }
 
 calcCorr(getter,corr,u);
 }
 
-double Fac::demagEnergy(const double u[DIM][NPI],const double phi[NPI]) const
+double Fac::demagEnergy(const Pt::pt3D u[NPI],const double phi[NPI]) const
 {
 double q[NPI];
 Pt::pt3D n = calc_norm();
 
 for (int npi=0; npi<NPI; npi++)
-        { q[npi] = Ms * (u[0][npi]*n.x() + u[1][npi]*n.y() + u[2][npi]*n.z()); }
+        {
+        q[npi] = Ms * pScal(u[npi],n);//(u[0][npi]*n.x() + u[1][npi]*n.y() + u[2][npi]*n.z()); 
+        }
 double dens[NPI];
 for (int npi=0; npi<NPI; npi++)
     { dens[npi] = 0.5*mu0*q[npi]*phi[npi]; }
@@ -132,10 +136,10 @@ double pot = 0.5*(j*pot1 + k*pot2) + s1*pot3 + h*(k*h/2.+s1)*(1-log(h*(a+sqrt(a*
 return Ms*pot;
 }
 
-void Fac::calcCorr(std::function<const Pt::pt3D (Nodes::Node)> getter,std::vector<double> &corr,double u[DIM][NPI]) const
+void Fac::calcCorr(std::function<const Pt::pt3D (Nodes::Node)> getter,std::vector<double> &corr,Pt::pt3D u[NPI]) const
 {
 // calc coord gauss
-double gauss[DIM][NPI];
+Pt::pt3D gauss[NPI];
         
 interpolation(Nodes::get_p,gauss);
 // calc corr node by node
@@ -143,13 +147,11 @@ Pt::pt3D n = calc_norm();
 
 for (int i=0; i<N; i++)
     {
-    int i_ = ind[i];
-    Pt::pt3D p_i_ = (*refNode)[i_].p;	      
+    const int i_ = ind[i];
+    const Pt::pt3D p_i_ = (*refNode)[ i_ ].p;	      
     for (int j=0; j<NPI; j++)
         {
-        Pt::pt3D pg = Pt::pt3D(gauss[Pt::IDX_X][j], gauss[Pt::IDX_Y][j], gauss[Pt::IDX_Z][j]);
-        double sj = Ms* ( u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z() );
-        corr[i_]-= sj*weight[j]/Pt::dist(p_i_,pg);
+        corr[i_]-= Ms*pScal(u[j],n)*weight[j]/Pt::dist(p_i_, gauss[j]);
         }
     corr[i_]+= potential(getter,i);
     }

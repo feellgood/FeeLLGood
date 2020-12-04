@@ -116,12 +116,12 @@ class fmm
         {
         std::for_each(container.begin(),container.end(),[this,c,&idx](T const& elem)              
             {  
-            double gauss[Pt::DIM][NPI];
+            Pt::pt3D gauss[NPI];
             elem.interpolation(Nodes::get_p,gauss);
         
             for (int j=0; j<NPI; j++, idx++)
                 {
-                Pt::pt3D pSource = norm*(Pt::pt3D(gauss[0][j],gauss[1][j],gauss[2][j]) - c);
+                Pt::pt3D pSource = norm*(gauss[j] - c);
                 tree.insert( FPoint<FReal>(pSource.x(), pSource.y(), pSource.z()) , FParticleType::FParticleTypeSource, idx, 0.0);
                 }
             });//end for_each    

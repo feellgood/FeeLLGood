@@ -149,7 +149,7 @@ std::for_each(tet.begin(),tet.end(),[&idx_tet,&fout,scale](Tetra::Tet const &te)
     {
     
     /*------------------- INTERPOL --------------------*/
-    double gauss[Pt::DIM][Tetra::NPI];
+    Pt::pt3D gauss[Tetra::NPI];
     double Hdx[Tetra::NPI], Hdy[Tetra::NPI], Hdz[Tetra::NPI];
 
     te.interpolation(Nodes::get_p,gauss);
@@ -158,11 +158,9 @@ std::for_each(tet.begin(),tet.end(),[&idx_tet,&fout,scale](Tetra::Tet const &te)
     
     for (int npi=0; npi<Tetra::NPI; npi++)
         {
-	    double x = gauss[0][npi]/scale;
-	    double y = gauss[1][npi]/scale;
-	    double z = gauss[2][npi]/scale;
-	
-        fout << idx_tet << " " << npi << " " << x << " " << y << " " << z << " "<< Hdx[npi] << " " << Hdy[npi] << " " << Hdz[npi] << endl;
+	    Pt::pt3D p = gauss[npi]/scale;
+	    
+        fout << idx_tet << " " << npi << " " << p << " "<< Hdx[npi] << " " << Hdy[npi] << " " << Hdz[npi] << endl;
         // " %8d %3d %+20.10f %+20.10f %+20.10f %+20.10e %+20.10e %+20.10e"
         }
     idx_tet++;

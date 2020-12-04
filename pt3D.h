@@ -136,6 +136,9 @@ public:
     /** getter by int : carefull, no test on i ! */
     inline double operator() (const int i) const { return _x[i]; }
     
+    /** setter by int : carefull, no test on i ! */
+    inline void operator() (const int i, const double val) { _x[i]=val; }
+    
     inline pt3D& operator=(pt3D const& p) {_x[IDX_X] = p.x(); _x[IDX_Y] = p.y(); _x[IDX_Z] = p.z(); return *this;} /**< operator= */
     
     

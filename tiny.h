@@ -71,6 +71,32 @@ template <typename T, int M, int N, int P> inline void direct_transposed_mult(T 
        }
    }
 
+   /** mat mat multiplication
+\return \f$ C = A B \f$
+*/
+template <typename T, int M, int N, int P> inline void mult(const Pt::pt3D vec[N],const T B[N][P], Pt::pt3D C[P]) {
+   for (int i=0; i<M; i++) 
+   for (int k=0; k<P; k++) {
+       T v=T(0);
+       for (int j=0; j<N; j++) 
+           v+= vec[j](i)*B[j][k];
+       C[k](i,v);
+       }
+   }
+   
+/** mat mat multiplication
+\return \f$ C = A B \f$
+*/
+template <typename T, int M, int N, int P> inline void mult(const Pt::pt3D vec[N],const T B[N][P], T C[M][P]) {
+   for (int i=0; i<M; i++) 
+   for (int k=0; k<P; k++) {
+       T v=T(0);
+       for (int j=0; j<N; j++) 
+           v+= vec[j](i)*B[j][k];
+       C[i][k]=v;
+       }
+   }
+
    
 /** mat mat multiplication
 \return \f$ C = A B \f$

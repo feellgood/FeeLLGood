@@ -33,7 +33,7 @@ std::for_each(fac.begin(),fac.end(),[this,&settings](Facette::Fac const& fa)
     {
     Facette::prm const& param = settings.paramFacette[fa.idxPrm];    
     double phi[Facette::NPI];
-    double u[Pt::DIM][Facette::NPI];
+    Pt::pt3D u[Facette::NPI];
 
     fa.interpolation(Nodes::get_u,u);
     fa.interpolation(Nodes::get_phi,phi);

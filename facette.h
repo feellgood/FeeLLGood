@@ -93,29 +93,33 @@ class Fac{
             //{return (X[0]*weight[0] + X[1]*weight[1] + X[2]*weight[2] + X[3]*weight[3] );}
         
         /** interpolation for 3D vector field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
-        inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter /**< [in] */,double result[Pt::DIM][NPI] /**< [out] */) const
+        inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter /**< [in] */,Pt::pt3D result[NPI] /**< [out] */) const
         {
-        double vec_nod[Pt::DIM][N];
+        Pt::pt3D vec_nod[N];
         for (int i=0; i<N; i++)
             {
             Nodes::Node const& node = (*refNode)[ ind[i] ];
     
-            vec_nod[0][i]   = getter(node).x();
-            vec_nod[1][i]   = getter(node).y();
-            vec_nod[2][i]   = getter(node).z();
+            vec_nod[i] = getter(node);
             }
-        double sx = (vec_nod[Pt::IDX_X][0] + vec_nod[Pt::IDX_X][1] + vec_nod[Pt::IDX_X][2] )/5.0;
-        double sy = (vec_nod[Pt::IDX_Y][0] + vec_nod[Pt::IDX_Y][1] + vec_nod[Pt::IDX_Y][2] )/5.0;
-        double sz = (vec_nod[Pt::IDX_Z][0] + vec_nod[Pt::IDX_Z][1] + vec_nod[Pt::IDX_Z][2] )/5.0;
         
-        result[0][0] = result[0][1] = result[0][2] = result[0][3] = sx;
-        result[1][0] = result[1][1] = result[1][2] = result[1][3] = sy;
-        result[2][0] = result[2][1] = result[2][2] = result[2][3] = sz;
+        Pt::pt3D s = (vec_nod[0] + vec_nod[1] + vec_nod[2] )/5.0;
+        //double sx = (vec_nod[Pt::IDX_X][0] + vec_nod[Pt::IDX_X][1] + vec_nod[Pt::IDX_X][2] )/5.0;
+        //double sy = (vec_nod[Pt::IDX_Y][0] + vec_nod[Pt::IDX_Y][1] + vec_nod[Pt::IDX_Y][2] )/5.0;
+        //double sz = (vec_nod[Pt::IDX_Z][0] + vec_nod[Pt::IDX_Z][1] + vec_nod[Pt::IDX_Z][2] )/5.0;
         
-        result[0][0] *= (5.0/3.0); result[1][0] *= (5.0/3.0); result[2][0] *= (5.0/3.0);
-        result[0][1] += vec_nod[0][0]*2.0/5.0; result[0][2] += vec_nod[0][1]*2.0/5.0; result[0][3] += vec_nod[0][2]*2.0/5.0;
-        result[1][1] += vec_nod[1][0]*2.0/5.0; result[1][2] += vec_nod[1][1]*2.0/5.0; result[1][3] += vec_nod[1][2]*2.0/5.0;
-        result[2][1] += vec_nod[2][0]*2.0/5.0; result[2][2] += vec_nod[2][1]*2.0/5.0; result[2][3] += vec_nod[2][2]*2.0/5.0;
+        for(int i=0;i<NPI;i++)
+            {result[i] = s;}
+        result[0] *= (5.0/3.0);
+        //result[0][0] *= (5.0/3.0); result[1][0] *= (5.0/3.0); result[2][0] *= (5.0/3.0);
+
+        result[1] += vec_nod[0]*2.0/5.0;
+        result[2] += vec_nod[1]*2.0/5.0;
+        result[3] += vec_nod[2]*2.0/5.0;
+        
+        //result[0][1] += vec_nod[0][0]*2.0/5.0; result[0][2] += vec_nod[0][1]*2.0/5.0; result[0][3] += vec_nod[0][2]*2.0/5.0;
+        //result[1][1] += vec_nod[1][0]*2.0/5.0; result[1][2] += vec_nod[1][1]*2.0/5.0; result[1][3] += vec_nod[1][2]*2.0/5.0;
+        //result[2][1] += vec_nod[2][0]*2.0/5.0; result[2][2] += vec_nod[2][1]*2.0/5.0; result[2][3] += vec_nod[2][2]*2.0/5.0;
         
         //tiny::mult<double, DIM, N, NPI> (vec_nod, a, result);
         }
@@ -143,13 +147,13 @@ class Fac{
 	void integrales(std::vector<Facette::prm> const& params /**< [in] */, Pt::pt3D BE[N] /**< [out] */) const;
 		
         /** anisotropy energy of the facette */
-        double anisotropyEnergy(Facette::prm const& param /**< [in] */,const double u[Pt::DIM][NPI] /**< [in] */) const;
+        double anisotropyEnergy(Facette::prm const& param /**< [in] */,const Pt::pt3D u[NPI] /**< [in] */) const;
         
         /** surface charges  */
         void charges(std::function<Pt::pt3D (Nodes::Node)> getter,std::vector<double> &srcDen,std::vector<double> &corr,int &nsrc) const;
         
         /** demagnetizing energy of the facette */
-        double demagEnergy(const double u[Pt::DIM][NPI] /**< [in] */,const double phi[NPI] /**< [in] */) const;
+        double demagEnergy(const Pt::pt3D u[NPI] /**< [in] */,const double phi[NPI] /**< [in] */) const;
         
         /** assemblage of the matrix elements from inner matrix in facette object */
         void assemblage_mat(write_matrix &K) const;
@@ -168,7 +172,7 @@ class Fac{
         double potential(std::function<Pt::pt3D (Nodes::Node)> getter, int i) const;
         
         /** computes correction values */
-        void calcCorr(std::function<const Pt::pt3D (Nodes::Node)> getter,std::vector<double> &corr,double u[Pt::DIM][NPI]) const;
+        void calcCorr(std::function<const Pt::pt3D (Nodes::Node)> getter,std::vector<double> &corr,Pt::pt3D u[NPI]) const;
         
         /** lexicographic order on indices */
         inline bool operator< (const Fac &f) const
