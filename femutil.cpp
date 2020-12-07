@@ -36,9 +36,8 @@ surf = std::accumulate(fac.begin(),fac.end(),0.0,[](double x,Facette::Fac const&
 
 void Fem::femutil(Settings const& settings)
 {
-//facettes set with order less_than
-std::set<Facette::Fac, Facette::less_than> sf;
-    
+std::set<Facette::Fac> sf;//implicit use of operator< overloaded in class Fac
+
 std::for_each(tet.begin(),tet.end(),[&sf](Tetra::Tet const& te)
 	{
 	int ia=te.ind[0];int ib=te.ind[1];int ic=te.ind[2];int id=te.ind[3];
@@ -54,17 +53,13 @@ std::for_each(fac.begin(),fac.end(),[this,&settings,&sf](Facette::Fac &fa)
     fa.Ms = 0.;
     if ( !(settings.paramFacette[fa.idxPrm].suppress_charges) )
         {
-        int i0 = fa.ind[0];
-        int i1 = fa.ind[1];
-        int i2 = fa.ind[2];
-
-        std::set< Facette::Fac, Facette::less_than >::iterator it=sf.end();
+        std::set< Facette::Fac>::iterator it=sf.end();
         for (int perm=0; perm<2; perm++) 
             {
             for (int nrot=0; nrot<3; nrot++)
                 {
                 Facette::Fac fc(node.size());
-                fc.ind[(0+nrot)%3]=i0; fc.ind[(1+nrot)%3]=i1; fc.ind[(2+nrot)%3]=i2;
+                for (int i=0;i<3;i++) fc.ind[(i+nrot)%3]= fa.ind[i];
                 it=sf.find(fc);
                 if (it!=sf.end()) break;
                 }
@@ -78,7 +73,7 @@ std::for_each(fac.begin(),fac.end(),[this,&settings,&sf](Facette::Fac &fa)
                 //fa.Ms will have the magnitude of first arg of copysign, with the sign of second arg
                 fa.Ms = std::copysign(nu0*settings.paramTetra[it->idxPrm].J , Pt::pTriple( p1-p0 , p2-p0 ,fa.calc_norm()) );
                 }
-            std::swap(i1,i2);
+	    fa.swap_idx(1,2);
             }//end perm
         }
     }); //end for_each

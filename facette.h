@@ -195,6 +195,8 @@ class Fac{
 
 	/** computes surface of the face		*/		
 	double calc_surf(void) const;
+
+	inline void swap_idx(const int i,const int j) { std::swap(ind[i],ind[j]); }
     
     private:
         const int NOD;/**< number of nodes */
@@ -203,14 +205,6 @@ class Fac{
         const std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
         
 };//end class Fac
-
-
-/** operator less_than for the orientation of the facette, lexicographic order */
-struct less_than 
-{
-    /** operator () for ordering facettes with operator< overloaded */
-    bool operator()(const Fac &f1, const Fac &f2) const {return (f1<f2);} 
-};
 
 }//end namespace
 
