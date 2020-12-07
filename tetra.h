@@ -111,9 +111,6 @@ indices convention is<br>
 */
 class Tet{
     public:
-		inline Tet(int _NOD): NOD(_NOD),reg(0)
-        { idxPrm=-1; treated = false;} /**< default constructor */
-		
 		/** constructor for readMesh. It initializes weight hat function and dad(x|y|z) if \f$ | detJ | < \epsilon \f$ jacobian is considered degenerated
          */
 		inline Tet(const std::vector<Nodes::Node>  *_p_node /**< [in] pointer to the nodes */,

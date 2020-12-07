@@ -53,9 +53,9 @@ Face is a class containing the index references to nodes, it has a triangular sh
 */
 class Fac{
 	public:
-		inline Fac(int _NOD /**< [in] */):NOD(_NOD),reg(0)  /**< constructor */
-            { treated = false; }
-        
+        /** constructor */
+	inline Fac(int _NOD /**< [in] */):treated(false),NOD(_NOD),reg(0) { }
+
         /** constructor used by readMesh */
         inline Fac(const std::vector<Nodes::Node>  *_p_node /**< [in] pointer to the nodes */,
                    const int _reg /**< [in] region number */,
