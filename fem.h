@@ -145,13 +145,13 @@ class Fem
     /** saving function for a solution */
     void saver(Settings & settings /**< [in] */,timing const& t_prm /**< [in] */, std::ofstream &fout /**< [out] */, const int nt /**< [in] */) const;
 
-    /** text file (vtk) writing function for a solution */
+    /** text file (vtk) writing function for a solution, using text VTK format (unstructured grid version 2.0) : deprecated, it is recommanded to use convert2vtk python script instead */
     void savecfg_vtk(Settings const& settings /**< [in] */,timing const& t_prm /**< [in] */,const std::string fileName /**< [in] */) const;
 
     /** text file (tsv) writing function for a solution */
     void savesol(const std::string fileName /**< [in] */,timing const& t_prm /**< [in] */,const double s /**< [in] */) const;
 
-    /** save the field values */
+    /** save the demagnetizing field values, including idx and npi indices, for debug use */
     void saveH(const std::string fileName /**< [in] */,const double t/**< [in] */,const double scale /**< [in] */) const;
     
     /** 
