@@ -48,20 +48,6 @@ a[3][j]   = w[j];
 constexpr double a[N][NPI] = {{1.-u[0]-v[0]-w[0],1.-u[1]-v[1]-w[1],1.-u[2]-v[2]-w[2],1.-u[3]-v[3]-w[3],1.-u[4]-v[4]-w[4]},
 {u[0],u[1],u[2],u[3],u[4]}, {v[0],v[1],v[2],v[3],v[4]}, {w[0],w[1],w[2],w[3],w[4]}};
 
-
-/*
-void node_mult_a(Pt::pt3D const vec[N],Pt::pt3D result[NPI])
-        {
-        for (int k=0; k<NPI; k++) 
-            {
-            result[k] = Pt::pt3D(0,0,0);
-                for(int j=0; j<N; j++)
-                {
-                result[k] += vec[j]*a[j][k];
-                }
-            }
-        }
-*/
         
 /** \class prm
 region number and material constants
@@ -266,9 +252,8 @@ class Tet{
                 { X[j] -= ( scalar_nod[i] * Pt::pt3D(dadx[i][j],dady[i][j],dadz[i][j]) ); }
             }
         }
-		
-		
-		/** interpolation for components of a field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
+
+        /** interpolation for components of a field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
         inline void interpolation(std::function<double (Nodes::Node)> getter,double Xx[NPI],double Xy[NPI],double Xz[NPI]) const
         {
         double scalar_nod[N];    
@@ -278,7 +263,7 @@ class Tet{
         tiny::neg_transposed_mult<double, N, NPI> (scalar_nod, dadz, Xz);
         }
 		
-		/** interpolation for scalar field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
+        /** interpolation for scalar field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
         inline void interpolation(std::function<double (Nodes::Node)> getter,double result[NPI]) const
         {
         double scalar_nod[N];    
@@ -374,39 +359,15 @@ class Tet{
         /** getter to access and copy some vector parts of the node vector */
 		inline void getVecDataFromNode(std::function<Pt::pt3D (Nodes::Node)> getter,Pt::pt3D vecData[N]) const
             { for (int i=0; i<N; i++) vecData[i] = getter((*refNode)[ ind[i] ]); }
-        
-        /** getter to access and copy some vector parts of the node vector */
-/*
-        inline void getVecDataFromNode(std::function<Pt::pt3D (Nodes::Node)> getter,double vecData[Pt::DIM][N]) const
-		{
-        for (int i=0; i<N; i++)
-            {
-            Pt::pt3D const& p = getter((*refNode)[ ind[i] ]);
-    
-            vecData[Pt::IDX_X][i]   = p.x();
-            vecData[Pt::IDX_Y][i]   = p.y();
-            vecData[Pt::IDX_Z][i]   = p.z();
-            }
-        }
-*/
-
-		/** getter to access and copy some single component of a vector of the node vector */
-		inline double getVecDataFromNode(std::function<Pt::pt3D (Nodes::Node)> getter,Pt::index idx,int i) const
-            { return getter((*refNode)[ ind[i] ])(idx); }
-		
+        		
 		/** getter to access and copy some scalar parts of the node vector */
 		inline void getScalDataFromNode(std::function<double (Nodes::Node)> getter,double scalData[N]) const
-		{
-        for (int i=0; i<N; i++)
-            { scalData[i] =  getter( (*refNode)[ ind[i] ] ); }    
-        }
+            { for (int i=0; i<N; i++) scalData[i] =  getter( (*refNode)[ ind[i] ] ); }
 		
 		/** getter to access and copy some scalar parts (vector components) of the node vector */
 		inline void getScalDataFromNode(std::function<double (Nodes::Node,Pt::index)> getter,Pt::index idx,double scalData[N]) const
-		{
-        for (int i=0; i<N; i++)
-            { scalData[i] =  getter( (*refNode)[ ind[i] ] ,idx); }    
-        }
+            { for (int i=0; i<N; i++) scalData[i] =  getter( (*refNode)[ ind[i] ] ,idx); }
+
     };//end class Tetra
 }//end namespace Tetra
 
