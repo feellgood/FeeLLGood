@@ -114,7 +114,8 @@ class Tet{
 		inline Tet(int _NOD): NOD(_NOD),reg(0)
         { idxPrm=-1; treated = false;} /**< default constructor */
 		
-		/** constructor for readMesh */
+		/** constructor for readMesh. It initializes weight hat function and dad(x|y|z) if \f$ | detJ | < \epsilon \f$ jacobian is considered degenerated
+         */
 		inline Tet(const std::vector<Nodes::Node>  *_p_node /**< [in] pointer to the nodes */,
                    const int _reg /**< [in] region number */,
                    const int _idx /**< [in] region index in region vector */,
@@ -158,35 +159,23 @@ class Tet{
 		double dadz[N][NPI];/**< variations of hat function along z directions */
         
         bool treated;/**< flag */
-        
-		/** initializes weight hat function and dad(x|y|z) if \f$ | detJ | < \epsilon \f$ jacobian is considered degenerated */
-		void init(double epsilon);
-        
-        
+
         /** weighted scalar product */
         inline double weightedScalarProd(const double X[NPI]) const
             {return (X[0]*weight[0] + X[1]*weight[1] + X[2]*weight[2] + X[3]*weight[3] +X[4]*weight[4]);}
 		
-		
-		
-		
 		/** interpolation for 3D vector field: the getter function is given as a parameter in order to know what part of the node you want to interpolate */
 		inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,Pt::pt3D result[NPI]) const
         {
-        //double vec_nod[Pt::DIM][N];
-        //getVecDataFromNode(getter,vec_nod);
         Pt::pt3D vec_nod[N];
         getVecDataFromNode(getter,vec_nod);
         
-        //node_mult_a(vec_nod,result);
         tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, a, result);
         }
 		
 		/** interpolation for a tensor : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
         inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double Tx[Pt::DIM][NPI],double Ty[Pt::DIM][NPI],double Tz[Pt::DIM][NPI]) const
         {
-        //double vec_nod[Pt::DIM][N];
-        //getVecDataFromNode(getter,vec_nod);
         Pt::pt3D vec_nod[N];
         getVecDataFromNode(getter,vec_nod);
 
@@ -203,9 +192,7 @@ class Tet{
 		double u[Pt::DIM][NPI];
         double dudx[Pt::DIM][NPI], dudy[Pt::DIM][NPI], dudz[Pt::DIM][NPI];
         
-		//double vec_nod[Pt::DIM][N];
-        //getVecDataFromNode(getter,vec_nod);
-        Pt::pt3D vec_nod[N];
+		Pt::pt3D vec_nod[N];
         getVecDataFromNode(getter,vec_nod);
         
         tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, a, u);
@@ -226,8 +213,6 @@ class Tet{
         inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double result[Pt::DIM][NPI],
                                   double Tx[Pt::DIM][NPI],double Ty[Pt::DIM][NPI],double Tz[Pt::DIM][NPI]) const
         {
-        //double vec_nod[Pt::DIM][N];
-        //getVecDataFromNode(getter,vec_nod);
         Pt::pt3D vec_nod[N];
         getVecDataFromNode(getter,vec_nod);
         
@@ -300,8 +285,7 @@ class Tet{
         
         
 		/** computes the integral contribution of the tetrahedron to the evolution of the magnetization */		
-		//void integrales(std::vector<Tetra::prm> const& params, const double dt, Pt::pt3D const& Hext, double tau_r, double Vz, double AE[3*N][3*N], Pt::pt3D BE[N])  const;
-        void integrales(std::vector<Tetra::prm> const& params, timing const& prm_t, Pt::pt3D const& Hext, double Vz, double AE[3*N][3*N], Pt::pt3D BE[N])  const;
+		void integrales(std::vector<Tetra::prm> const& params, timing const& prm_t, Pt::pt3D const& Hext, double Vz, double AE[3*N][3*N], Pt::pt3D BE[N])  const;
 		
         /** exchange energy of the tetrahedron */
         double exchangeEnergy(Tetra::prm const& param,const double dudx[Pt::DIM][NPI],const double dudy[Pt::DIM][NPI],const double dudz[Pt::DIM][NPI]) const;
@@ -317,9 +301,6 @@ class Tet{
         
         /** zeeman energy of the tetrahedron */
         double zeemanEnergy(Tetra::prm const& param,double uz_drift,Pt::pt3D const& Hext,const double u[Pt::DIM][NPI]) const;
-        
-        /** computes projection of a tetrahedron using inner matrix in tetra object */
-        //void projection(double A[3*N][3*N], double B[3*N]);
         
         /** matrix assembly using inner matrix in tetra */
         void assemblage_mat(write_matrix &K) const;
