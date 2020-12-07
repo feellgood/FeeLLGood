@@ -53,13 +53,14 @@ std::for_each(fac.begin(),fac.end(),[this,&settings,&sf](Facette::Fac &fa)
     fa.Ms = 0.;
     if ( !(settings.paramFacette[fa.idxPrm].suppress_charges) )
         {
+	int i0 = fa.ind[0], i1 = fa.ind[1], i2 = fa.ind[2];
         std::set< Facette::Fac>::iterator it=sf.end();
         for (int perm=0; perm<2; perm++) 
             {
             for (int nrot=0; nrot<3; nrot++)
                 {
                 Facette::Fac fc(node.size());
-                for (int i=0;i<3;i++) fc.ind[(i+nrot)%3]= fa.ind[i];
+                fc.ind[(0+nrot)%3]=i0; fc.ind[(1+nrot)%3]=i1; fc.ind[(2+nrot)%3]=i2;
                 it=sf.find(fc);
                 if (it!=sf.end()) break;
                 }
@@ -71,9 +72,9 @@ std::for_each(fac.begin(),fac.end(),[this,&settings,&sf](Facette::Fac &fa)
                 const Pt::pt3D & p2 = node[ it->ind[2] ].p;
                 
                 //fa.Ms will have the magnitude of first arg of copysign, with the sign of second arg
-                fa.Ms = std::copysign(nu0*settings.paramTetra[it->idxPrm].J , Pt::pTriple( p1-p0 , p2-p0 ,fa.calc_norm()) );
+                fa.Ms = std::copysign(nu0*settings.paramTetra[it->idxPrm].J , Pt::pTriple( p1-p0 , p2-p0 ,fa.calc_norm()) );// carefull here, calc_norm recomputes the normal to the face before the idx swap
                 }
-	    fa.swap_idx(1,2);
+	    std::swap(i1,i2);//fa.swap_idx(1,2); not sure what the algo is supposed to do: it seems from ref archive we do not want to swap inner fac indices but local i1 and i2
             }//end perm
         }
     }); //end for_each
