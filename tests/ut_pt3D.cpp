@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <cstdlib>
-#include <ctime>
+#include <random>
 
 #include "pt3D.h"
 
@@ -106,16 +106,20 @@ BOOST_CHECK( (x1 == 0.0) && (x2 == r2.maxLength())  );
 
 BOOST_AUTO_TEST_CASE(pt3D_triple_product)
 {
-srand(time(0));
-const Pt::pt3D X(((double)rand())/RAND_MAX,((double)rand())/RAND_MAX,((double)rand())/RAND_MAX);
-const Pt::pt3D Y(((double)rand())/RAND_MAX,((double)rand())/RAND_MAX,((double)rand())/RAND_MAX);
-const Pt::pt3D Z((double)(rand())/RAND_MAX,((double)rand())/RAND_MAX,((double)rand())/RAND_MAX);
+std::random_device rd;
+
+std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::uniform_real_distribution<> distrib(-1.0,1.0);
+
+const Pt::pt3D X(distrib(gen),distrib(gen),distrib(gen));
+const Pt::pt3D Y(distrib(gen),distrib(gen),distrib(gen));
+const Pt::pt3D Z(distrib(gen),distrib(gen),distrib(gen));
 
 double x1 = Pt::pTriple(X,Y,Z);
 double x2 = Pt::pTriple(Y,Z,X);
 double x3 = Pt::pTriple(Z,X,Y);
 
-std::cout << "this nasty test check that triple product of 3D vectors is invariant by circular permutation, whatever is the numerical error" << std::endl;
+std::cout << "this test check that the triple product of three 3D random vectors is invariant by circular permutation, whatever is the numerical error" << std::endl;
 std::cout << "X=" << X << std::endl;
 std::cout << "Y=" << Y << std::endl;
 std::cout << "Z=" << Z << std::endl;
