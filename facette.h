@@ -196,6 +196,7 @@ class Fac{
 	/** computes surface of the face		*/		
 	double calc_surf(void) const;
 
+    /** swap i and j indices values */
 	inline void swap_idx(const int i,const int j) { std::swap(ind[i],ind[j]); }
     
     private:

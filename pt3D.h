@@ -168,7 +168,8 @@ public:
 	/**
      * return algebric norm \f$ \mathcal{R}^3 \f$
      */
-	inline double norm(void) {return sqrt(_x[IDX_X]*_x[IDX_X] + _x[IDX_Y]*_x[IDX_Y] + _x[IDX_Z]*_x[IDX_Z]);}
+	inline double norm(void) const
+		{return sqrt(_x[IDX_X]*_x[IDX_X] + _x[IDX_Y]*_x[IDX_Y] + _x[IDX_Z]*_x[IDX_Z]);}
 
     /**
      * normalization : divide each components x,y and z by the norm \f$ \mathcal{R}^3 \f$ in place without safety
