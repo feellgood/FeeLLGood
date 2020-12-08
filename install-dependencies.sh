@@ -17,7 +17,8 @@ job_count=$(getconf _NPROCESSORS_ONLN)
 
 # Install apt packages.
 sudo apt-get update -q
-sudo apt-get install -y cmake libboost-dev
+sudo apt-get install -y cmake libboost-dev \
+    libboost-system-dev libboost-filesystem-dev libboost-test-dev
 
 # Download and build the libraries here. This is the grandparent of the
 # current directory in a Travis build.
