@@ -31,8 +31,8 @@ Pt::pt3D v0;/**< initial or reset value, used to store previous value for time e
 Pt::pt3D u;/**< magnetization value */
 Pt::pt3D v;/**< magnetization speed */
 
-double theta_sph;/**< unit vector theta angle in spherical coordinates  */
-double phi_sph;/**< unit vector phi angle in spherical coordinates  */
+double theta_sph;/**< theta angle for unit vector \f$ e_p = (\theta,\phi) \times u_0 \f$ in spherical coordinates  */
+double phi_sph;/**< phi angle for unit vector \f$ e_p = (\theta,\phi) \times u_0 \f$ in spherical coordinates  */
 
 double phi0;/**< scalar potential initial or reset value, used to store previous value for time evolution */
 double phi;/**< scalar potential value */

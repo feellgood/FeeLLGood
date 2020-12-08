@@ -52,6 +52,9 @@ SET(SOURCES mag_parser.cpp time_integration.cpp feellgoodSettings.cpp
 
 configure_file(config.h.in ./config.h)
 
+add_subdirectory(tests)
+
+
 ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES})
 
 TARGET_LINK_LIBRARIES(feellgood scalfmm ANN)
@@ -67,4 +70,12 @@ endif(DEFINED withSharedLib)
 
 install(TARGETS feellgood RUNTIME DESTINATION bin)
 install(PROGRAMS ./tools/convert2vtk DESTINATION bin)
+
+#############
+# unit tests
+#############
+
+enable_testing()
+add_test (NAME ut_pt3D_arithmetic 
+        COMMAND test_ut_pt3D)
 
