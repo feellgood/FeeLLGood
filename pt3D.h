@@ -300,7 +300,7 @@ inline void inverse(double M[DIM][DIM],double detM)
 /** 
  geometry : returns iso-barycenter
 */
-inline pt3D barycentre(pt3D a,pt3D b,pt3D c) { return( (a+b+c)/3.0 );}
+inline pt3D barycentre(pt3D const a,pt3D const b,pt3D const c) { return( (a+b+c)/3.0 );}
 
 
 /**
