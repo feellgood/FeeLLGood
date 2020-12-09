@@ -7,6 +7,7 @@
 #include <random>
 
 #include "pt3D.h"
+#include "tiny.h"
 
 BOOST_AUTO_TEST_SUITE(ut_pt3D_arithmetic)
 
@@ -168,7 +169,7 @@ std::uniform_real_distribution<> distrib(-1.0,1.0);
 Pt::pt3D X(distrib(gen),distrib(gen),distrib(gen));
 
 std::cout << "###################" << std::endl;
-std::cout << "this test check that a random general rotation filled with a random unit quaternions respect sq(det-1) < __DBL_EPSILON__ " << std::endl;
+std::cout << "this test check that a random general rotation (filled using a random unit quaternions) respect sq(det-1) < __DBL_EPSILON__ " << std::endl;
 std::cout << "X= " << X << std::endl;
 
 while(Pt::norme2(X) > 1.0 )
@@ -193,5 +194,55 @@ std::cout << "det(random_rot) -1=" << result-1.0 << std::endl;
 BOOST_CHECK( (Pt::sq(result - 1.0)  < __DBL_EPSILON__ )  );
 }
 
+BOOST_AUTO_TEST_CASE(pt3D_inverse)
+{
+double M[Pt::DIM][Pt::DIM];
+double inv_M[Pt::DIM][Pt::DIM];
+std::random_device rd;
+
+std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::uniform_real_distribution<> distrib(-1.0,1.0);
+
+Pt::pt3D X(distrib(gen),distrib(gen),distrib(gen));
+
+std::cout << "###################" << std::endl;
+std::cout << "this test check that a random general rotation multiplied by its inverse is ID : norm^2( M * M^-1 - M^-1 * M ) < __DBL_EPSILON__ " << std::endl;
+std::cout << "* is performed using a tiny.h template , norm is the sqrt of the sum of the square of all components (Frobenius) " << std::endl;
+std::cout << "X= " << X << std::endl;
+
+while(Pt::norme2(X) > 1.0 )
+    { X.x(distrib(gen)); X.y(distrib(gen)); X.z(distrib(gen)); }
+
+double x = X.x();double y = X.y();double z = X.z();
+double w = sqrt(1.0 - Pt::norme2(X) ); // w could be negative too
+
+inv_M[0][0] = M[0][0] = 2.0*(x*x + w*w) - 1.0;
+inv_M[0][1] = M[0][1] = 2.0*(x*y - z*w);
+inv_M[0][2] = M[0][2] = 2.0*(x*z + y*w);
+inv_M[1][0] = M[1][0] = 2.0*(x*y + z*w);
+inv_M[1][1] = M[1][1] = 2.0*(y*y + w*w) - 1.0;
+inv_M[1][2] = M[1][2] = 2.0*(y*z - x*w);
+inv_M[2][0] = M[2][0] = 2.0*(x*z - y*w);
+inv_M[2][1] = M[2][1] = 2.0*(y*z + x*w);
+inv_M[2][2] = M[2][2] = 2.0*(z*z + w*w) - 1.0;
+
+double det_M = Pt::det(M);
+
+Pt::inverse(inv_M,det_M);
+
+double M_inv_M[Pt::DIM][Pt::DIM];
+double inv_M_M[Pt::DIM][Pt::DIM];
+
+tiny::mult<double, Pt::DIM, Pt::DIM, Pt::DIM>(M,inv_M, M_inv_M);
+tiny::mult<double, Pt::DIM, Pt::DIM, Pt::DIM>(inv_M, M, inv_M_M);
+
+double result = 0.0;
+for(int i=0;i<Pt::DIM;i++)
+    for(int j=0;j<Pt::DIM;j++)
+        result += Pt::sq(M_inv_M[i][j] - inv_M_M[i][j]);
+
+std::cout << "norm^2(M M^-1 - M^-1 M) =" << result << std::endl;
+BOOST_CHECK( result  < __DBL_EPSILON__ );
+}
 
 BOOST_AUTO_TEST_SUITE_END()
