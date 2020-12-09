@@ -10,7 +10,9 @@
 
 BOOST_AUTO_TEST_SUITE(ut_pt3D_arithmetic)
 
-/* minus one test: check boost is fine */
+/*---------------------------------------*/
+/* minus one test: check boost is fine   */
+/*---------------------------------------*/
 
 BOOST_AUTO_TEST_CASE(Stupid)
 {
@@ -18,7 +20,10 @@ float x = 1.0;
 BOOST_CHECK(x != 0.0f);
 }
 
+/*-----------------------------------------------------*/
 /* zero lvl tests : direct elementary member functions */ 
+/*-----------------------------------------------------*/
+
 
 BOOST_AUTO_TEST_CASE(pt3D_getter)
 {
@@ -87,7 +92,19 @@ double z = -12.0;
 BOOST_CHECK( (x == result(Pt::IDX_X))&&(y == result(Pt::IDX_Y))&&(z == result(Pt::IDX_Z)) );
 }
 
+BOOST_AUTO_TEST_CASE(pt3D_op_dist)
+{
+Pt::pt3D X(1,2,3);
+Pt::pt3D Y(3,2,-4);
+
+double x = sqrt(53.0);
+BOOST_CHECK( fabs( x - Pt::dist(X,Y) ) < __DBL_EPSILON__ );
+}
+
+/*---------------------------------------*/
 /* first lvl tests : nested calculus,... */
+/*---------------------------------------*/
+
 
 BOOST_AUTO_TEST_CASE(pt3D_product_left_and_right)
 {
@@ -102,7 +119,10 @@ double x2 = 2.0;
 BOOST_CHECK( (x1 == 0.0) && (x2 == r2.maxLength())  );
 }
 
-/* second lvl tests : pure mathematics */
+/*---------------------------------------*/
+/* second lvl tests : pure mathematics   */
+/*---------------------------------------*/
+
 
 BOOST_AUTO_TEST_CASE(pt3D_triple_product)
 {
@@ -137,7 +157,41 @@ std::cout << "__DBL_EPSILON__ =" << __DBL_EPSILON__ << std::endl;
 BOOST_CHECK( (fabs(x1-x2)  < __DBL_EPSILON__) && (fabs(x2-x3)  < __DBL_EPSILON__) && ( fabs(x3-x1)  < __DBL_EPSILON__)  );
 }
 
+BOOST_AUTO_TEST_CASE(pt3D_det)
+{
+double M[Pt::DIM][Pt::DIM];
+std::random_device rd;
 
+std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::uniform_real_distribution<> distrib(-1.0,1.0);
+
+Pt::pt3D X(distrib(gen),distrib(gen),distrib(gen));
+
+std::cout << "###################" << std::endl;
+std::cout << "this test check that a random general rotation filled with a random unit quaternions respect sq(det-1) < __DBL_EPSILON__ " << std::endl;
+std::cout << "X= " << X << std::endl;
+
+while(Pt::norme2(X) > 1.0 )
+    { X.x(distrib(gen)); X.y(distrib(gen)); X.z(distrib(gen)); }
+
+double x = X.x();double y = X.y();double z = X.z();
+double w = sqrt(1.0 - Pt::norme2(X) ); // w could be negative too
+
+M[0][0] = 2.0*(x*x + w*w) - 1.0;
+M[0][1] = 2.0*(x*y - z*w);
+M[0][2] = 2.0*(x*z + y*w);
+M[1][0] = 2.0*(x*y + z*w);
+M[1][1] = 2.0*(y*y + w*w) - 1.0;
+M[1][2] = 2.0*(y*z - x*w);
+M[2][0] = 2.0*(x*z - y*w);
+M[2][1] = 2.0*(y*z + x*w);
+M[2][2] = 2.0*(z*z + w*w) - 1.0;
+
+double result = Pt::det(M);
+
+std::cout << "det(random_rot) -1=" << result-1.0 << std::endl;
+BOOST_CHECK( (Pt::sq(result - 1.0)  < __DBL_EPSILON__ )  );
+}
 
 
 BOOST_AUTO_TEST_SUITE_END()
