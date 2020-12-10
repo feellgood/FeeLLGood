@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE geometryTest
+#define BOOST_TEST_MODULE pt3DTest
 
 #include <boost/test/unit_test.hpp>
 

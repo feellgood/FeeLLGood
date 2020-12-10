@@ -83,6 +83,5 @@ install(PROGRAMS ./tools/convert2vtk DESTINATION bin)
 #############
 
 enable_testing()
-add_test (NAME ut_pt3D_arithmetic 
-        COMMAND test_ut_pt3D)
-
+add_test (NAME ut_pt3D_arithmetic COMMAND test_ut_pt3D)
+add_test (NAME ut_node COMMAND test_ut_node)
