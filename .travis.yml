@@ -13,7 +13,7 @@ install: ./install-dependencies.sh
 
 # Build and test.
 script:
-    - cmake .
+    - cmake . -DENABLE_UTESTS=ON
     - make -j $(getconf _NPROCESSORS_ONLN)
     - make test
     - python3 full_test.py

@@ -24,3 +24,8 @@ target_link_libraries(test_ut_node
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
   )
+  
+#enable_testing()
+
+add_test (NAME ut_pt3D_arithmetic COMMAND test_ut_pt3D)
+add_test (NAME ut_node COMMAND test_ut_node)
