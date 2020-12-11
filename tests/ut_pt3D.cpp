@@ -25,13 +25,37 @@ BOOST_CHECK(x != 0.0f);
 /* zero lvl tests : direct elementary member functions */ 
 /*-----------------------------------------------------*/
 
+BOOST_AUTO_TEST_CASE(pt3D_noParam_constructor)
+{
+Pt::pt3D X;
+double x(0);
+std::cout << "no param constructor test" << std::endl;
+BOOST_CHECK( (x == X(Pt::IDX_X)) && (x == X(Pt::IDX_Y)) && (x == X(Pt::IDX_Z)) );
+}
+
+BOOST_AUTO_TEST_CASE(pt3D_param_constructor1)
+{
+Pt::pt3D X(1,3,5);
+double x(1),y(3),z(5);
+std::cout << "param constructor (rectangular coordinates) test" << std::endl;
+BOOST_CHECK( (x == X(Pt::IDX_X)) && (y == X(Pt::IDX_Y)) && (z == X(Pt::IDX_Z)) );
+}
+
+BOOST_AUTO_TEST_CASE(pt3D_param_constructor2)
+{
+Pt::pt3D X(0,0);
+double x(0),y(0),z(1);
+std::cout << "param constructor (spherical coordinates, build a vector on the unit sphere) test" << std::endl;
+BOOST_CHECK( (x == X(Pt::IDX_X)) && (y == X(Pt::IDX_Y)) && (z == X(Pt::IDX_Z)) );
+}
+
 
 BOOST_AUTO_TEST_CASE(pt3D_getter)
 {
 Pt::pt3D X(1,2,3);
 
 double result = X(Pt::IDX_X)+X(Pt::IDX_Y)*X(Pt::IDX_Z);
-double x = 7.0;
+double x(7.0);
 BOOST_CHECK(x == result);
 }
 
@@ -41,9 +65,9 @@ Pt::pt3D X(1,2,3);
 Pt::pt3D Y(3,2,-4);
 
 Pt::pt3D result = X+Y;
-double x = 4.0;
-double y = 4.0;
-double z = -1.0;
+double x(4.0);
+double y(4.0);
+double z(-1.0);
 BOOST_CHECK( (x == result(Pt::IDX_X)) && (y == result(Pt::IDX_Y)) && (z == result(Pt::IDX_Z)) );
 }
 
@@ -53,9 +77,9 @@ Pt::pt3D X(1,2,3);
 Pt::pt3D Y(3,2,-4);
 
 Pt::pt3D result = X-Y;
-double x = -2.0;
-double y = 0.0;
-double z = 7.0;
+double x(-2.0);
+double y(0.0);
+double z(7.0);
 BOOST_CHECK( (x == result(Pt::IDX_X)) && (y == result(Pt::IDX_Y)) && (z == result(Pt::IDX_Z)) );
 }
 
@@ -65,9 +89,9 @@ Pt::pt3D X(1,0,0);
 Pt::pt3D Y(0,1,0);
 
 Pt::pt3D result = X*Y;
-double x = 0.0;
-double y = 0.0;
-double z = 1.0;
+double x(0.0);
+double y(0.0);
+double z(1.0);
 BOOST_CHECK( (x == result(Pt::IDX_X)) && (y == result(Pt::IDX_Y)) && (z == result(Pt::IDX_Z)) );
 }
 
@@ -77,7 +101,7 @@ Pt::pt3D X(1,2,3);
 Pt::pt3D Y(3,2,-4);
 
 double result = Pt::pScal(X,Y);
-double x = -5.0;
+double x(-5.0);
 BOOST_CHECK( x == result );
 }
 
@@ -87,9 +111,9 @@ Pt::pt3D X(1,2,3);
 Pt::pt3D Y(3,2,-4);
 
 Pt::pt3D result = Pt::pDirect(X,Y);
-double x = 3.0;
-double y = 4.0;
-double z = -12.0;
+double x(3.0);
+double y(4.0);
+double z(-12.0);
 BOOST_CHECK( (x == result(Pt::IDX_X))&&(y == result(Pt::IDX_Y))&&(z == result(Pt::IDX_Z)) );
 }
 
@@ -116,7 +140,7 @@ Pt::pt3D r1 = 3*X;
 double x1 = (r1 - X*3).norm();
 Pt::pt3D r2 = 0.5*Y;
 
-double x2 = 2.0;
+double x2(2.0);
 BOOST_CHECK( (x1 == 0.0) && (x2 == r2.maxLength())  );
 }
 
@@ -124,6 +148,17 @@ BOOST_CHECK( (x1 == 0.0) && (x2 == r2.maxLength())  );
 /* second lvl tests : pure mathematics   */
 /*---------------------------------------*/
 
+BOOST_AUTO_TEST_CASE(pt3D_unit_sphere)
+{
+std::random_device rd;
+
+std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::uniform_real_distribution<> distrib(0.0,1.0);
+    
+Pt::pt3D X(M_PI*distrib(gen),2*M_PI*distrib(gen));
+std::cout << "test that constructor in spherical coordinates(S^2) is making a unit vector" << std::endl;
+BOOST_CHECK( fabs(X.norm() - 1.0) < __DBL_EPSILON__ );
+}
 
 BOOST_AUTO_TEST_CASE(pt3D_triple_product)
 {
@@ -236,7 +271,7 @@ double inv_M_M[Pt::DIM][Pt::DIM];
 tiny::mult<double, Pt::DIM, Pt::DIM, Pt::DIM>(M,inv_M, M_inv_M);
 tiny::mult<double, Pt::DIM, Pt::DIM, Pt::DIM>(inv_M, M, inv_M_M);
 
-double result = 0.0;
+double result(0);
 for(int i=0;i<Pt::DIM;i++)
     for(int j=0;j<Pt::DIM;j++)
         result += Pt::sq(M_inv_M[i][j] - inv_M_M[i][j]);

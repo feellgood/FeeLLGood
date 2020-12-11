@@ -33,12 +33,12 @@ namespace Pt
 /**
 sign(x) = 1.0 if x>0, otherwise -1.0
 */
-inline double sign(double x) {if (x>0) return 1.0; else return -1.0; }
+inline double sign(const double x) {if (x>0) return 1.0; else return -1.0; }
 
 /**
 \return \f$ x^2 \f$
 */
-inline double sq(double x) {return x*x;}
+inline double sq(const double x) {return x*x;}
 
 
 /** \class pt3D
