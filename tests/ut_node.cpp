@@ -37,7 +37,7 @@ BOOST_CHECK(x != 0.0f);
 /*---------------------------------------*/
 
 
-BOOST_AUTO_TEST_CASE(node_e_p)
+BOOST_AUTO_TEST_CASE(node_e_p, * boost::unit_test::tolerance(1e-15))
 {
 std::random_device rd;
 
@@ -51,10 +51,11 @@ n.phi_sph = 2*distrib(gen);
 n.u0 = Pt::pt3D(distrib(gen)-M_PI_2,distrib(gen)-M_PI_2,distrib(gen)-M_PI_2); // u0 should be a unit vector but the tests here check more
 Pt::pt3D X = n.calc_ep();
 
-BOOST_CHECK( (fabs(X.norm() - 1.0) < __DBL_EPSILON__)&&( fabs(Pt::pScal(n.u0,X)) < __DBL_EPSILON__  ) );
+BOOST_TEST(X.norm() == 1.0);
+BOOST_TEST( fabs(Pt::pScal(n.u0,X)) == 0.0 );
 }
 
-BOOST_AUTO_TEST_CASE(node_evol)
+BOOST_AUTO_TEST_CASE(node_evol, * boost::unit_test::tolerance(1e-15))
 {
 std::random_device rd;
 
@@ -80,7 +81,7 @@ n.make_evol(vp,vq,dt);
 std::cout << "v = " << v << std::endl;
 std::cout << "simplify[v] = " << n.v << std::endl;
 
-BOOST_CHECK( Pt::sq(Pt::dist(n.v,v))  < __DBL_EPSILON__ );
+BOOST_TEST( Pt::dist(n.v,v)  == 0.0 );
 }
 
 

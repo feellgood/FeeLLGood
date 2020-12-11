@@ -12,7 +12,10 @@ add_definitions (-DBOOST_TEST_DYN_LINK)
 
 add_executable (test_ut_pt3D ut_pt3D.cpp)
 add_executable (test_ut_node ut_node.cpp)
-add_executable (test_ut_facette ut_facette.cpp)
+
+SET(SOURCES ../facette.cpp ut_facette.cpp)
+add_executable (test_ut_facette ${SOURCES})
+
 add_executable (test_ut_tetra ut_tetra.cpp)
 
 target_link_libraries(test_ut_pt3D

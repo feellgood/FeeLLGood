@@ -63,14 +63,16 @@ class Fac{
                    const int i0 /**< [in] node index */,
                    const int i1 /**< [in] node index */,
                    const int i2 /**< [in] node index */) : idxPrm(_idx),NOD(_p_node->size()),reg(_reg),refNode(_p_node)
-            {
+        {
+	if(NOD>0)
+		{
 		ind[0] = i0; ind[1] = i1; ind[2] = i2;
                 for (int i=0; i<N; i++) ind[i]--; // to force index to start from 0 (C++) instead of Matlab/msh convention
                 treated = false;
 		double surf = calc_surf();
                 for (int j=0; j<NPI; j++) {weight[j] = 2.*surf*pds[j]; }
-            }
-        
+           	}
+        }
 		/** constructor from a region number and three indices */		
 		inline Fac(int r,int i0,int i1,int i2): NOD(0),reg(r)
 		{ind[0]=i0;ind[1]=i1;ind[2]=i2;}
@@ -97,11 +99,7 @@ class Fac{
         {
         Pt::pt3D vec_nod[N];
         for (int i=0; i<N; i++)
-            {
-            Nodes::Node const& node = (*refNode)[ ind[i] ];
-    
-            vec_nod[i] = getter(node);
-            }
+            { vec_nod[i] = getter( (*refNode)[ ind[i] ] ); }
         
         Pt::pt3D s = (vec_nod[0] + vec_nod[1] + vec_nod[2] )/5.0;
         //double sx = (vec_nod[Pt::IDX_X][0] + vec_nod[Pt::IDX_X][1] + vec_nod[Pt::IDX_X][2] )/5.0;
@@ -193,8 +191,8 @@ class Fac{
 	/** computes the norm to the face */
 	Pt::pt3D calc_norm(void) const;
 
-	/** computes surface of the face		*/		
-	double calc_surf(void) const;
+/** computes surface of the face		*/		
+	double calc_surf(void) const;	
 
     /** swap i and j indices values */
 	inline void swap_idx(const int i,const int j) { std::swap(ind[i],ind[j]); }
@@ -204,7 +202,6 @@ class Fac{
         const int reg;/**< .msh region number */
         
         const std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
-        
 };//end class Fac
 
 }//end namespace

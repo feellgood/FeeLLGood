@@ -117,13 +117,12 @@ double z(-12.0);
 BOOST_CHECK( (x == result(Pt::IDX_X))&&(y == result(Pt::IDX_Y))&&(z == result(Pt::IDX_Z)) );
 }
 
-BOOST_AUTO_TEST_CASE(pt3D_op_dist)
+BOOST_AUTO_TEST_CASE(pt3D_op_dist, * boost::unit_test::tolerance(1e-15))
 {
 Pt::pt3D X(1,2,3);
 Pt::pt3D Y(3,2,-4);
 
-double x = sqrt(53.0);
-BOOST_CHECK( fabs( x - Pt::dist(X,Y) ) < __DBL_EPSILON__ );
+BOOST_TEST( Pt::dist(X,Y) == sqrt(53.0) );
 }
 
 /*---------------------------------------*/
@@ -148,7 +147,7 @@ BOOST_CHECK( (x1 == 0.0) && (x2 == r2.maxLength())  );
 /* second lvl tests : pure mathematics   */
 /*---------------------------------------*/
 
-BOOST_AUTO_TEST_CASE(pt3D_unit_sphere)
+BOOST_AUTO_TEST_CASE(pt3D_unit_sphere, * boost::unit_test::tolerance(1e-15))
 {
 std::random_device rd;
 
@@ -157,10 +156,10 @@ std::uniform_real_distribution<> distrib(0.0,1.0);
     
 Pt::pt3D X(M_PI*distrib(gen),2*M_PI*distrib(gen));
 std::cout << "test that constructor in spherical coordinates(S^2) is making a unit vector" << std::endl;
-BOOST_CHECK( fabs(X.norm() - 1.0) < __DBL_EPSILON__ );
+BOOST_TEST( X.norm() == 1.0 );
 }
 
-BOOST_AUTO_TEST_CASE(pt3D_triple_product)
+BOOST_AUTO_TEST_CASE(pt3D_triple_product, * boost::unit_test::tolerance(1e-15))
 {
 std::random_device rd;
 
@@ -188,12 +187,12 @@ std::cout << "x1-x2=" << x1-x2 << std::endl;
 std::cout << "x2-x3=" << x2-x3 << std::endl;
 std::cout << "x3-x1=" << x3-x1 << std::endl;
 
-std::cout << "__DBL_EPSILON__ =" << __DBL_EPSILON__ << std::endl;
-
-BOOST_CHECK( (fabs(x1-x2)  < __DBL_EPSILON__) && (fabs(x2-x3)  < __DBL_EPSILON__) && ( fabs(x3-x1)  < __DBL_EPSILON__)  );
+BOOST_TEST( x1 == x2 );
+BOOST_TEST( x2 == x3 );
+BOOST_TEST( x3 == x1 );
 }
 
-BOOST_AUTO_TEST_CASE(pt3D_det)
+BOOST_AUTO_TEST_CASE(pt3D_det, * boost::unit_test::tolerance(1e-15))
 {
 double M[Pt::DIM][Pt::DIM];
 std::random_device rd;
@@ -226,10 +225,10 @@ M[2][2] = 2.0*(z*z + w*w) - 1.0;
 double result = Pt::det(M);
 
 std::cout << "det(random_rot) -1=" << result-1.0 << std::endl;
-BOOST_CHECK( (Pt::sq(result - 1.0)  < __DBL_EPSILON__ )  );
+BOOST_TEST( Pt::sq(result) == 1.0 );
 }
 
-BOOST_AUTO_TEST_CASE(pt3D_inverse)
+BOOST_AUTO_TEST_CASE(pt3D_inverse, * boost::unit_test::tolerance(1e-15))
 {
 double M[Pt::DIM][Pt::DIM];
 double inv_M[Pt::DIM][Pt::DIM];
@@ -277,7 +276,7 @@ for(int i=0;i<Pt::DIM;i++)
         result += Pt::sq(M_inv_M[i][j] - inv_M_M[i][j]);
 
 std::cout << "norm^2(M M^-1 - M^-1 M) =" << result << std::endl;
-BOOST_CHECK( result  < __DBL_EPSILON__ );
+BOOST_TEST( result  == 0.0 );
 }
 
 BOOST_AUTO_TEST_SUITE_END()
