@@ -1,8 +1,8 @@
-#define BOOST_TEST_MODULE nodeTest
+#define BOOST_TEST_MODULE tetraTest
 
 #include <boost/test/unit_test.hpp>
 
-BOOST_AUTO_TEST_SUITE(ut_node)
+BOOST_AUTO_TEST_SUITE(ut_tetra)
 
 /*---------------------------------------*/
 /* minus one test: check boost is fine   */

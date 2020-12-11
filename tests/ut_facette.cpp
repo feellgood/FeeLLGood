@@ -1,8 +1,8 @@
-#define BOOST_TEST_MODULE nodeTest
+#define BOOST_TEST_MODULE facetteTest
 
 #include <boost/test/unit_test.hpp>
 
-BOOST_AUTO_TEST_SUITE(ut_node)
+BOOST_AUTO_TEST_SUITE(ut_facette)
 
 /*---------------------------------------*/
 /* minus one test: check boost is fine   */
