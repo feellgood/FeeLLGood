@@ -40,15 +40,9 @@ double phiv0;/**< initial or reset value, used to store previous value for time 
 double phiv;/**< no idea */
 
 /**
-vector ep is computed when needed, it is the second vector of a base composed of u0,ep,eq = u0*ep , vector product 
+vector ep is computed when needed, it is the second vector of a base composed of u0,ep,u0*ep , vector product 
  */
 inline Pt::pt3D calc_ep() const {Pt::pt3D ep = Pt::pt3D(theta_sph,phi_sph)*u0; ep.normalize(); return ep; }
-
-
-/**
-vector eq is computed when needed, it is the third vector of a base composed of u0,ep,eq = u0*ep , vector product 
- */
-inline Pt::pt3D calc_eq() const {return u0*calc_ep(); }
 
 /**
 reset the node magnetization, speed, phi, and phiv
@@ -62,12 +56,23 @@ inline void evolution(void) { u0=u; v0=v; phi0 = phi; phiv0 = phiv; }
 
 /**
 integration of the evolution of the magnetization for time step dt
+in a base composed of u0,ep,eq = u0*ep we have  
+\f$ v = v_p e_p + v_q e_q \f$
+and new magnetization value is : \f$ u = u_0 + v dt \f$ after normalization
+There is an algebraic simplification when developping \f$ v \f$ due to the fact that magnetization u0 is a unit vector, and \f$ v = v_p/r \hat{\zeta} \times u_0 + v_q/r (\hat{\zeta} - (u_0 \cdot \hat{\zeta}) u_0 )  \f$
+With \f$ \hat{\zeta} \f$ unit vector defined by theta_sph and phi_sph and \f$ r=sin(\hat{\zeta},u_0) \f$
+This formula needs less operator*
 */
-inline void make_evol(double vp /**< [in] */,double vq /**< [in] */,double dt /**< [in] */) {
-	Pt::pt3D ep = calc_ep(); 
-    v = vp*ep + vq*u0*ep;
-	u = u0 + dt*v;
-	u.normalize();}
+
+inline void make_evol(const double vp /**< [in] */,const double vq /**< [in] */,const double dt /**< [in] */)
+{
+Pt::pt3D zeta = Pt::pt3D(theta_sph,phi_sph); 
+Pt::pt3D vec = zeta*u0;
+double r = vec.norm();
+v = (vp/r)*vec + (vq/r)*(zeta - (Pt::pScal(u0,zeta))*u0);
+u = u0 + dt*v;
+u.normalize();
+}
 
 };//end struct node
 
@@ -92,7 +97,6 @@ inline double get_u_comp(Node const& n /**< [in] */, Pt::index idx /**< [in] */)
 /** getter for v component */
 inline double get_v_comp(Node const& n /**< [in] */ ,Pt::index idx /**< [in] */) {return n.v(idx);}
 
-
 /** getter for phi */
 inline double get_phi(Node const& n /**< [in] */) {return n.phi;}
 
@@ -107,8 +111,6 @@ inline void set_phi(Node & n,double val) {n.phi = val;}
 
 /** setter for phi_v */
 inline void set_phiv(Node & n,double val) {n.phiv = val;}
-
-
 
 } //end namespace Nodes
 
