@@ -119,10 +119,11 @@ private:
         {
         Nodes::Node const& n = (*refNode)[x.ind[node_i]];
         Pt::pt3D ep = n.calc_ep();    
+        Pt::pt3D eq = n.u0*ep; eq.normalize();    
         if(i<N)
             { val = ep(j/N); }
         else
-            { val = (n.u0*ep)(j/N); }// equivalent to calc_eq
+            { val = eq(j/N); }// equivalent to calc_eq
         }
     return val;
     }
