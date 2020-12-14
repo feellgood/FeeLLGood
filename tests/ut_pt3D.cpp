@@ -159,7 +159,7 @@ std::cout << "test that constructor in spherical coordinates(S^2) is making a un
 BOOST_TEST( X.norm() == 1.0 );
 }
 
-BOOST_AUTO_TEST_CASE(pt3D_triple_product, * boost::unit_test::tolerance(1e-15))
+BOOST_AUTO_TEST_CASE(pt3D_triple_product, * boost::unit_test::tolerance(1e-14))
 {
 std::random_device rd;
 
@@ -192,7 +192,7 @@ BOOST_TEST( x2 == x3 );
 BOOST_TEST( x3 == x1 );
 }
 
-BOOST_AUTO_TEST_CASE(pt3D_det, * boost::unit_test::tolerance(1e-15))
+BOOST_AUTO_TEST_CASE(pt3D_det, * boost::unit_test::tolerance(1e-14))
 {
 double M[Pt::DIM][Pt::DIM];
 std::random_device rd;
@@ -203,7 +203,7 @@ std::uniform_real_distribution<> distrib(-1.0,1.0);
 Pt::pt3D X(distrib(gen),distrib(gen),distrib(gen));
 
 std::cout << "###################" << std::endl;
-std::cout << "this test check that a random general rotation (filled using a random unit quaternions) respect sq(det-1) < __DBL_EPSILON__ " << std::endl;
+std::cout << "this test check that a random general rotation (filled using a random unit quaternions) respect sq(det-1) < 1e-14 " << std::endl;
 std::cout << "X= " << X << std::endl;
 
 while(Pt::norme2(X) > 1.0 )
