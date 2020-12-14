@@ -20,6 +20,27 @@ BOOST_CHECK(x != 0.0f);
 /* zero lvl tests : direct elementary member functions */ 
 /*-----------------------------------------------------*/
 
+BOOST_AUTO_TEST_CASE(tiny_add)
+{
+const int M = 3;
+const int N = 2;
+double A[M][N] = {{1,2},{3,4},{5,6}};
+double B[M][N] = {{4,31},{-5,0},{0,1}};
+double C[M][N] = {{0}};
+const double val_ref[M][N] = {{5,33},{-2,4},{5,7}};
+tiny::add<double,M,N>(A,B,C);
+
+bool result = (C[0][0] == val_ref[0][0]);
+result &= (C[0][1] == val_ref[0][1]);
+result &= (C[1][0] == val_ref[1][0]);
+result &= (C[1][1] == val_ref[1][1]);
+result &= (C[2][0] == val_ref[2][0]);
+result &= (C[2][1] == val_ref[2][1]);
+
+std::cout << "basic test addition" << std::endl;
+BOOST_CHECK( result == true );
+}
+
 BOOST_AUTO_TEST_CASE(tiny_sub)
 {
 const int M = 3;
@@ -49,6 +70,19 @@ BOOST_CHECK( result == true );
 /*---------------------------------------*/
 /* second lvl tests : pure mathematics   */
 /*---------------------------------------*/
+
+BOOST_AUTO_TEST_CASE(tiny_frobenius, * boost::unit_test::tolerance(1e-15))
+{
+const int M = 3;
+const int N = 2;
+double A[M][N] = {{1,2},{3,4},{5,6}};
+
+double result = tiny::frob_norm<double,M,N>(A);
+
+std::cout << "test frobenius norm" << std::endl;
+BOOST_TEST( result == sqrt(91.0) );
+}
+
 
 BOOST_AUTO_TEST_CASE(tiny_dist, * boost::unit_test::tolerance(1e-15))
 {
