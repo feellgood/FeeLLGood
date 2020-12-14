@@ -42,9 +42,9 @@ mySettings["time_integration"]["max(du)"] = 0.001
 
 
 #cosine directions [alpha,beta,gamma]
-mySettings["mesh"]["volume_regions"]["300"]["alpha"] = [1.0,0.0,0.0]
-mySettings["mesh"]["volume_regions"]["300"]["beta"] = [0.0,1.0,0.0]
-mySettings["mesh"]["volume_regions"]["300"]["gamma"] = [0.0,0.0,1.0]
+mySettings["mesh"]["volume_regions"]["300"]["ex"] = [1.0,0.0,0.0]
+mySettings["mesh"]["volume_regions"]["300"]["ey"] = [0.0,1.0,0.0]
+mySettings["mesh"]["volume_regions"]["300"]["ez"] = [0.0,0.0,1.0]
 
 mySettings["initial_magnetization"] = {"Mx":"1","My":"1","Mz":"0"}
 
