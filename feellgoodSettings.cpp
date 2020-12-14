@@ -104,7 +104,7 @@ for (boost::property_tree::ptree::value_type &s : s_sub_tree)
             if (sub_k.first == "K3")
                 { p.K3 = sub_k.second.get_value<double>(); }
             
-            if (sub_k.first == "alpha")
+            if (sub_k.first == "ex")
                 {
                 double X[Pt::DIM];
                 int i=0;
@@ -112,7 +112,7 @@ for (boost::property_tree::ptree::value_type &s : s_sub_tree)
                 p.alpha = Pt::pt3D(X[0],X[1],X[2]);
                 }
             
-            if (sub_k.first == "beta")
+            if (sub_k.first == "ey")
                 {
                 double X[Pt::DIM];
                 int i=0;
@@ -120,7 +120,7 @@ for (boost::property_tree::ptree::value_type &s : s_sub_tree)
                 p.beta = Pt::pt3D(X[0],X[1],X[2]);
                 }
             
-            if (sub_k.first == "gamma")
+            if (sub_k.first == "ez")
                 {
                 double X[Pt::DIM];
                 int i=0;
@@ -225,7 +225,7 @@ catch(std::exception &e)
     { std::cout << "no spin polarized" << std::endl; }
 
 
-try { sub_tree = root.get_child("demagnetization_field_solver"); }
+try { sub_tree = root.get_child("demagnetizating_field_solver"); }
 catch (std::exception &e)
     { std::cout << e.what() << std::endl; }
 scalfmmNbTh = sub_tree.get<int>("nb_threads",8);
@@ -236,7 +236,7 @@ catch (std::exception &e)
 solverNbTh = sub_tree.get<int>("nb_threads",8);
 
 MAXITER = sub_tree.get<int>("max(iter)",500);
-REFRESH_PRC = sub_tree.get<int>("refresh_preconditionner_every",20);
+REFRESH_PRC = sub_tree.get<int>("refresh_preconditioner_every",20);
 
 try { sub_tree = root.get_child("time_integration"); }
 catch (std::exception &e)

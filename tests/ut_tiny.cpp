@@ -106,7 +106,7 @@ BOOST_CHECK( result == true );
 /* second lvl tests : pure mathematics   */
 /*---------------------------------------*/
 
-BOOST_AUTO_TEST_CASE(tiny_frobenius, * boost::unit_test::tolerance(UT_TEST))
+BOOST_AUTO_TEST_CASE(tiny_frobenius, * boost::unit_test::tolerance(UT_TOL))
 {
 const int M = 3;
 const int N = 2;
@@ -119,7 +119,7 @@ BOOST_TEST( result == sqrt(91.0) );
 }
 
 
-BOOST_AUTO_TEST_CASE(tiny_dist, * boost::unit_test::tolerance(UT_TEST))
+BOOST_AUTO_TEST_CASE(tiny_dist, * boost::unit_test::tolerance(UT_TOL))
 {
 const int M = 3;
 const int N = 2;

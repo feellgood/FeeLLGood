@@ -10,10 +10,10 @@ mySettings = Settings("ellipsoid.msh")
 
 MaxNbThreads = int(subprocess.check_output(["getconf","_NPROCESSORS_ONLN"]))
 
-mySettings["finite_element_solver"]["nb_threads"] = MaxNbThreads
+mySettings["finite_element_solver"]["nb_threads"] = 6 # ellipsoid.msh is small, maxnbthreads is counterproductive
 mySettings["finite_element_solver"]["max(iter)"] = 500
 
-mySettings["demagnetization_field_solver"]["nb_threads"] = MaxNbThreads
+mySettings["demagnetizating_field_solver"]["nb_threads"] = MaxNbThreads
 
 mySettings["outputs"]["evol_columns"] = ["t","<Mx>","<My>","<Mz>","E_ex","E_demag","E_zeeman","E_tot"]
 mySettings["outputs"]["take_photo"] = 100
