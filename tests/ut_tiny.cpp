@@ -31,17 +31,33 @@ const double val_ref[M][N] = {{5,33},{-2,4},{5,7}};
 tiny::add<double,M,N>(A,B,C);
 
 bool result = (C[0][0] == val_ref[0][0]);
-result &= (C[0][1] == val_ref[0][1]);
-result &= (C[1][0] == val_ref[1][0]);
-result &= (C[1][1] == val_ref[1][1]);
-result &= (C[2][0] == val_ref[2][0]);
-result &= (C[2][1] == val_ref[2][1]);
+for(int i=0;i<M;i++)
+    for(int j=0;j<N;j++)
+        result &= (C[i][j] == val_ref[i][j]);
 
 std::cout << "basic test addition" << std::endl;
 BOOST_CHECK( result == true );
 }
 
-BOOST_AUTO_TEST_CASE(tiny_mult)
+BOOST_AUTO_TEST_CASE(tiny_mult_mat_vect)
+{
+const int M = 3;
+const int N = 2;
+double A[M][N] = {{1,2},{3,4},{5,6}};
+double B[N] = {-2,1};
+double C[M] = {0};
+const double val_ref[M] = {0,-2,-4};
+tiny::mult<double,M,N>(A,B,C);
+
+bool result = (C[0] == val_ref[0]);
+for(int j=0;j<M;j++)
+        result &= (C[j] == val_ref[j]);
+
+std::cout << "basic test mat*vect multiplication" << std::endl;
+BOOST_CHECK( result == true );
+}
+
+BOOST_AUTO_TEST_CASE(tiny_mult_mat_mat)
 {
 const int M = 3;
 const int N = 2;
@@ -57,7 +73,7 @@ for(int i=0;i<M;i++)
     for(int j=0;j<P;j++)
         result &= (C[i][j] == val_ref[i][j]);
 
-std::cout << "basic test multiplication" << std::endl;
+std::cout << "basic test mat*mat multiplication" << std::endl;
 BOOST_CHECK( result == true );
 }
 
