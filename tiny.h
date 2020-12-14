@@ -4,8 +4,12 @@
 /** \file tiny.h
 contains a namespace to perform simple printing and algebra simple operations on matrices and vectors. <br>
 \todo this namespace is redondant with gmm, could probably be replaced or improved with overloaded operators and a matrix class, or valarrays
+
+addition, substraction, frobenius norms and dist implemented only for unit tests, not used in feellgood algebra
 */
 #include <iostream>
+
+#include "pt3D.h"
 
 /**
 \namespace tiny to grab altogether the templates to compute some linear algebra
@@ -21,6 +25,45 @@ template <typename T, int M, int N> inline void print(T A[M][N]) {
        }
    std::cout << std::endl;
    }
+   
+/** frobenius Norm for vector with real coefficients
+*/
+template <typename T,int N> inline double frob_norm(const T A[N])
+{
+T result=T(0);
+
+for (int j=0; j<N; j++) 
+    result += Pt::sq(A[j]);
+
+return sqrt(result);
+}   
+
+/** frobenius Norm for matrix with real coefficients
+*/
+template <typename T,int M,int N> inline double frob_norm(const T A[M][N])
+{
+T result=T(0);
+
+for (int i=0; i<M; i++)
+    {
+    for (int j=0; j<N; j++) 
+        result += Pt::sq(A[i][j]);
+       }
+return sqrt(result);
+}
+
+/** distance defined with frobenius Norm for matrix with real coefficients : dist(A,B) = Frob(A-B)
+*/
+template <typename T,int M,int N> inline double dist(const T A[M][N],const T B[M][N])
+{
+T result=T(0);
+
+for (int i=0; i<M; i++)
+    for (int j=0; j<N; j++) 
+        result += Pt::sq(A[i][j] - B[i][j]);
+
+return sqrt(result);
+}
 
 /** mat vector multiplication
 \return returns Y \f$ Y = A X \f$
@@ -97,7 +140,26 @@ template <typename T, int M, int N, int P> inline void mult(const Pt::pt3D vec[N
        }
    }
 
-   
+/** mat mat addition
+\return \f$ C = A + B \f$
+*/
+template <typename T, int M, int N> inline void add(const T A[M][N],const T B[M][N], T C[M][N])
+{
+for (int i=0; i<M; i++) 
+   for (int k=0; k<N; k++) 
+    { C[i][k] = A[i][k] + B[i][k]; }
+}
+
+/** mat mat substraction
+\return \f$ C = A - B \f$
+*/
+template <typename T, int M, int N> inline void sub(const T A[M][N],const T B[M][N], T C[M][N])
+{
+for (int i=0; i<M; i++) 
+   for (int k=0; k<N; k++) 
+    { C[i][k] = A[i][k] - B[i][k]; }
+}
+
 /** mat mat multiplication
 \return \f$ C = A B \f$
 */

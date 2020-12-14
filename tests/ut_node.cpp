@@ -8,6 +8,8 @@
 
 #include "node.h"
 
+// might be interesting to fix a tolerance value from config.h.in for some lvl 2 tests
+
 BOOST_AUTO_TEST_SUITE(ut_node)
 
 /*---------------------------------------*/
@@ -55,7 +57,7 @@ BOOST_TEST(X.norm() == 1.0);
 BOOST_TEST( fabs(Pt::pScal(n.u0,X)) == 0.0 );
 }
 
-BOOST_AUTO_TEST_CASE(node_evol, * boost::unit_test::tolerance(1e-15))
+BOOST_AUTO_TEST_CASE(node_evol, * boost::unit_test::tolerance(1e-14)) 
 {
 std::random_device rd;
 

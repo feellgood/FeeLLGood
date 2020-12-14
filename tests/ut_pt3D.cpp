@@ -270,12 +270,9 @@ double inv_M_M[Pt::DIM][Pt::DIM];
 tiny::mult<double, Pt::DIM, Pt::DIM, Pt::DIM>(M,inv_M, M_inv_M);
 tiny::mult<double, Pt::DIM, Pt::DIM, Pt::DIM>(inv_M, M, inv_M_M);
 
-double result(0);
-for(int i=0;i<Pt::DIM;i++)
-    for(int j=0;j<Pt::DIM;j++)
-        result += Pt::sq(M_inv_M[i][j] - inv_M_M[i][j]);
+double result = tiny::dist<double, Pt::DIM, Pt::DIM>(M_inv_M,inv_M_M);
 
-std::cout << "norm^2(M M^-1 - M^-1 M) =" << result << std::endl;
+std::cout << "frobenius_norm^2(M M^-1 - M^-1 M) =" << Pt::sq(result) << std::endl;
 BOOST_TEST( result  == 0.0 );
 }
 
