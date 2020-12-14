@@ -47,9 +47,9 @@ for (int i=0; i<N; i++)
 void Tet::integrales(std::vector<Tetra::prm> const& params, timing const& prm_t,Pt::pt3D const& Hext,double Vz, double AE[3*N][3*N], Pt::pt3D BE[N]) const
 {
 double alpha_LLG = params[idxPrm].alpha_LLG;
-pt3D alpha = params[idxPrm].alpha;
-pt3D beta = params[idxPrm].beta;
-pt3D gamma = params[idxPrm].gamma;
+pt3D ex = params[idxPrm].ex;
+pt3D ey = params[idxPrm].ey;
+pt3D ez = params[idxPrm].ez;
 
 double Uz = params[idxPrm].Uz;
 //double beta_sc = params[idxPrm].beta_sc; //not yet
@@ -71,8 +71,8 @@ interpolation(Nodes::get_phiv0,Hv);
 
 for (int npi=0; npi<NPI; npi++)
     {
-    pt3D uk_u = pt3D(pScal(alpha,U[npi]), pScal(beta,U[npi]), pScal(gamma,U[npi]));
-    pt3D uk_v = pt3D(pScal(alpha,V[npi]), pScal(beta,V[npi]), pScal(gamma,V[npi]));
+    pt3D uk_u = pt3D(pScal(ex,U[npi]), pScal(ey,U[npi]), pScal(ez,U[npi]));
+    pt3D uk_v = pt3D(pScal(ex,V[npi]), pScal(ey,V[npi]), pScal(ez,V[npi]));
 
     Pt::pt3D uk_uuu = pDirect(pt3D(1,1,1) - pDirect(uk_u,uk_u), uk_u);
     
@@ -87,13 +87,14 @@ for (int npi=0; npi<NPI; npi++)
     pt3D Ht = s_dt*(Hv[npi] + pDirect(truc,params[idxPrm].uk) + pDirect(truc2,uk_u) ); // DEBUG !  must check, we are mixing different anisotropy contributions here
     
     pt3D Heff = Kbis*pScal(params[idxPrm].uk,U[npi])*params[idxPrm].uk;
-    Heff += -K3bis*( uk_uuu(0)*alpha + uk_uuu(1)*beta + uk_uuu(2)*gamma ) + Hd[npi] + Hext;
+    Heff += -K3bis*( uk_uuu(0)*ex + uk_uuu(1)*ey + uk_uuu(2)*ez ) + Hd[npi] + Hext;
 
     for (int i=0; i<N; i++)
         {
+        const double beta = params[idxPrm].beta_sc; 
         const double ai_w = weight[npi]*a[i][npi];
         BE[i] -= weight[npi]*Abis*(dadx[i][npi]*dUdx[npi] + dady[i][npi]*dUdy[npi] + dadz[i][npi]*dUdz[npi]);
-        BE[i] += ai_w*(alpha*Vz - beta*Uz)*(dUdz[npi] + dVdz[npi]*s_dt) ;
+        BE[i] += ai_w*(alpha_LLG*Vz - beta*Uz)*(dUdz[npi] + dVdz[npi]*s_dt) ;
         BE[i] += ai_w*(Heff + Ht + (Vz-Uz)*(U[npi]*(dUdz[npi]+dVdz[npi]*s_dt) +V[npi]*dUdz[npi]*s_dt) );
         }
     }
@@ -118,13 +119,14 @@ double dens[NPI];
 
 for (int npi=0; npi<NPI; npi++)
     {
-    // uniaxial magnectocrystalline anisotropy constant K, anisotropy axis uk 
-    dens[npi] = -param.K*sq( Pt::pScal( param.uk, Pt::pt3D(u[0][npi],u[1][npi],u[2][npi]) ) );
+    Pt::pt3D m = Pt::pt3D(u[0][npi],u[1][npi],u[2][npi]);
+    // uniaxial magnetocrystalline anisotropy constant K, anisotropy axis uk 
+    dens[npi] = -param.K*sq( Pt::pScal( param.uk, m) );
         
         // cosinus directeurs
-    double al0= param.alpha(0)*u[0][npi] + param.alpha(1)*u[1][npi] + param.alpha(2)*u[2][npi];
-    double al1= param.beta(0)*u[0][npi] + param.beta(1)*u[1][npi] + param.beta(2)*u[2][npi];
-    double al2= param.gamma(0)*u[0][npi] + param.gamma(1)*u[1][npi] + param.gamma(2)*u[2][npi];
+    double al0= Pt::pScal( param.ex, m );
+    double al1= Pt::pScal( param.ey, m );
+    double al2= Pt::pScal( param.ez, m );
     
     dens[npi] += param.K3*(sq(al0*al1) + sq(al1*al2) + sq(al2*al0)); // cubic anisotropy (K3)
     }

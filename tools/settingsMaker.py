@@ -58,13 +58,13 @@ class Settings(object):
     # (key) , initialized with def values
     def createVolRegion(self,key):
         if key not in self.mySets["mesh"]["volume_regions"]:
-            self.mySets["mesh"]["volume_regions"].update( { key : {"Ae":1e-11, "Js":1, "K":0.0, "uk":[0.0,0.0,0.0],"K3":0.0, "ex":[0.0,0.0,0.0], "ey":[0.0,0.0,0.0], "ez":[0.0,0.0,0.0], "alpha_LLG":0.05} } )
+            self.mySets["mesh"]["volume_regions"].update( { key : {"Ae":1e-11, "Js":1, "K":0.0, "uk":[0.0,0.0,1.0],"K3":0.0, "ex":[1.0,0.0,0.0], "ey":[0.0,1.0,0.0], "ez":[0.0,0.0,1.0], "alpha_LLG":0.05} } )
 
     ## \brief set material constants exchange , magnetization at saturation and alpha_LLG for region 'key', create if if key does not exists
     # (key) , initialized with def values
     def setMaterialRegion(self,key,cst_exch,mag_sat,cst_alpha):
         if key not in self.mySets["mesh"]["volume_regions"]:
-            self.mySets["mesh"]["volume_regions"].update( { key : {"Ae":cst_exch, "Js":mag_sat, "K":0.0, "uk":[0.0,0.0,0.0],"K3":0.0, "ex":[0.0,0.0,0.0], "ey":[0.0,0.0,0.0], "ez":[0.0,0.0,0.0], "alpha_LLG":cst_alpha} } )
+            self.mySets["mesh"]["volume_regions"].update( { key : {"Ae":cst_exch, "Js":mag_sat, "K":0.0, "uk":[0.0,0.0,1.0],"K3":0.0, "ex":[1.0,0.0,0.0], "ey":[0.0,1.0,0.0], "ez":[0.0,0.0,1.0], "alpha_LLG":cst_alpha} } )
         else:
             self.mySets["mesh"]["volume_regions"][key]["Ae"] = cst_exch
             self.mySets["mesh"]["volume_regions"][key]["Js"] = mag_sat

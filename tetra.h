@@ -62,9 +62,9 @@ struct prm
 	Pt::pt3D uk;/**< uniaxial anisotropy axis */
 	
 	double K3;/**< cubic anisotropy constant */	
-	Pt::pt3D alpha; /**< cosine director alpha (for cubic anisotropy) */
-	Pt::pt3D beta; /**< cosine director beta (for cubic anisotropy) */
-	Pt::pt3D gamma; /**< cosine director gamma (for cubic anisotropy) */
+	Pt::pt3D ex; /**< unit vector1 (for cubic anisotropy) */
+	Pt::pt3D ey; /**< unit vector2 (for cubic anisotropy) */
+	Pt::pt3D ez; /**< unit vector3 (for cubic anisotropy) */
 	double Uz;/**< for spin polarized current */
 	double beta_sc;/**< non adiabatic constant \f$ \beta \f$ for spin polarization current */	
 	
@@ -80,7 +80,7 @@ struct prm
             { std::cout << "K*uk =" << K << "*[ " << uk << "]" << std::endl; }
         
 		if(K3!=0)
-            { std::cout << "K3 = " << K3 << "; alpha=[ " << alpha << "], beta=[" << beta << "], gamma=[" << gamma << "]\n"; }
+            { std::cout << "K3 = " << K3 << "; ex=[ " << ex << "], ey=[" << ey << "], ez=[" << ez << "]\n"; }
 		};	
 	};
 

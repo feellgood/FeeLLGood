@@ -52,6 +52,9 @@ const double BOHRS_MUB = CHARGE_ELECTRON*PLANCKS_HBAR/(2.*MASS_ELECTRON);
 #define EPSILON 1e-40
 //should not be fixed but computed with an analysis of the mesh
 
+/** USER_TOL is tolerance for 'unit' vector input values : if abs(norm(x)-1) < USER_TOL then x is a unit vector */
+#define USER_TOL 1e-8
+
 /** tolerance for some unit tests involving some numerical errors */
 #define UT_TOL 1e-15
 

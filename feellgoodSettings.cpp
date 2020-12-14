@@ -93,40 +93,14 @@ for (boost::property_tree::ptree::value_type &s : s_sub_tree)
             if (sub_k.first == "K")
                 { p.K = sub_k.second.get_value<double>(); }
             
-            if (sub_k.first == "uk")
-                {
-                double X[Pt::DIM];
-                int i=0;
-                for(boost::property_tree::ptree::value_type &row : sub_k.second) { X[i] = row.second.get_value<double>();i++; }
-                p.uk = Pt::pt3D(X[0],X[1],X[2]);
-                }
+            p.uk = readUnitVector(sub_k,"uk");
             
             if (sub_k.first == "K3")
                 { p.K3 = sub_k.second.get_value<double>(); }
             
-            if (sub_k.first == "ex")
-                {
-                double X[Pt::DIM];
-                int i=0;
-                for(boost::property_tree::ptree::value_type &row : sub_k.second) { X[i] = row.second.get_value<double>();i++; }
-                p.alpha = Pt::pt3D(X[0],X[1],X[2]);
-                }
-            
-            if (sub_k.first == "ey")
-                {
-                double X[Pt::DIM];
-                int i=0;
-                for(boost::property_tree::ptree::value_type &row : sub_k.second) { X[i] = row.second.get_value<double>();i++; }
-                p.beta = Pt::pt3D(X[0],X[1],X[2]);
-                }
-            
-            if (sub_k.first == "ez")
-                {
-                double X[Pt::DIM];
-                int i=0;
-                for(boost::property_tree::ptree::value_type &row : sub_k.second) { X[i] = row.second.get_value<double>();i++; }
-                p.gamma = Pt::pt3D(X[0],X[1],X[2]);
-                }
+            p.ex = readUnitVector(sub_k,"ex");
+            p.ey = readUnitVector(sub_k,"ey");
+            p.ez = readUnitVector(sub_k,"ez");
             
             if (sub_k.first == "Js") {p.J = sub_k.second.get_value<double>();}
             }
@@ -147,19 +121,9 @@ for (boost::property_tree::ptree::value_type &s : s_sub_tree)
         p.reg = stoi(name_reg);
         for (boost::property_tree::ptree::value_type &sub_k : s_sub_tree.get_child(name_reg))
             {
-            
-            if (sub_k.first == "Ks")
-                {
-                p.Ks = sub_k.second.get_value<double>();
-                }
-            if (sub_k.first == "uk")
-                {double X[Pt::DIM];
-		int i=0;
-                for(boost::property_tree::ptree::value_type &row : sub_k.second)
-                    { X[i] = row.second.get_value<double>();i++; }
-		p.uk = Pt::pt3D(X[0],X[1],X[2]);                
-		}
-	if (sub_k.first == "suppress_charges") {p.suppress_charges = sub_k.second.get_value<bool>();}
+            if (sub_k.first == "Ks") { p.Ks = sub_k.second.get_value<double>(); }
+            p.uk = readUnitVector(sub_k,"uk");
+            if (sub_k.first == "suppress_charges") {p.suppress_charges = sub_k.second.get_value<bool>();}
             }
         paramFacette.push_back(p);
         //p.infos();	
@@ -204,17 +168,7 @@ sBx = sub_tree.get<std::string>("Bx");
 sBy = sub_tree.get<std::string>("By");
 sBz = sub_tree.get<std::string>("Bz");
 doCompile1Dprm();
-    
-/*
-std::vector<double> val_vect;
-for(boost::property_tree::ptree::value_type &cell :sub_tree)
-    { val_vect.push_back( nu0 * cell.second.get_value<double>() ); }
 
-if(val_vect.size() != Pt::DIM) {std::cout<<"wrong number of field components"<<std::endl;}
-else
-    { Hext = Pt::pt3D(val_vect[0],val_vect[1],val_vect[2]); }
-*/
-    
 try
     {
     sub_tree = root.get_child("spin_polarized_current");
@@ -252,4 +206,18 @@ double tf = sub_tree.get<double>("final_time",dt_max);
 timing t_prm = timing(0.0,tf,dt_min,dt_max);
 
 return(t_prm);
+}
+
+Pt::pt3D Settings::readUnitVector(boost::property_tree::ptree::value_type &sub_k, std::string varName)
+{
+Pt::pt3D vect;
+if (sub_k.first == varName)
+    {
+    std::vector<double> X;
+    for(boost::property_tree::ptree::value_type &row : sub_k.second) { X.push_back( row.second.get_value<double>() ); }
+    if(X.size() != Pt::DIM) {std::cout<<"wrong number of components for " << varName <<std::endl; exit(1);}
+    vect = Pt::pt3D(X[0],X[1],X[2]);
+    if ( fabs(vect.norm()-1.0) > USER_TOL ) {std::cout<<"WARNING: " << varName <<"= " << vect << " not a unit vector, it will be normalized"<<std::endl; vect.normalize();}
+    }
+return vect;
 }

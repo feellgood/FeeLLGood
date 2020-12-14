@@ -11,6 +11,8 @@
 #include <cmath>
 #include <string>
 
+#include<boost/property_tree/ptree.hpp>
+
 #include "mag_parser.h"
 #include "time_integration.h"
 #include "tetra.h"
@@ -166,6 +168,8 @@ class Settings{
 	std::string pbName;     /**< mesh file, gmsh file format */
     MagnetizationParser mag_parser;  /**< parser for the magnetization expressions */
     TimeDepFieldParser field_parser; /**< parser for the time dependant applied field expressions */
+
+    Pt::pt3D readUnitVector(boost::property_tree::ptree::value_type &sub_k, std::string varName);/**< read json sub tree and return a unit vector, check number of components, must be Pt::DIM */
 };
 
 #endif /* feellgoodSettings_h */
