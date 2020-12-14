@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <random>
 
+#include "config.h" // for tolerance UT_TOL macro
 #include "pt3D.h"
 #include "tiny.h"
 
@@ -117,7 +118,7 @@ double z(-12.0);
 BOOST_CHECK( (x == result(Pt::IDX_X))&&(y == result(Pt::IDX_Y))&&(z == result(Pt::IDX_Z)) );
 }
 
-BOOST_AUTO_TEST_CASE(pt3D_op_dist, * boost::unit_test::tolerance(1e-15))
+BOOST_AUTO_TEST_CASE(pt3D_op_dist, * boost::unit_test::tolerance(UT_TOL))
 {
 Pt::pt3D X(1,2,3);
 Pt::pt3D Y(3,2,-4);
@@ -147,7 +148,7 @@ BOOST_CHECK( (x1 == 0.0) && (x2 == r2.maxLength())  );
 /* second lvl tests : pure mathematics   */
 /*---------------------------------------*/
 
-BOOST_AUTO_TEST_CASE(pt3D_unit_sphere, * boost::unit_test::tolerance(1e-15))
+BOOST_AUTO_TEST_CASE(pt3D_unit_sphere, * boost::unit_test::tolerance(UT_TOL))
 {
 std::random_device rd;
 
@@ -159,7 +160,7 @@ std::cout << "test that constructor in spherical coordinates(S^2) is making a un
 BOOST_TEST( X.norm() == 1.0 );
 }
 
-BOOST_AUTO_TEST_CASE(pt3D_triple_product, * boost::unit_test::tolerance(1e-14))
+BOOST_AUTO_TEST_CASE(pt3D_triple_product, * boost::unit_test::tolerance(10.0*UT_TOL))
 {
 std::random_device rd;
 
@@ -192,7 +193,7 @@ BOOST_TEST( x2 == x3 );
 BOOST_TEST( x3 == x1 );
 }
 
-BOOST_AUTO_TEST_CASE(pt3D_det, * boost::unit_test::tolerance(1e-14))
+BOOST_AUTO_TEST_CASE(pt3D_det, * boost::unit_test::tolerance(10.0*UT_TOL))
 {
 double M[Pt::DIM][Pt::DIM];
 std::random_device rd;
@@ -228,7 +229,7 @@ std::cout << "det(random_rot) -1=" << result-1.0 << std::endl;
 BOOST_TEST( Pt::sq(result) == 1.0 );
 }
 
-BOOST_AUTO_TEST_CASE(pt3D_inverse, * boost::unit_test::tolerance(1e-15))
+BOOST_AUTO_TEST_CASE(pt3D_inverse, * boost::unit_test::tolerance(UT_TOL))
 {
 double M[Pt::DIM][Pt::DIM];
 double inv_M[Pt::DIM][Pt::DIM];

@@ -2,6 +2,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "config.h"
 #include "tiny.h"
 
 BOOST_AUTO_TEST_SUITE(ut_tiny)
@@ -105,7 +106,7 @@ BOOST_CHECK( result == true );
 /* second lvl tests : pure mathematics   */
 /*---------------------------------------*/
 
-BOOST_AUTO_TEST_CASE(tiny_frobenius, * boost::unit_test::tolerance(1e-15))
+BOOST_AUTO_TEST_CASE(tiny_frobenius, * boost::unit_test::tolerance(UT_TEST))
 {
 const int M = 3;
 const int N = 2;
@@ -118,7 +119,7 @@ BOOST_TEST( result == sqrt(91.0) );
 }
 
 
-BOOST_AUTO_TEST_CASE(tiny_dist, * boost::unit_test::tolerance(1e-15))
+BOOST_AUTO_TEST_CASE(tiny_dist, * boost::unit_test::tolerance(UT_TEST))
 {
 const int M = 3;
 const int N = 2;

@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <random>
 
+#include "config.h" // for tolerance UT_TOL macro
 #include "node.h"
 
 // might be interesting to fix a tolerance value from config.h.in for some lvl 2 tests
@@ -39,7 +40,7 @@ BOOST_CHECK(x != 0.0f);
 /*---------------------------------------*/
 
 
-BOOST_AUTO_TEST_CASE(node_e_p, * boost::unit_test::tolerance(1e-15))
+BOOST_AUTO_TEST_CASE(node_e_p, * boost::unit_test::tolerance(UT_TOL))
 {
 std::random_device rd;
 
@@ -57,7 +58,7 @@ BOOST_TEST(X.norm() == 1.0);
 BOOST_TEST( fabs(Pt::pScal(n.u0,X)) == 0.0 );
 }
 
-BOOST_AUTO_TEST_CASE(node_evol, * boost::unit_test::tolerance(1e-14)) 
+BOOST_AUTO_TEST_CASE(node_evol, * boost::unit_test::tolerance(10.0*UT_TOL)) 
 {
 std::random_device rd;
 
