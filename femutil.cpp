@@ -74,7 +74,7 @@ std::for_each(fac.begin(),fac.end(),[this,&settings,&sf](Facette::Fac &fa)
                 //fa.Ms will have the magnitude of first arg of copysign, with the sign of second arg
                 fa.Ms = std::copysign(nu0*settings.paramTetra[it->idxPrm].J , Pt::pTriple( p1-p0 , p2-p0 ,fa.calc_norm()) );// carefull here, calc_norm recomputes the normal to the face before the idx swap
                 }
-	    std::swap(i1,i2);//fa.swap_idx(1,2); not sure what the algo is supposed to do: it seems from ref archive we do not want to swap inner fac indices but local i1 and i2
+	    std::swap(i1,i2);// it seems from ref archive we do not want to swap inner fac indices but local i1 and i2
             }//end perm
         }
     }); //end for_each

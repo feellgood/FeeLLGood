@@ -52,7 +52,6 @@ pt3D ey = params[idxPrm].ey;
 pt3D ez = params[idxPrm].ez;
 
 double Uz = params[idxPrm].Uz;
-//double beta_sc = params[idxPrm].beta_sc; //not yet
 
 double Abis = 2.0*(params[idxPrm].A)/(params[idxPrm].J);
 double Kbis = 2.0*(params[idxPrm].K)/(params[idxPrm].J);

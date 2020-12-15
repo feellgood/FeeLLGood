@@ -73,13 +73,9 @@ class Fac{
                 for (int j=0; j<NPI; j++) {weight[j] = 2.*surf*pds[j]; }
            	}
         }
-		/** constructor from a region number and three indices */		
-		inline Fac(int r,int i0,int i1,int i2): NOD(0),reg(r)
-		{ind[0]=i0;ind[1]=i1;ind[2]=i2;}
 		
 		/** constructor from a region number, idxPrm and three indices */		
-		inline Fac(int r,int idx,int i0,int i1,int i2): NOD(0),reg(r) 
-		{idxPrm=idx; ind[0]=i0;ind[1]=i1;ind[2]=i2;}
+		inline Fac(int r,int idx,int i0,int i1,int i2): NOD(0),reg(r) {idxPrm=idx; ind[0]=i0;ind[1]=i1;ind[2]=i2;}
 		
 		int idxPrm;/**< index of the material parameters of the facette */	
 			
@@ -193,9 +189,6 @@ class Fac{
 
 /** computes surface of the face		*/		
 	double calc_surf(void) const;	
-
-    /** swap i and j indices values */
-	inline void swap_idx(const int i,const int j) { std::swap(ind[i],ind[j]); }
     
     private:
         const int NOD;/**< number of nodes */

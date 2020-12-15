@@ -40,6 +40,9 @@ class Settings{
         
         solverNbTh = 8;
         scalfmmNbTh = 8;
+        
+        Uz =  0.0;    
+        beta = 0.0;
         }
 	
 	/** convenient enum to define what quantity is written in output file .evol */
