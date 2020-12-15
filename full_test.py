@@ -9,11 +9,12 @@ from settingsMaker import Settings
 mySettings = Settings("ellipsoid.msh")
 
 MaxNbThreads = int(subprocess.check_output(["getconf","_NPROCESSORS_ONLN"]))
+nbThreads = (MaxNbThreads + 4) // 3 # ellipsoid.msh is small, maxnbthreads is counterproductive
 
-mySettings["finite_element_solver"]["nb_threads"] = 6 # ellipsoid.msh is small, maxnbthreads is counterproductive
+mySettings["finite_element_solver"]["nb_threads"] = nbThreads
 mySettings["finite_element_solver"]["max(iter)"] = 500
 
-mySettings["demagnetizing_field_solver"]["nb_threads"] = MaxNbThreads
+mySettings["demagnetizing_field_solver"]["nb_threads"] = nbThreads
 
 mySettings["outputs"]["evol_columns"] = ["t","<Mx>","<My>","<Mz>","E_ex","E_demag","E_zeeman","E_tot"]
 mySettings["outputs"]["take_photo"] = 100
