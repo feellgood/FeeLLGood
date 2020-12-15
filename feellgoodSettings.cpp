@@ -93,14 +93,20 @@ for (boost::property_tree::ptree::value_type &s : s_sub_tree)
             if (sub_k.first == "K")
                 { p.K = sub_k.second.get_value<double>(); }
             
-            p.uk = readUnitVector(sub_k,"uk");
+            if (sub_k.first == "uk")
+                { p.uk = readUnitVector(sub_k,"uk"); }
             
             if (sub_k.first == "K3")
                 { p.K3 = sub_k.second.get_value<double>(); }
             
-            p.ex = readUnitVector(sub_k,"ex");
-            p.ey = readUnitVector(sub_k,"ey");
-            p.ez = readUnitVector(sub_k,"ez");
+            if (sub_k.first == "ex")
+                { p.ex = readUnitVector(sub_k,"ex"); }
+                
+            if (sub_k.first == "ey")
+                { p.ey = readUnitVector(sub_k,"ey"); }
+            
+            if (sub_k.first == "ez")
+                { p.ez = readUnitVector(sub_k,"ez"); }
             
             if (sub_k.first == "Js") {p.J = sub_k.second.get_value<double>();}
             }
@@ -121,9 +127,12 @@ for (boost::property_tree::ptree::value_type &s : s_sub_tree)
         p.reg = stoi(name_reg);
         for (boost::property_tree::ptree::value_type &sub_k : s_sub_tree.get_child(name_reg))
             {
-            if (sub_k.first == "Ks") { p.Ks = sub_k.second.get_value<double>(); }
-            p.uk = readUnitVector(sub_k,"uk");
-            if (sub_k.first == "suppress_charges") {p.suppress_charges = sub_k.second.get_value<bool>();}
+            if (sub_k.first == "Ks")
+                { p.Ks = sub_k.second.get_value<double>(); }
+            if (sub_k.first == "uk")
+                { p.uk = readUnitVector(sub_k,"uk"); }
+            if (sub_k.first == "suppress_charges") 
+                { p.suppress_charges = sub_k.second.get_value<bool>(); }
             }
         paramFacette.push_back(p);
         //p.infos();	
@@ -179,7 +188,7 @@ catch(std::exception &e)
     { std::cout << "no spin polarized" << std::endl; }
 
 
-try { sub_tree = root.get_child("demagnetizating_field_solver"); }
+try { sub_tree = root.get_child("demagnetizing_field_solver"); }
 catch (std::exception &e)
     { std::cout << e.what() << std::endl; }
 scalfmmNbTh = sub_tree.get<int>("nb_threads",8);
@@ -211,13 +220,13 @@ return(t_prm);
 Pt::pt3D Settings::readUnitVector(boost::property_tree::ptree::value_type &sub_k, std::string varName)
 {
 Pt::pt3D vect;
-if (sub_k.first == varName)
-    {
-    std::vector<double> X;
-    for(boost::property_tree::ptree::value_type &row : sub_k.second) { X.push_back( row.second.get_value<double>() ); }
-    if(X.size() != Pt::DIM) {std::cout<<"wrong number of components for " << varName <<std::endl; exit(1);}
-    vect = Pt::pt3D(X[0],X[1],X[2]);
-    if ( fabs(vect.norm()-1.0) > USER_TOL ) {std::cout<<"WARNING: " << varName <<"= " << vect << " not a unit vector, it will be normalized"<<std::endl; vect.normalize();}
-    }
+
+std::vector<double> X;
+for(boost::property_tree::ptree::value_type &row : sub_k.second) { X.push_back( row.second.get_value<double>() ); }
+if(X.size() != Pt::DIM) {std::cout<<"wrong number of components for " << varName <<std::endl; exit(1);}
+vect = Pt::pt3D(X[0],X[1],X[2]);
+if ( fabs(vect.norm()-1.0) > USER_TOL )
+    {std::cout<<"WARNING: " << varName <<"= " << vect << " not a unit vector"<<std::endl; }
+vect.normalize();
 return vect;
 }
