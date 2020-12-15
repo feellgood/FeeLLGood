@@ -169,7 +169,7 @@ class Settings{
     MagnetizationParser mag_parser;  /**< parser for the magnetization expressions */
     TimeDepFieldParser field_parser; /**< parser for the time dependant applied field expressions */
 
-    Pt::pt3D readUnitVector(boost::property_tree::ptree::value_type &sub_k, std::string varName);/**< read json sub tree and return a unit vector, check number of components, must be Pt::DIM */
+    Pt::pt3D readUnitVector(boost::property_tree::ptree::value_type &sub_k,const std::string varName);/**< read json sub tree and return a unit vector, check number of components, must be Pt::DIM */
 };
 
 #endif /* feellgoodSettings_h */

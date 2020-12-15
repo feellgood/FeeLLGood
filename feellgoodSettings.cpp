@@ -217,7 +217,7 @@ timing t_prm = timing(0.0,tf,dt_min,dt_max);
 return(t_prm);
 }
 
-Pt::pt3D Settings::readUnitVector(boost::property_tree::ptree::value_type &sub_k, std::string varName)
+Pt::pt3D Settings::readUnitVector(boost::property_tree::ptree::value_type &sub_k, const std::string varName)
 {
 Pt::pt3D vect;
 
