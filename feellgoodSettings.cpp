@@ -179,7 +179,7 @@ catch(std::exception &e)
     { std::cout << "no spin polarized" << std::endl; }
 
 
-try { sub_tree = root.get_child("demagnetizating_field_solver"); }
+try { sub_tree = root.get_child("demagnetizing_field_solver"); }
 catch (std::exception &e)
     { std::cout << e.what() << std::endl; }
 scalfmmNbTh = sub_tree.get<int>("nb_threads",8);

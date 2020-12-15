@@ -11,7 +11,7 @@ This non-linear partial derivative equation is solved using finite element metho
 
 \f$ A \f$ is the exchange energy constant, \f$ M_s \f$ is the magnetization at saturation of the considered material. \f$ E_{an} \f$ is the anisotropy energy contribution. \f$ \mathbf{H}_a \f$
 is the external applied field.
-The demagnetization field \f$ \mathbf{H}_d = -\frac{1}{4 \pi} \int_V \nabla \cdot \mathbf{m} \frac{\mathbf{r}}{r^3} dV \f$ is computed using fast multipole algorithm, implemented in the external library scalfmm.
+The demagnetizing field \f$ \mathbf{H}_d = -\frac{1}{4 \pi} \int_V \nabla \cdot \mathbf{m} \frac{\mathbf{r}}{r^3} dV \f$ is computed using fast multipole algorithm, implemented in the external library scalfmm.
 Material parameters are given to feellgood solver through the mesh file.
 
 ## Installation & configuration

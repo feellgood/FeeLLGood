@@ -15,7 +15,7 @@ MaxNbThreads = int(subprocess.check_output(["getconf","_NPROCESSORS_ONLN"]))
 mySettings["finite_element_solver"]["nb_threads"] = 4 # MaxNbThreads
 mySettings["finite_element_solver"]["max(iter)"] = 700
 
-mySettings["demagnetizating_field_solver"]["nb_threads"] = 4 # MaxNbThreads
+mySettings["demagnetizing_field_solver"]["nb_threads"] = 4 # MaxNbThreads
 
 mySettings["outputs"]["evol_columns"] = ["t","<Mx>","<My>","<Mz>","<dMx/dt>","<dMy/dt>","<dMz/dt>","Hx","Hy","Hz","E_ex","E_demag","E_zeeman","E_tot"]
 mySettings["outputs"]["take_photo"] = 500
