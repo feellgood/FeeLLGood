@@ -35,8 +35,8 @@ std::for_each(fac.begin(),fac.end(),[this,&settings](Facette::Fac const& fa)
     double phi[Facette::NPI];
     Pt::pt3D u[Facette::NPI];
 
-    fa.interpolation(Nodes::get_u,u);
-    fa.interpolation(Nodes::get_phi,phi);
+    fa.interpolation<Pt::pt3D>(Nodes::get_u,u);
+    fa.interpolation<double>(Nodes::get_phi,phi);
     
     if(param.Ks != 0.0)
         { E_aniso += fa.anisotropyEnergy(param,u); }

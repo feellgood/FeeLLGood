@@ -64,82 +64,63 @@ class Fac{
                    const int i1 /**< [in] node index */,
                    const int i2 /**< [in] node index */) : idxPrm(_idx),NOD(_p_node->size()),reg(_reg),refNode(_p_node)
         {
-	if(NOD>0)
-		{
-		ind[0] = i0; ind[1] = i1; ind[2] = i2;
-                for (int i=0; i<N; i++) ind[i]--; // to force index to start from 0 (C++) instead of Matlab/msh convention
-                treated = false;
-		double surf = calc_surf();
-                for (int j=0; j<NPI; j++) {weight[j] = 2.*surf*pds[j]; }
-           	}
+        if(NOD>0)
+            {
+            ind[0] = i0; ind[1] = i1; ind[2] = i2;
+            for (int i=0; i<N; i++) ind[i]--; // to force index to start from 0 (C++) instead of Matlab/msh convention
+            treated = false;
+            surf = calc_surf();
+            }
         }
 		
 		/** constructor from a region number, idxPrm and three indices */		
-		inline Fac(int r,int idx,int i0,int i1,int i2): NOD(0),reg(r) {idxPrm=idx; ind[0]=i0;ind[1]=i1;ind[2]=i2;}
+		inline Fac(const int r,const int idx,const int i0,const int i1,const int i2): idxPrm(idx),surf(0),Ms(0),NOD(0),reg(r)
+            {ind[0]=i0;ind[1]=i1;ind[2]=i2; treated = false;}
 		
 		int idxPrm;/**< index of the material parameters of the facette */	
-			
+		
+		double surf;
 		double Ms; /**< magnetization at saturation of the face */    
 		int ind[N];/**< indices table of the nodes */
-		double weight[NPI];/**< weights table */
-		
 		bool treated;/**< flag */
-		
-        /** weighted scalar product : factorized formulation */
+
+        /** weighted scalar product : factorized formulation: weight(1)=weight(2)=weight(3) */
         inline double weightedScalarProd(const double X[NPI] /**< [in] */) const
-            {return ( X[0]*weight[0] + (X[1] +X[2] + X[3])*weight[1] );}
-            //{return (X[0]*weight[0] + X[1]*weight[1] + X[2]*weight[2] + X[3]*weight[3] );}
+            { return ( X[0]*weight(0) + (X[1] +X[2] + X[3])*weight(1) ); }
+        
+        /** interpolation template; T == 3D vector field or T == double .The getter function is given as a parameter in order to know what part of the node you want to interpolate 
+         To check with reference code : is there a missing transposition ?
+         //tiny::mult<double, DIM, N, NPI> (vec_nod, a, result); //if T == double
+         //tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result); //if T == PT::pt3D
+         */
+        template <class T>
+        void interpolation(std::function< T (Nodes::Node)> getter /**< [in] */,T result[NPI] /**< [out] */) const
+        {
+        T X_nod[N];
+        for (int i=0; i<N; i++)
+            { X_nod[i] = getter( (*refNode)[ ind[i] ] ); }
+        
+        T s = X_nod[0] + X_nod[1] + X_nod[2];
+        result[0] = s/3.0;
+        result[1] = (s + 2.0*X_nod[0])/5.0;
+        result[2] = (s + 2.0*X_nod[1])/5.0;
+        result[3] = (s + 2.0*X_nod[2])/5.0;
+        }
         
         /** interpolation for 3D vector field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
         inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter /**< [in] */,Pt::pt3D result[NPI] /**< [out] */) const
-        {
-        Pt::pt3D vec_nod[N];
-        for (int i=0; i<N; i++)
-            { vec_nod[i] = getter( (*refNode)[ ind[i] ] ); }
-        
-        Pt::pt3D s = (vec_nod[0] + vec_nod[1] + vec_nod[2] )/5.0;
-        //double sx = (vec_nod[Pt::IDX_X][0] + vec_nod[Pt::IDX_X][1] + vec_nod[Pt::IDX_X][2] )/5.0;
-        //double sy = (vec_nod[Pt::IDX_Y][0] + vec_nod[Pt::IDX_Y][1] + vec_nod[Pt::IDX_Y][2] )/5.0;
-        //double sz = (vec_nod[Pt::IDX_Z][0] + vec_nod[Pt::IDX_Z][1] + vec_nod[Pt::IDX_Z][2] )/5.0;
-        
-        for(int i=0;i<NPI;i++)
-            {result[i] = s;}
-        result[0] *= (5.0/3.0);
-        //result[0][0] *= (5.0/3.0); result[1][0] *= (5.0/3.0); result[2][0] *= (5.0/3.0);
-
-        result[1] += vec_nod[0]*2.0/5.0;
-        result[2] += vec_nod[1]*2.0/5.0;
-        result[3] += vec_nod[2]*2.0/5.0;
-        
-        //result[0][1] += vec_nod[0][0]*2.0/5.0; result[0][2] += vec_nod[0][1]*2.0/5.0; result[0][3] += vec_nod[0][2]*2.0/5.0;
-        //result[1][1] += vec_nod[1][0]*2.0/5.0; result[1][2] += vec_nod[1][1]*2.0/5.0; result[1][3] += vec_nod[1][2]*2.0/5.0;
-        //result[2][1] += vec_nod[2][0]*2.0/5.0; result[2][2] += vec_nod[2][1]*2.0/5.0; result[2][3] += vec_nod[2][2]*2.0/5.0;
-        
-        //tiny::mult<double, DIM, N, NPI> (vec_nod, a, result);
-        }
-        
+            { interpolation<Pt::pt3D>(getter,result); }
+     
         /** interpolation for scalar field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
         inline void interpolation(std::function<double (Nodes::Node)> getter /**< [in] */,double result[NPI] /**< [out] */) const
-        {
-        double scalar_nod[N];    
-        for (int i=0; i<N; i++)
-            {
-            Nodes::Node const& n = (*refNode)[ ind[i] ];
-            scalar_nod[i] =  getter(n);
-            }
-        
-        double sn = scalar_nod[0] + scalar_nod[1] + scalar_nod[2];
-        
-        result[0] = sn/3.0; result[1] = (sn + 2.0*scalar_nod[0])/5.0; result[2] = (sn + 2.0*scalar_nod[1])/5.0; result[2] = (sn + 2.0*scalar_nod[2])/5.0;
-        //tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result);
-        }
-        
+            { interpolation<double>(getter,result); }
+
         /** basic infos */		
-	inline void infos() const {std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2] <<std::endl;};
+        inline void infos() const {std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2] <<std::endl;};
         
-	/** computes the integral contribution of the triangular face */
-	void integrales(std::vector<Facette::prm> const& params /**< [in] */, Pt::pt3D BE[N] /**< [out] */) const;
-		
+        /** computes the integral contribution of the triangular face */
+        void integrales(std::vector<Facette::prm> const& params /**< [in] */, Pt::pt3D BE[N] /**< [out] */) const;
+
         /** anisotropy energy of the facette */
         double anisotropyEnergy(Facette::prm const& param /**< [in] */,const Pt::pt3D u[NPI] /**< [in] */) const;
         
@@ -181,20 +162,22 @@ class Fac{
 	/** small matrix for integrales */
 	double Kp[2*N][2*N];        
 	
-    	/** small vector for integrales */
-    	double Lp[2*N];
+    /** small vector for integrales */
+    double Lp[2*N];
 
 	/** computes the norm to the face */
 	Pt::pt3D calc_norm(void) const;
 
-/** computes surface of the face		*/		
-	double calc_surf(void) const;	
+    /** computes surface of the face */
+    double calc_surf(void) const;
     
     private:
         const int NOD;/**< number of nodes */
         const int reg;/**< .msh region number */
         
         const std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
+
+        inline double weight(const int i) const { return 2.0*surf*Facette::pds[i]; }
 };//end class Fac
 
 }//end namespace

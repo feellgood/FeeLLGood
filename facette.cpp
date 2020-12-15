@@ -10,11 +10,11 @@ Pt::pt3D const & uk = params[idxPrm].uk;
 double Kbis = 2.0*(params[idxPrm].Ks)/Ms; // carefull Ms of the facette here (could lead to div by zero ?)
 
 Pt::pt3D u[NPI];
-interpolation(Nodes::get_u0,u);
+interpolation<Pt::pt3D>(Nodes::get_u0,u);
 
 for (int npi=0; npi<NPI; npi++)
 	{
-    double w_uk_u = weight[npi]*pScal(uk,u[npi]);//(uk(0)*u[0][npi] + uk(1)*u[1][npi] + uk(2)*u[2][npi]); 
+    double w_uk_u = weight(npi)*pScal(uk,u[npi]);
 
     for (int i=0; i<N; i++) { BE[i] += Kbis*a[i][npi]*w_uk_u*uk; }
     }
@@ -31,13 +31,11 @@ return weightedScalarProd(dens);
 void Fac::charges(std::function<Pt::pt3D (Nodes::Node)> getter,std::vector<double> &srcDen,std::vector<double> &corr,int &nsrc) const
 {
 Pt::pt3D u[NPI];
-interpolation(getter,u);
+interpolation<Pt::pt3D>(getter,u);
 Pt::pt3D n = calc_norm();
 
 for (int j=0; j<NPI; j++, nsrc++)
-    { 
-    srcDen[nsrc] = Ms * weight[j] * pScal(u[j],n);//( u[0][j]*n.x() + u[1][j]*n.y() + u[2][j]*n.z() ) ; 
-    }
+    { srcDen[nsrc] = Ms * weight(j) * pScal(u[j],n); }
 
 calcCorr(getter,corr,u);
 }
@@ -48,9 +46,7 @@ double q[NPI];
 Pt::pt3D n = calc_norm();
 
 for (int npi=0; npi<NPI; npi++)
-        {
-        q[npi] = Ms * pScal(u[npi],n);//(u[0][npi]*n.x() + u[1][npi]*n.y() + u[2][npi]*n.z()); 
-        }
+        { q[npi] = Ms * pScal(u[npi],n); }
 double dens[NPI];
 for (int npi=0; npi<NPI; npi++)
     { dens[npi] = 0.5*mu0*q[npi]*phi[npi]; }
@@ -141,7 +137,7 @@ void Fac::calcCorr(std::function<const Pt::pt3D (Nodes::Node)> getter,std::vecto
 // calc coord gauss
 Pt::pt3D gauss[NPI];
         
-interpolation(Nodes::get_p,gauss);
+interpolation<Pt::pt3D>(Nodes::get_p,gauss);
 // calc corr node by node
 Pt::pt3D n = calc_norm();
 
@@ -151,7 +147,7 @@ for (int i=0; i<N; i++)
     const Pt::pt3D p_i_ = (*refNode)[ i_ ].p;	      
     for (int j=0; j<NPI; j++)
         {
-        corr[i_]-= Ms*pScal(u[j],n)*weight[j]/Pt::dist(p_i_, gauss[j]);
+        corr[i_]-= Ms*pScal(u[j],n)*weight(j)/Pt::dist(p_i_, gauss[j]);
         }
     corr[i_]+= potential(getter,i);
     }
