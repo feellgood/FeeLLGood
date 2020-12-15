@@ -79,7 +79,7 @@ class Fac{
 		
 		int idxPrm;/**< index of the material parameters of the facette */	
 		
-		double surf;
+		double surf;/**< surface of the element */
 		double Ms; /**< magnetization at saturation of the face */    
 		int ind[N];/**< indices table of the nodes */
 		bool treated;/**< flag */
@@ -88,11 +88,10 @@ class Fac{
         inline double weightedScalarProd(const double X[NPI] /**< [in] */) const
             { return ( X[0]*weight(0) + (X[1] +X[2] + X[3])*weight(1) ); }
         
-        /** interpolation template; T == 3D vector field or T == double .The getter function is given as a parameter in order to know what part of the node you want to interpolate 
-         To check with reference code : is there a missing transposition ?
-         //tiny::mult<double, DIM, N, NPI> (vec_nod, a, result); //if T == double
-         //tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result); //if T == PT::pt3D
-         */
+        /** interpolation template; T == 3D vector field or T == double .The getter function is given as a parameter in order to know what part of the node you want to interpolate */
+        //To check with reference code : is there a missing transposition ?
+        //tiny::mult<double, DIM, N, NPI> (vec_nod, a, result); //if T == double
+        //tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result); //if T == PT::pt3D
         template <class T>
         void interpolation(std::function< T (Nodes::Node)> getter /**< [in] */,T result[NPI] /**< [out] */) const
         {
@@ -177,6 +176,7 @@ class Fac{
         
         const std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
 
+        /** computes weight coefficients */
         inline double weight(const int i) const { return 2.0*surf*Facette::pds[i]; }
 };//end class Fac
 
