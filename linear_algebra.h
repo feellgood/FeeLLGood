@@ -49,7 +49,7 @@ public:
     ~LinAlgebra ()
         { if (prc != nullptr) {delete prc;} }
     
-	/** pointer to diagonal preconditionner  */
+	/** pointer to diagonal preconditioner  */
 	gmm::diagonal_precond <read_matrix> *prc = nullptr;
 
     /** mono thread solver , debug only */ 

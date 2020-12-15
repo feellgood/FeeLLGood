@@ -29,7 +29,7 @@ class Settings(object):
 
         self.mySets["finite_element_solver"] = {"nb_threads" : 16, "max(iter)" : 500, "refresh_preconditioner_every": 20}
 
-        self.mySets["demagnetizating_field_solver"] = {"nb_threads" : 16}
+        self.mySets["demagnetizing_field_solver"] = {"nb_threads" : 16}
 
         self.mySets["time_integration"] = {"final_time" : 1e-6, "min(du)" : 1e-9, "max(du)" : 0.02, "min(dt)" : 1e-11, "max(dt)" : 1e-7}
     

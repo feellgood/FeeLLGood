@@ -95,7 +95,7 @@ for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target +=
         
         if (err)
             {
-            std::cout << "solver warning #" << err << ": you might need to adapt time step, max(du), and/or the refreshing period of the preconditionner" << std::endl;
+            std::cout << "solver warning #" << err << ": you might need to adapt time step, max(du), and/or the refreshing period of the preconditioner" << std::endl;
             flag++;
             stepper.set_soft_limit(t_prm.get_dt() / 2);
             continue;
