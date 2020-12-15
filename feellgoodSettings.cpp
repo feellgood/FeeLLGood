@@ -24,7 +24,8 @@ else
 
 std::cout << "\t applied field Bext = [ " << sBx << ",\t" << sBy << ",\t" << sBz << " ] A/m" << std::endl;
 
-std::cout << "recentering along " << recentering_direction << " with threshold = " << threshold << std::endl;
+if (recenter)
+    { std::cout << "recentering along " << recentering_direction << " with threshold = " << threshold << std::endl; }
 
 for(unsigned int i=0;i<paramTetra.size();i++) {paramTetra[i].infos();}
 for(unsigned int i=0;i<paramFacette.size();i++) {paramFacette[i].infos();}
@@ -160,6 +161,7 @@ else if (verbose) { std::cout<< "initial magnetization defined from file :" << r
 try 
     {
     sub_tree = root.get_child("recentering"); 
+    recenter = true;
     recentering_direction = sub_tree.get<char>("direction",'Z');
 
     if((recentering_direction != 'X') && (recentering_direction != 'Y') && (recentering_direction != 'Z'))
