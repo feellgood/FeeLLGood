@@ -3,8 +3,8 @@
 
 #include "Utils/FTic.hpp"//for counter from scalfmm
 
-
 #include "fem.h"
+#include "mesh.h"
 #include "linear_algebra.h"
 #include "fmm_demag.h"
 #include "time_integration.h"
@@ -80,7 +80,7 @@ if(mySettings.verbose)
 std::cout<<"start computing..."<<std::endl;
 counter.tic();
 //once fem containers are ok, linAlgebra object is built
-LinAlgebra linAlg(mySettings,fem.node,fem.tet,fem.fac);
+LinAlgebra linAlg(mySettings,fem.msh);
 
 scal_fmm::fmm myFMM(fem,mySettings.verbose,mySettings.scalfmmNbTh);
 

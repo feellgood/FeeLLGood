@@ -82,10 +82,10 @@ for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target +=
             else std::cout << "nt_output = " << nt_output << ", nt = " << nt << ", t = " << t_prm.get_t();
             std::cout << ", dt = " << t_prm.get_dt() ;
             }
-        if (t_prm.is_dt_TooSmall()) { fem.reset();break; }
+        if (t_prm.is_dt_TooSmall()) { fem.msh.reset();break; }
 
         /* changement de referentiel */
-        fem.DW_vz += fem.DW_dir*fem.avg(Nodes::get_v_comp,Pt::IDX_Z)*fem.l.z()/2.;
+        fem.DW_vz += fem.DW_dir*fem.msh.avg(Nodes::get_v_comp,Pt::IDX_Z)*fem.msh.l.z()/2.;
         
         linAlg.set_DW_vz(fem.DW_vz);
         //int err = linAlg.monoThreadSolver(t_prm,nt);

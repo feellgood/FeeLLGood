@@ -23,6 +23,8 @@ It does also contains the definition of many constants for the solver, and for s
 #include <sys/times.h>
 #include <unistd.h>
 
+#include "mesh.h"
+
 #include "feellgoodSettings.h"
 #include "ANN.h"
 
@@ -32,8 +34,8 @@ class container to grab altogether all parameters of a simulation, including mes
 class Fem
     {
     public:
-        /** constructor */
-        inline Fem(Settings & mySets,timing &t_prm) //mySets cannot be passed const because of getValue method in init_distrib, to set x,y,z values
+        /** constructor: call mesh constructor, initialize pts,kdtree and many inner variables */
+        inline Fem(Settings & mySets,timing &t_prm):msh(mySets) //mySets cannot be passed const because of getValue method in init_distrib, to set x,y,z values
             {
             vmax  = 0.0;
             DW_vz = DW_vz0 = 0.0;
@@ -45,29 +47,27 @@ class Fem
             E_zeeman0 = E_zeeman = 0.0;
             Etot0 = Etot = 0.0;
             
-            readMesh(mySets);
-            
-            pts= annAllocPts(node.size(), Pt::DIM);
-            kdtree = new ANNkd_tree(pts, node.size(), Pt::DIM);
+            pts= annAllocPts(msh.getNbNodes(), Pt::DIM);
+            kdtree = new ANNkd_tree(pts, msh.getNbNodes(), Pt::DIM);
             if (!kdtree) SYSTEM_ERROR;
-
-            int i=0;
-            std::for_each(node.begin(),node.end(),[this,&i](Nodes::Node const& n)
-                { this->pts[i][0] = n.p.x();this->pts[i][1] = n.p.y();this->pts[i][2] = n.p.z();i++; } );
             
-            femutil(mySets);// reordering of index nodes for facette orientation, also some modifications on fac::Ms
-            
-            geometry();// initialization of l,c,diam,vol,surf
+            for(int i=0;i<msh.getNbNodes();i++)
+                { 
+                Nodes::Node const& n = msh.getNode(i);
+                this->pts[i][0] = n.p.x();
+                this->pts[i][1] = n.p.y();
+                this->pts[i][2] = n.p.z(); 
+                }
             
             if (mySets.restoreFileName == "")
                 {
                 if(mySets.verbose)
                     { std::cout<< "initial magnetization M(x,y,z,t=0) = { " << mySets.sMx << "\t" << mySets.sMy << "\t" << mySets.sMz << " }\n"; } 
-                init_distrib(mySets);
+                msh.init_distrib(mySets);
                 }
             else
                 {
-                double _t = readSol(mySets.verbose,mySets.getScale(), mySets.restoreFileName);
+                double _t = msh.readSol(mySets.verbose,mySets.getScale(), mySets.restoreFileName);
                 t_prm.set_t(_t);    
                 }
                     
@@ -79,16 +79,7 @@ class Fem
         { annDeallocPts(pts); delete kdtree; }
     
     
-    
-    
-	Pt::pt3D c;/**< center position */	
-	Pt::pt3D l;/**< lengths along x,y,z axis */	
-	
-	double diam;/**< max of l coordinates, to define a bounding box */
-	double surf;/**< total surface */
-	double vol;/**< total volume of the mesh */
-	
-	double vmax;/**< maximum speed of magnetization */
+    double vmax;/**< maximum speed of magnetization */
 
 	double E_exch0; /**< previous iteration exchange energy  */
     double E_aniso0; /**< previous iteration anisotropy energy  */
@@ -108,9 +99,7 @@ class Fem
 	double Etot0;/**< initial total energy */
 	double Etot;/**< total energy */
 	
-	std::vector <Nodes::Node> node; /**< node container */
-	std::vector <Facette::Fac>  fac; /**< face container */
-	std::vector <Tetra::Tet>  tet; /**< tetrahedron container */
+	mesh msh;
     
     /**
     print some informations of fem container
@@ -126,7 +115,7 @@ class Fem
     */
     inline void evolution(void)
         {
-        std::for_each(node.begin(), node.end(), [](Nodes::Node &n){ n.evolution();} );
+        msh.evolution();
         E_exch0 = E_exch;
         E_aniso0 = E_aniso;
         E_demag0 = E_demag;
@@ -134,40 +123,9 @@ class Fem
         Etot0 = Etot;
         }
         
-    /**
-    reset the nodes struct to restart another step time simulation
-    Undo the action of one or many "vsolve" runs in case of failure.
-    Demagnetizing field and energies don't need to be reset, because they won't be updated if failure is detected.
-    I don't know how to cleanly reset "fem.DW_vz". BC
-    */
-    inline void reset(void) { std::for_each(node.begin(),node.end(),[](Nodes::Node &n) {n.reset();}); }    
     
     /** saving function for a solution */
     void saver(Settings & settings /**< [in] */,timing const& t_prm /**< [in] */, std::ofstream &fout /**< [out] */, const int nt /**< [in] */) const;
-
-    /** text file (vtk) writing function for a solution, using text VTK format (unstructured grid version 2.0) : deprecated, it is recommanded to use convert2vtk python script instead */
-    void savecfg_vtk(Settings const& settings /**< [in] */,timing const& t_prm /**< [in] */,const std::string fileName /**< [in] */) const;
-
-    /** text file (tsv) writing function for a solution */
-    void savesol(const std::string fileName /**< [in] */,timing const& t_prm /**< [in] */,const double s /**< [in] */) const;
-
-    /** save the demagnetizing field values, including idx and npi indices, for debug use */
-    void saveH(const std::string fileName /**< [in] */,const double t/**< [in] */,const double scale /**< [in] */) const;
-    
-    /** 
-    average component of either u or v through getter on the whole set of tetetrahedron
-    */
-    double avg(std::function<double (Nodes::Node,Pt::index)> getter /**< [in] */,Pt::index d /**< [in] */) const
-    {// syntaxe pénible avec opérateur binaire dans la lambda pour avoir un += sur la fonction voulue, with C++17 we should use reduce instead of accumulate here
-    double sum = std::accumulate(tet.begin(),tet.end(),0.0, [getter,&d](double &s,Tetra::Tet const& te)
-                            {
-                            double val[Tetra::NPI]; 
-                            te.interpolation(getter,d,val); 
-                            return (s + te.weightedScalarProd(val));    
-                            } );
-
-    return sum/vol;
-    }
     
     /** recentering algorithm for the study of the motion of a domain wall. 
  
@@ -186,87 +144,7 @@ class Fem
     private:
     ANNkd_tree* kdtree;/**< ANN kdtree to find efficiently the closest set of nodes to a physical point in the mesh  */
     ANNpointArray pts;/**< container for the building of the kdtree (handled by ANN library) */
-    
-    /** computes an analytical initial magnetization distribution as a starting point for the simulation */
-    inline void init_distrib(Settings & mySets /**< [in] */)
-        { std::for_each( node.begin(),node.end(), [this,&mySets](Nodes::Node & n) 
-            {
-            Pt::pt3D pNorm = Pt::pt3D( (n.p.x() - c.x())/l.x() , (n.p.y() - c.y())/l.y() , (n.p.z() - c.z())/l.z() );
-            n.u0 = mySets.getValue(pNorm);
-            n.u = n.u0;
-            n.phi  = 0.;
-            n.phiv = 0.;
-            } 
-        ); }
 
-/** return the minimum of all nodes coordinate along coord axis */
-inline double minNodes(const Pt::index coord)
-{
-const auto minCoord = std::min_element(node.begin(),node.end(),[coord](Nodes::Node &n1,Nodes::Node &n2) {return (n1.p(coord)<n2.p(coord)); } );
-return minCoord->p(coord); 
-}
-
-/** return the maximum of all nodes coordinate along coord axis */
-inline double maxNodes(const Pt::index coord)
-{
-const auto maxCoord = std::max_element(node.begin(),node.end(),[coord](Nodes::Node &n1,Nodes::Node &n2) {return (n1.p(coord)<n2.p(coord)); } );
-return maxCoord->p(coord);
-}
-
-/**
-read a solution from a file (tsv formated) and initialize fem struct to restart computation from that distribution, return time
-*/
-double readSol(bool VERBOSE/**< [in] */,
-             double scaling /**< [in] scaling factor for physical coordinates */,
-             std::string fileName /**< [in] */ );
-
-/** read old mesh format 2.2 */
-void readOldMesh(Settings const& mySets,std::ifstream &msh);
-
-/** read old mesh format 4.1 */
-void readNewMesh(Settings const& mySets,std::ifstream &msh);
-
-/** reading mesh file function */
-void readMesh(Settings const& mySets);
-
-/**  utilitary function to initialize pts,kdtree, reorientation of the tetrahedrons if needed; definition of Ms on facette elements <br>
-Indices and orientation convention : 
-
-                        v
-                      .
-                    ,/
-                   /
-                2(ic)                                 2
-              ,/|`\                                 ,/|`\
-            ,/  |  `\                             ,/  |  `\
-          ,/    '.   `\                         ,6    '.   `5
-        ,/       |     `\                     ,/       8     `\
-      ,/         |       `\                 ,/         |       `\
-     0(ia)-------'.--------1(ib) --> u     0--------4--'.--------1
-      `\.         |      ,/                 `\.         |      ,/
-         `\.      |    ,/                      `\.      |    ,9
-            `\.   '. ,/                           `7.   '. ,/
-               `\. |/                                `\. |/
-                  `3(id)                                `3
-                     `\.
-                        ` w
-
-*/
-
-/** check phi values for debug */
-inline void checkNodes(void)
-{
-int k=0;
-for(unsigned int i=0;i<node.size();i++) { if (std::isnan(node[i].phi)) {std::cout << "#" << i<<std::endl; node[i].phi = 0;k++;}  }
-std::cout << "total nb of NaN in node[].phi ="<< k << std::endl;
-}
-
-/** redefine orientation of triangular faces in accordance with the tetrahedron */
-void femutil(Settings const& settings /**< [in] */);
-
-/** find center and length along coordinates and diameter = max(l(x|y|z)), computes vol,surf */
-void geometry(void);
-        
 /** find direction of motion of DW */
 void direction( enum Pt::index idx_dir /**< [in] */);
 

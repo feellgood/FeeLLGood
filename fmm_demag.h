@@ -59,10 +59,10 @@ class fmm
     {
     public:
         /** constructor, initialize memory for tree, kernel, sources corrections, initialize all sources */
-        inline fmm(Fem &fem,bool VERBOSE,const int ScalfmmNbThreads): NOD(fem.node.size()) ,FAC( fem.fac.size()) , TET( fem.tet.size()) , SRC( FAC * Facette::NPI + TET * Tetra::NPI) , tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels( NbLevels, boxWidth, boxCenter)
+        inline fmm(Fem &fem,bool VERBOSE,const int ScalfmmNbThreads): NOD(fem.msh.getNbNodes()) ,FAC( fem.msh.getNbFacs()) , TET( fem.msh.getNbTets()) , SRC( FAC * Facette::NPI + TET * Tetra::NPI) , tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels( NbLevels, boxWidth, boxCenter)
             {
             omp_set_num_threads(ScalfmmNbThreads);
-            norm = 1./(2.*fem.diam);
+            norm = 1./(2.*fem.msh.diam);
             
             FTic counter;
             counter.tic();
@@ -70,12 +70,12 @@ class fmm
             FSize idxPart=0;
             for(idxPart=0; idxPart< NOD; ++idxPart)
                 {
-                Pt::pt3D pTarget = norm*(fem.node[idxPart].p - fem.c);
+                Pt::pt3D pTarget = norm*(fem.msh.getNode(idxPart).p - fem.msh.c);
                 tree.insert( FPoint<FReal>(pTarget.x(), pTarget.y(), pTarget.z()) , FParticleType::FParticleTypeTarget, idxPart);//, 0.0);    
                 }
             
-            insertCharges<Tetra::Tet,Tetra::NPI>(fem.tet,idxPart,fem.c);
-            insertCharges<Facette::Fac,Facette::NPI>(fem.fac,idxPart,fem.c);
+            insertCharges<Tetra::Tet,Tetra::NPI>(fem.msh.tet,idxPart,fem.msh.c);
+            insertCharges<Facette::Fac,Facette::NPI>(fem.msh.fac,idxPart,fem.msh.c);
             
             counter.tac();
             if(VERBOSE) 
@@ -137,13 +137,8 @@ class fmm
         std::vector<double> srcDen(SRC,0);
         std::vector<double> corr(NOD,0);
         
-        int nsrc = 0;
-        std::for_each(fem.tet.begin(),fem.tet.end(),[&srcDen,getter,&nsrc,&settings](Tetra::Tet const& tet)              
-            { tet.charges(getter,srcDen,nsrc, nu0 * settings.paramTetra[tet.idxPrm].J ); });//end for_each on tet
-
-        std::for_each(fem.fac.begin(),fem.fac.end(),[&srcDen,&corr,getter,&nsrc](Facette::Fac const& fac)
-            { fac.charges(getter,srcDen,corr,nsrc); });// end for_each on fac
-
+        fem.msh.calc_charges(getter,srcDen,corr,settings);
+        
         // reset potentials and forces - physicalValues[idxPart] = Q
         tree.forEachLeaf([this,&srcDen](LeafClass* leaf)
             {
@@ -168,7 +163,7 @@ class fmm
             for(int idxPart = 0 ; idxPart < nbParticlesInLeaf ; ++idxPart)
                 {
                 const int indexPartOrig = indexes[idxPart];
-                setter(fem.node[indexPartOrig], (potentials[idxPart]*norm + corr[indexPartOrig])/(4*M_PI));
+                setter(fem.msh.setNode(indexPartOrig), (potentials[idxPart]*norm + corr[indexPartOrig])/(4*M_PI));
                 }
             });
         }

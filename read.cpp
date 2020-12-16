@@ -1,11 +1,13 @@
-#include "fem.h"
+#include "mesh.h"
+
+#include "feellgoodSettings.h"
 
 #include "pt3D.h"
 
 using namespace std;
 
 
-void Fem::readOldMesh(Settings const& mySets,ifstream &msh)
+void mesh::readOldMesh(Settings const& mySets,ifstream &msh)
 {
     int tags, reg, TYP;
     string symb = "";
@@ -75,7 +77,7 @@ if ((symb != "$EndElements") && msh.fail())
     {std::cerr << "error while reading elements; symb = " << symb << std::endl;SYSTEM_ERROR;}
 }
 
-void Fem::readNewMesh(Settings const& mySets,ifstream &msh)
+void mesh::readNewMesh(Settings const& mySets,ifstream &msh)
 {
 string symb = "";
    
@@ -162,7 +164,7 @@ if ((symb != "$EndElements") && msh.fail())
     {cerr << "error while reading elements; symb = " << symb << endl;SYSTEM_ERROR;}
 }
 
-void Fem::readMesh(Settings const& mySets)
+void mesh::readMesh(Settings const& mySets)
 {
 string symb;
 ifstream msh( mySets.getPbName() );
@@ -200,7 +202,7 @@ if(symb == "$MeshFormat")
 msh.close();
 }
 
-double Fem::readSol(bool VERBOSE,double scaling, string fileName)
+double mesh::readSol(bool VERBOSE,double scaling, const string fileName)
 {
 ifstream fin(fileName, std::ifstream::in);
 if (!fin)

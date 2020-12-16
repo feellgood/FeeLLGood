@@ -4,7 +4,16 @@ void LinAlgebra::updateNodes(std::vector<double> const& X,const double dt)
 {
 double v2max = 0.0;
 
-int i=0;
+for(int i=0; i < refMsh->getNbNodes() ; i++)
+    {
+    double vp = X[i];
+    double vq = X[NOD+i];
+    double v2 = vp*vp + vq*vq;
+    if (v2>v2max) { v2max = v2; }
+    refMsh->setNode(i).make_evol(vp,vq,dt);    
+    }
+
+/*
 std::for_each(refNode->begin(),refNode->end(),
     [this,&v2max,&i,&dt,&X](Nodes::Node &n)
         {
@@ -16,7 +25,7 @@ std::for_each(refNode->begin(),refNode->end(),
         i++;    
         }
 );//end for_each
-
+*/
 v_max = sqrt(v2max);
 }
 
@@ -37,23 +46,25 @@ assert(refTetIt[NbTH-1].second == myTet.end());
 
 void LinAlgebra::base_projection(bool determinist)
 {
+double r1,r2;
+    
 if(!determinist)
     {    
     std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
     std::uniform_real_distribution<> distrib(0.0,1.0);
     
-    std::for_each(refNode->begin(),refNode->end(),[&gen,&distrib](Nodes::Node &n) 
-    { 
-        n.theta_sph = M_PI * distrib(gen);
-        n.phi_sph = M_2_PI * distrib(gen);
-    }); 
+    r1 = distrib(gen);
+    r2 = distrib(gen);
     }
 else
     {
-    std::for_each(refNode->begin(),refNode->end(),[](Nodes::Node &n) 
-    { 
-        n.theta_sph = M_PI * rand() / (RAND_MAX+1.);
-        n.phi_sph = M_2_PI * rand() / (RAND_MAX+1.);
-    });
+    r1 = rand() / (RAND_MAX+1.);
+    r2 = rand() / (RAND_MAX+1.);
+    }
+
+for(int i=0; i < refMsh->getNbNodes() ; i++)
+    {
+    refMsh->setNode(i).theta_sph = M_PI*r1;
+    refMsh->setNode(i).phi_sph = M_2_PI*r2;
     }
 }

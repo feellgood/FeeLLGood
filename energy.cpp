@@ -3,13 +3,13 @@
 
 void Fem::energy(double const t,Settings & settings)
 {
-double uz_drift=2.*DW_z/l.z()*DW_dir;
+double uz_drift=2.*DW_z/msh.l.z()*DW_dir;
 
 zeroEnergy();
 
 const Pt::pt3D Hext = settings.getValue(t);
 
-std::for_each(tet.begin(),tet.end(),[this,&Hext,&settings,uz_drift](Tetra::Tet const& te) 
+std::for_each(msh.tet.begin(),msh.tet.end(),[this,&Hext,&settings,uz_drift](Tetra::Tet const& te) 
     {
     Tetra::prm const& param = settings.paramTetra[te.idxPrm];
     double u[Pt::DIM][Tetra::NPI],dudx[Pt::DIM][Tetra::NPI], dudy[Pt::DIM][Tetra::NPI], dudz[Pt::DIM][Tetra::NPI];
@@ -29,7 +29,7 @@ std::for_each(tet.begin(),tet.end(),[this,&Hext,&settings,uz_drift](Tetra::Tet c
     }
 );
 
-std::for_each(fac.begin(),fac.end(),[this,&settings](Facette::Fac const& fa)
+std::for_each(msh.fac.begin(),msh.fac.end(),[this,&settings](Facette::Fac const& fa)
     {
     Facette::prm const& param = settings.paramFacette[fa.idxPrm];    
     double phi[Facette::NPI];

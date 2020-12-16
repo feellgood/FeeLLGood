@@ -31,7 +31,7 @@ for(int i=0;i<NbTH;i++)
         });//end for_each
     }
 
-    std::for_each(refFac->begin(),refFac->end(), [this,&K_TH,&L_TH](Facette::Fac & fac)
+    std::for_each(refMsh->fac.begin(),refMsh->fac.end(), [this,&K_TH,&L_TH](Facette::Fac & fac)
         {
         double Ks[3*Facette::N][3*Facette::N] = { {0} };
         Pt::pt3D Ls[Facette::N];
@@ -135,7 +135,7 @@ for(int i=0;i<NbTH;i++)
 
 tab_TH[NbTH] = std::thread( [this,&K_TH,&L_TH]()
     {
-    std::for_each(refFac->begin(),refFac->end(), [this,&K_TH,&L_TH](Facette::Fac & fac)
+    std::for_each(refMsh->fac.begin(),refMsh->fac.end(), [this,&K_TH,&L_TH](Facette::Fac & fac)
         {
         double Ks[3*Facette::N][3*Facette::N] = { {0} };
         Pt::pt3D Ls[Facette::N];
@@ -155,8 +155,8 @@ tab_TH[NbTH] = std::thread( [this,&K_TH,&L_TH]()
 
 for(int i=0;i<(NbTH+1);i++) {tab_TH[i].join();}
 
-insertCoeff<Tetra::Tet>(*refTet,K_TH,L_TH);
-insertCoeff<Facette::Fac>(*refFac,K_TH,L_TH);
+insertCoeff<Tetra::Tet>(refMsh->tet,K_TH,L_TH);
+insertCoeff<Facette::Fac>(refMsh->fac,K_TH,L_TH);
 
 counter.tac();
 

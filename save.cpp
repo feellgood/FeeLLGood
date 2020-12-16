@@ -1,6 +1,7 @@
 #include <algorithm>
 
 #include "fem.h"
+#include "mesh.h"
 #include "config.h"
 #include "time_integration.h"
 
@@ -24,12 +25,12 @@ for(unsigned int i = 0;i<settings.evol_columns.size();i++)
     if(keyVal == "t") { fout << t_prm.get_t() << sep;}
     if(keyVal == "dt") { fout << t_prm.get_dt() << sep;}
     if(keyVal == "max_dm") { fout << vmax*t_prm.get_dt() << sep;}
-    if(keyVal == "<Mx>") { fout << avg(Nodes::get_u_comp,Pt::IDX_X) << sep;}
-    if(keyVal == "<My>") { fout << avg(Nodes::get_u_comp,Pt::IDX_Y) << sep;}
-    if(keyVal == "<Mz>") { fout << avg(Nodes::get_u_comp,Pt::IDX_Z) << sep;}
-    if(keyVal == "<dMx/dt>") { fout << avg(Nodes::get_v_comp,Pt::IDX_X) << sep;}
-    if(keyVal == "<dMy/dt>") { fout << avg(Nodes::get_v_comp,Pt::IDX_Y) << sep;}
-    if(keyVal == "<dMz/dt>") { fout << avg(Nodes::get_v_comp,Pt::IDX_Z) << sep;}
+    if(keyVal == "<Mx>") { fout << msh.avg(Nodes::get_u_comp,Pt::IDX_X) << sep;}
+    if(keyVal == "<My>") { fout << msh.avg(Nodes::get_u_comp,Pt::IDX_Y) << sep;}
+    if(keyVal == "<Mz>") { fout << msh.avg(Nodes::get_u_comp,Pt::IDX_Z) << sep;}
+    if(keyVal == "<dMx/dt>") { fout << msh.avg(Nodes::get_v_comp,Pt::IDX_X) << sep;}
+    if(keyVal == "<dMy/dt>") { fout << msh.avg(Nodes::get_v_comp,Pt::IDX_Y) << sep;}
+    if(keyVal == "<dMz/dt>") { fout << msh.avg(Nodes::get_v_comp,Pt::IDX_Z) << sep;}
     if(keyVal == "E_ex") { fout << E_exch << sep;}
     if(keyVal == "E_aniso") { fout << E_aniso << sep;}
     if(keyVal == "E_demag") { fout << E_demag << sep;}
@@ -50,19 +51,19 @@ if ((nt%save_period)==0)
     if (settings.withVtk)
         {
         string str = baseName + "_iter" + to_string(nt) + ".vtk";
-        savecfg_vtk(settings,t_prm,str);
+        msh.savecfg_vtk(settings,t_prm,str);
         }
     
     string str = baseName + "_iter" + to_string(nt) + ".sol";
  
     if(settings.verbose) { cout << " " << str << endl; }    
-    savesol(str,t_prm,settings.getScale());
+    msh.savesol(str,t_prm,settings.getScale());
     if(settings.verbose) { cout << "all nodes written." << endl; }
     //    saveH(str);
     }
 }
 
-void Fem::savecfg_vtk(Settings const& settings,timing const& t_prm,const string fileName) const
+void mesh::savecfg_vtk(Settings const& settings,timing const& t_prm,const string fileName) const
 {
     const int TET = tet.size();
     const int NOD = node.size();
@@ -83,8 +84,7 @@ fout << "DATASET UNSTRUCTURED_GRID" << endl;
 fout << "POINTS "<< NOD << " float" << endl;
 
 std::for_each(node.begin(),node.end(),[this,&fout](Nodes::Node const&n)
-        {fout << n.p.x() << "\t" << n.p.y() << "\t" << n.p.z() + DW_z << endl;});
-//fout << boost::format("%+20.10e %+20.10e %+20.10e") % x % y % z << endl;
+        {fout << n.p << endl;});
 
 fout << "CELLS " << setw(8) << TET << "\t" << setw(8) << (5*TET) << endl;
 
@@ -109,7 +109,7 @@ std::for_each(node.begin(),node.end(),[&fout](Nodes::Node const& n){fout << n.u 
 //fout << boost::format("%+20.10e %+20.10e %+20.10e") % u1 % u2 % u3 << endl;
 }
 
-void Fem::savesol(const string fileName,timing const& t_prm, const double s) const
+void mesh::savesol(const string fileName,timing const& t_prm, const double s) const
 {
 ofstream fout(fileName, ios::out);
 if (!fout)
@@ -134,7 +134,7 @@ std::for_each(node.begin(),node.end(),[&i,s,&fout](Nodes::Node const&n)
 fout.close();
 }
 
-void Fem::saveH(const string fileName,const double t,const double scale) const
+void mesh::saveH(const string fileName,const double t,const double scale) const
 {
 cout << " " << fileName << endl <<" -------------------" << endl << endl;
 

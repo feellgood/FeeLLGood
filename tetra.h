@@ -277,8 +277,7 @@ class Tet{
         
         /** matrix filling */
         void lumping(int const& npi,double alpha_eff,double prefactor, double AE[3*N][3*N]) const;
-        
-        
+
 		/** computes the integral contribution of the tetrahedron to the evolution of the magnetization */		
 		void integrales(std::vector<Tetra::prm> const& params, timing const& prm_t, Pt::pt3D const& Hext, double Vz, double AE[3*N][3*N], Pt::pt3D BE[N])  const;
 		

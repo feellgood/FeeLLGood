@@ -26,6 +26,7 @@ projection and matrix assembly is multithreaded for tetrahedron, monothread for 
 #include "facette.h"
 #include "node.h"
 
+#include "mesh.h"
 
 /** \class LinAlgebra
 convenient class to grab altogether some part of the calculations involved using gmm solver at each timestep
@@ -35,13 +36,11 @@ class LinAlgebra
 public:
 	/** constructor */	
     inline LinAlgebra(Settings & s /**< [in] */,
-                      std::vector<Nodes::Node> & myNode /**< [in] */,
-                      std::vector <Tetra::Tet> &myTet /**< [in] */,
-                      std::vector <Facette::Fac> & myFace /**< [in] */) :  NbTH(s.solverNbTh),NOD(myNode.size()),refNode(&myNode),refFac(&myFace),refTet(&myTet),settings(s)
+                      mesh & my_msh /**< [in] */) :  NbTH(s.solverNbTh),NOD(my_msh.getNbNodes()),refMsh(&my_msh),settings(s)
     {
     tab_TH.resize(NbTH+1);
     refTetIt.resize(NbTH);
-    prepareItTet(myTet);
+    prepareItTet( refMsh->tet );
     base_projection(!RAND_DETERMINIST);
     }
     
@@ -69,9 +68,7 @@ private:
     const int NbTH;
     
     const int NOD;/**< total number of nodes, also an offset for filling sparseMatrix, initialized by constructor */
-    std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
-	std::vector <Facette::Fac> *refFac; /**< direct access to the faces */
-	std::vector <Tetra::Tet> *refTet; /**< direct access to the tet */
+    mesh *refMsh;/**< direct access to the mesh */
 	
     /** vector of pair of iterators for the tetrahedrons for multithreading */
 	std::vector < std::pair<std::vector<Tetra::Tet>::iterator,std::vector<Tetra::Tet>::iterator> > refTetIt; 
@@ -117,7 +114,7 @@ private:
     
     if(node_i == (j%N))
         {
-        Nodes::Node const& n = (*refNode)[x.ind[node_i]];
+        Nodes::Node const& n = refMsh->getNode( x.ind[node_i] );// (*refNode)[x.ind[node_i]];
         Pt::pt3D ep = n.calc_ep();    
         Pt::pt3D eq = n.u0*ep; eq.normalize();    
         if(i<N)

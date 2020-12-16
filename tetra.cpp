@@ -152,16 +152,16 @@ for (int npi=0; npi<NPI; npi++)
 return ( -0.5*mu0*Ms*weightedScalarProd(dens) );
 }
 
-double Tet::zeemanEnergy(Tetra::prm const& param,double uz_drift,Pt::pt3D const& Hext,const double u[DIM][NPI]) const
+double Tet::zeemanEnergy(Tetra::prm const& param,double uz_drift,Pt::pt3D const& Hext,double const u[DIM][NPI]) const
 {
 double dens[NPI];
-double Js = param.J;
 
 for (int npi=0; npi<NPI; npi++)
     {
-    dens[npi] = u[0][npi]*Hext(Pt::IDX_X) + u[1][npi]*Hext(Pt::IDX_Y) + u[2][npi]*Hext(Pt::IDX_Z) + uz_drift*Hext(Pt::IDX_Z);
+    Pt::pt3D u_npi= Pt::pt3D(u[0][npi],u[1][npi],u[2][npi]);
+    dens[npi] = Pt::pScal(u_npi,Hext) + uz_drift*Hext(Pt::IDX_Z);
     }
-return ( -Js*weightedScalarProd(dens) );
+return ( -param.J*weightedScalarProd(dens) );
 }
 
 void Tet::assemblage_mat(write_matrix &K) const
