@@ -157,6 +157,13 @@ private:
     /** node container */
     std::shared_ptr<Nodes::Node[]> node;
     
+    /** memory allocation for the nodes : delete[] must be specified in C++11, not in C++17 */
+    inline void init_node(const int Nb)
+        {
+        nbNod = Nb;
+        node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[Nb],std::default_delete<Nodes::Node[]>() ); 
+        }
+    
     /** total number of nodes read from mesh file */
     int nbNod;
     

@@ -23,7 +23,7 @@ if (msh.fail())
 double scale = mySets.getScale();
 
 msh >> nbNod;
-node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod]);
+init_node(nbNod);
 
 for (int i=0; i<nbNod; i++)
     {
@@ -96,7 +96,7 @@ msh >> numBloc >> nbNod >> idx_begin >> idx_end;
 
 if (idx_end != nbNod) {std::cout << "indexation not supported" << std::endl;SYSTEM_ERROR;}
 
-node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod]);
+init_node(nbNod);
 
 int i=0;
 while (i<nbNod)
