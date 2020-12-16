@@ -38,7 +38,7 @@ public:
      * magnetization. This should only called _after_ defining the
      * expressions with set_expressions().
      */
-    Pt::pt3D get_magnetization(const Pt::pt3D &p);
+    Pt::pt3D get_magnetization(const Pt::pt3D &p) const;
 
 private:
     class Impl3Dprm;
@@ -64,7 +64,7 @@ public:
             const std::string &Bz);
 
     /** getter for time dependant field value */
-    Pt::pt3D get_timeDepField(const double t_val);
+    Pt::pt3D get_timeDepField(const double t_val) const;
 private:
     class Impl1Dprm;
     std::unique_ptr<Impl1Dprm> pimpl1Dprm;/**< internal implementation pointer */ 

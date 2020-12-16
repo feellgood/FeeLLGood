@@ -35,7 +35,7 @@ class Fem
     {
     public:
         /** constructor: call mesh constructor, initialize pts,kdtree and many inner variables */
-        inline Fem(Settings & mySets,timing &t_prm):msh(mySets) //mySets cannot be passed const because of getValue method in init_distrib, to set x,y,z values
+        inline Fem(Settings const& mySets,timing &t_prm):msh(mySets)
             {
             vmax  = 0.0;
             DW_vz = DW_vz0 = 0.0;

@@ -79,7 +79,7 @@ void MagnetizationParser::set_expressions(
     pimpl3Dprm->set_expressions(Mx, My, Mz);
 }
 
-Pt::pt3D MagnetizationParser::get_magnetization(const Pt::pt3D &p)
+Pt::pt3D MagnetizationParser::get_magnetization(const Pt::pt3D &p) const
 {
     return pimpl3Dprm->get_magnetization(p);
 }
@@ -139,7 +139,7 @@ void TimeDepFieldParser::set_expressions(
     pimpl1Dprm->set_expressions(Bx, By, Bz);
 }
 
-Pt::pt3D TimeDepFieldParser::get_timeDepField(const double t_val)
+Pt::pt3D TimeDepFieldParser::get_timeDepField(const double t_val) const
 {
     return pimpl1Dprm->get_timeDepField(t_val);
 }

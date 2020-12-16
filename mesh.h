@@ -20,7 +20,7 @@ class mesh
 {
 public:
     /** constructor  : read mesh, reorder indices and computes some values related to the mesh */
-    inline mesh(Settings & mySets /**< [in] */)
+    inline mesh(Settings const& mySets /**< [in] */)
         {
         readMesh(mySets);
         indexReorder(mySets);// reordering of index nodes for facette orientation, also some modifications on fac::Ms
@@ -108,7 +108,7 @@ public:
              const std::string fileName /**< [in] */ );
 
     /** computes an analytical initial magnetization distribution as a starting point for the simulation */
-    inline void init_distrib(Settings & mySets /**< [in] */)
+    inline void init_distrib(Settings const& mySets /**< [in] */)
         { 
         for(int i=0;i<nbNod;i++)
             {
