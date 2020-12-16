@@ -99,6 +99,7 @@ class Fem
 	double Etot0;/**< initial total energy */
 	double Etot;/**< total energy */
 	
+	/** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh */
 	mesh msh;
     
     /**

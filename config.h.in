@@ -40,7 +40,7 @@ const double PLANCKS_H    	= 6.62606896e-34;   /**< kg m^2 / s */
 const double PLANCKS_HBAR 	= 1.05457162825e-34; /**< kg m^2 / s */
 const double CHARGE_ELECTRON 	= 1.602176487e-19;   /**< C */
 const double MASS_ELECTRON 	= 9.10938188e-31;   /**< kg */
-const double BOHRS_MUB = CHARGE_ELECTRON*PLANCKS_HBAR/(2.*MASS_ELECTRON);
+const double BOHRS_MUB = CHARGE_ELECTRON*PLANCKS_HBAR/(2.*MASS_ELECTRON); /**< C.m^2 */
 
 /** for debugging purpose, some determinist pseudo random number for ep,eq vector basis can be used */
 #define RAND_DETERMINIST true

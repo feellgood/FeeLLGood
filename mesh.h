@@ -1,6 +1,10 @@
 #ifndef mesh_h
 #define mesh_h
 
+/** \file mesh.h
+\brief class mesh, read_mesh, save
+*/
+
 #include <set>
 
 #include "node.h"
@@ -9,6 +13,9 @@
 
 #include "feellgoodSettings.h"
 
+/** \class mesh
+class for storing the mesh, including mesh geometry values, containers for the nodes, trinagular faces and tetrahedrons. nodes data are not public. They are accessible only through getter and setter.
+*/
 class mesh
 {
 public:
@@ -24,12 +31,19 @@ public:
             //init_distrib(mySets);
         }
     
+    /** return number of nodes  */
     inline int getNbNodes(void) { return node.size(); }
+    
+    /** return number of triangular fac */
     inline int getNbFacs(void) { return fac.size(); }
+    
+    /** return number of tetrahedrons */
     inline int getNbTets(void) { return tet.size(); }
     
+    /** getter : return node */
     inline const Nodes::Node getNode(const int i) { return node[i]; }
     
+    /** setter : node */
     inline Nodes::Node & setNode(const int i) {return node[i];}
     
     /** basic informations on the mesh */
@@ -52,6 +66,7 @@ public:
         std::cout << "total nb of NaN in node[].phi ="<< k << std::endl;
         }
 
+    /** call evolution for all the nodes */
     inline void evolution(void) { std::for_each(node.begin(), node.end(), [](Nodes::Node &n){ n.evolution();} ); }
     
     /** find center and length along coordinates and diameter = max(l(x|y|z)), computes vol,surf */
@@ -134,6 +149,7 @@ double readSol(bool VERBOSE/**< [in] */,
     /** save the demagnetizing field values, including idx and npi indices, for debug use */
     void saveH(const std::string fileName /**< [in] */,const double t/**< [in] */,const double scale /**< [in] */) const;
     
+    /** computes all charges for the demag field to feed a tree in the fast multipole algo (scalfmm) */
     void calc_charges(std::function<const Pt::pt3D (Nodes::Node)> getter,std::vector<double> & srcDen,std::vector<double> & corr,Settings const& settings)
     {
     int nsrc = 0;
