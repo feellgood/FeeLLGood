@@ -19,7 +19,7 @@ const double w = weight[npi];
 for (int i=0; i<N; i++)
     {
     const double ai_w = w*a[i][npi];
-    const pt3D ai_w_u0 = ai_w*Nodes::get_u0((*refNode)[ ind[i] ]);
+    const pt3D ai_w_u0 = ai_w*Nodes::get_u0(refNode[ ind[i] ]);
 
     AE[    i][    i] +=  alpha_eff * ai_w;
     AE[  N+i][  N+i] +=  alpha_eff * ai_w;
@@ -181,10 +181,10 @@ for (int i=0; i < N; i++)
 
 double Tet::Jacobian(double J[DIM][DIM])
 {
-Pt::pt3D const & p0 = (*refNode)[ ind[0] ].p;
-Pt::pt3D const & p1 = (*refNode)[ ind[1] ].p;
-Pt::pt3D const & p2 = (*refNode)[ ind[2] ].p;
-Pt::pt3D const & p3 = (*refNode)[ ind[3] ].p;
+Pt::pt3D const & p0 = refNode[ ind[0] ].p;
+Pt::pt3D const & p1 = refNode[ ind[1] ].p;
+Pt::pt3D const & p2 = refNode[ ind[2] ].p;
+Pt::pt3D const & p3 = refNode[ ind[3] ].p;
 J[0][0] = p1.x()-p0.x(); J[0][1] = p2.x()-p0.x(); J[0][2] = p3.x()-p0.x();   
 J[1][0] = p1.y()-p0.y(); J[1][1] = p2.y()-p0.y(); J[1][2] = p3.y()-p0.y();
 J[2][0] = p1.z()-p0.z(); J[2][1] = p2.z()-p0.z(); J[2][2] = p3.z()-p0.z();
@@ -194,10 +194,10 @@ return Pt::det(J);
 
 double Tet::calc_vol(void) const
 {
-Pt::pt3D const & p0 = (*refNode)[ ind[0] ].p;
-Pt::pt3D const & p1 = (*refNode)[ ind[1] ].p;
-Pt::pt3D const & p2 = (*refNode)[ ind[2] ].p;
-Pt::pt3D const & p3 = (*refNode)[ ind[3] ].p;
+Pt::pt3D const & p0 = refNode[ ind[0] ].p;
+Pt::pt3D const & p1 = refNode[ ind[1] ].p;
+Pt::pt3D const & p2 = refNode[ ind[2] ].p;
+Pt::pt3D const & p3 = refNode[ ind[3] ].p;
 
 return Pt::pTriple(p1-p0,p2-p0,p3-p0)/6.0;
 }

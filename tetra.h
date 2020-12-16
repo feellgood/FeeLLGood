@@ -113,13 +113,14 @@ class Tet{
     public:
 		/** constructor for readMesh. It initializes weight hat function and dad(x|y|z) if \f$ | detJ | < \epsilon \f$ jacobian is considered degenerated
          */
-		inline Tet(const std::vector<Nodes::Node>  *_p_node /**< [in] pointer to the nodes */,
+		inline Tet(const std::shared_ptr<Nodes::Node[]> _p_node /**< [in] pointer to the nodes */,
+                   const int _NOD,
                    const int _reg /**< [in] region number */,
                    const int _idx /**< [in] region index in region vector */,
                    const int i0 /**< [in] node index */,
                    const int i1 /**< [in] node index */,
                    const int i2 /**< [in] node index */,
-                   const int i3 /**< [in] node index */) : idxPrm(_idx),NOD(_p_node->size()),reg(_reg),refNode(_p_node)
+                   const int i3 /**< [in] node index */) : idxPrm(_idx),NOD(_NOD),reg(_reg),refNode(_p_node)
             {
             ind[0] = i0; ind[1] = i1; ind[2] = i2; ind[3] = i3;
             for (int i=0; i<N; i++) ind[i]--;           // convention Matlab/msh -> C++
@@ -255,7 +256,7 @@ class Tet{
         {
         double scalar_nod[N];    
         
-        for (int i=0; i<N; i++) scalar_nod[i] =  getter( (*refNode)[ ind[i] ] ,idx);
+        for (int i=0; i<N; i++) scalar_nod[i] =  getter( refNode[ ind[i] ] ,idx);
         tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result);
         }
 		
@@ -268,9 +269,9 @@ class Tet{
             std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2]<< "\t"<< ind[3] <<std::endl;
             switch(idx)
                 {
-                case Nodes::IDX_p : for(int i=0;i<N;i++) {std::cout<<"p_" << i<<  ((*refNode)[ ind[i] ]).p  <<std::endl;} break;
-                case Nodes::IDX_u : for(int i=0;i<N;i++) {std::cout<<"m_" << i<< ((*refNode)[ ind[i] ]).u  <<std::endl;} break;
-                case Nodes::IDX_phi : for(int i=0;i<N;i++) {std::cout<<"phi" << i<< ((*refNode)[ ind[i] ]).phi  <<std::endl;} break;
+                case Nodes::IDX_p : for(int i=0;i<N;i++) {std::cout<<"p_" << i<<  (refNode[ ind[i] ]).p  <<std::endl;} break;
+                case Nodes::IDX_u : for(int i=0;i<N;i++) {std::cout<<"m_" << i<< (refNode[ ind[i] ]).u  <<std::endl;} break;
+                case Nodes::IDX_phi : for(int i=0;i<N;i++) {std::cout<<"phi" << i<< (refNode[ ind[i] ]).phi  <<std::endl;} break;
                 default:break;
                 }
             };
@@ -328,11 +329,12 @@ class Tet{
         const int NOD;/**< total number of nodes, also an offset for filling sparseMatrix */
         const int reg;/**< .msh region number */
         
-        const std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
+        const std::shared_ptr<Nodes::Node[]> refNode;/**< direct access to the Nodes */
+        //const std::vector<Nodes::Node>  *
         
         /** template getter to access and copy some parts of the node vector ot type T = double or Pt::pt3D  */
         template <class T> void getDataFromNode(std::function< T (Nodes::Node)> getter,T X_data[N]) const
-            { for (int i=0; i<N; i++) X_data[i] = getter((*refNode)[ ind[i] ]); }
+            { for (int i=0; i<N; i++) X_data[i] = getter(refNode[ ind[i] ]); }
     };//end class Tetra
 }//end namespace Tetra
 

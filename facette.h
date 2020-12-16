@@ -57,12 +57,13 @@ class Fac{
 	inline Fac(int _NOD /**< [in] */):treated(false),NOD(_NOD),reg(0) { }
 
         /** constructor used by readMesh */
-        inline Fac(const std::vector<Nodes::Node>  *_p_node /**< [in] pointer to the nodes */,
+        inline Fac(const std::shared_ptr<Nodes::Node[]> _p_node /**< [in] pointer to the node */,
+                   const int _NOD /**< [in] nb nodes */,
                    const int _reg /**< [in] region number */,
                    const int _idx /**< [in] region index in region vector */,
                    const int i0 /**< [in] node index */,
                    const int i1 /**< [in] node index */,
-                   const int i2 /**< [in] node index */) : idxPrm(_idx),NOD(_p_node->size()),reg(_reg),refNode(_p_node)
+                   const int i2 /**< [in] node index */) : idxPrm(_idx),NOD(_NOD),reg(_reg),refNode(_p_node)
         {
         if(NOD>0)
             {
@@ -97,7 +98,7 @@ class Fac{
         {
         T X_nod[N];
         for (int i=0; i<N; i++)
-            { X_nod[i] = getter( (*refNode)[ ind[i] ] ); }
+            { X_nod[i] = getter( refNode[ ind[i] ] ); }
         
         T s = X_nod[0] + X_nod[1] + X_nod[2];
         result[0] = s/3.0;
@@ -174,8 +175,10 @@ class Fac{
         const int NOD;/**< number of nodes */
         const int reg;/**< .msh region number */
         
-        const std::vector<Nodes::Node>  *refNode;/**< direct access to the Nodes */
-
+        /** direct access to the Nodes */
+        //const std::vector<Nodes::Node>  *refNode;
+        const std::shared_ptr<Nodes::Node[]> refNode;
+        
         /** computes weight coefficients */
         inline double weight(const int i) const { return 2.0*surf*Facette::pds[i]; }
 };//end class Fac

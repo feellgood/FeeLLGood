@@ -19,8 +19,6 @@ queryPt[0]=qPt.x(); queryPt[1]=qPt.y(); queryPt[2]=qPt.z();
 
 kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 int ns=nnIdx[0];
-
-
 double u2L= msh.getNode(ns).u(idx_dir);
 
 /* right */
@@ -36,7 +34,6 @@ delete[] dists;
 delete[] nnIdx;
 annDeallocPt(queryPt);
 }
-
 
 
 bool Fem::recenter(double thres,char recentering_direction)
@@ -71,11 +68,6 @@ queryPt[0]= qPt.x(); queryPt[1]= qPt.y(); queryPt[2]= qPt.z();
 kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 ns=nnIdx[0]; 
 double u2L=msh.getNode(ns).u(idx_dir);
-
-// centre
-queryPt[0]=msh.c.x(); queryPt[1]=msh.c.y(); queryPt[2]=msh.c.z();
-kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
-ns=nnIdx[0];
 
 // bord droit
 qPt = msh.c + 0.5*pDirect(p_dir,msh.l);

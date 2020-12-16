@@ -21,11 +21,11 @@ if (msh.fail())
     }
 
 double scale = mySets.getScale();
-int NOD;    
-msh >> NOD;
-node.resize(NOD);
 
-for (int i=0; i<NOD; i++)
+msh >> nbNod;
+node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod]);
+
+for (int i=0; i<nbNod; i++)
     {
     msh >> symb >> node[i].p;
 	node[i].p.rescale(scale);
@@ -57,13 +57,13 @@ while((msh >> symb)&&(symb != "$EndElements")&&(! msh.fail() ) )
         case 2:{
             int i0,i1,i2;
             msh >> i0 >> i1 >> i2;
-            fac.push_back( Facette::Fac(&node,reg,mySets.findFacetteRegionIdx(reg),i0,i1,i2 ) );
+            fac.push_back( Facette::Fac(node,nbNod,reg,mySets.findFacetteRegionIdx(reg),i0,i1,i2 ) );
             break;
 	    }
         case 4:{
             int i0,i1,i2,i3;
             msh >> i0 >> i1 >> i2 >> i3;
-            tet.push_back( Tetra::Tet(&node,reg,mySets.findTetraRegionIdx(reg),i0,i1,i2,i3) );
+            tet.push_back( Tetra::Tet(node,nbNod,reg,mySets.findTetraRegionIdx(reg),i0,i1,i2,i3) );
             break;
 	    }
         default:
@@ -91,14 +91,15 @@ if (msh.fail())
 
 double scale = mySets.getScale();
 
-int NOD,numBloc,idx_begin,idx_end;
-msh >> numBloc >> NOD >> idx_begin >> idx_end;
+int numBloc,idx_begin,idx_end;
+msh >> numBloc >> nbNod >> idx_begin >> idx_end;
 
-if (idx_end != NOD) {std::cout << "indexation not supported" << std::endl;SYSTEM_ERROR;}
-node.resize(NOD);
+if (idx_end != nbNod) {std::cout << "indexation not supported" << std::endl;SYSTEM_ERROR;}
+
+node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod]);
 
 int i=0;
-while (i<NOD)
+while (i<nbNod)
     {
     int j=0;
     while(j<numBloc)
@@ -144,14 +145,14 @@ while ((symb != "$EndElements")&&(symb != "$End")&& !(msh.fail()) )
             int i0,i1,i2;
             msh >> i0 >> i1 >> i2;
             
-            fac.push_back( Facette::Fac(&node,reg,mySets.findFacetteRegionIdx(reg),i0,i1,i2 ) );
+            fac.push_back( Facette::Fac(node,nbNod,reg,mySets.findFacetteRegionIdx(reg),i0,i1,i2 ) );
             break;
 	    }
         case 4:{
             int i0,i1,i2,i3;
             msh >> i0 >> i1 >> i2 >> i3;
             
-            tet.push_back( Tetra::Tet(&node,reg,mySets.findTetraRegionIdx(reg),i0,i1,i2,i3) );
+            tet.push_back( Tetra::Tet(node,nbNod,reg,mySets.findTetraRegionIdx(reg),i0,i1,i2,i3) );
             break;
 	    }
         default:
@@ -221,7 +222,7 @@ double t = stod(str.substr(idx));
 
 if(VERBOSE) { cout << ".sol file: " << str << " @ time t = " << t << endl; }
 
-const int NOD = node.size();
+const int NOD = getNbNodes();
 
 for (int i=0; i<NOD; i++)
     {
@@ -239,7 +240,7 @@ for (int i=0; i<NOD; i++)
     else
         {
         node_.p.rescale(scaling);
-        if (( Pt::norme2(n.p - node_.p) > Pt::sq(diam * 1e-9))&&VERBOSE) 
+        if (( Pt::norme2(n.p - node_.p) > Pt::sq(diam * scaling))&&VERBOSE) 
             { cerr << "WARNING difference in node positions"  << i  << "\t" << n.p << endl << i_ << "\t" << node_.p << endl; }
         }
     }

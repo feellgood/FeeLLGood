@@ -23,8 +23,6 @@ BOOST_CHECK(x != 0.0f);
 
 BOOST_AUTO_TEST_CASE(Fac_constructor1)
 {
-std::vector<Nodes::Node> v_nodes;  
-
 Facette::Fac f(0);
 
 BOOST_CHECK( (f.getN() == Facette::N) && (f.getNPI() == Facette::NPI) );
@@ -32,9 +30,9 @@ BOOST_CHECK( (f.getN() == Facette::N) && (f.getNPI() == Facette::NPI) );
 
 BOOST_AUTO_TEST_CASE(Fac_constructor2)
 {
-std::vector<Nodes::Node> v_nodes;
+//std::shared_ptr<Nodes::Node[]> v_nodes;
 
-Facette::Fac f(&v_nodes,0,0,0,0,0);
+Facette::Fac f(nullptr,0,0,0,0,0,0);
 
 BOOST_CHECK( (f.getN() == Facette::N) && (f.getNPI() == Facette::NPI) );
 }

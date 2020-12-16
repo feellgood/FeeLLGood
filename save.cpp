@@ -66,8 +66,8 @@ if ((nt%save_period)==0)
 void mesh::savecfg_vtk(Settings const& settings,timing const& t_prm,const string fileName) const
 {
     const int TET = tet.size();
-    const int NOD = node.size();
-    
+    const int NOD = nbNod;
+
 if(settings.verbose) { cout <<"\n -------------------\n " << fileName << endl; }
 
 ofstream fout(fileName, ios::out);
@@ -83,8 +83,7 @@ fout << "ASCII" << endl;
 fout << "DATASET UNSTRUCTURED_GRID" << endl;
 fout << "POINTS "<< NOD << " float" << endl;
 
-std::for_each(node.begin(),node.end(),[this,&fout](Nodes::Node const&n)
-        {fout << n.p << endl;});
+for(int i=0;i<NOD;i++) {fout << node[i].p << endl;}
 
 fout << "CELLS " << setw(8) << TET << "\t" << setw(8) << (5*TET) << endl;
 
@@ -102,10 +101,10 @@ fout <<"POINT_DATA " << setw(8) << NOD << endl;
 fout <<"SCALARS phi float 1" << endl;
 fout << "LOOKUP_TABLE my_table" << endl;
 
-std::for_each(node.begin(),node.end(),[&fout](Nodes::Node const& n){fout << n.phi << endl;} );
+for(int i=0;i<NOD;i++) {fout << node[i].phi << endl;}
 
 fout << "VECTORS u float" << endl;
-std::for_each(node.begin(),node.end(),[&fout](Nodes::Node const& n){fout << n.u << endl;} );
+for(int i=0;i<NOD;i++) {fout << node[i].u << endl;}
 //fout << boost::format("%+20.10e %+20.10e %+20.10e") % u1 % u2 % u3 << endl;
 }
 
@@ -122,14 +121,11 @@ fout << "#time : " << t_prm.get_t() << endl;
 
 // fout << boost::format("%8d %+20.10f %+20.10f %+20.10f %+20.10f %+20.10f %+20.10f %+20.10e") % i % x % y % z % u1 % u2 % u3 % phi << endl;}
 
-int i=0;
-std::for_each(node.begin(),node.end(),[&i,s,&fout](Nodes::Node const&n)
+for(int i=0;i<nbNod;i++)
         { 
-        Pt::pt3D p = n.p/s;
-        fout << i << "\t" << p << "\t" << n.u << "\t" << n.phi << endl;
-        i++;
-        } // lambda works with << overloaded
-    );
+        Pt::pt3D p = node[i].p/s;
+        fout << i << "\t" << p << "\t" << node[i].u << "\t" << node[i].phi << endl;
+        }
 
 fout.close();
 }

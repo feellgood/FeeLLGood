@@ -28,7 +28,9 @@ public:
         }
     
     /** return number of nodes  */
-    inline int getNbNodes(void) const { return node.size(); }
+    inline int getNbNodes(void) const { 
+        return nbNod;//node.size(); 
+        }
     
     /** return number of triangular fac */
     inline int getNbFacs(void) const { return fac.size(); }
@@ -46,7 +48,7 @@ public:
     void infos(void) const
         {
         std::cout << "\t diam bounding box ="<< diam << std::endl;
-        std::cout << "\t nodes\t\t\t" << node.size() << std::endl;
+        std::cout << "\t nodes\t\t\t" << getNbNodes() << std::endl;
         std::cout << "\t faces\t\t\t" << fac.size() << std::endl;
         std::cout << "\t tetraedrons\t\t" << tet.size() << std::endl;
         std::cout << "\t Total surface\t\t"  << surf << std::endl;
@@ -55,7 +57,10 @@ public:
 
     /** call evolution for all the nodes */
     inline void evolution(void)
-        { std::for_each(node.begin(), node.end(), [](Nodes::Node &n){ n.evolution();} ); }
+        { 
+            //std::for_each(node.begin(), node.end(), [](Nodes::Node &n){ n.evolution();} ); 
+            for(int i=0;i<nbNod;i++) node[i].evolution();
+        }
     
     /** find center and length along coordinates and diameter = max(l(x|y|z)), computes vol,surf */
     void geometry(void)
@@ -92,7 +97,8 @@ public:
     Demagnetizing field and energies don't need to be reset, because they won't be updated if failure is detected.
     I don't know how to cleanly reset "fem.DW_vz". BC
     */
-    inline void reset(void) { std::for_each(node.begin(),node.end(),[](Nodes::Node &n) {n.reset();}); }
+    inline void reset(void) 
+        { for(int i=0;i<nbNod;i++) node[i].reset(); }
     
 
     /** read a solution from a file (tsv formated) and initialize fem struct to restart computation from that distribution, return time
@@ -103,11 +109,12 @@ public:
 
     /** computes an analytical initial magnetization distribution as a starting point for the simulation */
     inline void init_distrib(Settings & mySets /**< [in] */)
-        { std::for_each( node.begin(),node.end(), [this,&mySets](Nodes::Node & n) 
+        { 
+        for(int i=0;i<nbNod;i++)
             {
-            n.u0 = mySets.getValue( Nodes::get_p(n) );
-            n.u = n.u0; n.phi  = 0.; n.phiv = 0.;
-            } ); 
+            node[i].u0 = mySets.getValue( Nodes::get_p(node[i]) );
+            node[i].u = node[i].u0; node[i].phi  = 0.; node[i].phiv = 0.;
+            }  
         }
     
     /** 
@@ -148,8 +155,11 @@ public:
     
 private:
     /** node container */
-    std::vector <Nodes::Node> node;
-
+    std::shared_ptr<Nodes::Node[]> node;
+    
+    /** total number of nodes read from mesh file */
+    int nbNod;
+    
 	/** reading mesh file function */
     void readMesh(Settings const& mySets);
 
@@ -162,15 +172,25 @@ private:
 	/** return the minimum of all nodes coordinate along coord axis */
     inline double minNodes(const Pt::index coord)
         {
-        const auto minCoord = std::min_element(node.begin(),node.end(),[coord](Nodes::Node &n1,Nodes::Node &n2) {return (n1.p(coord)<n2.p(coord)); } );
-        return minCoord->p(coord); 
+        double _min = __DBL_MAX__;
+        for(int i=0;i<nbNod;i++)
+            {
+            double val = node[i].p(coord);
+            if (val < _min) _min = val;
+            }
+        return _min;
         }
 
     /** return the maximum of all nodes coordinate along coord axis */
     inline double maxNodes(const Pt::index coord)
         {
-        const auto maxCoord = std::max_element(node.begin(),node.end(),[coord](Nodes::Node &n1,Nodes::Node &n2) {return (n1.p(coord)<n2.p(coord)); } );
-        return maxCoord->p(coord);
+        double _max = __DBL_MIN__;
+        for(int i=0;i<nbNod;i++)
+            {
+            double val = node[i].p(coord);
+            if (val > _max) _max = val;
+            }
+        return _max;
         }
     
     /** redefine orientation of triangular faces in accordance with the tetrahedron
@@ -222,7 +242,7 @@ private:
                     {
                     for (int nrot=0; nrot<3; nrot++)
                         {
-                        Facette::Fac fc(node.size());
+                        Facette::Fac fc(getNbNodes());
                         fc.ind[(0+nrot)%3]=i0; fc.ind[(1+nrot)%3]=i1; fc.ind[(2+nrot)%3]=i2;
                         it=sf.find(fc);
                         if (it!=sf.end()) break;
