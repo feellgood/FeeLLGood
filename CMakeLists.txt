@@ -51,7 +51,7 @@ SET(HEADERS config.h pt3D.h node.h matBlocDiag.h mag_parser.h mesh.h
 
 SET(SOURCES mag_parser.cpp time_integration.cpp feellgoodSettings.cpp
     solver.cpp tetra.cpp facette.cpp read.cpp save.cpp
-    linear_algebra.cpp femutil.cpp energy.cpp recentering.cpp tiny.h)
+    linear_algebra.cpp energy.cpp recentering.cpp tiny.h)
 
 configure_file(config.h.in ./config.h)
 

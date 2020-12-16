@@ -9,8 +9,6 @@
 #include "config.h" // for tolerance UT_TOL macro
 #include "node.h"
 
-// might be interesting to fix a tolerance value from config.h.in for some lvl 2 tests
-
 BOOST_AUTO_TEST_SUITE(ut_node)
 
 /*---------------------------------------*/
@@ -27,7 +25,24 @@ BOOST_CHECK(x != 0.0f);
 /* zero lvl tests : direct elementary member functions */ 
 /*-----------------------------------------------------*/
 
-BOOST_AUTO_TEST_CASE(node_get_p, * boost::unit_test::tolerance(UT_TOL))
+BOOST_AUTO_TEST_CASE(node_get_p_lvl0)
+{
+Nodes::Node n;
+Pt::pt3D pPos(1.0,0.0,0.0);
+
+n.p = pPos;
+
+BOOST_CHECK(Nodes::get_p(n).x() == 1.0);
+BOOST_CHECK(Nodes::get_p(n).y() == 0.0);
+BOOST_CHECK(Nodes::get_p(n).z() == 0.0);
+}
+
+
+/*---------------------------------------*/
+/* first lvl tests : nested calculus,... */
+/*---------------------------------------*/
+
+BOOST_AUTO_TEST_CASE(node_get_p_lvl1, * boost::unit_test::tolerance(UT_TOL))
 {
 Nodes::Node n;
 Pt::pt3D pPos(1.0,3.0,5.0);
@@ -37,12 +52,6 @@ n.p.normalize();
 
 BOOST_TEST(Nodes::get_p(n).norm() == 1.0);
 }
-
-
-/*---------------------------------------*/
-/* first lvl tests : nested calculus,... */
-/*---------------------------------------*/
-
 
 /*---------------------------------------*/
 /* second lvl tests : pure mathematics   */

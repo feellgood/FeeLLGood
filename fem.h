@@ -105,7 +105,11 @@ class Fem
     /**
     print some informations of fem container
     */
-    void infos(void) const;
+    void infos(void) const 
+        {
+        std::cout << "This is feeLLGood SHA1= " + std::string(SHAnumber) << std::endl;
+        msh.infos();
+        }
     
     /** computes all the energies */
     void energy(double const t /**< [in] time in second, used to compute zeeman contribution if applied field is time dependant */,

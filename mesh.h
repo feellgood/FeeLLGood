@@ -19,29 +19,25 @@ class for storing the mesh, including mesh geometry values, containers for the n
 class mesh
 {
 public:
-    /** default constructor */
-    inline mesh() {}
-    
-    /** constructor */
+    /** constructor  : read mesh, reorder indices and computes some values related to the mesh */
     inline mesh(Settings & mySets /**< [in] */)
         {
         readMesh(mySets);
-        femutil(mySets);// reordering of index nodes for facette orientation, also some modifications on fac::Ms
+        indexReorder(mySets);// reordering of index nodes for facette orientation, also some modifications on fac::Ms
         geometry();// initialization of l,c,diam,vol,surf
-            //init_distrib(mySets);
         }
     
     /** return number of nodes  */
-    inline int getNbNodes(void) { return node.size(); }
+    inline int getNbNodes(void) const { return node.size(); }
     
     /** return number of triangular fac */
-    inline int getNbFacs(void) { return fac.size(); }
+    inline int getNbFacs(void) const { return fac.size(); }
     
     /** return number of tetrahedrons */
-    inline int getNbTets(void) { return tet.size(); }
+    inline int getNbTets(void) const { return tet.size(); }
     
     /** getter : return node */
-    inline const Nodes::Node getNode(const int i) { return node[i]; }
+    inline const Nodes::Node getNode(const int i) const { return node[i]; }
     
     /** setter : node */
     inline Nodes::Node & setNode(const int i) {return node[i];}
@@ -56,18 +52,10 @@ public:
         std::cout << "\t Total surface\t\t"  << surf << std::endl;
         std::cout << "\t Total volume\t\t\t" << vol << std::endl;
         }
-    
-    
-    /** check phi values for debug */
-    inline void checkNodes(void)
-        {
-        int k=0;
-        for(unsigned int i=0;i<node.size();i++) { if (std::isnan(node[i].phi)) {std::cout << "#" << i<<std::endl; node[i].phi = 0;k++;}  }
-        std::cout << "total nb of NaN in node[].phi ="<< k << std::endl;
-        }
 
     /** call evolution for all the nodes */
-    inline void evolution(void) { std::for_each(node.begin(), node.end(), [](Nodes::Node &n){ n.evolution();} ); }
+    inline void evolution(void)
+        { std::for_each(node.begin(), node.end(), [](Nodes::Node &n){ n.evolution();} ); }
     
     /** find center and length along coordinates and diameter = max(l(x|y|z)), computes vol,surf */
     void geometry(void)
@@ -106,16 +94,14 @@ public:
     */
     inline void reset(void) { std::for_each(node.begin(),node.end(),[](Nodes::Node &n) {n.reset();}); }
     
-    
-    
-    /**
-read a solution from a file (tsv formated) and initialize fem struct to restart computation from that distribution, return time
-*/
-double readSol(bool VERBOSE/**< [in] */,
+
+    /** read a solution from a file (tsv formated) and initialize fem struct to restart computation from that distribution, return time
+    */
+    double readSol(bool VERBOSE/**< [in] */,
              double scaling /**< [in] scaling factor for physical coordinates */,
              const std::string fileName /**< [in] */ );
 
-/** computes an analytical initial magnetization distribution as a starting point for the simulation */
+    /** computes an analytical initial magnetization distribution as a starting point for the simulation */
     inline void init_distrib(Settings & mySets /**< [in] */)
         { std::for_each( node.begin(),node.end(), [this,&mySets](Nodes::Node & n) 
             {
@@ -161,17 +147,18 @@ double readSol(bool VERBOSE/**< [in] */,
     }
     
 private:
-    std::vector <Nodes::Node> node; /**< node container */
-	
+    /** node container */
+    std::vector <Nodes::Node> node;
+
 	/** reading mesh file function */
     void readMesh(Settings const& mySets);
-	
+
 	/** read old mesh format 2.2 */
     void readOldMesh(Settings const& mySets,std::ifstream &msh);
 
     /** read mesh format 4.1 */
     void readNewMesh(Settings const& mySets,std::ifstream &msh);
-	
+
 	/** return the minimum of all nodes coordinate along coord axis */
     inline double minNodes(const Pt::index coord)
         {
@@ -187,8 +174,8 @@ private:
         }
     
     /** redefine orientation of triangular faces in accordance with the tetrahedron
-     * reorientation of the tetrahedrons if needed; definition of Ms on facette elements
-Indices and orientation convention : 
+    * reorientation of the tetrahedrons if needed; definition of Ms on facette elements
+    Indices and orientation convention : 
 
                         v
                       .
@@ -210,7 +197,7 @@ Indices and orientation convention :
                         ` w
 
 */
-    void femutil(Settings const& settings)
+    void indexReorder(Settings const& settings)
         {
         std::set<Facette::Fac> sf;//implicit use of operator< overloaded in class Fac
 
