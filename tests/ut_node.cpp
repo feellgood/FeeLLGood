@@ -27,7 +27,16 @@ BOOST_CHECK(x != 0.0f);
 /* zero lvl tests : direct elementary member functions */ 
 /*-----------------------------------------------------*/
 
+BOOST_AUTO_TEST_CASE(node_get_p, * boost::unit_test::tolerance(UT_TOL))
+{
+Nodes::Node n;
+Pt::pt3D pPos(1.0,3.0,5.0);
 
+n.p = pPos;
+n.p.normalize();
+
+BOOST_TEST(Nodes::get_p(n).norm() == 1.0);
+}
 
 
 /*---------------------------------------*/

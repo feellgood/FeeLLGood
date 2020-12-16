@@ -104,8 +104,7 @@ double readSol(bool VERBOSE/**< [in] */,
     inline void init_distrib(Settings & mySets /**< [in] */)
         { std::for_each( node.begin(),node.end(), [this,&mySets](Nodes::Node & n) 
             {
-            Pt::pt3D pNorm = Pt::pt3D( (n.p.x() - c.x())/l.x() , (n.p.y() - c.y())/l.y() , (n.p.z() - c.z())/l.z() );
-            n.u0 = mySets.getValue(pNorm);
+            n.u0 = mySets.getValue( Nodes::get_p(n) );
             n.u = n.u0; n.phi  = 0.; n.phiv = 0.;
             } ); 
         }

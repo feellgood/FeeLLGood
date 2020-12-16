@@ -13,6 +13,9 @@ rectangle.make(meshFileName,vol_region_name,surf_region_name)
 
 mySettings = Settings(meshFileName)
 
+mySettings["finite_element_solver"]["nb_threads"] = 32 # MaxNbThreads
+mySettings["demagnetizing_field_solver"]["nb_threads"] = 32 # MaxNbThreads
+
 mySettings["outputs"]["file_basename"] = "rectangle"
 
 mySettings["outputs"]["evol_time_step"] = 0.5e-11
@@ -46,6 +49,6 @@ mySettings["mesh"]["volume_regions"]["300"]["ex"] = [1.0,0.0,0.0]
 mySettings["mesh"]["volume_regions"]["300"]["ey"] = [0.0,1.0,0.0]
 mySettings["mesh"]["volume_regions"]["300"]["ez"] = [0.0,0.0,1.0]
 
-mySettings["initial_magnetization"] = {"Mx":"1","My":"1","Mz":"0"}
+mySettings["initial_magnetization"] = {"Mx":"x","My":"y","Mz":"0.1"}
 
 mySettings.write('rectangle_test.json')

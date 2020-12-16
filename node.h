@@ -77,7 +77,7 @@ u.normalize();
 };//end struct node
 
 /** getter for p */
-inline const Pt::pt3D get_p(Node const& n /**< [in] */) {return n.p;}
+inline Pt::pt3D get_p(Node const& n /**< [in] */) {return n.p;}
 
 /** getter for u0*/
 inline const Pt::pt3D get_u0(Node const& n /**< [in] */) {return n.u0;}
