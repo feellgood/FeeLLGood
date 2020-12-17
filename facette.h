@@ -169,7 +169,7 @@ class Fac{
 	Pt::pt3D calc_norm(void) const;
 
     /** computes surface of the face */
-    double calc_surf(void) const;
+    inline double calc_surf(void) const { return 0.5*normal_vect().norm(); }
     
     private:
         const int NOD;/**< number of nodes */
@@ -181,6 +181,17 @@ class Fac{
         
         /** computes weight coefficients */
         inline double weight(const int i) const { return 2.0*surf*Facette::pds[i]; }
+        
+        /** return normal to the triangular face, not normalized */
+        inline Pt::pt3D normal_vect() const
+            {
+            Pt::pt3D p0 = refNode[ ind[0] ].p;
+            Pt::pt3D p1 = refNode[ ind[1] ].p;
+            Pt::pt3D p2 = refNode[ ind[2] ].p;
+
+            return( (p1-p0)*(p2-p0) );
+            }
+        
 };//end class Fac
 
 }//end namespace

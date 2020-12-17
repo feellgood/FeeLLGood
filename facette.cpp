@@ -70,24 +70,9 @@ void Fac::assemblage_mat(write_matrix &K) const
 
 Pt::pt3D Fac::calc_norm(void) const
 {
-Pt::pt3D p0 = refNode[ ind[0] ].p;
-Pt::pt3D p1 = refNode[ ind[1] ].p;
-Pt::pt3D p2 = refNode[ ind[2] ].p;
-
-Pt::pt3D n = (p1-p0)*(p2-p0);
+Pt::pt3D n = normal_vect();
 n.normalize();
 return n;
-}
-
-double Fac::calc_surf(void) const
-{
-Pt::pt3D p0 = refNode[ ind[0] ].p;
-Pt::pt3D p1 = refNode[ ind[1] ].p;
-Pt::pt3D p2 = refNode[ ind[2] ].p;
-
-Pt::pt3D vec = (p1-p0)*(p2-p0);
-
-return 0.5*vec.norm();
 }
 
 double Fac::potential(std::function<Pt::pt3D (Nodes::Node)> getter, int i) const
