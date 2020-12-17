@@ -2,11 +2,15 @@
   Elementary matrix Calculation for a tetrahedron element 
  */ 
 
+#include <set>
+
 #include "tetra.h"
 #include "pt3D.h"
 #include "tiny.h"
 #include "matBlocDiag.h"
 #include "time_integration.h"
+
+#include "facette.h"
 
 using namespace Tetra;
 using namespace Pt;
@@ -200,4 +204,18 @@ Pt::pt3D const & p2 = refNode[ ind[2] ].p;
 Pt::pt3D const & p3 = refNode[ ind[3] ].p;
 
 return Pt::pTriple(p1-p0,p2-p0,p3-p0)/6.0;
+}
+
+std::set<Facette::Fac> Tet::ownedFac() const
+{
+std::set<Facette::Fac> s;
+
+int ia=ind[0];int ib=ind[1];int ic=ind[2];int id=ind[3];
+
+s.insert( Facette::Fac(reg,idxPrm,ia,ic,ib) );
+s.insert( Facette::Fac(reg,idxPrm,ib,ic,id) );
+s.insert( Facette::Fac(reg,idxPrm,ia,id,ic) );
+s.insert( Facette::Fac(reg,idxPrm,ia,ib,id) );
+
+return s;
 }

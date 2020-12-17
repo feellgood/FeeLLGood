@@ -6,6 +6,7 @@
   header containing Tet class, some constants, and integrales
  */
 #include <functional>
+#include <set>
 
 #include "gmm/gmm_kernel.h"
 
@@ -13,7 +14,7 @@
 #include "node.h"
 #include "tiny.h"
 #include "time_integration.h"
-
+#include "facette.h"
 
 /** \namespace Tetra
  to grab altogether some constants for struct Tet
@@ -324,13 +325,14 @@ class Tet{
         
         /** computes volume	of the tetrahedron */
 		double calc_vol(void) const;
-        
+
+        /** return a set of the four facettes of the tetrahedron */
+        std::set<Facette::Fac> ownedFac() const;
+
     private:
         const int NOD;/**< total number of nodes, also an offset for filling sparseMatrix */
         const int reg;/**< .msh region number */
-        
         const std::shared_ptr<Nodes::Node[]> refNode;/**< direct access to the Nodes */
-        //const std::vector<Nodes::Node>  *
         
         /** template getter to access and copy some parts of the node vector ot type T = double or Pt::pt3D  */
         template <class T> void getDataFromNode(std::function< T (Nodes::Node)> getter,T X_data[N]) const

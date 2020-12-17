@@ -63,20 +63,20 @@ class Fac{
                    const int _idx /**< [in] region index in region vector */,
                    const int i0 /**< [in] node index */,
                    const int i1 /**< [in] node index */,
-                   const int i2 /**< [in] node index */) : idxPrm(_idx),NOD(_NOD),reg(_reg),refNode(_p_node)
+                   const int i2 /**< [in] node index */) : idxPrm(_idx),treated(false),NOD(_NOD),reg(_reg),refNode(_p_node)
         {
+        ind[0] = i0; ind[1] = i1; ind[2] = i2;
+        for (int i=0; i<N; i++) ind[i]--; // to force index to start from 0 (C++) instead of Matlab/msh convention
+        //treated = false;
         if(NOD>0)
-            {
-            ind[0] = i0; ind[1] = i1; ind[2] = i2;
-            for (int i=0; i<N; i++) ind[i]--; // to force index to start from 0 (C++) instead of Matlab/msh convention
-            treated = false;
-            surf = calc_surf();
-            }
+            { surf = calc_surf(); }
+        else
+            { surf = 0.0; Ms = 0.0; }
         }
 		
 		/** constructor from a region number, idxPrm and three indices */		
-		inline Fac(const int r,const int idx,const int i0,const int i1,const int i2): idxPrm(idx),surf(0),Ms(0),NOD(0),reg(r)
-            {ind[0]=i0;ind[1]=i1;ind[2]=i2; treated = false;}
+		inline Fac(const int r,const int idx,const int i0,const int i1,const int i2): idxPrm(idx),surf(0),Ms(0),treated(false),NOD(0),reg(r)
+            {ind[0]=i0;ind[1]=i1;ind[2]=i2;}
 		
 		int idxPrm;/**< index of the material parameters of the facette */	
 		

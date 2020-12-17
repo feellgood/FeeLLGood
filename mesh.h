@@ -230,12 +230,8 @@ private:
 
         std::for_each(tet.begin(),tet.end(),[&sf](Tetra::Tet const& te)
             {
-            int ia=te.ind[0];int ib=te.ind[1];int ic=te.ind[2];int id=te.ind[3];
-            const int reg = te.getRegion();
-            sf.insert( Facette::Fac(reg,te.idxPrm,ia,ic,ib) );
-            sf.insert( Facette::Fac(reg,te.idxPrm,ib,ic,id) );
-            sf.insert( Facette::Fac(reg,te.idxPrm,ia,id,ic) );
-            sf.insert( Facette::Fac(reg,te.idxPrm,ia,ib,id) ); 
+            std::set<Facette::Fac> tet_set = te.ownedFac();
+            for(std::set<Facette::Fac>::iterator it = tet_set.begin();it != tet_set.end(); ++it) sf.insert( *it );
             });//end for_each
 
         std::for_each(fac.begin(),fac.end(),[this,&settings,&sf](Facette::Fac &fa)
