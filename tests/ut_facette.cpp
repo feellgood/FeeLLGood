@@ -30,13 +30,17 @@ BOOST_CHECK( (f.getN() == Facette::N) && (f.getNPI() == Facette::NPI) );
 
 BOOST_AUTO_TEST_CASE(Fac_constructor2)
 {
-//std::shared_ptr<Nodes::Node[]> v_nodes;
-
 Facette::Fac f(nullptr,0,0,0,0,0,0);
 
 BOOST_CHECK( (f.getN() == Facette::N) && (f.getNPI() == Facette::NPI) );
 }
 
+BOOST_AUTO_TEST_CASE(Fac_constructor3)
+{
+Facette::Fac f(0,0,0,0,0);
+
+BOOST_CHECK( (f.getN() == Facette::N) && (f.getNPI() == Facette::NPI) );
+}
 
 /*---------------------------------------*/
 /* first lvl tests : nested calculus,... */

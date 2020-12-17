@@ -16,7 +16,8 @@ add_executable (test_ut_node ut_node.cpp)
 SET(SOURCES ../facette.cpp ut_facette.cpp)
 add_executable (test_ut_facette ${SOURCES})
 
-add_executable (test_ut_tetra ut_tetra.cpp)
+SET(SOURCES ../tetra.cpp ut_tetra.cpp)
+add_executable (test_ut_tetra ${SOURCES})
 
 add_executable (test_ut_tiny ut_tiny.cpp)
 

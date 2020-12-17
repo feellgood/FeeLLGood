@@ -115,40 +115,41 @@ class Tet{
 		/** constructor for readMesh. It initializes weight hat function and dad(x|y|z) if \f$ | detJ | < \epsilon \f$ jacobian is considered degenerated
          */
 		inline Tet(const std::shared_ptr<Nodes::Node[]> _p_node /**< [in] pointer to the nodes */,
-                   const int _NOD,
+                   const int _NOD /**< [in] total nb of nodes */,
                    const int _reg /**< [in] region number */,
                    const int _idx /**< [in] region index in region vector */,
                    const int i0 /**< [in] node index */,
                    const int i1 /**< [in] node index */,
                    const int i2 /**< [in] node index */,
-                   const int i3 /**< [in] node index */) : idxPrm(_idx),NOD(_NOD),reg(_reg),refNode(_p_node)
+                   const int i3 /**< [in] node index */) : idxPrm(_idx),treated(false),NOD(_NOD),reg(_reg),refNode(_p_node)
             {
             ind[0] = i0; ind[1] = i1; ind[2] = i2; ind[3] = i3;
             for (int i=0; i<N; i++) ind[i]--;           // convention Matlab/msh -> C++
-            treated = false;
             
-            if (calc_vol() < 0.) { std::swap(ind[2],ind[3]); }
+	if(NOD>0)
+		{
+            	if (calc_vol() < 0.0) { std::swap(ind[2],ind[3]); }
             
-            double J[Pt::DIM][Pt::DIM];//we have to rebuild the jacobian in case of ill oriented tetrahedron 
-            double detJ = Jacobian(J);
-            double da[N][Pt::DIM];
+            	double J[Pt::DIM][Pt::DIM];//we have to rebuild the jacobian in case of ill oriented tetrahedron 
+            	double detJ = Jacobian(J);
+            	double da[N][Pt::DIM];
     
-            if (fabs(detJ) < Tetra::epsilon)
-                {
-                std::cerr << "Singular jacobian in tetrahedron" << std::endl;
-                infos();
-                SYSTEM_ERROR;
-                }
-            Pt::inverse(J,detJ);
-            tiny::mult<double, N, Pt::DIM, Pt::DIM> (Tetra::dadu, J, da);
+            	if (fabs(detJ) < Tetra::epsilon)
+                	{
+                	std::cerr << "Singular jacobian in tetrahedron" << std::endl;
+                	infos();
+                	SYSTEM_ERROR;
+                	}
+            	Pt::inverse(J,detJ);
+            	tiny::mult<double, N, Pt::DIM, Pt::DIM> (Tetra::dadu, J, da);
     
-            for (int j=0; j<NPI; j++)
-                {
-                for (int i=0; i<N; i++) { dadx[i][j]=da[i][0]; dady[i][j]=da[i][1]; dadz[i][j]=da[i][2]; }
-                weight[j]    = detJ * Tetra::pds[j];
-                }   
-            } 
-		
+            	for (int j=0; j<NPI; j++)
+            	    {
+            	    for (int i=0; i<N; i++) { dadx[i][j]=da[i][0]; dady[i][j]=da[i][1]; dadz[i][j]=da[i][2]; }
+            	    weight[j]    = detJ * Tetra::pds[j];
+            	    }   
+            	} 
+	}
 		
 		int idxPrm;/**< index of the material parameters of the tetrahedron */		
 		int ind[N];/**< indices to the nodes */
