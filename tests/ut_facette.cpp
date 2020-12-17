@@ -71,7 +71,7 @@ node[2] = n3;
 
 Facette::Fac f(node,nbNod,0,0,0,1,2);
 double s = 0.5;
-BOOST_CHECK( f.calc_surf() == s );
+BOOST_TEST( f.calc_surf() == s );
 }
 
 
