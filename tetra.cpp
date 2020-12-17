@@ -212,10 +212,10 @@ std::set<Facette::Fac> s;
 
 int ia=ind[0];int ib=ind[1];int ic=ind[2];int id=ind[3];
 
-s.insert( Facette::Fac(reg,idxPrm,ia,ic,ib) );
-s.insert( Facette::Fac(reg,idxPrm,ib,ic,id) );
-s.insert( Facette::Fac(reg,idxPrm,ia,id,ic) );
-s.insert( Facette::Fac(reg,idxPrm,ia,ib,id) );
+s.insert( Facette::Fac(nullptr,0,reg,idxPrm,ia,ic,ib) );
+s.insert( Facette::Fac(nullptr,0,reg,idxPrm,ib,ic,id) );
+s.insert( Facette::Fac(nullptr,0,reg,idxPrm,ia,id,ic) );
+s.insert( Facette::Fac(nullptr,0,reg,idxPrm,ia,ib,id) );
 
 return s;
 }

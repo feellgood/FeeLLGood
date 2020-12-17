@@ -65,19 +65,18 @@ class Fac{
                    const int i1 /**< [in] node index */,
                    const int i2 /**< [in] node index */) : idxPrm(_idx),treated(false),NOD(_NOD),reg(_reg),refNode(_p_node)
         {
-        ind[0] = i0; ind[1] = i1; ind[2] = i2;
-        for (int i=0; i<N; i++) ind[i]--; // to force index to start from 0 (C++) instead of Matlab/msh convention
-        //treated = false;
+        ind[0]=i0;ind[1]=i1;ind[2]=i2;
         if(NOD>0)
-            { surf = calc_surf(); }
+            { // to force index to start from 0 (C++) instead of Matlab/msh convention
+            if((i0>0)&&(i0<=NOD)) { ind[0]--; } else std::cout<< "warning index i0 out of bounds in fac constructor" <<std::endl;
+            if((i1>0)&&(i1<=NOD)) { ind[1]--; } else std::cout<< "warning index i1 out of bounds in fac constructor" <<std::endl;
+            if((i2>0)&&(i2<=NOD)) { ind[2]--; } else std::cout<< "warning index i2 out of bounds in fac constructor" <<std::endl;
+            surf = calc_surf();
+            }
         else
-            { surf = 0.0; Ms = 0.0; }
+            { surf = 0.0; Ms = 0.0; }// no index shift here if NOD == 0 : usefull while reordering face indices
         }
-		
-		/** constructor from a region number, idxPrm and three indices */		
-		inline Fac(const int r,const int idx,const int i0,const int i1,const int i2): idxPrm(idx),surf(0),Ms(0),treated(false),NOD(0),reg(r)
-            {ind[0]=i0;ind[1]=i1;ind[2]=i2;}
-		
+
 		int idxPrm;/**< index of the material parameters of the facette */	
 		
 		double surf;/**< surface of the element */

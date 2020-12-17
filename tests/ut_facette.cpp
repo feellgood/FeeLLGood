@@ -2,6 +2,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "config.h"
 #include "facette.h"
 #include "node.h"
 
@@ -23,24 +24,19 @@ BOOST_CHECK(x != 0.0f);
 
 BOOST_AUTO_TEST_CASE(Fac_constructor1)
 {
+std::cout << "1 param constructor" << std::endl;
 Facette::Fac f(0);
 
+std::cout << "indices:" << f.ind[0] << ";" << f.ind[1] <<";" << f.ind[2] << std::endl;
 BOOST_CHECK( (f.getN() == Facette::N) && (f.getNPI() == Facette::NPI) );
 }
 
 BOOST_AUTO_TEST_CASE(Fac_full_constructor)
 {
+std::cout << "7 param constructor" << std::endl;
 Facette::Fac f(nullptr,0,0,0,0,0,0);
 
-BOOST_CHECK( (f.getN() == Facette::N) && (f.getNPI() == Facette::NPI) );
-}
-
-
-
-BOOST_AUTO_TEST_CASE(Fac_constructor3)
-{
-Facette::Fac f(0,0,0,0,0);
-
+std::cout << "indices:" << f.ind[0] << ";" << f.ind[1] <<";" << f.ind[2] << std::endl;
 BOOST_CHECK( (f.getN() == Facette::N) && (f.getNPI() == Facette::NPI) );
 }
 
@@ -55,6 +51,7 @@ BOOST_CHECK( (f.getN() == Facette::N) && (f.getNPI() == Facette::NPI) );
 
 BOOST_AUTO_TEST_CASE(Fac_calc_surf, * boost::unit_test::tolerance(UT_TOL))
 {
+std::cout << "calc_surf test" << std::endl;
 int nbNod = 3;
 std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
 
@@ -69,7 +66,10 @@ node[0] = n1;
 node[1] = n2;
 node[2] = n3;
 
-Facette::Fac f(node,nbNod,0,0,0,1,2);
+Facette::Fac f(node,nbNod,0,0,1,2,3);// carefull with the index shift
+
+std::cout << "indices:" << f.ind[0] << ";" << f.ind[1] <<";" << f.ind[2] << std::endl;
+
 double s = 0.5;
 BOOST_TEST( f.calc_surf() == s );
 }
