@@ -324,8 +324,8 @@ class Tet{
         /** small vector for integrales */
         double Lp[2*N];
         
-        /** computes volume	of the tetrahedron */
-		double calc_vol(void) const;
+        /** computes volume of the tetrahedron */
+	double calc_vol(void) const;
 
         /** return a set of the four facettes of the tetrahedron */
         std::set<Facette::Fac> ownedFac() const;
