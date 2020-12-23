@@ -271,6 +271,12 @@ inline double norme2(pt3D const & p) {return( p.x()*p.x() + p.y()*p.y() + p.z()*
  */
 inline double norme(pt3D const & p) {return sqrt(norme2(p));}
 
+
+/** check orthogonality of three vectors */
+inline bool isOrthogonal(pt3D const& a,pt3D const& b,pt3D const& c,const double precision) 
+    {bool val = ( fabs(  pScal(a,b)) < precision); val &= ( fabs(  pScal(b,c)) < precision); val &= ( fabs(  pScal(c,a)) < precision);   return val;}
+
+
 /** 
 \return \f$ \det M \f$
 */

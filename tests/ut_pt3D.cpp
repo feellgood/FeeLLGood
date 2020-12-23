@@ -163,6 +163,17 @@ double x2(2.0);
 BOOST_CHECK( (x1 == 0.0) && (x2 == r2.maxLength())  );
 }
 
+BOOST_AUTO_TEST_CASE(pt3D_orthogonality)
+{
+Pt::pt3D X(1,0,0);
+Pt::pt3D Y(0,1,0);
+Pt::pt3D Z(0,0,1);
+
+BOOST_CHECK( Pt::isOrthogonal(X,Y,Z,__DBL_EPSILON__) == true );
+Y.x(1);
+BOOST_CHECK( Pt::isOrthogonal(X,Y,Z,USER_TOL) == false );
+}
+
 /*---------------------------------------*/
 /* second lvl tests : pure mathematics   */
 /*---------------------------------------*/

@@ -109,7 +109,11 @@ for (boost::property_tree::ptree::value_type &s : s_sub_tree)
             if (sub_k.first == "ez")
                 { p.ez = readUnitVector(sub_k,"ez"); }
             
-            if (sub_k.first == "Js") {p.J = sub_k.second.get_value<double>();}
+            if ( !Pt::isOrthogonal(p.ex,p.ey,p.ez,USER_TOL) )
+                { std::cout << "Warning : {ex,ey,ez} is not orthogonal" << std::endl; }
+            
+            if (sub_k.first == "Js")
+                { p.J = sub_k.second.get_value<double>(); }
             }
         p.Uz = 0.0;
         p.beta_sc = 0.0;
