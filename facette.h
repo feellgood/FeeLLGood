@@ -90,8 +90,8 @@ class Fac{
         
         /** interpolation template; T == 3D vector field or T == double .The getter function is given as a parameter in order to know what part of the node you want to interpolate */
         //To check with reference code : is there a missing transposition ?
-        //tiny::mult<double, DIM, N, NPI> (vec_nod, a, result); //if T == double
-        //tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result); //if T == PT::pt3D
+        //tiny::mult<double, DIM, N, NPI> (vec_nod, a, result); //if T == PT::pt3D
+        //tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result); //if T == double
         template <class T>
         void interpolation(std::function< T (Nodes::Node)> getter /**< [in] */,T result[NPI] /**< [out] */) const
         {
