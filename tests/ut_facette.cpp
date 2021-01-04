@@ -77,7 +77,7 @@ double s = 0.5;
 BOOST_TEST( f.calc_surf() == s );
 }
 
-BOOST_AUTO_TEST_CASE(Fac_interpolation, * boost::unit_test::tolerance(UT_TOL))
+BOOST_AUTO_TEST_CASE(Fac_interpolation_pt3D, * boost::unit_test::tolerance(UT_TOL))
 {
 std::cout << "surf interpolation test" << std::endl;
 int nbNod = 3;
@@ -121,6 +121,54 @@ double diff_r = 0;
 for (int i=0;i<Pt::DIM;i++)
     for (int j=0;j<Facette::NPI;j++)
         diff_r += Pt::sq(result[i][j] - _u[j](i));
+
+std::cout << "raw difference result =" << diff_r << std::endl;
+BOOST_TEST( sqrt(diff_r) == 0.0 );
+}
+
+BOOST_AUTO_TEST_CASE(Fac_interpolation_double, * boost::unit_test::tolerance(UT_TOL))
+{
+std::cout << "surf interpolation test" << std::endl;
+int nbNod = 3;
+std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
+
+std::random_device rd;
+std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::uniform_real_distribution<> distrib(0.0,1.0);
+
+
+Pt::pt3D p1(1,0,0),p2(0,1,0),p3(1,1,0),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
+double theta_sph(0),phi_sph(0),phi0(0),phi(0),phiv0(0),phiv(0);
+
+Nodes::Node n1 = {p1,u0,v0,u,v,theta_sph,phi_sph,phi0,phi,phiv0,phiv};
+Nodes::Node n2 = {p2,u0,v0,u,v,theta_sph,phi_sph,phi0,phi,phiv0,phiv};
+Nodes::Node n3 = {p3,u0,v0,u,v,theta_sph,phi_sph,phi0,phi,phiv0,phiv};
+
+node[0] = n1;
+node[1] = n2;
+node[2] = n3;
+
+node[0].phi0 = distrib(gen);
+node[1].phi0 = distrib(gen);
+node[2].phi0 = distrib(gen);
+
+Facette::Fac f(node,nbNod,0,0,1,2,3);// carefull with the index shift
+
+double _p[Facette::NPI];
+f.interpolation<double>(Nodes::get_phi0,_p);
+
+double scal_nod[Facette::N];
+    for (int j=0;j<Facette::N;j++)
+        { scal_nod[j] = node[j].phi0; }
+
+double result[Facette::NPI];
+// a[N][NPI]
+tiny::transposed_mult<double, Facette::N, Facette::NPI> (scal_nod, Facette::a, result);
+
+double diff_r = 0;
+
+for (int j=0;j<Facette::NPI;j++)
+    diff_r += Pt::sq(result[j] - _p[j]);
 
 std::cout << "raw difference result =" << diff_r << std::endl;
 BOOST_TEST( sqrt(diff_r) == 0.0 );

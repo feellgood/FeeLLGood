@@ -88,22 +88,23 @@ class Fac{
         inline double weightedScalarProd(const double X[NPI] /**< [in] */) const
             { return ( X[0]*weight(0) + (X[1] +X[2] + X[3])*weight(1) ); }
         
-        /** interpolation template; T == 3D vector field or T == double .The getter function is given as a parameter in order to know what part of the node you want to interpolate */
-        //To check with reference code : is there a missing transposition ?
+        /** interpolation template; T == 3D vector field or T == double .The getter function is given as a parameter in order to know what part of the node you want to interpolate 
+        if T is Pt::pt3D then result = vec_nod * a : mind the transposition due to the fact that vec_nod is an array of pt3D
+        if T is double then result = transpose(scalar_nod) * a
+            */
+        
         //tiny::mult<double, DIM, N, NPI> (vec_nod, a, result); //if T == PT::pt3D
         //tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result); //if T == double
         template <class T>
         void interpolation(std::function< T (Nodes::Node)> getter /**< [in] */,T result[NPI] /**< [out] */) const
         {
-        T X_nod[N];
-        for (int i=0; i<N; i++)
-            { X_nod[i] = getter( refNode[ ind[i] ] ); }
+        const T x0( getter( refNode[ ind[0] ] ) ),x1( getter( refNode[ ind[1] ] ) ),x2( getter( refNode[ ind[2] ] ) );
         
-        T s = X_nod[0] + X_nod[1] + X_nod[2];
-        result[0] = s/3.0;
-        result[1] = (s + 2.0*X_nod[0])/5.0;
-        result[2] = (s + 2.0*X_nod[1])/5.0;
-        result[3] = (s + 2.0*X_nod[2])/5.0;
+        result[0] = x0;result[0] += x1; result[0] += x2;
+        result[1] = (result[0] + 2.0*x0)/5.0;
+        result[2] = (result[0] + 2.0*x1)/5.0;
+        result[3] = (result[0] + 2.0*x2)/5.0;
+        result[0] /= 3.0;
         }
         
         /** interpolation for 3D vector field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
