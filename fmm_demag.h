@@ -117,7 +117,7 @@ class fmm
         std::for_each(container.begin(),container.end(),[this,c,&idx](T const& elem)              
             {  
             Pt::pt3D gauss[NPI];
-            elem.interpolation(Nodes::get_p,gauss);
+            elem.interpolation(Nodes::get_p,gauss);// for facette it is interpolation<Pt::pt3D> called here
         
             for (int j=0; j<NPI; j++, idx++)
                 {
