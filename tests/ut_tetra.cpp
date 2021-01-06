@@ -93,6 +93,7 @@ Tetra::Tet t(node,nbNod,0,0,1,2,3,4);//carefull with indices (starting from 1)
 
 // ref code (with minimal adaptations of integrales method in file MuMag_integrales.cc of src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
 double _u_nod[3][Tetra::N], _u[3][Tetra::NPI];
+double dudx[3][Tetra::NPI], dudy[3][Tetra::NPI], dudz[3][Tetra::NPI];
 
 for (int ie=0; ie<Tetra::N; ie++)
     {
@@ -101,6 +102,10 @@ for (int ie=0; ie<Tetra::N; ie++)
     for (int d=0; d<3; d++) { _u_nod[d][ie]   = nod.u0(d); }
     }
 tiny::mult<double, 3, Tetra::N, Tetra::NPI> (_u_nod, Tetra::a, _u);
+tiny::mult<double, 3, Tetra::N, Tetra::NPI> (_u_nod, t.dadx, dudx);
+tiny::mult<double, 3, Tetra::N, Tetra::NPI> (_u_nod, t.dady, dudy);
+tiny::mult<double, 3, Tetra::N, Tetra::NPI> (_u_nod, t.dadz, dudz);
+
 // end ref code
 
 
@@ -111,22 +116,50 @@ Pt::pt3D U[Tetra::NPI];
 t.interpolation(Nodes::get_u0,U,dUdx,dUdy,dUdz);
 // end code to check
 
-double distance = 0.0;
-double n_u = 0.0;
-double n_U = 0.0;
+double dist_uU(0.0),dist_dudx_dUdx(0.0),dist_dudy_dUdy(0.0),dist_dudz_dUdz(0.0);
+double n_u(0.0),n_dudx(0.0),n_dudy(0.0),n_dudz(0.0);
+double n_U(0.0),n_dUdx(0.0),n_dUdy(0.0),n_dUdz(0.0);
+
 for(int i=0;i<Tetra::N;i++)
     for(int j=0;j<Pt::DIM;j++)
         {
-        distance += Pt::sq( _u[j][i] - U[i](j) );
+        dist_uU += Pt::sq( _u[j][i] - U[i](j) );
+        dist_dudx_dUdx += Pt::sq( dudx[j][i] - dUdx[i](j) );
+        dist_dudy_dUdy += Pt::sq( dudy[j][i] - dUdy[i](j) );
+        dist_dudz_dUdz += Pt::sq( dudz[j][i] - dUdz[i](j) );
         n_u += Pt::sq( _u[j][i] );
+        n_dudx += Pt::sq( dudx[j][i] );
+        n_dudy += Pt::sq( dudy[j][i] );
+        n_dudz += Pt::sq( dudz[j][i] );
+        
         n_U += Pt::sq( U[i](j) );
+        n_dUdx += Pt::sq( dUdx[i](j) );
+        n_dUdy += Pt::sq( dUdy[i](j) );
+        n_dUdz += Pt::sq( dUdz[i](j) );
         }
     
-std::cout << "distance^2 =" << distance << std::endl;
-BOOST_TEST( sqrt(distance) == 0.0 );
-std::cout << "sum of the square of the matrix components of ref code =" << n_u << std::endl;
-std::cout << "sum of the square of the matrix components of code to test =" << n_U << std::endl;
+std::cout << "distance^2 (u,U) =" << dist_uU << std::endl;
+BOOST_TEST( sqrt(dist_uU) == 0.0 );
+BOOST_TEST( sqrt(dist_dudx_dUdx) == 0.0 );
+BOOST_TEST( sqrt(dist_dudy_dUdy) == 0.0 );
+BOOST_TEST( sqrt(dist_dudz_dUdz) == 0.0 );
+
+// to avoid gag of comparing pure zeros we also check that matrices norm are equal
+std::cout << "sum of the square of the matrix components of ref code u=" << n_u << std::endl;
+std::cout << "sum of the square of the matrix components of code to test U=" << n_U << std::endl;
 BOOST_TEST( n_u == n_U ); //let's be paranoid
+
+std::cout << "sum of the square of the matrix components of ref code dudx=" << n_dudx << std::endl;
+std::cout << "sum of the square of the matrix components of code to test dUdx=" << n_dUdx << std::endl;
+BOOST_TEST( n_dudx == n_dUdx );
+
+std::cout << "sum of the square of the matrix components of ref code dudy=" << n_dudy << std::endl;
+std::cout << "sum of the square of the matrix components of code to test dUdy=" << n_dUdy << std::endl;
+BOOST_TEST( n_dudy == n_dUdy );
+
+std::cout << "sum of the square of the matrix components of ref code dudz=" << n_dudz << std::endl;
+std::cout << "sum of the square of the matrix components of code to test dUdz=" << n_dUdz << std::endl;
+BOOST_TEST( n_dudz == n_dUdz );
 }
 
 BOOST_AUTO_TEST_SUITE_END()
