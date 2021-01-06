@@ -37,6 +37,90 @@ BOOST_CHECK( (tet.getN() == Tetra::N) && (tet.getNPI() == Tetra::NPI) );
 /*---------------------------------------*/
 /* second lvl tests : pure mathematics   */
 /*---------------------------------------*/
+BOOST_AUTO_TEST_CASE(Tet_inner_tables, * boost::unit_test::tolerance(UT_TOL))
+{
+// this test is dedicated to  check dadx,dady,dadz and weight tables, those values are initilized once by Tet constructor
+int nbNod = 4;
+std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
+
+std::random_device rd;
+std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::uniform_real_distribution<> distrib(0.0,1.0);
+
+Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
+double theta_sph(0),phi_sph(0),phi0(0),phi(0),phiv0(0),phiv(0);
+
+Nodes::Node n0 = {p0,u0,v0,u,v,theta_sph,phi_sph,phi0,phi,phiv0,phiv};
+Nodes::Node n1 = {p1,u0,v0,u,v,theta_sph,phi_sph,phi0,phi,phiv0,phiv};
+Nodes::Node n2 = {p2,u0,v0,u,v,theta_sph,phi_sph,phi0,phi,phiv0,phiv};
+Nodes::Node n3 = {p3,u0,v0,u,v,theta_sph,phi_sph,phi0,phi,phiv0,phiv};
+
+node[0] = n0;
+node[1] = n1;
+node[2] = n2;
+node[3] = n3;
+for (int i=0;i<nbNod;i++) { node[i].u0 = Pt::pt3D(M_PI*distrib(gen),2*M_PI*distrib(gen)); }
+
+Tetra::Tet t(node,nbNod,0,0,1,2,3,4);//carefull with indices (starting from 1)
+
+// ref code (with minimal adaptations of dad(x|y|z) in file Mesh_hat.cc of src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
+double _dadx[Tetra::N][Tetra::NPI];
+double _dady[Tetra::N][Tetra::NPI];
+double _dadz[Tetra::N][Tetra::NPI];
+double da[Tetra::N][Pt::DIM];
+double J[Pt::DIM][Pt::DIM];
+double nod[Pt::DIM][Tetra::N];
+double weight[Tetra::NPI];
+
+for (int ie=0; ie<Tetra::N; ie++)
+    {
+    int i= t.ind[ie];
+    nod[0][ie] = node[i].p(0);
+    nod[1][ie] = node[i].p(1);
+    nod[2][ie] = node[i].p(2);
+    }
+
+tiny::mult<double,Pt::DIM,Tetra::N,Pt::DIM>(nod, Tetra::dadu, J);
+double detJ = Pt::det(J);//lu_det(J);
+Pt::inverse(J,detJ);
+tiny::mult<double,Tetra::N,Pt::DIM,Pt::DIM>(Tetra::dadu, J, da);
+
+for (int npi=0; npi<Tetra::NPI; npi++)
+    {
+    for (int ie=0; ie<Tetra::N; ie++)
+        {
+        _dadx[ie][npi]= da[ie][0];
+        _dady[ie][npi]= da[ie][1];
+        _dadz[ie][npi]= da[ie][2];
+        }
+    weight[npi]= detJ*Tetra::pds[npi];
+    }
+
+// end ref code
+
+// the Tet constructor is computing dad(x|y|z)
+
+double result_dadx(0.0),result_dady(0.0),result_dadz(0.0),result_w(0.0);
+for (int npi=0; npi<Tetra::NPI; npi++)
+    {
+    for (int ie=0; ie<Tetra::N; ie++)
+        {
+        result_dadx += Pt::sq( _dadx[ie][npi] - t.dadx[ie][npi] );
+        result_dady += Pt::sq( _dady[ie][npi] - t.dady[ie][npi] );
+        result_dadz += Pt::sq( _dadz[ie][npi] - t.dadz[ie][npi] );
+        }
+    result_w += Pt::sq( weight[npi] - t.weight[npi] );
+    }
+
+std::cout << "sq_frob norm diff dadx,dady,dadz= " << result_dadx << " ; " << result_dady << " ; " << result_dadz << std::endl;
+BOOST_TEST( sqrt(result_dadx) == 0.0 );
+BOOST_TEST( sqrt(result_dady) == 0.0 );
+BOOST_TEST( sqrt(result_dadz) == 0.0 );
+
+std::cout<< "frob norm diff weight= "<< result_w <<std::endl;
+BOOST_TEST( sqrt(result_w) == 0.0 );
+}
+
 BOOST_AUTO_TEST_CASE(Tet_calc_vol, * boost::unit_test::tolerance(UT_TOL))
 {
 int nbNod = 4;
@@ -56,6 +140,7 @@ node[2] = n2;
 node[3] = n3;
 
 Tetra::Tet t(node,nbNod,0,0,1,2,3,4);//carefull with indices (starting from 1)
+
 double result = 1/6.0;
 double vol = t.calc_vol();
 std::cout << "vol(tetra) =" << vol << std::endl;
@@ -75,11 +160,8 @@ Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(
 double theta_sph(0),phi_sph(0),phi0(0),phi(0),phiv0(0),phiv(0);
 
 Nodes::Node n0 = {p0,u0,v0,u,v,theta_sph,phi_sph,phi0,phi,phiv0,phiv};
-
 Nodes::Node n1 = {p1,u0,v0,u,v,theta_sph,phi_sph,phi0,phi,phiv0,phiv};
-
 Nodes::Node n2 = {p2,u0,v0,u,v,theta_sph,phi_sph,phi0,phi,phiv0,phiv};
-
 Nodes::Node n3 = {p3,u0,v0,u,v,theta_sph,phi_sph,phi0,phi,phiv0,phiv};
 
 node[0] = n0;
@@ -105,7 +187,6 @@ tiny::mult<double, 3, Tetra::N, Tetra::NPI> (_u_nod, Tetra::a, _u);
 tiny::mult<double, 3, Tetra::N, Tetra::NPI> (_u_nod, t.dadx, dudx);
 tiny::mult<double, 3, Tetra::N, Tetra::NPI> (_u_nod, t.dady, dudy);
 tiny::mult<double, 3, Tetra::N, Tetra::NPI> (_u_nod, t.dadz, dudz);
-
 // end ref code
 
 
