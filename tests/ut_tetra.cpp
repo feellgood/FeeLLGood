@@ -147,6 +147,18 @@ std::cout << "vol(tetra) =" << vol << std::endl;
 BOOST_TEST( vol == result );
 }
 
+double sq_dist(double _x[Pt::DIM][Tetra::NPI],Pt::pt3D X[Tetra::NPI])
+{
+double val(0.0);
+
+for(int i=0;i<Tetra::N;i++)
+    for(int j=0;j<Pt::DIM;j++)
+        {val += Pt::sq( _x[j][i] - X[i](j) );}
+
+return val;
+}
+
+
 BOOST_AUTO_TEST_CASE(Tet_nod_interpolation, * boost::unit_test::tolerance(UT_TOL))
 {
 int nbNod = 4;
@@ -169,7 +181,11 @@ node[1] = n1;
 node[2] = n2;
 node[3] = n3;
 
-for (int i=0;i<nbNod;i++) { node[i].u0 = Pt::pt3D(M_PI*distrib(gen),2*M_PI*distrib(gen)); }
+for (int i=0;i<nbNod;i++)
+    {
+    node[i].u0 = Pt::pt3D(M_PI*distrib(gen),2*M_PI*distrib(gen));
+    node[i].v0 = Pt::pt3D(M_PI*distrib(gen),2*M_PI*distrib(gen));
+    }
 
 Tetra::Tet t(node,nbNod,0,0,1,2,3,4);//carefull with indices (starting from 1)
 
@@ -177,70 +193,116 @@ Tetra::Tet t(node,nbNod,0,0,1,2,3,4);//carefull with indices (starting from 1)
 double _u_nod[3][Tetra::N], _u[3][Tetra::NPI];
 double dudx[3][Tetra::NPI], dudy[3][Tetra::NPI], dudz[3][Tetra::NPI];
 
+double _v_nod[3][Tetra::N], _v[3][Tetra::NPI];
+double dvdx[3][Tetra::NPI], dvdy[3][Tetra::NPI], dvdz[3][Tetra::NPI];
+
 for (int ie=0; ie<Tetra::N; ie++)
     {
     int i= t.ind[ie];
     Nodes::Node &nod = node[i];
-    for (int d=0; d<3; d++) { _u_nod[d][ie]   = nod.u0(d); }
+    for (int d=0; d<3; d++)
+        { 
+        _u_nod[d][ie]   = nod.u0(d);
+        _v_nod[d][ie]   = nod.v0(d);
+        }
     }
 tiny::mult<double, 3, Tetra::N, Tetra::NPI> (_u_nod, Tetra::a, _u);
 tiny::mult<double, 3, Tetra::N, Tetra::NPI> (_u_nod, t.dadx, dudx);
 tiny::mult<double, 3, Tetra::N, Tetra::NPI> (_u_nod, t.dady, dudy);
 tiny::mult<double, 3, Tetra::N, Tetra::NPI> (_u_nod, t.dadz, dudz);
+
+tiny::mult<double, 3, Tetra::N, Tetra::NPI> (_v_nod, Tetra::a, _v);
+tiny::mult<double, 3, Tetra::N, Tetra::NPI> (_v_nod, t.dadx, dvdx);
+tiny::mult<double, 3, Tetra::N, Tetra::NPI> (_v_nod, t.dady, dvdy);
+tiny::mult<double, 3, Tetra::N, Tetra::NPI> (_v_nod, t.dadz, dvdz);
 // end ref code
 
 
 // code to check
 Pt::pt3D dUdx[Tetra::NPI], dUdy[Tetra::NPI], dUdz[Tetra::NPI];
-Pt::pt3D U[Tetra::NPI];
+Pt::pt3D dVdx[Tetra::NPI], dVdy[Tetra::NPI], dVdz[Tetra::NPI];
+Pt::pt3D U[Tetra::NPI],V[Tetra::NPI];
 
 t.interpolation(Nodes::get_u0,U,dUdx,dUdy,dUdz);
+t.interpolation(Nodes::get_v0,V,dVdx,dVdy,dVdz);
 // end code to check
 
-double dist_uU(0.0),dist_dudx_dUdx(0.0),dist_dudy_dUdy(0.0),dist_dudz_dUdz(0.0);
-double n_u(0.0),n_dudx(0.0),n_dudy(0.0),n_dudz(0.0);
-double n_U(0.0),n_dUdx(0.0),n_dUdy(0.0),n_dUdz(0.0);
+double n_u = tiny::frob_norm<double,3,Tetra::NPI>(_u);
+double n_dudx = tiny::frob_norm<double,3,Tetra::NPI>(dudx);
+double n_dudy = tiny::frob_norm<double,3,Tetra::NPI>(dudy);
+double n_dudz = tiny::frob_norm<double,3,Tetra::NPI>(dudz);
 
-for(int i=0;i<Tetra::N;i++)
-    for(int j=0;j<Pt::DIM;j++)
-        {
-        dist_uU += Pt::sq( _u[j][i] - U[i](j) );
-        dist_dudx_dUdx += Pt::sq( dudx[j][i] - dUdx[i](j) );
-        dist_dudy_dUdy += Pt::sq( dudy[j][i] - dUdy[i](j) );
-        dist_dudz_dUdz += Pt::sq( dudz[j][i] - dUdz[i](j) );
-        n_u += Pt::sq( _u[j][i] );
-        n_dudx += Pt::sq( dudx[j][i] );
-        n_dudy += Pt::sq( dudy[j][i] );
-        n_dudz += Pt::sq( dudz[j][i] );
-        
-        n_U += Pt::sq( U[i](j) );
-        n_dUdx += Pt::sq( dUdx[i](j) );
-        n_dUdy += Pt::sq( dUdy[i](j) );
-        n_dUdz += Pt::sq( dUdz[i](j) );
-        }
-    
+double n_v = tiny::frob_norm<double,3,Tetra::NPI>(_v);
+double n_dvdx = tiny::frob_norm<double,3,Tetra::NPI>(dvdx);
+double n_dvdy = tiny::frob_norm<double,3,Tetra::NPI>(dvdy);
+double n_dvdz = tiny::frob_norm<double,3,Tetra::NPI>(dvdz);
+
+double dist_uU = sq_dist(_u,U);
+double dist_dudx_dUdx = sq_dist(dudx,dUdx);
+double dist_dudy_dUdy = sq_dist(dudy,dUdy);
+double dist_dudz_dUdz = sq_dist(dudz,dUdz);
+
+double dist_vV = sq_dist(_v,V);
+double dist_dvdx_dVdx = sq_dist(dvdx,dVdx);
+double dist_dvdy_dVdy = sq_dist(dvdy,dVdy);
+double dist_dvdz_dVdz = sq_dist(dvdz,dVdz);
+
+double n_U = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(U));
+double n_dUdx = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(dUdx));
+double n_dUdy = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(dUdy));
+double n_dUdz = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(dUdz));
+
+double n_V = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(V));
+double n_dVdx = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(dVdx));
+double n_dVdy = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(dVdy));
+double n_dVdz = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(dVdz));
+
 std::cout << "distance^2 (u,U) =" << dist_uU << std::endl;
 BOOST_TEST( sqrt(dist_uU) == 0.0 );
 BOOST_TEST( sqrt(dist_dudx_dUdx) == 0.0 );
 BOOST_TEST( sqrt(dist_dudy_dUdy) == 0.0 );
 BOOST_TEST( sqrt(dist_dudz_dUdz) == 0.0 );
 
-// to avoid gag of comparing pure zeros we also check that matrices norm are equal
-std::cout << "sum of the square of the matrix components of ref code u=" << n_u << std::endl;
-std::cout << "sum of the square of the matrix components of code to test U=" << n_U << std::endl;
-BOOST_TEST( n_u == n_U ); //let's be paranoid
+std::cout << "distance^2 (v,V) =" << dist_vV << std::endl;
+BOOST_TEST( sqrt(dist_vV) == 0.0 );
+BOOST_TEST( sqrt(dist_dvdx_dVdx) == 0.0 );
+BOOST_TEST( sqrt(dist_dvdy_dVdy) == 0.0 );
+BOOST_TEST( sqrt(dist_dvdz_dVdz) == 0.0 );
 
-std::cout << "sum of the square of the matrix components of ref code dudx=" << n_dudx << std::endl;
-std::cout << "sum of the square of the matrix components of code to test dUdx=" << n_dUdx << std::endl;
+// to avoid gag of comparing pure zeros we also check that matrices norm are equal
+//let's be paranoid
+
+std::cout << "frobenius norm of ref code u=" << n_u << std::endl;
+std::cout << "frobenius norm of code to test U=" << n_U << std::endl;
+BOOST_TEST( n_u == n_U );
+
+std::cout << "frobenius norm of ref code dudx=" << n_dudx << std::endl;
+std::cout << "frobenius norm of code to test dUdx=" << n_dUdx << std::endl;
 BOOST_TEST( n_dudx == n_dUdx );
 
-std::cout << "sum of the square of the matrix components of ref code dudy=" << n_dudy << std::endl;
-std::cout << "sum of the square of the matrix components of code to test dUdy=" << n_dUdy << std::endl;
+std::cout << "frobenius norm of ref code dudy=" << n_dudy << std::endl;
+std::cout << "frobenius norm of code to test dUdy=" << n_dUdy << std::endl;
 BOOST_TEST( n_dudy == n_dUdy );
 
-std::cout << "sum of the square of the matrix components of ref code dudz=" << n_dudz << std::endl;
-std::cout << "sum of the square of the matrix components of code to test dUdz=" << n_dUdz << std::endl;
+std::cout << "frobenius norm of ref code dudz=" << n_dudz << std::endl;
+std::cout << "frobenius norm of code to test dUdz=" << n_dUdz << std::endl;
 BOOST_TEST( n_dudz == n_dUdz );
+
+std::cout << "frobenius norm of ref code v=" << n_v << std::endl;
+std::cout << "frobenius norm of code to test V=" << n_V << std::endl;
+BOOST_TEST( n_v == n_V );
+
+std::cout << "frobenius norm of ref code dvdx=" << n_dvdx << std::endl;
+std::cout << "frobenius norm of code to test dVdx=" << n_dVdx << std::endl;
+BOOST_TEST( n_dvdx == n_dVdx );
+
+std::cout << "frobenius norm of ref code dvdy=" << n_dvdy << std::endl;
+std::cout << "frobenius norm of code to test dVdy=" << n_dVdy << std::endl;
+BOOST_TEST( n_dvdy == n_dVdy );
+
+std::cout << "frobenius norm of ref code dvdz=" << n_dvdz << std::endl;
+std::cout << "frobenius norm of code to test dVdz=" << n_dVdz << std::endl;
+BOOST_TEST( n_dvdz == n_dVdz );
 }
 
 BOOST_AUTO_TEST_SUITE_END()

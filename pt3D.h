@@ -314,6 +314,18 @@ inline void inverse(double M[DIM][DIM],double detM)
 */
 inline pt3D barycentre(pt3D const a,pt3D const b,pt3D const c) { return( (a+b+c)/3.0 );}
 
+/**
+ frobenius norm of a table of pt3D
+ */
+// this template is only used by some unit tests
+template<int nbVect>
+double sq_frobenius_norm(const pt3D X[nbVect])
+{
+double val(0.0);
+for(int i=0;i<nbVect;i++) { val += norme2(X[i]); }
+return val;
+}
+
 
 /**
  * function template to write into a file the vector<typename>, as a column of text : use overloaded operator<<
