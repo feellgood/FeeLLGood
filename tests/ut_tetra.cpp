@@ -158,6 +158,20 @@ for(int i=0;i<Tetra::N;i++)
 return val;
 }
 
+double sq_dist(double _x[Tetra::NPI],double _y[Tetra::NPI],double _z[Tetra::NPI],Pt::pt3D X[Tetra::NPI])
+{
+double val(0.0);
+
+for(int i=0;i<Tetra::N;i++)
+    {
+    val += Pt::sq( _x[i] - X[i].x() );
+    val += Pt::sq( _y[i] - X[i].y() );
+    val += Pt::sq( _z[i] - X[i].z() );
+    }
+
+return val;
+}
+
 
 BOOST_AUTO_TEST_CASE(Tet_nod_interpolation, * boost::unit_test::tolerance(UT_TOL))
 {
@@ -304,5 +318,100 @@ std::cout << "frobenius norm of ref code dvdz=" << n_dvdz << std::endl;
 std::cout << "frobenius norm of code to test dVdz=" << n_dVdz << std::endl;
 BOOST_TEST( n_dvdz == n_dVdz );
 }
+
+BOOST_AUTO_TEST_CASE(Tet_nod_interpolation2, * boost::unit_test::tolerance(UT_TOL))
+{
+int nbNod = 4;
+std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
+
+std::random_device rd;
+std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::uniform_real_distribution<> distrib(0.0,1.0);
+
+Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
+double theta_sph(0),phi_sph(0),phi0(0),phi(0),phiv0(0),phiv(0);
+
+Nodes::Node n0 = {p0,u0,v0,u,v,theta_sph,phi_sph,phi0,phi,phiv0,phiv};
+Nodes::Node n1 = {p1,u0,v0,u,v,theta_sph,phi_sph,phi0,phi,phiv0,phiv};
+Nodes::Node n2 = {p2,u0,v0,u,v,theta_sph,phi_sph,phi0,phi,phiv0,phiv};
+Nodes::Node n3 = {p3,u0,v0,u,v,theta_sph,phi_sph,phi0,phi,phiv0,phiv};
+
+node[0] = n0;
+node[1] = n1;
+node[2] = n2;
+node[3] = n3;
+
+for (int i=0;i<nbNod;i++)
+    {
+    node[i].phi0 = distrib(gen);
+    node[i].phiv0 = distrib(gen);
+    }
+
+Tetra::Tet t(node,nbNod,0,0,1,2,3,4);//carefull with indices (starting from 1)
+
+// ref code (with minimal adaptations of integrales method in file MuMag_integrales.cc of src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
+double negphi0_nod[Tetra::N],Hdx[Tetra::NPI],Hdy[Tetra::NPI],Hdz[Tetra::NPI];
+double negphiv0_nod[Tetra::N],Hvx[Tetra::NPI],Hvy[Tetra::NPI],Hvz[Tetra::NPI];
+
+for (int ie=0; ie<Tetra::N; ie++)
+    {
+    int i= t.ind[ie];
+    Nodes::Node &nod = node[i];
+
+    negphi0_nod[ie]  = -nod.phi0; 
+    negphiv0_nod[ie] = -nod.phiv0;
+    }
+
+tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphi0_nod, t.dadx, Hdx);
+tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphi0_nod, t.dady, Hdy);
+tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphi0_nod, t.dadz, Hdz);
+
+tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphiv0_nod, t.dadx, Hvx);
+tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphiv0_nod, t.dady, Hvy);
+tiny::transposed_mult<double, Tetra::N, Tetra::NPI> (negphiv0_nod, t.dadz, Hvz);
+// end ref code
+
+
+// code to check
+Pt::pt3D Hd[Tetra::NPI], Hv[Tetra::NPI];
+
+t.interpolation(Nodes::get_phi0,Hd);
+t.interpolation(Nodes::get_phiv0,Hv);
+// end code to check
+
+double n_Hdx = tiny::frob_norm<double,Tetra::NPI>(Hdx);
+double n_Hdy = tiny::frob_norm<double,Tetra::NPI>(Hdy);
+double n_Hdz = tiny::frob_norm<double,Tetra::NPI>(Hdz);
+double n_Hd_ref = sqrt(Pt::sq(n_Hdx) + Pt::sq(n_Hdy) + Pt::sq(n_Hdz));
+
+double n_Hvx = tiny::frob_norm<double,Tetra::NPI>(Hvx);
+double n_Hvy = tiny::frob_norm<double,Tetra::NPI>(Hvy);
+double n_Hvz = tiny::frob_norm<double,Tetra::NPI>(Hvz);
+double n_Hv_ref = sqrt(Pt::sq(n_Hvx) + Pt::sq(n_Hvy) + Pt::sq(n_Hvz));
+
+double dist_Hd = sq_dist(Hdx,Hdy,Hdz,Hd);
+double dist_Hv = sq_dist(Hvx,Hvy,Hvz,Hv);
+
+double n_Hd = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(Hd));
+double n_Hv = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(Hv));
+
+std::cout << "distance^2 Hd =" << dist_Hd << std::endl;
+BOOST_TEST( sqrt(dist_Hd) == 0.0 );
+
+std::cout << "distance^2 Hv =" << dist_Hv << std::endl;
+BOOST_TEST( sqrt(dist_Hv) == 0.0 );
+
+// to avoid gag of comparing pure zeros we also check that matrices norm are equal
+//let's be paranoid
+
+std::cout << "frobenius norm of ref code Hd=" << n_Hd_ref << std::endl;
+std::cout << "frobenius norm of code to test Hd=" << n_Hd << std::endl;
+BOOST_TEST( n_Hd_ref == n_Hd );
+
+std::cout << "frobenius norm of ref code Hv=" << n_Hv_ref << std::endl;
+std::cout << "frobenius norm of code to test Hv=" << n_Hv << std::endl;
+BOOST_TEST( n_Hv_ref == n_Hv );
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()
