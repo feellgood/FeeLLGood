@@ -26,6 +26,26 @@ BOOST_CHECK(x != 0.0f);
 /* zero lvl tests : direct elementary member functions */ 
 /*-----------------------------------------------------*/
 
+BOOST_AUTO_TEST_CASE(timing_constructor, * boost::unit_test::tolerance(UT_TOL))
+{
+std::random_device rd;
+
+std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::uniform_real_distribution<> distrib(0.0,1.0);
+
+
+double a= distrib(gen);
+double b= distrib(gen);
+
+timing prm_t = timing(0.0,1.0,std::min(a,b),std::max(a,b));
+
+double dt = prm_t.get_dt();
+
+std::cout << "test timing constructor" << std::endl;
+BOOST_TEST( dt == sqrt(a*b) );
+}
+
+
 /*---------------------------------------*/
 /* first lvl tests : nested calculus,... */
 /*---------------------------------------*/
