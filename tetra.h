@@ -113,6 +113,7 @@ indices convention is<br>
 class Tet{
     public:
 		/** constructor for readMesh. It initializes weight hat function and dad(x|y|z) if \f$ | detJ | < \epsilon \f$ jacobian is considered degenerated
+         unit tests : Tet_constructor; Tet_inner_tables
          */
 		inline Tet(const std::shared_ptr<Nodes::Node[]> _p_node /**< [in] pointer to the nodes */,
                    const int _NOD /**< [in] total nb of nodes */,
@@ -306,10 +307,10 @@ class Tet{
         inline void assemblage_vect(std::vector<double> &L) const
             { for (int i=0; i < N; i++) { L[NOD+ind[i]] += Lp[i]; L[ind[i]] += Lp[N+i]; } }
         
-        /** getter for N */
+        /** getter for N ; unit tests : Tet_constructor */
 		inline int getN(void) const {return N;}
 		
-		/** getter for NPI */
+		/** getter for NPI ; unit tests : Tet_constructor */
 		inline int getNPI(void) const {return NPI;}
 		
 		/** getter for region */
@@ -324,7 +325,7 @@ class Tet{
         /** small vector for integrales */
         double Lp[2*N];
         
-        /** computes volume of the tetrahedron */
+        /** computes volume of the tetrahedron ; unit test Tet_calc_vol */
 	double calc_vol(void) const;
 
         /** return a set of the four facettes of the tetrahedron */
@@ -335,7 +336,7 @@ class Tet{
         const int reg;/**< .msh region number */
         const std::shared_ptr<Nodes::Node[]> refNode;/**< direct access to the Nodes */
         
-        /** template getter to access and copy some parts of the node vector ot type T = double or Pt::pt3D  */
+        /** template getter to access and copy some parts of the node vector of type T = double or Pt::pt3D  */
         template <class T> void getDataFromNode(std::function< T (Nodes::Node)> getter,T X_data[N]) const
             { for (int i=0; i<N; i++) X_data[i] = getter(refNode[ ind[i] ]); }
     };//end class Tetra
