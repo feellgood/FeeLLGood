@@ -413,5 +413,111 @@ std::cout << "frobenius norm of code to test Hv=" << n_Hv << std::endl;
 BOOST_TEST( n_Hv_ref == n_Hv );
 }
 
+BOOST_AUTO_TEST_CASE(Tet_lumping, * boost::unit_test::tolerance(UT_TOL))
+{
+double AE[3*Tetra::N][3*Tetra::N] = {{0}};
+double AE_to_check[3*Tetra::N][3*Tetra::N] = {{0}};
+
+int nbNod = 4;
+std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
+
+std::random_device rd;
+std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::uniform_real_distribution<> distrib(0.0,1.0);
+
+Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
+double theta_sph(0),phi_sph(0),phi0(0),phi(0),phiv0(0),phiv(0);
+
+Nodes::Node n0 = {p0,u0,v0,u,v,theta_sph,phi_sph,phi0,phi,phiv0,phiv};
+Nodes::Node n1 = {p1,u0,v0,u,v,theta_sph,phi_sph,phi0,phi,phiv0,phiv};
+Nodes::Node n2 = {p2,u0,v0,u,v,theta_sph,phi_sph,phi0,phi,phiv0,phiv};
+Nodes::Node n3 = {p3,u0,v0,u,v,theta_sph,phi_sph,phi0,phi,phiv0,phiv};
+
+node[0] = n0;
+node[1] = n1;
+node[2] = n2;
+node[3] = n3;
+
+for (int i=0;i<nbNod;i++) { node[i].u0 = Pt::pt3D(M_PI*distrib(gen),2*M_PI*distrib(gen)); }
+
+Tetra::Tet t(node,nbNod,0,0,1,2,3,4);//carefull with indices (starting from 1)
+
+double a= distrib(gen);
+double b= distrib(gen);
+
+timing prm_t = timing(0.0,1.0,std::min(a,b),std::max(a,b));
+
+double s_dt = THETA*prm_t.get_dt();//theta from theta scheme in config.h.in
+
+double alpha_LLG = 0.5;
+double uHeff = distrib(gen);
+double alfa = prm_t.calc_alpha_eff(alpha_LLG,uHeff);
+
+double dt = prm_t.get_dt();
+double A = distrib(gen);//Ae
+double Js = distrib(gen);
+
+double Abis = 2.0*A/Js;
+
+double TAUR = prm_t.TAUR;
+
+// ref code (with minimal adaptations of integrales method in file MuMag_integrales.cc of src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
+double u_nod[3][Tetra::N];
+for (int ie=0; ie<Tetra::N; ie++)
+{
+    int i= t.ind[ie];
+    Nodes::Node &nod = node[i];
+    for (int d=0; d<3; d++){
+        u_nod[d][ie]   = nod.u0(d);  // aimantation
+        }
+}
+
+for (int npi=0;npi<Tetra::NPI;npi++)
+{
+double w, ai, dai_dx, dai_dy, dai_dz, daj_dx, daj_dy, daj_dz;
+double Dai_Daj;
+
+double R = dt/TAUR*abs(log(dt/TAUR)); 
+
+w = t.weight[npi];
+for (int ie=0; ie<Tetra::N;ie++)
+    {
+    ai = Tetra::a[ie][npi];
+    dai_dx= t.dadx[ie][npi];  dai_dy= t.dady[ie][npi];  dai_dz= t.dadz[ie][npi];
+    
+    AE[      ie][       ie] +=  alfa* ai *w;  //lumping
+    AE[  Tetra::N+ie][   Tetra::N+ie] +=  alfa* ai *w;
+    AE[2*Tetra::N+ie][ 2*Tetra::N+ie] +=  alfa* ai *w;
+
+
+    AE[      ie][ 2*Tetra::N+ie] += +u_nod[1][ie]* ai *w; //lumping
+    AE[      ie][   Tetra::N+ie] += -u_nod[2][ie]* ai *w;
+    AE[  Tetra::N+ie][       ie] += +u_nod[2][ie]* ai *w;
+    AE[  Tetra::N+ie][ 2*Tetra::N+ie] += -u_nod[0][ie]* ai *w;
+    AE[2*Tetra::N+ie][   Tetra::N+ie] += +u_nod[0][ie]* ai *w;
+    AE[2*Tetra::N+ie][       ie] += -u_nod[1][ie]* ai *w;
+
+    for (int je=0; je<Tetra::N; je++){
+        daj_dx= t.dadx[je][npi];  daj_dy= t.dady[je][npi];  daj_dz= t.dadz[je][npi];
+        Dai_Daj = dai_dx*daj_dx + dai_dy*daj_dy + dai_dz*daj_dz;
+
+        AE[      ie][       je]    +=  s_dt*(1.+R)*  2*A/Js* Dai_Daj *w;
+        AE[  Tetra::N+ie][   Tetra::N+je]    +=  s_dt*(1.+R)*  2*A/Js* Dai_Daj *w;
+        AE[2*Tetra::N+ie][ 2*Tetra::N+je]    +=  s_dt*(1.+R)*  2*A/Js* Dai_Daj *w;
+	    }
+    }
+}
+// end ref code
+
+// code to check
+for (int npi=0; npi<Tetra::NPI; npi++)
+    t.lumping(npi, alfa, prm_t.prefactor*s_dt*Abis, AE_to_check);
+// end code to check
+
+double val = tiny::dist<double,3*Tetra::N,3*Tetra::N>(AE,AE_to_check);
+std::cout << "distance = "<< val << std::endl;
+BOOST_TEST( val == 0.0 );
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()
