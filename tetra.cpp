@@ -47,6 +47,18 @@ for (int i=0; i<N; i++)
     }
 }
 
+void Tet::build_BE(int const& npi, Pt::pt3D const & Ht, Pt::pt3D const & Heff,double alpha, double beta, double Abis, double s_dt, double Uz, double Vz,
+                   Pt::pt3D U[NPI], Pt::pt3D V[NPI],
+            Pt::pt3D dUdx[NPI], Pt::pt3D dUdy[NPI], Pt::pt3D dUdz[NPI], Pt::pt3D dVdx[NPI], Pt::pt3D dVdy[NPI], Pt::pt3D dVdz[NPI], Pt::pt3D BE[N]) const
+{// the artificial drift from eventual recentering is only along z !! it should be generalized
+for (int i=0; i<N; i++)
+    {
+    const double ai_w = weight[npi]*a[i][npi];
+    BE[i] -= weight[npi]*Abis*(dadx[i][npi]*dUdx[npi] + dady[i][npi]*dUdy[npi] + dadz[i][npi]*dUdz[npi]);
+    BE[i] += ai_w*(alpha*Vz - beta*Uz)*(dUdz[npi] + dVdz[npi]*s_dt) ;
+    BE[i] += ai_w*(Heff + Ht*s_dt + (Vz-Uz)*(U[npi]*(dUdz[npi]+dVdz[npi]*s_dt) +V[npi]*dUdz[npi]*s_dt) );
+    }
+}
 
 void Tet::integrales(std::vector<Tetra::prm> const& params, timing const& prm_t,Pt::pt3D const& Hext,double Vz, double AE[3*N][3*N], Pt::pt3D BE[N]) const
 {
@@ -54,8 +66,6 @@ double alpha_LLG = params[idxPrm].alpha_LLG;
 pt3D ex = params[idxPrm].ex;
 pt3D ey = params[idxPrm].ey;
 pt3D ez = params[idxPrm].ez;
-
-double Uz = params[idxPrm].Uz;
 
 double Abis = 2.0*(params[idxPrm].A)/(params[idxPrm].J);
 double Kbis = 2.0*(params[idxPrm].K)/(params[idxPrm].J);
@@ -92,14 +102,7 @@ for (int npi=0; npi<NPI; npi++)
     pt3D Heff = Kbis*pScal(params[idxPrm].uk,U[npi])*params[idxPrm].uk;
     Heff += -K3bis*( uk_uuu(0)*ex + uk_uuu(1)*ey + uk_uuu(2)*ez ) + Hd[npi] + Hext;
 
-    for (int i=0; i<N; i++)
-        {
-        const double beta = params[idxPrm].beta_sc; 
-        const double ai_w = weight[npi]*a[i][npi];
-        BE[i] -= weight[npi]*Abis*(dadx[i][npi]*dUdx[npi] + dady[i][npi]*dUdy[npi] + dadz[i][npi]*dUdz[npi]);
-        BE[i] += ai_w*(alpha_LLG*Vz - beta*Uz)*(dUdz[npi] + dVdz[npi]*s_dt) ;
-        BE[i] += ai_w*(Heff + Ht*s_dt + (Vz-Uz)*(U[npi]*(dUdz[npi]+dVdz[npi]*s_dt) +V[npi]*dUdz[npi]*s_dt) );
-        }
+    build_BE(npi, Ht, Heff, alpha_LLG, params[idxPrm].beta_sc, Abis, s_dt, params[idxPrm].Uz, Vz, U, V, dUdx, dUdy, dUdz, dVdx, dVdy, dVdz, BE);
     }
 }
 
