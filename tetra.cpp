@@ -51,18 +51,19 @@ void Tet::build_BE(int const& npi, Pt::pt3D const & Ht, Pt::pt3D const & Heff,do
                    Pt::pt3D U[NPI], Pt::pt3D V[NPI],
             Pt::pt3D dUdx[NPI], Pt::pt3D dUdy[NPI], Pt::pt3D dUdz[NPI], Pt::pt3D dVdx[NPI], Pt::pt3D dVdy[NPI], Pt::pt3D dVdz[NPI], Pt::pt3D BE[N]) const
 {// the artificial drift from eventual recentering is only along z !! it should be generalized
+const double w = weight[npi];
 for (int i=0; i<N; i++)
     {
-    const double ai_w = weight[npi]*a[i][npi];
-    BE[i] -= weight[npi]*Abis*(dadx[i][npi]*dUdx[npi] + dady[i][npi]*dUdy[npi] + dadz[i][npi]*dUdz[npi]);
-    BE[i] += ai_w*(alpha*Vz - beta*Uz)*(dUdz[npi] + dVdz[npi]*s_dt) ;
-    BE[i] += ai_w*(Heff + Ht*s_dt + (Vz-Uz)*(U[npi]*(dUdz[npi]+dVdz[npi]*s_dt) +V[npi]*dUdz[npi]*s_dt) );
+    const double ai_w = w*a[i][npi];
+    BE[i] -= (w*Abis)*(dadx[i][npi]*dUdx[npi] + dady[i][npi]*dUdy[npi] + dadz[i][npi]*dUdz[npi]);
+    BE[i] += ai_w*(Heff + (alpha*Vz - beta*Uz)*dUdz[npi] + (Vz-Uz)*(U[npi]*dUdz[npi]) );
+    
+    BE[i] += (ai_w*s_dt)*(Ht + (alpha*Vz - beta*Uz)*dVdz[npi] + (Vz-Uz)*(U[npi]*dVdz[npi] +V[npi]*dUdz[npi]) );
     }
 }
 
 void Tet::integrales(std::vector<Tetra::prm> const& params, timing const& prm_t,Pt::pt3D const& Hext,double Vz, double AE[3*N][3*N], Pt::pt3D BE[N]) const
 {
-double alpha_LLG = params[idxPrm].alpha_LLG;
 pt3D ex = params[idxPrm].ex;
 pt3D ey = params[idxPrm].ey;
 pt3D ez = params[idxPrm].ez;
@@ -93,16 +94,16 @@ for (int npi=0; npi<NPI; npi++)
     double uHeff = -Abis*(norme2(dUdx[npi]) + norme2(dUdy[npi]) + norme2(dUdz[npi])); 
 	uHeff +=  pScal(U[npi], Hext + Hd[npi]) + Kbis*sq(pScal(params[idxPrm].uk,U[npi])) - K3bis*pScal(uk_u,uk_uuu);
 
-    lumping(npi, prm_t.calc_alpha_eff(alpha_LLG,uHeff), prm_t.prefactor*s_dt*Abis, AE);
+    lumping(npi, prm_t.calc_alpha_eff(params[idxPrm].alpha_LLG,uHeff), prm_t.prefactor*s_dt*Abis, AE);
     
     pt3D Ht = Hv[npi];
-    Ht += Kbis*pScal(params[idxPrm].uk,V[npi])*params[idxPrm].uk; 
-    Ht += -K3bis*pDirect(uk_v,uk_u-3*cube_uk_u);
+    Ht += Kbis*pScal(params[idxPrm].uk,V[npi])*params[idxPrm].uk;
+    Ht += -K3bis*pDirect(uk_v,uk_u-3*cube_uk_u);// there is a mix between second order anisotropy axis and ex for cubic anisotropy, due to previous formulation
 
     pt3D Heff = Kbis*pScal(params[idxPrm].uk,U[npi])*params[idxPrm].uk;
     Heff += -K3bis*( uk_uuu(0)*ex + uk_uuu(1)*ey + uk_uuu(2)*ez ) + Hd[npi] + Hext;
 
-    build_BE(npi, Ht, Heff, alpha_LLG, params[idxPrm].beta_sc, Abis, s_dt, params[idxPrm].Uz, Vz, U, V, dUdx, dUdy, dUdz, dVdx, dVdy, dVdz, BE);
+    build_BE(npi, Ht, Heff, params[idxPrm].alpha_LLG, params[idxPrm].beta_sc, Abis, s_dt, params[idxPrm].Uz, Vz, U, V, dUdx, dUdy, dUdz, dVdx, dVdy, dVdz, BE);
     }
 }
 
