@@ -84,10 +84,9 @@ for (int npi=0; npi<NPI; npi++)
 
     lumping(npi, prm_t.calc_alpha_eff(alpha_LLG,uHeff), prm_t.prefactor*s_dt*Abis, AE);
     
-    pt3D truc = Kbis*pScal(params[idxPrm].uk,V[npi])*pt3D(1,1,1);
-    pt3D truc2 = -K3bis*pDirect(uk_v , pt3D(1,1,1)-3*pDirect(uk_u,uk_u));
-    
-    pt3D Ht = s_dt*(Hv[npi] + pDirect(truc,params[idxPrm].uk) + pDirect(truc2,uk_u) ); // DEBUG !  must check, we are mixing different anisotropy contributions here
+    pt3D Ht = Hv[npi];
+    Ht += Kbis*pScal(params[idxPrm].uk,V[npi])*params[idxPrm].uk; 
+    Ht += -K3bis*pDirect(pDirect(uk_v , pt3D(1,1,1)-3*pDirect(uk_u,uk_u)), uk_u);
     
     pt3D Heff = Kbis*pScal(params[idxPrm].uk,U[npi])*params[idxPrm].uk;
     Heff += -K3bis*( uk_uuu(0)*ex + uk_uuu(1)*ey + uk_uuu(2)*ez ) + Hd[npi] + Hext;
@@ -98,7 +97,7 @@ for (int npi=0; npi<NPI; npi++)
         const double ai_w = weight[npi]*a[i][npi];
         BE[i] -= weight[npi]*Abis*(dadx[i][npi]*dUdx[npi] + dady[i][npi]*dUdy[npi] + dadz[i][npi]*dUdz[npi]);
         BE[i] += ai_w*(alpha_LLG*Vz - beta*Uz)*(dUdz[npi] + dVdz[npi]*s_dt) ;
-        BE[i] += ai_w*(Heff + Ht + (Vz-Uz)*(U[npi]*(dUdz[npi]+dVdz[npi]*s_dt) +V[npi]*dUdz[npi]*s_dt) );
+        BE[i] += ai_w*(Heff + Ht*s_dt + (Vz-Uz)*(U[npi]*(dUdz[npi]+dVdz[npi]*s_dt) +V[npi]*dUdz[npi]*s_dt) );
         }
     }
 }
