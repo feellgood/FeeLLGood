@@ -77,8 +77,9 @@ for (int npi=0; npi<NPI; npi++)
     pt3D uk_u = pt3D(pScal(ex,U[npi]), pScal(ey,U[npi]), pScal(ez,U[npi]));
     pt3D uk_v = pt3D(pScal(ex,V[npi]), pScal(ey,V[npi]), pScal(ez,V[npi]));
 
-    Pt::pt3D uk_uuu = pDirect(pt3D(1,1,1) - pDirect(uk_u,uk_u), uk_u);
-    
+    Pt::pt3D cube_uk_u = directCube(uk_u);
+    Pt::pt3D uk_uuu = uk_u - cube_uk_u;
+
     double uHeff = -Abis*(norme2(dUdx[npi]) + norme2(dUdy[npi]) + norme2(dUdz[npi])); 
 	uHeff +=  pScal(U[npi], Hext + Hd[npi]) + Kbis*sq(pScal(params[idxPrm].uk,U[npi])) - K3bis*pScal(uk_u,uk_uuu);
 
@@ -86,8 +87,8 @@ for (int npi=0; npi<NPI; npi++)
     
     pt3D Ht = Hv[npi];
     Ht += Kbis*pScal(params[idxPrm].uk,V[npi])*params[idxPrm].uk; 
-    Ht += -K3bis*pDirect(pDirect(uk_v , pt3D(1,1,1)-3*pDirect(uk_u,uk_u)), uk_u);
-    
+    Ht += -K3bis*pDirect(uk_v,uk_u-3*cube_uk_u);
+
     pt3D Heff = Kbis*pScal(params[idxPrm].uk,U[npi])*params[idxPrm].uk;
     Heff += -K3bis*( uk_uuu(0)*ex + uk_uuu(1)*ey + uk_uuu(2)*ez ) + Hd[npi] + Hext;
 

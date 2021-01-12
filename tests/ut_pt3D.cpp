@@ -137,6 +137,19 @@ double z(-12.0);
 BOOST_CHECK( (x == result(Pt::IDX_X))&&(y == result(Pt::IDX_Y))&&(z == result(Pt::IDX_Z)) );
 }
 
+BOOST_AUTO_TEST_CASE(pt3D_op_directCube, * boost::unit_test::tolerance(UT_TOL))
+{
+Pt::pt3D X(1,2,3);
+
+double x = pow(X(Pt::IDX_X),3);
+double y = pow(X(Pt::IDX_Y),3);
+double z = pow(X(Pt::IDX_Z),3);
+Pt::pt3D result = Pt::directCube(X);
+BOOST_TEST( x == result(Pt::IDX_X));
+BOOST_TEST( y == result(Pt::IDX_Y));
+BOOST_TEST( z == result(Pt::IDX_Z));
+}
+
 BOOST_AUTO_TEST_CASE(pt3D_op_dist, * boost::unit_test::tolerance(UT_TOL))
 {
 Pt::pt3D X(1,2,3);

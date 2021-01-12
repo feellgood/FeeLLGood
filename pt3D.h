@@ -249,6 +249,10 @@ algebra : R^3 direct (component to component) product
  */
 inline pt3D pDirect(pt3D const& a,pt3D const& b) { return pt3D( a.x()*b.x() , a.y()*b.y() , a.z()*b.z() ); }
 
+/**
+algebra : R^3 direct (component to component) cube
+ */
+inline pt3D directCube(pt3D const& a) { return pt3D( a.x()*a.x()*a.x() , a.y()*a.y()*a.y() , a.z()*a.z()*a.z() ); }
 
 /**
 algebra : R^3 scalar triple product
