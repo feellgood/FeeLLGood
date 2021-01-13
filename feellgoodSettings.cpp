@@ -166,10 +166,14 @@ try
     {
     sub_tree = root.get_child("recentering"); 
     recenter = true;
-    recentering_direction = sub_tree.get<char>("direction",'Z');
+    char recentering_dir = sub_tree.get<char>("direction",'Z');
 
-    if((recentering_direction != 'X') && (recentering_direction != 'Y') && (recentering_direction != 'Z'))
+    if((recentering_dir != 'X') && (recentering_dir != 'Y') && (recentering_dir != 'Z'))
         { std::cout << "unknown recentering direction !"<< std::endl; exit(1); }
+    if (recentering_dir == 'X') { recentering_direction = Pt::IDX_X; }
+        else if (recentering_dir == 'Y') { recentering_direction = Pt::IDX_Y; }
+            else { recentering_direction = Pt::IDX_Z; }
+
     threshold = sub_tree.get<double>("threshold",0.1);
     }
     catch (std::exception &e)

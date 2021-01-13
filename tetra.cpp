@@ -81,7 +81,7 @@ for (int i=0; i<N; i++)
     }
 }
 
-void Tet::integrales(std::vector<Tetra::prm> const& params, timing const& prm_t,Pt::pt3D const& Hext,double Vz, double AE[3*N][3*N], Pt::pt3D BE[N]) const
+void Tet::integrales(std::vector<Tetra::prm> const& params, timing const& prm_t,Pt::pt3D const& Hext,Pt::index idx_dir, double Vdrift, double AE[3*N][3*N], Pt::pt3D BE[N]) const
 {
 pt3D ex = params[idxPrm].ex;
 pt3D ey = params[idxPrm].ey;
@@ -125,7 +125,13 @@ for (int npi=0; npi<NPI; npi++)
 
     build_BE(npi, Ht, Heff, Abis, s_dt, dUdx, dUdy, dUdz, BE);
     add_STT_BE(npi,params[idxPrm].beta_sc,params[idxPrm].Uz,s_dt,U,V,dUdz,dVdz,BE);
-    add_drift_BE(npi,alpha,s_dt,Vz,U,V,dUdz,dVdz,BE);// carefull here it should not be dUdz and dVdz
+    
+    if (idx_dir == Pt::IDX_Z)
+        add_drift_BE(npi,alpha,s_dt,Vdrift,U,V,dUdz,dVdz,BE);
+    else if (idx_dir == Pt::IDX_Y)
+        add_drift_BE(npi,alpha,s_dt,Vdrift,U,V,dUdy,dVdy,BE);
+    else if (idx_dir == Pt::IDX_X)
+        add_drift_BE(npi,alpha,s_dt,Vdrift,U,V,dUdx,dVdx,BE);
     }
 }
 

@@ -24,7 +24,7 @@ for(int i=0;i<NbTH;i++)
         double K[3*Tetra::N][3*Tetra::N] = { {0} }; 
         Pt::pt3D L[Tetra::N];
         
-        tet.integrales(settings.paramTetra,t_prm,Hext,DW_vz,K, L);
+        tet.integrales(settings.paramTetra,t_prm,Hext,settings.recentering_direction,DW_vz,K, L);
         projection_mat<Tetra::Tet,Tetra::N>(tet,K);
         projection_vect<Tetra::Tet,Tetra::N>(tet,L);
         tet.assemblage_mat(K_TH);tet.assemblage_vect(L_TH);tet.treated = true;
@@ -121,7 +121,7 @@ for(int i=0;i<NbTH;i++)
             double K[3*Tetra::N][3*Tetra::N] = { {0} }; 
             Pt::pt3D L[Tetra::N];
             
-            tet.integrales(settings.paramTetra,t_prm,Hext,DW_vz,K, L);
+            tet.integrales(settings.paramTetra,t_prm,Hext,settings.recentering_direction,DW_vz,K, L);
             projection_mat<Tetra::Tet,Tetra::N>(tet,K);
             projection_vect<Tetra::Tet,Tetra::N>(tet,L);
             if(my_mutex.try_lock())

@@ -33,7 +33,7 @@ class Settings{
         MAXITER = 500;
         REFRESH_PRC = 20;
         recenter = false;
-        recentering_direction = 'Z';
+        recentering_direction = Pt::IDX_Z;
         threshold = 0.1;
         
         restoreFileName = "";
@@ -78,7 +78,7 @@ class Settings{
 	int save_period;/**< magnetic configuration saved every save_period time steps */
 	
     bool recenter;/**< to recenter magnetization distribution or not */
-	char recentering_direction;/**< recentering direction, should be 'X'|'Y'|'Z' */
+	Pt::index recentering_direction;/**< recentering direction, should be IDX_X|IDX_Y|IDX_Z */
 	double threshold;/**< threshold value to recenter or not versus avg(M_recentering_direction) */
 	
 	int solverNbTh;/**< nb of threads for the finite element solver */
