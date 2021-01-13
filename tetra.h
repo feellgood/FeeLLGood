@@ -282,10 +282,11 @@ class Tet{
         /** AE matrix filling */
         void lumping(int const& npi,double alpha_eff,double prefactor, double AE[3*N][3*N]) const;
         
+        /** STT contribution to vector BE */
+        void build_contrib_STT_BE(int const& npi, double beta, double Uz,double s_dt, Pt::pt3D U[NPI], Pt::pt3D V[NPI], Pt::pt3D dUdz[NPI], Pt::pt3D dVdz[NPI], Pt::pt3D BE[N]) const;
+        
         /** BE vector filling */
-        void build_BE(int const& npi, Pt::pt3D const & Ht, Pt::pt3D const & Heff,double alpha, double beta, double Abis, double s_dt, double Uz, double Vz,
-                      Pt::pt3D U[NPI], Pt::pt3D V[NPI],
-            Pt::pt3D dUdx[NPI], Pt::pt3D dUdy[NPI], Pt::pt3D dUdz[NPI], Pt::pt3D dVdx[NPI], Pt::pt3D dVdy[NPI], Pt::pt3D dVdz[NPI], Pt::pt3D BE[N]) const;
+        void build_BE(int const& npi, Pt::pt3D const & Ht, Pt::pt3D const & Heff, double alpha, double Abis, double s_dt, double Vz, Pt::pt3D U[NPI], Pt::pt3D V[NPI], Pt::pt3D dUdx[NPI], Pt::pt3D dUdy[NPI], Pt::pt3D dUdz[NPI], Pt::pt3D dVdx[NPI], Pt::pt3D dVdy[NPI], Pt::pt3D dVdz[NPI], Pt::pt3D BE[N]) const;
 
 		/** computes the integral contribution of the tetrahedron to the evolution of the magnetization */		
 		void integrales(std::vector<Tetra::prm> const& params, timing const& prm_t, Pt::pt3D const& Hext, double Vz, double AE[3*N][3*N], Pt::pt3D BE[N])  const;

@@ -47,18 +47,27 @@ for (int i=0; i<N; i++)
     }
 }
 
-void Tet::build_BE(int const& npi, Pt::pt3D const & Ht, Pt::pt3D const & Heff,double alpha, double beta, double Abis, double s_dt, double Uz, double Vz,
-                   Pt::pt3D U[NPI], Pt::pt3D V[NPI],
-            Pt::pt3D dUdx[NPI], Pt::pt3D dUdy[NPI], Pt::pt3D dUdz[NPI], Pt::pt3D dVdx[NPI], Pt::pt3D dVdy[NPI], Pt::pt3D dVdz[NPI], Pt::pt3D BE[N]) const
+void Tet::build_contrib_STT_BE(int const& npi, double beta, double Uz,double s_dt, Pt::pt3D U[NPI], Pt::pt3D V[NPI], Pt::pt3D dUdz[NPI], Pt::pt3D dVdz[NPI], Pt::pt3D BE[N]) const
+{
+for (int i=0; i<N; i++)
+    {
+    const double ai_w = weight[npi]*a[i][npi];
+
+    BE[i] -= (ai_w*Uz)*( beta*dUdz[npi] + U[npi]*dUdz[npi] );
+    BE[i] -= (ai_w*s_dt*Uz)*( beta*dVdz[npi] + U[npi]*dVdz[npi] +V[npi]*dUdz[npi] );
+    }
+}
+
+void Tet::build_BE(int const& npi, Pt::pt3D const & Ht, Pt::pt3D const & Heff, double alpha, double Abis, double s_dt, double Vz, Pt::pt3D U[NPI], Pt::pt3D V[NPI], Pt::pt3D dUdx[NPI], Pt::pt3D dUdy[NPI], Pt::pt3D dUdz[NPI], Pt::pt3D dVdx[NPI], Pt::pt3D dVdy[NPI], Pt::pt3D dVdz[NPI], Pt::pt3D BE[N]) const
 {// the artificial drift from eventual recentering is only along z !! it should be generalized
-const double w = weight[npi];
+double w = weight[npi];
+
 for (int i=0; i<N; i++)
     {
     const double ai_w = w*a[i][npi];
     BE[i] -= (w*Abis)*(dadx[i][npi]*dUdx[npi] + dady[i][npi]*dUdy[npi] + dadz[i][npi]*dUdz[npi]);
-    BE[i] += ai_w*(Heff + (alpha*Vz - beta*Uz)*dUdz[npi] + (Vz-Uz)*(U[npi]*dUdz[npi]) );
-    
-    BE[i] += (ai_w*s_dt)*(Ht + (alpha*Vz - beta*Uz)*dVdz[npi] + (Vz-Uz)*(U[npi]*dVdz[npi] +V[npi]*dUdz[npi]) );
+    BE[i] += ai_w*(Heff + Vz*( alpha*dUdz[npi] + U[npi]*dUdz[npi] ) );
+    BE[i] += (ai_w*s_dt)*(Ht + (alpha*Vz)*dVdz[npi] + Vz*(U[npi]*dVdz[npi] +V[npi]*dUdz[npi]) );
     }
 }
 
@@ -67,6 +76,10 @@ void Tet::integrales(std::vector<Tetra::prm> const& params, timing const& prm_t,
 pt3D ex = params[idxPrm].ex;
 pt3D ey = params[idxPrm].ey;
 pt3D ez = params[idxPrm].ez;
+
+double alpha = params[idxPrm].alpha_LLG;
+double beta = params[idxPrm].beta_sc;
+double Uz = params[idxPrm].Uz;
 
 double Abis = 2.0*(params[idxPrm].A)/(params[idxPrm].J);
 double Kbis = 2.0*(params[idxPrm].K)/(params[idxPrm].J);
@@ -94,7 +107,7 @@ for (int npi=0; npi<NPI; npi++)
     double uHeff = -Abis*(norme2(dUdx[npi]) + norme2(dUdy[npi]) + norme2(dUdz[npi])); 
 	uHeff +=  pScal(U[npi], Hext + Hd[npi]) + Kbis*sq(pScal(params[idxPrm].uk,U[npi])) - K3bis*pScal(uk_u,uk_uuu);
 
-    lumping(npi, prm_t.calc_alpha_eff(params[idxPrm].alpha_LLG,uHeff), prm_t.prefactor*s_dt*Abis, AE);
+    lumping(npi, prm_t.calc_alpha_eff(alpha,uHeff), prm_t.prefactor*s_dt*Abis, AE);
     
     pt3D Ht = Hv[npi];
     Ht += Kbis*pScal(params[idxPrm].uk,V[npi])*params[idxPrm].uk;
@@ -103,7 +116,9 @@ for (int npi=0; npi<NPI; npi++)
     pt3D Heff = Kbis*pScal(params[idxPrm].uk,U[npi])*params[idxPrm].uk;
     Heff += -K3bis*( uk_uuu(0)*ex + uk_uuu(1)*ey + uk_uuu(2)*ez ) + Hd[npi] + Hext;
 
-    build_BE(npi, Ht, Heff, params[idxPrm].alpha_LLG, params[idxPrm].beta_sc, Abis, s_dt, params[idxPrm].Uz, Vz, U, V, dUdx, dUdy, dUdz, dVdx, dVdy, dVdz, BE);
+    build_BE(npi, Ht, Heff, alpha, Abis, s_dt, Vz, U, V, dUdx, dUdy, dUdz, dVdx, dVdy, dVdz, BE);
+    
+    build_contrib_STT_BE(npi,beta,Uz,s_dt,U,V,dUdz,dVdz,BE);
     }
 }
 
