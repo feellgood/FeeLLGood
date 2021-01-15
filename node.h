@@ -37,7 +37,9 @@ double phi_sph;/**< phi angle for unit vector \f$ e_p = (\theta,\phi) \times u_0
 double phi0;/**< scalar potential initial or reset value, used to store previous value for time evolution */
 double phi;/**< scalar potential value */
 double phiv0;/**< initial or reset value, used to store previous value for time evolution */
-double phiv;/**< no idea */
+double phiv;/**< scalar potential associated to velocity */
+
+double V;/**< electrostatic potential for STT */
 
 /**
 vector ep is computed when needed, it is the second vector of a base composed of u0,ep,u0*ep , vector product 

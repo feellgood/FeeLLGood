@@ -49,7 +49,23 @@ a[3][j]   = w[j];
 constexpr double a[N][NPI] = {{1.-u[0]-v[0]-w[0],1.-u[1]-v[1]-w[1],1.-u[2]-v[2]-w[2],1.-u[3]-v[3]-w[3],1.-u[4]-v[4]-w[4]},
 {u[0],u[1],u[2],u[3],u[4]}, {v[0],v[1],v[2],v[3],v[4]}, {w[0],w[1],w[2],w[3],w[4]}};
 
+
+/** \class STT
+ container for Spin Transfert Torque constants
+ */
+
+struct STT
+    {
+    double beta_sc;/**< \f$ \beta \f$ is polarization rate of the current */    
+    double N0;/**< density of states at Fermi level, units : J^-1 nm^-3  */
+    double C0;/**< Conductivity Ohm^-1 nm^-1 */
+    double lJ;/**< length */
+    double lsf;/**< spin flip length */
+    double gamma0;/**< gyromagnetic constant (to check) */
+    std::function<double (Pt::pt3D)> func;/**< function to take into account spacial variation of current density (input is gauss point) */
         
+    };
+
 /** \class prm
 region number and material constants
 */
@@ -66,8 +82,7 @@ struct prm
 	Pt::pt3D ex; /**< unit vector1 (for cubic anisotropy) */
 	Pt::pt3D ey; /**< unit vector2 (for cubic anisotropy) */
 	Pt::pt3D ez; /**< unit vector3 (for cubic anisotropy) */
-	double Uz;/**< for spin polarized current */
-	double beta_sc;/**< non adiabatic constant \f$ \beta \f$ for spin polarization current */	
+	STT p_STT;
 	
 	/** print the struct parameters */
 	inline void infos()
@@ -283,7 +298,7 @@ class Tet{
         void lumping(int const& npi,double alpha_eff,double prefactor, double AE[3*N][3*N]) const;
         
         /** STT contribution to vector BE */
-        void add_STT_BE(int const& npi, double beta, double Uz,double s_dt, Pt::pt3D U[NPI], Pt::pt3D V[NPI], Pt::pt3D dUdz[NPI], Pt::pt3D dVdz[NPI], Pt::pt3D BE[N]) const;
+        double add_STT_BE(int const& npi, STT p_stt, double Js, Pt::pt3D gradV[NPI], Pt::pt3D p_g[NPI], Pt::pt3D U[NPI], Pt::pt3D dUdx[NPI],Pt::pt3D dUdy[NPI],Pt::pt3D dUdz[NPI], Pt::pt3D BE[N]) const;
         
         /** drift contribution due to eventual recentering to vector BE */
         void add_drift_BE(int const& npi, double alpha, double s_dt, double Vdrift, Pt::pt3D U[NPI], Pt::pt3D V[NPI], Pt::pt3D dUd_[NPI], Pt::pt3D dVd_[NPI], Pt::pt3D BE[N]) const;

@@ -115,8 +115,14 @@ for (boost::property_tree::ptree::value_type &s : s_sub_tree)
             if (sub_k.first == "Js")
                 { p.J = sub_k.second.get_value<double>(); }
             }
-        p.Uz = 0.0;
-        p.beta_sc = 0.0;
+        p.p_STT.beta_sc = 0.0;
+        p.p_STT.N0 = 1.0;
+        p.p_STT.C0 = 1.0;
+        p.p_STT.lJ = 1.0;
+        p.p_STT.lsf = 1.0;
+        p.p_STT.gamma0 = 1.0;
+        p.p_STT.func = [](Pt::pt3D) {return 1;};
+        
         paramTetra.push_back(p);
         }
     }

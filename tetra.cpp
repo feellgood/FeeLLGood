@@ -47,15 +47,27 @@ for (int i=0; i<N; i++)
     }
 }
 
-void Tet::add_STT_BE(int const& npi, double beta, double Uz,double s_dt, Pt::pt3D U[NPI], Pt::pt3D V[NPI], Pt::pt3D dUdz[NPI], Pt::pt3D dVdz[NPI], Pt::pt3D BE[N]) const
+double Tet::add_STT_BE(int const& npi, STT p_stt,double Js, Pt::pt3D gradV[NPI], Pt::pt3D p_g[NPI], Pt::pt3D U[NPI], Pt::pt3D dUdx[NPI],Pt::pt3D dUdy[NPI],Pt::pt3D dUdz[NPI], Pt::pt3D BE[N]) const
 {
-for (int i=0; i<N; i++)
-    {
-    const double ai_w = weight[npi]*a[i][npi];
+const double ksi = Pt::sq(p_stt.lJ/p_stt.lsf);// this is in Thiaville notations beta_DW
 
-    BE[i] -= (ai_w*Uz)*( beta*dUdz[npi] + U[npi]*dUdz[npi] );
-    BE[i] -= (ai_w*s_dt*Uz)*( beta*dVdz[npi] + U[npi]*dVdz[npi] +V[npi]*dUdz[npi] );
-    }
+const double D0 = 2.0*p_stt.C0/(Pt::sq(CHARGE_ELECTRON)*p_stt.N0);
+
+const double pf=Pt::sq(p_stt.lJ)/(D0*(1.+ksi*ksi)) * BOHRS_MUB*p_stt.beta_sc/CHARGE_ELECTRON;
+
+const double prefactor = D0/Pt::sq(p_stt.lJ)/(p_stt.gamma0*nu0*Js);
+
+Pt::pt3D j_grad_u = -p_stt.C0*Pt::pt3D(Pt::pScal(gradV[npi],Pt::pt3D(dUdx[npi](Pt::IDX_X),dUdy[npi](Pt::IDX_X),dUdz[npi](Pt::IDX_X)) ),
+                                 Pt::pScal(gradV[npi],Pt::pt3D(dUdx[npi](Pt::IDX_Y),dUdy[npi](Pt::IDX_Y),dUdz[npi](Pt::IDX_Y)) ),
+                                 Pt::pScal(gradV[npi],Pt::pt3D(dUdx[npi](Pt::IDX_Z),dUdy[npi](Pt::IDX_Z),dUdz[npi](Pt::IDX_Z)) ));
+
+Pt::pt3D m = pf*(ksi*j_grad_u+U[npi]*j_grad_u);
+Pt::pt3D Hm = -p_stt.C0*p_stt.func(p_g[npi])*gradV[npi]*p_g[npi];
+
+for (int i=0; i<N; i++)
+    { BE[i] += weight[npi]*a[i][npi]*(Hm + prefactor*m); }
+
+return Pt::pScal(U[npi],Hm);
 }
 
 void Tet::add_drift_BE(int const& npi, double alpha, double s_dt, double Vdrift, Pt::pt3D U[NPI], Pt::pt3D V[NPI], Pt::pt3D dUd_[NPI], Pt::pt3D dVd_[NPI], Pt::pt3D BE[N]) const
@@ -88,9 +100,10 @@ pt3D ey = params[idxPrm].ey;
 pt3D ez = params[idxPrm].ez;
 
 double alpha = params[idxPrm].alpha_LLG;
-double Abis = 2.0*(params[idxPrm].A)/(params[idxPrm].J);
-double Kbis = 2.0*(params[idxPrm].K)/(params[idxPrm].J);
-double K3bis = 2.0*(params[idxPrm].K3)/(params[idxPrm].J);
+double Js =params[idxPrm].J;
+double Abis = 2.0*(params[idxPrm].A)/Js;
+double Kbis = 2.0*(params[idxPrm].K)/Js;
+double K3bis = 2.0*(params[idxPrm].K3)/Js;
 const double s_dt = THETA*prm_t.get_dt();//theta from theta scheme in config.h.in
 
 /*-------------------- INTERPOLATION --------------------*/
@@ -103,6 +116,27 @@ interpolation(Nodes::get_v0,V,dVdx,dVdy,dVdz);
 interpolation(Nodes::get_phi0,Hd);
 interpolation(Nodes::get_phiv0,Hv);
 
+// for STT
+Pt::pt3D p_g[NPI];
+interpolation(Nodes::get_p,p_g);
+
+Pt::pt3D gradV[NPI];
+double V_nod[N];
+
+for (int i=0;i<Tetra::N;i++) { V_nod[i] = refNode[ ind[i] ].V; }
+
+for (int j=0; j<NPI; j++) { 
+       double vx(0),vy(0),vz(0);
+       for (int i=0; i<N; i++)
+            { vx += V_nod[i]*dadx[i][j]; vy += V_nod[i]*dady[i][j]; vz += V_nod[i]*dadz[i][j];}
+       gradV[j] = Pt::pt3D(vx,vy,vz);
+       }
+//tiny::transposed_mult<double, N, NPI> (V_nod, dadx, dVdx);
+//tiny::transposed_mult<double, N, NPI> (V_nod, dady, dVdy);
+//tiny::transposed_mult<double, N, NPI> (V_nod, dadz, dVdz);
+
+// end STT
+
 for (int npi=0; npi<NPI; npi++)
     {
     pt3D uk_u = pt3D(pScal(ex,U[npi]), pScal(ey,U[npi]), pScal(ez,U[npi]));
@@ -111,11 +145,6 @@ for (int npi=0; npi<NPI; npi++)
     Pt::pt3D cube_uk_u = directCube(uk_u);
     Pt::pt3D uk_uuu = uk_u - cube_uk_u;
 
-    double uHeff = -Abis*(norme2(dUdx[npi]) + norme2(dUdy[npi]) + norme2(dUdz[npi])); 
-	uHeff +=  pScal(U[npi], Hext + Hd[npi]) + Kbis*sq(pScal(params[idxPrm].uk,U[npi])) - K3bis*pScal(uk_u,uk_uuu);
-
-    lumping(npi, prm_t.calc_alpha_eff(alpha,uHeff), prm_t.prefactor*s_dt*Abis, AE);
-    
     pt3D Ht = Hv[npi];
     Ht += Kbis*pScal(params[idxPrm].uk,V[npi])*params[idxPrm].uk;
     Ht += -K3bis*pDirect(uk_v,uk_u-3*cube_uk_u);// there is a mix between second order anisotropy axis and ex for cubic anisotropy, due to previous formulation
@@ -124,7 +153,8 @@ for (int npi=0; npi<NPI; npi++)
     Heff += -K3bis*( uk_uuu(0)*ex + uk_uuu(1)*ey + uk_uuu(2)*ez ) + Hd[npi] + Hext;
 
     build_BE(npi, Ht, Heff, Abis, s_dt, dUdx, dUdy, dUdz, BE);
-    add_STT_BE(npi,params[idxPrm].beta_sc,params[idxPrm].Uz,s_dt,U,V,dUdz,dVdz,BE);
+
+    double uHm = add_STT_BE(npi,params[idxPrm].p_STT,Js,gradV,p_g,U,dUdx,dUdy,dUdz,BE);
     
     if (idx_dir == Pt::IDX_Z)
         add_drift_BE(npi,alpha,s_dt,Vdrift,U,V,dUdz,dVdz,BE);
@@ -132,6 +162,11 @@ for (int npi=0; npi<NPI; npi++)
         add_drift_BE(npi,alpha,s_dt,Vdrift,U,V,dUdy,dVdy,BE);
     else if (idx_dir == Pt::IDX_X)
         add_drift_BE(npi,alpha,s_dt,Vdrift,U,V,dUdx,dVdx,BE);
+
+    double uHeff = -Abis*(norme2(dUdx[npi]) + norme2(dUdy[npi]) + norme2(dUdz[npi])); 
+	uHeff +=  uHm + pScal(U[npi], Hext + Hd[npi]) + Kbis*sq(pScal(params[idxPrm].uk,U[npi])) - K3bis*pScal(uk_u,uk_uuu);
+
+    lumping(npi, prm_t.calc_alpha_eff(alpha,uHeff), prm_t.prefactor*s_dt*Abis, AE);
     }
 }
 
