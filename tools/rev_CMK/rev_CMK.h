@@ -18,6 +18,7 @@
 #include <boost/graph/properties.hpp>
 #include <boost/graph/bandwidth.hpp>
 
+boost::char_separator<char> sep("=;:| \"\t");
 
 struct Node { double x, y, z; };
 
@@ -72,8 +73,6 @@ void reverse_cmk(std::string nom, std::vector <int> &old2newlabel, std::vector <
 boost::property_map <Graph, boost::vertex_index_t>::type index_map;
 std::vector <size_type> perm;
 std::vector <Vertex>    inv_perm;
-
-boost::char_separator<char> sep("=;:| \"\t");
 
 std::ifstream fin(nom.c_str());
 if (!fin) {
