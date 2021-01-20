@@ -20,23 +20,35 @@
 
 boost::char_separator<char> sep("=;:| \"\t");
 
-struct Node { double x, y, z; };
-
 typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 
-typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS,
-boost::property<boost::vertex_color_t, boost::default_color_type, boost::property<boost::vertex_degree_t,int> > > Graph;
+inline void gotoNextToken(std::ostream & my_output,std::ifstream & fin, const char * s_tok)
+{
+std::string str;
+for (;;)
+    {
+    getline(fin, str); // 1eme ligne
+    if (str.empty()) { continue; }
+
+    tokenizer tokens(str, sep);
+    tokenizer::iterator tok_iter = tokens.begin();
+    my_output << str << std::endl;
+    if (*tok_iter== s_tok) break; 
+    }
+}
+
+struct Node { double x, y, z; };
+
+typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, boost::property<boost::vertex_color_t, boost::default_color_type, boost::property<boost::vertex_degree_t,int> > > Graph;
 
 typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
 
 typedef boost::graph_traits<Graph>::vertices_size_type size_type;
 
 class BadConversion : public std::runtime_error {
- public:
-   BadConversion(const std::string& s)
-     : std::runtime_error(s)
-     { }
- };
+public:
+   BadConversion(const std::string& s) : std::runtime_error(s) { } 
+};
 
 template <typename T> 
 inline T str2num(const std::string& s)
@@ -68,28 +80,15 @@ for (int i=0; i<NBN; i++)
         }    
 }
  
-void reverse_cmk(std::string nom, std::vector <int> &old2newlabel, std::vector <int> &new2oldlabel)
+void reverse_cmk(std::ifstream & fin, std::vector <int> &old2newlabel, std::vector <int> &new2oldlabel)
 {
 boost::property_map <Graph, boost::vertex_index_t>::type index_map;
 std::vector <size_type> perm;
 std::vector <Vertex>    inv_perm;
 
-std::ifstream fin(nom.c_str());
-if (!fin) {
-   std::cerr << "Pb lecture fichier " << nom << std::endl;
-   exit(1);
-   }
+gotoNextToken(std::cout,fin,"$Nodes");
 
 std::string str;
-for (;;) {
-    getline(fin, str); // 1eme ligne
-    if (str.empty()) { continue; }
-
-    tokenizer tokens(str, sep);
-    tokenizer::iterator tok_iter = tokens.begin();
-    std::cout << str << std::endl;
-    if (*tok_iter=="$Nodes") break; 
-}
 
 int NOD=0;
 for (;;) {
@@ -129,16 +128,7 @@ for (;;) {
 }
 
 
-
-for (;;) {
-    getline(fin, str); // 1eme ligne
-    if (str.empty()) { continue; }
-
-    tokenizer tokens(str, sep);
-    tokenizer::iterator tok_iter = tokens.begin();
-    std::cout << str << std::endl;
-    if (*tok_iter=="$Elements") break; 
-}
+gotoNextToken(std::cout,fin,"$Elements");
 
 int NE=0;
 for (;;) {
@@ -273,42 +263,25 @@ for (int nbn=0; nbn<NBN; nbn++)
 fout << std::endl;
 }
 
-void update_labelling(std::string nom, std::vector <int> &old2newlabel, std::vector <int> &new2oldlabel)
+void update_labelling(std::string inputFileName, std::vector <int> &old2newlabel, std::vector <int> &new2oldlabel)
 {
-boost::char_separator<char> sep("=;:| \"\t");
+std::string outputFileName = inputFileName + ".r_cmk";
 
-std::string nom0=nom + ".orig";
-int ier=rename(nom.c_str(), nom0.c_str());
-if (ier) {
-   perror( "Error renaming file" );
-   exit(1);
-   }
-
-std::ifstream fin(nom0.c_str());
+std::ifstream fin(inputFileName);
 if (!fin) {
-   std::cerr << "cannot open file " << nom << std::endl;
+   std::cerr << "cannot open file " << inputFileName << std::endl;
    exit(1);
    }
 
-std::ofstream fout(nom.c_str());
+std::ofstream fout(outputFileName);
 if (!fout) {
    std::cerr << "cannot write file " << std::endl;
    exit(1);
    }
 
 std::string str;
-for (;;) {
-    getline(fin, str); // 1eme ligne
-    if (str.empty()) {
-       fout << std::endl;
-       continue;
-       }
 
-    tokenizer tokens(str, sep);
-    tokenizer::iterator tok_iter = tokens.begin();
-    fout << str << std::endl;
-    if (*tok_iter=="$Nodes") break; 
-}
+gotoNextToken(fout,fin,"$Nodes");
 
 int NOD=0;
 for (;;) {
@@ -348,21 +321,7 @@ for (int nod=1; nod<=NOD; nod++) {
     }
 fout << "$EndNodes" << std::endl;
 
-for (;;) {
-    getline(fin, str); // 1eme ligne
-    if (str.empty()) {
-       fout << std::endl;
-       continue;
-       }
-
-    tokenizer tokens(str, sep);
-    tokenizer::iterator tok_iter = tokens.begin();
-
-    if (*tok_iter=="$Elements") {
-       fout << str << std::endl;
-       break;
-       } 
-}
+gotoNextToken(fout,fin,"$Elements");
 
 int NE=0;
 for (;;) {

@@ -24,16 +24,23 @@
 int main(int argc, char **argv)
 {
 if (argc !=2) {
-   std::cout << "usage : cmk file" << std::endl;
+   std::cout << "rev_CMK expect a mesh filename input to apply reverse Cuthill McKee algorithm. The original file is unchanged, a new mesh file is created with original input filename with an extra extension .r_cmk" << std::endl;
    exit(1);
    }
 
-std::string str=argv[1];
+std::string fileName = argv[1];
 
 std::vector <int> old2newlabel;
 std::vector <int> new2oldlabel;
-reverse_cmk(str, old2newlabel, new2oldlabel);
-update_labelling(str, old2newlabel, new2oldlabel);
+
+std::ifstream fin(fileName);
+if (!fin) {
+   std::cerr << "Cannot open file " << fileName << std::endl;
+   exit(1);
+   }
+
+reverse_cmk(fin, old2newlabel, new2oldlabel);
+update_labelling(fileName, old2newlabel, new2oldlabel);
 
 return 0;
 }

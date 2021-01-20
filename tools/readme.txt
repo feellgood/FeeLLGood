@@ -1,5 +1,5 @@
-Those two python scripts use VTK, convert2vtk is a command line tool to convert a feellgood .sol output file to a .vtu file. You need to provide the mesh file.
-To install VTK for python, type in a terminal:
+convert2vtk is a command line tool to convert a feellgood .sol output file to a .vtu file. You need to provide the mesh file.
+convert2vtk and show.py are using VTK, to install VTK for python, type in a terminal:
 
 python -m pip install --upgrade --user vtk
 
