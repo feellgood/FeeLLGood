@@ -329,16 +329,11 @@ for (;;) {
 std::vector<Node> coord(NOD);
 for (;;) {
     getline(fin, str); // 1eme ligne
-    if (str.empty()) {
-       std::cout << std::endl;
-       continue;
-       }
+    if (str.empty()) { continue; }
 
     tokenizer tokens(str, sep);
     tokenizer::iterator tok_iter = tokens.begin();
-    if (*tok_iter=="$EndNodes") {
-       break; 
-       }
+    if (*tok_iter=="$EndNodes") { break; }
     int i=str2num<int>(*tok_iter)-1;
     boost::advance(tok_iter, 1);
     coord[i].x=str2num<double>(*tok_iter);
@@ -346,13 +341,10 @@ for (;;) {
     coord[i].y=str2num<double>(*tok_iter);
     boost::advance(tok_iter, 1);
     coord[i].z=str2num<double>(*tok_iter);
-
-//    cout << boost::format("%d %.18g %.18g %.18g") % i % coord[i].x % coord[i].y % coord[i].z << endl;
-//    cout << *tok_iter << endl;
 }
 
 for (int nod=1; nod<=NOD; nod++) {
-    int i=new2oldlabel[nod-1];
+    const int i = new2oldlabel[nod-1];
     fout << boost::format("%d %.18g %.18g %.18g") % nod % coord[i].x % coord[i].y % coord[i].z << std::endl;
     }
 fout << "$EndNodes" << std::endl;
@@ -366,8 +358,7 @@ for (;;) {
 
     tokenizer tokens(str, sep);
     tokenizer::iterator tok_iter = tokens.begin();
-//    cout << str << endl;
-//    cout << *tok_iter << endl;
+
     if (*tok_iter=="$Elements") {
        fout << str << std::endl;
        break;
@@ -377,10 +368,8 @@ for (;;) {
 int NE=0;
 for (;;) {
     getline(fin, str);
-    if (str.empty()) {
-       std::cout << std::endl;
-       continue;
-       }
+    if (str.empty()) { continue; }
+
     tokenizer tokens(str, sep);
     tokenizer::iterator tok_iter = tokens.begin();
     boost::advance(tok_iter, 0);
@@ -393,17 +382,11 @@ int ne, tags, reg, TYP;
 
 for (;;){
     getline(fin, str); // 1eme ligne
-    if (str.empty()) {
-//       cout << endl;
-       continue;
-       }
+    if (str.empty()) { continue; }
 
     tokenizer tokens(str, sep);
     tokenizer::iterator tok_iter = tokens.begin();
-    if (*tok_iter=="$EndElements") {
-//       cout << *tok_iter << endl;
-       break; 
-       } 
+    if (*tok_iter=="$EndElements") { break; }
 
     ne =str2num<int>(*tok_iter);
     boost::advance(tok_iter, 1);
