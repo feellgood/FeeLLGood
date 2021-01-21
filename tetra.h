@@ -26,11 +26,11 @@ const int NPI = 5;/**< number of weights  */
 
 const double epsilon = EPSILON;/**< this constant is defined from a macro in config.h.in, it is used to check the validity of the tetrahedreon, a degeneracy test */
 
-const double A=1./4.;/**< some constant to build hat functions */
-const double B=1./6.;/**< some constant to build hat functions */
-const double C=1./2.;/**< some constant to build hat functions */
-const double D=-2./15.;/**< some constant to build hat functions */
-const double E=3./40.;/**< some constant to build hat functions */
+const double A=1./4.;/**< constant to build hat functions */
+const double B=1./6.;/**< constant to build hat functions */
+const double C=1./2.;/**< constant to build hat functions */
+const double D=-2./15.;/**< constant to build hat functions */
+const double E=3./40.;/**< constant to build hat functions */
 const double u[NPI]   = {A,B,B,B,C};/**< some constants to build hat functions */
 const double v[NPI]   = {A,B,B,C,B};/**< some constants to build hat functions */
 const double w[NPI]   = {A,B,C,B,B};/**< some constants to build hat functions */
@@ -51,7 +51,7 @@ constexpr double a[N][NPI] = {{1.-u[0]-v[0]-w[0],1.-u[1]-v[1]-w[1],1.-u[2]-v[2]-
 
 
 /** \class STT
- container for Spin Transfert Torque constants
+ container for Spin Transfert Torque constants, Thiaville model
  */
 
 struct STT
@@ -82,7 +82,7 @@ struct prm
 	Pt::pt3D ex; /**< unit vector1 (for cubic anisotropy) */
 	Pt::pt3D ey; /**< unit vector2 (for cubic anisotropy) */
 	Pt::pt3D ez; /**< unit vector3 (for cubic anisotropy) */
-	STT p_STT;
+	STT p_STT; /**< spin transfert torque (thiaville STT) parameters */
 	
 	/** print the struct parameters */
 	inline void infos()
