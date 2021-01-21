@@ -80,10 +80,10 @@ class Settings(object):
     ## \brief some test to check the validity of the parameters
     # this method is called before writing the json file, it might also be called from another script for some checking before calling the write method
     def check(self):
+        if self.mySets["outputs"]["directory"][-1] != '/':
+                self.mySets["outputs"]["directory"] += '/'
         if not(os.path.isdir( self.mySets["outputs"]["directory"] )):
             print("WARNING : the directory " + self.mySets["outputs"]["directory"] + " does not exist" )
-            if self.mySets["outputs"]["directory"][-1] != '/':
-                self.mySets["outputs"]["directory"] += '/'
         else:
             print("output directory " + self.mySets["outputs"]["directory"] + " is valid")
     
