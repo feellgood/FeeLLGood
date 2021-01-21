@@ -50,7 +50,9 @@ std::string baseName = settings.r_path_output_dir + settings.getSimName();
 std::string str = baseName + ".evol";
 
 std::ofstream fout(str);
-if (!fout) { std::cerr << "cannot open file "<< str << std::endl; SYSTEM_ERROR; }
+
+if (fout.fail())
+    { std::cout << "cannot open file "<< str << std::endl; SYSTEM_ERROR; }
 
 if(settings.evol_header)
     {

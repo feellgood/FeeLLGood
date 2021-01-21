@@ -71,9 +71,9 @@ void mesh::savecfg_vtk(Settings const& settings,timing const& t_prm,const string
 if(settings.verbose) { cout <<"\n -------------------\n " << fileName << endl; }
 
 ofstream fout(fileName, ios::out);
-if (!fout)
+if (fout.fail())
     {
-    if(settings.verbose) {cerr << "cannot open file : " << fileName << endl;}
+    std::cout << "cannot open file : " << fileName << std::endl;
     SYSTEM_ERROR;
     }
 
@@ -111,9 +111,9 @@ for(int i=0;i<NOD;i++) {fout << node[i].u << endl;}
 void mesh::savesol(const string fileName,timing const& t_prm, const double s) const
 {
 ofstream fout(fileName, ios::out);
-if (!fout)
+if (fout.fail())
     {
-    cerr << "cannot open file " << fileName << endl;
+    std::cout << "cannot open file " << fileName << std::endl;
     SYSTEM_ERROR;
     }
 //fout << boost::format("#time : %+20.10e ") % fem.t << endl;
@@ -132,12 +132,14 @@ fout.close();
 
 void mesh::saveH(const string fileName,const double t,const double scale) const
 {
-cout << " " << fileName << endl <<" -------------------" << endl << endl;
+std::cout << " " << fileName <<"\n -------------------\n" << std::endl;
 
 ofstream fout(fileName, ios::out);
-if (!fout){
-   cerr << "cannot open file " << fileName << endl;
-   SYSTEM_ERROR;}
+if (fout.fail())
+    {
+    std::cout << "cannot open file " << fileName << std::endl;
+    SYSTEM_ERROR;
+    }
 fout << "#time : "<< t << endl;
 
 int idx_tet=0;
