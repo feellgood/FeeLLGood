@@ -82,14 +82,14 @@ for (int i=0; i<N; i++)
     }
 }
 
-void Tet::build_BE(int const& npi, Pt::pt3D const & Ht, Pt::pt3D const & Heff, double Abis, double s_dt, Pt::pt3D dUdx[NPI], Pt::pt3D dUdy[NPI], Pt::pt3D dUdz[NPI], Pt::pt3D BE[N]) const
+void Tet::build_BE(int const& npi, Pt::pt3D const & H, double Abis, Pt::pt3D dUdx[NPI], Pt::pt3D dUdy[NPI], Pt::pt3D dUdz[NPI], Pt::pt3D BE[N]) const
 {
 const double w = weight[npi];
 
 for (int i=0; i<N; i++)
     {
     BE[i] -= (w*Abis)*(dadx[i][npi]*dUdx[npi] + dady[i][npi]*dUdy[npi] + dadz[i][npi]*dUdz[npi]);
-    BE[i] += (w*a[i][npi])*(Heff + s_dt*Ht);
+    BE[i] += (w*a[i][npi])*H;
     }
 }
 
@@ -152,7 +152,8 @@ for (int npi=0; npi<NPI; npi++)
     pt3D Heff = Kbis*pScal(params[idxPrm].uk,U[npi])*params[idxPrm].uk;
     Heff += -K3bis*( uk_uuu(0)*ex + uk_uuu(1)*ey + uk_uuu(2)*ez ) + Hd[npi] + Hext;
 
-    build_BE(npi, Ht, Heff, Abis, s_dt, dUdx, dUdy, dUdz, BE);
+    pt3D H = Heff + s_dt*Ht;
+    build_BE(npi, H, Abis, dUdx, dUdy, dUdz, BE);
 
     double uHm = add_STT_BE(npi,params[idxPrm].p_STT,Js,gradV,p_g,U,dUdx,dUdy,dUdz,BE);
     
