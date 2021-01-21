@@ -82,6 +82,8 @@ class Settings(object):
     def check(self):
         if not(os.path.isdir( self.mySets["outputs"]["directory"] )):
             print("WARNING : the directory " + self.mySets["outputs"]["directory"] + " does not exist" )
+            if self.mySets["outputs"]["directory"][-1] != '/':
+                self.mySets["outputs"]["directory"] += '/'
         else:
             print("output directory " + self.mySets["outputs"]["directory"] + " is valid")
     
