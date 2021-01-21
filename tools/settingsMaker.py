@@ -1,3 +1,4 @@
+import os.path
 import json
 
 ## \class Settings
@@ -76,9 +77,18 @@ class Settings(object):
         if key not in self.mySets["mesh"]["surface_regions"]:
             self.mySets["mesh"]["surface_regions"].update( { key : {"suppress_charges" : False, "Ks" : 0.0, "uk" : [0.0, 0.0 ,1.0]} } )
 
+    ## \brief some test to check the validity of the parameters
+    # this method is called before writing the json file, it might also be called from another script for some checking before calling the write method
+    def check(self):
+        if not(os.path.isdir( self.mySets["outputs"]["directory"] )):
+            print("WARNING : the directory " + self.mySets["outputs"]["directory"] + " does not exist" )
+        else:
+            print("output directory " + self.mySets["outputs"]["directory"] + " is valid")
+    
     ## \brief write json file
     # this method write a json file from the dictionary built by the creator
     def write(self,fileName):
+        self.check()
         with open(fileName,'w') as outfile:
             json.dump(self.mySets,outfile,indent = 4)
         print("json file " + fileName + " generated.")
