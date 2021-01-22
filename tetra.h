@@ -306,6 +306,12 @@ class Tet{
         /** BE vector filling */
         void build_BE(int const& npi, Pt::pt3D const & H, double Abis, Pt::pt3D dUdx[NPI], Pt::pt3D dUdy[NPI], Pt::pt3D dUdz[NPI], Pt::pt3D BE[N]) const;
 
+        /** append H_aniso for uniaxial anisotropy contribution, returns contribution to uHeff (used to compute the stabilizing effective damping) */
+        double calc_aniso_uniax(int const& npi,Pt::pt3D const& uk,const double Kbis, const double s_dt, Pt::pt3D U[NPI], Pt::pt3D V[NPI], Pt::pt3D & H_aniso) const;
+        
+        /** append H_aniso for cubic anisotropy contribution, returns contribution to uHeff (used to compute the stabilizing effective damping) */
+        double calc_aniso_cub(int const& npi,Pt::pt3D const& ex,Pt::pt3D const& ey,Pt::pt3D const& ez,const double K3bis, const double s_dt, Pt::pt3D U[NPI], Pt::pt3D V[NPI], Pt::pt3D & H_aniso) const;
+        
 		/** computes the integral contribution of the tetrahedron to the evolution of the magnetization */		
 		void integrales(std::vector<Tetra::prm> const& params, timing const& prm_t, Pt::pt3D const& Hext, Pt::index idx_dir, double Vdrift, double AE[3*N][3*N], Pt::pt3D BE[N])  const;
 		

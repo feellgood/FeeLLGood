@@ -93,12 +93,26 @@ for (int i=0; i<N; i++)
     }
 }
 
+double Tet::calc_aniso_uniax(int const& npi,Pt::pt3D const& uk,const double Kbis, const double s_dt, Pt::pt3D U[NPI], Pt::pt3D V[NPI], Pt::pt3D & H_aniso) const
+{
+H_aniso += ( Kbis*pScal(uk, U[npi]+s_dt*V[npi]) )*uk;
+return ( Kbis*sq(pScal(uk,U[npi])) );
+}
+
+double Tet::calc_aniso_cub(int const& npi,Pt::pt3D const& ex,Pt::pt3D const& ey,Pt::pt3D const& ez,const double K3bis, const double s_dt, Pt::pt3D U[NPI], Pt::pt3D V[NPI], Pt::pt3D & H_aniso) const
+{
+pt3D uk_u = pt3D(pScal(ex,U[npi]), pScal(ey,U[npi]), pScal(ez,U[npi]));
+pt3D uk_v = pt3D(pScal(ex,V[npi]), pScal(ey,V[npi]), pScal(ez,V[npi]));
+
+Pt::pt3D cube_uk_u = directCube(uk_u);
+Pt::pt3D uk_uuu = uk_u - cube_uk_u;
+
+H_aniso += -K3bis*( uk_uuu(0)*ex + uk_uuu(1)*ey + uk_uuu(2)*ez  + s_dt*pDirect(uk_v,uk_u-3*cube_uk_u) );
+return ( -K3bis*pScal(uk_u,uk_uuu) );
+}
+
 void Tet::integrales(std::vector<Tetra::prm> const& params, timing const& prm_t,Pt::pt3D const& Hext,Pt::index idx_dir, double Vdrift, double AE[3*N][3*N], Pt::pt3D BE[N]) const
 {
-pt3D ex = params[idxPrm].ex;
-pt3D ey = params[idxPrm].ey;
-pt3D ez = params[idxPrm].ez;
-
 double alpha = params[idxPrm].alpha_LLG;
 double Js =params[idxPrm].J;
 double Abis = 2.0*(params[idxPrm].A)/Js;
@@ -121,16 +135,18 @@ Pt::pt3D p_g[NPI];
 interpolation(Nodes::get_p,p_g);
 
 Pt::pt3D gradV[NPI];
-double V_nod[N];
 
-for (int i=0;i<Tetra::N;i++) { V_nod[i] = refNode[ ind[i] ].V; }
-
-for (int j=0; j<NPI; j++) { 
-       double vx(0),vy(0),vz(0);
-       for (int i=0; i<N; i++)
-            { vx += V_nod[i]*dadx[i][j]; vy += V_nod[i]*dady[i][j]; vz += V_nod[i]*dadz[i][j];}
-       gradV[j] = Pt::pt3D(vx,vy,vz);
-       }
+for (int npi=0; npi<Tetra::NPI; npi++) 
+    { 
+    double vx(0),vy(0),vz(0);
+    for (int i=0; i<Tetra::N; i++)
+        {
+        vx += (refNode[ind[i]].V)*dadx[i][npi];
+        vy += (refNode[ind[i]].V)*dady[i][npi]; 
+        vz += (refNode[ind[i]].V)*dadz[i][npi];
+        }
+    gradV[npi] = Pt::pt3D(vx,vy,vz);
+    }
 //tiny::transposed_mult<double, N, NPI> (V_nod, dadx, dVdx);
 //tiny::transposed_mult<double, N, NPI> (V_nod, dady, dVdy);
 //tiny::transposed_mult<double, N, NPI> (V_nod, dadz, dVdz);
@@ -139,17 +155,13 @@ for (int j=0; j<NPI; j++) {
 
 for (int npi=0; npi<NPI; npi++)
     {
-    pt3D uk_u = pt3D(pScal(ex,U[npi]), pScal(ey,U[npi]), pScal(ez,U[npi]));
-    pt3D uk_v = pt3D(pScal(ex,V[npi]), pScal(ey,V[npi]), pScal(ez,V[npi]));
-
-    Pt::pt3D cube_uk_u = directCube(uk_u);
-    Pt::pt3D uk_uuu = uk_u - cube_uk_u;
-
-    pt3D H_an_cubic = -K3bis*( uk_uuu(0)*ex + uk_uuu(1)*ey + uk_uuu(2)*ez  + s_dt*pDirect(uk_v,uk_u-3*cube_uk_u) );
+    pt3D H_aniso;
+    double contrib_aniso(0);
     
-    pt3D H_an_uniaxial = ( Kbis*pScal(params[idxPrm].uk, U[npi]+s_dt*V[npi]) )*params[idxPrm].uk;
-    
-    pt3D H = H_an_uniaxial + H_an_cubic + Hd[npi] + Hext + s_dt*Hv[npi];
+    contrib_aniso += calc_aniso_uniax(npi,params[idxPrm].uk,Kbis,s_dt,U,V,H_aniso);
+    contrib_aniso += calc_aniso_cub(npi, params[idxPrm].ex, params[idxPrm].ey, params[idxPrm].ez,K3bis,s_dt,U,V, H_aniso);
+
+    pt3D H = H_aniso + Hd[npi] + Hext + s_dt*Hv[npi];
     build_BE(npi, H, Abis, dUdx, dUdy, dUdz, BE);
 
     double uHm = add_STT_BE(npi,params[idxPrm].p_STT,Js,gradV,p_g,U,dUdx,dUdy,dUdz,BE);
@@ -162,7 +174,7 @@ for (int npi=0; npi<NPI; npi++)
         add_drift_BE(npi,alpha,s_dt,Vdrift,U,V,dUdx,dVdx,BE);
 
     double uHeff = -Abis*(norme2(dUdx[npi]) + norme2(dUdy[npi]) + norme2(dUdz[npi])); 
-	uHeff +=  uHm + pScal(U[npi], Hext + Hd[npi]) + Kbis*sq(pScal(params[idxPrm].uk,U[npi])) - K3bis*pScal(uk_u,uk_uuu);
+	uHeff +=  uHm + pScal(U[npi], Hext + Hd[npi]) + contrib_aniso;
 
     lumping(npi, prm_t.calc_alpha_eff(alpha,uHeff), prm_t.prefactor*s_dt*Abis, AE);
     }
