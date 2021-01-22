@@ -20,7 +20,7 @@ class mesh
 {
 public:
     /** constructor  : read mesh, reorder indices and computes some values related to the mesh */
-    inline mesh(Settings const& mySets /**< [in] */)
+    inline mesh(Settings const& mySets /**< [in] */):nbNod(0)
         {
         readMesh(mySets);
         if(mySets.verbose) std::cout<< "mesh in memory." <<std::endl;
@@ -31,9 +31,7 @@ public:
         }
     
     /** return number of nodes  */
-    inline int getNbNodes(void) const { 
-        return nbNod;//node.size(); 
-        }
+    inline int getNbNodes(void) const { return nbNod; }
     
     /** return number of triangular fac */
     inline int getNbFacs(void) const { return fac.size(); }
@@ -59,11 +57,7 @@ public:
         }
 
     /** call evolution for all the nodes */
-    inline void evolution(void)
-        { 
-            //std::for_each(node.begin(), node.end(), [](Nodes::Node &n){ n.evolution();} ); 
-            for(int i=0;i<nbNod;i++) node[i].evolution();
-        }
+   inline void evolution(void) { for(int i=0;i<nbNod;i++) node[i].evolution(); }
     
     /** find center and length along coordinates and diameter = max(l(x|y|z)), computes vol,surf */
     void geometry(void)
@@ -100,8 +94,7 @@ public:
     Demagnetizing field and energies don't need to be reset, because they won't be updated if failure is detected.
     I don't know how to cleanly reset "fem.DW_vz". BC
     */
-    inline void reset(void) 
-        { for(int i=0;i<nbNod;i++) node[i].reset(); }
+    inline void reset(void) { for(int i=0;i<nbNod;i++) node[i].reset(); }
     
 
     /** read a solution from a file (tsv formated) and initialize fem struct to restart computation from that distribution, return time
@@ -133,8 +126,6 @@ public:
                             } );
     return sum/vol;
     }
-    
-    
 
     /** text file (vtk) writing function for a solution, using text VTK format (unstructured grid version 2.0) : deprecated, it is recommanded to use convert2vtk python script instead */
     void savecfg_vtk(Settings const& settings /**< [in] */,timing const& t_prm /**< [in] */,const std::string fileName /**< [in] */) const;
@@ -157,7 +148,7 @@ public:
     }
     
 private:
-    /** node container */
+    /** node container : the shared pointer is not initialized by constructor, but later, while reading the mesh, by member function init_node */
     std::shared_ptr<Nodes::Node[]> node;
     
     /** memory allocation for the nodes : delete[] must be specified in C++11, not in C++17 */
@@ -180,7 +171,7 @@ private:
     void readNewMesh(Settings const& mySets,std::ifstream &msh);
 
 	/** return the minimum of all nodes coordinate along coord axis */
-    inline double minNodes(const Pt::index coord)
+    inline double minNodes(const Pt::index coord) const
         {
         double _min = __DBL_MAX__;
         for(int i=0;i<nbNod;i++)
@@ -192,7 +183,7 @@ private:
         }
 
     /** return the maximum of all nodes coordinate along coord axis */
-    inline double maxNodes(const Pt::index coord)
+    inline double maxNodes(const Pt::index coord) const
         {
         double _max = __DBL_MIN__;
         for(int i=0;i<nbNod;i++)
@@ -234,7 +225,7 @@ private:
         std::for_each(tet.begin(),tet.end(),[&sf](Tetra::Tet const& te)
             {
             std::set<Facette::Fac> tet_set = te.ownedFac();
-            for(std::set<Facette::Fac>::iterator it = tet_set.begin();it != tet_set.end(); ++it) sf.insert( *it );
+            sf.insert(tet_set.begin(),tet_set.end());
             });//end for_each
 
         std::for_each(fac.begin(),fac.end(),[this,&settings,&sf](Facette::Fac &fa)
