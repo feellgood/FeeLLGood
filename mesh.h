@@ -19,14 +19,29 @@ class for storing the mesh, including mesh geometry values, containers for the n
 class mesh
 {
 public:
-    /** constructor  : read mesh, reorder indices and computes some values related to the mesh */
+    /** constructor  : read mesh, reorder indices and computes values related to the mesh : center and length along coordinates and diameter = max(l(x|y|z)), vol,surf */
     inline mesh(Settings const& mySets /**< [in] */):nbNod(0)
         {
         readMesh(mySets);
         if(mySets.verbose) std::cout<< "mesh in memory." <<std::endl;
         indexReorder(mySets);// reordering of index nodes for facette orientation, also some modifications on fac::Ms
         if(mySets.verbose) std::cout<< "mesh reindexed." <<std::endl;
-        geometry();// initialization of l,c,diam,vol,surf
+        
+        double xmin = minNodes(Pt::IDX_X);
+        double xmax = maxNodes(Pt::IDX_X);
+
+        double ymin = minNodes(Pt::IDX_Y);
+        double ymax = maxNodes(Pt::IDX_Y);
+
+        double zmin = minNodes(Pt::IDX_Z);
+        double zmax = maxNodes(Pt::IDX_Z);
+
+        l = Pt::pt3D(xmax - xmin,ymax - ymin,zmax - zmin);
+        diam = l.maxLength();
+        c = Pt::pt3D(0.5*(xmax + xmin),0.5*(ymax + ymin),0.5*(zmax + zmin));
+        vol = std::accumulate(tet.begin(),tet.end(),0.0,[](double x,Tetra::Tet const& te){return x + te.calc_vol();} );
+        surf = std::accumulate(fac.begin(),fac.end(),0.0,[](double x,Facette::Fac const& fa){return x + fa.calc_surf();} );
+        
         if(mySets.verbose) std::cout<< "mesh geometry computed." <<std::endl;
         }
     
@@ -59,34 +74,26 @@ public:
     /** call evolution for all the nodes */
    inline void evolution(void) { for(int i=0;i<nbNod;i++) node[i].evolution(); }
     
-    /** find center and length along coordinates and diameter = max(l(x|y|z)), computes vol,surf */
-    void geometry(void)
-        {
-        double xmin = minNodes(Pt::IDX_X);
-        double xmax = maxNodes(Pt::IDX_X);
+    /** isobarycenter */	
+    Pt::pt3D c;
 
-        double ymin = minNodes(Pt::IDX_Y);
-        double ymax = maxNodes(Pt::IDX_Y);
-
-        double zmin = minNodes(Pt::IDX_Z);
-        double zmax = maxNodes(Pt::IDX_Z);
-
-        l = Pt::pt3D(xmax - xmin,ymax - ymin,zmax - zmin);
-        diam = l.maxLength();
-        c = Pt::pt3D(0.5*(xmax + xmin),0.5*(ymax + ymin),0.5*(zmax + zmin));
-        vol = std::accumulate(tet.begin(),tet.end(),0.0,[](double x,Tetra::Tet const& te){return x + te.calc_vol();} );
-        surf = std::accumulate(fac.begin(),fac.end(),0.0,[](double x,Facette::Fac const& fa){return x + fa.calc_surf();} );
-        }
-        
-    Pt::pt3D c;/**< center position */	
-	Pt::pt3D l;/**< lengths along x,y,z axis */	
+    /** lengths along x,y,z axis */
+    Pt::pt3D l;
 	
-	double diam;/**< max of l coordinates, to define a bounding box */
-	double surf;/**< total surface */
-	double vol;/**< total volume of the mesh */
+    /** max of l coordinates, to define a bounding box */
+	double diam;
     
-    std::vector <Facette::Fac>  fac; /**< face container */
-	std::vector <Tetra::Tet>  tet; /**< tetrahedron container */
+    /** total surface */
+	double surf;
+    
+    /** total volume of the mesh */
+	double vol;
+    
+     /** face container */
+    std::vector <Facette::Fac>  fac;
+    
+     /** tetrahedron container */
+	std::vector <Tetra::Tet>  tet;
     
     /**
     reset the nodes struct to restart another step time simulation
