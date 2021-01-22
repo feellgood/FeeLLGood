@@ -23,8 +23,11 @@ public:
     inline mesh(Settings const& mySets /**< [in] */)
         {
         readMesh(mySets);
+        if(mySets.verbose) std::cout<< "mesh in memory." <<std::endl;
         indexReorder(mySets);// reordering of index nodes for facette orientation, also some modifications on fac::Ms
+        if(mySets.verbose) std::cout<< "mesh reindexed." <<std::endl;
         geometry();// initialization of l,c,diam,vol,surf
+        if(mySets.verbose) std::cout<< "mesh geometry computed." <<std::endl;
         }
     
     /** return number of nodes  */

@@ -145,14 +145,11 @@ for (int npi=0; npi<NPI; npi++)
     Pt::pt3D cube_uk_u = directCube(uk_u);
     Pt::pt3D uk_uuu = uk_u - cube_uk_u;
 
-    pt3D Ht = Hv[npi];
-    Ht += Kbis*pScal(params[idxPrm].uk,V[npi])*params[idxPrm].uk;
-    Ht += -K3bis*pDirect(uk_v,uk_u-3*cube_uk_u);// there is a mix between second order anisotropy axis and ex for cubic anisotropy, due to previous formulation
-
-    pt3D Heff = Kbis*pScal(params[idxPrm].uk,U[npi])*params[idxPrm].uk;
-    Heff += -K3bis*( uk_uuu(0)*ex + uk_uuu(1)*ey + uk_uuu(2)*ez ) + Hd[npi] + Hext;
-
-    pt3D H = Heff + s_dt*Ht;
+    pt3D H_an_cubic = -K3bis*( uk_uuu(0)*ex + uk_uuu(1)*ey + uk_uuu(2)*ez  + s_dt*pDirect(uk_v,uk_u-3*cube_uk_u) );
+    
+    pt3D H_an_uniaxial = ( Kbis*pScal(params[idxPrm].uk, U[npi]+s_dt*V[npi]) )*params[idxPrm].uk;
+    
+    pt3D H = H_an_uniaxial + H_an_cubic + Hd[npi] + Hext + s_dt*Hv[npi];
     build_BE(npi, H, Abis, dUdx, dUdy, dUdz, BE);
 
     double uHm = add_STT_BE(npi,params[idxPrm].p_STT,Js,gradV,p_g,U,dUdx,dUdy,dUdz,BE);

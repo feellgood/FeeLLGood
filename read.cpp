@@ -72,7 +72,7 @@ while((msh >> symb)&&(symb != "$EndElements")&&(! msh.fail() ) )
         }
     }
 
-
+if(mySets.verbose) { std::cout << "last symb = " << symb << std::endl; }
 if ((symb != "$EndElements") && msh.fail()) 
     {std::cerr << "error while reading elements; symb = " << symb << std::endl;SYSTEM_ERROR;}
 }
@@ -199,8 +199,14 @@ if(symb == "$MeshFormat")
         }
     else { std::cout <<"mesh file format " << mshFormat << " not supported." << std::endl; SYSTEM_ERROR; }
     }
-        
-msh.close();
+
+if (! msh.fail())
+    {
+    if(mySets.verbose) std::cout<< "closing mesh" <<std::endl;
+    msh.close();
+    }
+else
+    { std::cout<< "error while closing mesh." <<std::endl; SYSTEM_ERROR; }
 }
 
 double mesh::readSol(bool VERBOSE,double scaling, const string fileName)

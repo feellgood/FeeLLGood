@@ -48,16 +48,24 @@ class Fem
             Etot0 = Etot = 0.0;
             
             pts= annAllocPts(msh.getNbNodes(), Pt::DIM);
-            kdtree = new ANNkd_tree(pts, msh.getNbNodes(), Pt::DIM);
-            if (!kdtree) SYSTEM_ERROR;
+            if(!pts) { std::cout<< "ANN memory error while allocating points" <<std::endl; SYSTEM_ERROR; }
+            else if (mySets.verbose) { std::cout << "ANN pts allocated." << std::endl; }
             
             for(int i=0;i<msh.getNbNodes();i++)
                 { 
-                Nodes::Node const& n = msh.getNode(i);
-                this->pts[i][0] = n.p.x();
-                this->pts[i][1] = n.p.y();
-                this->pts[i][2] = n.p.z(); 
+                this->pts[i][0] = msh.getNode(i).p.x();
+                this->pts[i][1] = msh.getNode(i).p.y();
+                this->pts[i][2] = msh.getNode(i).p.z(); 
                 }
+            
+            if(mySets.verbose) {std::cout<< "start building ANN kd_tree..." <<std::endl;}
+            
+            kdtree = new ANNkd_tree(pts, msh.getNbNodes(), Pt::DIM);
+            if (!kdtree) { std::cout<< "ANN memory error while allocating kd_tree" <<std::endl; SYSTEM_ERROR; }
+            
+            if(mySets.verbose) { std::cout << "ANN kd_tree allocated." << std::endl; }
+            
+            
             
             if (mySets.restoreFileName == "")
                 {
