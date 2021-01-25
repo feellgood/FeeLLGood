@@ -455,7 +455,7 @@ double alfa = prm_t.calc_alpha_eff(alpha_LLG,uHeff);
 
 double dt = prm_t.get_dt();
 double A = distrib(gen);//Ae
-double Js = distrib(gen);
+double Js = 0.5 + distrib(gen);// 0.5 offset to center on 1 the Js value
 
 double Abis = 2.0*A/Js;
 
@@ -550,14 +550,16 @@ for (int i=0;i<nbNod;i++)
 Tetra::Tet t(node,nbNod,0,0,1,2,3,4);//carefull with indices (starting from 1)
 
 double dt = distrib(gen);
-double uk00 = distrib(gen);
-double uk01 = distrib(gen);
-double uk02 = distrib(gen);
+
+Pt::pt3D uk = Pt::pt3D(M_PI*distrib(gen),2*M_PI*distrib(gen));
+
+double uk00 = uk.x();
+double uk01 = uk.y();
+double uk02 = uk.z();
 double K = distrib(gen);
-double Js = distrib(gen);
+double Js = 0.5 + distrib(gen);// add 0.5 to center Js around 1
 
 double contrib_aniso(0);
-Pt::pt3D uk = Pt::pt3D(uk00,uk01,uk02);
 double Kbis=2.0*K/Js;
 std::cout << "uniaxial anisotropy test on a tetrahedron" << std::endl;
 std::cout << "uk =" << uk << std::endl;
