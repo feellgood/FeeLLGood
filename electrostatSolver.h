@@ -1,5 +1,7 @@
 #include <boost/progress.hpp>
 
+#include <map>
+
 #include "fem.h"
 
 #include "config.h"
@@ -25,9 +27,36 @@ private:
     
     const int MAXITER;//5000
     
-    inline double getSigma(const int reg) const {return 0;}
-    inline double getJn(const int reg) const {return 0;}
-    inline double getV(const int reg) const {return 0;}
+    std::map<int,double> sigma_values;
+    std::map<int,double> Jn_values;
+    std::map<int,double> V_values;
+    
+    inline double getSigma(const int reg)
+        {
+        double val(0);
+        std::map<int,double>::iterator it = sigma_values.find(reg); 
+        if (it != sigma_values.end() ) val = it->second;
+        
+        return val;
+        }
+        
+    inline double getJn(const int reg)
+        {
+        double val(0);
+        std::map<int,double>::iterator it = Jn_values.find(reg); 
+        if (it != Jn_values.end() ) val = it->second;
+        
+        return val;
+        }
+    
+    inline double getV(const int reg)
+        {
+        double val(0);
+        std::map<int,double>::iterator it = V_values.find(reg); 
+        if (it != V_values.end() ) val = it->second;
+        
+        return val;
+        }
     
     template <class T>
     void assembling(T const& obj, gmm::dense_matrix <double> &Ke, std::vector <double> &Le, write_matrix &K, write_vector &L)
