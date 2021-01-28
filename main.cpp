@@ -9,6 +9,8 @@
 #include "fmm_demag.h"
 #include "time_integration.h"
 
+#include "electrostatSolver.h"
+
 using namespace std;
 
 int time_integration(Fem &fem,Settings &settings /**< [in] */,LinAlgebra &linAlg /**< [in] */,scal_fmm::fmm &myFMM  /**< [in] */,timing &t_prm);

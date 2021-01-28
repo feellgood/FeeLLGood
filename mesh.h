@@ -154,6 +154,12 @@ public:
         { fac.charges(getter,srcDen,corr,nsrc); });// end for_each on fac
     }
     
+    /** getter for electrostatic potential */
+    inline double get_elec_pot(const int i) const {return node[i].V;}
+    
+    /** setter for electrostatic potential */
+    inline void set_elec_pot(const int i,const double val) {node[i].V = val;}
+    
 private:
     /** node container : the shared pointer is not initialized by constructor, but later, while reading the mesh, by member function init_node */
     std::shared_ptr<Nodes::Node[]> node;
@@ -167,6 +173,7 @@ private:
     
     /** total number of nodes read from mesh file */
     int nbNod;
+    
     
 	/** reading mesh file function */
     void readMesh(Settings const& mySets);

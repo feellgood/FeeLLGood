@@ -135,13 +135,19 @@ class Fac{
         inline void assemblage_vect(std::vector<double> &L) const
             { for (int i=0; i < N; i++) { L[NOD+ind[i]] += Lp[i]; L[ind[i]] += Lp[N+i]; } }
         
-        /** getter for N */		
-	inline int getN(void) const {return N;}	
+        /** getter for N */
+        inline int getN(void) const {return N;}	
 
-	/** getter for NPI */		
-	inline int getNPI(void) const {return NPI;}	
-		
-	/** computes correction on potential*/
+        /** getter for NPI */
+        inline int getNPI(void) const {return NPI;}	
+
+        /** getter for region */
+        inline int getRegion(void) const {return reg;}
+
+        /** computes weight coefficients */
+        inline double weight(const int i) const { return 2.0*surf*Facette::pds[i]; }
+        
+        /** computes correction on potential*/
         double potential(std::function<Pt::pt3D (Nodes::Node)> getter, int i) const;
         
         /** computes correction values */
@@ -174,11 +180,7 @@ class Fac{
         const int reg;/**< .msh region number */
         
         /** direct access to the Nodes */
-        //const std::vector<Nodes::Node>  *refNode;
         const std::shared_ptr<Nodes::Node[]> refNode;
-        
-        /** computes weight coefficients */
-        inline double weight(const int i) const { return 2.0*surf*Facette::pds[i]; }
         
         /** return normal to the triangular face, not normalized */
         inline Pt::pt3D normal_vect() const
