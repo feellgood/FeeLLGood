@@ -519,7 +519,7 @@ std::cout << "distance = "<< val << std::endl;
 BOOST_TEST( val == 0.0 );
 }
 
-BOOST_AUTO_TEST_CASE(Tet_aniso_uniax, * boost::unit_test::tolerance(UT_TOL))
+BOOST_AUTO_TEST_CASE(Tet_aniso_uniax, * boost::unit_test::tolerance(10.0*UT_TOL))
 {
 int nbNod = 4;
 std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 

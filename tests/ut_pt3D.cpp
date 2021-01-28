@@ -203,7 +203,7 @@ std::cout << "test that constructor in spherical coordinates(S^2) is making a un
 BOOST_TEST( X.norm() == 1.0 );
 }
 
-BOOST_AUTO_TEST_CASE(pt3D_triple_product, * boost::unit_test::tolerance(100*UT_TOL))
+BOOST_AUTO_TEST_CASE(pt3D_triple_product, * boost::unit_test::tolerance(UT_TOL))
 {
 std::random_device rd;
 
@@ -231,9 +231,13 @@ std::cout << "x1-x2=" << x1-x2 << std::endl;
 std::cout << "x2-x3=" << x2-x3 << std::endl;
 std::cout << "x3-x1=" << x3-x1 << std::endl;
 
-BOOST_TEST( Pt::sq(x1) == Pt::sq(x2) );
-BOOST_TEST( Pt::sq(x2) == Pt::sq(x3) );
-BOOST_TEST( Pt::sq(x3) == Pt::sq(x1) );
+// Rounding errors are expected to scale like this quantity. We divide
+// them by this in order to get them in the order of machine epsilon.
+double scale = X.norm() * Y.norm() * Z.norm();
+
+BOOST_TEST( (x1 - x2) / scale == 0 );
+BOOST_TEST( (x2 - x3) / scale == 0 );
+BOOST_TEST( (x3 - x1) / scale == 0 );
 }
 
 BOOST_AUTO_TEST_CASE(pt3D_det, * boost::unit_test::tolerance(10.0*UT_TOL))

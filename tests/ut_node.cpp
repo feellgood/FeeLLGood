@@ -58,7 +58,7 @@ BOOST_TEST(Nodes::get_p(n).norm() == 1.0);
 /*---------------------------------------*/
 
 
-BOOST_AUTO_TEST_CASE(node_e_p, * boost::unit_test::tolerance(UT_TOL))
+BOOST_AUTO_TEST_CASE(node_e_p, * boost::unit_test::tolerance(100.0*UT_TOL))
 {
 std::random_device rd;
 
@@ -76,7 +76,7 @@ BOOST_TEST(X.norm() == 1.0);
 BOOST_TEST( fabs(Pt::pScal(n.u0,X)) == 0.0 );
 }
 
-BOOST_AUTO_TEST_CASE(node_evol, * boost::unit_test::tolerance(100.0*UT_TOL)) 
+BOOST_AUTO_TEST_CASE(node_evol, * boost::unit_test::tolerance(1e3*UT_TOL))
 {
 std::random_device rd;
 
