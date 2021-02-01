@@ -103,11 +103,10 @@ double Tet::calc_aniso_cub(int const& npi,Pt::pt3D const& ex,Pt::pt3D const& ey,
 {
 pt3D uk_u = pt3D(pScal(ex,U[npi]), pScal(ey,U[npi]), pScal(ez,U[npi]));
 pt3D uk_v = pt3D(pScal(ex,V[npi]), pScal(ey,V[npi]), pScal(ez,V[npi]));
-
 Pt::pt3D cube_uk_u = directCube(uk_u);
 Pt::pt3D uk_uuu = uk_u - cube_uk_u;
 
-H_aniso += -K3bis*( uk_uuu(0)*ex + uk_uuu(1)*ey + uk_uuu(2)*ez  + s_dt*pDirect(uk_v,uk_u-3*cube_uk_u) );
+H_aniso += -K3bis*( uk_uuu(0)*ex + uk_uuu(1)*ey + uk_uuu(2)*ez  + s_dt*pDirect(pDirect(uk_v,ex),pt3D(1,1,1)-3*pDirect(uk_u,uk_u)) );
 return ( -K3bis*pScal(uk_u,uk_uuu) );
 }
 
