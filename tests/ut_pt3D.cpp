@@ -235,9 +235,12 @@ std::cout << "x3-x1=" << x3-x1 << std::endl;
 // them by this in order to get them in the order of machine epsilon.
 double scale = X.norm() * Y.norm() * Z.norm();
 
-BOOST_TEST( (x1 - x2) / scale == 0 );
-BOOST_TEST( (x2 - x3) / scale == 0 );
-BOOST_TEST( (x3 - x1) / scale == 0 );
+double v1 = (x1 - x2)/scale;
+BOOST_TEST( v1 == 0.0 );
+double v2 = (x2 - x3)/scale;
+BOOST_TEST( v2 == 0.0 );
+double v3 = (x3 - x1)/scale;
+BOOST_TEST( v3 == 0.0 );
 }
 
 BOOST_AUTO_TEST_CASE(pt3D_det, * boost::unit_test::tolerance(10.0*UT_TOL))
