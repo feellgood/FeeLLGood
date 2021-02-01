@@ -1,3 +1,8 @@
+/** \file electrostatSolver.h
+  \brief solver for electrostatic problem when STT is required
+  header containing electrostatSolver class. I uses biconjugate stabilized gradient with diagonal preconditioner. The solver is only called once to compute voltages V for each nodes of the mesh, when STT computation is involved.
+ */
+
 #include <boost/progress.hpp>
 
 #include <map>
@@ -18,19 +23,25 @@
 #include "facette.h"
 #include "tiny.h"
 
+/** \class electrostatSolver
+this class is containing both data and a solver to compute potential from dirichlet boundary conditions problem for the current density flowing in the sample.
+*/
 class electrostatSolver {
 public:
-    inline electrostatSolver(const std::shared_ptr<Nodes::Node[]> _p_node /**< [in] pointer to the nodes */,const int max_iter): refNode(_p_node), MAXITER(max_iter) {}
+    /** constructor */
+    inline electrostatSolver(const std::shared_ptr<Nodes::Node[]> _p_node /**< [in] pointer to the nodes */,const int max_iter /**< [in] maximum number of iteration */ ): refNode(_p_node), MAXITER(max_iter) {}
 
 private:
     const std::shared_ptr<Nodes::Node[]> refNode;/**< direct access to the Nodes */
     
-    const int MAXITER;//5000
+    const int MAXITER;/**< maximum number of iteration for biconjugate stabilized gradient */
+    //5000 in ref code
     
-    std::map<int,double> sigma_values;
-    std::map<int,double> Jn_values;
-    std::map<int,double> V_values;
+    std::map<int,double> sigma_values;/**< conductivity region volume table */
+    std::map<int,double> Jn_values;/**< table of current densities */
+    std::map<int,double> V_values;/**< table of voltage dirichlet boundary conditions (on surface region) */ 
     
+    /** sigma value getter */
     inline double getSigma(const int reg)
         {
         double val(0);
@@ -40,6 +51,7 @@ private:
         return val;
         }
         
+    /** Jn value getter */
     inline double getJn(const int reg)
         {
         double val(0);
@@ -49,6 +61,7 @@ private:
         return val;
         }
     
+    /** potential value getter */
     inline double getV(const int reg)
         {
         double val(0);
@@ -58,6 +71,7 @@ private:
         return val;
         }
     
+    /** template to assemble the matrix and vector, T is Tet or Fac */
     template <class T>
     void assembling(T const& obj, gmm::dense_matrix <double> &Ke, std::vector <double> &Le, write_matrix &K, write_vector &L)
     {
@@ -74,6 +88,7 @@ private:
         }
     }
 
+    /** compute integrales for matrix coefficients,input from tet */
     void integrales(Tetra::Tet &tet, gmm::dense_matrix <double> &AE)
     { //sigma is the region conductivity
     double sigma = getSigma(tet.getRegion());
@@ -96,6 +111,7 @@ private:
         }
     }
 
+    /** compute integrales for vector coefficients, input from facette */
 void integrales(Facette::Fac &fac, std::vector <double> &BE)
 {
 double Jn = getJn(fac.getRegion());
@@ -107,6 +123,7 @@ for (int npi=0; npi<Facette::NPI; npi++)
     }
 }
 
+/** solver, using biconjugate stabilized gradient, with diagonal preconditionner */
 int solve(mesh &msh)
 {
     const int NOD = msh.getNbNodes();
