@@ -19,6 +19,9 @@ add_executable (test_ut_facette ${SOURCES})
 SET(SOURCES ../tetra.cpp ut_tetra.cpp)
 add_executable (test_ut_tetra ${SOURCES})
 
+SET(SOURCES ../tetra.cpp ut_anisotropy.cpp)
+add_executable (test_ut_anisotropy ${SOURCES})
+
 add_executable (test_ut_tiny ut_tiny.cpp)
 
 add_executable (test_ut_time_int ut_time_int.cpp)
@@ -47,6 +50,12 @@ target_link_libraries(test_ut_tetra
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
   )
 
+target_link_libraries(test_ut_anisotropy
+  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY}
+  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  )
+  
 target_link_libraries(test_ut_tiny
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
@@ -64,5 +73,6 @@ add_test (NAME ut_pt3D_arithmetic COMMAND test_ut_pt3D)
 add_test (NAME ut_node COMMAND test_ut_node)
 add_test (NAME ut_facette COMMAND test_ut_facette)
 add_test (NAME ut_tetra COMMAND test_ut_tetra)
+add_test (NAME ut_anisotropy COMMAND test_ut_anisotropy)
 add_test (NAME ut_tiny COMMAND test_ut_tiny)
 add_test (NAME ut_time_int COMMAND test_ut_time_int)
