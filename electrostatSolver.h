@@ -7,16 +7,14 @@
 
 #include <map>
 
-#include "fem.h"
-
-#include "config.h"
-
 //#include "gmm/gmm.h"
 //#include "gmm/gmm_MUMPS_interface.h"
 //#include "gmm/gmm_precond_ilu.h"
 #include "gmm/gmm_iter.h"
 #include "gmm/gmm_solver_bicgstab.h"
 
+#include "fem.h"
+#include "config.h"
 #include "mesh.h"
 
 #include "tetra.h"
@@ -29,13 +27,14 @@ this class is containing both data and a solver to compute potential from dirich
 class electrostatSolver {
 public:
     /** constructor */
-    inline electrostatSolver(const std::shared_ptr<Nodes::Node[]> _p_node /**< [in] pointer to the nodes */,const int max_iter /**< [in] maximum number of iteration */ ): refNode(_p_node), MAXITER(max_iter) {}
+    inline electrostatSolver(mesh const& _msh /**< [in] reference to the mesh */,const int max_iter /**< [in] maximum number of iteration */ ): msh(_msh), MAXITER(max_iter) { }
 
 private:
-    const std::shared_ptr<Nodes::Node[]> refNode;/**< direct access to the Nodes */
+    /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh */
+	mesh msh;
     
-    const int MAXITER;/**< maximum number of iteration for biconjugate stabilized gradient */
-    //5000 in ref code
+    /** maximum number of iteration for biconjugate stabilized gradient */
+    const int MAXITER; //fixed to 5000 in ref code
     
     std::map<int,double> sigma_values;/**< conductivity region volume table */
     std::map<int,double> Jn_values;/**< table of current densities */
@@ -172,7 +171,8 @@ for (int ne=0; ne<FAC; ne++)
        for (int ie=0; ie<Facette::N; ie++)
             {
            int i= fac.ind[ie];
-           gmm::linalg_traits<gmm::row_matrix<write_vector > >::const_sub_row_type row = mat_const_row(Kw, i);
+           auto row = mat_const_row(Kw, i);
+           //gmm::linalg_traits<gmm::row_matrix<write_vector > >::const_sub_row_type row = mat_const_row(Kw, i);
            for (write_vector::const_iterator it=vect_const_begin(row); it!=vect_const_end(row); ++it)
                Kw(i, it->first)=0;
            Kw(i, i) =  1;
@@ -182,8 +182,10 @@ for (int ne=0; ne<FAC; ne++)
     }
 
 /* equilibrage des lignes */
-for (int i=0; i<NOD; i++){
-    gmm::linalg_traits<gmm::row_matrix<write_vector > >::const_sub_row_type row = mat_const_row(Kw, i);
+for (int i=0; i<NOD; i++)
+    {
+    auto row = mat_const_row(Kw, i);
+    //gmm::linalg_traits<gmm::row_matrix<write_vector > >::const_sub_row_type row = mat_const_row(Kw, i);
     double norme=gmm::vect_norminf(row);
     Lw[i]/=norme;
     for (write_vector::const_iterator it=vect_const_begin(row); it!=vect_const_end(row); ++it)
@@ -216,7 +218,7 @@ read_vector Xr(NOD); gmm::copy(Xw, Xr);
 
 std::cout << time.elapsed() << std::endl;
 
-for (int i=0; i<NOD; i++) { refNode[i].V = Xr[i]; }
+for (int i=0; i<NOD; i++) { msh.setNode(i).V = Xr[i]; }
 
 return 0;
 }

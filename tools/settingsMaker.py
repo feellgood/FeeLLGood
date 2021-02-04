@@ -47,8 +47,8 @@ class Settings(object):
 
     ## \brief define spin_polarized_current
     # uk and beta input parameters defining spin transfert torque
-    def spin_polarized_current(self,Uz,beta):
-        self.mySets["spin_polarized_current"] = {"Uz" : Uz, "beta" : beta}
+    def createSTT(self,volRegRef,gamma0,sigma,N0,beta,l_J,l_sf,bc_surf_reg_ref1,bc_val_name1,bc_val1,bc_surf_reg_ref2,bc_val_name2,bc_val2):
+        self.mySets["spin_transfer_torque"] = {"volume_region_reference" : str(volRegRef), "gamma_0" : gamma0, "sigma" : sigma,"dens_state" : N0, "beta" : beta,"l_J" : l_J,"l_sf" : l_sf,"boundary_conditions" : {  str(bc_surf_reg_ref1) : { bc_val_name1 : bc_val1 } ,  str(bc_surf_reg_ref2) : { bc_val_name2: bc_val2 } } }
 
     ## \brief define recentering
     # direction and threshold input parameters defining recentering
@@ -86,6 +86,30 @@ class Settings(object):
             print("WARNING : the directory " + self.mySets["outputs"]["directory"] + " does not exist" )
         else:
             print("output directory " + self.mySets["outputs"]["directory"] + " is valid")
+        if "spin_transfer_torque" in self.mySets:
+            print("spin transfer torque subsection detected.")
+            if "boundary_conditions" not in self.mySets["spin_transfer_torque"]:
+                print("undefined boundary conditions.")
+            elif len(self.mySets["spin_transfer_torque"]["boundary_conditions"]) == 2 :
+                print("2 boundary conditions")
+                bc = self.mySets["spin_transfer_torque"]["boundary_conditions"]
+                nbV=0
+                nbJ=0
+                for i in bc.values():
+                    if isinstance(i,dict) and "V" in i.keys():
+                        nbV += 1
+                    if isinstance(i,dict) and "J" in i.keys():
+                        nbJ += 1
+                if nbV == 2:
+                    print("Dirichlet boundary conditions.")
+                elif nbV ==1 and nbJ==1:
+                    print("mixt boundary conditions.")
+                elif nbJ==2:
+                    print("Neumann conditions.")
+                else:
+                    print("not supported boundary conditions.")
+            else :
+                print("wrong number of boundary conditions, should be 2.")
     
     ## \brief write json file
     # this method write a json file from the dictionary built by the creator

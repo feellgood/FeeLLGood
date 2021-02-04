@@ -78,11 +78,13 @@ if(mySettings.verbose)
     t_prm.infos();
     fem.infos();
     }
-
+    
 std::cout<<"start computing..."<<std::endl;
 counter.tic();
 //once fem containers are ok, linAlgebra object is built
 LinAlgebra linAlg(mySettings,fem.msh);
+
+electrostatSolver pot_solver = electrostatSolver(fem.msh,5000);// not so clean way to call constructor
 
 scal_fmm::fmm myFMM(fem,mySettings.verbose,mySettings.scalfmmNbTh);
 

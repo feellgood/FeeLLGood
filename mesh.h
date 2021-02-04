@@ -164,6 +164,8 @@ private:
     /** node container : the shared pointer is not initialized by constructor, but later, while reading the mesh, by member function init_node */
     std::shared_ptr<Nodes::Node[]> node;
     
+    
+    
     /** memory allocation for the nodes : delete[] must be specified in C++11, not in C++17 */
     inline void init_node(const int Nb)
         {
