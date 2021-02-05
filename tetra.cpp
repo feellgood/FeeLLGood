@@ -51,18 +51,18 @@ double Tet::add_STT_BE(int const& npi, STT p_stt,double Js, Pt::pt3D gradV[NPI],
 {
 const double ksi = Pt::sq(p_stt.lJ/p_stt.lsf);// this is in Thiaville notations beta_DW
 
-const double D0 = 2.0*p_stt.C0/(Pt::sq(CHARGE_ELECTRON)*p_stt.N0);
+const double D0 = 2.0*p_stt.sigma/(Pt::sq(CHARGE_ELECTRON)*p_stt.N0);
 
-const double pf=Pt::sq(p_stt.lJ)/(D0*(1.+ksi*ksi)) * BOHRS_MUB*p_stt.beta_sc/CHARGE_ELECTRON;
+const double pf=Pt::sq(p_stt.lJ)/(D0*(1.+ksi*ksi)) * BOHRS_MUB*p_stt.beta/CHARGE_ELECTRON;
 
 const double prefactor = D0/Pt::sq(p_stt.lJ)/(p_stt.gamma0*nu0*Js);
 
-Pt::pt3D j_grad_u = -p_stt.C0*Pt::pt3D(Pt::pScal(gradV[npi],Pt::pt3D(dUdx[npi](Pt::IDX_X),dUdy[npi](Pt::IDX_X),dUdz[npi](Pt::IDX_X)) ),
+Pt::pt3D j_grad_u = -p_stt.sigma*Pt::pt3D(Pt::pScal(gradV[npi],Pt::pt3D(dUdx[npi](Pt::IDX_X),dUdy[npi](Pt::IDX_X),dUdz[npi](Pt::IDX_X)) ),
                                  Pt::pScal(gradV[npi],Pt::pt3D(dUdx[npi](Pt::IDX_Y),dUdy[npi](Pt::IDX_Y),dUdz[npi](Pt::IDX_Y)) ),
                                  Pt::pScal(gradV[npi],Pt::pt3D(dUdx[npi](Pt::IDX_Z),dUdy[npi](Pt::IDX_Z),dUdz[npi](Pt::IDX_Z)) ));
 
 Pt::pt3D m = pf*(ksi*j_grad_u+U[npi]*j_grad_u);
-Pt::pt3D Hm = -p_stt.C0*p_stt.func(p_g[npi])*gradV[npi]*p_g[npi];
+Pt::pt3D Hm = -p_stt.sigma*p_stt.func(p_g[npi])*gradV[npi]*p_g[npi];
 
 for (int i=0; i<N; i++)
     { BE[i] += weight[npi]*a[i][npi]*(Hm + prefactor*m); }

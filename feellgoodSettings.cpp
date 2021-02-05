@@ -115,9 +115,9 @@ for (boost::property_tree::ptree::value_type &s : s_sub_tree)
             if (sub_k.first == "Js")
                 { p.J = sub_k.second.get_value<double>(); }
             }
-        p.p_STT.beta_sc = 0.0;
+        p.p_STT.beta = 0.0;
         p.p_STT.N0 = 1.0;
-        p.p_STT.C0 = 1.0;
+        p.p_STT.sigma = 1.0;
         p.p_STT.lJ = 1.0;
         p.p_STT.lsf = 1.0;
         p.p_STT.gamma0 = 1.0;
@@ -198,12 +198,23 @@ doCompile1Dprm();
 
 try
     {
-    sub_tree = root.get_child("spin_polarized_current");
-    Uz = sub_tree.get<double>("Uz",0.0);
-    beta = sub_tree.get<double>("beta",0.0);
+    sub_tree = root.get_child("spin_transfer_torque");
+    
+    p_stt.func = [](Pt::pt3D) {return 1;};
+    
+    p_stt.gamma0 = sub_tree.get<double>("gamma0",0.0);
+    p_stt.sigma = sub_tree.get<double>("sigma",1.0);
+    p_stt.N0 = sub_tree.get<double>("dens_state",1.0);
+    p_stt.beta = sub_tree.get<double>("beta",0.0);
+    
+    p_stt.lJ = sub_tree.get<double>("l_J",1.0);
+    p_stt.lsf = sub_tree.get<double>("l_sf",1.0);
+    std::string reg_str = sub_tree.get<std::string>("volume_region_reference"); 
+    p_stt.reg = stoi(reg_str);
+    p_stt.bc = Tetra::boundary_conditions::Undef; // default value
     }
 catch(std::exception &e)
-    { std::cout << "no spin polarized" << std::endl; }
+    { stt_flag = false; }
 
 
 try { sub_tree = root.get_child("demagnetizing_field_solver"); }

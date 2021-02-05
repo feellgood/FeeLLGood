@@ -41,8 +41,7 @@ class Settings{
         solverNbTh = 8;
         scalfmmNbTh = 8;
         
-        Uz =  0.0;    
-        beta = 0.0;
+        stt_flag = false;
         }
 	
 	/** convenient enum to define what quantity is written in output file .evol */
@@ -84,12 +83,11 @@ class Settings{
 	int solverNbTh;/**< nb of threads for the finite element solver */
 	int scalfmmNbTh;/**< nb of threads for the computation of the demag field with scalfmm */
     
-    //Pt::pt3D Hext;/**< applied external field. Unit : SI (A/m) */
+    Tetra::STT p_stt;/**< spin transfert torque parameters */
     
-    double Uz;/**< spin transfert torque adiabatic prefactor along z direction */
-    double beta;/**< spin transfert torque non-adiabatic prefactor along z direction */
+    bool stt_flag;/**< if spin transfer torque p_stt is fully initialized and boundary conditions ok, stt_flag is set to true */
     
-	std::string sMx;/**< string for analytical definition of Mx */
+    std::string sMx;/**< string for analytical definition of Mx */
 	std::string sMy;/**< string for analytical definition of My */
     std::string sMz;/**< string for analytical definition of Mz */
     

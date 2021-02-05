@@ -84,8 +84,11 @@ counter.tic();
 //once fem containers are ok, linAlgebra object is built
 LinAlgebra linAlg(mySettings,fem.msh);
 
-electrostatSolver pot_solver = electrostatSolver(fem.msh,5000);// not so clean way to call constructor
-
+if (mySettings.stt_flag)
+    { electrostatSolver pot_solver = electrostatSolver(fem.msh,5000); }
+else
+    { std::cout << "no spin transfer torque, or incorrect syntax/missing parameter" << std::endl; }
+    
 scal_fmm::fmm myFMM(fem,mySettings.verbose,mySettings.scalfmmNbTh);
 
 int nt = time_integration(fem,mySettings,linAlg,myFMM,t_prm);

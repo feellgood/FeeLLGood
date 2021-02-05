@@ -50,22 +50,30 @@ constexpr double a[N][NPI] = {{1.-u[0]-v[0]-w[0],1.-u[1]-v[1]-w[1],1.-u[2]-v[2]-
 {u[0],u[1],u[2],u[3],u[4]}, {v[0],v[1],v[2],v[3],v[4]}, {w[0],w[1],w[2],w[3],w[4]}};
 
 
+
+enum boundary_conditions {Dirichlet,Neumann,Mixt,Undef};
+
+
 /** \class STT
  container for Spin Transfert Torque constants, Thiaville model
  */
 
 struct STT
     {
-    double beta_sc;/**< \f$ \beta \f$ is polarization rate of the current */    
+    int reg;/**< volume region number */
+    double beta;/**< \f$ \beta \f$ is polarization rate of the current */    
     double N0;/**< density of states at Fermi level, units : J^-1 nm^-3  */
-    double C0;/**< Conductivity Ohm^-1 nm^-1 */
+    double sigma;/**< Conductivity Ohm^-1 nm^-1 */
     double lJ;/**< length */
     double lsf;/**< spin flip length */
     double gamma0;/**< gyromagnetic constant (to check) */
     std::function<double (Pt::pt3D)> func;/**< function to take into account spacial variation of current density (input is gauss point) */
-        
+    
+    boundary_conditions bc;/**< boundary conditions nature */
     };
 
+
+    
 /** \class prm
 region number and material constants
 */
