@@ -1,9 +1,7 @@
 /** \file electrostatSolver.h
   \brief solver for electrostatic problem when STT is required
-  header containing electrostatSolver class. I uses biconjugate stabilized gradient with diagonal preconditioner. The solver is only called once to compute voltages V for each nodes of the mesh, when STT computation is involved.
+  header containing electrostatSolver class. It uses biconjugate stabilized gradient with diagonal preconditioner. The solver is only called once to compute voltages V for each nodes of the mesh, when STT computation is involved.
  */
-
-#include <boost/progress.hpp>
 
 #include <map>
 
@@ -27,12 +25,21 @@ this class is containing both data and a solver to compute potential from dirich
 class electrostatSolver {
 public:
     /** constructor */
-    inline electrostatSolver(mesh const& _msh /**< [in] reference to the mesh */,const int max_iter /**< [in] maximum number of iteration */ ): msh(_msh), MAXITER(max_iter) { }
+    inline electrostatSolver(mesh const& _msh /**< [in] reference to the mesh */,const bool v,const int max_iter /**< [in] maximum number of iteration */ ): msh(_msh), NOD(msh.getNbNodes()), TET(msh.getNbTets()), FAC(msh.getNbFacs()), verbose(v), MAXITER(max_iter) { }
 
 private:
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh */
 	mesh msh;
     
+    /** number of nodes */
+    const int NOD;
+    /** number of tet */
+    const int TET;
+    /** number of fac */
+    const int FAC;
+    /** if verbose set to true, some printing are sent to terminal */
+    const bool verbose;
+
     /** maximum number of iteration for biconjugate stabilized gradient */
     const int MAXITER; //fixed to 5000 in ref code
     
@@ -88,7 +95,7 @@ private:
     }
 
     /** compute integrales for matrix coefficients,input from tet */
-    void integrales(Tetra::Tet &tet, gmm::dense_matrix <double> &AE)
+    void integrales(Tetra::Tet const& tet, gmm::dense_matrix <double> &AE)
     { //sigma is the region conductivity
     double sigma = getSigma(tet.getRegion());
 
@@ -123,21 +130,13 @@ for (int npi=0; npi<Facette::NPI; npi++)
 }
 
 /** solver, using biconjugate stabilized gradient, with diagonal preconditionner */
-int solve(mesh &msh)
+int solve(void)
 {
-    const int NOD = msh.getNbNodes();
-    const int TET = msh.getNbTets();
-    const int FAC = msh.getNbFacs();
-    
-boost::timer time;
-const int  VERBOSE = 0;
-
 write_matrix Kw(NOD, NOD);
 write_vector Lw(NOD);
 write_vector Xw(NOD);
 
-std::cout << "assembling..." << std::endl;
-time.restart();
+if(verbose) { std::cout << "assembling..." << std::endl; }
 
 for (int ne=0; ne<TET; ne++){
     Tetra::Tet &tet = msh.tet[ne];
@@ -155,10 +154,6 @@ for (int ne=0; ne<FAC; ne++){
     assembling<Facette::Fac>(fac, K, L, Kw, Lw);
     }
 
-std::cout << time.elapsed() << std::endl;
-
-time.restart();
-
 read_matrix  Kr(NOD, NOD);    gmm::copy(Kw, Kr);
 
 // conditions de Dirichlet
@@ -170,15 +165,15 @@ for (int ne=0; ne<FAC; ne++)
     double V = getV(reg);
        for (int ie=0; ie<Facette::N; ie++)
             {
-           int i= fac.ind[ie];
-           auto row = mat_const_row(Kw, i);
-           //gmm::linalg_traits<gmm::row_matrix<write_vector > >::const_sub_row_type row = mat_const_row(Kw, i);
-           for (write_vector::const_iterator it=vect_const_begin(row); it!=vect_const_end(row); ++it)
-               Kw(i, it->first)=0;
-           Kw(i, i) =  1;
-           Lw[i]    =  V;  
-           Xw[i]    =  V;
-           }
+            const int i= fac.ind[ie];
+            auto row = mat_const_row(Kw, i);
+            //gmm::linalg_traits<gmm::row_matrix<write_vector > >::const_sub_row_type row = mat_const_row(Kw, i);
+            std::for_each(row.begin(),row.end(),[&Kw,i]( std::pair<const long unsigned int, double>& it){ Kw(i,it.first) = 0.0; } );
+            //for (write_vector::const_iterator it=vect_const_begin(row); it!=vect_const_end(row); ++it) Kw(i, it->first)=0;
+            Kw(i, i) =  1;
+            Lw[i]    =  V;  
+            Xw[i]    =  V;
+            }
     }
 
 /* equilibrage des lignes */
@@ -188,35 +183,28 @@ for (int i=0; i<NOD; i++)
     //gmm::linalg_traits<gmm::row_matrix<write_vector > >::const_sub_row_type row = mat_const_row(Kw, i);
     double norme=gmm::vect_norminf(row);
     Lw[i]/=norme;
-    for (write_vector::const_iterator it=vect_const_begin(row); it!=vect_const_end(row); ++it)
-        Kw(i, it->first)/=norme;
+    
+    std::for_each(row.begin(),row.end(),[&Kw,norme,i]( std::pair<const long unsigned int, double>& it){ Kw(i,it.first)/=norme; } );
+    //for (write_vector::const_iterator it=vect_const_begin(row); it!=vect_const_end(row); ++it) Kw(i, it->first)/=norme;
     }
 
 gmm::copy(Kw, Kr);
 read_vector  Lr(NOD);        gmm::copy(Lw, Lr);
 
-std::cout << time.elapsed() << std::endl;
-
-std::cout << "preconditionning ..." << std::endl;
-time.restart();
+if(verbose) { std::cout << "preconditionning ..." << std::endl; }
 
 gmm::diagonal_precond <read_matrix> prc(Kr);
-
 //gmm::ilu_precond <read_matrix> prc(Kr);
-std::cout << time.elapsed() << std::endl;
 
-std::cout << "solving ..." << std::endl;
-time.restart();
+if(verbose) { std::cout << "solving ..." << std::endl; }
 
 gmm::iteration iter(1e-8);
 iter.set_maxiter(MAXITER);
-iter.set_noisy(VERBOSE);
+iter.set_noisy(verbose);
 
 gmm::bicgstab(Kr, Xw, Lr, prc, iter);
 
 read_vector Xr(NOD); gmm::copy(Xw, Xr);
-
-std::cout << time.elapsed() << std::endl;
 
 for (int i=0; i<NOD; i++) { msh.setNode(i).V = Xr[i]; }
 
