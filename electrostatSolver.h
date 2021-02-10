@@ -25,7 +25,7 @@ this class is containing both data and a solver to compute potential from dirich
 class electrostatSolver {
 public:
     /** constructor */
-    inline electrostatSolver(mesh const& _msh /**< [in] reference to the mesh */,const bool v,const int max_iter /**< [in] maximum number of iteration */ ): msh(_msh), NOD(msh.getNbNodes()), TET(msh.getNbTets()), FAC(msh.getNbFacs()), verbose(v), MAXITER(max_iter) { }
+    inline electrostatSolver(mesh const& _msh /**< [in] reference to the mesh */,const bool v /**< [in] verbose bool */,const int max_iter /**< [in] maximum number of iteration */ ): msh(_msh), NOD(msh.getNbNodes()), TET(msh.getNbTets()), FAC(msh.getNbFacs()), verbose(v), MAXITER(max_iter) { }
 
 private:
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh */
