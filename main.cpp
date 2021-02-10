@@ -85,7 +85,12 @@ counter.tic();
 LinAlgebra linAlg(mySettings,fem.msh);
 
 if (mySettings.stt_flag)
-    { electrostatSolver pot_solver = electrostatSolver(fem.msh,mySettings.verbose,5000); }
+    { 
+    if (mySettings.p_stt.bc != Tetra::boundary_conditions::Undef) {std::cout << "spin transfer torque not yet supported, coming soon..." << std::endl; }
+        //{electrostatSolver pot_solver = electrostatSolver(fem.msh,mySettings.verbose,5000); }
+    else
+        { std::cout << "warning : undefined boundary conditions for STT" << std::endl; }
+    }
 else
     { std::cout << "no spin transfer torque" << std::endl; }
     

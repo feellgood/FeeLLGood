@@ -214,8 +214,33 @@ try
         std::string reg_str = sub_tree.get<std::string>("volume_region_reference"); 
         p_stt.reg = stoi(reg_str);
         p_stt.bc = Tetra::boundary_conditions::Undef; // default value
-        if (p_stt.bc == Tetra::boundary_conditions::Undef ) { std::cout << "warning : undefined boundary conditions for STT" << std::endl; }
+        try 
+            {
+            s_sub_tree = sub_tree.get_child("boundary_conditions");
             
+            for (boost::property_tree::ptree::value_type &s : s_sub_tree)
+                {
+                std::string name_reg = s.first;
+                if (!name_reg.empty())
+                    {
+                    Tetra::bc_data bc_vals;
+                    bc_vals.reg = stoi(name_reg);
+                    
+                    try { bc_vals.val = s_sub_tree.get_child(s.first).get<double>("V"); bc_vals.typ = Tetra::type_val_reg::potV; }
+                    catch(std::exception &e) 
+                        {  
+                        try { bc_vals.val = s_sub_tree.get_child(s.first).get<double>("J"); bc_vals.typ = Tetra::type_val_reg::densJ; }
+                        catch(std::exception &e) { std::cout << "unrecognized boundary condition physical constant on region " << bc_vals.reg << std::endl; exit(1); }
+                        }
+                    
+                    p_stt.full_bc_data.push_back( bc_vals );
+                    }
+                }   
+            }
+        catch(std::exception &e)
+            { std::cout << "warning : missing boundary conditions in spin_transfer_torque" << std::endl; }
+        p_stt.define_boundary_conditions();
+        if (p_stt.bc != Tetra::boundary_conditions::Undef ) {stt_flag = true;}
         }
     catch(std::exception &e)
         { stt_flag = false; std::cout<< "incorrect syntax/missing parameter in spin_transfer_torque section" <<std::endl; }
