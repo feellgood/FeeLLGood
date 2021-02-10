@@ -67,6 +67,7 @@ struct bc_data
     double val;/**< value of physical constant on reg */
     int reg;/**< ref to a surface region for val */    
     
+    /** printing of the datas to the terminal */
     inline void infos(void)
         { std::cout << "reg=" << reg << "val=" << val << "\t typ=" << typ <<std::endl; }
     };
@@ -90,6 +91,7 @@ struct STT
     
     std::vector<bc_data> full_bc_data; /**< all the boundary conditions */
     
+    /** check the nature of the boundary conditions associated to a spin transfer torque problem */
     inline void define_boundary_conditions(void)
         {
         if(full_bc_data.size() == 2) 

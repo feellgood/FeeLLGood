@@ -25,7 +25,37 @@ this class is containing both data and a solver to compute potential from dirich
 class electrostatSolver {
 public:
     /** constructor */
-    inline electrostatSolver(mesh const& _msh /**< [in] reference to the mesh */,const bool v /**< [in] verbose bool */,const int max_iter /**< [in] maximum number of iteration */ ): msh(_msh), NOD(msh.getNbNodes()), TET(msh.getNbTets()), FAC(msh.getNbFacs()), verbose(v), MAXITER(max_iter) { }
+    inline electrostatSolver(mesh const& _msh /**< [in] reference to the mesh */, Tetra::STT const& p_stt /**< all spin transfer torque parameters */,
+                             const bool v /**< [in] verbose bool */,
+                             const int max_iter /**< [in] maximum number of iteration */ ): msh(_msh), NOD(msh.getNbNodes()), TET(msh.getNbTets()), FAC(msh.getNbFacs()), verbose(v), MAXITER(max_iter) 
+                             {
+                             if (p_stt.bc != Tetra::boundary_conditions::Undef)
+                                {
+                                sigma_values.insert( std::pair<int,double>(p_stt.reg,p_stt.sigma) );
+                                
+                                std::for_each(p_stt.full_bc_data.begin(),p_stt.full_bc_data.end(), 
+                                              [this](Tetra::bc_data const& bc_d)
+                                                {
+                                                switch(bc_d.typ)
+                                                    {
+                                                    case Tetra::type_val_reg::potV: 
+                                                        V_values.insert(std::pair<int,double>(bc_d.reg,bc_d.val) );
+                                                    break;
+                                                    case Tetra::type_val_reg::densJ:
+                                                        J_values.insert(std::pair<int,double>(bc_d.reg,bc_d.val) );
+                                                    break;
+                                                    default: std::cout << "type error for physical constant in boundary conditions" << std::endl; exit(1); break;
+                                                    }
+                                                    
+                                                } 
+                                             ); //end for_each
+                                }
+                            else
+                                { std::cout << "warning : undefined boundary conditions for STT" << std::endl; exit(1);}
+                            
+                            std::cout << "new implementation of spin transfer torque not yet supported, coming soon..." << std::endl; 
+                            infos();
+                            }
 
 private:
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh */
@@ -44,8 +74,28 @@ private:
     const int MAXITER; //fixed to 5000 in ref code
     
     std::map<int,double> sigma_values;/**< conductivity region volume table */
-    std::map<int,double> Jn_values;/**< table of current densities */
-    std::map<int,double> V_values;/**< table of voltage dirichlet boundary conditions (on surface region) */ 
+    
+    /** boundary conditions : table of current densities (int is a surface region) */
+    std::map<int,double> J_values;
+    
+    /** boundary conditions : table of voltage (int is a surface region) */
+    std::map<int,double> V_values; 
+    
+    /** basic informations on boundary conditions */
+    inline void infos(void) 
+        {
+        std::for_each(sigma_values.begin(),sigma_values.end(),
+                      [](std::pair<int,double> const& p)
+                      { std::cout << "reg: " << p.first << "\tsigma :" << p.second << std::endl; } );
+        
+        std::for_each(J_values.begin(),J_values.end(),
+                      [](std::pair<int,double> const& p)
+                      { std::cout << "reg: " << p.first << "\tJ :" << p.second << std::endl; } );
+        
+        std::for_each(V_values.begin(),V_values.end(),
+                      [](std::pair<int,double> const& p)
+                      { std::cout << "reg: " << p.first << "\tV :" << p.second << std::endl; } );
+        }
     
     /** sigma value getter */
     inline double getSigma(const int reg)
@@ -58,11 +108,11 @@ private:
         }
         
     /** Jn value getter */
-    inline double getJn(const int reg)
+    inline double getJ(const int reg)
         {
         double val(0);
-        std::map<int,double>::iterator it = Jn_values.find(reg); 
-        if (it != Jn_values.end() ) val = it->second;
+        std::map<int,double>::iterator it = J_values.find(reg); 
+        if (it != J_values.end() ) val = it->second;
         
         return val;
         }
@@ -120,12 +170,12 @@ private:
     /** compute integrales for vector coefficients, input from facette */
 void integrales(Facette::Fac &fac, std::vector <double> &BE)
 {
-double Jn = getJn(fac.getRegion());
+double J = getJ(fac.getRegion());
 
 for (int npi=0; npi<Facette::NPI; npi++)
     {
     double w =fac.weight(npi);
-    for (int ie=0; ie<Facette::N; ie++) { BE[ie] -= Facette::a[ie][npi]*Jn *w; }
+    for (int ie=0; ie<Facette::N; ie++) { BE[ie] -= Facette::a[ie][npi]*J *w; }
     }
 }
 
