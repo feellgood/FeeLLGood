@@ -87,7 +87,7 @@ LinAlgebra linAlg(mySettings,fem.msh);
 if (mySettings.stt_flag)
     { electrostatSolver pot_solver = electrostatSolver(fem.msh,mySettings.verbose,5000); }
 else
-    { std::cout << "no spin transfer torque, or incorrect syntax/missing parameter" << std::endl; }
+    { std::cout << "no spin transfer torque" << std::endl; }
     
 scal_fmm::fmm myFMM(fem,mySettings.verbose,mySettings.scalfmmNbTh);
 

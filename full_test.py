@@ -42,6 +42,8 @@ mySettings["time_integration"]["max(du)"] = 0.1
 
 mySettings["initial_magnetization"] = {"Mx":"0","My":"0","Mz":"1"}
 
+mySettings["spin_transfer_torque"] = {"bof":"lalala"}
+
 JSON_fileName = 'full_test_settings.json'
 mySettings.write(JSON_fileName)
 

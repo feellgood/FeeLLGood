@@ -202,16 +202,23 @@ try
     
     p_stt.func = [](Pt::pt3D) {return 1;};
     
-    p_stt.gamma0 = sub_tree.get<double>("gamma0",0.0);
-    p_stt.sigma = sub_tree.get<double>("sigma",1.0);
-    p_stt.N0 = sub_tree.get<double>("dens_state",1.0);
-    p_stt.beta = sub_tree.get<double>("beta",0.0);
+    try
+        {
+        p_stt.gamma0 = sub_tree.get<double>("gamma0",0.0);
+        p_stt.sigma = sub_tree.get<double>("sigma",1.0);
+        p_stt.N0 = sub_tree.get<double>("dens_state",1.0);
+        p_stt.beta = sub_tree.get<double>("beta",0.0);
     
-    p_stt.lJ = sub_tree.get<double>("l_J",1.0);
-    p_stt.lsf = sub_tree.get<double>("l_sf",1.0);
-    std::string reg_str = sub_tree.get<std::string>("volume_region_reference"); 
-    p_stt.reg = stoi(reg_str);
-    p_stt.bc = Tetra::boundary_conditions::Undef; // default value
+        p_stt.lJ = sub_tree.get<double>("l_J",1.0);
+        p_stt.lsf = sub_tree.get<double>("l_sf",1.0);
+        std::string reg_str = sub_tree.get<std::string>("volume_region_reference"); 
+        p_stt.reg = stoi(reg_str);
+        p_stt.bc = Tetra::boundary_conditions::Undef; // default value
+        if (p_stt.bc == Tetra::boundary_conditions::Undef ) { std::cout << "warning : undefined boundary conditions for STT" << std::endl; }
+            
+        }
+    catch(std::exception &e)
+        { stt_flag = false; std::cout<< "incorrect syntax/missing parameter in spin_transfer_torque section" <<std::endl; }
     }
 catch(std::exception &e)
     { stt_flag = false; }
