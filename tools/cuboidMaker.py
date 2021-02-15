@@ -4,6 +4,9 @@ class Cuboid(object):
     def __init__ (self,pt_min,pt_max,nbX,nbY,nbZ):
         """ 
             constructor, inits nodes lists, and builds tetrahedrons and outer surface mesh of the cuboid in the volume defined by pt_min,pt_max
+            Tet is a table containing 4 indices refering to the list of points
+            Fac is a table containing 3 indices refering to the list of points
+            index shift to obey gmsh file format 2.2 is performed while writing the file, except first column indices of points table  
         """
         idx = 1
         self.nbX = nbX
@@ -20,6 +23,8 @@ class Cuboid(object):
                     idx += 1
         self.Tet = []
         self.Fac = []
+        self.subSurf = []
+        self.subSurfRegName = []
         for i in range(0,self.nbX):
             for j in range(0,self.nbY):
                 for k in range(0,self.nbZ):
@@ -77,12 +82,36 @@ class Cuboid(object):
     def stringTet(self,idx):
         return str(1+self.Tet[idx][0])+"\t"+str(1+self.Tet[idx][1])+"\t"+str(1+self.Tet[idx][2]) +"\t"+str(1+self.Tet[idx][3])
 
-    def stringFac(self,idx):
-        return str(1+self.Fac[idx][0])+"\t"+str(1+self.Fac[idx][1])+"\t"+str(1+self.Fac[idx][2])
-
+    def stringFac(self,table,idx):
+        #return str(1+self.Fac[idx][0])+"\t"+str(1+self.Fac[idx][1])+"\t"+str(1+self.Fac[idx][2])
+        return str(1+table[idx][0])+"\t"+str(1+table[idx][1])+"\t"+str(1+table[idx][2])
+    
     def calc_idx(self,i,j,k):
         return( (self.nbZ+1)*(self.nbY+1)*i +  (self.nbZ+1)*j + k)
 
+    def calc_nb_elements(self):
+        nbElem = len(self.Tet) + len(self.Fac)
+        for i in range(0,len(self.subSurf)):
+            nbElem += len(self.subSurf[i])
+        return(nbElem)
+        
+    def add_sub_surface(self,subSurfRegName,func):
+        tempo_subSurf = []
+        for i in range(0,len(self.Fac)):
+            f = self.Fac[i]
+            idxA = f[0]
+            idxB = f[1]
+            idxC = f[2]
+            A = self.pts[idxA]
+            B = self.pts[idxB]
+            C = self.pts[idxC]
+            
+            if(func(A[1],A[2],A[3]) and func(B[1],B[2],B[3]) and func(C[1],C[2],C[3]) ):
+                tempo_subSurf.append( [idxA,idxB,idxC] )
+        self.subSurf.append( tempo_subSurf )
+        self.subSurfRegName.append(subSurfRegName)
+
+    
     def make(self,meshFileName,volRegionName,surfRegionName):
         """ write mesh file in gmsh 2.2 format """
         meshFile = open(meshFileName,'w')
@@ -91,16 +120,22 @@ class Cuboid(object):
         for i in range(0,len(self.pts)):
             meshFile.write( str(self.pts[i][0])+"\t"+str(self.pts[i][1])+"\t"+str(self.pts[i][2])+"\t"+str(self.pts[i][3]) + "\n" )
         meshFile.write("$EndNodes\n$Elements\n")
-        meshFile.write(str(len(self.Tet)+len(self.Fac))+"\n")
+        nbElem = self.calc_nb_elements()
+        meshFile.write(str(nbElem)+"\n")
         idx=1
         for i in range(0,len(self.Tet)):
             s = self.stringTet(i)
             meshFile.write( str(idx)+"\t4\t2\t" + volRegionName + "\t1\t" + s + "\n" )
             idx += 1
         for i in range(0,len(self.Fac)):
-            s = self.stringFac(i)
+            s = self.stringFac(self.Fac,i)
             meshFile.write( str(idx)+"\t2\t2\t" + surfRegionName + "\t1\t"+ s + "\n" )
             idx += 1
+        for i in range(0,len(self.subSurf)):
+            for j in range(0,len(self.subSurf[i])):
+                s = self.stringFac(self.subSurf[i],j)
+                meshFile.write( str(idx)+"\t2\t2\t" + self.subSurfRegName[i] + "\t1\t"+ s + "\n" )
+                idx += 1
         meshFile.write("$EndElements\n")
         meshFile.close()
         print("mesh file " + meshFileName + " generated.")
