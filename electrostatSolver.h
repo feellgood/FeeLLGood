@@ -53,7 +53,7 @@ public:
                             else
                                 { std::cout << "warning : undefined boundary conditions for STT" << std::endl; exit(1);}
                             
-                            std::cout << "new implementation of spin transfer torque not yet supported, coming soon..." << std::endl; 
+                            solve();
                             infos();
                             }
 
@@ -206,26 +206,25 @@ for (int ne=0; ne<FAC; ne++){
 
 read_matrix  Kr(NOD, NOD);    gmm::copy(Kw, Kr);
 
+if(verbose) { std::cout << "boundary conditions..." << std::endl; }
 // conditions de Dirichlet
 for (int ne=0; ne<FAC; ne++)
     {
     Facette::Fac &fac = msh.fac[ne];
-    const int reg = fac.getRegion();
-    
-    double V = getV(reg);
+    double V = getV(fac.getRegion());
        for (int ie=0; ie<Facette::N; ie++)
             {
             const int i= fac.ind[ie];
             auto row = mat_const_row(Kw, i);
-            //gmm::linalg_traits<gmm::row_matrix<write_vector > >::const_sub_row_type row = mat_const_row(Kw, i);
-            std::for_each(row.begin(),row.end(),[&Kw,i]( std::pair<const long unsigned int, double>& it){ Kw(i,it.first) = 0.0; } );
-            //for (write_vector::const_iterator it=vect_const_begin(row); it!=vect_const_end(row); ++it) Kw(i, it->first)=0;
+       //gmm::linalg_traits<gmm::row_matrix<write_vector > >::const_sub_row_type row = mat_const_row(Kw, i);
+            std::for_each(row.begin(),row.end(),[&Kw,&i]( std::pair<const long unsigned int, double> const& it){ Kw(i,it.first) = 0.0; } );
             Kw(i, i) =  1;
             Lw[i]    =  V;  
             Xw[i]    =  V;
             }
     }
 
+if(verbose) { std::cout << "line weighting..." << std::endl; }
 /* equilibrage des lignes */
 for (int i=0; i<NOD; i++)
     {
@@ -234,8 +233,7 @@ for (int i=0; i<NOD; i++)
     double norme=gmm::vect_norminf(row);
     Lw[i]/=norme;
     
-    std::for_each(row.begin(),row.end(),[&Kw,norme,i]( std::pair<const long unsigned int, double>& it){ Kw(i,it.first)/=norme; } );
-    //for (write_vector::const_iterator it=vect_const_begin(row); it!=vect_const_end(row); ++it) Kw(i, it->first)/=norme;
+    std::for_each(row.begin(),row.end(),[&Kw,norme,&i]( std::pair<const long unsigned int, double> const& it){ Kw(i,it.first)/=norme; } );
     }
 
 gmm::copy(Kw, Kr);
@@ -256,8 +254,7 @@ gmm::bicgstab(Kr, Xw, Lr, prc, iter);
 
 read_vector Xr(NOD); gmm::copy(Xw, Xr);
 
-for (int i=0; i<NOD; i++) { msh.setNode(i).V = Xr[i]; }
-
+msh.setNodesPotential(Xr);
 return 0;
 }
     

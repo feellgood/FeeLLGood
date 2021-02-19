@@ -5,10 +5,16 @@ sys.path.insert(0,'../tools')
 from cuboidMaker import Cuboid
 from settingsMaker import Settings
 
-rectangle = Cuboid([-256,-256,-2],[256,256,2],128,128,1)
+rectangle = Cuboid([-2,-2,-2],[2,2,2],2,2,2)
 meshFileName = 'rectangle.msh'
 vol_region_name = "300"
 surf_region_name = "200"
+
+bc1_regNumber = 201
+bc2_regNumber = 202
+
+rectangle.add_sub_surface(str(bc1_regNumber), lambda x,y,z: z== -2 )
+rectangle.add_sub_surface(str(bc2_regNumber), lambda x,y,z: z== 2 )
 rectangle.make(meshFileName,vol_region_name,surf_region_name)
 
 mySettings = Settings(meshFileName)
@@ -25,7 +31,6 @@ mySettings["outputs"]["take_photo"] = 500
 
 mySettings.createVolRegion( vol_region_name )
 mySettings.createSurfRegion( surf_region_name )
-
 
 #magnetization at saturation (SI unit = A/m)
 mySettings["mesh"]["volume_regions"]["300"]["Js"] = 800e3
@@ -47,9 +52,9 @@ N0 = 1
 beta = 1
 l_J = 1
 l_sf = 1
-V1 = 42
+V1 = 0
 V2 = -3.14
-mySettings.createSTT(300,gamma0,sigma,N0,beta,l_J,l_sf,200,"V",V1,201,"V",V2)
+mySettings.createSTT(300,gamma0,sigma,N0,beta,l_J,l_sf,bc1_regNumber,"V",V1,bc2_regNumber,"V",V2)
 
 mySettings["initial_magnetization"] = {"Mx":"x","My":"y","Mz":"0.1"}
 

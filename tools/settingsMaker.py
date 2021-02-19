@@ -91,7 +91,6 @@ class Settings(object):
             if "boundary_conditions" not in self.mySets["spin_transfer_torque"]:
                 print("undefined boundary conditions.")
             elif len(self.mySets["spin_transfer_torque"]["boundary_conditions"]) == 2 :
-                print("2 boundary conditions")
                 bc = self.mySets["spin_transfer_torque"]["boundary_conditions"]
                 nbV=0
                 nbJ=0
