@@ -52,9 +52,8 @@ public:
                                 }
                             else
                                 { std::cout << "warning : undefined boundary conditions for STT" << std::endl; exit(1);}
-                            
-                            solve();
-                            infos();
+                            if(verbose) { infos(); }
+                            solve(1e-8);// iter_tol from ref code Zhang&Li version
                             }
 
 private:
@@ -168,7 +167,7 @@ private:
     }
 
     /** compute integrales for vector coefficients, input from facette */
-void integrales(Facette::Fac &fac, std::vector <double> &BE)
+void integrales(Facette::Fac const& fac, std::vector <double> &BE)
 {
 double J = getJ(fac.getRegion());
 
@@ -180,7 +179,7 @@ for (int npi=0; npi<Facette::NPI; npi++)
 }
 
 /** solver, using biconjugate stabilized gradient, with diagonal preconditionner */
-int solve(void)
+int solve(const double iter_tol)
 {
 write_matrix Kw(NOD, NOD);
 write_vector Lw(NOD);
@@ -189,7 +188,7 @@ write_vector Xw(NOD);
 if(verbose) { std::cout << "assembling..." << std::endl; }
 
 for (int ne=0; ne<TET; ne++){
-    Tetra::Tet &tet = msh.tet[ne];
+    Tetra::Tet const& tet = msh.tet[ne];
     gmm::dense_matrix <double> K(Tetra::N, Tetra::N);
     std::vector <double> L(Tetra::N);
     integrales(tet, K);
@@ -197,7 +196,7 @@ for (int ne=0; ne<TET; ne++){
     }
 
 for (int ne=0; ne<FAC; ne++){
-    Facette::Fac &fac = msh.fac[ne];
+    Facette::Fac const& fac = msh.fac[ne];
     gmm::dense_matrix <double> K(Facette::N, Facette::N);
     std::vector <double> L(Facette::N);
     integrales(fac, L);     
@@ -215,9 +214,7 @@ for (int ne=0; ne<FAC; ne++)
        for (int ie=0; ie<Facette::N; ie++)
             {
             const int i= fac.ind[ie];
-            auto row = mat_const_row(Kw, i);
-       //gmm::linalg_traits<gmm::row_matrix<write_vector > >::const_sub_row_type row = mat_const_row(Kw, i);
-            std::for_each(row.begin(),row.end(),[&Kw,&i]( std::pair<const long unsigned int, double> const& it){ Kw(i,it.first) = 0.0; } );
+            std::for_each(mat_row(Kw, i).begin(),mat_row(Kw, i).end(), [](std::pair<const long unsigned int, double> & it) { it.second = 0.0; } );
             Kw(i, i) =  1;
             Lw[i]    =  V;  
             Xw[i]    =  V;
@@ -228,25 +225,20 @@ if(verbose) { std::cout << "line weighting..." << std::endl; }
 /* equilibrage des lignes */
 for (int i=0; i<NOD; i++)
     {
-    auto row = mat_const_row(Kw, i);
-    //gmm::linalg_traits<gmm::row_matrix<write_vector > >::const_sub_row_type row = mat_const_row(Kw, i);
-    double norme=gmm::vect_norminf(row);
+    double norme=gmm::vect_norminf(mat_row(Kw, i));
     Lw[i]/=norme;
-    
-    std::for_each(row.begin(),row.end(),[&Kw,norme,&i]( std::pair<const long unsigned int, double> const& it){ Kw(i,it.first)/=norme; } );
+    std::for_each(mat_row(Kw, i).begin(),mat_row(Kw, i).end(), [norme](std::pair<const long unsigned int, double> & it) { it.second/=norme; } );
     }
 
 gmm::copy(Kw, Kr);
 read_vector  Lr(NOD);        gmm::copy(Lw, Lr);
 
 if(verbose) { std::cout << "preconditionning ..." << std::endl; }
-
 gmm::diagonal_precond <read_matrix> prc(Kr);
-//gmm::ilu_precond <read_matrix> prc(Kr);
 
 if(verbose) { std::cout << "solving ..." << std::endl; }
 
-gmm::iteration iter(1e-8);
+gmm::iteration iter(iter_tol);
 iter.set_maxiter(MAXITER);
 iter.set_noisy(verbose);
 
