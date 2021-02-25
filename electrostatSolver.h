@@ -126,23 +126,23 @@ private:
         return val;
         }
     
-    /** template to assemble the matrix and vector, T is Tet or Fac */
-    template <class T>
-    void assembling(T const& obj, gmm::dense_matrix <double> &Ke, std::vector <double> &Le, write_matrix &K, write_vector &L)
+    /** assemble the matrix K from tet and Ke inputs */
+    void assembling_mat(Tetra::Tet const& tet, gmm::dense_matrix <double> &Ke, write_matrix &K)
     {
-    const int N = obj.getN();
-    for (int ie=0; ie<N; ie++)
+    for (int ie=0; ie<Tetra::N; ie++)
         {
-        int i= obj.ind[ie];             
-        for (int je=0; je<N; je++)
-            {
-            int j= obj.ind[je];
-            K(i, j)+= Ke(ie, je);
-            }
-        L[i]+= Le[ie];
+        const int i= tet.ind[ie];             
+        for (int je=0; je<Tetra::N; je++) { K(i, tet.ind[je]) += Ke(ie, je); }
         }
     }
-
+    
+    /** assemble the vector L from fac and Le inputs */
+    void assembling_vect(Facette::Fac const& fac, std::vector <double> &Le, write_vector &L)
+    {
+    for (int ie=0; ie<Facette::N; ie++) { L[ fac.ind[ie] ] += Le[ie]; }
+    }
+    
+    
     /** compute integrales for matrix coefficients,input from tet */
     void integrales(Tetra::Tet const& tet, gmm::dense_matrix <double> &AE)
     { //sigma is the region conductivity
@@ -172,10 +172,7 @@ void integrales(Facette::Fac const& fac, std::vector <double> &BE)
 double J = getJ(fac.getRegion());
 
 for (int npi=0; npi<Facette::NPI; npi++)
-    {
-    double w =fac.weight(npi);
-    for (int ie=0; ie<Facette::N; ie++) { BE[ie] -= Facette::a[ie][npi]*J *w; }
-    }
+    { for (int ie=0; ie<Facette::N; ie++) { BE[ie] -= Facette::a[ie][npi]*J*fac.weight(npi); } }
 }
 
 /** solver, using biconjugate stabilized gradient, with diagonal preconditionner */
@@ -190,17 +187,15 @@ if(verbose) { std::cout << "assembling..." << std::endl; }
 for (int ne=0; ne<TET; ne++){
     Tetra::Tet const& tet = msh.tet[ne];
     gmm::dense_matrix <double> K(Tetra::N, Tetra::N);
-    std::vector <double> L(Tetra::N);
     integrales(tet, K);
-    assembling<Tetra::Tet>(tet, K, L, Kw, Lw);
+    assembling_mat(tet, K, Kw);
     }
 
 for (int ne=0; ne<FAC; ne++){
     Facette::Fac const& fac = msh.fac[ne];
-    gmm::dense_matrix <double> K(Facette::N, Facette::N);
     std::vector <double> L(Facette::N);
     integrales(fac, L);     
-    assembling<Facette::Fac>(fac, K, L, Kw, Lw);
+    assembling_vect(fac, L, Lw);
     }
 
 read_matrix  Kr(NOD, NOD);    gmm::copy(Kw, Kr);
@@ -233,16 +228,13 @@ for (int i=0; i<NOD; i++)
 gmm::copy(Kw, Kr);
 read_vector  Lr(NOD);        gmm::copy(Lw, Lr);
 
-if(verbose) { std::cout << "preconditionning ..." << std::endl; }
-gmm::diagonal_precond <read_matrix> prc(Kr);
-
 if(verbose) { std::cout << "solving ..." << std::endl; }
 
 gmm::iteration iter(iter_tol);
 iter.set_maxiter(MAXITER);
 iter.set_noisy(verbose);
 
-gmm::bicgstab(Kr, Xw, Lr, prc, iter);
+gmm::bicgstab(Kr, Xw, Lr, gmm::diagonal_precond <read_matrix>(Kr), iter);
 
 read_vector Xr(NOD); gmm::copy(Xw, Xr);
 

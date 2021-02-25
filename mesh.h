@@ -14,7 +14,7 @@
 #include "feellgoodSettings.h"
 
 /** \class mesh
-class for storing the mesh, including mesh geometry values, containers for the nodes, trinagular faces and tetrahedrons. nodes data are not public. They are accessible only through getter and setter.
+class for storing the mesh, including mesh geometry values, containers for the nodes, triangular faces and tetrahedrons. nodes data are not public. They are accessible only through getter and setter.
 */
 class mesh
 {
@@ -62,7 +62,11 @@ public:
     
     /** setter : node potential */
     inline void setNodesPotential(read_vector const& Xr)
-        { for (int i=0; i < nbNod; i++) { node[i].V = Xr[i]; } }
+        { for (int i=0; i < nbNod; i++)
+            { node[i].V = Xr[i]; 
+            //std::cout << "V["<< i << "]= " << Xr[i] << std::endl;
+            } 
+        }
     
     /** basic informations on the mesh */
     void infos(void) const

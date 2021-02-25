@@ -5,7 +5,7 @@ sys.path.insert(0,'../tools')
 from cuboidMaker import Cuboid
 from settingsMaker import Settings
 
-rectangle = Cuboid([-2,-2,-2],[2,2,2],2,2,2)
+rectangle = Cuboid([-2,-2,-2],[2,2,2],3,3,3)
 meshFileName = 'rectangle.msh'
 vol_region_name = "300"
 surf_region_name = "200"
@@ -33,12 +33,12 @@ mySettings.createVolRegion( vol_region_name )
 mySettings.createSurfRegion( surf_region_name )
 
 #magnetization at saturation (SI unit = A/m)
-mySettings["mesh"]["volume_regions"]["300"]["Js"] = 800e3
+mySettings["mesh"]["volume_regions"][vol_region_name]["Js"] = 800e3
 
 # exchange constant (unit = J/m)
-mySettings["mesh"]["volume_regions"]["300"]["Ae"] = 13e-12
+mySettings["mesh"]["volume_regions"][vol_region_name]["Ae"] = 13e-12
 
-mySettings["mesh"]["volume_regions"]["300"]["alpha_LLG"] = 0.02
+mySettings["mesh"]["volume_regions"][vol_region_name]["alpha_LLG"] = 0.02
 
 mySettings["time_integration"]["final_time"] = 0.5e-9
 mySettings["time_integration"]["min(dt)"] = 0.1e-17
