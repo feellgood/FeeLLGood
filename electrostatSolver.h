@@ -5,11 +5,10 @@
 
 #include <map>
 
-//#include "gmm/gmm.h"
-//#include "gmm/gmm_MUMPS_interface.h"
-//#include "gmm/gmm_precond_ilu.h"
 #include "gmm/gmm_iter.h"
 #include "gmm/gmm_solver_bicgstab.h"
+#include "gmm/gmm_solver_cg.h"
+
 
 #include "fem.h"
 #include "config.h"
@@ -26,7 +25,9 @@ class electrostatSolver {
 public:
     /** constructor */
     inline electrostatSolver(mesh const& _msh /**< [in] reference to the mesh */, Tetra::STT const& p_stt /**< all spin transfer torque parameters */,
+                             const double _tol /**< [in] tolerance for solvers */,
                              const bool v /**< [in] verbose bool */,
+                             const bool fastSolve /**< [in] if true fast_solve is used */,
                              const int max_iter /**< [in] maximum number of iteration */ ): msh(_msh), NOD(msh.getNbNodes()), TET(msh.getNbTets()), FAC(msh.getNbFacs()), verbose(v), MAXITER(max_iter) 
                              {
                              if (p_stt.bc != Tetra::boundary_conditions::Undef)
@@ -53,7 +54,38 @@ public:
                             else
                                 { std::cout << "warning : undefined boundary conditions for STT" << std::endl; exit(1);}
                             if(verbose) { infos(); }
-                            solve(1e-8);// iter_tol from ref code Zhang&Li version
+                            
+                            if (fastSolve)
+                                {
+                                Vd.resize(NOD);
+                                
+                                for (int ne=0; ne<FAC; ne++)
+                                    {
+                                    Facette::Fac const& fac = msh.fac[ne]; 
+                                    std::map<int,double>::iterator it = V_values.find( fac.getRegion() ); 
+                                    if (it != V_values.end() ) 
+                                        { // found
+                                        for (int ie=0; ie<Facette::N; ie++)
+                                            {
+                                            int i= fac.ind[ie];  
+                                            Vd[i]    =  it->second;
+                                            ld.push_back(i);
+                                            }
+                                        }
+                                    }
+                                
+                                std::sort( ld.begin(), ld.end() );
+                                ld.erase( std::unique(ld.begin(), ld.end() ) , ld.end() );
+                                
+                                dofs.resize(NOD);
+                                std::vector<size_t> all(NOD);
+                                std::iota (all.begin(), all.end(), 0); // Fill with 0, 1, ..., NOD-1.
+                                std::vector<size_t>::iterator it = std::set_difference (all.begin(), all.end(), ld.begin(), ld.end(), dofs.begin());
+                                dofs.resize(it-dofs.begin());
+                                    
+                                fast_solve(_tol);
+                                }
+                            else solve(_tol);
                             }
 
 private:
@@ -79,6 +111,17 @@ private:
     
     /** boundary conditions : table of voltage (int is a surface region) */
     std::map<int,double> V_values; 
+    
+/* ------ data structure for fast solver --- */
+    /** freedom degree list for the potential */
+    std::vector <size_t> dofs;
+    
+    /** dirichlet index node list */
+    std::vector <size_t> ld;
+    
+    /** Dirichlet potential values at the nodes, 0 elsewhere */
+    std::vector <double> Vd;
+/* ------ end data structure for fast solver --- */
     
     /** basic informations on boundary conditions */
     inline void infos(void) 
@@ -242,5 +285,80 @@ msh.setNodesPotential(Xr);
 return 0;
 }
     
+/* ----------------------------------------------------- */
+/* experimental Ohms'law solver */
+/* ----------------------------------------------------- */
     
+    
+    
+    
+    
+/** other solver (using reduced sub space), using conjugate gradient, with diagonal preconditionner with mixt boundary conditions */
+int fast_solve(const double iter_tol)
+{ 
+write_matrix Kw(NOD, NOD);
+write_vector Lw(NOD);
+
+for (int ne=0; ne<TET; ne++){
+    Tetra::Tet const& tet = msh.tet[ne];
+    gmm::dense_matrix <double> K(Tetra::N, Tetra::N);
+    integrales(tet, K);   
+    assembling_mat(tet, K, Kw);
+    }
+
+for (int ne=0; ne<FAC; ne++){
+    Facette::Fac const& fac = msh.fac[ne];
+    std::vector <double> L(Facette::N);
+    integrales(fac, L);     
+    assembling_vect(fac, L, Lw);
+    }
+
+
+// Modification du second membre pour tenir compte des valeurs du potentiel aux noeuds de dirichlet
+{
+read_vector  Lr(NOD);
+gmm::copy(Lw,  Lr);
+
+read_matrix  Kr(NOD, NOD);  
+gmm::copy(Kw,  Kr);
+
+gmm::mult(Kr, gmm::scaled(Vd, -1.0), Lr, Lw);  // Kr * (-Vd) + Lr --> Lw
+}
+
+write_matrix subKw(dofs.size(), dofs.size());      
+gmm::copy(gmm::sub_matrix(Kw, gmm::sub_index(dofs)    , gmm::sub_index(dofs))    , subKw);
+read_matrix  Kr(dofs.size(), dofs.size());
+gmm::copy(subKw,  Kr);
+
+write_vector subLw(dofs.size());
+gmm::copy(gmm::sub_vector(Lw, gmm::sub_index(dofs))    , subLw);  
+read_vector  Lr(dofs.size());
+gmm::copy(subLw,  Lr);
+
+write_vector Xw(dofs.size());
+
+
+std::cout << "\t solving .......................... " << std::endl;
+
+gmm::iteration iter(iter_tol);
+iter.set_maxiter(MAXITER);
+iter.set_noisy(verbose);
+
+gmm::identity_matrix PS;   // Optional scalar product for cg
+
+gmm::cg(Kr, Xw, Lr, PS, gmm::diagonal_precond <read_matrix>(Kr), iter); // Conjugate gradient
+
+read_vector Xr(dofs.size());
+gmm::copy(Xw, Xr);
+
+for (size_t ip=0; ip<dofs.size(); ip++)
+    { msh.set_elec_pot( dofs[ip] , Xr[ip] ); }
+
+
+for (size_t ip=0; ip<ld.size(); ip++)
+    { msh.set_elec_pot( ld[ip] , Vd[ ld[ip] ] ); }
+    
+return 0;
+}
+
 }; //end class electrostatSolver

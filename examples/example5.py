@@ -5,7 +5,7 @@ sys.path.insert(0,'../tools')
 from cuboidMaker import Cuboid
 from settingsMaker import Settings
 
-rectangle = Cuboid([-2,-2,-2],[2,2,2],3,3,3)
+rectangle = Cuboid([-2,-2,-2],[2,2,2],10,10,10)
 meshFileName = 'rectangle.msh'
 vol_region_name = "300"
 surf_region_name = "200"
@@ -52,7 +52,7 @@ N0 = 1
 beta = 1
 l_J = 1
 l_sf = 1
-V1 = 0
+V1 = 2
 V2 = -3.14
 mySettings.createSTT(300,gamma0,sigma,N0,beta,l_J,l_sf,bc1_regNumber,"V",V1,bc2_regNumber,"V",V2)
 

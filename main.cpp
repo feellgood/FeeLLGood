@@ -85,7 +85,7 @@ counter.tic();
 LinAlgebra linAlg(mySettings,fem.msh);
 
 if (mySettings.stt_flag)
-    { electrostatSolver pot_solver = electrostatSolver(fem.msh,mySettings.p_stt,mySettings.verbose,5000); }
+    { electrostatSolver pot_solver = electrostatSolver(fem.msh,mySettings.p_stt,1e-8,mySettings.verbose,false,5000); }
 else
     { std::cout << "no spin transfer torque" << std::endl; }
     
