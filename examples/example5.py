@@ -52,7 +52,7 @@ N0 = 1
 beta = 1
 l_J = 1
 l_sf = 1
-V1 = 2
+V1 = 1.2345
 V2 = -3.14
 mySettings.createSTT(300,gamma0,sigma,N0,beta,l_J,l_sf,bc1_regNumber,"V",V1,bc2_regNumber,"V",V2)
 

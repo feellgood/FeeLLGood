@@ -11,19 +11,17 @@
 
 #include "electrostatSolver.h"
 
-using namespace std;
-
 int time_integration(Fem &fem,Settings &settings /**< [in] */,LinAlgebra &linAlg /**< [in] */,scal_fmm::fmm &myFMM  /**< [in] */,timing &t_prm);
 
-inline string spaceString(int nbSpace)
-{string S;
+inline std::string spaceString(int nbSpace)
+{std::string S;
     for(int i=0;i<nbSpace;i++) {S += " ";}
 return S;
 }
 
 void prompt(void)
 {
-    stringstream SsId;
+    std::stringstream SsId;
     SsId << getpid();
 std::cout << "\n\t ┌────────────────────────────┐\n";
 std::cout <<   "\t │         FeeLLGood          │\n";
@@ -37,12 +35,12 @@ std::cout <<   "\t └───────────────────�
 
 std::string parseOptions(Settings &settings,int argc,char* argv[])
 {
-string fileJson;
+std::string fileJson;
 std::cout << "parsing options..." << std::endl;
 
 if(argc<2)
 	{
-	cout << "no JSON file provided, see FeeLLGood online documentation to create some settings using Python script settingsMaker.py" <<endl; 
+	std::cout << "no JSON file provided, see FeeLLGood online documentation to create some settings using Python script settingsMaker.py" << std::endl; 
 	exit(1);
     }
 else if (argc == 2)
@@ -62,13 +60,11 @@ return fileJson;
 int main(int argc,char* argv[])
 {
 Settings mySettings;
-
 FTic counter;
 
 prompt();
 
-string fileJson = parseOptions(mySettings,argc,argv);
-
+std::string fileJson = parseOptions(mySettings,argc,argv);
 timing t_prm = mySettings.read(fileJson);
 Fem fem = Fem(mySettings,t_prm);
 
@@ -94,7 +90,7 @@ scal_fmm::fmm myFMM(fem,mySettings.verbose,mySettings.scalfmmNbTh);
 int nt = time_integration(fem,mySettings,linAlg,myFMM,t_prm);
         
 counter.tac();
-cout << "\n  * iterations: " << nt << "\n  * total computing time: " << counter.elapsed() << " s\n" << endl;
+std::cout << "\n  * iterations: " << nt << "\n  * total computing time: " << counter.elapsed() << " s\n" << std::endl;
     
 return 0;
 }

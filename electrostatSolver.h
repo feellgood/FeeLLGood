@@ -247,16 +247,22 @@ if(verbose) { std::cout << "boundary conditions..." << std::endl; }
 // conditions de Dirichlet
 for (int ne=0; ne<FAC; ne++)
     {
-    Facette::Fac &fac = msh.fac[ne];
-    double V = getV(fac.getRegion());
-       for (int ie=0; ie<Facette::N; ie++)
+    Facette::Fac const& fac = msh.fac[ne];
+
+    std::map<int,double>::iterator it = V_values.find(fac.getRegion()); 
+        
+    if (it != V_values.end() ) 
+        {
+        double V = it->second;
+        for (int ie=0; ie<Facette::N; ie++)
             {
             const int i= fac.ind[ie];
             std::for_each(mat_row(Kw, i).begin(),mat_row(Kw, i).end(), [](std::pair<const long unsigned int, double> & it) { it.second = 0.0; } );
-            Kw(i, i) =  1;
-            Lw[i]    =  V;  
+            Kw(i, i) =  1e9;
+            Lw[i]    =  V*1e9;  
             Xw[i]    =  V;
             }
+        }
     }
 
 if(verbose) { std::cout << "line weighting..." << std::endl; }
