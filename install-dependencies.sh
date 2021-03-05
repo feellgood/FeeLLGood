@@ -52,9 +52,9 @@ sudo make install
 cd ../..
 
 # Install GMM.
-wget -nv http://download-mirror.savannah.gnu.org/releases/getfem/stable/gmm-5.3.tar.gz
-tar xzf gmm-5.3.tar.gz
-cd gmm-5.3/
+wget -nv http://download-mirror.savannah.gnu.org/releases/getfem/stable/gmm-5.4.tar.gz
+tar xzf gmm-5.4.tar.gz
+cd gmm-5.4/
 ./configure
 make -j $job_count
 sudo make install
