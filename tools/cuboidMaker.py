@@ -138,5 +138,5 @@ class Cuboid(object):
                 idx += 1
         meshFile.write("$EndElements\n")
         meshFile.close()
-        print("mesh file " + meshFileName + " generated.")
+        print("mesh file " + meshFileName + " generated, nb nodes =" + str(len(self.pts)) + " , nb tetra =" +str(len(self.Tet)) )
 

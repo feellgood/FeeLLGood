@@ -5,7 +5,7 @@ sys.path.insert(0,'../tools')
 from cuboidMaker import Cuboid
 from settingsMaker import Settings
 
-rectangle = Cuboid([-2,-2,-2],[2,2,2],10,10,10)
+rectangle = Cuboid([-2,-2,-2],[2,2,2],50,50,50)
 meshFileName = 'rectangle.msh'
 vol_region_name = "300"
 surf_region_name = "200"

@@ -77,20 +77,25 @@ if(mySettings.verbose)
     
 std::cout<<"start computing..."<<std::endl;
 counter.tic();
-//once fem containers are ok, linAlgebra object is built
 LinAlgebra linAlg(mySettings,fem.msh);
 
 if (mySettings.stt_flag)
-    { electrostatSolver pot_solver = electrostatSolver(fem.msh,mySettings.p_stt,1e-8,mySettings.verbose,false,5000); }
+    {
+    FTic chronoElec;
+    chronoElec.tic();    
+    electrostatSolver pot_solver = electrostatSolver(fem.msh,mySettings.p_stt,1e-8,mySettings.verbose,false,5000); 
+    chronoElec.tac();
+    std::cout << "\tSTT total computing time: " << chronoElec.elapsed() << " s\n" << std::endl;
+    }
 else
     { std::cout << "no spin transfer torque" << std::endl; }
-    
+
 scal_fmm::fmm myFMM(fem,mySettings.verbose,mySettings.scalfmmNbTh);
 
 int nt = time_integration(fem,mySettings,linAlg,myFMM,t_prm);
         
 counter.tac();
 std::cout << "\n  * iterations: " << nt << "\n  * total computing time: " << counter.elapsed() << " s\n" << std::endl;
-    
+
 return 0;
 }

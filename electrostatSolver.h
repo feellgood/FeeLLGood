@@ -305,6 +305,9 @@ int fast_solve(const double iter_tol)
 write_matrix Kw(NOD, NOD);
 write_vector Lw(NOD);
 
+FTic counter;
+
+counter.tic();
 for (int ne=0; ne<TET; ne++){
     Tetra::Tet const& tet = msh.tet[ne];
     gmm::dense_matrix <double> K(Tetra::N, Tetra::N);
@@ -318,18 +321,21 @@ for (int ne=0; ne<FAC; ne++){
     integrales(fac, L);     
     assembling_vect(fac, L, Lw);
     }
+counter.tac();
+std::cout << "\t integrales & assembling total computing time: " << counter.elapsed() << " s\n" << std::endl;
 
 
+counter.tic();
 // Modification du second membre pour tenir compte des valeurs du potentiel aux noeuds de dirichlet
-{
-read_vector  Lr(NOD);
-gmm::copy(Lw,  Lr);
+    {
+    read_vector  Lr(NOD);
+    gmm::copy(Lw,  Lr);
 
-read_matrix  Kr(NOD, NOD);  
-gmm::copy(Kw,  Kr);
+    read_matrix  Kr(NOD, NOD);  
+    gmm::copy(Kw,  Kr);
 
-gmm::mult(Kr, gmm::scaled(Vd, -1.0), Lr, Lw);  // Kr * (-Vd) + Lr --> Lw
-}
+    gmm::mult(Kr, gmm::scaled(Vd, -1.0), Lr, Lw);  // Kr * (-Vd) + Lr --> Lw
+    }
 
 write_matrix subKw(dofs.size(), dofs.size());      
 gmm::copy(gmm::sub_matrix(Kw, gmm::sub_index(dofs)    , gmm::sub_index(dofs))    , subKw);
@@ -337,13 +343,17 @@ read_matrix  Kr(dofs.size(), dofs.size());
 gmm::copy(subKw,  Kr);
 
 write_vector subLw(dofs.size());
-gmm::copy(gmm::sub_vector(Lw, gmm::sub_index(dofs))    , subLw);  
+gmm::copy(gmm::sub_vector(Lw, gmm::sub_index(dofs))    , subLw);
 read_vector  Lr(dofs.size());
 gmm::copy(subLw,  Lr);
 
 write_vector Xw(dofs.size());
+counter.tac();
+std::cout << "\t many copies with subindices vector total computing time: " << counter.elapsed() << " s\n" << std::endl;
 
 
+
+counter.tic();
 std::cout << "\t solving .......................... " << std::endl;
 
 gmm::iteration iter(iter_tol);
@@ -363,6 +373,9 @@ for (size_t ip=0; ip<dofs.size(); ip++)
 
 for (size_t ip=0; ip<ld.size(); ip++)
     { msh.set_elec_pot( ld[ip] , Vd[ ld[ip] ] ); }
+
+counter.tac();
+std::cout << "\t total cg solving time: " << counter.elapsed() << " s\n" << std::endl;
     
 return 0;
 }
