@@ -27,7 +27,6 @@ public:
     inline electrostatSolver(mesh const& _msh /**< [in] reference to the mesh */, Tetra::STT const& p_stt /**< all spin transfer torque parameters */,
                              const double _tol /**< [in] tolerance for solvers */,
                              const bool v /**< [in] verbose bool */,
-                             const bool fastSolve /**< [in] if true fast_solve is used */,
                              const int max_iter /**< [in] maximum number of iteration */ ): msh(_msh), NOD(msh.getNbNodes()), TET(msh.getNbTets()), FAC(msh.getNbFacs()), verbose(v), MAXITER(max_iter) 
                              {
                              if (p_stt.bc != Tetra::boundary_conditions::Undef)
@@ -54,41 +53,7 @@ public:
                             else
                                 { std::cout << "warning : undefined boundary conditions for STT" << std::endl; exit(1);}
                             if(verbose) { infos(); }
-                            
-                            if (fastSolve)
-                                {
-                                Vd.resize(NOD);
-                                
-                                for (int ne=0; ne<FAC; ne++)
-                                    {
-                                    Facette::Fac const& fac = msh.fac[ne]; 
-                                    std::map<int,double>::iterator it = V_values.find( fac.getRegion() ); 
-                                    if (it != V_values.end() ) 
-                                        { // found
-                                        for (int ie=0; ie<Facette::N; ie++)
-                                            {
-                                            int i= fac.ind[ie];  
-                                            Vd[i]    =  it->second;
-                                            ld.push_back(i);
-                                            }
-                                        }
-                                    }
-                                
-                                std::sort( ld.begin(), ld.end() );
-                                ld.erase( std::unique(ld.begin(), ld.end() ) , ld.end() );
-                                //std::for_each(ld.begin(), ld.end(), [](size_t const& val){ std::cout << "ld =" << val << std::endl;} );
-                                
-                                //dofs.resize(NOD);// no dofs with fast_solve2
-                                //std::vector<size_t> all(NOD);
-                                //std::iota (all.begin(), all.end(), 0); // Fill with 0, 1, ..., NOD-1.
-                                
-                                // no dofs with fast_solve2
-                                //std::vector<size_t>::iterator it = std::set_difference (all.begin(), all.end(), ld.begin(), ld.end(), dofs.begin());
-                                //dofs.resize(it-dofs.begin());
-                                
-                                fast_solve2(_tol);
-                                }
-                            else solve(_tol);
+                            solve(_tol);
                             }
 
 private:
@@ -114,20 +79,7 @@ private:
     
     /** boundary conditions : table of voltage (int is a surface region) */
     std::map<int,double> V_values; 
-
-
-    /* ------ data structure for fast solver --- */
-    /** freedom degree list for the potential */
-    //std::vector <size_t> dofs;
-    
-    /** dirichlet index node list */
-    std::vector <size_t> ld;
-    
-    /** Dirichlet potential values at the nodes, 0 elsewhere */
-    std::vector <double> Vd;
-
-    /* ------ end data structure for fast solver --- */
-    
+ 
     /** basic informations on boundary conditions */
     inline void infos(void) 
         {
@@ -182,23 +134,21 @@ private:
             }
         }
     }
+    
     /** compute integrales for vector coefficients, input from facette */
 void integrales(Facette::Fac const& fac, std::vector <double> &BE)
-{
-std::map<int,double>::iterator it = J_values.find(fac.getRegion()); 
-if (it != J_values.end() )
     {
-    double J = it->second;
-
-    for (int npi=0; npi<Facette::NPI; npi++)
-        { for (int ie=0; ie<Facette::N; ie++) { BE[ie] -= Facette::a[ie][npi]*J*fac.weight(npi); } }
+    std::map<int,double>::iterator it = J_values.find(fac.getRegion()); 
+    if (it != J_values.end() )
+        {
+        double J = it->second;
+        for (int npi=0; npi<Facette::NPI; npi++)
+            { for (int ie=0; ie<Facette::N; ie++) { BE[ie] -= Facette::a[ie][npi]*J*fac.weight(npi); } }
+        }
     }
-}
 
 void prepareData(write_matrix &Kw, write_vector & Lw)
 {
-if(verbose) { std::cout << "assembling..." << std::endl; }
-
 for (int ne=0; ne<TET; ne++){
     Tetra::Tet const& tet = msh.tet[ne];
     gmm::dense_matrix <double> K(Tetra::N, Tetra::N);
@@ -230,7 +180,6 @@ if(verbose) { std::cout << "boundary conditions..." << std::endl; }
 for (int ne=0; ne<FAC; ne++)
     {
     Facette::Fac const& fac = msh.fac[ne];
-
     std::map<int,double>::iterator it = V_values.find(fac.getRegion()); 
         
     if (it != V_values.end() ) 
@@ -271,144 +220,5 @@ read_vector Xr(NOD); gmm::copy(Xw, Xr);
 msh.setNodesPotential(Xr);
 return 0;
 }
-    
-/* ----------------------------------------------------- */
-/* experimental Ohms'law solver */
-/* ----------------------------------------------------- */
-    
-    
-    
-    
-    
-/** other solver (using reduced sub space), using conjugate gradient, with diagonal preconditionner with mixt boundary conditions */
-/*
-int fast_solve(const double iter_tol)
-{ 
-write_matrix Kw(NOD, NOD);
-write_vector Lw(NOD);
-
-FTic counter;
-
-counter.tic();
-
-prepareData(Kw,Lw);
-
-counter.tac();
-std::cout << "\t integrales & assembling total computing time: " << counter.elapsed() << " s\n" << std::endl;
-
-
-counter.tic();
-// Modification du second membre pour tenir compte des valeurs du potentiel aux noeuds de dirichlet
-    {
-    read_vector  Lr(NOD);
-    gmm::copy(Lw,  Lr);
-
-    read_matrix  Kr(NOD, NOD);  
-    gmm::copy(Kw,  Kr);
-
-    gmm::mult(Kr, gmm::scaled(Vd, -1.0), Lr, Lw);  // Kr * (-Vd) + Lr --> Lw
-    }
-
-write_matrix subKw(dofs.size(), dofs.size());      
-gmm::copy(gmm::sub_matrix(Kw, gmm::sub_index(dofs)    , gmm::sub_index(dofs))    , subKw);
-read_matrix  Kr(dofs.size(), dofs.size());
-gmm::copy(subKw,  Kr);
-
-write_vector subLw(dofs.size());
-gmm::copy(gmm::sub_vector(Lw, gmm::sub_index(dofs))    , subLw);
-read_vector  Lr(dofs.size());
-gmm::copy(subLw,  Lr);
-
-write_vector Xw(dofs.size());
-counter.tac();
-std::cout << "\t many copies with subindices vector total computing time: " << counter.elapsed() << " s\n" << std::endl;
-
-
-
-counter.tic();
-std::cout << "\t solving .......................... " << std::endl;
-
-gmm::iteration iter(iter_tol);
-iter.set_maxiter(MAXITER);
-iter.set_noisy(verbose);
-
-gmm::identity_matrix PS;   // Optional scalar product for cg
-
-gmm::cg(Kr, Xw, Lr, PS, gmm::diagonal_precond <read_matrix>(Kr), iter); // Conjugate gradient
-
-read_vector Xr(dofs.size());
-gmm::copy(Xw, Xr);
-
-for (size_t ip=0; ip<dofs.size(); ip++)
-    { msh.set_elec_pot( dofs[ip] , Xr[ip] ); }
-
-
-for (size_t ip=0; ip<ld.size(); ip++)
-    { msh.set_elec_pot( ld[ip] , Vd[ ld[ip] ] ); }
-
-counter.tac();
-std::cout << "\t total cg solving time: " << counter.elapsed() << " s\n" << std::endl;
-    
-return 0;
-}
-*/
-
-/** other solver (using reduced sub space), using conjugate gradient, with diagonal preconditionner with mixt boundary conditions */
-int fast_solve2(const double iter_tol)
-{ 
-write_matrix Kw(NOD, NOD);
-write_vector Lw(NOD);
-write_vector Xw(NOD);
-
-FTic counter;
-
-counter.tic();
-
-prepareData(Kw,Lw);
-
-/*
-std::for_each(ld.begin(),ld.end(),[this,&Kw,&Lw,&Xw](const size_t i)
-    {
-    double coeff_diag = Kw(i,i);
-    Kw(i,i) *= 1e9;
-    Lw[i] = coeff_diag*1e9*Vd[i];
-    Xw[i] = Vd[i];
-    });
-*/
-for (std::vector<size_t>::const_iterator it=ld.begin(); it!=ld.end(); ++it)
-    {
-    size_t i=*it;
-    double Diag = Kw(i, i);
-    //if (Diag == 0) { std::cout<< "oualala!" <<std::endl; } else { std::cout << "."; }
-    Kw(i, i) =  Diag*1e9;    
-    Lw[i]    =  Diag*1e9*Vd[i];   
-    Xw[i]     = Vd[i];
-    }
-    
-read_matrix  Kr(NOD, NOD);    gmm::copy(Kw, Kr);
-read_vector  Lr(NOD);         gmm::copy(Lw, Lr);
-
-counter.tac();
-std::cout << "\t integrales & assembling total computing time: " << counter.elapsed() << " s\n" << std::endl;
-
-counter.tic();
-std::cout << "\t solving .......................... " << std::endl;
-
-gmm::iteration iter(iter_tol);
-iter.set_maxiter(MAXITER);
-iter.set_noisy(verbose);
-
-gmm::identity_matrix PS;   // Optional scalar product for cg
-gmm::cg(Kr, Xw, Lr, PS, gmm::diagonal_precond <read_matrix>(Kr), iter); // Conjugate gradient
-
-read_vector Xr(NOD); gmm::copy(Xw, Xr);
-msh.setNodesPotential(Xr);
-
-counter.tac();
-std::cout << "\t total cg solving time: " << counter.elapsed() << " s\n" << std::endl;
-    
-return 0;
-}
-
 
 }; //end class electrostatSolver
