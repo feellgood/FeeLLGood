@@ -62,11 +62,7 @@ public:
     
     /** setter : node potential */
     inline void setNodesPotential(read_vector const& Xr)
-        { for (int i=0; i < nbNod; i++)
-            { node[i].V = Xr[i]; 
-            //std::cout << "V["<< i << "]= " << Xr[i] << std::endl;
-            } 
-        }
+        { for (int i=0; i < nbNod; i++) node[i].V = Xr[i]; }
     
     /** basic informations on the mesh */
     void infos(void) const

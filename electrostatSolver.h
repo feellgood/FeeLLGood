@@ -76,14 +76,17 @@ public:
                                 
                                 std::sort( ld.begin(), ld.end() );
                                 ld.erase( std::unique(ld.begin(), ld.end() ) , ld.end() );
+                                //std::for_each(ld.begin(), ld.end(), [](size_t const& val){ std::cout << "ld =" << val << std::endl;} );
                                 
-                                dofs.resize(NOD);
-                                std::vector<size_t> all(NOD);
-                                std::iota (all.begin(), all.end(), 0); // Fill with 0, 1, ..., NOD-1.
-                                std::vector<size_t>::iterator it = std::set_difference (all.begin(), all.end(), ld.begin(), ld.end(), dofs.begin());
-                                dofs.resize(it-dofs.begin());
-                                    
-                                fast_solve(_tol);
+                                //dofs.resize(NOD);// no dofs with fast_solve2
+                                //std::vector<size_t> all(NOD);
+                                //std::iota (all.begin(), all.end(), 0); // Fill with 0, 1, ..., NOD-1.
+                                
+                                // no dofs with fast_solve2
+                                //std::vector<size_t>::iterator it = std::set_difference (all.begin(), all.end(), ld.begin(), ld.end(), dofs.begin());
+                                //dofs.resize(it-dofs.begin());
+                                
+                                fast_solve2(_tol);
                                 }
                             else solve(_tol);
                             }
@@ -111,17 +114,19 @@ private:
     
     /** boundary conditions : table of voltage (int is a surface region) */
     std::map<int,double> V_values; 
-    
-/* ------ data structure for fast solver --- */
+
+
+    /* ------ data structure for fast solver --- */
     /** freedom degree list for the potential */
-    std::vector <size_t> dofs;
+    //std::vector <size_t> dofs;
     
     /** dirichlet index node list */
     std::vector <size_t> ld;
     
     /** Dirichlet potential values at the nodes, 0 elsewhere */
     std::vector <double> Vd;
-/* ------ end data structure for fast solver --- */
+
+    /* ------ end data structure for fast solver --- */
     
     /** basic informations on boundary conditions */
     inline void infos(void) 
@@ -138,93 +143,60 @@ private:
                       [](std::pair<int,double> const& p)
                       { std::cout << "reg: " << p.first << "\tV :" << p.second << std::endl; } );
         }
-    
-    /** sigma value getter */
-    inline double getSigma(const int reg)
-        {
-        double val(0);
-        std::map<int,double>::iterator it = sigma_values.find(reg); 
-        if (it != sigma_values.end() ) val = it->second;
         
-        return val;
-        }
-        
-    /** Jn value getter */
-    inline double getJ(const int reg)
-        {
-        double val(0);
-        std::map<int,double>::iterator it = J_values.find(reg); 
-        if (it != J_values.end() ) val = it->second;
-        
-        return val;
-        }
-    
-    /** potential value getter */
-    inline double getV(const int reg)
-        {
-        double val(0);
-        std::map<int,double>::iterator it = V_values.find(reg); 
-        if (it != V_values.end() ) val = it->second;
-        
-        return val;
-        }
-    
     /** assemble the matrix K from tet and Ke inputs */
-    void assembling_mat(Tetra::Tet const& tet, gmm::dense_matrix <double> &Ke, write_matrix &K)
+    inline void assembling_mat(Tetra::Tet const& tet, gmm::dense_matrix <double> &Ke, write_matrix &K)
     {
     for (int ie=0; ie<Tetra::N; ie++)
-        {
-        const int i= tet.ind[ie];             
-        for (int je=0; je<Tetra::N; je++) { K(i, tet.ind[je]) += Ke(ie, je); }
-        }
+        { for (int je=0; je<Tetra::N; je++) { K(tet.ind[ie], tet.ind[je]) += Ke(ie, je); } }
     }
     
     /** assemble the vector L from fac and Le inputs */
-    void assembling_vect(Facette::Fac const& fac, std::vector <double> &Le, write_vector &L)
-    {
-    for (int ie=0; ie<Facette::N; ie++) { L[ fac.ind[ie] ] += Le[ie]; }
-    }
+    inline void assembling_vect(Facette::Fac const& fac, std::vector <double> &Le, write_vector &L)
+    { for (int ie=0; ie<Facette::N; ie++) { L[ fac.ind[ie] ] += Le[ie]; } }
     
     
     /** compute integrales for matrix coefficients,input from tet */
     void integrales(Tetra::Tet const& tet, gmm::dense_matrix <double> &AE)
     { //sigma is the region conductivity
-    double sigma = getSigma(tet.getRegion());
-
-    for (int npi=0; npi<Tetra::NPI; npi++)
+    std::map<int,double>::iterator it = sigma_values.find(tet.getRegion()); 
+    if (it != sigma_values.end() ) 
         {
-        double w, dai_dx, dai_dy, dai_dz, daj_dx, daj_dy, daj_dz;
-        w = tet.weight[npi];
-
-        for (int ie=0; ie<Tetra::N; ie++)
+        double sigma = it->second;
+    
+        for (int npi=0; npi<Tetra::NPI; npi++)
             {
-            dai_dx= tet.dadx[ie][npi];  dai_dy= tet.dady[ie][npi];  dai_dz= tet.dadz[ie][npi];
+            double w, dai_dx, dai_dy, dai_dz, daj_dx, daj_dy, daj_dz;
+            w = tet.weight[npi];
 
-            for (int je=0; je<Tetra::N; je++)
+            for (int ie=0; ie<Tetra::N; ie++)
                 {
-                daj_dx= tet.dadx[je][npi];  daj_dy= tet.dady[je][npi];  daj_dz= tet.dadz[je][npi];
-                AE(ie, je) += sigma*(dai_dx*daj_dx + dai_dy*daj_dy + dai_dz*daj_dz)*w;		
+                dai_dx= tet.dadx[ie][npi];  dai_dy= tet.dady[ie][npi];  dai_dz= tet.dadz[ie][npi];
+
+                for (int je=0; je<Tetra::N; je++)
+                    {
+                    daj_dx= tet.dadx[je][npi];  daj_dy= tet.dady[je][npi];  daj_dz= tet.dadz[je][npi];
+                    AE(ie, je) += sigma*(dai_dx*daj_dx + dai_dy*daj_dy + dai_dz*daj_dz)*w;		
+                    }
                 }
             }
         }
     }
-
     /** compute integrales for vector coefficients, input from facette */
 void integrales(Facette::Fac const& fac, std::vector <double> &BE)
 {
-double J = getJ(fac.getRegion());
+std::map<int,double>::iterator it = J_values.find(fac.getRegion()); 
+if (it != J_values.end() )
+    {
+    double J = it->second;
 
-for (int npi=0; npi<Facette::NPI; npi++)
-    { for (int ie=0; ie<Facette::N; ie++) { BE[ie] -= Facette::a[ie][npi]*J*fac.weight(npi); } }
+    for (int npi=0; npi<Facette::NPI; npi++)
+        { for (int ie=0; ie<Facette::N; ie++) { BE[ie] -= Facette::a[ie][npi]*J*fac.weight(npi); } }
+    }
 }
 
-/** solver, using biconjugate stabilized gradient, with diagonal preconditionner */
-int solve(const double iter_tol)
+void prepareData(write_matrix &Kw, write_vector & Lw)
 {
-write_matrix Kw(NOD, NOD);
-write_vector Lw(NOD);
-write_vector Xw(NOD);
-
 if(verbose) { std::cout << "assembling..." << std::endl; }
 
 for (int ne=0; ne<TET; ne++){
@@ -239,7 +211,17 @@ for (int ne=0; ne<FAC; ne++){
     std::vector <double> L(Facette::N);
     integrales(fac, L);     
     assembling_vect(fac, L, Lw);
-    }
+    }    
+}
+
+/** solver, using biconjugate stabilized gradient, with diagonal preconditionner */
+int solve(const double iter_tol)
+{
+write_matrix Kw(NOD, NOD);
+write_vector Lw(NOD);
+write_vector Xw(NOD);
+
+prepareData(Kw,Lw);
 
 read_matrix  Kr(NOD, NOD);    gmm::copy(Kw, Kr);
 
@@ -286,7 +268,6 @@ iter.set_noisy(verbose);
 gmm::bicgstab(Kr, Xw, Lr, gmm::diagonal_precond <read_matrix>(Kr), iter);
 
 read_vector Xr(NOD); gmm::copy(Xw, Xr);
-
 msh.setNodesPotential(Xr);
 return 0;
 }
@@ -300,6 +281,7 @@ return 0;
     
     
 /** other solver (using reduced sub space), using conjugate gradient, with diagonal preconditionner with mixt boundary conditions */
+/*
 int fast_solve(const double iter_tol)
 { 
 write_matrix Kw(NOD, NOD);
@@ -308,19 +290,9 @@ write_vector Lw(NOD);
 FTic counter;
 
 counter.tic();
-for (int ne=0; ne<TET; ne++){
-    Tetra::Tet const& tet = msh.tet[ne];
-    gmm::dense_matrix <double> K(Tetra::N, Tetra::N);
-    integrales(tet, K);   
-    assembling_mat(tet, K, Kw);
-    }
 
-for (int ne=0; ne<FAC; ne++){
-    Facette::Fac const& fac = msh.fac[ne];
-    std::vector <double> L(Facette::N);
-    integrales(fac, L);     
-    assembling_vect(fac, L, Lw);
-    }
+prepareData(Kw,Lw);
+
 counter.tac();
 std::cout << "\t integrales & assembling total computing time: " << counter.elapsed() << " s\n" << std::endl;
 
@@ -379,5 +351,64 @@ std::cout << "\t total cg solving time: " << counter.elapsed() << " s\n" << std:
     
 return 0;
 }
+*/
+
+/** other solver (using reduced sub space), using conjugate gradient, with diagonal preconditionner with mixt boundary conditions */
+int fast_solve2(const double iter_tol)
+{ 
+write_matrix Kw(NOD, NOD);
+write_vector Lw(NOD);
+write_vector Xw(NOD);
+
+FTic counter;
+
+counter.tic();
+
+prepareData(Kw,Lw);
+
+/*
+std::for_each(ld.begin(),ld.end(),[this,&Kw,&Lw,&Xw](const size_t i)
+    {
+    double coeff_diag = Kw(i,i);
+    Kw(i,i) *= 1e9;
+    Lw[i] = coeff_diag*1e9*Vd[i];
+    Xw[i] = Vd[i];
+    });
+*/
+for (std::vector<size_t>::const_iterator it=ld.begin(); it!=ld.end(); ++it)
+    {
+    size_t i=*it;
+    double Diag = Kw(i, i);
+    //if (Diag == 0) { std::cout<< "oualala!" <<std::endl; } else { std::cout << "."; }
+    Kw(i, i) =  Diag*1e9;    
+    Lw[i]    =  Diag*1e9*Vd[i];   
+    Xw[i]     = Vd[i];
+    }
+    
+read_matrix  Kr(NOD, NOD);    gmm::copy(Kw, Kr);
+read_vector  Lr(NOD);         gmm::copy(Lw, Lr);
+
+counter.tac();
+std::cout << "\t integrales & assembling total computing time: " << counter.elapsed() << " s\n" << std::endl;
+
+counter.tic();
+std::cout << "\t solving .......................... " << std::endl;
+
+gmm::iteration iter(iter_tol);
+iter.set_maxiter(MAXITER);
+iter.set_noisy(verbose);
+
+gmm::identity_matrix PS;   // Optional scalar product for cg
+gmm::cg(Kr, Xw, Lr, PS, gmm::diagonal_precond <read_matrix>(Kr), iter); // Conjugate gradient
+
+read_vector Xr(NOD); gmm::copy(Xw, Xr);
+msh.setNodesPotential(Xr);
+
+counter.tac();
+std::cout << "\t total cg solving time: " << counter.elapsed() << " s\n" << std::endl;
+    
+return 0;
+}
+
 
 }; //end class electrostatSolver
