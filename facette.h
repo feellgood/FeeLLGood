@@ -170,8 +170,13 @@ class Fac{
     double Lp[2*N];
 
 	/** computes the norm to the face */
-	Pt::pt3D calc_norm(void) const;
-
+	inline Pt::pt3D calc_norm(void) const
+    {
+    Pt::pt3D n = normal_vect();
+    n.normalize();
+    return n;
+    }
+    
     /** computes surface of the face */
     inline double calc_surf(void) const { return 0.5*normal_vect().norm(); }
     

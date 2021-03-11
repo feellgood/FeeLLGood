@@ -68,13 +68,6 @@ void Fac::assemblage_mat(write_matrix &K) const
         }
 }
 
-Pt::pt3D Fac::calc_norm(void) const
-{
-Pt::pt3D n = normal_vect();
-n.normalize();
-return n;
-}
-
 double Fac::potential(std::function<Pt::pt3D (Nodes::Node)> getter, int i) const
 {
 int ii  = (i+1)%3;

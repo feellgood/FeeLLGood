@@ -37,7 +37,7 @@ mySettings["mesh"]["volume_regions"]["300"]["Ae"] = 10e-12
 mySettings["mesh"]["volume_regions"]["300"]["alpha_LLG"] = 0.05
 
 mySettings["time_integration"]["final_time"] = 10.0e-9
-mySettings["time_integration"]["min(dt)"] = 0.1e-18
+mySettings["time_integration"]["min(dt)"] = 0.1e-11
 mySettings["time_integration"]["max(dt)"] = 0.1e-9
 
 mySettings["time_integration"]["max(du)"] = 40

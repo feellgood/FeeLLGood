@@ -57,7 +57,7 @@ public:
                             }
 
 private:
-    /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh */
+    /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh ( const ref ) */
 	mesh msh;
     
     /** number of nodes */
@@ -147,6 +147,7 @@ void integrales(Facette::Fac const& fac, std::vector <double> &BE)
         }
     }
 
+    /** fill matrix and vector to solve potential values on each node */
 void prepareData(write_matrix &Kw, write_vector & Lw)
 {
 for (int ne=0; ne<TET; ne++){
