@@ -202,6 +202,7 @@ Facette::Fac f(node,nbNod,0,0,1,2,3);// carefull with the index shift
 f.Ms = distrib(gen);
 
 int i =0;
+int Hv = 0;
 // ref code (from MuMag_potential.cc with minimal adaptations of src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
 double nx,ny,nz,Ms;
 
@@ -231,7 +232,6 @@ h = 2.*f.surf;
 t/=b;  h/=b;
 double a = t/h;  double c = (t-b)/h;
 
-int Hv = 0;
 double s1, s2, s3;
 if (Hv) {
 	s1 = node1.v(0)*nx + node1.v(1)*ny + node1.v(2)*nz;
@@ -300,6 +300,7 @@ Facette::Fac f(node,nbNod,0,0,1,2,3);// carefull with the index shift
 f.Ms = distrib(gen);
 
 int i =0;
+int Hv = 1;
 // ref code (from MuMag_potential.cc with minimal adaptations of src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
 double nx,ny,nz,Ms;
 
@@ -329,7 +330,6 @@ h = 2.*f.surf;
 t/=b;  h/=b;
 double a = t/h;  double c = (t-b)/h;
 
-int Hv = 1;
 double s1, s2, s3;
 if (Hv) {
 	s1 = node1.v(0)*nx + node1.v(1)*ny + node1.v(2)*nz;
