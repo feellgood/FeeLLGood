@@ -16,7 +16,7 @@ using namespace Tetra;
 using namespace Pt;
 
 
-void Tet::lumping(int const& npi,double alpha_eff,double prefactor, double AE[3*N][3*N]) const
+void Tet::lumping(int const& npi,double alpha_eff,double prefactor, double (&AE)[3*N][3*N]) const
 {
 const double w = weight[npi];
 
@@ -47,7 +47,7 @@ for (int i=0; i<N; i++)
     }
 }
 
-double Tet::add_STT_BE(int const& npi, STT p_stt,double Js, Pt::pt3D gradV[NPI], Pt::pt3D p_g[NPI], Pt::pt3D U[NPI], Pt::pt3D dUdx[NPI],Pt::pt3D dUdy[NPI],Pt::pt3D dUdz[NPI], Pt::pt3D BE[N]) const
+double Tet::add_STT_BE(int const& npi, STT p_stt,double Js, Pt::pt3D (&gradV)[NPI], Pt::pt3D (&p_g)[NPI], Pt::pt3D (&U)[NPI], Pt::pt3D (&dUdx)[NPI],Pt::pt3D (&dUdy)[NPI],Pt::pt3D (&dUdz)[NPI], Pt::pt3D (&BE)[N]) const
 {
 const double ksi = Pt::sq(p_stt.lJ/p_stt.lsf);// this is in Thiaville notations beta_DW
 
@@ -70,7 +70,7 @@ for (int i=0; i<N; i++)
 return Pt::pScal(U[npi],Hm);
 }
 
-void Tet::add_drift_BE(int const& npi, double alpha, double s_dt, double Vdrift, Pt::pt3D U[NPI], Pt::pt3D V[NPI], Pt::pt3D dUd_[NPI], Pt::pt3D dVd_[NPI], Pt::pt3D BE[N]) const
+void Tet::add_drift_BE(int const& npi, double alpha, double s_dt, double Vdrift, Pt::pt3D (&U)[NPI], Pt::pt3D (&V)[NPI], Pt::pt3D (&dUd_)[NPI], Pt::pt3D (&dVd_)[NPI], Pt::pt3D (&BE)[N]) const
 {// the artificial drift from eventual recentering is along x,y or z
 double w = weight[npi];
 
@@ -82,7 +82,7 @@ for (int i=0; i<N; i++)
     }
 }
 
-void Tet::build_BE(int const& npi, Pt::pt3D const & H, double Abis, Pt::pt3D dUdx[NPI], Pt::pt3D dUdy[NPI], Pt::pt3D dUdz[NPI], Pt::pt3D BE[N]) const
+void Tet::build_BE(int const& npi, Pt::pt3D const & H, double Abis, Pt::pt3D (&dUdx)[NPI], Pt::pt3D (&dUdy)[NPI], Pt::pt3D (&dUdz)[NPI], Pt::pt3D (&BE)[N]) const
 {
 const double w = weight[npi];
 
@@ -93,13 +93,13 @@ for (int i=0; i<N; i++)
     }
 }
 
-double Tet::calc_aniso_uniax(int const& npi,Pt::pt3D const& uk,const double Kbis, const double s_dt, Pt::pt3D U[NPI], Pt::pt3D V[NPI], Pt::pt3D & H_aniso) const
+double Tet::calc_aniso_uniax(int const& npi,Pt::pt3D const& uk,const double Kbis, const double s_dt, Pt::pt3D (&U)[NPI], Pt::pt3D (&V)[NPI], Pt::pt3D & H_aniso) const
 {
 H_aniso += ( Kbis*pScal(uk, U[npi]+s_dt*V[npi]) )*uk;
 return ( Kbis*sq(pScal(uk,U[npi])) );
 }
 
-double Tet::calc_aniso_cub(int const& npi,Pt::pt3D const& ex,Pt::pt3D const& ey,Pt::pt3D const& ez,const double K3bis, const double s_dt, Pt::pt3D U[NPI], Pt::pt3D V[NPI], Pt::pt3D & H_aniso) const
+double Tet::calc_aniso_cub(int const& npi,Pt::pt3D const& ex,Pt::pt3D const& ey,Pt::pt3D const& ez,const double K3bis, const double s_dt, Pt::pt3D (&U)[NPI], Pt::pt3D (&V)[NPI], Pt::pt3D & H_aniso) const
 {
 pt3D uk_u = pt3D(pScal(ex,U[npi]), pScal(ey,U[npi]), pScal(ez,U[npi]));
 pt3D uk_v = pt3D(pScal(ex,V[npi]), pScal(ey,V[npi]), pScal(ez,V[npi]));
@@ -110,7 +110,7 @@ H_aniso += -K3bis*( uk_uuu(0)*ex + uk_uuu(1)*ey + uk_uuu(2)*ez  + s_dt*pDirect(p
 return ( -K3bis*pScal(uk_u,uk_uuu) );
 }
 
-void Tet::integrales(std::vector<Tetra::prm> const& params, timing const& prm_t,Pt::pt3D const& Hext,Pt::index idx_dir, double Vdrift, double AE[3*N][3*N], Pt::pt3D BE[N]) const
+void Tet::integrales(std::vector<Tetra::prm> const& params, timing const& prm_t,Pt::pt3D const& Hext,Pt::index idx_dir, double Vdrift, double (&AE)[3*N][3*N], Pt::pt3D (&BE)[N]) const
 {
 double alpha = params[idxPrm].alpha_LLG;
 double Js =params[idxPrm].J;
@@ -179,7 +179,7 @@ for (int npi=0; npi<NPI; npi++)
     }
 }
 
-double Tet::exchangeEnergy(Tetra::prm const& param,const double dudx[DIM][NPI],const double dudy[DIM][NPI],const double dudz[DIM][NPI]) const
+double Tet::exchangeEnergy(Tetra::prm const& param,const double (&dudx)[DIM][NPI],const double (&dudy)[DIM][NPI],const double (&dudz)[DIM][NPI]) const
 {
 double dens[NPI];
 
@@ -192,7 +192,7 @@ for (int npi=0; npi<NPI; npi++)
 return ( param.A * weightedScalarProd(dens) );
 }
 
-double Tet::anisotropyEnergy(Tetra::prm const& param,const double u[DIM][NPI]) const
+double Tet::anisotropyEnergy(Tetra::prm const& param,const double (&u)[DIM][NPI]) const
 {
 double dens[NPI];
 
@@ -222,7 +222,7 @@ for (int j=0; j<NPI; j++, nsrc++)
     { srcDen[nsrc] = -Ms * ( dudx[0][j] + dudy[1][j] + dudz[2][j] ) * weight[j]; }
 }
 
-double Tet::demagEnergy(Tetra::prm const& param,const double dudx[DIM][NPI],const double dudy[DIM][NPI],const double dudz[DIM][NPI],const double phi[NPI]) const
+double Tet::demagEnergy(Tetra::prm const& param,const double (&dudx)[DIM][NPI],const double (&dudy)[DIM][NPI],const double (&dudz)[DIM][NPI],const double (&phi)[NPI]) const
 {
 double dens[NPI];
 double Ms = nu0 * param.J;
@@ -232,7 +232,7 @@ for (int npi=0; npi<NPI; npi++)
 return ( -0.5*mu0*Ms*weightedScalarProd(dens) );
 }
 
-double Tet::zeemanEnergy(Tetra::prm const& param,double uz_drift,Pt::pt3D const& Hext,double const u[DIM][NPI]) const
+double Tet::zeemanEnergy(Tetra::prm const& param,double uz_drift,Pt::pt3D const& Hext,double const (&u)[DIM][NPI]) const
 {
 double dens[NPI];
 
@@ -259,7 +259,7 @@ for (int i=0; i < N; i++)
     }    
 }
 
-double Tet::Jacobian(double J[DIM][DIM])
+double Tet::Jacobian(double (&J)[DIM][DIM])
 {
 Pt::pt3D const & p0 = refNode[ ind[0] ].p;
 Pt::pt3D const & p1 = refNode[ ind[1] ].p;

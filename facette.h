@@ -85,7 +85,7 @@ class Fac{
 		bool treated;/**< flag */
 
         /** weighted scalar product : factorized formulation: weight(1)=weight(2)=weight(3) */
-        inline double weightedScalarProd(const double X[NPI] /**< [in] */) const
+        inline double weightedScalarProd(const double (&X)[NPI] /**< [in] */) const
             { return ( X[0]*weight(0) + (X[1] +X[2] + X[3])*weight(1) ); }
         
         /** interpolation template; T == 3D vector field or T == double .The getter function is given as a parameter in order to know what part of the node you want to interpolate 
@@ -96,7 +96,7 @@ class Fac{
         //tiny::mult<double, DIM, N, NPI> (vec_nod, a, result); //if T == PT::pt3D
         //tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result); //if T == double
         template <class T>
-        void interpolation(std::function< T (Nodes::Node)> getter /**< [in] */,T result[NPI] /**< [out] */) const
+        void interpolation(std::function< T (Nodes::Node)> getter /**< [in] */,T (&result)[NPI] /**< [out] */) const
         {
         const T x0( getter( refNode[ ind[0] ] ) ),x1( getter( refNode[ ind[1] ] ) ),x2( getter( refNode[ ind[2] ] ) );
         
@@ -110,23 +110,23 @@ class Fac{
         /** interpolation for 3D vector field : the getter function is given as a parameter in order to know what part of the node you want to interpolate 
          This function is only usefull for fmm_demag.h, in other parts of the code the generic interpolation template is directly called
          */
-        inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter /**< [in] */,Pt::pt3D result[NPI] /**< [out] */) const
+        inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter /**< [in] */,Pt::pt3D (&result)[NPI] /**< [out] */) const
             { interpolation<Pt::pt3D>(getter,result); }
      
         /** basic infos */		
         inline void infos() const {std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2] <<std::endl;};
         
         /** computes the integral contribution of the triangular face */
-        void integrales(std::vector<Facette::prm> const& params /**< [in] */, Pt::pt3D BE[N] /**< [out] */) const;
+        void integrales(std::vector<Facette::prm> const& params /**< [in] */, Pt::pt3D (&BE)[N] /**< [out] */) const;
 
         /** anisotropy energy of the facette */
-        double anisotropyEnergy(Facette::prm const& param /**< [in] */,const Pt::pt3D u[NPI] /**< [in] */) const;
+        double anisotropyEnergy(Facette::prm const& param /**< [in] */,const Pt::pt3D (&u)[NPI] /**< [in] */) const;
         
         /** surface charges  */
         void charges(std::function<Pt::pt3D (Nodes::Node)> getter,std::vector<double> &srcDen,std::vector<double> &corr,int &nsrc) const;
         
         /** demagnetizing energy of the facette */
-        double demagEnergy(const Pt::pt3D u[NPI] /**< [in] */,const double phi[NPI] /**< [in] */) const;
+        double demagEnergy(const Pt::pt3D (&u)[NPI] /**< [in] */,const double (&phi)[NPI] /**< [in] */) const;
         
         /** assemblage of the matrix elements from inner matrix in facette object */
         void assemblage_mat(write_matrix &K) const;
@@ -151,7 +151,7 @@ class Fac{
         double potential(std::function<Pt::pt3D (Nodes::Node)> getter, int i) const;
         
         /** computes correction values */
-        void calcCorr(std::function<const Pt::pt3D (Nodes::Node)> getter,std::vector<double> &corr,Pt::pt3D u[NPI]) const;
+        void calcCorr(std::function<const Pt::pt3D (Nodes::Node)> getter,std::vector<double> &corr,Pt::pt3D (&u)[NPI]) const;
         
         /** lexicographic order on indices */
         inline bool operator< (const Fac &f) const
@@ -169,7 +169,7 @@ class Fac{
     /** small vector for integrales */
     double Lp[2*N];
 
-	/** computes the norm to the face */
+	/** computes the norm to the face, returns a unit vector */
 	inline Pt::pt3D calc_norm(void) const
     {
     Pt::pt3D n = normal_vect();

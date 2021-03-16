@@ -217,11 +217,11 @@ class Tet{
         bool treated;/**< flag */
 
         /** weighted scalar product */
-        inline double weightedScalarProd(const double X[NPI]) const
+        inline double weightedScalarProd(const double (&X)[NPI]) const
             {return (X[0]*weight[0] + X[1]*weight[1] + X[2]*weight[2] + X[3]*weight[3] +X[4]*weight[4]);}
 		
 		/** interpolation for 3D vector field: the getter function is given as a parameter in order to know what part of the node you want to interpolate */
-		inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,Pt::pt3D result[NPI]) const
+		inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,Pt::pt3D (&result)[NPI]) const
         {
         Pt::pt3D vec_nod[N];
         getDataFromNode<Pt::pt3D>(getter,vec_nod);
@@ -229,7 +229,7 @@ class Tet{
         }
 		
 		/** interpolation for scalar field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
-        inline void interpolation(std::function<double (Nodes::Node)> getter,double result[NPI]) const
+        inline void interpolation(std::function<double (Nodes::Node)> getter,double (&result)[NPI]) const
         {
         double scalar_nod[N];    
         getDataFromNode<double>(getter,scalar_nod);
@@ -237,7 +237,7 @@ class Tet{
         }
 		
 		/** interpolation for a tensor : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
-        inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double Tx[Pt::DIM][NPI],double Ty[Pt::DIM][NPI],double Tz[Pt::DIM][NPI]) const
+        inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double (&Tx)[Pt::DIM][NPI],double (&Ty)[Pt::DIM][NPI],double (&Tz)[Pt::DIM][NPI]) const
         {
         Pt::pt3D vec_nod[N];
         getDataFromNode<Pt::pt3D>(getter,vec_nod);
@@ -248,8 +248,8 @@ class Tet{
         }
 		
 		/** interpolation for 3D vector field and a tensor : getter function is given as a parameter to know what part of the node you want to interpolate */
-        inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,Pt::pt3D result[NPI],
-                                  Pt::pt3D Tx[NPI],Pt::pt3D Ty[NPI],Pt::pt3D Tz[NPI]) const
+        inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,Pt::pt3D (&result)[NPI],
+                                  Pt::pt3D (&Tx)[NPI],Pt::pt3D (&Ty)[NPI],Pt::pt3D (&Tz)[NPI]) const
         {
 		double u[Pt::DIM][NPI];
         double dudx[Pt::DIM][NPI], dudy[Pt::DIM][NPI], dudz[Pt::DIM][NPI];
@@ -272,8 +272,8 @@ class Tet{
         }
 		
 		/** interpolation for 3D vector field and a tensor : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
-        inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double result[Pt::DIM][NPI],
-                                  double Tx[Pt::DIM][NPI],double Ty[Pt::DIM][NPI],double Tz[Pt::DIM][NPI]) const
+        inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,double (&result)[Pt::DIM][NPI],
+                                  double (&Tx)[Pt::DIM][NPI],double (&Ty)[Pt::DIM][NPI],double (&Tz)[Pt::DIM][NPI]) const
         {
         Pt::pt3D vec_nod[N];
         getDataFromNode<Pt::pt3D>(getter,vec_nod);
@@ -285,7 +285,7 @@ class Tet{
         }
 		
         /** interpolation for components of a field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
-        inline void interpolation(std::function<double (Nodes::Node)> getter,Pt::pt3D X[NPI]) const
+        inline void interpolation(std::function<double (Nodes::Node)> getter,Pt::pt3D (&X)[NPI]) const
         {
         double scalar_nod[N];    
         getDataFromNode<double>(getter,scalar_nod);
@@ -300,7 +300,7 @@ class Tet{
         }
 
         /** interpolation for components of a field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
-        inline void interpolation(std::function<double (Nodes::Node)> getter,double Xx[NPI],double Xy[NPI],double Xz[NPI]) const
+        inline void interpolation(std::function<double (Nodes::Node)> getter,double (&Xx)[NPI],double (&Xy)[NPI],double (&Xz)[NPI]) const
         {
         double scalar_nod[N];    
         getDataFromNode<double>(getter,scalar_nod);
@@ -310,7 +310,7 @@ class Tet{
         }
 
 		/** interpolation for scalar field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
-        inline void interpolation(std::function<double (Nodes::Node,Pt::index)> getter,Pt::index idx,double result[NPI]) const
+        inline void interpolation(std::function<double (Nodes::Node,Pt::index)> getter,Pt::index idx,double (&result)[NPI]) const
         {
         double scalar_nod[N];    
         
@@ -335,40 +335,40 @@ class Tet{
             };
         
         /** AE matrix filling */
-        void lumping(int const& npi,double alpha_eff,double prefactor, double AE[3*N][3*N]) const;
+        void lumping(int const& npi,double alpha_eff,double prefactor, double (&AE)[3*N][3*N]) const;
         
         /** STT contribution to vector BE */
-        double add_STT_BE(int const& npi, STT p_stt, double Js, Pt::pt3D gradV[NPI], Pt::pt3D p_g[NPI], Pt::pt3D U[NPI], Pt::pt3D dUdx[NPI],Pt::pt3D dUdy[NPI],Pt::pt3D dUdz[NPI], Pt::pt3D BE[N]) const;
+        double add_STT_BE(int const& npi, STT p_stt, double Js, Pt::pt3D (&gradV)[NPI], Pt::pt3D (&p_g)[NPI], Pt::pt3D (&U)[NPI], Pt::pt3D (&dUdx)[NPI],Pt::pt3D (&dUdy)[NPI],Pt::pt3D (&dUdz)[NPI], Pt::pt3D (&BE)[N]) const;
         
         /** drift contribution due to eventual recentering to vector BE */
-        void add_drift_BE(int const& npi, double alpha, double s_dt, double Vdrift, Pt::pt3D U[NPI], Pt::pt3D V[NPI], Pt::pt3D dUd_[NPI], Pt::pt3D dVd_[NPI], Pt::pt3D BE[N]) const;
+        void add_drift_BE(int const& npi, double alpha, double s_dt, double Vdrift, Pt::pt3D (&U)[NPI], Pt::pt3D (&V)[NPI], Pt::pt3D (&dUd_)[NPI], Pt::pt3D (&dVd_)[NPI], Pt::pt3D (&BE)[N]) const;
         
         /** BE vector filling */
-        void build_BE(int const& npi, Pt::pt3D const & H, double Abis, Pt::pt3D dUdx[NPI], Pt::pt3D dUdy[NPI], Pt::pt3D dUdz[NPI], Pt::pt3D BE[N]) const;
+        void build_BE(int const& npi, Pt::pt3D const & H, double Abis, Pt::pt3D (&dUdx)[NPI], Pt::pt3D (&dUdy)[NPI], Pt::pt3D (&dUdz)[NPI], Pt::pt3D (&BE)[N]) const;
 
         /** append H_aniso for uniaxial anisotropy contribution, returns contribution to uHeff (used to compute the stabilizing effective damping) */
-        double calc_aniso_uniax(int const& npi,Pt::pt3D const& uk,const double Kbis, const double s_dt, Pt::pt3D U[NPI], Pt::pt3D V[NPI], Pt::pt3D & H_aniso) const;
+        double calc_aniso_uniax(int const& npi,Pt::pt3D const& uk,const double Kbis, const double s_dt, Pt::pt3D (&U)[NPI], Pt::pt3D (&V)[NPI], Pt::pt3D & H_aniso) const;
         
         /** append H_aniso for cubic anisotropy contribution, returns contribution to uHeff (used to compute the stabilizing effective damping) */
-        double calc_aniso_cub(int const& npi,Pt::pt3D const& ex,Pt::pt3D const& ey,Pt::pt3D const& ez,const double K3bis, const double s_dt, Pt::pt3D U[NPI], Pt::pt3D V[NPI], Pt::pt3D & H_aniso) const;
+        double calc_aniso_cub(int const& npi,Pt::pt3D const& ex,Pt::pt3D const& ey,Pt::pt3D const& ez,const double K3bis, const double s_dt, Pt::pt3D (&U)[NPI], Pt::pt3D (&V)[NPI], Pt::pt3D & H_aniso) const;
         
 		/** computes the integral contribution of the tetrahedron to the evolution of the magnetization */		
-		void integrales(std::vector<Tetra::prm> const& params, timing const& prm_t, Pt::pt3D const& Hext, Pt::index idx_dir, double Vdrift, double AE[3*N][3*N], Pt::pt3D BE[N])  const;
+		void integrales(std::vector<Tetra::prm> const& params, timing const& prm_t, Pt::pt3D const& Hext, Pt::index idx_dir, double Vdrift, double (&AE)[3*N][3*N], Pt::pt3D (&BE)[N])  const;
 		
         /** exchange energy of the tetrahedron */
-        double exchangeEnergy(Tetra::prm const& param,const double dudx[Pt::DIM][NPI],const double dudy[Pt::DIM][NPI],const double dudz[Pt::DIM][NPI]) const;
+        double exchangeEnergy(Tetra::prm const& param,const double (&dudx)[Pt::DIM][NPI],const double (&dudy)[Pt::DIM][NPI],const double (&dudz)[Pt::DIM][NPI]) const;
         
         /** anisotropy energy of the tetrahedron */
-        double anisotropyEnergy(Tetra::prm const& param,const double u[Pt::DIM][NPI]) const;
+        double anisotropyEnergy(Tetra::prm const& param,const double (&u)[Pt::DIM][NPI]) const;
         
         /** volume charges  */
         void charges(std::function<Pt::pt3D (Nodes::Node)> getter,std::vector<double> &srcDen,int &nsrc,double Ms) const;
         
         /** demagnetizing energy of the tetrahedron */
-        double demagEnergy(Tetra::prm const& param,const double dudx[Pt::DIM][NPI],const double dudy[Pt::DIM][NPI],const double dudz[Pt::DIM][NPI],const double phi[NPI]) const;
+        double demagEnergy(Tetra::prm const& param,const double (&dudx)[Pt::DIM][NPI],const double (&dudy)[Pt::DIM][NPI],const double (&dudz)[Pt::DIM][NPI],const double (&phi)[NPI]) const;
         
         /** zeeman energy of the tetrahedron */
-        double zeemanEnergy(Tetra::prm const& param,double uz_drift,Pt::pt3D const& Hext,const double u[Pt::DIM][NPI]) const;
+        double zeemanEnergy(Tetra::prm const& param,double uz_drift,Pt::pt3D const& Hext,const double (&u)[Pt::DIM][NPI]) const;
         
         /** matrix assembly using inner matrix in tetra */
         void assemblage_mat(write_matrix &K) const;
@@ -387,7 +387,7 @@ class Tet{
 		inline int getRegion(void) const {return reg;}
 		
 		/** \return \f$ |J| \f$ build Jacobian \f$ J \f$ */
-        double Jacobian(double J[Pt::DIM][Pt::DIM]);
+        double Jacobian(double (&J)[Pt::DIM][Pt::DIM]);
         
         /** small matrix for integrales */
         double Kp[2*N][2*N];
@@ -407,7 +407,7 @@ class Tet{
         const std::shared_ptr<Nodes::Node[]> refNode;/**< direct access to the Nodes */
         
         /** template getter to access and copy some parts of the node vector of type T = double or Pt::pt3D  */
-        template <class T> void getDataFromNode(std::function< T (Nodes::Node)> getter,T X_data[N]) const
+        template <class T> void getDataFromNode(std::function< T (Nodes::Node)> getter,T (&X_data)[N]) const
             { for (int i=0; i<N; i++) X_data[i] = getter(refNode[ ind[i] ]); }
     };//end class Tetra
 }//end namespace Tetra

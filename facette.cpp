@@ -4,7 +4,7 @@
 using namespace Facette;
 using namespace Pt;
 
-void Fac::integrales(std::vector<Facette::prm> const& params, Pt::pt3D BE[N]) const
+void Fac::integrales(std::vector<Facette::prm> const& params, Pt::pt3D (&BE)[N]) const
 {
 Pt::pt3D const & uk = params[idxPrm].uk;
 double Kbis = 2.0*(params[idxPrm].Ks)/Ms; // carefull Ms of the facette here (could lead to div by zero ?)
@@ -20,7 +20,7 @@ for (int npi=0; npi<NPI; npi++)
     }
 }
 
-double Fac::anisotropyEnergy(Facette::prm const& param,const Pt::pt3D u[NPI]) const
+double Fac::anisotropyEnergy(Facette::prm const& param,const Pt::pt3D (&u)[NPI]) const
 {//surface Neel anisotropy (uk is a uniaxial easy axis)
 double dens[NPI];
 for (int npi=0; npi<NPI; npi++)
@@ -40,7 +40,7 @@ for (int j=0; j<NPI; j++, nsrc++)
 calcCorr(getter,corr,u);
 }
 
-double Fac::demagEnergy(const Pt::pt3D u[NPI],const double phi[NPI]) const
+double Fac::demagEnergy(const Pt::pt3D (&u)[NPI],const double (&phi)[NPI]) const
 {
 double q[NPI];
 Pt::pt3D n = calc_norm();
@@ -112,7 +112,7 @@ double pot = (xi*s1 +( (xi*(1+c*t/h) -b*(r-b)/h)*s2 + b*(r-b-c*xi)*s3/h )/(1+c*c
 return Ms*pot;
 }
 
-void Fac::calcCorr(std::function<const Pt::pt3D (Nodes::Node)> getter,std::vector<double> &corr,Pt::pt3D u[NPI]) const
+void Fac::calcCorr(std::function<const Pt::pt3D (Nodes::Node)> getter,std::vector<double> &corr,Pt::pt3D (&u)[NPI]) const
 {
 // calc coord gauss
 Pt::pt3D gauss[NPI];
@@ -124,7 +124,7 @@ Pt::pt3D n = calc_norm();
 for (int i=0; i<N; i++)
     {
     const int i_ = ind[i];
-    const Pt::pt3D p_i_ = refNode[ i_ ].p;	      
+    Pt::pt3D & p_i_ = refNode[ i_ ].p;	      
     for (int j=0; j<NPI; j++)
         {
         corr[i_]-= Ms*pScal(u[j],n)*weight(j)/Pt::dist(p_i_, gauss[j]);
