@@ -19,7 +19,7 @@ class Cuboid(object):
         for i in range(0,self.nbX+1):
             for j in range(0,self.nbY+1):
                 for k in range(0,self.nbZ+1):
-                    self.pts.append([idx,pt_min[0]+(i*dx),pt_min[1]+(j*dy),pt_min[1]+(k*dz)])
+                    self.pts.append([idx,pt_min[0]+(i*dx),pt_min[1]+(j*dy),pt_min[2]+(k*dz)])
                     idx += 1
         self.Tet = []
         self.Fac = []
@@ -79,11 +79,25 @@ class Cuboid(object):
                         self.Fac.append([C,G,H])
                         self.Fac.append([H,D,C])
 
+    def transformNodes(self,func):
+        """
+        apply func on pts array, func input and output are 3D vectors
+        """
+        for i in range(0,len(self.pts)):
+            # pts[i][0] is an index, so we do not use map function here
+            x = self.pts[i][1]
+            y = self.pts[i][2]
+            z = self.pts[i][3]
+            transformed_pt = []
+            transformed_pt = func([x,y,z])
+            self.pts[i][1] = transformed_pt[0]
+            self.pts[i][2] = transformed_pt[1]
+            self.pts[i][3] = transformed_pt[2]
+            
     def stringTet(self,idx):
         return str(1+self.Tet[idx][0])+"\t"+str(1+self.Tet[idx][1])+"\t"+str(1+self.Tet[idx][2]) +"\t"+str(1+self.Tet[idx][3])
 
     def stringFac(self,table,idx):
-        #return str(1+self.Fac[idx][0])+"\t"+str(1+self.Fac[idx][1])+"\t"+str(1+self.Fac[idx][2])
         return str(1+table[idx][0])+"\t"+str(1+table[idx][1])+"\t"+str(1+table[idx][2])
     
     def calc_idx(self,i,j,k):
