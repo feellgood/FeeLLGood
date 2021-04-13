@@ -155,17 +155,11 @@ class Fac{
         
         /** lexicographic order on indices */
         inline bool operator< (const Fac &f) const
-            {
-            if (this->ind[0] < f.ind[0]) return true;
-            else if ((this->ind[0] == f.ind[0]) && (this->ind[1] < f.ind[1])) return true;
-                else if ((this->ind[0] == f.ind[0]) && (this->ind[1] == f.ind[1]) && (this->ind[2] < f.ind[2])) return true;
+        { return (this->ind[0] < f.ind[0])||( (this->ind[0] == f.ind[0])&&( (this->ind[1] < f.ind[1]) || ((this->ind[1] == f.ind[1])&&(this->ind[2] < f.ind[2]) )) ); }
 
-            return false;
-            }
-    
 	/** small matrix for integrales */
 	double Kp[2*N][2*N];        
-	
+
     /** small vector for integrales */
     double Lp[2*N];
 
