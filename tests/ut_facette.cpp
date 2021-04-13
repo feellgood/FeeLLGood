@@ -47,6 +47,34 @@ BOOST_CHECK( (f.getN() == Facette::N) && (f.getNPI() == Facette::NPI) );
 /* first lvl tests : nested calculus,... */
 /*---------------------------------------*/
 
+BOOST_AUTO_TEST_CASE(Fac_operator_infto)
+{
+std::cout << "Fac operator< unit test" << std::endl;
+
+std::random_device rd;
+std::mt19937_64 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::uniform_int_distribution<int> distrib;
+
+Facette::Fac f(nullptr,0,0,0,0,0,0);
+bool test_result = !(f<f);// whatever is f, f<f must return false
+
+for(int i=0;i<100;i++)
+    {
+    Facette::Fac f1(nullptr,0,0,0,distrib(gen),distrib(gen),distrib(gen));
+    Facette::Fac f2(nullptr,0,0,0,distrib(gen),distrib(gen),distrib(gen));
+
+/* ref code */
+    bool val_ref=false;
+    if (f1.ind[0] < f2.ind[0]) val_ref=true;
+            else if ((f1.ind[0] == f2.ind[0]) && (f1.ind[1] < f2.ind[1])) val_ref=true;
+                else if ((f1.ind[0] == f2.ind[0]) && (f1.ind[1] == f2.ind[1]) && (f1.ind[2] < f2.ind[2])) val_ref=true;
+    /* end ref code */
+
+    test_result = test_result && ((f1 < f2) == val_ref);
+    }
+BOOST_CHECK( test_result );
+}
+
 
 /*---------------------------------------*/
 /* second lvl tests : pure mathematics   */
@@ -184,7 +212,7 @@ std::random_device rd;
 std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
-Pt::pt3D p1(1,0,0),p2(0,1,0),p3(1,1,0);
+Pt::pt3D p1(1+(distrib(gen)-0.5)/10.0,(distrib(gen)-0.5)/10.0,(distrib(gen)-0.5)/10.0),p2((distrib(gen)-0.5)/10.0,1+(distrib(gen)-0.5)/10.0,1+(distrib(gen)-0.5)/10.0),p3((distrib(gen)-0.5)/10.0,1+(distrib(gen)-0.5)/10.0,(distrib(gen)-0.5)/10.0);
 Pt::pt3D u0(M_PI*distrib(gen),2*M_PI*distrib(gen)), u(M_PI*distrib(gen),2*M_PI*distrib(gen));
 Pt::pt3D v0(2*distrib(gen)-1,2*distrib(gen)-1,2*distrib(gen)-1), v(2*distrib(gen)-1,2*distrib(gen)-1,2*distrib(gen)-1);
 
@@ -282,7 +310,7 @@ std::random_device rd;
 std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
-Pt::pt3D p1(1,0,0),p2(0,1,0),p3(1,1,0);
+Pt::pt3D p1(1+(distrib(gen)-0.5)/10.0,(distrib(gen)-0.5)/10.0,(distrib(gen)-0.5)/10.0),p2((distrib(gen)-0.5)/10.0,1+(distrib(gen)-0.5)/10.0,1+(distrib(gen)-0.5)/10.0),p3((distrib(gen)-0.5)/10.0,1+(distrib(gen)-0.5)/10.0,(distrib(gen)-0.5)/10.0);
 Pt::pt3D u0(M_PI*distrib(gen),2*M_PI*distrib(gen)), u(M_PI*distrib(gen),2*M_PI*distrib(gen));
 Pt::pt3D v0(2*distrib(gen)-1,2*distrib(gen)-1,2*distrib(gen)-1), v(2*distrib(gen)-1,2*distrib(gen)-1,2*distrib(gen)-1);
 
