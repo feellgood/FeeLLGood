@@ -83,33 +83,25 @@ Pt::pt3D p1p3 = node3.p - node1.p;
 std::function<double(double)> f = [](double x){return sqrt(1.0+x*x);} ;
 
 double b = p1p2.norm();
-double t = Pt::pScal(p1p2,p1p3)/b;
-double h = 2.*calc_surf()/b;
-if (h<0) std::cout << "h is negative : surface is ill-oriented" << std::endl;
+double t = Pt::pScal(p1p2,p1p3)/b; // carefull with t , if cos(p1p2,p1p3) is negative then t is negative
+double _2s = 2.*calc_surf();
+double h = _2s/b;
+
+if (_2s<0)
+    { std::cout << "facette surface is negative : surface is ill-oriented" << std::endl; exit(1);}
 
 double c = (t-b)/h;
-double r = h*f(t/h);// if h is positive it is the same as double r = sqrt( sq(h) + sq(t));
-
+double r = h*f(t/h);// if _2s is positive it is the same as double r = sqrt( sq(_2s/b) + sq(t));
 double log_1 = log( (c*t + h + f(c)*r) / (b*(c+f(c))) );
-//double h_log_2 = h*log(t + r);
-
 double xi = b*log_1/f(c);
 
 Pt::pt3D n = calc_norm();
-
 double s1 = Pt::pScal(getter(node1),n);
 double s2 = Pt::pScal(getter(node2),n);
 double s3 = Pt::pScal(getter(node3),n);
 
-//double k_h = (-t*(s2-s1)/b + s3 - s1)/2.0;
-//double pot1 = b*(xi + c*(r-b))/(1+c*c);
-//double pot2 = b*(-c*xi + r - b)/(1+c*c) + h*(h_log_2 - 0.5*h);
-//double pot3 = h_log_2 - h + xi;
-//double pot = 0.5*(s2-s1)*pot1/b + k_h*pot2/h + s1*xi + k_h*(h-h_log_2) - 0.5*k_h*h;
-//double pot = 0.5*(s2-s1)*pot1/b + k_h*b*(r-b-c*xi)/(h*(1+c*c)) + s1*xi;
-
-double pot = (xi*s1 +( (xi*(1+c*t/h) -b*(r-b)/h)*s2 + b*(r-b-c*xi)*s3/h )/(1+c*c))/2.0;
-return Ms*pot;
+double pot = xi*s1 +( (xi*(h + c*t) - b*(r-b))*s2 + b*(r-b-c*xi)*s3 )*b/(_2s*(1+c*c));
+return 0.5*Ms*pot;
 }
 
 void Fac::calcCorr(std::function<const Pt::pt3D (Nodes::Node)> getter,std::vector<double> &corr,Pt::pt3D (&u)[NPI]) const
