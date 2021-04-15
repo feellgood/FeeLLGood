@@ -1,0 +1,46 @@
+name: tests
+
+on: [pull_request, push, repository_dispatch]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    env:
+      CCACHE_COMPRESS: "true"
+      CCACHE_MAXSIZE: 500M
+
+    steps:
+    - name: checkout repository
+      uses: actions/checkout@v2
+
+    - name: install ccache
+      run: sudo apt-get install ccache
+
+    - name: restore cache
+      uses: actions/cache@v2
+      with:
+        path: ~/.ccache
+        key: ccache
+
+    - name: install dependencies
+      run: |
+        export PATH="/usr/lib/ccache:$PATH"
+        ./install-dependencies.sh
+
+    - name: build
+      run: |
+        export PATH="/usr/lib/ccache:$PATH"
+        cmake . -DENABLE_UTESTS=ON
+        make -j $(getconf _NPROCESSORS_ONLN)
+
+    - name: show ccache stats
+      run: |
+        ccache --show-stats
+        ccache --zero-stats
+
+    - name: run unit tests
+      run: make test
+
+    - name: run functional test
+      run: python3 full_test.py

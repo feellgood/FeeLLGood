@@ -1,4 +1,4 @@
-# FeeLLGood – A micromagnetic solver [![Build Status](https://travis-ci.com/feellgood/FeeLLGood.svg?branch=master)](https://travis-ci.com/feellgood/FeeLLGood)
+# FeeLLGood – A micromagnetic solver ![Build Status](https://github.com/feellgood/FeeLLGood/actions/workflows/tests.yml/badge.svg)
 
 FEELLGOOD is a micromagnetic solver using finite element technique to integrate Landau Lifshitz Gilbert equation. It computes the demagnetizing field using the so-called fast multipole algorithm.
 

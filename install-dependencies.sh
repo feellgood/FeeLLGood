@@ -3,9 +3,9 @@
 # install-dependencies.sh: Install the dependencies required for
 # building FeeLLGood.
 #
-# This is a support script for the automated build tests performed by
-# Travis CI (travis-ci.org). It is not intended for end-users, and it
-# contains a few calls to `sudo'. Use it at your own risk.
+# This is a support script for the automated tests performed by GitHub
+# Actions. It is not intended for end-users, and it contains a few calls
+# to `sudo'. Use it at your own risk.
 
 # Set shell options:
 # -e: exit as soon as a command fails
@@ -17,12 +17,11 @@ job_count=$(getconf _NPROCESSORS_ONLN)
 
 # Install apt packages.
 sudo apt-get update -q
-sudo apt-get install -y cmake libboost-dev \
+sudo apt-get install -y libboost-dev \
     libboost-system-dev libboost-filesystem-dev libboost-test-dev
 
-# Download and build the libraries here. This is the grandparent of the
-# current directory in a Travis build.
-cd $HOME/build/
+# Download and build the libraries here.
+cd /tmp
 
 # Install ANN.
 wget -nv https://www.cs.umd.edu/~mount/ANN/Files/1.1.2/ann_1.1.2.tar.gz
