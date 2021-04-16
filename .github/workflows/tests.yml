@@ -21,7 +21,10 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ~/.ccache
-        key: ccache
+        key: ccache-${{ runner.os }}-${{ github.sha }}
+        restore-keys: |
+          ccache-${{ runner.os }}-
+          ccache-
 
     - name: install dependencies
       run: |
