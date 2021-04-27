@@ -447,7 +447,9 @@ std::cout << "dist(P,Pref) = " << result << std::endl;
 
 BOOST_TEST( normP > 0.0 );
 BOOST_CHECK( isfinite(result) );
-BOOST_TEST( result == 0.0 );
+
+for(int i=0;i<2*N;i++)
+    for(int j=0;j<3*N;j++) {BOOST_CHECK(P[i][j] == Pref[i][j]);}
 }
 
 BOOST_AUTO_TEST_SUITE_END()
