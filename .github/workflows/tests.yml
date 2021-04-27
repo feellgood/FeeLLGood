@@ -43,7 +43,7 @@ jobs:
         ccache --zero-stats
 
     - name: run unit tests
-      run: make test || cat Testing/Temporary/LastTest.log
+      run: make test
 
     - name: run functional test
       run: python3 full_test.py
