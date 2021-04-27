@@ -519,4 +519,56 @@ std::cout << "distance = "<< val << std::endl;
 BOOST_TEST( val == 0.0 );
 }
 
+BOOST_AUTO_TEST_CASE(Tet_Pcoeff, * boost::unit_test::tolerance(UT_TOL))
+{
+std::cout << "Tet test on Nodes::Pcoeff template" << std::endl;
+const int N = Tetra::N;
+
+int nbNod = 4;
+std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
+
+std::random_device rd;
+std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::uniform_real_distribution<> distrib(0.0,1.0);
+
+
+Pt::pt3D p1(1,0,0),p2(0,1,0),p3(1,1,0),p4(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
+double theta_sph(0),phi_sph(0),phi0(0),phi(0),phiv0(0),phiv(0),V(0);
+
+node[0] = {p1,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,V};
+node[1] = {p2,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,V};
+node[2] = {p3,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,V};
+node[3] = {p4,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,V};
+
+for(int i=0;i<nbNod;i++)
+    {
+    node[i].u0 = Pt::pt3D(M_PI*distrib(gen),2*M_PI*distrib(gen));
+    node[i].setBasis(M_PI*distrib(gen),2*M_PI*distrib(gen));
+    }
+
+Tetra::Tet t(node,nbNod,0,0,1,2,3,4);//carefull with indices (starting from 1)
+
+double P[2*N][3*N];
+for(int i=0;i<2*N;i++)
+    for(int j=0;j<3*N;j++)
+        P[i][j] = Nodes::Pcoeff<Tetra::Tet>(t,i,j);
+
+    /* ref code */
+double Pref[2*N][3*N] = { {0} }; // P must be filled with zero
+
+for (int i=0; i<N; i++)
+    {
+    Nodes::Node & n = t.getNode(i);
+    Pref[i][i]  = n.ep.x();  Pref[i][N+i]  = n.ep.y();  Pref[i][2*N+i]  = n.ep.z();
+    Pref[N+i][i]= n.eq.x();  Pref[N+i][N+i]= n.eq.y();  Pref[N+i][2*N+i]= n.eq.z();
+    }
+/* end ref code */
+double normP = tiny::frob_norm<double,2*N,3*N>(P);
+std::cout << "frob norm(P) = " << normP << " ; frob norm(Pref) = " << tiny::frob_norm<double,2*N,3*N>(Pref) << std::endl;
+
+BOOST_TEST( normP > 0.0 );
+double result = tiny::dist<double,2*N,3*N>(P,Pref); 
+BOOST_TEST( result == 0.0 );
+}
+
 BOOST_AUTO_TEST_SUITE_END()
