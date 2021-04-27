@@ -519,7 +519,7 @@ std::cout << "distance = "<< val << std::endl;
 BOOST_TEST( val == 0.0 );
 }
 
-BOOST_AUTO_TEST_CASE(Tet_Pcoeff, * boost::unit_test::tolerance(UT_TOL))
+BOOST_AUTO_TEST_CASE(Tet_Pcoeff)
 {
 std::cout << "Tet test on Nodes::Pcoeff template" << std::endl;
 const int N = Tetra::N;
@@ -567,7 +567,7 @@ std::cout << "frob norm(P) = " << normP << " ; frob norm(Pref) = " << tiny::frob
 double result = tiny::dist<double,2*N,3*N>(P,Pref); 
 std::cout << "dist(P,Pref) = " << result << std::endl;
 
-BOOST_TEST( normP > 0.0 );
+BOOST_CHECK( normP > ((double)0) );
 BOOST_CHECK( isfinite(result) );
 for(int i=0;i<2*N;i++)
     for(int j=0;j<3*N;j++) {BOOST_CHECK(P[i][j] == Pref[i][j]);}

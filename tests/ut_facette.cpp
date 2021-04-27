@@ -398,7 +398,7 @@ std::cout << "raw difference result =" << result_to_test - result_ref << std::en
 BOOST_TEST( result_to_test == result_ref );
 }
 
-BOOST_AUTO_TEST_CASE(Fac_Pcoeff, * boost::unit_test::tolerance(UT_TOL))
+BOOST_AUTO_TEST_CASE(Fac_Pcoeff)
 {
 std::cout << "fac test on Nodes::Pcoeff template" << std::endl;
 const int N = Facette::N;
@@ -445,7 +445,7 @@ std::cout << "frob norm(P) = " << normP << " ; frob norm(Pref) = " << tiny::frob
 double result = tiny::dist<double,2*N,3*N>(P,Pref); 
 std::cout << "dist(P,Pref) = " << result << std::endl;
 
-BOOST_TEST( normP > 0.0 );
+BOOST_CHECK( normP > ((double)0) );
 BOOST_CHECK( isfinite(result) );
 
 for(int i=0;i<2*N;i++)
