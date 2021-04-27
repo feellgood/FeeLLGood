@@ -54,6 +54,15 @@ computes vector eq, it is the third vector of a base composed of  \f$ \left{ u0,
  */
 inline void calc_eq() {eq = u0*ep; ep.normalize(); }
 
+/** setter for the local basis vector */
+inline void setBasis(const double r1,const double r2)
+{
+theta_sph = r1;
+phi_sph = r2;
+calc_ep();
+calc_eq();
+}
+
 /**
 reset the node magnetization, speed, phi, and phiv
 */
@@ -126,18 +135,8 @@ inline void set_phiv(Node & n,double val) {n.phiv = val;}
 template<class T> double Pcoeff(T & x,int i,int j)
     {
     const int N = x.getN();
-    double val = 0;
+    double val(0);
     int node_i = i%N;
-    
-    /*
-	double P[2*N][3*N] = { {0} }; // P must be filled with zero
-	
-    for (int i=0; i<N; i++){
-  	  Nodes::Node & n = x.getNode(i);//(*refNode)[x.ind[i]];
-	P[i][i]  = n.ep.x();  P[i][N+i]  = n.ep.y();  P[i][2*N+i]  = n.ep.z();
-	P[N+i][i]= n.eq.x();  P[N+i][N+i]= n.eq.y();  P[N+i][2*N+i]= n.eq.z();
-    	}
-    */
     
     if(node_i == (j%N))
         {

@@ -62,11 +62,5 @@ else
     r2 = rand() / (RAND_MAX+1.);
     }
 
-for(int i=0; i < NOD ; i++)
-    {
-    refMsh->setNode(i).theta_sph = M_PI*r1;
-    refMsh->setNode(i).phi_sph = M_2_PI*r2;
-    refMsh->setNode(i).calc_ep();
-    refMsh->setNode(i).calc_eq();
-    }
+for(int i=0; i < NOD ; i++) refMsh->setNode(i).setBasis(M_PI*r1,M_2_PI*r2);
 }
