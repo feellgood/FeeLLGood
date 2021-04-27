@@ -77,9 +77,9 @@ This formula needs less operator*
 inline void make_evol(const double vp /**< [in] */,const double vq /**< [in] */,const double dt /**< [in] */)
 {
 Pt::pt3D zeta = Pt::pt3D(theta_sph,phi_sph); 
-Pt::pt3D vec = zeta*u0;
-double r = vec.norm();
-v = (vp/r)*vec + (vq/r)*(zeta - (Pt::pScal(u0,zeta))*u0);
+double r = Pt::norme(zeta*u0);
+
+v = vp*ep + (vq/r)*(zeta - (Pt::pScal(u0,zeta))*u0);
 u = u0 + dt*v;
 u.normalize();
 }
@@ -121,6 +121,35 @@ inline void set_phi(Node & n,double val) {n.phi = val;}
 
 /** setter for phi_v */
 inline void set_phiv(Node & n,double val) {n.phiv = val;}
+
+/** template function to provide P matrix coefficients for T= tetra or facette, with respect to its block diagonal structure */
+template<class T> double Pcoeff(T & x,int i,int j)
+    {
+    const int N = x.getN();
+    double val = 0;
+    int node_i = i%N;
+    
+    /*
+	double P[2*N][3*N] = { {0} }; // P must be filled with zero
+	
+    for (int i=0; i<N; i++){
+  	  Nodes::Node & n = x.getNode(i);//(*refNode)[x.ind[i]];
+	P[i][i]  = n.ep.x();  P[i][N+i]  = n.ep.y();  P[i][2*N+i]  = n.ep.z();
+	P[N+i][i]= n.eq.x();  P[N+i][N+i]= n.eq.y();  P[N+i][2*N+i]= n.eq.z();
+    	}
+    */
+    
+    if(node_i == (j%N))
+        {
+        Nodes::Node & n = x.getNode(node_i);
+           
+        if(i<N)
+            { val = n.ep(j/N); }
+        else
+            { val = n.eq(j/N); }
+        }
+    return val;
+    }
 
 } //end namespace Nodes
 

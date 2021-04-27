@@ -25,43 +25,7 @@ projection and matrix assembly is multithreaded for tetrahedron, monothread for 
 #include "tetra.h"
 #include "facette.h"
 #include "node.h"
-
 #include "mesh.h"
-
-/** template function to provide P matrix coefficients for T= tetra or facette, with respect to its block diagonal structure */
-template<class T> double Pcoeff(T & x,int i,int j)
-    {
-    const int N = x.getN();
-    double val = 0;
-    int node_i = i%N;
-    
-    /*
-	double P[2*N][3*N] = { {0} }; // P must be filled with zero
-	
-    for (int i=0; i<N; i++){
-  	  Nodes::Node & n = x.getNode(i);//(*refNode)[x.ind[i]];
-	P[i][i]  = n.ep.x();  P[i][N+i]  = n.ep.y();  P[i][2*N+i]  = n.ep.z();
-	P[N+i][i]= n.eq.x();  P[N+i][N+i]= n.eq.y();  P[N+i][2*N+i]= n.eq.z();
-    	}
-    */
-    
-    if(node_i == (j%N))
-        {
-        Nodes::Node & n = x.getNode(node_i);//refMsh->getNode( x.ind[node_i] );
-        //Pt::pt3D ep = n.calc_ep();    
-           
-        if(i<N)
-            { val = n.ep(j/N); }
-        else
-            { 
-            //Pt::pt3D eq = n.u0*ep;
-            //eq.normalize(); 
-            val = n.eq(j/N);
-            }
-        }
-    return val;
-    }
-
 
 /** \class LinAlgebra
 convenient class to grab altogether some part of the calculations involved using gmm solver at each timestep
@@ -142,9 +106,9 @@ private:
     for (int i=0; i<(2*N); i++)
         {
         x.Lp[i] = 0;
-        for (int k=0; k<N; k++) { x.Lp[i] += Pcoeff<T>(x,i,k)*B[k].x(); }
-        for (int k=0; k<N; k++) { x.Lp[i] += Pcoeff<T>(x,i,N+k)*B[k].y(); }
-        for (int k=0; k<N; k++) { x.Lp[i] += Pcoeff<T>(x,i,2*N+k)*B[k].z(); }
+        for (int k=0; k<N; k++) { x.Lp[i] += Nodes::Pcoeff<T>(x,i,k)*B[k].x(); }
+        for (int k=0; k<N; k++) { x.Lp[i] += Nodes::Pcoeff<T>(x,i,N+k)*B[k].y(); }
+        for (int k=0; k<N; k++) { x.Lp[i] += Nodes::Pcoeff<T>(x,i,2*N+k)*B[k].z(); }
         }
     x.treated = false;
     }
@@ -160,7 +124,7 @@ private:
         for (int k=0; k<(3*N); k++)
             {
             PA[i][k]=0;
-            for (int j=0; j<(3*N); j++) { PA[i][k] += Pcoeff<T>(x,i,j)*A[j][k]; }
+            for (int j=0; j<(3*N); j++) { PA[i][k] += Nodes::Pcoeff<T>(x,i,j)*A[j][k]; }
             }
         }
 
@@ -169,7 +133,7 @@ private:
         for (int k=0; k<(2*N); k++)
         {
        x.Kp[i][k] = 0;
-       for (int j=0; j<(3*N); j++) { x.Kp[i][k] += PA[i][j]* Pcoeff<T>(x,k,j); }
+       for (int j=0; j<(3*N); j++) { x.Kp[i][k] += PA[i][j]* Nodes::Pcoeff<T>(x,k,j); }
        }
     
     x.treated = false;
