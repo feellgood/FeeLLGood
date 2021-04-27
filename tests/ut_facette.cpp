@@ -442,10 +442,12 @@ for (int i=0; i<N; i++)
 /* end ref code */
 double normP = tiny::frob_norm<double,2*N,3*N>(P);
 std::cout << "frob norm(P) = " << normP << " ; frob norm(Pref) = " << tiny::frob_norm<double,2*N,3*N>(Pref) << std::endl;
+double result = tiny::dist<double,2*N,3*N>(P,Pref); 
+std::cout << "dist(P,Pref) = " << result << std::endl;
 
 BOOST_TEST( normP > 0.0 );
-double result = tiny::dist<double,2*N,3*N>(P,Pref); 
 BOOST_CHECK( isfinite(result) );
+BOOST_TEST( result == 0.0 );
 }
 
 BOOST_AUTO_TEST_SUITE_END()
