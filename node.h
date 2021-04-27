@@ -132,7 +132,7 @@ inline void set_phi(Node & n,double val) {n.phi = val;}
 inline void set_phiv(Node & n,double val) {n.phiv = val;}
 
 /** template function to provide P matrix coefficients for T= tetra or facette, with respect to its block diagonal structure */
-template<class T> double Pcoeff(T & x,int i,int j)
+template<class T> double Pcoeff(T & x,const int i,const int j)
     {
     const int N = x.getN();
     double val(0);
