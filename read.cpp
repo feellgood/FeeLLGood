@@ -170,7 +170,7 @@ void mesh::readMesh(Settings const& mySets)
 string symb;
 ifstream msh( mySets.getPbName() );
 
-if (!msh)
+if (msh.fail())
     {
     cerr << "cannot open file " << mySets.getPbName() << endl; 
     SYSTEM_ERROR;

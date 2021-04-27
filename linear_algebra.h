@@ -28,6 +28,41 @@ projection and matrix assembly is multithreaded for tetrahedron, monothread for 
 
 #include "mesh.h"
 
+/** template function to provide P matrix coefficients for T= tetra or facette, with respect to its block diagonal structure */
+template<class T> double Pcoeff(T & x,int i,int j)
+    {
+    const int N = x.getN();
+    double val = 0;
+    int node_i = i%N;
+    
+    /*
+	double P[2*N][3*N] = { {0} }; // P must be filled with zero
+	
+    for (int i=0; i<N; i++){
+  	  Nodes::Node & n = x.getNode(i);//(*refNode)[x.ind[i]];
+	P[i][i]  = n.ep.x();  P[i][N+i]  = n.ep.y();  P[i][2*N+i]  = n.ep.z();
+	P[N+i][i]= n.eq.x();  P[N+i][N+i]= n.eq.y();  P[N+i][2*N+i]= n.eq.z();
+    	}
+    */
+    
+    if(node_i == (j%N))
+        {
+        Nodes::Node & n = x.getNode(node_i);//refMsh->getNode( x.ind[node_i] );
+        //Pt::pt3D ep = n.calc_ep();    
+           
+        if(i<N)
+            { val = n.ep(j/N); }
+        else
+            { 
+            //Pt::pt3D eq = n.u0*ep;
+            //eq.normalize(); 
+            val = n.eq(j/N);
+            }
+        }
+    return val;
+    }
+
+
 /** \class LinAlgebra
 convenient class to grab altogether some part of the calculations involved using gmm solver at each timestep
 */
@@ -96,53 +131,27 @@ private:
     void base_projection(bool determinist);
     
     
-    /** template function to provide P matrix coefficients, with respect to its block diagonal structure */
-    template<class T,int N> double Pcoeff(T const& x,int i,int j) const
-    {
-    double val = 0;
-    int node_i = i%N;
     
-    /*
-	double P[2*N][3*N] = { {0} }; // P must be filled with zero
-	
-    for (int i=0; i<N; i++){
-  	  Nodes::Node const& n = (*refNode)[x.ind[i]];
-	P[i][i]  = n.ep.x();  P[i][N+i]  = n.ep.y();  P[i][2*N+i]  = n.ep.z();
-	P[N+i][i]= n.eq.x();  P[N+i][N+i]= n.eq.y();  P[N+i][2*N+i]= n.eq.z();
-    	}
-    */
-    
-    if(node_i == (j%N))
-        {
-        Nodes::Node const& n = refMsh->getNode( x.ind[node_i] );// (*refNode)[x.ind[node_i]];
-        Pt::pt3D ep = n.calc_ep();    
-        Pt::pt3D eq = n.u0*ep; eq.normalize();    
-        if(i<N)
-            { val = ep(j/N); }
-        else
-            { val = eq(j/N); }// equivalent to calc_eq
-        }
-    return val;
-    }
     
 /** template to make projection for T, tetra or facette. It computes Bp = P*B and stores result in inner vector Lp of class T*/
-    template<class T,int N> void projection_vect(T &x, Pt::pt3D (&B)[N])
+    //template<class T,int N> void projection_vect(T &x, Pt::pt3D (&B)[N])
+    template<class T> void projection_vect(T &x, Pt::pt3D *B)
     {
         //tiny::mult<double,2*N,3*N>(P,B,x.Lp);
-
+    const int N = x.getN();
     for (int i=0; i<(2*N); i++)
         {
         x.Lp[i] = 0;
-        for (int k=0; k<N; k++) { x.Lp[i] += Pcoeff<T,N>(x,i,k)*B[k].x(); }
-        for (int k=0; k<N; k++) { x.Lp[i] += Pcoeff<T,N>(x,i,N+k)*B[k].y(); }
-        for (int k=0; k<N; k++) { x.Lp[i] += Pcoeff<T,N>(x,i,2*N+k)*B[k].z(); }
+        for (int k=0; k<N; k++) { x.Lp[i] += Pcoeff<T>(x,i,k)*B[k].x(); }
+        for (int k=0; k<N; k++) { x.Lp[i] += Pcoeff<T>(x,i,N+k)*B[k].y(); }
+        for (int k=0; k<N; k++) { x.Lp[i] += Pcoeff<T>(x,i,2*N+k)*B[k].z(); }
         }
     x.treated = false;
     }
     
     
 /** template to make projection for T, tetra or facette. It computes Ap = (P*A)*trans(P) and stores result in inner matrix Kp of class T*/
-	template <class T,int N> void projection_mat(T &x,double (&A)[3*N][3*N])//,  double B[3*N])
+	template <class T,int N> void projection_mat(T &x,double (&A)[3*N][3*N])
 	{
     double PA[2*N][3*N]; // no need to initialize with zeros
 //tiny::mult<double,2*N,3*N,3*N>(P,A,PA);
@@ -151,7 +160,7 @@ private:
         for (int k=0; k<(3*N); k++)
             {
             PA[i][k]=0;
-            for (int j=0; j<(3*N); j++) { PA[i][k] += Pcoeff<T,N>(x,i,j)*A[j][k]; }
+            for (int j=0; j<(3*N); j++) { PA[i][k] += Pcoeff<T>(x,i,j)*A[j][k]; }
             }
         }
 
@@ -160,7 +169,7 @@ private:
         for (int k=0; k<(2*N); k++)
         {
        x.Kp[i][k] = 0;
-       for (int j=0; j<(3*N); j++) { x.Kp[i][k] += PA[i][j]* Pcoeff<T,N>(x,k,j); }
+       for (int j=0; j<(3*N); j++) { x.Kp[i][k] += PA[i][j]* Pcoeff<T>(x,k,j); }
        }
     
     x.treated = false;

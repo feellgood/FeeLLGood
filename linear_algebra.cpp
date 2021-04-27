@@ -4,7 +4,7 @@ void LinAlgebra::updateNodes(std::vector<double> const& X,const double dt)
 {
 double v2max = 0.0;
 
-for(int i=0; i < refMsh->getNbNodes() ; i++)
+for(int i=0; i < NOD ; i++)
     {
     double vp = X[i];
     double vq = X[NOD+i];
@@ -62,9 +62,11 @@ else
     r2 = rand() / (RAND_MAX+1.);
     }
 
-for(int i=0; i < refMsh->getNbNodes() ; i++)
+for(int i=0; i < NOD ; i++)
     {
     refMsh->setNode(i).theta_sph = M_PI*r1;
     refMsh->setNode(i).phi_sph = M_2_PI*r2;
+    refMsh->setNode(i).calc_ep();
+    refMsh->setNode(i).calc_eq();
     }
 }

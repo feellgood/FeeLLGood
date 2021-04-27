@@ -34,6 +34,9 @@ Pt::pt3D v;/**< magnetization speed */
 double theta_sph;/**< theta angle for unit vector \f$ e_p = (\theta,\phi) \times u_0 \f$ in spherical coordinates  */
 double phi_sph;/**< phi angle for unit vector \f$ e_p = (\theta,\phi) \times u_0 \f$ in spherical coordinates  */
 
+Pt::pt3D ep;/**< local vector basis : \f$ e_p = \vec{rand} \times u0 \f$ , then normalized */
+Pt::pt3D eq;/**< local vector basis : \f$ e_q = u0 \times e_p \f$ , then normalized */
+
 double phi0;/**< scalar potential initial or reset value, used to store previous value for time evolution */
 double phi;/**< scalar potential value */
 double phiv0;/**< initial or reset value, used to store previous value for time evolution */
@@ -42,9 +45,14 @@ double phiv;/**< scalar potential associated to velocity */
 double V;/**< electrostatic potential (for STT) */
 
 /**
-vector ep is computed when needed, it is the second vector of a base composed of u0,ep,u0*ep , vector product 
+computes vector ep, it is the second vector of a base composed of  \f$ \left{ u0,e_p , e_q = u0 \times e_p \right} \f$ 
  */
-inline Pt::pt3D calc_ep() const {Pt::pt3D ep = Pt::pt3D(theta_sph,phi_sph)*u0; ep.normalize(); return ep; }
+inline void calc_ep() {ep = Pt::pt3D(theta_sph,phi_sph)*u0; ep.normalize(); }
+
+/**
+computes vector eq, it is the third vector of a base composed of  \f$ \left{ u0,e_p , e_q = u0 \times e_p \right} \f$ 
+ */
+inline void calc_eq() {eq = u0*ep; ep.normalize(); }
 
 /**
 reset the node magnetization, speed, phi, and phiv
