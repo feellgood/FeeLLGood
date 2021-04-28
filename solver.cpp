@@ -25,8 +25,7 @@ for(int i=0;i<NbTH;i++)
         Pt::pt3D L[Tetra::N];
         
         tet.integrales(settings.paramTetra,t_prm,Hext,settings.recentering_direction,DW_vz,K, L);
-        projection_mat<Tetra::Tet,Tetra::N>(tet,K);
-        projection_vect<Tetra::Tet>(tet,L);//projection_vect<Tetra::Tet,Tetra::N>(tet,L);
+        tet.projection(K,L);
         tet.assemblage_mat(K_TH);tet.assemblage_vect(L_TH);tet.treated = true;
         });//end for_each
     }
@@ -37,8 +36,7 @@ for(int i=0;i<NbTH;i++)
         Pt::pt3D Ls[Facette::N];
         
         fac.integrales(settings.paramFacette,Ls);     
-        projection_mat<Facette::Fac,Facette::N>(fac,Ks);
-        projection_vect<Facette::Fac>(fac,Ls);//projection_vect<Facette::Fac,Facette::N>(fac,Ls);
+        fac.projection(Ks,Ls);
         fac.assemblage_mat(K_TH);fac.assemblage_vect(L_TH);fac.treated =true;
         });
   
@@ -122,8 +120,7 @@ for(int i=0;i<NbTH;i++)
             Pt::pt3D L[Tetra::N];
             
             tet.integrales(settings.paramTetra,t_prm,Hext,settings.recentering_direction,DW_vz,K, L);
-            projection_mat<Tetra::Tet,Tetra::N>(tet,K);
-            projection_vect<Tetra::Tet>(tet,L);//projection_vect<Tetra::Tet,Tetra::N>(tet,L);
+            tet.projection(K,L);
             if(my_mutex.try_lock())
                 {
                 tet.assemblage_mat(K_TH);tet.assemblage_vect(L_TH);tet.treated = true;
@@ -140,9 +137,8 @@ tab_TH[NbTH] = std::thread( [this,&K_TH,&L_TH]()
         double Ks[3*Facette::N][3*Facette::N] = { {0} };
         Pt::pt3D Ls[Facette::N];
         
-        fac.integrales(settings.paramFacette,Ls);     
-        projection_mat<Facette::Fac,Facette::N>(fac,Ks);
-        projection_vect<Facette::Fac>(fac,Ls);//projection_vect<Facette::Fac,Facette::N>(fac,Ls);
+        fac.integrales(settings.paramFacette,Ls);
+        fac.projection(Ks,Ls);
         
         if(my_mutex.try_lock())
             {

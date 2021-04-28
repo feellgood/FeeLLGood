@@ -370,6 +370,14 @@ class Tet{
         /** zeeman energy of the tetrahedron */
         double zeemanEnergy(Tetra::prm const& param,double uz_drift,Pt::pt3D const& Hext,const double (&u)[Pt::DIM][NPI]) const;
         
+        /** projections using Nodes::projection templates */
+        inline void projection(double (&K)[3*N][3*N], Pt::pt3D L[N])
+        {
+        Nodes::projection_mat<Tetra::Tet,N>(*this,K);
+        Nodes::projection_vect<Tetra::Tet,N>(*this,L);
+        treated = false;
+        }
+        
         /** matrix assembly using inner matrix in tetra */
         void assemblage_mat(write_matrix &K) const;
         

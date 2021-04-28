@@ -128,6 +128,14 @@ class Fac{
         /** demagnetizing energy of the facette */
         double demagEnergy(const Pt::pt3D (&u)[NPI] /**< [in] */,const double (&phi)[NPI] /**< [in] */) const;
         
+        /** projections using Nodes::projection templates */
+        inline void projection(double (&K)[3*N][3*N], Pt::pt3D L[N])
+        {
+        Nodes::projection_mat<Facette::Fac,N>(*this,K);
+        Nodes::projection_vect<Facette::Fac,N>(*this,L);
+        treated = false;
+        }
+        
         /** assemblage of the matrix elements from inner matrix in facette object */
         void assemblage_mat(write_matrix &K) const;
         

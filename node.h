@@ -150,6 +150,44 @@ template<class T> double Pcoeff(T & x,const int i,const int j)
     return val;
     }
 
+/** template to make projection for T, tetra or facette. It computes Bp = P*B and stores result in inner vector Lp of class T*/
+    //template<class T,int N> void projection_vect(T &x, Pt::pt3D (&B)[N])
+template<class T,int N> void projection_vect(T &x, Pt::pt3D *B)
+    {
+        //tiny::mult<double,2*N,3*N>(P,B,x.Lp);
+    for (int i=0; i<(2*N); i++)
+        {
+        x.Lp[i] = 0;
+        for (int k=0; k<N; k++) { x.Lp[i] += Nodes::Pcoeff<T>(x,i,k)*B[k].x(); }
+        for (int k=0; k<N; k++) { x.Lp[i] += Nodes::Pcoeff<T>(x,i,N+k)*B[k].y(); }
+        for (int k=0; k<N; k++) { x.Lp[i] += Nodes::Pcoeff<T>(x,i,2*N+k)*B[k].z(); }
+        }
+    }
+    
+    
+/** template to make projection for T, tetra or facette. It computes Ap = (P*A)*trans(P) and stores result in inner matrix Kp of class T*/
+template <class T,int N> void projection_mat(T &x,double (&A)[3*N][3*N])
+	{
+    double PA[2*N][3*N]; // no need to initialize with zeros
+//tiny::mult<double,2*N,3*N,3*N>(P,A,PA);
+	for (int i=0; i<(2*N); i++) 
+        {
+        for (int k=0; k<(3*N); k++)
+            {
+            PA[i][k]=0;
+            for (int j=0; j<(3*N); j++) { PA[i][k] += Nodes::Pcoeff<T>(x,i,j)*A[j][k]; }
+            }
+        }
+
+//tiny::direct_transposed_mult<double,2*N,3*N,2*N>(PA,P,x.Kp);
+   for (int i=0; i<(2*N); i++) 
+        for (int k=0; k<(2*N); k++)
+        {
+       x.Kp[i][k] = 0;
+       for (int j=0; j<(3*N); j++) { x.Kp[i][k] += PA[i][j]* Nodes::Pcoeff<T>(x,k,j); }
+       }
+    }
+    
 } //end namespace Nodes
 
 #endif /* node_h */
