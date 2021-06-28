@@ -4,6 +4,7 @@
 
 #include <random>
 
+#include "ut_config.h"
 #include "tetra.h"
 
 /**

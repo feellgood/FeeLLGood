@@ -54,6 +54,7 @@ SET(SOURCES mag_parser.cpp time_integration.cpp feellgoodSettings.cpp
     linear_algebra.cpp energy.cpp recentering.cpp tiny.h)
 
 configure_file(config.h.in ./config.h)
+configure_file(./tests/ut_config.h.in ./tests/ut_config.h)
 
 ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES})
 

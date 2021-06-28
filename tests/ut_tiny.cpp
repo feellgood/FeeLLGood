@@ -2,7 +2,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "config.h"
+#include "ut_config.h"
 #include "tiny.h"
 
 BOOST_AUTO_TEST_SUITE(ut_tiny)

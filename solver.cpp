@@ -4,7 +4,7 @@
 #include "Utils/FTic.hpp"
 #include "linear_algebra.h"
 
-
+/*
 int LinAlgebra::monoThreadSolver(Pt::pt3D const& Hext,timing const& t_prm,long nt)
 {
 FTic counter;
@@ -97,7 +97,7 @@ read_vector Xr(2*NOD);    gmm::copy(Xw, Xr);
 updateNodes(Xw,t_prm.get_dt());
 return 0;
 }
-
+*/
 
 int LinAlgebra::solver(Pt::pt3D const& Hext,timing const& t_prm,long nt)
 {

@@ -4,6 +4,7 @@
 
 #include <random>
 
+#include "ut_config.h"
 #include "tetra.h"
 
 BOOST_AUTO_TEST_SUITE(ut_tetra)

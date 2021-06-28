@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <random>
 
-#include "config.h" // for tolerance UT_TOL macro
+#include "ut_config.h" // for tolerance UT_TOL macro
 #include "pt3D.h"
 #include "tiny.h"
 
@@ -176,7 +176,7 @@ double x2(2.0);
 BOOST_CHECK( (x1 == 0.0) && (x2 == r2.maxLength())  );
 }
 
-BOOST_AUTO_TEST_CASE(pt3D_orthogonality)
+BOOST_AUTO_TEST_CASE(pt3D_orthogonality, * boost::unit_test::tolerance(UT_TOL))
 {
 Pt::pt3D X(1,0,0);
 Pt::pt3D Y(0,1,0);
@@ -184,7 +184,7 @@ Pt::pt3D Z(0,0,1);
 
 BOOST_CHECK( Pt::isOrthogonal(X,Y,Z,__DBL_EPSILON__) == true );
 Y.x(1);
-BOOST_CHECK( Pt::isOrthogonal(X,Y,Z,USER_TOL) == false );
+BOOST_CHECK( Pt::isOrthogonal(X,Y,Z,UT_TOL) == false );
 }
 
 /*---------------------------------------*/

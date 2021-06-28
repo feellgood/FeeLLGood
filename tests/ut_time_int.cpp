@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <random>
 
-#include "config.h" // for tolerance UT_TOL macro
+#include "ut_config.h" // for tolerance UT_TOL macro
 #include "pt3D.h"
 #include "time_integration.h"
 

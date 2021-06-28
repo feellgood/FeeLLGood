@@ -1,0 +1,9 @@
+#ifndef UT_CONFIG_H
+#define UT_CONFIG_H
+
+
+
+/** tolerance for some unit tests involving some numerical errors */
+#define UT_TOL 1e-15
+
+#endif

@@ -4,7 +4,7 @@
 
 #include <random>
 
-#include "config.h"
+#include "ut_config.h"
 #include "facette.h"
 #include "node.h"
 #include "tiny.h"

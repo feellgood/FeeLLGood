@@ -51,7 +51,7 @@ public:
 	gmm::diagonal_precond <read_matrix> *prc = nullptr;
 
     /** mono thread solver , debug only */ 
-    int monoThreadSolver(Pt::pt3D const& Hext,timing const& t_prm,long nt);
+    //int monoThreadSolver(Pt::pt3D const& Hext,timing const& t_prm,long nt);
     
     /**  solver, uses bicgstab and gmres, sparse matrix and vector are filled with multiThreading */
 	int  solver(Pt::pt3D const& Hext /**< [in] applied field */, timing const& t_prm /**< [in] */,long nt /**< [in] */);
