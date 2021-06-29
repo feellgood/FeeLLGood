@@ -18,8 +18,7 @@ BOOST_AUTO_TEST_CASE(anisotropy_uniax, * boost::unit_test::tolerance(10.0*UT_TOL
 int nbNod = 4;
 std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
 
-std::random_device rd;
-std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::mt19937 gen(my_seed());
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0);
@@ -119,8 +118,7 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, * boost::unit_test::tolerance(10.0*UT_TOL
 int nbNod = 4;
 std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
 
-std::random_device rd;
-std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::mt19937 gen(my_seed());
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0);

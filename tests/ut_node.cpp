@@ -60,9 +60,7 @@ BOOST_TEST(Nodes::get_p(n).norm() == 1.0);
 
 BOOST_AUTO_TEST_CASE(node_e_p, * boost::unit_test::tolerance(100.0*UT_TOL))
 {
-std::random_device rd;
-
-std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::mt19937 gen(my_seed());
 std::uniform_real_distribution<> distrib(0.0,M_PI);
     
 Nodes::Node n;
@@ -78,9 +76,7 @@ BOOST_TEST( fabs(Pt::pScal(n.u0,n.ep)) == 0.0 );
 
 BOOST_AUTO_TEST_CASE(node_evol, * boost::unit_test::tolerance(1e3*UT_TOL))
 {
-std::random_device rd;
-
-std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::mt19937 gen(my_seed());
 std::uniform_real_distribution<> distrib(0.0,M_PI);
     
 Nodes::Node n;

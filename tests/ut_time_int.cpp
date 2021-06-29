@@ -28,9 +28,7 @@ BOOST_CHECK(x != 0.0f);
 
 BOOST_AUTO_TEST_CASE(timing_constructor, * boost::unit_test::tolerance(UT_TOL))
 {
-std::random_device rd;
-
-std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::mt19937 gen(my_seed());
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 
@@ -56,9 +54,7 @@ BOOST_TEST( dt == sqrt(a*b) );
 
 BOOST_AUTO_TEST_CASE(calc_alpha_eff, * boost::unit_test::tolerance(UT_TOL))
 {
-std::random_device rd;
-
-std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::mt19937 gen(my_seed());
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 double alpha_LLG = distrib(gen);

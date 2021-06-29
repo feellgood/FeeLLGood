@@ -51,8 +51,7 @@ BOOST_AUTO_TEST_CASE(Fac_operator_infto)
 {
 std::cout << "Fac operator< unit test" << std::endl;
 
-std::random_device rd;
-std::mt19937_64 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::mt19937_64 gen(my_seed());// random number generator: standard Mersenne twister initialized with seed
 std::uniform_int_distribution<int> distrib;
 
 Facette::Fac f(nullptr,0,0,0,0,0,0);
@@ -111,8 +110,7 @@ std::cout << "surf interpolation test" << std::endl;
 int nbNod = 3;
 std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
 
-std::random_device rd;
-std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::mt19937 gen(my_seed());
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 
@@ -160,10 +158,8 @@ std::cout << "surf interpolation test" << std::endl;
 int nbNod = 3;
 std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
 
-std::random_device rd;
-std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::mt19937 gen(my_seed());
 std::uniform_real_distribution<> distrib(0.0,1.0);
-
 
 Pt::pt3D p1(1,0,0),p2(0,1,0),p3(1,1,0),u,v,u0,v0;
 double theta_sph(0),phi_sph(0),phi0(0),phi(0),phiv0(0),phiv(0),V(0);
@@ -208,8 +204,7 @@ std::cout << "fac potential test on u" << std::endl;
 int nbNod = 3;
 std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
 
-std::random_device rd;
-std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::mt19937 gen(my_seed());
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 Pt::pt3D p1(1+(distrib(gen)-0.5)/10.0,(distrib(gen)-0.5)/10.0,(distrib(gen)-0.5)/10.0),p2((distrib(gen)-0.5)/10.0,1+(distrib(gen)-0.5)/10.0,1+(distrib(gen)-0.5)/10.0),p3((distrib(gen)-0.5)/10.0,1+(distrib(gen)-0.5)/10.0,(distrib(gen)-0.5)/10.0);
@@ -306,8 +301,7 @@ std::cout << "fac potential test on v" << std::endl;
 int nbNod = 3;
 std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
 
-std::random_device rd;
-std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::mt19937 gen(my_seed());
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 Pt::pt3D p1(1+(distrib(gen)-0.5)/10.0,(distrib(gen)-0.5)/10.0,(distrib(gen)-0.5)/10.0),p2((distrib(gen)-0.5)/10.0,1+(distrib(gen)-0.5)/10.0,1+(distrib(gen)-0.5)/10.0),p3((distrib(gen)-0.5)/10.0,1+(distrib(gen)-0.5)/10.0,(distrib(gen)-0.5)/10.0);
@@ -406,10 +400,8 @@ const int N = Facette::N;
 int nbNod = 3;
 std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
 
-std::random_device rd;
-std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::mt19937 gen(my_seed());
 std::uniform_real_distribution<> distrib(0.0,1.0);
-
 
 Pt::pt3D p1(1,0,0),p2(0,1,0),p3(1,1,0),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
 double theta_sph(0),phi_sph(0),phi0(0),phi(0),phiv0(0),phiv(0),V(0);

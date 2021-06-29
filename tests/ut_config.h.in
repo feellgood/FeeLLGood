@@ -1,9 +1,23 @@
 #ifndef UT_CONFIG_H
 #define UT_CONFIG_H
 
+#include <random>
+
+#define DET_UT @DET_UTESTS@
+
+inline unsigned my_seed(void)
+{ 
+// random number generator seed: standard Mersenne twister initialized with default seed or random_device (non deterministic)
+unsigned seed;
+if(DET_UT)
+    seed = std::mt19937_64::default_seed; //5489u;
+else
+    { std::random_device rd; seed = rd(); }
+return seed;
+}
 
 
 /** tolerance for some unit tests involving some numerical errors */
-#define UT_TOL 1e-15
+#define UT_TOL 5e-16
 
 #endif

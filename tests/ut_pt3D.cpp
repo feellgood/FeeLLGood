@@ -193,9 +193,7 @@ BOOST_CHECK( Pt::isOrthogonal(X,Y,Z,UT_TOL) == false );
 
 BOOST_AUTO_TEST_CASE(pt3D_unit_sphere, * boost::unit_test::tolerance(UT_TOL))
 {
-std::random_device rd;
-
-std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::mt19937 gen(my_seed());
 std::uniform_real_distribution<> distrib(0.0,1.0);
     
 Pt::pt3D X(M_PI*distrib(gen),2*M_PI*distrib(gen));
@@ -205,9 +203,7 @@ BOOST_TEST( X.norm() == 1.0 );
 
 BOOST_AUTO_TEST_CASE(pt3D_triple_product, * boost::unit_test::tolerance(UT_TOL))
 {
-std::random_device rd;
-
-std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::mt19937 gen(my_seed());
 std::uniform_real_distribution<> distrib(-1.0,1.0);
 
 const Pt::pt3D X(distrib(gen),distrib(gen),distrib(gen));
@@ -246,9 +242,8 @@ BOOST_TEST( v3 == 0.0 );
 BOOST_AUTO_TEST_CASE(pt3D_det, * boost::unit_test::tolerance(10.0*UT_TOL))
 {
 double M[Pt::DIM][Pt::DIM];
-std::random_device rd;
 
-std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::mt19937 gen(my_seed());
 std::uniform_real_distribution<> distrib(-1.0,1.0);
 
 Pt::pt3D X(distrib(gen),distrib(gen),distrib(gen));
@@ -283,9 +278,8 @@ BOOST_AUTO_TEST_CASE(pt3D_inverse, * boost::unit_test::tolerance(UT_TOL))
 {
 double M[Pt::DIM][Pt::DIM];
 double inv_M[Pt::DIM][Pt::DIM];
-std::random_device rd;
 
-std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
+std::mt19937 gen(my_seed());
 std::uniform_real_distribution<> distrib(-1.0,1.0);
 
 Pt::pt3D X(distrib(gen),distrib(gen),distrib(gen));

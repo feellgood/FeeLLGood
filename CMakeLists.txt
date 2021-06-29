@@ -54,7 +54,6 @@ SET(SOURCES mag_parser.cpp time_integration.cpp feellgoodSettings.cpp
     linear_algebra.cpp energy.cpp recentering.cpp tiny.h)
 
 configure_file(config.h.in ./config.h)
-configure_file(./tests/ut_config.h.in ./tests/ut_config.h)
 
 ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES})
 
@@ -79,8 +78,18 @@ install(PROGRAMS ./tools/convert2vtk DESTINATION bin)
 #===========================================================================
 
 option(ENABLE_UTESTS "Enable tests" OFF)
-
 message( STATUS "enable unit tests: ENABLE_UTESTS = "  ${ENABLE_UTESTS} )
+
+option(ENABLE_DET_UTESTS "Enable deterministic unit tests" OFF)
+message( STATUS "enable deterministic unit tests: ENABLE_DET_UTESTS = "  ${ENABLE_DET_UTESTS} )
+if(${ENABLE_DET_UTESTS})
+    set(DET_UTESTS true )
+else()
+    set(DET_UTESTS false )
+endif()
+
+configure_file(./tests/ut_config.h.in ./tests/ut_config.h)
+
 if(${ENABLE_UTESTS})
     include(CTest)
     add_subdirectory(tests)
