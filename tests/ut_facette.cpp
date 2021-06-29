@@ -51,7 +51,8 @@ BOOST_AUTO_TEST_CASE(Fac_operator_infto)
 {
 std::cout << "Fac operator< unit test" << std::endl;
 
-std::mt19937_64 gen(my_seed());// random number generator: standard Mersenne twister initialized with seed
+unsigned sd = my_seed();
+std::mt19937_64 gen(sd);// random number generator: standard Mersenne twister initialized with seed
 std::uniform_int_distribution<int> distrib;
 
 Facette::Fac f(nullptr,0,0,0,0,0,0);
@@ -71,6 +72,8 @@ for(int i=0;i<100;i++)
 
     test_result = test_result && ((f1 < f2) == val_ref);
     }
+
+if (!DET_UT) std::cout << "seed =" << sd << std::endl;
 BOOST_CHECK( test_result );
 }
 
@@ -110,7 +113,8 @@ std::cout << "surf interpolation test" << std::endl;
 int nbNod = 3;
 std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
 
-std::mt19937 gen(my_seed());
+unsigned sd = my_seed();
+std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 
@@ -148,6 +152,7 @@ for (int i=0;i<Pt::DIM;i++)
     for (int j=0;j<Facette::NPI;j++)
         diff_r += Pt::sq(result[i][j] - _u[j](i));
 
+if (!DET_UT) std::cout << "seed =" << sd << std::endl;
 std::cout << "raw difference result =" << diff_r << std::endl;
 BOOST_TEST( sqrt(diff_r) == 0.0 );
 }
@@ -158,7 +163,8 @@ std::cout << "surf interpolation test" << std::endl;
 int nbNod = 3;
 std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
 
-std::mt19937 gen(my_seed());
+unsigned sd = my_seed();
+std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 Pt::pt3D p1(1,0,0),p2(0,1,0),p3(1,1,0),u,v,u0,v0;
@@ -194,6 +200,7 @@ double diff_r = 0;
 for (int j=0;j<Facette::NPI;j++)
     diff_r += Pt::sq(result[j] - _p[j]);
 
+if (!DET_UT) std::cout << "seed =" << sd << std::endl;
 std::cout << "raw difference result =" << diff_r << std::endl;
 BOOST_TEST( sqrt(diff_r) == 0.0 );
 }
@@ -204,7 +211,8 @@ std::cout << "fac potential test on u" << std::endl;
 int nbNod = 3;
 std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
 
-std::mt19937 gen(my_seed());
+unsigned sd = my_seed(); 
+std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 Pt::pt3D p1(1+(distrib(gen)-0.5)/10.0,(distrib(gen)-0.5)/10.0,(distrib(gen)-0.5)/10.0),p2((distrib(gen)-0.5)/10.0,1+(distrib(gen)-0.5)/10.0,1+(distrib(gen)-0.5)/10.0),p3((distrib(gen)-0.5)/10.0,1+(distrib(gen)-0.5)/10.0,(distrib(gen)-0.5)/10.0);
@@ -291,8 +299,9 @@ double result_ref = Ms*pot;
 // end ref code
 
 double result_to_test = f.potential(Nodes::get_u,i);
+if (!DET_UT) std::cout << "seed =" << sd << std::endl;
 std::cout << "raw difference result =" << result_to_test - result_ref << std::endl;
-BOOST_TEST( result_to_test == result_ref );
+BOOST_TEST( result_to_test == result_ref ,"possible rounding error in potential on u corrections");
 }
 
 BOOST_AUTO_TEST_CASE(Fac_potential_v, * boost::unit_test::tolerance(UT_TOL))
@@ -301,7 +310,8 @@ std::cout << "fac potential test on v" << std::endl;
 int nbNod = 3;
 std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
 
-std::mt19937 gen(my_seed());
+unsigned sd = my_seed();
+std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 Pt::pt3D p1(1+(distrib(gen)-0.5)/10.0,(distrib(gen)-0.5)/10.0,(distrib(gen)-0.5)/10.0),p2((distrib(gen)-0.5)/10.0,1+(distrib(gen)-0.5)/10.0,1+(distrib(gen)-0.5)/10.0),p3((distrib(gen)-0.5)/10.0,1+(distrib(gen)-0.5)/10.0,(distrib(gen)-0.5)/10.0);
@@ -388,8 +398,9 @@ double result_ref = Ms*pot;
 // end ref code
 
 double result_to_test = f.potential(Nodes::get_v,i);
+if (!DET_UT) std::cout << "seed =" << sd << std::endl;
 std::cout << "raw difference result =" << result_to_test - result_ref << std::endl;
-BOOST_TEST( result_to_test == result_ref );
+BOOST_TEST( result_to_test == result_ref ,"possible rounding error in potential on v corrections");
 }
 
 BOOST_AUTO_TEST_CASE(Fac_Pcoeff)
@@ -400,7 +411,8 @@ const int N = Facette::N;
 int nbNod = 3;
 std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
 
-std::mt19937 gen(my_seed());
+unsigned sd = my_seed();
+std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 Pt::pt3D p1(1,0,0),p2(0,1,0),p3(1,1,0),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
@@ -433,6 +445,7 @@ for (int i=0; i<N; i++)
     }
 /* end ref code */
 double normP = tiny::frob_norm<double,2*N,3*N>(P);
+if (!DET_UT) std::cout << "seed =" << sd << std::endl;
 std::cout << "frob norm(P) = " << normP << " ; frob norm(Pref) = " << tiny::frob_norm<double,2*N,3*N>(Pref) << std::endl;
 double result = tiny::dist<double,2*N,3*N>(P,Pref); 
 std::cout << "dist(P,Pref) = " << result << std::endl;
