@@ -18,7 +18,8 @@ BOOST_AUTO_TEST_CASE(anisotropy_uniax, * boost::unit_test::tolerance(10.0*UT_TOL
 int nbNod = 4;
 std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
 
-std::mt19937 gen(my_seed());
+unsigned sd = my_seed();
+std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0);
@@ -55,6 +56,7 @@ double Js = 0.5 + distrib(gen);// add 0.5 to center Js around 1
 double contrib_aniso(0);
 double Kbis=2.0*K/Js;
 std::cout << "uniaxial anisotropy test on a tetrahedron" << std::endl;
+if (!DET_UT) std::cout << "seed =" << sd << std::endl;
 std::cout << "uk =" << uk << std::endl;
 
 // ref code (with minimal adaptations of integrales method in file MuMag_integrales.cc of src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
@@ -106,7 +108,8 @@ for (int npi=0; npi<Tetra::NPI; npi++)
 
     Pt::pt3D refHval = Pt::pt3D(H[0]+THETA*dt*Ht[0],H[1]+THETA*dt*Ht[1],H[2]+THETA*dt*Ht[2]);
     std::cout << "ref H value = " << refHval << "; H_aniso=" << H_aniso << std::endl;
-    BOOST_TEST( Pt::dist(refHval, H_aniso) == 0.0 );
+    
+    BOOST_TEST( Pt::dist(refHval, H_aniso) == 0.0 ,"mismatch in uniaxial anisotropy field value");
     
     BOOST_TEST( uHau == contrib_aniso );
     }
@@ -118,7 +121,8 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, * boost::unit_test::tolerance(10.0*UT_TOL
 int nbNod = 4;
 std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
 
-std::mt19937 gen(my_seed());
+unsigned sd = my_seed();
+std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0);
@@ -169,6 +173,7 @@ double Js = 0.5 + distrib(gen);// add 0.5 to center Js around 1
 double contrib_aniso(0);
 double K3bis=2.0*K3/Js;
 std::cout << "cubic anisotropy test on a tetrahedron" << std::endl;
+if (!DET_UT) std::cout << "seed =" << sd << std::endl;
 std::cout << "ex =" << ex << std::endl;
 std::cout << "ey =" << ey << std::endl;
 std::cout << "ez =" << ez << std::endl;
@@ -218,9 +223,7 @@ for (int npi=0; npi<Tetra::NPI; npi++)
     std::cout << "uk1_v = " << uk1_v << std::endl;
     std::cout << "uk2_v = " << uk2_v << std::endl;
     
-    
     double uHa3u = -2*K3/Js*(uk0_u*(1-uk0_u*uk0_u)*uk0_u + uk1_u*(1-uk1_u*uk1_u)*uk1_u + uk2_u*(1-uk2_u*uk2_u)*uk2_u);
-
 
     double Ht[3];
     Ht[0]= -2*K3/Js* uk0_v*(1-3*uk0_u*uk0_u)*uk00; 
@@ -237,11 +240,10 @@ for (int npi=0; npi<Tetra::NPI; npi++)
     
     Pt::pt3D refHval = Pt::pt3D(H[0]+THETA*dt*Ht[0],H[1]+THETA*dt*Ht[1],H[2]+THETA*dt*Ht[2]);
     std::cout << "ref H value = " << refHval << "; H_aniso=" << H_aniso << std::endl;
-    BOOST_TEST( Pt::dist(refHval, H_aniso) == 0.0 );
+    BOOST_TEST( Pt::dist(refHval, H_aniso) == 0.0 ,"mismatch in cubic anisotropy field value");
     
     BOOST_TEST( uHa3u == contrib_aniso );
     }
 }
-
 
 BOOST_AUTO_TEST_SUITE_END()
