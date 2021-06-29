@@ -28,6 +28,7 @@ BOOST_CHECK(x != 0.0f);
 
 BOOST_AUTO_TEST_CASE(timing_constructor, * boost::unit_test::tolerance(UT_TOL))
 {
+unsigned sd = my_seed();
 std::mt19937 gen(my_seed());
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
@@ -40,6 +41,7 @@ timing prm_t = timing(0.0,1.0,std::min(a,b),std::max(a,b));
 double dt = prm_t.get_dt();
 
 std::cout << "test timing constructor" << std::endl;
+if (!DET_UT) std::cout << "seed =" << sd << std::endl;
 BOOST_TEST( dt == sqrt(a*b) );
 }
 
@@ -54,7 +56,8 @@ BOOST_TEST( dt == sqrt(a*b) );
 
 BOOST_AUTO_TEST_CASE(calc_alpha_eff, * boost::unit_test::tolerance(UT_TOL))
 {
-std::mt19937 gen(my_seed());
+unsigned sd = my_seed();
+std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 double alpha_LLG = distrib(gen);
@@ -88,6 +91,7 @@ double my_alpha = prm_t.calc_alpha_eff(alpha_LLG,X);
 // end code to check
 
 std::cout << "test that calc_alpha_eff gives correct effective damping parameter relatively to ref source code" << std::endl;
+if (!DET_UT) std::cout << "seed =" << sd << std::endl;
 BOOST_TEST( my_alpha == alfa );
 }
 
