@@ -18,6 +18,6 @@ return seed;
 
 
 /** tolerance for some unit tests involving some numerical errors */
-#define UT_TOL 5cd scripte-16
+#define UT_TOL 5e-16
 
 #endif
