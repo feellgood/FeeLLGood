@@ -44,7 +44,8 @@ BOOST_AUTO_TEST_CASE(Tet_inner_tables, * boost::unit_test::tolerance(UT_TOL))
 int nbNod = 4;
 std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
 
-std::mt19937 gen(my_seed());
+unsigned sd = my_seed();
+std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
@@ -113,6 +114,7 @@ for (int npi=0; npi<Tetra::NPI; npi++)
     }
 
 std::cout << "sq_frob norm diff dadx,dady,dadz= " << result_dadx << " ; " << result_dady << " ; " << result_dadz << std::endl;
+if (!DET_UT) std::cout << "seed =" << sd << std::endl;
 BOOST_TEST( sqrt(result_dadx) == 0.0 );
 BOOST_TEST( sqrt(result_dady) == 0.0 );
 BOOST_TEST( sqrt(result_dadz) == 0.0 );
@@ -178,7 +180,8 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation, * boost::unit_test::tolerance(UT_TOL
 int nbNod = 4;
 std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
 
-std::mt19937 gen(my_seed());
+unsigned sd = my_seed();
+std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
@@ -270,6 +273,7 @@ double n_dVdx = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(dVdx));
 double n_dVdy = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(dVdy));
 double n_dVdz = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(dVdz));
 
+if (!DET_UT) std::cout << "seed =" << sd << std::endl;
 std::cout << "distance^2 (u,U) =" << dist_uU << std::endl;
 BOOST_TEST( sqrt(dist_uU) == 0.0 );
 BOOST_TEST( sqrt(dist_dudx_dUdx) == 0.0 );
@@ -323,7 +327,8 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation2, * boost::unit_test::tolerance(UT_TO
 int nbNod = 4;
 std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
 
-std::mt19937 gen(my_seed());
+unsigned sd = my_seed();
+std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
@@ -393,6 +398,7 @@ double dist_Hv = sq_dist(Hvx,Hvy,Hvz,Hv);
 double n_Hd = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(Hd));
 double n_Hv = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(Hv));
 
+if (!DET_UT) std::cout << "seed =" << sd << std::endl;
 std::cout << "distance^2 Hd =" << dist_Hd << std::endl;
 BOOST_TEST( sqrt(dist_Hd) == 0.0 );
 
@@ -419,7 +425,8 @@ double AE_to_check[3*Tetra::N][3*Tetra::N] = {{0}};
 int nbNod = 4;
 std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
 
-std::mt19937 gen(my_seed());
+unsigned sd = my_seed();
+std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
@@ -512,6 +519,7 @@ for (int npi=0; npi<Tetra::NPI; npi++)
 // end code to check
 
 double val = tiny::dist<double,3*Tetra::N,3*Tetra::N>(AE,AE_to_check);
+if (!DET_UT) std::cout << "seed =" << sd << std::endl;
 std::cout << "distance = "<< val << std::endl;
 BOOST_TEST( val == 0.0 );
 }
@@ -524,7 +532,8 @@ const int N = Tetra::N;
 int nbNod = 4;
 std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
 
-std::mt19937 gen(my_seed());
+unsigned sd = my_seed();
+std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 Pt::pt3D p1(1,0,0),p2(0,1,0),p3(1,1,0),p4(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
@@ -558,6 +567,8 @@ for (int i=0; i<N; i++)
     }
 /* end ref code */
 double normP = tiny::frob_norm<double,2*N,3*N>(P);
+if (!DET_UT) std::cout << "seed =" << sd << std::endl;
+
 std::cout << "frob norm(P) = " << normP << " ; frob norm(Pref) = " << tiny::frob_norm<double,2*N,3*N>(Pref) << std::endl;
 double result = tiny::dist<double,2*N,3*N>(P,Pref); 
 std::cout << "dist(P,Pref) = " << result << std::endl;
