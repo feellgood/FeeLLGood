@@ -193,17 +193,20 @@ BOOST_CHECK( Pt::isOrthogonal(X,Y,Z,UT_TOL) == false );
 
 BOOST_AUTO_TEST_CASE(pt3D_unit_sphere, * boost::unit_test::tolerance(UT_TOL))
 {
-std::mt19937 gen(my_seed());
+unsigned sd = my_seed();
+std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(0.0,1.0);
     
 Pt::pt3D X(M_PI*distrib(gen),2*M_PI*distrib(gen));
 std::cout << "test that constructor in spherical coordinates(S^2) is making a unit vector" << std::endl;
+if (!DET_UT) std::cout << "seed =" << sd << std::endl;
 BOOST_TEST( X.norm() == 1.0 );
 }
 
 BOOST_AUTO_TEST_CASE(pt3D_triple_product, * boost::unit_test::tolerance(UT_TOL))
 {
-std::mt19937 gen(my_seed());
+unsigned sd = my_seed();
+std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(-1.0,1.0);
 
 const Pt::pt3D X(distrib(gen),distrib(gen),distrib(gen));
@@ -231,6 +234,7 @@ std::cout << "x3-x1=" << x3-x1 << std::endl;
 // them by this in order to get them in the order of machine epsilon.
 double scale = X.norm() * Y.norm() * Z.norm();
 
+if (!DET_UT) std::cout << "seed =" << sd << std::endl;
 double v1 = (x1 - x2)/scale;
 BOOST_TEST( v1 == 0.0 );
 double v2 = (x2 - x3)/scale;
@@ -243,7 +247,8 @@ BOOST_AUTO_TEST_CASE(pt3D_det, * boost::unit_test::tolerance(10.0*UT_TOL))
 {
 double M[Pt::DIM][Pt::DIM];
 
-std::mt19937 gen(my_seed());
+unsigned sd = my_seed();
+std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(-1.0,1.0);
 
 Pt::pt3D X(distrib(gen),distrib(gen),distrib(gen));
@@ -270,6 +275,7 @@ M[2][2] = 2.0*(z*z + w*w) - 1.0;
 
 double result = Pt::det(M);
 
+if (!DET_UT) std::cout << "seed =" << sd << std::endl;
 std::cout << "det(random_rot) -1=" << result-1.0 << std::endl;
 BOOST_TEST( Pt::sq(result) == 1.0 );
 }
@@ -279,7 +285,8 @@ BOOST_AUTO_TEST_CASE(pt3D_inverse, * boost::unit_test::tolerance(UT_TOL))
 double M[Pt::DIM][Pt::DIM];
 double inv_M[Pt::DIM][Pt::DIM];
 
-std::mt19937 gen(my_seed());
+unsigned sd = my_seed();
+std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(-1.0,1.0);
 
 Pt::pt3D X(distrib(gen),distrib(gen),distrib(gen));
@@ -317,6 +324,7 @@ tiny::mult<double, Pt::DIM, Pt::DIM, Pt::DIM>(inv_M, M, inv_M_M);
 
 double result = tiny::dist<double, Pt::DIM, Pt::DIM>(M_inv_M,inv_M_M);
 
+if (!DET_UT) std::cout << "seed =" << sd << std::endl;
 std::cout << "frobenius_norm^2(M M^-1 - M^-1 M) =" << Pt::sq(result) << std::endl;
 BOOST_TEST( result  == 0.0 );
 }
