@@ -37,7 +37,7 @@ jobs:
     - name: build
       run: |
         export PATH="/usr/lib/ccache:$PATH"
-        cmake . -DENABLE_UTESTS=ON
+        cmake . -DENABLE_UTESTS=ON -DENABLE_DET_UTESTS=ON
         make -j $(getconf _NPROCESSORS_ONLN)
 
     - name: show ccache stats
