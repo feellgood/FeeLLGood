@@ -29,7 +29,7 @@ BOOST_CHECK(x != 0.0f);
 BOOST_AUTO_TEST_CASE(timing_constructor, * boost::unit_test::tolerance(UT_TOL))
 {
 unsigned sd = my_seed();
-std::mt19937 gen(my_seed());
+std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 
