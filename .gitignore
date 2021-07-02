@@ -6,6 +6,7 @@ Makefile
 Makefile.X86_64
 cmake_install.cmake
 config.h
+tests/ut_config.h
 feellgood
 feellgood_exe
 install_manifest.txt
