@@ -80,8 +80,14 @@ install(PROGRAMS ./tools/convert2vtk DESTINATION bin)
 option(ENABLE_UTESTS "Enable tests" OFF)
 message( STATUS "enable unit tests: ENABLE_UTESTS = "  ${ENABLE_UTESTS} )
 
+#===========================================================================
+#  cmake . -DENABLE_DET_UTESTS=ON
+# this option forces random numbers to be deterministic 
+#===========================================================================
+
 option(ENABLE_DET_UTESTS "Enable deterministic unit tests" OFF)
 message( STATUS "enable deterministic unit tests: ENABLE_DET_UTESTS = "  ${ENABLE_DET_UTESTS} )
+
 if(${ENABLE_DET_UTESTS})
     set(DET_UTESTS true )
 else()
