@@ -5,6 +5,11 @@
 #include <cctype>
 #include <exception>
 
+/* Silence a warning internal to Boost, fixed in Boost 1.76.0. */
+#if BOOST_VERSION < 107600
+# define BOOST_BIND_GLOBAL_PLACEHOLDERS
+#endif
+
 #include<boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
