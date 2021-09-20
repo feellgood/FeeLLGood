@@ -42,16 +42,20 @@ sudo cp include/ANN/ANN.h /usr/local/include/
 cd ..
 
 # Download and install exprtk.
-wget -nv http://www.partow.net/downloads/exprtk.zip
-unzip -q exprtk.zip
-sudo cp exprtk/exprtk.hpp /usr/local/include/
+# Use the version tagged "g20210303" by FreeBSD ports.
+# C.f. https://cgit.freebsd.org/ports/tree/math/exprtk/Makefile
+exprtk_sha1=ca5c577917646ddba3f71ce6d5dd7d01f351ee80
+wget -nv https://github.com/ArashPartow/exprtk/archive/$exprtk_sha1.zip
+mv $exprtk_sha1.zip exprtk-$exprtk_sha1.zip
+unzip -q exprtk-$exprtk_sha1.zip
+sudo cp exprtk-$exprtk_sha1/exprtk.hpp /usr/local/include/
 
 # Download, patch and install ScalFMM.
-wget -nv https://gitlab.inria.fr/solverstack/ScalFMM/-/archive/V1.5.1/ScalFMM-V1.5.1.tar.gz
-tar xzf ScalFMM-V1.5.1.tar.gz
-cd ScalFMM-V1.5.1/
-sed -i 's/ROtation/Rotation/' Src/CMakeLists.txt
-sed -i 's/~0x00LL/~0ULL/' Src/Containers/F{,Sub}Octree.hpp
+# Use the tip of the branch maintenance/scalfmm-1.5 as of 2021-09-20.
+scalfmm_sha1=fc74e81413daac54f61ce62591229e9c6a676f5b
+wget -nv https://gitlab.inria.fr/solverstack/ScalFMM/-/archive/$scalfmm_sha1/ScalFMM-$scalfmm_sha1.tar.gz
+tar xzf ScalFMM-$scalfmm_sha1.tar.gz
+cd ScalFMM-$scalfmm_sha1/
 sed -i 's/memcpy/if (nbParticles != 0) memcpy/' Src/Components/FBasicParticleContainer.hpp
 sed -i '/#include <string>/a #include <stdexcept>' Src/Utils/FAlgorithmTimers.hpp
 cd Build
