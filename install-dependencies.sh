@@ -52,12 +52,11 @@ sudo cp exprtk-$exprtk_sha1/exprtk.hpp /usr/local/include/
 
 # Download, patch and install ScalFMM.
 # Use the tip of the branch maintenance/scalfmm-1.5 as of 2021-09-20.
-scalfmm_sha1=fc74e81413daac54f61ce62591229e9c6a676f5b
+scalfmm_sha1=22b9e4f6cf4ea721d71198a71e3f5d2c5ae5e7cc
 wget -nv https://gitlab.inria.fr/solverstack/ScalFMM/-/archive/$scalfmm_sha1/ScalFMM-$scalfmm_sha1.tar.gz
 tar xzf ScalFMM-$scalfmm_sha1.tar.gz
 cd ScalFMM-$scalfmm_sha1/
 sed -i 's/memcpy/if (nbParticles != 0) memcpy/' Src/Components/FBasicParticleContainer.hpp
-sed -i '/#include <string>/a #include <stdexcept>' Src/Utils/FAlgorithmTimers.hpp
 cd Build
 cmake ..
 make -j $job_count
