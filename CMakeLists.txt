@@ -42,7 +42,7 @@ MESSAGE(STATUS "MAX_NB_THREADS = ${MAX_NB_THREADS}")
 # -fsanitize=address leak  null (to debug memory leak) undefined
 #===========================================================================
 
-set( CMAKE_CXX_FLAGS "-DNDEBUG -Wall -Wextra -std=c++11 -fopenmp -O3 -march=native" CACHE STRING "C++ compiler flags used during builds." FORCE )
+set( CMAKE_CXX_FLAGS "-DNDEBUG -Wall -Wextra -std=c++14 -fopenmp -O3 -march=native" CACHE STRING "C++ compiler flags used during builds." FORCE )
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
 

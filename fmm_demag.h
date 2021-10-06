@@ -22,7 +22,7 @@ this header is the interface to scalfmm. Its purpose is to prepare an octree for
 #include "Kernels/Rotation/FRotationKernel.hpp"
 #include "Kernels/Rotation/FRotationCell.hpp"
 
-#include "fem.h"
+#include "mesh.h"
 
 /**
 \namespace scal_fmm to grab altogether the templates and functions using scalfmm for the computation of the demag field 
@@ -59,10 +59,10 @@ class fmm
     {
     public:
         /** constructor, initialize memory for tree, kernel, sources corrections, initialize all sources */
-        inline fmm(Fem &fem,bool VERBOSE,const int ScalfmmNbThreads): NOD(fem.msh.getNbNodes()) ,FAC( fem.msh.getNbFacs()) , TET( fem.msh.getNbTets()) , SRC( FAC * Facette::NPI + TET * Tetra::NPI) , tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels( NbLevels, boxWidth, boxCenter)
+        inline fmm(mesh &msh,bool VERBOSE,const int ScalfmmNbThreads): NOD(msh.getNbNodes()) ,FAC( msh.getNbFacs()) , TET( msh.getNbTets()) , SRC( FAC * Facette::NPI + TET * Tetra::NPI) , tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels( NbLevels, boxWidth, boxCenter)
             {
             omp_set_num_threads(ScalfmmNbThreads);
-            norm = 1./(2.*fem.msh.diam);
+            norm = 1./(2.*msh.diam);
             
             FTic counter;
             counter.tic();
@@ -70,12 +70,13 @@ class fmm
             FSize idxPart=0;
             for(idxPart=0; idxPart< NOD; ++idxPart)
                 {
-                Pt::pt3D pTarget = norm*(fem.msh.getNode(idxPart).p - fem.msh.c);
+                Pt::pt3D pTarget = norm*(msh.getNode(idxPart).p - msh.c);
                 tree.insert( FPoint<FReal>(pTarget.x(), pTarget.y(), pTarget.z()) , FParticleType::FParticleTypeTarget, idxPart);//, 0.0);    
-                }
+		//tree.insert( FPoint<FReal>(pTarget.x(), pTarget.y(), pTarget.z()) , FParticleType::target, idxPart);                
+		}
             
-            insertCharges<Tetra::Tet,Tetra::NPI>(fem.msh.tet,idxPart,fem.msh.c);
-            insertCharges<Facette::Fac,Facette::NPI>(fem.msh.fac,idxPart,fem.msh.c);
+            insertCharges<Tetra::Tet,Tetra::NPI>(msh.tet,idxPart,msh.c);
+            insertCharges<Facette::Fac,Facette::NPI>(msh.fac,idxPart,msh.c);
             
             counter.tac();
             if(VERBOSE) 
@@ -86,13 +87,13 @@ class fmm
         /**
         launch the calculation of the demag field with second order corrections
         */
-        void calc_demag(Fem &fem,Settings &mySettings)
+        void calc_demag(mesh &msh,Settings &mySettings)
         {
         FTic counter;
         counter.tic();
         
-        demag(Nodes::get_u, Nodes::set_phi, fem, mySettings);
-        demag(Nodes::get_v, Nodes::set_phiv, fem, mySettings);
+        demag(Nodes::get_u, Nodes::set_phi, msh, mySettings);
+        demag(Nodes::get_v, Nodes::set_phiv, msh, mySettings);
 
         counter.tac();
         if(mySettings.verbose) { std::cout << "Magnetostatics done in " << counter.elapsed() << " s." << std::endl; }
@@ -123,21 +124,22 @@ class fmm
                 {
                 Pt::pt3D pSource = norm*(gauss[j] - c);
                 tree.insert( FPoint<FReal>(pSource.x(), pSource.y(), pSource.z()) , FParticleType::FParticleTypeSource, idx, 0.0);
-                }
+                //tree.insert( FPoint<FReal>(pSource.x(), pSource.y(), pSource.z()) , FParticleType::source, idx, 0.0);
+		}
             });//end for_each    
         }
         
     /**
     computes the demag field, with (getter  = u,setter = phi) or (getter = v,setter = phi_v)
     */
-    void demag(std::function<const Pt::pt3D (Nodes::Node)> getter,std::function<void (Nodes::Node &,const double)> setter,Fem &fem,Settings &settings)
+    void demag(std::function<const Pt::pt3D (Nodes::Node)> getter,std::function<void (Nodes::Node &,const double)> setter,mesh &msh,Settings &settings)
         {
         FmmClass algo(&tree, &kernels);
         
         std::vector<double> srcDen(SRC,0);
         std::vector<double> corr(NOD,0);
         
-        fem.msh.calc_charges(getter,srcDen,corr,settings);
+        msh.calc_charges(getter,srcDen,corr,settings);
         
         // reset potentials and forces - physicalValues[idxPart] = Q
         tree.forEachLeaf([this,&srcDen](LeafClass* leaf)
@@ -155,7 +157,7 @@ class fmm
         
         algo.execute();
 
-        tree.forEachLeaf([this,&corr,&fem,setter](LeafClass* leaf){
+        tree.forEachLeaf([this,&corr,&msh,setter](LeafClass* leaf){
             const FReal* const potentials = leaf->getTargets()->getPotentials();
             const int nbParticlesInLeaf  = leaf->getTargets()->getNbParticles();
             const FVector<long long>& indexes  = leaf->getTargets()->getIndexes();
@@ -163,7 +165,7 @@ class fmm
             for(int idxPart = 0 ; idxPart < nbParticlesInLeaf ; ++idxPart)
                 {
                 const int indexPartOrig = indexes[idxPart];
-                setter(fem.msh.setNode(indexPartOrig), (potentials[idxPart]*norm + corr[indexPartOrig])/(4*M_PI));
+                setter(msh.setNode(indexPartOrig), (potentials[idxPart]*norm + corr[indexPartOrig])/(4*M_PI));
                 }
             });
         }

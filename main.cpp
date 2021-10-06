@@ -90,7 +90,7 @@ if (mySettings.stt_flag)
 else
     { std::cout << "no spin transfer torque" << std::endl; }
 
-scal_fmm::fmm myFMM(fem,mySettings.verbose,mySettings.scalfmmNbTh);
+scal_fmm::fmm myFMM(fem.msh,mySettings.verbose,mySettings.scalfmmNbTh);
 
 int nt = time_integration(fem,mySettings,linAlg,myFMM,t_prm);
         

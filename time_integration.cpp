@@ -35,7 +35,7 @@ public:
 /** compute all quantitites at time t */
 inline void compute_all(Fem &fem,Settings &settings,scal_fmm::fmm &myFMM,double t)
     {
-    myFMM.calc_demag(fem,settings);
+    myFMM.calc_demag(fem.msh,settings);
     fem.energy(t,settings);
     fem.evolution();
     }
