@@ -1,41 +1,46 @@
 #include "mesh.h"
-
 #include "feellgoodSettings.h"
-
 #include "pt3D.h"
 
-using namespace std;
+
+void on_fail_msg_error(std::ifstream &f_in, const std::string strWhat)
+{
+if (f_in.fail())
+    {
+    std::cerr << strWhat << std::endl; 
+    SYSTEM_ERROR;
+    } 
+}
+
+
+void lookFor(const bool verbose, std::ifstream &f_in, const std::string strWhat)
+{
+std::string symb = "";
+while (symb != strWhat) {f_in >> symb;}
+
+if (verbose) on_fail_msg_error(f_in,"could not find beacon " + strWhat);
+}
+
 
 void mesh::readMesh(Settings const& mySets)
 {
-string symb;
-ifstream msh( mySets.getPbName() );
+std::string symb;
+std::ifstream msh( mySets.getPbName() );
 
-if (msh.fail())
-    {
-    cerr << "cannot open file " << mySets.getPbName() << endl; 
-    SYSTEM_ERROR;
-    } 
+on_fail_msg_error(msh,"cannot open file " + mySets.getPbName() );
 
 msh >> symb;
 if(symb == "$MeshFormat")
     {
-    string mshFormat = "";
+    std::string mshFormat = "";
     msh >> mshFormat;
     if(mshFormat == "2.2" ) 
         {
         if(mySets.verbose) {std::cout << "mesh file format 2.2" << std::endl;} 
         int tags, reg, TYP;
-        string symb = "";
-   
-        while (symb != "$Nodes") {msh >> symb;}
-
-        if (msh.fail())
-            {
-            if(mySets.verbose) { cerr << "could not find $Nodes" << endl; }
-            SYSTEM_ERROR;
-            }
-
+  
+    lookFor(mySets.verbose,msh,"$Nodes");
+    
     double scale = mySets.getScale();
 
     msh >> nbNod;
@@ -47,20 +52,10 @@ if(symb == "$MeshFormat")
         node[i].p.rescale(scale);
         }
 
-    if (msh.fail())
-        {
-        if(mySets.verbose) {cerr << "error while reading nodes" << endl;}
-        SYSTEM_ERROR;
-        }
-
-    while (symb != "$Elements") {msh >> symb;}
-
-    if (msh.fail())
-        {
-        if(mySets.verbose) {std::cerr << "could not find $Elements" << std::endl;}
-        SYSTEM_ERROR;
-        }
+    on_fail_msg_error(msh,"error while reading nodes" );
     
+    lookFor(mySets.verbose,msh,"$Elements");
+
     int nbElem;
     msh >> nbElem; 
     if(mySets.verbose) {std::cout <<"nb Elem: "<< nbElem <<std::endl;}
@@ -88,10 +83,7 @@ if(symb == "$MeshFormat")
             }
         }
 
-    if(mySets.verbose) { std::cout << "last symb = " << symb << std::endl; }
-    if ((symb != "$EndElements") && msh.fail()) 
-        {std::cerr << "error while reading elements; symb = " << symb << std::endl;SYSTEM_ERROR;}
-            
+        on_fail_msg_error(msh,"error while reading elements" );
         }
     else { std::cout <<"mesh file format " << mshFormat << " not supported." << std::endl; SYSTEM_ERROR; }
     }
@@ -102,19 +94,16 @@ if (! msh.fail())
     msh.close();
     }
 else
-    { std::cout<< "error while closing mesh." <<std::endl; SYSTEM_ERROR; }
+    { std::cout<< "error before closing mesh." <<std::endl; SYSTEM_ERROR; }
 }
 
-double mesh::readSol(bool VERBOSE,double scaling, const string fileName)
+double mesh::readSol(bool VERBOSE,double scaling, const std::string fileName)
 {
-ifstream fin(fileName, std::ifstream::in);
-if (!fin)
-    {
-    cerr << "cannot open file: " << fileName << endl;
-    SYSTEM_ERROR;
-    }
+std::ifstream fin(fileName, std::ifstream::in);
 
-string str;
+on_fail_msg_error(fin, "cannot open file: " + fileName );
+
+std::string str;
 getline(fin, str);
 
 unsigned long idx = str.find(":");
@@ -122,11 +111,9 @@ idx +=2;
 
 double t = stod(str.substr(idx));
 
-if(VERBOSE) { cout << ".sol file: " << str << " @ time t = " << t << endl; }
+if(VERBOSE) { std::cout << ".sol file: " << str << " @ time t = " << t << std::endl; }
 
-const int NOD = getNbNodes();
-
-for (int i=0; i<NOD; i++)
+for (int i=0; i<nbNod; i++)
     {
     Nodes::Node & n = node[i];
     Nodes::Node node_;
@@ -135,7 +122,7 @@ for (int i=0; i<NOD; i++)
 
     if (i!=i_)
         {
-        if(VERBOSE) { cerr << ".sol file mismatch with mesh nodes"<< endl; }
+        if(VERBOSE) { std::cerr << ".sol file mismatch with mesh nodes"<< std::endl; }
         fin.close();
         SYSTEM_ERROR;
         }
@@ -143,7 +130,7 @@ for (int i=0; i<NOD; i++)
         {
         node_.p.rescale(scaling);
         if (( Pt::norme2(n.p - node_.p) > Pt::sq(diam * scaling))&&VERBOSE) 
-            { cerr << "WARNING difference in node positions"  << i  << "\t" << n.p << endl << i_ << "\t" << node_.p << endl; }
+            { std::cerr << "WARNING difference in node positions"  << i  << "\t" << n.p << std::endl << i_ << "\t" << node_.p << std::endl; }
         }
     }
 fin.close();    			     
