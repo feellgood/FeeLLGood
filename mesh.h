@@ -181,15 +181,10 @@ private:
     int nbNod;
     
     
-	/** reading mesh file function */
+	/** reading mesh format 2.2 file function */
     void readMesh(Settings const& mySets);
 
-	/** read old mesh format 2.2 */
-    void readOldMesh(Settings const& mySets,std::ifstream &msh);
-
-    /** read mesh format 4.1 */
-    void readNewMesh(Settings const& mySets,std::ifstream &msh);
-
+    
 	/** return the minimum of all nodes coordinate along coord axis */
     inline double minNodes(const Pt::index coord) const
         {
