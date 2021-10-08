@@ -57,7 +57,7 @@ class Fac{
         inline Fac(int _NOD /**< [in] */):idxPrm(0),treated(false),NOD(_NOD),reg(0),refNode(nullptr) { surf = 0.0; Ms = 0.0; ind[0]=ind[1]=ind[2]=0; }
 
         /** constructor used by readMesh */
-        inline Fac(const std::shared_ptr<Nodes::Node[]> _p_node /**< [in] pointer to the node */,
+        inline Fac(const Nodes::NodeList _p_node /**< [in] pointer to the node */,
                    const int _NOD /**< [in] nb nodes */,
                    const int _reg /**< [in] region number */,
                    const int _idx /**< [in] region index in region vector */,
@@ -190,7 +190,7 @@ class Fac{
         const int reg;/**< .msh region number */
         
         /** direct access to the Nodes */
-        const std::shared_ptr<Nodes::Node[]> refNode;
+        const Nodes::NodeList refNode;
         
         /** return normal to the triangular face, not normalized */
         inline Pt::pt3D normal_vect() const

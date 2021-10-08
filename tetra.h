@@ -170,7 +170,7 @@ class Tet{
 		/** constructor for readMesh. It initializes weight hat function and dad(x|y|z) if \f$ | detJ | < \epsilon \f$ jacobian is considered degenerated
          unit tests : Tet_constructor; Tet_inner_tables
          */
-		inline Tet(const std::shared_ptr<Nodes::Node[]> _p_node /**< [in] pointer to the nodes */,
+		inline Tet(const Nodes::NodeList _p_node /**< [in] pointer to the nodes */,
                    const int _NOD /**< [in] total nb of nodes */,
                    const int _reg /**< [in] region number */,
                    const int _idx /**< [in] region index in region vector */,
@@ -415,7 +415,7 @@ class Tet{
     private:
         const int NOD;/**< total number of nodes, also an offset for filling sparseMatrix */
         const int reg;/**< .msh region number */
-        const std::shared_ptr<Nodes::Node[]> refNode;/**< direct access to the Nodes */
+        const Nodes::NodeList refNode;/**< direct access to the Nodes */
         
         /** template getter to access and copy some parts of the node vector of type T = double or Pt::pt3D  */
         template <class T> void getDataFromNode(std::function< T (Nodes::Node)> getter,T (&X_data)[N]) const

@@ -165,16 +165,16 @@ public:
     inline void set_elec_pot(const int i,const double val) {node[i].V = val;}
     
 private:
-    /** node container : the shared pointer is not initialized by constructor, but later, while reading the mesh, by member function init_node */
-    std::shared_ptr<Nodes::Node[]> node;
+    /** node container : the node list is not initialized by constructor, but later, while reading the mesh, by member function init_node */
+    Nodes::NodeList node;
     
     
     
-    /** memory allocation for the nodes : delete[] must be specified in C++11, not in C++17 */
+    /** memory allocation for the nodes */
     inline void init_node(const int Nb)
         {
         nbNod = Nb;
-        node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[Nb],std::default_delete<Nodes::Node[]>() ); 
+        node = Nodes::NodeList(new Nodes::Node[Nb]);
         }
     
     /** total number of nodes read from mesh file */
