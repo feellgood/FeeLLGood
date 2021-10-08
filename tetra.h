@@ -386,7 +386,7 @@ class Tet{
             { for (int i=0; i < N; i++) { L[NOD+ind[i]] += Lp[i]; L[ind[i]] += Lp[N+i]; } }
         
         /** getter for N ; unit tests : Tet_constructor */
-		inline constexpr int getN(void) const {return N;}
+		inline int getN(void) const {return N;}
 		
 		/** getter for NPI ; unit tests : Tet_constructor */
 		inline int getNPI(void) const {return NPI;}
