@@ -22,7 +22,7 @@ MESSAGE(STATUS "CXX ${CMAKE_CXX_COMPILER_ID}")
 #===========================================================================
 
 execute_process(
-    COMMAND git show-ref --verify --head HEAD --hash
+    COMMAND git show-ref --head /HEAD --hash
     OUTPUT_VARIABLE SHAstr OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 set(SHAstr "\"${SHAstr}\"")  # add quotes
