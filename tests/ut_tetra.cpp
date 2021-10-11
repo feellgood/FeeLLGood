@@ -561,7 +561,7 @@ double Pref[2*N][3*N] = { {0} }; // P must be filled with zero
 
 for (int i=0; i<N; i++)
     {
-    Nodes::Node & n = t.getNode(i);
+    const Nodes::Node & n = t.getNode(i);
     Pref[i][i]  = n.ep.x();  Pref[i][N+i]  = n.ep.y();  Pref[i][2*N+i]  = n.ep.z();
     Pref[N+i][i]= n.eq.x();  Pref[N+i][N+i]= n.eq.y();  Pref[N+i][2*N+i]= n.eq.z();
     }
