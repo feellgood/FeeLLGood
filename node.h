@@ -140,7 +140,7 @@ template<class T> double Pcoeff(T & x,const int i,const int j)
     
     if(node_i == (j%N))
         {
-        Nodes::Node & n = x.getNode(node_i);
+        const Nodes::Node & n = x.getNode(node_i);
            
         if(i<N)
             { val = n.ep(j/N); }

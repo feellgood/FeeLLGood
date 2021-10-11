@@ -116,7 +116,7 @@ Pt::pt3D n = calc_norm();
 for (int i=0; i<N; i++)
     {
     const int i_ = ind[i];
-    Pt::pt3D & p_i_ = refNode[ i_ ].p;	      
+    const Pt::pt3D & p_i_ = refNode[ i_ ].p;	      
     for (int j=0; j<NPI; j++)
         {
         corr[i_]-= Ms*pScal(u[j],n)*weight(j)/Pt::dist(p_i_, gauss[j]);

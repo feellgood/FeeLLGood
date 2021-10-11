@@ -150,7 +150,7 @@ class Fac{
         inline int getNPI(void) const {return NPI;}	
 
         /** getter for node */
-		inline Nodes::Node & getNode(const int i) {return refNode[ind[i]];}
+		inline const Nodes::Node & getNode(const int i) {return refNode[ind[i]];}
         
         /** getter for region */
         inline int getRegion(void) const {return reg;}
