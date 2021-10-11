@@ -57,6 +57,7 @@ wget -nv https://gitlab.inria.fr/solverstack/ScalFMM/-/archive/$scalfmm_sha1/Sca
 tar xzf ScalFMM-$scalfmm_sha1.tar.gz
 cd ScalFMM-$scalfmm_sha1/
 sed -i 's/memcpy/if (nbParticles != 0) memcpy/' Src/Components/FBasicParticleContainer.hpp
+sed -i 's/OPENMP_CXX_FOUND/OPENMP_FOUND OR OPENMP_CXX_FOUND/' CMakeLists.txt
 cd Build
 cmake ..
 make -j $job_count
