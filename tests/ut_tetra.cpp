@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(Tet_inner_tables, * boost::unit_test::tolerance(UT_TOL))
 {
 // this test is dedicated to  check dadx,dady,dadz and weight tables, those values are initilized once by Tet constructor
 int nbNod = 4;
-std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
+Nodes::NodeList node(new Nodes::Node[nbNod]); 
 
 unsigned sd = my_seed();
 std::mt19937 gen(sd);
@@ -126,7 +126,7 @@ BOOST_TEST( sqrt(result_w) == 0.0 );
 BOOST_AUTO_TEST_CASE(Tet_calc_vol, * boost::unit_test::tolerance(UT_TOL))
 {
 int nbNod = 4;
-std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
+Nodes::NodeList node(new Nodes::Node[nbNod]); 
 
 Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
 double theta_sph(0),phi_sph(0),phi0(0),phi(0),phiv0(0),phiv(0);
@@ -178,7 +178,7 @@ return val;
 BOOST_AUTO_TEST_CASE(Tet_nod_interpolation, * boost::unit_test::tolerance(UT_TOL))
 {
 int nbNod = 4;
-std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
+Nodes::NodeList node(new Nodes::Node[nbNod]); 
 
 unsigned sd = my_seed();
 std::mt19937 gen(sd);
@@ -325,7 +325,7 @@ BOOST_TEST( n_dvdz == n_dVdz );
 BOOST_AUTO_TEST_CASE(Tet_nod_interpolation2, * boost::unit_test::tolerance(UT_TOL))
 {
 int nbNod = 4;
-std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
+Nodes::NodeList node(new Nodes::Node[nbNod]); 
 
 unsigned sd = my_seed();
 std::mt19937 gen(sd);
@@ -423,7 +423,7 @@ double AE[3*Tetra::N][3*Tetra::N] = {{0}};
 double AE_to_check[3*Tetra::N][3*Tetra::N] = {{0}};
 
 int nbNod = 4;
-std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
+Nodes::NodeList node(new Nodes::Node[nbNod]); 
 
 unsigned sd = my_seed();
 std::mt19937 gen(sd);
@@ -530,7 +530,7 @@ std::cout << "Tet test on Nodes::Pcoeff template" << std::endl;
 const int N = Tetra::N;
 
 int nbNod = 4;
-std::shared_ptr<Nodes::Node[]> node = std::shared_ptr<Nodes::Node[]>(new Nodes::Node[nbNod],std::default_delete<Nodes::Node[]>() ); 
+Nodes::NodeList node(new Nodes::Node[nbNod]); 
 
 unsigned sd = my_seed();
 std::mt19937 gen(sd);
