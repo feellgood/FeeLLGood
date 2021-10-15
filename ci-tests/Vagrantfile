@@ -1,0 +1,84 @@
+# Vagrantfile for testing feeLLGood on multiple Linux distributions.
+
+Vagrant.configure("2") do |config|
+
+  ######################################################################
+  # Common configuration.
+
+  # Boxes vary wildly in their default amount of RAM. Set it to 4 GiB.
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 4096
+  end
+
+  # Provision the VM by installing the feeLLGood dependencies.
+  config.vm.provision "shell",
+    path: "install-dependencies.sh", args: "-d", privileged: false
+
+  # Provide read-only access to the parent directory.
+  # This mount is disabled below in those few boxes that do not support
+  # it for lack of the VirtualBox guest additions.
+  config.vm.synced_folder "..", "/home/vagrant/host-FeeLLGood",
+    mount_options: ["ro"]
+
+  ######################################################################
+  # Distro-specific configuration.
+
+  # Ubuntu 21.10 "Impish Indri"
+  config.vm.define "ubuntu_impish", autostart: false do |machine|
+    machine.vm.box = "ubuntu/impish64"
+  end
+
+  # Ubuntu 20.04 LTS "Focal Fossa"
+  config.vm.define "ubuntu_focal", autostart: false do |machine|
+    machine.vm.box = "ubuntu/focal64"
+  end
+
+  # Ubuntu 18.04 LTS "Bionic Beaver"
+  config.vm.define "ubuntu_bionic", autostart: false do |machine|
+    machine.vm.box = "ubuntu/bionic64"
+  end
+
+  # Ubuntu 16.04 LTS "Xenial Xerus"
+  config.vm.define "ubuntu_xenial", autostart: false do |machine|
+    machine.vm.box = "ubuntu/xenial64"
+  end
+
+  # Debian Testing, future Debian 12 "Bookworm"
+  config.vm.define "debian_testing", autostart: false do |machine|
+    machine.vm.box = "debian/testing64"
+  end
+
+  # Debian 11 "Bullseye", released 2021-08-14
+  config.vm.define "debian_bullseye", autostart: false do |machine|
+    machine.vm.box = "debian/bullseye64"
+  end
+
+  # Debian 10 "Buster", released 2019-07-06
+  config.vm.define "debian_buster", autostart: false do |machine|
+    machine.vm.box = "debian/buster64"
+    machine.vm.synced_folder "..", "/home/vagrant/host-FeeLLGood",
+      disabled: true  # not supported
+  end
+
+  # Debian 9 "Stretch", released 2017-06-17
+  config.vm.define "debian_stretch", autostart: false do |machine|
+    machine.vm.box = "debian/stretch64"
+    machine.vm.synced_folder "..", "/home/vagrant/host-FeeLLGood",
+      disabled: true  # not supported
+  end
+
+  # CentOS 8, released 2019-09-24, EOL 2021-12-31
+  config.vm.define "centos_8", autostart: false do |machine|
+    machine.vm.box = "centos/8"
+    machine.vm.hostname = "centos-8"
+    machine.vm.synced_folder "..", "/home/vagrant/host-FeeLLGood",
+      disabled: true  # not supported
+  end
+
+  # Rocky Linux 8, released 2021-06-21 as 8.4 "Green Obsidian"
+  config.vm.define "rockylinux_8", autostart: false do |machine|
+    machine.vm.box = "rockylinux/8"
+    machine.vm.hostname = "rockylinux-8"
+  end
+
+end
