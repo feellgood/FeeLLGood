@@ -32,7 +32,7 @@ jobs:
     - name: install dependencies
       run: |
         export PATH="/usr/lib/ccache:$PATH"
-        ci-tests/install-dependencies.sh
+        ci-tests/install-dependencies.sh -u
 
     - name: build
       run: |
