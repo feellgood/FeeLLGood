@@ -1,9 +1,14 @@
+#!/usr/bin/python3
+
 import os
 import sys
 import subprocess
 from math import sqrt
 
-sys.path.insert(0,'./tools')
+# Move to the script's directory.
+os.chdir(sys.path[0])
+
+sys.path.insert(0,'../tools')
 from settingsMaker import Settings
 
 mySettings = Settings("ellipsoid.msh")
@@ -50,7 +55,7 @@ if(os.path.exists(mySettings["outputs"]["directory"]) and os.path.isdir(mySettin
 else:
 	os.system("mkdir " + mySettings["outputs"]["directory"])
 
-val = subprocess.run(["./feellgood",JSON_fileName])
+val = subprocess.run(["../feellgood",JSON_fileName])
 
 if(val.returncode==0):
 	print("FeeLLGood terminated correctly with " + JSON_fileName + " input file.")

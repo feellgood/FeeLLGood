@@ -32,7 +32,7 @@ jobs:
     - name: install dependencies
       run: |
         export PATH="/usr/lib/ccache:$PATH"
-        ./install-dependencies.sh
+        ci-tests/install-dependencies.sh
 
     - name: build
       run: |
@@ -49,4 +49,4 @@ jobs:
       run: make test
 
     - name: run functional test
-      run: python3 full_test.py
+      run: ci-tests/full_test.py
