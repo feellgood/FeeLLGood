@@ -23,6 +23,11 @@ Vagrant.configure("2") do |config|
   ######################################################################
   # Distro-specific configuration.
 
+  # Ubuntu development branch, future 22.04 LTS "Jammy Jellyfish"
+  config.vm.define "ubuntu_jammy", autostart: false do |machine|
+    machine.vm.box = "ubuntu/jammy64"
+  end
+
   # Ubuntu 21.10 "Impish Indri"
   config.vm.define "ubuntu_impish", autostart: false do |machine|
     machine.vm.box = "ubuntu/impish64"
