@@ -129,7 +129,7 @@ public:
     */
     double avg(std::function<double (Nodes::Node,Pt::index)> getter /**< [in] */,Pt::index d /**< [in] */) const
     {// syntaxe pénible avec opérateur binaire dans la lambda pour avoir un += sur la fonction voulue, with C++17 we should use reduce instead of accumulate here
-    double sum = std::accumulate(tet.begin(),tet.end(),0.0, [getter,&d](double &s,Tetra::Tet const& te)
+    double sum = std::accumulate(tet.begin(),tet.end(),0.0, [getter,&d](double s,Tetra::Tet const& te)
                             {
                             double val[Tetra::NPI]; 
                             te.interpolation(getter,d,val); 
