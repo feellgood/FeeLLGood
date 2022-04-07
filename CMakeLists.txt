@@ -42,6 +42,16 @@ MESSAGE(STATUS "MAX_NB_THREADS = ${MAX_NB_THREADS}")
 # -fsanitize=address leak  null (to debug memory leak) undefined
 #===========================================================================
 
+# Link-time optimization requires cmake version at least 3.9.
+option(ENABLE_LTO "Enable link-time optimization" OFF)
+message(STATUS "Link-time optimization: ENABLE_LTO = " ${ENABLE_LTO})
+if(${ENABLE_LTO})
+    cmake_policy(SET CMP0069 NEW)
+    include(CheckIPOSupported)
+    check_ipo_supported()
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
+
 set( CMAKE_CXX_FLAGS "-DNDEBUG -Wall -Wextra -std=c++14 -fopenmp -O3 -march=native" CACHE STRING "C++ compiler flags used during builds." FORCE )
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
