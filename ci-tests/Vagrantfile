@@ -23,14 +23,9 @@ Vagrant.configure("2") do |config|
   ######################################################################
   # Distro-specific configuration.
 
-  # Ubuntu development branch, future 22.04 LTS "Jammy Jellyfish"
+  # Ubuntu 22.04 LTS "Jammy Jellyfish"
   config.vm.define "ubuntu_jammy", autostart: false do |machine|
     machine.vm.box = "ubuntu/jammy64"
-  end
-
-  # Ubuntu 21.10 "Impish Indri"
-  config.vm.define "ubuntu_impish", autostart: false do |machine|
-    machine.vm.box = "ubuntu/impish64"
   end
 
   # Ubuntu 20.04 LTS "Focal Fossa"
@@ -41,11 +36,6 @@ Vagrant.configure("2") do |config|
   # Ubuntu 18.04 LTS "Bionic Beaver"
   config.vm.define "ubuntu_bionic", autostart: false do |machine|
     machine.vm.box = "ubuntu/bionic64"
-  end
-
-  # Ubuntu 16.04 LTS "Xenial Xerus"
-  config.vm.define "ubuntu_xenial", autostart: false do |machine|
-    machine.vm.box = "ubuntu/xenial64"
   end
 
   # Debian Testing, future Debian 12 "Bookworm"
