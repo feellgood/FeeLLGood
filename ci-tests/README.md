@@ -38,7 +38,16 @@ Summary of tested items:
 
 ## Manual testing
 
-Install [Vagrant][] and [VirtualBox][]. Then, in this directory, run
+Install [Vagrant][], [VirtualBox][] and the Vagrant disksize plugin:
+
+```shell
+curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+sudo apt install vagrant virtualbox
+vagrant plugin install vagrant-disksize
+```
+
+Then, in this directory, run
 
 ```shell
 vagrant status

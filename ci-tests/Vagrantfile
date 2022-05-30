@@ -74,6 +74,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "rockylinux_8", autostart: false do |machine|
     machine.vm.box = "rockylinux/8"
     machine.vm.hostname = "rockylinux-8"
+    machine.disksize.size = "10GB"
   end
 
 end
