@@ -1,4 +1,5 @@
 #include <cfloat>
+#include <signal.h>
 #include "fem.h"
 #include "time_integration.h"
 
@@ -124,6 +125,20 @@ for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target +=
         fem.DW_vz0 = fem.DW_vz;/* mise a jour de la vitesse du dernier referentiel et deplacement de paroi */ 
         fem.DW_z  += fem.DW_vz*t_prm.get_dt();
         if(settings.recenter) fem.recenter(settings.threshold,settings.recentering_direction);
+
+        // If we were just politely asked to terminate,
+        // save the state right now and bail out.
+        extern volatile sig_atomic_t received_sigterm;
+        if (received_sigterm)
+            {
+            std::cout << "Received SIGTERM: saving the magnetization configuration...\n";
+            std::string fileName = settings.r_path_output_dir
+                + settings.getSimName() + "_at_exit.sol";
+            fem.msh.savesol(fileName, t_prm, settings.getScale());
+            std::cout << "Magnetization configuration saved to "
+                << fileName << "\nTerminating.\n";
+            exit(1);
+            }
             
         }//endwhile
     fem.saver(settings,t_prm,fout,nt_output++);

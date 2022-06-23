@@ -1,5 +1,6 @@
 #include <iostream>
 #include <unistd.h> // for getpid()
+#include <signal.h>
 
 #include "Utils/FTic.hpp"//for counter from scalfmm
 
@@ -10,6 +11,14 @@
 #include "time_integration.h"
 
 #include "electrostatSolver.h"
+
+// Catch SIGTERM in order to save the state before quitting.
+volatile sig_atomic_t received_sigterm = 0;
+
+static void sigterm_handler(int)
+{
+received_sigterm = 1;
+}
 
 int time_integration(Fem &fem,Settings &settings /**< [in] */,LinAlgebra &linAlg /**< [in] */,scal_fmm::fmm &myFMM  /**< [in] */,timing &t_prm);
 
@@ -91,6 +100,16 @@ else
     { std::cout << "no spin transfer torque" << std::endl; }
 
 scal_fmm::fmm myFMM(fem.msh,mySettings.verbose,mySettings.scalfmmNbTh);
+
+// Catch SIGTERM.
+struct sigaction action;
+action.sa_handler = sigterm_handler;
+action.sa_flags = 0;
+sigemptyset(&action.sa_mask);
+if (sigaction(SIGTERM, &action, NULL) == -1) {
+    perror("SIGTERM");
+    return EXIT_FAILURE;
+}
 
 int nt = time_integration(fem,mySettings,linAlg,myFMM,t_prm);
         
