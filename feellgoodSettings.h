@@ -97,9 +97,6 @@ class Settings{
     
     std::string restoreFileName;/**< input file name for continuing a calculation (sol.in) */
 
-/** minimum value for du step */
-    double DUMIN;	//1e-6 ; 1e-9 en dynamique
-
 /** maximum value for du step */
     double DUMAX; // 0.1 en stat; 0.02 en dynamique
     

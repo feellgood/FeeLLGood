@@ -106,7 +106,6 @@ for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target +=
 
         double dumax = t_prm.get_dt()*fem.vmax;
         if(settings.verbose) { std::cout << "\t dumax = " << dumax << ",  vmax = "<< fem.vmax << std::endl; }
-        if (dumax < settings.DUMIN) break; 
                 
         stepper.set_soft_limit(settings.DUMAX / fem.vmax / 2);
         if (dumax > settings.DUMAX)

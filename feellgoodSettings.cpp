@@ -271,7 +271,6 @@ try { sub_tree = root.get_child("time_integration"); }
 catch (std::exception &e)
     { std::cout << e.what() << std::endl; }
     
-DUMIN = sub_tree.get<double>("min(du)",1e-9);
 DUMAX = sub_tree.get<double>("max(du)",0.02);
 
 double dt_min = sub_tree.get<double>("min(dt)",1e-14);

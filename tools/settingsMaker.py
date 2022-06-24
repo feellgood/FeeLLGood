@@ -32,7 +32,7 @@ class Settings(object):
 
         self.mySets["demagnetizing_field_solver"] = {"nb_threads" : 16}
 
-        self.mySets["time_integration"] = {"final_time" : 1e-6, "min(du)" : 1e-9, "max(du)" : 0.02, "min(dt)" : 1e-11, "max(dt)" : 1e-7}
+        self.mySets["time_integration"] = {"final_time" : 1e-6, "max(du)" : 0.02, "min(dt)" : 1e-11, "max(dt)" : 1e-7}
     
     ## \brief getter
     # standard getter
