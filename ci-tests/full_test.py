@@ -76,9 +76,10 @@ if(val.returncode==0):
 		valRet = 0
 	else:
 		valRet = 1
+	print("return " + str(valRet) + " ;dist = %.2e"% sqrt((X-mx)**2+(Y-my)**2+(Z-mz)**2))
 else:
 	print("FeeLLGood terminated before final time")
 	valRet = 1
-print("return " + str(valRet) + " ;dist = %.2e"% sqrt((X-mx)**2+(Y-my)**2+(Z-mz)**2))
+print("return " + str(valRet))
 sys.exit(valRet)
 
