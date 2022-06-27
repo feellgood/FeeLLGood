@@ -51,6 +51,10 @@ try { sub_tree = root.get_child("outputs"); }
         { std::cout << e.what() << std::endl; }
 
 r_path_output_dir = sub_tree.get<std::string>("directory");
+// If the directory is not empty, it should end with '/'.
+if (!r_path_output_dir.empty() && r_path_output_dir.back() != '/')
+    { r_path_output_dir += '/'; }
+
 simName = sub_tree.get<std::string>("file_basename");
 withVtk = sub_tree.get<bool>("vtk_file",0);
 time_step = sub_tree.get<double>("evol_time_step",1e-7);
