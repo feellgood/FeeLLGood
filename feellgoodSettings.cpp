@@ -4,6 +4,7 @@
 #include <ctime>
 #include <cctype>
 #include <exception>
+#include <unistd.h>  // for sysconf()
 
 /* Silence a warning internal to Boost, fixed in Boost 1.76.0. */
 #if BOOST_VERSION < 107600
@@ -257,16 +258,23 @@ try
 catch(std::exception &e)
     { stt_flag = false; }
 
+// The number of available processors (actually, hardware threads) is
+// the default for the number of threads to spin.
+int available_cpu_count = sysconf(_SC_NPROCESSORS_ONLN);
 
 try { sub_tree = root.get_child("demagnetizing_field_solver"); }
 catch (std::exception &e)
     { std::cout << e.what() << std::endl; }
-scalfmmNbTh = sub_tree.get<int>("nb_threads",8);
+scalfmmNbTh = sub_tree.get<int>("nb_threads",0);
+if (scalfmmNbTh <= 0)
+    { scalfmmNbTh = available_cpu_count; }
 
 try { sub_tree = root.get_child("finite_element_solver"); }
 catch (std::exception &e)
     { std::cout << e.what() << std::endl; }
-solverNbTh = sub_tree.get<int>("nb_threads",8);
+solverNbTh = sub_tree.get<int>("nb_threads",0);
+if (solverNbTh <= 0)
+    { solverNbTh = available_cpu_count; }
 
 MAXITER = sub_tree.get<int>("max(iter)",500);
 REFRESH_PRC = sub_tree.get<int>("refresh_preconditioner_every",20);
