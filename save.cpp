@@ -44,7 +44,7 @@ for(unsigned int i = 0;i<settings.evol_columns.size();i++)
     }
 fout << std::flush;
 
-string baseName = settings.r_path_output_dir + settings.getSimName();
+string baseName = settings.r_path_output_dir + '/' + settings.getSimName();
     
 if ((nt%save_period)==0) 
     {

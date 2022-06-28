@@ -47,7 +47,7 @@ fem.DW_z  = 0.0;
 
 compute_all(fem,settings,myFMM,t_prm.get_t());
 
-std::string baseName = settings.r_path_output_dir + settings.getSimName();
+std::string baseName = settings.r_path_output_dir + '/' + settings.getSimName();
 std::string str = baseName + ".evol";
 
 std::ofstream fout(str);
@@ -131,7 +131,7 @@ for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target +=
         if (received_sigterm)
             {
             std::cout << "Received SIGTERM: saving the magnetization configuration...\n";
-            std::string fileName = settings.r_path_output_dir
+            std::string fileName = settings.r_path_output_dir + '/'
                 + settings.getSimName() + "_at_exit.sol";
             fem.msh.savesol(fileName, t_prm, settings.getScale());
             std::cout << "Magnetization configuration saved to "

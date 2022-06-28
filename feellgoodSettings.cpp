@@ -51,10 +51,12 @@ try { sub_tree = root.get_child("outputs"); }
     catch (std::exception &e)
         { std::cout << e.what() << std::endl; }
 
-r_path_output_dir = sub_tree.get<std::string>("directory");
-// If the directory is not empty, it should end with '/'.
-if (!r_path_output_dir.empty() && r_path_output_dir.back() != '/')
-    { r_path_output_dir += '/'; }
+r_path_output_dir = sub_tree.get<std::string>("directory", ".");
+// Normalize directory name.
+if (r_path_output_dir.empty())
+    { r_path_output_dir = "."; }
+if (r_path_output_dir.length() > 1 && r_path_output_dir.back() == '/')
+    { r_path_output_dir.pop_back(); }
 
 simName = sub_tree.get<std::string>("file_basename");
 withVtk = sub_tree.get<bool>("vtk_file",0);
