@@ -50,11 +50,6 @@ mySettings["initial_magnetization"] = {"Mx":"0","My":"0","Mz":"1"}
 JSON_fileName = 'full_test_settings.json'
 mySettings.write(JSON_fileName)
 
-if(os.path.exists(mySettings["outputs"]["directory"]) and os.path.isdir(mySettings["outputs"]["directory"]) ):
-	print("directory " + mySettings["outputs"]["directory"] + " already exists.")
-else:
-	os.system("mkdir " + mySettings["outputs"]["directory"])
-
 val = subprocess.run(["../feellgood",JSON_fileName])
 
 if(val.returncode==0):

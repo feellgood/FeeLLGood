@@ -80,10 +80,6 @@ class Settings(object):
     ## \brief some test to check the validity of the parameters
     # this method is called before writing the json file, it might also be called from another script for some checking before calling the write method
     def check(self):
-        if not(os.path.isdir( self.mySets["outputs"]["directory"] )):
-            print("WARNING : the directory " + self.mySets["outputs"]["directory"] + " does not exist" )
-        else:
-            print("output directory " + self.mySets["outputs"]["directory"] + " is valid")
         if "spin_transfer_torque" in self.mySets:
             print("spin transfer torque subsection detected.")
             if "boundary_conditions" not in self.mySets["spin_transfer_torque"]:
