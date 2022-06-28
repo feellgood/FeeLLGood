@@ -208,9 +208,15 @@ if(restoreFileName == "")
             catch (std::exception &e)
                 { std::cout << e.what() << std::endl; }
 
-        sMx = sub_tree.get<std::string>("Mx");
-        sMy = sub_tree.get<std::string>("My");
-        sMz = sub_tree.get<std::string>("Mz");
+        if (sub_tree.size() != 3)
+            {
+            std::cerr << "initial_magnetization should have three components.\n";
+            exit(1);
+            }
+        auto it = sub_tree.begin();
+        sMx = it->second.data(); it++;
+        sMy = it->second.data(); it++;
+        sMz = it->second.data();
         doCompile3Dprm();
         
         if (verbose) { std::cout << "initial magnetization defined from a math expression" << std::endl; }

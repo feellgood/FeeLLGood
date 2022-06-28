@@ -49,6 +49,6 @@ mySettings["mesh"]["volume_regions"]["300"]["ex"] = [1.0,0.0,0.0]
 mySettings["mesh"]["volume_regions"]["300"]["ey"] = [0.0,1.0,0.0]
 mySettings["mesh"]["volume_regions"]["300"]["ez"] = [0.0,0.0,1.0]
 
-mySettings["initial_magnetization"] = {"Mx":"x","My":"y","Mz":"0.1"}
+mySettings["initial_magnetization"] = ["x", "y", "0.1"]
 
 mySettings.write('rectangle_test.json')

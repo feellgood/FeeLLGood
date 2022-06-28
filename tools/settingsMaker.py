@@ -24,7 +24,7 @@ class Settings(object):
 
         self.mySets["mesh"] = {"filename" : mshFileName, "scaling_factor" : 1e-9, "volume_regions" : {}, "surface_regions" : {} }
 
-        self.mySets["initial_magnetization"] = {"Mx" : "1-z^2", "My" : "0" , "Mz": "tanh(z*20)"}
+        self.mySets["initial_magnetization"] = ["1-z^2", "0", "tanh(z*20)"]
 
         self.mySets["Bext"] = {"Bx" : "0", "By" : "0" , "Bz": "0"}
 

@@ -45,7 +45,7 @@ mySettings["time_integration"]["max(dt)"] = 0.5e-7
 
 mySettings["time_integration"]["max(du)"] = 0.1
 
-mySettings["initial_magnetization"] = {"Mx":"0","My":"0","Mz":"1"}
+mySettings["initial_magnetization"] = [0, 0, 1]
 
 JSON_fileName = 'full_test_settings.json'
 mySettings.write(JSON_fileName)

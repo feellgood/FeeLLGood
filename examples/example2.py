@@ -33,7 +33,7 @@ mySettings["time_integration"]["max(dt)"] = 0.5e-10
 
 mySettings["time_integration"]["max(du)"] = 0.1
 
-mySettings["initial_magnetization"] = {"Mx":"0.01","My":"0","Mz":"0.99"}
+mySettings["initial_magnetization"] = [0.01, 0, 0.99]
 
 if(os.path.exists(mySettings["outputs"]["directory"]) and os.path.isdir(mySettings["outputs"]["directory"]) ):
 	print("directory " + mySettings["outputs"]["directory"] + " already exists.")

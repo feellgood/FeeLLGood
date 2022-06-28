@@ -48,7 +48,7 @@ mySettings["mesh"]["volume_regions"]["300"]["ex"] = [1.0,0.0,0.0]
 mySettings["mesh"]["volume_regions"]["300"]["ey"] = [0.0,1.0,0.0]
 mySettings["mesh"]["volume_regions"]["300"]["ez"] = [0.0,0.0,1.0]
 
-mySettings["initial_magnetization"] = {"Mx":"1","My":"0","Mz":"0"}
+mySettings["initial_magnetization"] = [1, 0, 0]
 
 mySettings.write('ico_test.json')
 

@@ -56,6 +56,6 @@ V1 = 1.2345
 V2 = -3.14
 mySettings.createSTT(300,gamma0,sigma,N0,beta,l_J,l_sf,bc1_regNumber,"V",V1,bc2_regNumber,"V",V2)
 
-mySettings["initial_magnetization"] = {"Mx":"x","My":"y","Mz":"0.1"}
+mySettings["initial_magnetization"] = ["x", "y", "0.1"]
 
 mySettings.write('rectangleSTT_test.json')
