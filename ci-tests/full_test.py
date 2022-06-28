@@ -29,7 +29,7 @@ mySettings["outputs"]["evol_time_step"] = 1e-7
 
 mySettings["mesh"]["scaling_factor"] = 1e-10
 
-mySettings["Bext"] = {"Bx" : "1", "By" : "0" , "Bz": "-1"}
+mySettings["Bext"] = [1, 0, -1]
 
 #carefull here, volume and region names must be stringified integers
 vol_region_name = "300"

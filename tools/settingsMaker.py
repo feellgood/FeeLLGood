@@ -26,7 +26,7 @@ class Settings(object):
 
         self.mySets["initial_magnetization"] = ["1-z^2", "0", "tanh(z*20)"]
 
-        self.mySets["Bext"] = {"Bx" : "0", "By" : "0" , "Bz": "0"}
+        self.mySets["Bext"] = [0, 0, 0]
 
         self.mySets["finite_element_solver"] = {"nb_threads" : 16, "max(iter)" : 500, "refresh_preconditioner_every": 20}
 

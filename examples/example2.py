@@ -54,7 +54,7 @@ os.chdir(currentPath)
 for i in range(0,nbStepsFrequency) :
 	freq = startFrequency + i*(stopFrequency - startFrequency)/(nbStepsFrequency-1)
 	omega = 2*pi*freq
-	mySettings["Bext"] = {"Bx" : str(A) + "*cos(" + str(omega) + "*t)", "By" : str(A) + "*sin("  + str(omega) +  "*t)" , "Bz": "0"}
+	mySettings["Bext"] = [f"{A}*cos({omega}*t)", f"{A}*sin({omega}*t)", "0"]
 	
 	mySettings.write('mySettings.json')
 	val = subprocess.run(["../feellgood","-v","mySettings.json"])

@@ -8,7 +8,7 @@ mySettings = Settings("../ellipsoid.msh")
 mySettings.createVolRegion( "300" )
 mySettings.createSurfRegion( "200" )
 
-mySettings["Bext"] = {"Bx" : "0.01", "By" : "0.0" , "Bz": "0.0"}
+mySettings["Bext"] = [0.01, 0.0, 0.0]
 mySettings["outputs"]["evol_columns"] = ["t","<Mx>","<My>","<Mz>","E_tot"]
 
 mySettings.write('mySettings.json')

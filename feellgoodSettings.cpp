@@ -246,9 +246,15 @@ try {sub_tree = root.get_child("Bext");}
 catch(std::exception &e)
     { std::cout << e.what() << std::endl; }
 
-sBx = sub_tree.get<std::string>("Bx");
-sBy = sub_tree.get<std::string>("By");
-sBz = sub_tree.get<std::string>("Bz");
+if (sub_tree.size() != 3)
+    {
+    std::cerr << "Bext should have three components.\n";
+    exit(1);
+    }
+auto it = sub_tree.begin();
+sBx = it->second.data(); it++;
+sBy = it->second.data(); it++;
+sBz = it->second.data();
 doCompile1Dprm();
 
 try
