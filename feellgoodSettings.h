@@ -11,7 +11,7 @@
 #include <cmath>
 #include <string>
 
-#include<boost/property_tree/ptree.hpp>
+#include <yaml-cpp/yaml.h>
 
 #include "mag_parser.h"
 #include "time_integration.h"
@@ -38,8 +38,8 @@ class Settings{
         
         restoreFileName = "";
         
-        solverNbTh = 8;
-        scalfmmNbTh = 8;
+        solverNbTh = 0;
+        scalfmmNbTh = 0;
         
         stt_flag = false;
         }
@@ -49,9 +49,12 @@ class Settings{
     
     /** some prints sent to terminal */	
     void infos(void);
+
+    /** read settings from a parsed YAML document */
+	void read(YAML::Node);
 	
-    /** read settings from a json file */
-	void read(std::string fileJson);
+    /** read settings from a YAML file */
+	void read(std::string filename);
 	
 	inline void setPbName(std::string str) {pbName = str;} /**< setter for .msh file name  */
 	inline std::string getPbName(void) const {return pbName;}/**< getter for problem file name */
@@ -171,8 +174,6 @@ class Settings{
 	std::string pbName;     /**< mesh file, gmsh file format */
     MagnetizationParser mag_parser;  /**< parser for the magnetization expressions */
     TimeDepFieldParser field_parser; /**< parser for the time dependant applied field expressions */
-
-    Pt::pt3D readUnitVector(boost::property_tree::ptree::value_type &sub_k,const std::string varName);/**< read json sub tree and return a unit vector, check number of components, must be Pt::DIM */
 };
 
 #endif /* feellgoodSettings_h */

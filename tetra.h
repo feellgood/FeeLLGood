@@ -50,7 +50,7 @@ constexpr double a[N][NPI] = {{1.-u[0]-v[0]-w[0],1.-u[1]-v[1]-w[1],1.-u[2]-v[2]-
 {u[0],u[1],u[2],u[3],u[4]}, {v[0],v[1],v[2],v[3],v[4]}, {w[0],w[1],w[2],w[3],w[4]}};
 
 
-/** when some spin transfer torque in json settings input file, this enum defines the nature of the boundary conditions  their int values are only used for dev or debug purpose */
+/** when some spin transfer torque in the settings input file, this enum defines the nature of the boundary conditions  their int values are only used for dev or debug purpose */
 enum boundary_conditions {Dirichlet = 1, Neumann = 2, Mixt = 3, Undef = -1};
 
 /** defines what is the physical nature of the value stored val (usefull for struct bc_data only) their int values are only used for dev or debug purpose */

@@ -67,7 +67,7 @@ configure_file(config.h.in ./config.h)
 
 ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES})
 
-TARGET_LINK_LIBRARIES(feellgood scalfmm ANN)
+TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm ANN)
 
 if(DEFINED withSharedLib)
     MESSAGE( "Shared lib generation " ${withSharedLib} )

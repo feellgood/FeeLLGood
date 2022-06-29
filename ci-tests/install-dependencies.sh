@@ -44,19 +44,20 @@ job_count=$(getconf _NPROCESSORS_ONLN)
 # Install required packages.
 packages="unzip make cmake git"
 if [[ "$ID" =~ centos|rocky ]]; then
-    packages="$packages wget gcc-c++ boost-devel python3"
+    packages="$packages wget gcc-c++ yaml-cpp-devel boost-devel python3"
     sudo dnf check-update -q || true
     sudo dnf upgrade -y libarchive
+    sudo dnf config-manager --set-enabled powertools
+    sudo dnf install -y epel-release
     if [ "$unit_tests" = "true" ]; then
         : # No extra packages required for unit testing
     fi
     if [ "$doxygen" = "true" ]; then
-        sudo dnf config-manager --set-enabled powertools
         packages="$packages doxygen"
     fi
     sudo dnf install -y $packages
 else  # Debian-like OS
-    packages="$packages g++ libboost-dev"
+    packages="$packages g++ libyaml-cpp-dev libboost-dev"
     sudo apt-get update -q
     if [ "$unit_tests" = "true" ]; then
         packages="$packages libboost-system-dev libboost-filesystem-dev libboost-test-dev"

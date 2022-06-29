@@ -44,26 +44,26 @@ std::cout <<   "\t └───────────────────�
 
 std::string parseOptions(Settings &settings,int argc,char* argv[])
 {
-std::string fileJson;
+std::string filename;
 std::cout << "parsing options..." << std::endl;
 
 if(argc<2)
 	{
-	std::cout << "no JSON file provided, see FeeLLGood online documentation to create some settings using Python script settingsMaker.py" << std::endl; 
+	std::cout << "no configuration file provided, see FeeLLGood online documentation to create some settings using Python script settingsMaker.py" << std::endl;
 	exit(1);
     }
 else if (argc == 2)
         {
-        fileJson = argv[1]; // argv[0] is "./feellgood"
-        std::cout << "using loaded settings from " << fileJson << " JSON file.\n";	
+        filename = argv[1]; // argv[0] is "./feellgood"
+        std::cout << "using loaded settings from " << filename << "\n";
         }
     else if ((argc == 3)&&( strcmp(argv[1],"-v") == 0))
         {
             std::cout << "verbose mode active\n"  << std::endl;
             settings.verbose = true;
-            fileJson = argv[2];
+            filename = argv[2];
         }
-return fileJson;
+return filename;
 }
 
 int main(int argc,char* argv[])
@@ -73,8 +73,8 @@ FTic counter;
 
 prompt();
 
-std::string fileJson = parseOptions(mySettings,argc,argv);
-mySettings.read(fileJson);
+std::string filename = parseOptions(mySettings,argc,argv);
+mySettings.read(filename);
 timing t_prm = timing(mySettings.tf, mySettings.dt_min, mySettings.dt_max);
 Fem fem = Fem(mySettings,t_prm);
 
