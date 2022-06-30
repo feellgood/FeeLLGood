@@ -215,7 +215,7 @@ void Settings::read(YAML::Node yaml)
 
     YAML::Node recentering = yaml["recentering"];
     if (recentering) {
-        recenter = true;
+        assign(recenter, recentering["enable"]);
         std::string direction = recentering["direction"].as<std::string>("Z");
         if (direction.length() != 1 || direction[0] < 'X' || direction[0] > 'Z')
             error("recentering.direction should be X, Y or Z.");
@@ -225,8 +225,6 @@ void Settings::read(YAML::Node yaml)
             case 'Z': recentering_direction = Pt::IDX_Z; break;
         }
         assign(threshold, recentering["threshold"]);
-    } else {
-        recenter = false;
     }  // recentering
 
     YAML::Node field = yaml["Bext"];
@@ -243,6 +241,7 @@ void Settings::read(YAML::Node yaml)
 
     YAML::Node stt = yaml["spin_transfer_torque"];
     if (stt) {
+        assign(stt_flag, stt["enable"]);
         assign(p_stt.gamma0, stt["gamma0"]);
         assign(p_stt.sigma, stt["sigma"]);
         assign(p_stt.N0, stt["dens_state"]);
@@ -252,8 +251,6 @@ void Settings::read(YAML::Node yaml)
         assign(p_stt.reg, stt["volume_region_reference"]);
         p_stt.func = [](Pt::pt3D){ return 1; };
         p_stt.bc = Tetra::boundary_conditions::Undef;
-    } else {
-        stt_flag = false;
     }  // spin_transfer_torque
 
     // The number of available processors (actually, hardware threads)
