@@ -36,7 +36,7 @@ std::uniform_real_distribution<> distrib(0.0,1.0);
 double a= distrib(gen);
 double b= distrib(gen);
 
-timing prm_t = timing(0.0,1.0,std::min(a,b),std::max(a,b));
+timing prm_t = timing(1.0,std::min(a,b),std::max(a,b));
 
 double dt = prm_t.get_dt();
 
@@ -64,7 +64,7 @@ double alpha_LLG = distrib(gen);
 
 double X= distrib(gen);
 
-timing prm_t = timing(0.0,1e-8,1e-14,1e-9);
+timing prm_t = timing(1e-8,1e-14,1e-9);
 
 // ref code (with minimal adaptations of MuMag_Integrales.cc of src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
 double dt = prm_t.get_dt();

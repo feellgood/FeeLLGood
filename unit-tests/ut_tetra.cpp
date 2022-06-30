@@ -449,7 +449,7 @@ Tetra::Tet t(node,nbNod,0,0,1,2,3,4);//carefull with indices (starting from 1)
 double a= distrib(gen);
 double b= distrib(gen);
 
-timing prm_t = timing(0.0,1.0,std::min(a,b),std::max(a,b));
+timing prm_t = timing(1.0,std::min(a,b),std::max(a,b));
 
 double s_dt = THETA*prm_t.get_dt();//theta from theta scheme in config.h.in
 
