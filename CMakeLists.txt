@@ -65,7 +65,12 @@ SET(SOURCES mag_parser.cpp time_integration.cpp feellgoodSettings.cpp
 
 configure_file(config.h.in ./config.h)
 
-ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES})
+add_custom_command(
+    OUTPUT default-settings.o
+    COMMAND ld -r -b binary default-settings.yml -o default-settings.o
+    DEPENDS default-settings.yml)
+
+ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES} default-settings.o)
 
 TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm ANN)
 

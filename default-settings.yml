@@ -1,0 +1,214 @@
+# FeeLLGood default configuration parameters.
+
+# This file documents the default configuration parameters used by
+# feeLLGood. It has the format and structure feeLLGood expects from the
+# user-supplied configuration file. It can thus be used as a template.
+#
+# The file format is YAML. Everything after a ‘#’ character is a
+# comment. Settings are organized in sections (YAML “objects”) which are
+# defined by the indentation, e.g:
+#
+#   outputs:                # ‘outputs’ section
+#     file_basename: foo    # a setting in the ‘outputs’ section
+#   mesh:                   # ‘mesh’ section
+#     filename: foo.msh     # a setting in the ‘mesh’ section
+#     volume_regions:       # a sub-section of ‘mesh’
+#       300:                # a sub-section of ‘volume_regions’
+#         Ae: 1.5e-11       # a setting in the ‘300’ section
+#
+# For a short primer on the YAML syntax, see
+# https://getopentest.org/reference/yaml-primer.html
+#
+# Some numeric values are unit-less, like the reduced magnetization. All
+# other values are in SI units.
+#
+# Unit vectors need not be of unit length: they will be normalized by
+# feeLLGood upon reading the file.
+
+# The ‘outputs’ section defines what data will be saved by feeLLGood,
+# and in which files.
+outputs:
+
+  # Directory where the output files will be stored. The default value
+  # (.) means the working working directory where the feeLLGood process
+  # is started. If the directory does not exist, it will be created.
+  directory: .
+
+  # This string will be used as a prefix for the names of all generated
+  # files.
+  file_basename: feellgood_out
+
+  # The global quantities listed under ‘evol_columns’ will be saved to
+  # the evolution file on this time step.
+  evol_time_step: 1e-7
+
+  # Global quantities that should be periodically saved to the evolution
+  # file. In addition to the defaults below, the following quantities
+  # are also available:
+  # - iter: iteration number
+  # - dt: time step
+  # - max_dm: maximum variation of the magnetization
+  # - <dMx/dt>: average change rate of Mx
+  # - <dMy/dt>: average change rate of My
+  # - <dMz/dt>: average change rate of Mz
+  # - E_aniso: anisotropy energy
+  # - DW_z: domain wall position along z
+  # - DW_dz: domain wall displacement
+  evol_columns:
+    - t         # time
+    - <Mx>      # Average value of Mx
+    - <My>      # Average value of My
+    - <Mz>      # Average value of Mz
+    - E_ex      # Exchange energy
+    - E_demag   # Demagnetizing energy
+    - E_zeeman  # Zeeman energy
+    - E_tot     # Total energy
+
+  # Whether to start the evolution file with a one-line header listing
+  # the names of the columns.
+  evol_header: false
+
+  # How often to save the magnetization configuration. This should be an
+  # integer that is interpreted in units of ‘evol_time_step’.
+  take_photo: 100
+
+  # Should feeLLGood save the magnetization configuration in the VTK
+  # file format in addition to its own ‘.sol’ format?
+  vtk_file: false
+
+# Description of the meshed object.
+mesh:
+
+  # Name of the file containing the mesh. As there is no valid default,
+  # the user must provide this in their configuration file.
+  filename:
+
+  # Unit of length used in the mesh file, in meters.
+  scaling_factor: 1e-9
+
+  # Material parameters of the volume regions defined by the mesh. Each
+  # region is defined as a subsection of ‘volume_regions’.
+  volume_regions:
+
+    # Defaults that apply to all regions. Note that ‘__default__’ is not
+    # a valid region name: it is a placeholder for the defaults. In the
+    # user-supplied configuration file, ‘__default__’ should be replaced
+    # by the region name, typically a number starting at 300.
+    __default__:
+
+      # Exchange constant.
+      Ae: 1e-11
+
+      # Saturation magnetization times µ₀, in tesla.
+      Js: 1
+
+      # Second order magnetocrystalline anisotropy constant.
+      K: 0
+
+      # Unit vector defining the anisotropy axis.
+      uk: [0, 0, 1]
+
+      # Cubic magnetocrystalline anisotropy constant.
+      K3: 0
+
+      # Unit vectors along the principal directions of the cubic
+      # anisotropy.
+      ex: [1, 0, 0]
+      ey: [0, 1, 0]
+      ez: [0, 0, 1]
+
+      # Dimensionless damping parameter.
+      alpha_LLG: 0.5
+
+  # Material parameters of the surface regions defined by the mesh.
+  surface_regions:
+
+    # Defaults that apply to all regions. Again, ‘__default__’ is a
+    # placeholder, not a valid region name.
+    __default__:
+
+      # Whether the magnetic charges on this surface should be removed,
+      # in order to simulate an infinite medium.
+      suppress_charges: false
+
+      # Second order surface anisotropy constant.
+      Ks: 0
+
+      # Unit vector along the surface anisotropy axis.
+      uk: [0, 0, 1]
+
+# The initial magnetization can be provided as either:
+# - the name of a file in feeLLGood’s format (‘.sol’ file)
+# - an array of three expression depending on the Cartesian spatial
+#   coordinates (x, y, z); the expression may be constants.
+initial_magnetization: [0, 0, 1]
+
+# Whether feeLLGood should try to artificially keep a domain wall in the
+# center of the simulated volume by translating the magnetization vector
+# field.
+recentering:
+
+  # Whether to enable recentering.
+  enable: false
+
+  # Direction along which to translate the magnetization field. Should
+  # be either ‘X’, ‘Y’ or ‘Z’.
+  direction: Z
+
+  # Threshold on the absolute value of the reduced magnetization above
+  # which to trigger the translation.
+  threshold: 0.1
+
+# Expressions of the applied field, as a function of t, the time in
+# seconds. May be constants.
+Bext: [0, 0, 0]
+
+# Parameters for simulating a spin transfer torque. This is a work in
+# progress, not ready for general use.
+spin_transfer_torque:
+  enable: false
+  gamma0: 0
+  sigma: 1.0
+  dens_state: 1.0
+  beta: 0
+  l_J: 1.0
+  l_sf: 1.0
+  volume_region_reference:
+
+# Parameters of the solver.
+finite_element_solver:
+
+  # Number of threads to use. The value 0 means to match the number of
+  # available processors (actually, hardware threads), as reported by
+  # sysconf(_SC_NPROCESSORS_ONLN).
+  nb_threads: 0
+
+  # Maximum number of iteration for biconjugate gradient algorithm.
+  max(iter): 500
+
+  # Number of iterations before the preconditioner is recomputed.
+  refresh_preconditioner_every: 20
+
+# Parameters for the computation of the demagnetizing field.
+demagnetizing_field_solver:
+
+  # Number of threads to use. The value 0 means to match the number of
+  # available processors.
+  nb_threads: 0
+
+# Parameters for the integration of the dynamic equation.
+time_integration:
+
+  # Time at which to terminate the simulation.
+  final_time: 1.5e-5
+
+  # Limit on the maximum variation of the reduced magnetization in a
+  # single time step.
+  max(du): 0.02
+
+  # Minimal time step. If the solver cannot converge with this time
+  # step, the simulation will be aborted.
+  min(dt): 1e-11
+
+  # Maximal time step.
+  max(dt): 5e-8

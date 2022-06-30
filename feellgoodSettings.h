@@ -23,27 +23,9 @@ container class to store many setting parameters, such as file names, parameters
 */
 class Settings{
 	public:
-        /** default constructor */
-	inline Settings() 
-        {
-        verbose = false;
-        withTsv=true;
-        withVtk = false;
-        evol_header = false;
-        MAXITER = 500;
-        REFRESH_PRC = 20;
-        recenter = false;
-        recentering_direction = Pt::IDX_Z;
-        threshold = 0.1;
-        
-        restoreFileName = "";
-        
-        solverNbTh = 0;
-        scalfmmNbTh = 0;
-        
-        stt_flag = false;
-        }
-	
+    /** default constructor */
+    Settings();
+
 	/** convenient enum to define what quantity is written in output file .evol */
     enum OUTPUTS {iter, t, dt, max_dm, avg_Mx, avg_My, avg_Mz, avg_Vx, avg_Vy, avg_Vz, V, E_ex, E_aniso, E_demag, E_zeeman, E_tot, DW_z, DW_dz, Hx, Hy, Hz};
     

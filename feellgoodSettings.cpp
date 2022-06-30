@@ -9,6 +9,17 @@
 
 
 /***********************************************************************
+ * Access to the default configuration embedded from the file
+ * default-settings.yml.
+ */
+
+extern "C" {
+    extern char _binary_default_settings_yml_start[];
+    extern char _binary_default_settings_yml_end[];
+}
+
+
+/***********************************************************************
  * Private helper functions.
  */
 
@@ -86,6 +97,17 @@ static bool assign(Pt::pt3D &var, const YAML::Node &node)
  * Public API.
  */
 
+Settings::Settings()
+{
+    verbose = false;
+    withTsv = true;
+    std::string defaults(
+            _binary_default_settings_yml_start,
+            _binary_default_settings_yml_end
+            - _binary_default_settings_yml_start);
+    read(YAML::Load(defaults));  // load defaults
+}
+
 void Settings::infos()
 {
 std::cout << "\t simulation name : "<< simName << std::endl;
@@ -122,7 +144,8 @@ void Settings::read(YAML::Node yaml)
             if (r_path_output_dir.length() > 1
                     && r_path_output_dir.back() == '/')
                 { r_path_output_dir.pop_back(); }
-            create_dir_if_needed(r_path_output_dir);
+            if (r_path_output_dir != ".")
+                create_dir_if_needed(r_path_output_dir);
         }
         assign(simName, outputs["file_basename"]);
         assign(withVtk, outputs["vtk_file"]);
@@ -143,18 +166,25 @@ void Settings::read(YAML::Node yaml)
     if (mesh) {
         if (!mesh.IsMap())
             error("mesh should be a map.");
-        assign(pbName, mesh["filename"]);
+        YAML::Node filename = mesh["filename"];
+        if (filename.IsScalar())
+            assign(pbName, filename);
         if (assign(_scale, mesh["scaling_factor"]) && _scale <= 0)
             error("mesh.scaling_factor should be positive.");
         YAML::Node volumes = mesh["volume_regions"];
         if (volumes) {
             if (!volumes.IsMap())
                 error("mesh.volume_regions should be a map.");
+            int default_idx = findTetraRegionIdx(-1);
+            Tetra::prm *default_volume = nullptr;
+            if (default_idx > -1)
+                default_volume = &paramTetra[default_idx];
             for (auto it = volumes.begin(); it != volumes.end(); ++it) {
                 std::string name = it->first.as<std::string>();
                 YAML::Node volume = it->second;
                 Tetra::prm p;
-                p.reg = stoi(name);
+                if (default_volume) p = *default_volume;
+                p.reg = name=="__default__" ? -1 : stoi(name);
                 assign(p.A, volume["Ae"]);
                 assign(p.J, volume["Js"]);
                 assign(p.K, volume["K"]);
@@ -183,11 +213,16 @@ void Settings::read(YAML::Node yaml)
         if (surfaces) {
             if (!surfaces.IsMap())
                 error("mesh.surface_regions should be a map.");
+            int default_idx = findFacetteRegionIdx(-1);
+            Facette::prm *default_surface = nullptr;
+            if (default_idx > -1)
+                default_surface = &paramFacette[default_idx];
             for (auto it = surfaces.begin(); it != surfaces.end(); ++it) {
                 std::string name = it->first.as<std::string>();
                 YAML::Node surface = it->second;
                 Facette::prm p;
-                p.reg = stoi(name);
+                if (default_surface) p = *default_surface;
+                p.reg = name=="__default__" ? -1 : stoi(name);
                 assign(p.suppress_charges, surface["suppress_charges"]);
                 assign(p.Ks, surface["Ks"]);
                 assign(p.uk, surface["uk"]);
@@ -248,7 +283,9 @@ void Settings::read(YAML::Node yaml)
         assign(p_stt.beta, stt["beta"]);
         assign(p_stt.lJ, stt["l_J"]);
         assign(p_stt.lsf, stt["l_sf"]);
-        assign(p_stt.reg, stt["volume_region_reference"]);
+        YAML::Node vol_ref = stt["volume_region_reference"];
+        if (vol_ref.IsScalar())
+            assign(p_stt.reg, vol_ref);
         p_stt.func = [](Pt::pt3D){ return 1; };
         p_stt.bc = Tetra::boundary_conditions::Undef;
     }  // spin_transfer_torque
@@ -278,7 +315,6 @@ void Settings::read(YAML::Node yaml)
         assign(DUMAX, time_integration["max(du)"]);
         assign(dt_min, time_integration["min(dt)"]);
         assign(dt_max, time_integration["max(dt)"]);
-        tf = dt_max;
         assign(tf, time_integration["final_time"]);
     }  // time_integration
 }
