@@ -9,7 +9,7 @@ class timing
 {
     public:
         /** constructor : fully initializes the timing parameters */
-        inline timing(const double _t,const double _tf,const double _dtmin,const double _dtmax):tf(_tf),DTMIN(_dtmin),DTMAX(_dtmax),TAUR(100.*DTMAX),t(_t) {set_dt_init();}
+        inline timing(const double _tf,const double _dtmin,const double _dtmax):tf(_tf),DTMIN(_dtmin),DTMAX(_dtmax),TAUR(100.*DTMAX),t(0) {set_dt_init();}
     
     /** final time of the simulation */
     const double tf;

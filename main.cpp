@@ -75,7 +75,7 @@ prompt();
 
 std::string fileJson = parseOptions(mySettings,argc,argv);
 mySettings.read(fileJson);
-timing t_prm = timing(0.0, mySettings.tf, mySettings.dt_min, mySettings.dt_max);
+timing t_prm = timing(mySettings.tf, mySettings.dt_min, mySettings.dt_max);
 Fem fem = Fem(mySettings,t_prm);
 
 if(mySettings.verbose)
