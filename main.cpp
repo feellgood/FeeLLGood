@@ -74,7 +74,8 @@ FTic counter;
 prompt();
 
 std::string fileJson = parseOptions(mySettings,argc,argv);
-timing t_prm = mySettings.read(fileJson);
+mySettings.read(fileJson);
+timing t_prm = timing(0.0, mySettings.tf, mySettings.dt_min, mySettings.dt_max);
 Fem fem = Fem(mySettings,t_prm);
 
 if(mySettings.verbose)

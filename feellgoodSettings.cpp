@@ -75,7 +75,7 @@ std::cout << solverNbTh+1 << " threads for assembling matrix." << std::endl;
 }
 
 
-timing Settings::read(std::string fileJson)
+void Settings::read(std::string fileJson)
 {
 boost::property_tree::ptree root;
 boost::property_tree::ptree sub_tree,s_sub_tree;
@@ -335,14 +335,9 @@ catch (std::exception &e)
     { std::cout << e.what() << std::endl; }
     
 DUMAX = sub_tree.get<double>("max(du)",0.02);
-
-double dt_min = sub_tree.get<double>("min(dt)",1e-14);
-double dt_max = sub_tree.get<double>("max(dt)",1e-7);
-double tf = sub_tree.get<double>("final_time",dt_max);
-
-timing t_prm = timing(0.0,tf,dt_min,dt_max);
-
-return(t_prm);
+dt_min = sub_tree.get<double>("min(dt)",1e-14);
+dt_max = sub_tree.get<double>("max(dt)",1e-7);
+tf = sub_tree.get<double>("final_time",dt_max);
 }
 
 Pt::pt3D Settings::readUnitVector(boost::property_tree::ptree::value_type &sub_k, const std::string varName)

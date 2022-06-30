@@ -51,7 +51,7 @@ class Settings{
     void infos(void);
 	
     /** read settings from a json file */
-	timing read(std::string fileJson);
+	void read(std::string fileJson);
 	
 	inline void setPbName(std::string str) {pbName = str;} /**< setter for .msh file name  */
 	inline std::string getPbName(void) const {return pbName;}/**< getter for problem file name */
@@ -129,6 +129,11 @@ class Settings{
     
     /**  if true the first line of .evol file is the title of each column tsv format, starting with \# */
     bool evol_header;
+
+    /* timing parameters */
+    double tf;      /**< final integration time */
+    double dt_min;  /**< minimal time step */
+    double dt_max;  /**< maximal time step */
     
 	/** \return index of the region in surface region container  */
 	inline int findFacetteRegionIdx(const int r /**< [in] */) const
