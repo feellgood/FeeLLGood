@@ -101,6 +101,21 @@ static bool assign(Pt::pt3D &var, const YAML::Node &node)
     return false;
 }
 
+// Stringify a boolean
+static const char * str(bool x)
+{
+    return x ? "true" : "false";
+}
+
+// Stringify a vector
+static const std::string str(Pt::pt3D v)
+{
+    return std::string("[")
+        + std::to_string(v.x()) + ", "
+        + std::to_string(v.y()) + ", "
+        + std::to_string(v.z()) + "]";
+}
+
 
 /***********************************************************************
  * Public API.
@@ -120,25 +135,84 @@ void Settings::dumpDefaults()
 
 void Settings::infos()
 {
-std::cout << "\t simulation name : "<< simName << std::endl;
-std::cout << "\t mesh file name: " << pbName << " with scaling factor " << getScale() << std::endl;
-
-std::cout << "\t save energy values every " << time_step << " seconds" << std::endl;
-std::cout << "\t snapshot of the magnetization configuration every " << save_period << " time steps" << std::endl;
-if (restoreFileName != "")
-    { std::cout << "\t restore initial magnetization distribution from file : " << restoreFileName <<std::endl; }
-else
-    { std::cout << "\t initial magnetization distribution from math expression" << std::endl; }
-
-std::cout << "\t applied field Bext = [ " << sBx << ",\t" << sBy << ",\t" << sBz << " ] A/m" << std::endl;
-
-if (recenter)
-    { std::cout << "recentering along " << recentering_direction << " with threshold = " << threshold << std::endl; }
-
-for(unsigned int i=0;i<paramTetra.size();i++) {paramTetra[i].infos();}
-for(unsigned int i=0;i<paramFacette.size();i++) {paramFacette[i].infos();}
-
-std::cout << solverNbTh+1 << " threads for assembling matrix." << std::endl;
+    std::cout << "outputs:\n";
+    std::cout << "  directory: " << r_path_output_dir << "\n";
+    std::cout << "  evol_time_step: " << time_step << "\n";
+    std::cout << "  evol_columns:\n";
+    for (auto it = evol_columns.begin(); it != evol_columns.end(); ++it) {
+        std::cout << "    - " << *it << "\n";
+    }
+    std::cout << "  evol_header: " << str(evol_header) << "\n";
+    std::cout << "  take_photo: " << save_period << "\n";
+    std::cout << "  vtk_file: " << str(withVtk) << "\n";
+    std::cout << "mesh:\n";
+    std::cout << "  filename: " << pbName << "\n";
+    std::cout << "  scaling_factor: " << _scale << "\n";
+    std::cout << "  volume_regions:\n";
+    for (auto it = paramTetra.begin(); it != paramTetra.end(); ++it) {
+        if (it->reg == -1)  // skip __default__
+            continue;
+        std::cout << "    " << it->reg << ":\n";
+        std::cout << "      Ae: " << it->A << "\n";
+        std::cout << "      Js: " << it->J << "\n";
+        std::cout << "      K: " << it->K << "\n";
+        std::cout << "      uk: " << str(it->uk) << "\n";
+        std::cout << "      K3: " << it->K3 << "\n";
+        std::cout << "      ex: " << str(it->ex) << "\n";
+        std::cout << "      ey: " << str(it->ey) << "\n";
+        std::cout << "      ez: " << str(it->ez) << "\n";
+        std::cout << "      alpha_LLG: " << it->alpha_LLG << "\n";
+    }
+    std::cout << "  surface_regions:\n";
+    for (auto it = paramFacette.begin(); it != paramFacette.end(); ++it) {
+        if (it->reg == -1)  // skip __default__
+            continue;
+        std::cout << "    " << it->reg << ":\n";
+        std::cout << "      suppress_charges: " << it->suppress_charges << "\n";
+        std::cout << "      Ks: " << it->Ks << "\n";
+        std::cout << "      uk: " << str(it->uk) << "\n";
+    }
+    std::cout << "initial_magnetization: ";
+    if (restoreFileName.empty())
+        std::cout << "[\""
+            << sMx << "\", \"" << sMy << "\", \"" << sMz << "\"]\n";
+    else
+        std::cout << restoreFileName << "\n";
+    std::cout << "recentering:\n";
+    std::cout << "  enable: " << str(recenter) << "\n";
+    if (recenter) {
+        std::cout << "  direction: ";
+        switch (recentering_direction) {
+            case Pt::IDX_X: std::cout << "X\n"; break;
+            case Pt::IDX_Y: std::cout << "Y\n"; break;
+            case Pt::IDX_Z: std::cout << "Z\n"; break;
+        }
+        std::cout << "  threshold: " << threshold << "\n";
+    }
+    std::cout << "Bext: [\""
+        << sBx << "\", \"" << sBy << "\", \"" << sBz << "\"]\n";
+    std::cout << "spin_transfer_torque:\n";
+    std::cout << "  enable: " << str(stt_flag) << "\n";
+    if (stt_flag) {
+        std::cout << "  gamma0: " << p_stt.gamma0 << "\n";
+        std::cout << "  sigma: " << p_stt.sigma << "\n";
+        std::cout << "  dens_state: " << p_stt.N0 << "\n";
+        std::cout << "  beta: " << p_stt.beta << "\n";
+        std::cout << "  l_J: " << p_stt.lJ << "\n";
+        std::cout << "  l_sf: " << p_stt.lsf << "\n";
+        std::cout << "  volume_region_reference: " << p_stt.reg << "\n";
+    }
+    std::cout << "finite_element_solver:\n";
+    std::cout << "  nb_threads: " << solverNbTh << "\n";
+    std::cout << "  max(iter): " << MAXITER << "\n";
+    std::cout << "  refresh_preconditioner_every: " << REFRESH_PRC << "\n";
+    std::cout << "demagnetizing_field_solver:\n";
+    std::cout << "  nb_threads: " << scalfmmNbTh << "\n";
+    std::cout << "time_integration:\n";
+    std::cout << "  final_time: " << tf << "\n";
+    std::cout << "  max(du): " << DUMAX << "\n";
+    std::cout << "  min(dt): " << dt_min << "\n";
+    std::cout << "  max(dt): " << dt_max << "\n";
 }
 
 void Settings::read(YAML::Node yaml)

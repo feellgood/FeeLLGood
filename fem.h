@@ -69,8 +69,6 @@ class Fem
             
             if (mySets.restoreFileName == "")
                 {
-                if(mySets.verbose)
-                    { std::cout<< "initial magnetization M(x,y,z,t=0) = { " << mySets.sMx << "\t" << mySets.sMy << "\t" << mySets.sMz << " }\n"; } 
                 msh.init_distrib(mySets);
                 }
             else

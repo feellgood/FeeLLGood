@@ -103,7 +103,9 @@ Fem fem = Fem(mySettings,t_prm);
 
 if(mySettings.verbose)
     {
+    std::cout << "-- settings: -----------------------------------\n";
     mySettings.infos();
+    std::cout << "-- end of settings -----------------------------\n";
     t_prm.infos();
     fem.infos();
     }
