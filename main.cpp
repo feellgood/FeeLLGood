@@ -88,19 +88,22 @@ std::cout <<   "\t └───────────────────�
 
 std::string parseOptions(Settings &settings,int argc,char* argv[])
 {
+bool print_help = false;
 bool print_defaults = false;
 bool verify = false;
 struct Option
     {
     std::string short_opt, long_opt;
+    const char *help;
     bool *setting;
     };
 struct Option options[] =
     {
-    {"-v", "--verbose", &settings.verbose},
-    {"", "--print-defaults", &print_defaults},
-    {"", "--verify", &verify},
-    {"", "", nullptr}  // sentinel
+    {"-h", "--help", "display short help and exit", &print_help},
+    {"", "--print-defaults", "print default settings and exit", &print_defaults},
+    {"", "--verify", "verify a settings file and exit", &verify},
+    {"-v", "--verbose", "enable verbose mode", &settings.verbose},
+    {"", "", nullptr, nullptr}  // sentinel
     };
 
 int optind;
@@ -118,6 +121,20 @@ for (optind = 1; optind < argc; optind++)
         }
     if (!o->setting)  // option not found
         break;
+    }
+if (print_help)
+    {
+    std::cout << "Usage: " << argv[0] << " [options] settings_file\n";
+    std::cout << "Options:\n";
+    for (Option *o = options; o->setting; o++) {
+        std::cout << "  ";
+        if (!o->short_opt.empty())
+            std::cout << o->short_opt << " ";
+        else
+            std::cout << "   ";
+        std::cout << pad(o->long_opt, 17) << " " << o->help << "\n";
+    }
+    exit(0);
     }
 if (print_defaults)
     {
