@@ -44,6 +44,7 @@ std::cout <<   "\t └───────────────────�
 
 std::string parseOptions(Settings &settings,int argc,char* argv[])
 {
+bool print_defaults = false;
 struct Option
     {
     std::string short_opt, long_opt;
@@ -52,6 +53,7 @@ struct Option
 struct Option options[] =
     {
     {"-v", "--verbose", &settings.verbose},
+    {"", "--print-defaults", &print_defaults},
     {"", "", nullptr}  // sentinel
     };
 
@@ -71,15 +73,17 @@ for (optind = 1; optind < argc; optind++)
     if (!o->setting)  // option not found
         break;
     }
+if (print_defaults)
+    {
+    Settings::dumpDefaults();
+    exit(0);
+    }
 if (optind != argc - 1)
     {
     std::cerr << "Usage: feellgood [options] config_file.yml\n";
     exit(1);
     }
-if (settings.verbose)
-    std::cout << "Verbose mode active.\n";
 std::string filename = argv[optind];
-std::cout << "Loading settings from " << filename << "\n";
 return filename;
 }
 
@@ -88,9 +92,11 @@ int main(int argc,char* argv[])
 Settings mySettings;
 FTic counter;
 
-prompt();
-
 std::string filename = parseOptions(mySettings,argc,argv);
+prompt();
+if (mySettings.verbose)
+    std::cout << "Verbose mode active.\n";
+std::cout << "Loading settings from " << filename << "\n";
 mySettings.read(filename);
 timing t_prm = timing(mySettings.tf, mySettings.dt_min, mySettings.dt_max);
 Fem fem = Fem(mySettings,t_prm);

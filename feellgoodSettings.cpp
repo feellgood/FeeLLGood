@@ -23,6 +23,15 @@ extern "C" {
  * Private helper functions.
  */
 
+// Return the YAML document defining the defaults.
+static std::string get_default_yaml()
+{
+    return std::string(
+            _binary_default_settings_yml_start,
+            _binary_default_settings_yml_end
+            - _binary_default_settings_yml_start);
+}
+
 // Create the output directory if it does not exist yet.
 static void create_dir_if_needed(std::string dirname)
 {
@@ -101,11 +110,12 @@ Settings::Settings()
 {
     verbose = false;
     withTsv = true;
-    std::string defaults(
-            _binary_default_settings_yml_start,
-            _binary_default_settings_yml_end
-            - _binary_default_settings_yml_start);
-    read(YAML::Load(defaults));  // load defaults
+    read(YAML::Load(get_default_yaml()));  // load defaults
+}
+
+void Settings::dumpDefaults()
+{
+    std::cout << get_default_yaml();
 }
 
 void Settings::infos()

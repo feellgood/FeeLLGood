@@ -28,6 +28,9 @@ class Settings{
 
 	/** convenient enum to define what quantity is written in output file .evol */
     enum OUTPUTS {iter, t, dt, max_dm, avg_Mx, avg_My, avg_Mz, avg_Vx, avg_Vy, avg_Vz, V, E_ex, E_aniso, E_demag, E_zeeman, E_tot, DW_z, DW_dz, Hx, Hy, Hz};
+
+    /** print out the YAML document defining the default settigs */
+    static void dumpDefaults();
     
     /** some prints sent to terminal */	
     void infos(void);
