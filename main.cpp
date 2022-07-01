@@ -63,17 +63,26 @@ inline std::string spaceString(int nbSpace)
 return S;
 }
 
+// Return a string padded with spaces to a given length.
+static std::string pad(std::string s, int length)
+{
+    length -= s.length();
+    if (length < 0)
+        length = 0;
+    return s + std::string(length, ' ');
+}
+
 void prompt(void)
 {
     std::stringstream SsId;
     SsId << getpid();
 std::cout << "\n\t ┌────────────────────────────┐\n";
 std::cout <<   "\t │         FeeLLGood          │\n";
-std::cout <<   "\t │        version " << feellgood_version << spaceString(28-16-feellgood_version.length() ) <<"│\n";
+std::cout <<   "\t │        version " << pad(feellgood_version, 28-16) <<"│\n";
 std::cout <<   "\t │      cnrs Grenoble-INP     │\n";
 std::cout <<   "\t │    feellgood.neel.cnrs.fr  │\n";
 std::cout <<   "\t ├────────────────────────────┤\n";
-std::cout <<   "\t │      process "<< SsId.str() <<  spaceString(28-14-SsId.str().length() ) <<"│\n";
+std::cout <<   "\t │      process "<< pad(SsId.str(), 28-14) <<"│\n";
 std::cout <<   "\t └────────────────────────────┘\n";
 }
 
