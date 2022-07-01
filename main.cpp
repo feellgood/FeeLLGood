@@ -1,5 +1,8 @@
 #include <iostream>
-#include <unistd.h> // for getpid()
+#include <unistd.h> // for getpid(), stat()
+#include <stdio.h>  // for perror()
+#include <sys/stat.h>  // for mkdir(), stat()
+#include <sys/types.h>  // for mkdir(), stat()
 #include <signal.h>
 
 #include "Utils/FTic.hpp"//for counter from scalfmm
@@ -18,6 +21,38 @@ volatile sig_atomic_t received_sigterm = 0;
 static void sigterm_handler(int)
 {
 received_sigterm = 1;
+}
+
+// Create the output directory if it does not exist yet.
+static void create_dir_if_needed(std::string dirname)
+{
+    std::cout << "Output directory: " << dirname << " ";
+    const char *name = dirname.c_str();
+    struct stat statbuf;
+    int res = stat(name, &statbuf);
+    if (res != 0 && errno != ENOENT) {
+        std::cout << "could not be searched.\n";
+        perror(name);
+        exit(1);
+    }
+    if (res == 0) {  // path exists
+        if (S_ISDIR(statbuf.st_mode)) {
+            std::cout << "(already exists)\n";
+            return;
+        } else {
+            std::cout << "exists and is not a directory.\n";
+            exit(1);
+        }
+    }
+
+    // The directory does not exist (stat() reported ENOENT), create it.
+    res = mkdir(name, 0777);
+    if (res != 0) {
+        std::cout << "could not be created.\n";
+        perror(name);
+        exit(1);
+    }
+    std::cout << "(created)\n";
 }
 
 int time_integration(Fem &fem,Settings &settings /**< [in] */,LinAlgebra &linAlg /**< [in] */,scal_fmm::fmm &myFMM  /**< [in] */,timing &t_prm);
@@ -45,6 +80,7 @@ std::cout <<   "\t └───────────────────�
 std::string parseOptions(Settings &settings,int argc,char* argv[])
 {
 bool print_defaults = false;
+bool verify = false;
 struct Option
     {
     std::string short_opt, long_opt;
@@ -54,6 +90,7 @@ struct Option options[] =
     {
     {"-v", "--verbose", &settings.verbose},
     {"", "--print-defaults", &print_defaults},
+    {"", "--verify", &verify},
     {"", "", nullptr}  // sentinel
     };
 
@@ -84,6 +121,12 @@ if (optind != argc - 1)
     exit(1);
     }
 std::string filename = argv[optind];
+if (verify)
+    {
+    settings.read(filename);
+    settings.infos();
+    exit(0);
+    }
 return filename;
 }
 
@@ -98,6 +141,7 @@ if (mySettings.verbose)
     std::cout << "Verbose mode active.\n";
 std::cout << "Loading settings from " << filename << "\n";
 mySettings.read(filename);
+create_dir_if_needed(mySettings.r_path_output_dir);
 timing t_prm = timing(mySettings.tf, mySettings.dt_min, mySettings.dt_max);
 Fem fem = Fem(mySettings,t_prm);
 

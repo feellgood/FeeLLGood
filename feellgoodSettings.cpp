@@ -1,9 +1,6 @@
 #include <iostream>
 #include <string>
-#include <stdio.h>  // for perror()
-#include <unistd.h>  // for sysconf(), stat()
-#include <sys/stat.h>  // for mkdir(), stat()
-#include <sys/types.h>  // for mkdir(), stat()
+#include <unistd.h>  // for sysconf()
 
 #include "feellgoodSettings.h"
 
@@ -30,38 +27,6 @@ static std::string get_default_yaml()
             _binary_default_settings_yml_start,
             _binary_default_settings_yml_end
             - _binary_default_settings_yml_start);
-}
-
-// Create the output directory if it does not exist yet.
-static void create_dir_if_needed(std::string dirname)
-{
-    std::cout << "Output directory: " << dirname << " ";
-    const char *name = dirname.c_str();
-    struct stat statbuf;
-    int res = stat(name, &statbuf);
-    if (res != 0 && errno != ENOENT) {
-        std::cout << "could not be searched.\n";
-        perror(name);
-        exit(1);
-    }
-    if (res == 0) {  // path exists
-        if (S_ISDIR(statbuf.st_mode)) {
-            std::cout << "(already exists)\n";
-            return;
-        } else {
-            std::cout << "exists and is not a directory.\n";
-            exit(1);
-        }
-    }
-
-    // The directory does not exist (stat() reported ENOENT), create it.
-    res = mkdir(name, 0777);
-    if (res != 0) {
-        std::cout << "could not be created.\n";
-        perror(name);
-        exit(1);
-    }
-    std::cout << "(created)\n";
 }
 
 // Bail out on errors.
@@ -228,8 +193,6 @@ void Settings::read(YAML::Node yaml)
             if (r_path_output_dir.length() > 1
                     && r_path_output_dir.back() == '/')
                 { r_path_output_dir.pop_back(); }
-            if (r_path_output_dir != ".")
-                create_dir_if_needed(r_path_output_dir);
         }
         assign(simName, outputs["file_basename"]);
         assign(withVtk, outputs["vtk_file"]);
