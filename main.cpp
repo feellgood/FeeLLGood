@@ -44,25 +44,42 @@ std::cout <<   "\t └───────────────────�
 
 std::string parseOptions(Settings &settings,int argc,char* argv[])
 {
-std::string filename;
-std::cout << "parsing options..." << std::endl;
+struct Option
+    {
+    std::string short_opt, long_opt;
+    bool *setting;
+    };
+struct Option options[] =
+    {
+    {"-v", "--verbose", &settings.verbose},
+    {"", "", nullptr}  // sentinel
+    };
 
-if(argc<2)
-	{
-	std::cout << "no configuration file provided, see FeeLLGood online documentation to create some settings using Python script settingsMaker.py" << std::endl;
-	exit(1);
+int optind;
+for (optind = 1; optind < argc; optind++)
+    {
+    char *opt = argv[optind];
+    Option *o;
+    for (o = options; o->setting; o++)
+        {
+        if (opt == o->short_opt || opt == o->long_opt)
+            {
+            *o->setting = true;
+            break;
+            }
+        }
+    if (!o->setting)  // option not found
+        break;
     }
-else if (argc == 2)
-        {
-        filename = argv[1]; // argv[0] is "./feellgood"
-        std::cout << "using loaded settings from " << filename << "\n";
-        }
-    else if ((argc == 3)&&( strcmp(argv[1],"-v") == 0))
-        {
-            std::cout << "verbose mode active\n"  << std::endl;
-            settings.verbose = true;
-            filename = argv[2];
-        }
+if (optind != argc - 1)
+    {
+    std::cerr << "Usage: feellgood [options] config_file.yml\n";
+    exit(1);
+    }
+if (settings.verbose)
+    std::cout << "Verbose mode active.\n";
+std::string filename = argv[optind];
+std::cout << "Loading settings from " << filename << "\n";
 return filename;
 }
 
