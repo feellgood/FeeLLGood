@@ -102,6 +102,7 @@ void Settings::infos()
 {
     std::cout << "outputs:\n";
     std::cout << "  directory: " << r_path_output_dir << "\n";
+    std::cout << "  file_basename: " << simName << "\n";
     std::cout << "  evol_time_step: " << time_step << "\n";
     std::cout << "  evol_columns:\n";
     for (auto it = evol_columns.begin(); it != evol_columns.end(); ++it) {
