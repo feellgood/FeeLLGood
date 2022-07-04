@@ -89,6 +89,7 @@ std::cout <<   "\t └───────────────────�
 std::string parseOptions(Settings &settings,int argc,char* argv[])
 {
 bool print_help = false;
+bool print_version = false;
 bool print_defaults = false;
 bool verify = false;
 struct Option
@@ -100,6 +101,7 @@ struct Option
 struct Option options[] =
     {
     {"-h", "--help", "display short help and exit", &print_help},
+    {"-V", "--version", "display version information and exit", &print_version},
     {"", "--print-defaults", "print default settings and exit", &print_defaults},
     {"", "--verify", "verify a settings file and exit", &verify},
     {"-v", "--verbose", "enable verbose mode", &settings.verbose},
@@ -134,6 +136,12 @@ if (print_help)
             std::cout << "   ";
         std::cout << pad(o->long_opt, 17) << " " << o->help << "\n";
     }
+    exit(0);
+    }
+if (print_version)
+    {
+    std::cout << "feeLLGood " << feellgood_version << "\n";
+    std::cout << "compiled from git commit " << SHAnumber << "\n";
     exit(0);
     }
 if (print_defaults)
