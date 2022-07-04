@@ -121,11 +121,14 @@ void Settings::infos()
         std::cout << "      Ae: " << it->A << "\n";
         std::cout << "      Js: " << it->J << "\n";
         std::cout << "      K: " << it->K << "\n";
-        std::cout << "      uk: " << str(it->uk) << "\n";
+        if (it->K != 0)
+            std::cout << "      uk: " << str(it->uk) << "\n";
         std::cout << "      K3: " << it->K3 << "\n";
-        std::cout << "      ex: " << str(it->ex) << "\n";
-        std::cout << "      ey: " << str(it->ey) << "\n";
-        std::cout << "      ez: " << str(it->ez) << "\n";
+        if (it->K3 != 0) {
+            std::cout << "      ex: " << str(it->ex) << "\n";
+            std::cout << "      ey: " << str(it->ey) << "\n";
+            std::cout << "      ez: " << str(it->ez) << "\n";
+        }
         std::cout << "      alpha_LLG: " << it->alpha_LLG << "\n";
     }
     std::cout << "  surface_regions:\n";
@@ -135,7 +138,8 @@ void Settings::infos()
         std::cout << "    " << it->reg << ":\n";
         std::cout << "      suppress_charges: " << it->suppress_charges << "\n";
         std::cout << "      Ks: " << it->Ks << "\n";
-        std::cout << "      uk: " << str(it->uk) << "\n";
+        if (it->Ks != 0)
+            std::cout << "      uk: " << str(it->uk) << "\n";
     }
     std::cout << "initial_magnetization: ";
     if (restoreFileName.empty())
