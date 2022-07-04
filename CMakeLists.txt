@@ -3,7 +3,7 @@
 #===========================================================================
 set(PROJECT_MAJOR_VERSION 0)
 set(PROJECT_MINOR_VERSION 6)
-set(PROJECT_PATCH_VERSION 3)
+set(PROJECT_PATCH_VERSION 4)
 #===========================================================================
 
 if(POLICY CMP0048)
