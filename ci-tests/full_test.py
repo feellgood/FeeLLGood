@@ -11,7 +11,7 @@ os.chdir(sys.path[0])
 sys.path.insert(0,'../tools')
 from settingsMaker import Settings
 
-mySettings = Settings("ellipsoid.msh")
+mySettings = Settings("../examples/ellipsoid.msh")
 
 MaxNbThreads = int(subprocess.check_output(["getconf","_NPROCESSORS_ONLN"]))
 nbThreads = (MaxNbThreads + 4) // 3 # ellipsoid.msh is small, maxnbthreads is counterproductive

@@ -33,8 +33,10 @@ Summary of tested items:
   * `-d`: install doxygen, which is needed to build the docs
 * `full_test.py`: minimal toy problem for checking that feeLLGood runs
   correctly
-* `ellipsoid.msh`: mesh used by `full_test.py`, ellipsoid made of
-  163&nbsp;nodes and 640&nbsp;elements.
+
+The script `full_test.py` uses the mesh `ellipsoid.msh` (163&nbsp;nodes
+and 640&nbsp;elements), which is expected to be in the directory
+`../examples`.
 
 ## Manual testing
 

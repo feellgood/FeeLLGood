@@ -6,7 +6,7 @@ from math import sqrt,pi
 sys.path.insert(0,'../tools')
 from settingsMaker import Settings
 
-mySettings = Settings("../ellipsoid.msh")
+mySettings = Settings("ellipsoid.msh")
 mySettings.createVolRegion( "300" )
 mySettings.createSurfRegion( "200" )
 
