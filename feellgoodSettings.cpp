@@ -137,7 +137,8 @@ void Settings::infos()
         if (it->reg == -1)  // skip __default__
             continue;
         std::cout << "    " << it->reg << ":\n";
-        std::cout << "      suppress_charges: " << it->suppress_charges << "\n";
+        std::cout << "      suppress_charges: "
+            << str(it->suppress_charges) << "\n";
         std::cout << "      Ks: " << it->Ks << "\n";
         if (it->Ks != 0)
             std::cout << "      uk: " << str(it->uk) << "\n";
