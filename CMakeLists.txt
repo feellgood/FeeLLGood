@@ -67,7 +67,7 @@ configure_file(config.h.in ./config.h)
 
 add_custom_command(
     OUTPUT default-settings.o
-    COMMAND ld -r -b binary default-settings.yml -o default-settings.o
+    COMMAND ld -r -b binary -z noexecstack default-settings.yml -o default-settings.o
     DEPENDS default-settings.yml)
 
 ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES} default-settings.o)
