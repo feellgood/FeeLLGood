@@ -173,7 +173,8 @@ std::string filename = parseOptions(mySettings,argc,argv);
 prompt();
 if (mySettings.verbose)
     std::cout << "Verbose mode active.\n";
-std::cout << "Loading settings from " << filename << "\n";
+std::string fileDisplayName = filename=="-" ? "standard input" : filename;
+std::cout << "Loading settings from " << fileDisplayName << "\n";
 if (!mySettings.read(filename))
     {
     std::cerr << "Error: no settings found.\n";

@@ -380,7 +380,11 @@ void Settings::read(YAML::Node yaml)
 
 bool Settings::read(std::string filename)
 {
-    YAML::Node config = YAML::LoadFile(filename);
+    YAML::Node config;
+    if (filename == "-")
+        config = YAML::Load(std::cin);
+    else
+        config = YAML::LoadFile(filename);
     if (config.IsNull())
         return false;
     read(config);
