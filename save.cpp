@@ -46,7 +46,7 @@ fout << std::flush;
 
 string baseName = settings.r_path_output_dir + '/' + settings.getSimName();
     
-if ((nt%save_period)==0) 
+if (save_period && (nt%save_period)==0)
     {
     if (settings.withVtk)
         {
