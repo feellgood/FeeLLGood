@@ -378,7 +378,11 @@ void Settings::read(YAML::Node yaml)
     }  // time_integration
 }
 
-void Settings::read(std::string filename)
+bool Settings::read(std::string filename)
 {
-    read(YAML::LoadFile(filename));
+    YAML::Node config = YAML::LoadFile(filename);
+    if (config.IsNull())
+        return false;
+    read(config);
+    return true;
 }

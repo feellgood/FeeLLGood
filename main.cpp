@@ -174,7 +174,11 @@ prompt();
 if (mySettings.verbose)
     std::cout << "Verbose mode active.\n";
 std::cout << "Loading settings from " << filename << "\n";
-mySettings.read(filename);
+if (!mySettings.read(filename))
+    {
+    std::cerr << "Error: no settings found.\n";
+    return 1;
+    }
 create_dir_if_needed(mySettings.r_path_output_dir);
 timing t_prm = timing(mySettings.tf, mySettings.dt_min, mySettings.dt_max);
 Fem fem = Fem(mySettings,t_prm);

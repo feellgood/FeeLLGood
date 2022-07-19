@@ -38,8 +38,8 @@ class Settings{
     /** read settings from a parsed YAML document */
 	void read(YAML::Node);
 	
-    /** read settings from a YAML file */
-	void read(std::string filename);
+    /** read settings from a YAML file. Returns true if a non-empty configuration is found. */
+	bool read(std::string filename);
 	
 	inline void setPbName(std::string str) {pbName = str;} /**< setter for .msh file name  */
 	inline std::string getPbName(void) const {return pbName;}/**< getter for problem file name */
