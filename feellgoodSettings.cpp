@@ -36,11 +36,11 @@ static void error(const char *message)
     exit(1);
 }
 
-// Conditionally assign a variable if the node is defined.
+// Conditionally assign a variable if the node is defined and scalar.
 template <typename T>
 static bool assign(T &var, const YAML::Node &node)
 {
-    if (node) {
+    if (node.IsScalar()) {
         var = node.as<T>();
         return true;
     }
@@ -225,9 +225,7 @@ void Settings::read(YAML::Node yaml)
     if (mesh) {
         if (!mesh.IsMap())
             error("mesh should be a map.");
-        YAML::Node filename = mesh["filename"];
-        if (filename.IsScalar())
-            assign(pbName, filename);
+        assign(pbName, mesh["filename"]);
         if (assign(_scale, mesh["scaling_factor"]) && _scale <= 0)
             error("mesh.scaling_factor should be positive.");
         YAML::Node volumes = mesh["volume_regions"];
@@ -342,9 +340,7 @@ void Settings::read(YAML::Node yaml)
         assign(p_stt.beta, stt["beta"]);
         assign(p_stt.lJ, stt["l_J"]);
         assign(p_stt.lsf, stt["l_sf"]);
-        YAML::Node vol_ref = stt["volume_region_reference"];
-        if (vol_ref.IsScalar())
-            assign(p_stt.reg, vol_ref);
+        assign(p_stt.reg, stt["volume_region_reference"]);
         p_stt.func = [](Pt::pt3D){ return 1; };
         p_stt.bc = Tetra::boundary_conditions::Undef;
     }  // spin_transfer_torque
