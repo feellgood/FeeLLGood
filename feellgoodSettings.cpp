@@ -372,6 +372,21 @@ void Settings::read(YAML::Node yaml)
         assign(dt_max, time_integration["max(dt)"]);
         assign(tf, time_integration["final_time"]);
     }  // time_integration
+
+    // outputs.file_basename defaults to base name of mesh.filename.
+    if (simName.empty() && !pbName.empty()) {
+        simName = pbName;
+
+        // Remove directory part.
+        size_t pos = simName.rfind('/');
+        if (pos != simName.npos)
+            simName.erase(0, pos + 1);
+
+        // Remove everything after last dot.
+        pos = simName.rfind('.');
+        if (pos != simName.npos)
+            simName.erase(pos);
+    }
 }
 
 bool Settings::read(std::string filename)

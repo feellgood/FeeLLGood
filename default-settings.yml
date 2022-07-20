@@ -35,8 +35,8 @@ outputs:
   directory: .
 
   # This string will be used as a prefix for the names of all generated
-  # files.
-  file_basename: feellgood_out
+  # files. Defaults to the base name of the mesh file.
+  file_basename:
 
   # The global quantities listed under ‘evol_columns’ will be saved to
   # the evolution file on this time step.
