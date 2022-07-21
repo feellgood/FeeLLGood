@@ -53,7 +53,6 @@ mySettings.write(JSON_fileName)
 val = subprocess.run(["../feellgood",JSON_fileName])
 
 if(val.returncode==0):
-	print("FeeLLGood terminated correctly with " + JSON_fileName + " input file.")
 	with open(mySettings["outputs"]["directory"] + mySettings["outputs"]["file_basename"] + ".evol","r") as f:
 		for line in f:
 			pass
@@ -63,18 +62,24 @@ if(val.returncode==0):
 	mx = float(data[1])
 	my = float(data[2])
 	mz = float(data[3])
-	print("mag= ",mx,';',my,';',mz)
 	X = 0.600566
 	Y = -0.00193843
 	Z = -0.799573
-	if(sqrt((X-mx)**2+(Y-my)**2+(Z-mz)**2) < 1e-5):
-		valRet = 0
-	else:
-		valRet = 1
-	print("return " + str(valRet) + " ;dist = %.2e"% sqrt((X-mx)**2+(Y-my)**2+(Z-mz)**2))
+	distance = sqrt((X-mx)**2+(Y-my)**2+(Z-mz)**2)
+	threshold = 1e-5
+	success = distance < threshold
+	print("feeLLGood terminated successfully")
+	print(f"final average reduced magnetization = ({mx}, {my}, {mz})")
+	print("distance from expected value        = %.2e" % distance)
+	print("threshold of acceptability          = %.2e" % threshold)
 else:
-	print("FeeLLGood terminated before final time")
-	valRet = 1
-print("return " + str(valRet))
-sys.exit(valRet)
+	print("feeLLGood failed: exit status = " + str(val.returncode))
+	success = False
 
+# Report success status.
+if success:
+	print("test PASSED")
+	sys.exit(0)
+else:
+	print("test FAILED")
+	sys.exit(1)
