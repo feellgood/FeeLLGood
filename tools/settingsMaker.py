@@ -12,28 +12,18 @@ class Settings(object):
         ## \brief dictionary
         # mySets is the strict equivalent to the json file needed by executable feellgood to run a simulation, any (key,value) not corresponding
         # to what is expected by feellgood is just ignored.
-        self.mySets = {}
+        self.mySets = {
+            "outputs": {},
+            "mesh": {
+                "filename": mshFileName,
+                "volume_regions": {},
+                "surface_regions": {}
+            },
+            "finite_element_solver": {},
+            "demagnetizing_field_solver": {},
+            "time_integration": {}
+        }
 
-        self.mySets["outputs"] = {"directory" : "data_out/",
-        "file_basename" : "tom",
-        "vtk_file" : False,
-        "evol_time_step" : 1e-7,
-        "take_photo" : 5,
-        "evol_columns" : ["iter","t","dt","max_dm","<Mx>","<My>","<Mz>","E_ex","E_aniso","E_demag","E_zeeman","E_tot","DW_z","DW_dz"],
-        "evol_header" : True }
-
-        self.mySets["mesh"] = {"filename" : mshFileName, "scaling_factor" : 1e-9, "volume_regions" : {}, "surface_regions" : {} }
-
-        self.mySets["initial_magnetization"] = ["1-z^2", "0", "tanh(z*20)"]
-
-        self.mySets["Bext"] = [0, 0, 0]
-
-        self.mySets["finite_element_solver"] = {"nb_threads" : 16, "max(iter)" : 500, "refresh_preconditioner_every": 20}
-
-        self.mySets["demagnetizing_field_solver"] = {"nb_threads" : 16}
-
-        self.mySets["time_integration"] = {"final_time" : 1e-6, "max(du)" : 0.02, "min(dt)" : 1e-11, "max(dt)" : 1e-7}
-    
     ## \brief getter
     # standard getter
     #
@@ -58,24 +48,26 @@ class Settings(object):
     ## \brief create a new volume region
     # (key) , initialized with def values
     def createVolRegion(self,key):
-        if key not in self.mySets["mesh"]["volume_regions"]:
-            self.mySets["mesh"]["volume_regions"].update( { key : {"Ae":1e-11, "Js":1, "K":0.0, "uk":[0.0,0.0,1.0],"K3":0.0, "ex":[1.0,0.0,0.0], "ey":[0.0,1.0,0.0], "ez":[0.0,0.0,1.0], "alpha_LLG":0.05} } )
+        regions = self.mySets["mesh"]["volume_regions"]
+        if key not in regions:
+            regions[key] = {}
+        return regions[key]
 
     ## \brief set material constants exchange , magnetization at saturation and alpha_LLG for region 'key', create if if key does not exists
     # (key) , initialized with def values
     def setMaterialRegion(self,key,cst_exch,mag_sat,cst_alpha):
-        if key not in self.mySets["mesh"]["volume_regions"]:
-            self.mySets["mesh"]["volume_regions"].update( { key : {"Ae":cst_exch, "Js":mag_sat, "K":0.0, "uk":[0.0,0.0,1.0],"K3":0.0, "ex":[1.0,0.0,0.0], "ey":[0.0,1.0,0.0], "ez":[0.0,0.0,1.0], "alpha_LLG":cst_alpha} } )
-        else:
-            self.mySets["mesh"]["volume_regions"][key]["Ae"] = cst_exch
-            self.mySets["mesh"]["volume_regions"][key]["Js"] = mag_sat
-            self.mySets["mesh"]["volume_regions"][key]["alpha_LLG"] = cst_alpha
-        
+        region = self.createVolRegion(key)
+        region["Ae"] = cst_exch
+        region["Js"] = mag_sat
+        region["alpha_LLG"] = cst_alpha
+
     ## \brief create a new surface region
     # (key) , initialized with def values
     def createSurfRegion(self,key):
-        if key not in self.mySets["mesh"]["surface_regions"]:
-            self.mySets["mesh"]["surface_regions"].update( { key : {"suppress_charges" : False, "Ks" : 0.0, "uk" : [0.0, 0.0 ,1.0]} } )
+        regions = self.mySets["mesh"]["surface_regions"]
+        if key not in regions:
+            regions[key] = {}
+        return regions[key]
 
     ## \brief some test to check the validity of the parameters
     # this method is called before writing the json file, it might also be called from another script for some checking before calling the write method
