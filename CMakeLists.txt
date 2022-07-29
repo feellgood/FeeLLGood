@@ -57,7 +57,8 @@ set( CMAKE_CXX_FLAGS "-DNDEBUG -Wall -Wextra -std=c++14 -fopenmp -O3 -march=nati
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
 
 SET(HEADERS config.h pt3D.h node.h matBlocDiag.h mag_parser.h mesh.h electrostatSolver.h
-    time_integration.h feellgoodSettings.h tetra.h facette.h linear_algebra.h)
+    time_integration.h feellgoodSettings.h tetra.h facette.h linear_algebra.h
+    log-stats.h)
 
 SET(SOURCES mag_parser.cpp time_integration.cpp feellgoodSettings.cpp
     solver.cpp tetra.cpp facette.cpp read.cpp save.cpp
