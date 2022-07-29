@@ -46,12 +46,19 @@ static void print_stats(const Stats &s)
 puts("\nTime step statistics:\n");
 puts("    time steps       count       dt [*]          dumax [*]");
 puts("    ──────────────────────────────────────────────────────────");
-printf("    successful   %9g   %8.2e ± %4.2f   %8.2e ± %4.2f\n",
-    (double) s.good_dt.count(), s.good_dt.mean(), s.good_dt.stddev(),
-    s.good_dumax.mean(), s.good_dumax.stddev());
-printf("    failed       %9g   %8.2e ± %4.2f\n",
-    (double) s.bad_dt.count(), s.bad_dt.mean(), s.bad_dt.stddev());
-puts("\n    [*] ranges given as (geometric mean) ± (relative stddev)");
+printf("    successful   %9g", (double) s.good_dt.count());
+if (s.good_dt.count() != 0)
+    printf("   %8.2e ± %4.2f   %8.2e ± %4.2f\n",
+        s.good_dt.mean(), s.good_dt.stddev(),
+        s.good_dumax.mean(), s.good_dumax.stddev());
+else
+    putchar('\n');
+printf("    failed       %9g", (double) s.bad_dt.count());
+if (s.bad_dt.count() != 0)
+    printf("   %8.2e ± %4.2f\n\n", s.bad_dt.mean(), s.bad_dt.stddev());
+else
+    puts("\n");
+puts("    [*] ranges given as (geometric mean) ± (relative stddev)");
 }
 
 /** compute all quantitites at time t */
