@@ -158,10 +158,13 @@ for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target +=
 
         // If we were just politely asked to terminate,
         // save the state right now and bail out.
-        extern volatile sig_atomic_t received_sigterm;
-        if (received_sigterm)
+        extern volatile sig_atomic_t received_signal;
+        if (received_signal)
             {
-            std::cout << "Received SIGTERM: saving the magnetization configuration...\n";
+            const char *signal_name = received_signal==SIGINT ? "SIGINT" :
+                    received_signal==SIGTERM ? "SIGTERM" : "signal";
+            std::cout << "Received " << signal_name
+                    << ": saving the magnetization configuration...\n";
             std::string fileName = settings.r_path_output_dir + '/'
                 + settings.getSimName() + "_at_exit.sol";
             fem.msh.savesol(fileName, t_prm, settings.getScale());
