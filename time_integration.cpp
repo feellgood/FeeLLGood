@@ -5,6 +5,7 @@
 
 #include "linear_algebra.h"
 #include "fmm_demag.h"
+#include "log-stats.h"
 
 /** Logic for finding a reasonable time step. */
 class TimeStepper {
@@ -32,6 +33,26 @@ public:
         return step;
     }
 };
+
+/** Summary statistics on the time steps. */
+struct Stats {
+    LogStats good_dt;  /**< dt of successful steps */
+    LogStats good_dumax;  /**< dumax of successful steps */
+    LogStats bad_dt;  /**< dt of failed steps */
+};
+
+static void print_stats(const Stats &s)
+{
+puts("\nTime step statistics:\n");
+puts("    time steps       count       dt [*]          dumax [*]");
+puts("    ──────────────────────────────────────────────────────────");
+printf("    successful   %9g   %8.2e ± %4.2f   %8.2e ± %4.2f\n",
+    (double) s.good_dt.count(), s.good_dt.mean(), s.good_dt.stddev(),
+    s.good_dumax.mean(), s.good_dumax.stddev());
+printf("    failed       %9g   %8.2e ± %4.2f\n",
+    (double) s.bad_dt.count(), s.bad_dt.mean(), s.bad_dt.stddev());
+puts("\n    [*] ranges given as (geometric mean) ± (relative stddev)");
+}
 
 /** compute all quantitites at time t */
 inline void compute_all(Fem &fem,Settings &settings,scal_fmm::fmm &myFMM,double t)
@@ -67,6 +88,7 @@ int nt_output = 0;  // visible iteration count
 int nt = 0;         // total iteration count
 double t_step = settings.time_step;
 TimeStepper stepper(t_prm.get_dt(), t_prm.DTMIN, t_prm.DTMAX);
+Stats stats;
 
 // Loop over the visible time steps,
 // i.e. those that will appear on the output file.
@@ -98,13 +120,15 @@ for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target +=
         
         if (err)
             {
-            std::cout << "solver warning #" << err << ": you might need to adapt time step, max(du), and/or the refreshing period of the preconditioner" << std::endl;
             flag++;
             stepper.set_soft_limit(t_prm.get_dt() / 2);
+            stats.bad_dt.add(t_prm.get_dt());
             continue;
             }
 
         double dumax = t_prm.get_dt()*fem.vmax;
+        stats.good_dt.add(t_prm.get_dt());
+        stats.good_dumax.add(dumax);
         if(settings.verbose) { std::cout << "\t dumax = " << dumax << ",  vmax = "<< fem.vmax << std::endl; }
                 
         stepper.set_soft_limit(settings.DUMAX / fem.vmax / 2);
@@ -136,6 +160,7 @@ for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target +=
             fem.msh.savesol(fileName, t_prm, settings.getScale());
             std::cout << "Magnetization configuration saved to "
                 << fileName << "\nTerminating.\n";
+            print_stats(stats);
             exit(1);
             }
             
@@ -146,5 +171,6 @@ for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target +=
 if (t_prm.is_dt_TooSmall()) { std::cout << " aborted:  dt < DTMIN"; }
         
 fout.close();
+print_stats(stats);
 return nt;
 }

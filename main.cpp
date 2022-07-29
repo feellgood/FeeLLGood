@@ -223,7 +223,14 @@ if (sigaction(SIGTERM, &action, NULL) == -1) {
 int nt = time_integration(fem,mySettings,linAlg,myFMM,t_prm);
         
 counter.tac();
-std::cout << "\n  * iterations: " << nt << "\n  * total computing time: " << counter.elapsed() << " s\n" << std::endl;
-
+double total_time = counter.elapsed();
+std::cout << "\nComputing time:\n\n";
+std::cout << "    total: " << total_time << " s";
+if (total_time >= 3600)
+    std::cout << " (" << total_time/3600 << " h)";
+else if (total_time >= 60)
+    std::cout << " (" << total_time/60 << " min)";
+std::cout << '\n';
+std::cout << "    per time step: " << total_time/nt << " s\n";
 return 0;
 }
