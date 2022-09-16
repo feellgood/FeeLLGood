@@ -15,12 +15,12 @@
 
 #include "electrostatSolver.h"
 
-// Catch SIGTERM in order to save the state before quitting.
-volatile sig_atomic_t received_sigterm = 0;
+// Catch some deadly signals in order to save the state before quitting.
+volatile sig_atomic_t received_signal = 0;
 
-static void sigterm_handler(int)
+static void signal_handler(int signal_number)
 {
-received_sigterm = 1;
+received_signal = signal_number;
 }
 
 // Create the output directory if it does not exist yet.
@@ -210,11 +210,15 @@ else
 
 scal_fmm::fmm myFMM(fem.msh,mySettings.verbose,mySettings.scalfmmNbTh);
 
-// Catch SIGTERM.
+// Catch SIGINT and SIGTERM.
 struct sigaction action;
-action.sa_handler = sigterm_handler;
+action.sa_handler = signal_handler;
 action.sa_flags = 0;
 sigemptyset(&action.sa_mask);
+if (sigaction(SIGINT, &action, NULL) == -1) {
+    perror("SIGINT");
+    return EXIT_FAILURE;
+}
 if (sigaction(SIGTERM, &action, NULL) == -1) {
     perror("SIGTERM");
     return EXIT_FAILURE;
@@ -223,7 +227,14 @@ if (sigaction(SIGTERM, &action, NULL) == -1) {
 int nt = time_integration(fem,mySettings,linAlg,myFMM,t_prm);
         
 counter.tac();
-std::cout << "\n  * iterations: " << nt << "\n  * total computing time: " << counter.elapsed() << " s\n" << std::endl;
-
+double total_time = counter.elapsed();
+std::cout << "\nComputing time:\n\n";
+std::cout << "    total: " << total_time << " s";
+if (total_time >= 3600)
+    std::cout << " (" << total_time/3600 << " h)";
+else if (total_time >= 60)
+    std::cout << " (" << total_time/60 << " min)";
+std::cout << '\n';
+std::cout << "    per time step: " << total_time/nt << " s\n";
 return 0;
 }
