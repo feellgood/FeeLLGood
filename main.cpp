@@ -63,27 +63,48 @@ inline std::string spaceString(int nbSpace)
 return S;
 }
 
-// Return a string padded with spaces to a given length.
-static std::string pad(std::string s, int length)
+// Return the number of characters in an UTF-8-encoded string.
+static int char_length(const std::string &s)
 {
-    length -= s.length();
+    int len = 0;
+    for (const char *p = s.c_str(); *p; ++p) {
+        if ((*p & 0xc0) != 0x80)  // count bytes not matching 0x10xxxxxx
+            len++;
+    }
+    return len;
+}
+
+// Return a string padded with spaces to a given length.
+static std::string pad(const std::string &s, int length)
+{
+    length -= char_length(s);
     if (length < 0)
         length = 0;
     return s + std::string(length, ' ');
 }
 
+// Return a string centered with spaces to a given length.
+static std::string center(const std::string &s, int length)
+{
+    length -= char_length(s);
+    if (length < 0)
+        length = 0;
+    int pad_left = length / 2;
+    int pad_right = length - pad_left;
+    return std::string(pad_left, ' ') + s + std::string(pad_right, ' ');
+}
+
 void prompt(void)
 {
-    std::stringstream SsId;
-    SsId << getpid();
-std::cout << "\n\t ┌────────────────────────────┐\n";
-std::cout <<   "\t │         FeeLLGood          │\n";
-std::cout <<   "\t │        version " << pad(feellgood_version, 28-16) <<"│\n";
-std::cout <<   "\t │      cnrs Grenoble-INP     │\n";
-std::cout <<   "\t │    feellgood.neel.cnrs.fr  │\n";
-std::cout <<   "\t ├────────────────────────────┤\n";
-std::cout <<   "\t │      process "<< pad(SsId.str(), 28-14) <<"│\n";
-std::cout <<   "\t └────────────────────────────┘\n";
+std::string name = std::string("feeLLGood ") + feellgood_version;
+std::string process = "process " + std::to_string(getpid());
+std::cout << "\t┌───────────────────────────────┐\n";
+std::cout << "\t│ " << center(name, 29) << " │\n";
+std::cout << "\t│ " << center("CNRS Grenoble – INP", 29) << " │\n";
+std::cout << "\t│ http://feellgood.neel.cnrs.fr │\n";
+std::cout << "\t├───────────────────────────────┤\n";
+std::cout << "\t│ " << center(process, 29) <<" │\n";
+std::cout << "\t└───────────────────────────────┘\n";
 }
 
 std::string parseOptions(Settings &settings,int argc,char* argv[])
