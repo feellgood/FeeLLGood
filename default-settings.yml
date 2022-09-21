@@ -30,8 +30,8 @@
 outputs:
 
   # Directory where the output files will be stored. The default value
-  # (.) means the working working directory where the feeLLGood process
-  # is started. If the directory does not exist, it will be created.
+  # (.) means the working directory where the feeLLGood process is
+  # started. If the directory does not exist, it will be created.
   directory: .
 
   # This string will be used as a prefix for the names of all generated
@@ -143,9 +143,9 @@ mesh:
 #   coordinates (x, y, z); the expression may be constants.
 initial_magnetization: [0, 0, 1]
 
-# Whether feeLLGood should try to artificially keep a domain wall in the
-# center of the simulated volume by translating the magnetization vector
-# field.
+# “Recentering” is the process by which feeLLGood tries to artificially
+# keep a domain wall in the center of the simulated volume by
+# translating the magnetization vector field.
 recentering:
 
   # Whether to enable recentering.
@@ -183,7 +183,7 @@ finite_element_solver:
   # sysconf(_SC_NPROCESSORS_ONLN).
   nb_threads: 0
 
-  # Maximum number of iteration for biconjugate gradient algorithm.
+  # Maximum number of iteration for the biconjugate gradient algorithm.
   max(iter): 500
 
   # Number of iterations before the preconditioner is recomputed.
