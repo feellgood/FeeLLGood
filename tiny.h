@@ -65,8 +65,10 @@ for (int i=0; i<M; i++)
 return sqrt(result);
 }
 
-/** mat vector multiplication
-\return returns Y \f$ Y = A X \f$
+/** matrix-vector multiplication: \f$ Y = A X \f$
+\param[in] A input matrix
+\param[in] X input vector
+\param[out] Y result
 */
 template <typename T, int M, int N> inline void mult(const T A[M][N],const T X[N], T Y[M]) {
    for (int i=0; i<M; i++) {
@@ -77,8 +79,10 @@ template <typename T, int M, int N> inline void mult(const T A[M][N],const T X[N
        }
    }
 
-/** left multiplication of a transposed vector and a matrix
-\return returns in Y \f$ Y = X^{\dagger} A \f$
+/** left multiplication of a transposed vector and a matrix: \f$ Y = X^{\dagger} A \f$
+\param[in] X input vector
+\param[in] A input matrix
+\param[out] Y result
 */
 template <typename T, int M, int N> inline void transposed_mult(const T X[M],const T A[M][N], T Y[N]) {
    for (int j=0; j<N; j++) { 
@@ -89,8 +93,11 @@ template <typename T, int M, int N> inline void transposed_mult(const T X[M],con
        }
    }
 
-/** operator: do left multiplication of a transposed vector and a matrix, and multiply by -1
-\return returns in Y \f$ Y = -X^{\dagger} A \f$
+/** left multiplication of a transposed vector and a matrix, multiplied by -1:
+    \f$ Y = -X^{\dagger} A \f$
+\param[in] X input vector
+\param[in] A input matrix
+\param[out] Y result
 */
 template <typename T, int M, int N> inline void neg_transposed_mult(const T X[M],const T A[M][N], T Y[N]) {
    for (int j=0; j<N; j++) { 
@@ -101,8 +108,10 @@ template <typename T, int M, int N> inline void neg_transposed_mult(const T X[M]
        }
    }
    
-/** mat Transpose(mat) multiplication
-\return \f$ C = A B^{\dagger}  \f$
+/** multiplication of a matrix with the transpose of another matrix:
+    \f$ C = A B^{\dagger}  \f$
+\param[in] A,B input matrices
+\param[out] C result
 */
 template <typename T, int M, int N, int P> inline void direct_transposed_mult(T A[M][N],T B[P][N], T C[M][P]) {
    for (int i=0; i<M; i++) 
@@ -114,34 +123,39 @@ template <typename T, int M, int N, int P> inline void direct_transposed_mult(T 
        }
    }
 
-   /** mat mat multiplication
-\return \f$ C = A B \f$
+/** matrix multiplication: \f$ C = A B \f$
+\param[in] A vector of Pt::pt3D, interpreted as a 3-row input matrix
+\param[in] B input matrix
+\param[out] C result: a 3-row matrix represented as a vector of Pt::pt3D
 */
-template <typename T, int M, int N, int P> inline void mult(const Pt::pt3D vec[N],const T B[N][P], Pt::pt3D C[P]) {
+template <typename T, int M, int N, int P> inline void mult(const Pt::pt3D A[N],const T B[N][P], Pt::pt3D C[P]) {
    for (int i=0; i<M; i++) 
    for (int k=0; k<P; k++) {
        T v=T(0);
        for (int j=0; j<N; j++) 
-           v+= vec[j](i)*B[j][k];
+           v+= A[j](i)*B[j][k];
        C[k](i,v);
        }
    }
    
-/** mat mat multiplication
-\return \f$ C = A B \f$
+/** matrix multiplication: \f$ C = A B \f$
+\param[in] A vector of Pt::pt3D, interpreted as a 3-row input matrix
+\param[in] B input matrix
+\param[out] C result
 */
-template <typename T, int M, int N, int P> inline void mult(const Pt::pt3D vec[N],const T B[N][P], T C[M][P]) {
+template <typename T, int M, int N, int P> inline void mult(const Pt::pt3D A[N],const T B[N][P], T C[M][P]) {
    for (int i=0; i<M; i++) 
    for (int k=0; k<P; k++) {
        T v=T(0);
        for (int j=0; j<N; j++) 
-           v+= vec[j](i)*B[j][k];
+           v+= A[j](i)*B[j][k];
        C[i][k]=v;
        }
    }
 
-/** mat mat addition
-\return \f$ C = A + B \f$
+/** matrix addition: \f$ C = A + B \f$
+\param[in] A,B input matrices
+\param[out] C result
 */
 template <typename T, int M, int N> inline void add(const T A[M][N],const T B[M][N], T C[M][N])
 {
@@ -150,8 +164,9 @@ for (int i=0; i<M; i++)
     { C[i][k] = A[i][k] + B[i][k]; }
 }
 
-/** mat mat substraction
-\return \f$ C = A - B \f$
+/** matrix subtraction: \f$ C = A - B \f$
+\param[in] A,B input matrices
+\param[out] C result
 */
 template <typename T, int M, int N> inline void sub(const T A[M][N],const T B[M][N], T C[M][N])
 {
@@ -160,8 +175,9 @@ for (int i=0; i<M; i++)
     { C[i][k] = A[i][k] - B[i][k]; }
 }
 
-/** mat mat multiplication
-\return \f$ C = A B \f$
+/** matrix multiplication: \f$ C = A B \f$
+\param[in] A,B input matrices
+\param[out] C result
 */
 template <typename T, int M, int N, int P> inline void mult(const T A[M][N],const T B[N][P], T C[M][P]) {
    for (int i=0; i<M; i++) 
