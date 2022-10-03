@@ -47,12 +47,12 @@ double phiv;/**< scalar potential associated to velocity */
 double V;/**< electrostatic potential (for STT) */
 
 /**
-computes vector ep, it is the second vector of a base composed of  \f$ \left{ u0,e_p , e_q = u0 \times e_p \right} \f$ 
+computes vector ep, it is the second vector of a base composed of  \f$ \left\lbrace u0,e_p , e_q = u0 \times e_p \right\rbrace \f$
  */
 inline void calc_ep() {ep = Pt::pt3D(theta_sph,phi_sph)*u0; ep.normalize(); }
 
 /**
-computes vector eq, it is the third vector of a base composed of  \f$ \left{ u0,e_p , e_q = u0 \times e_p \right} \f$ 
+computes vector eq, it is the third vector of a base composed of  \f$ \left\lbrace u0,e_p , e_q = u0 \times e_p \right\rbrace \f$
  */
 inline void calc_eq() {eq = u0*ep; ep.normalize(); }
 
