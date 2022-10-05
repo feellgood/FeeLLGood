@@ -221,11 +221,11 @@ class Tet{
             {return (X[0]*weight[0] + X[1]*weight[1] + X[2]*weight[2] + X[3]*weight[3] +X[4]*weight[4]);}
 		
 		/** interpolation for 3D vector field: the getter function is given as a parameter in order to know what part of the node you want to interpolate */
-		inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,Pt::pt3D (&result)[NPI]) const
+	inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,Pt::pt3D (&result)[NPI]) const
         {
         Pt::pt3D vec_nod[N];
         getDataFromNode<Pt::pt3D>(getter,vec_nod);
-        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, a, result);
+        tiny::mult<double, N, NPI> (vec_nod, a, result);
         }
 		
 		/** interpolation for scalar field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
@@ -251,10 +251,10 @@ class Tet{
         inline void interpolation(std::function<Pt::pt3D (Nodes::Node)> getter,Pt::pt3D (&result)[NPI],
                                   Pt::pt3D (&Tx)[NPI],Pt::pt3D (&Ty)[NPI],Pt::pt3D (&Tz)[NPI]) const
         {
-		double u[Pt::DIM][NPI];
+	double u[Pt::DIM][NPI];
         double dudx[Pt::DIM][NPI], dudy[Pt::DIM][NPI], dudz[Pt::DIM][NPI];
         
-		Pt::pt3D vec_nod[N];
+	Pt::pt3D vec_nod[N];
         getDataFromNode<Pt::pt3D>(getter,vec_nod);
         
         tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, a, u);
@@ -319,10 +319,10 @@ class Tet{
         }
 		
 		/** basic infos */		
-		inline void infos() const {std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2]<< "\t"<< ind[3] <<std::endl;};
+	inline void infos() const {std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2]<< "\t"<< ind[3] <<std::endl;};
 		
         /** more infos */		
-		inline void infos(Nodes::index idx) const 
+	inline void infos(Nodes::index idx) const 
             {
             std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2]<< "\t"<< ind[3] <<std::endl;
             switch(idx)

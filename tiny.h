@@ -128,8 +128,8 @@ template <typename T, int M, int N, int P> inline void direct_transposed_mult(T 
 \param[in] B input matrix
 \param[out] C result: a 3-row matrix represented as a vector of Pt::pt3D
 */
-template <typename T, int M, int N, int P> inline void mult(const Pt::pt3D A[N],const T B[N][P], Pt::pt3D C[P]) {
-   for (int i=0; i<M; i++) 
+template <typename T, int N, int P> inline void mult(const Pt::pt3D A[N],const T B[N][P], Pt::pt3D C[P]) {
+   for (int i=0; i<Pt::DIM; i++) 
    for (int k=0; k<P; k++) {
        T v=T(0);
        for (int j=0; j<N; j++) 
