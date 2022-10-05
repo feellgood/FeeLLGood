@@ -50,30 +50,8 @@ constexpr double a[N][NPI] = {{1.-u[0]-v[0]-w[0],1.-u[1]-v[1]-w[1],1.-u[2]-v[2]-
 {u[0],u[1],u[2],u[3],u[4]}, {v[0],v[1],v[2],v[3],v[4]}, {w[0],w[1],w[2],w[3],w[4]}};
 
 
-/** when some spin transfer torque in the settings input file, this enum defines the nature of the boundary conditions  their int values are only used for dev or debug purpose */
-enum boundary_conditions {Dirichlet = 1, Neumann = 2, Mixt = 3, Undef = -1};
-
-/** defines what is the physical nature of the value stored val (usefull for struct bc_data only) their int values are only used for dev or debug purpose */
-enum type_val_reg {potV = 1,densJ = 2};
-
-
-/** \struct bc_data
-container to regroup region surface number, its kind and its associated physical value for boundary conditions
-*/
-
-struct bc_data
-    {
-    type_val_reg typ;/**< type of physical constant on reg */
-    double val;/**< value of physical constant on reg */
-    int reg;/**< ref to a surface region for val */    
-    
-    /** printing of the datas to the terminal */
-    inline void infos(void)
-        { std::cout << "reg=" << reg << "val=" << val << "\t typ=" << typ <<std::endl; }
-    };
-
 /** \class STT
- container for Spin Transfert Torque constants, Thiaville model
+ container for Spin Transfert Torque constants, Thiaville model, Dirichlet boundary conditions (potential fixed value on two or more surfaces)
  */
 
 struct STT
@@ -86,25 +64,9 @@ struct STT
     double lsf;/**< spin flip length */
     double gamma0;/**< gyromagnetic constant (to check) */
     std::function<double (Pt::pt3D)> func;/**< function to take into account spacial variation of current density (input is gauss point) */
-    
-    boundary_conditions bc;/**< boundary conditions nature */
-    
-    std::vector<bc_data> full_bc_data; /**< all the boundary conditions */
-    
-    /** check the nature of the boundary conditions associated to a spin transfer torque problem */
-    inline void define_boundary_conditions(void)
-        {
-        if(full_bc_data.size() == 2) 
-            { if(( full_bc_data[0].typ == type_val_reg::potV )&&( full_bc_data[1].typ == type_val_reg::potV )) { bc = boundary_conditions::Dirichlet; } 
-            else if (( full_bc_data[0].typ == type_val_reg::densJ )&&( full_bc_data[1].typ == type_val_reg::densJ )) { bc = boundary_conditions::Neumann; } 
-            else if (( full_bc_data[0].typ == type_val_reg::densJ )&&( full_bc_data[1].typ == type_val_reg::potV )) { bc = boundary_conditions::Mixt; }
-            else if (( full_bc_data[0].typ == type_val_reg::potV )&&( full_bc_data[1].typ == type_val_reg::densJ )) { bc = boundary_conditions::Mixt; }
-            } 
-        else {std::cout<< "unsupported boundary conditions" <<std::endl; bc = boundary_conditions::Undef;} 
-        }
+        
+    std::vector<std::pair<int,double> > boundaryCond; /**< all the boundary conditions, first is the region number, second the associated value  */
     };
-
-
     
 /** \class prm
 region number and material constants

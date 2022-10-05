@@ -342,7 +342,6 @@ void Settings::read(YAML::Node yaml)
         assign(p_stt.lsf, stt["l_sf"]);
         assign(p_stt.reg, stt["volume_region_reference"]);
         p_stt.func = [](Pt::pt3D){ return 1; };
-        p_stt.bc = Tetra::boundary_conditions::Undef;
     }  // spin_transfer_torque
 
     // The number of available processors (actually, hardware threads)
