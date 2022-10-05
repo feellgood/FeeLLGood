@@ -57,12 +57,6 @@ static void create_dir_if_needed(std::string dirname)
 
 int time_integration(Fem &fem,Settings &settings /**< [in] */,LinAlgebra &linAlg /**< [in] */,scal_fmm::fmm &myFMM  /**< [in] */,timing &t_prm);
 
-inline std::string spaceString(int nbSpace)
-{std::string S;
-    for(int i=0;i<nbSpace;i++) {S += " ";}
-return S;
-}
-
 // Return the number of characters in an UTF-8-encoded string.
 static int char_length(const std::string &s)
 {
