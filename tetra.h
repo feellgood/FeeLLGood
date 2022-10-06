@@ -204,9 +204,9 @@ class Tet{
         Pt::pt3D vec_nod[N];
         getDataFromNode<Pt::pt3D>(getter,vec_nod);
         
-        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, dadx, Tx);
-        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, dady, Ty);
-        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, dadz, Tz);
+        tiny::mult<double, N, NPI> (vec_nod, dadx, Tx);
+        tiny::mult<double, N, NPI> (vec_nod, dady, Ty);
+        tiny::mult<double, N, NPI> (vec_nod, dadz, Tz);
         }
 		
 		/** interpolation for 3D vector field and a tensor : getter function is given as a parameter to know what part of the node you want to interpolate */
@@ -219,10 +219,10 @@ class Tet{
 	Pt::pt3D vec_nod[N];
         getDataFromNode<Pt::pt3D>(getter,vec_nod);
         
-        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, a, u);
-        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, dadx, dudx);
-        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, dady, dudy);
-        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, dadz, dudz);
+        tiny::mult<double, N, NPI> (vec_nod, a, u);
+        tiny::mult<double, N, NPI> (vec_nod, dadx, dudx);
+        tiny::mult<double, N, NPI> (vec_nod, dady, dudy);
+        tiny::mult<double, N, NPI> (vec_nod, dadz, dudz);
         
         for(int npi=0;npi<NPI;npi++) 
             {
@@ -240,10 +240,10 @@ class Tet{
         Pt::pt3D vec_nod[N];
         getDataFromNode<Pt::pt3D>(getter,vec_nod);
         
-        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, a, result);
-        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, dadx, Tx);
-        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, dady, Ty);
-        tiny::mult<double, Pt::DIM, N, NPI> (vec_nod, dadz, Tz);
+        tiny::mult<double, N, NPI> (vec_nod, a, result);
+        tiny::mult<double, N, NPI> (vec_nod, dadx, Tx);
+        tiny::mult<double, N, NPI> (vec_nod, dady, Ty);
+        tiny::mult<double, N, NPI> (vec_nod, dadz, Tz);
         }
 		
         /** interpolation for components of a field : the getter function is given as a parameter in order to know what part of the node you want to interpolate */
