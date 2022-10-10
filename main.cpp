@@ -26,7 +26,6 @@ received_signal = signal_number;
 // Create the output directory if it does not exist yet.
 static void create_dir_if_needed(std::string dirname)
 {
-    std::cout << "Output directory: " << dirname << " ";
     const char *name = dirname.c_str();
     struct stat statbuf;
     int res = stat(name, &statbuf);
@@ -68,16 +67,6 @@ static int char_length(const std::string &s)
     return len;
 }
 
-// Return a string repeated count times.
-static std::string repeat(const std::string &s, int count)
-{
-    std::string result;
-    result.reserve(s.size() * count);
-    for (int i = 0; i < count; i++)
-        result.append(s);
-    return result;
-}
-
 // Return a string padded with spaces to a given length.
 static std::string pad(const std::string &s, int length)
 {
@@ -87,34 +76,13 @@ static std::string pad(const std::string &s, int length)
     return s + std::string(length, ' ');
 }
 
-// Return a string centered with spaces to a given length.
-static std::string center(const std::string &s, int length)
-{
-    length -= char_length(s);
-    if (length < 0)
-        length = 0;
-    int pad_left = length / 2;
-    int pad_right = length - pad_left;
-    return std::string(pad_left, ' ') + s + std::string(pad_right, ' ');
-}
-
 void prompt(void)
 {
-std::string name = "feeLLGood " + feellgood_version;
-int width = name.size();
-std::string affiliation = "CNRS Grenoble – INP";
-width = std::max(width, char_length(affiliation));
-std::string url = "http://feellgood.neel.cnrs.fr";
-width = std::max(width, (int) url.size());
-std::string process = "process " + std::to_string(getpid());
-std::string separator = repeat("─", width);
-std::cout << "\t┌─" << separator                  << "─┐\n";
-std::cout << "\t│ " << center(name, width)        << " │\n";
-std::cout << "\t│ " << center(affiliation, width) << " │\n";
-std::cout << "\t│ " << center(url, width)         << " │\n";
-std::cout << "\t├─" << separator                  << "─┤\n";
-std::cout << "\t│ " << center(process, width)     << " │\n";
-std::cout << "\t└─" << separator                  << "─┘\n";
+std::cout << "\t┌───────────────────────────────┐\n";
+std::cout << "\t│           feeLLGood           │\n";
+std::cout << "\t│      CNRS Grenoble – INP      │\n";
+std::cout << "\t│ http://feellgood.neel.cnrs.fr │\n";
+std::cout << "\t└───────────────────────────────┘\n";
 }
 
 std::string parseOptions(Settings &settings,int argc,char* argv[])
@@ -202,14 +170,18 @@ FTic counter;
 std::string filename = parseOptions(mySettings,argc,argv);
 prompt();
 if (mySettings.verbose)
-    std::cout << "Verbose mode active.\n";
+    std::cout << "verbose mode:      on\n";
+std::cout << "feeLLGood version: " << feellgood_version << '\n';
+std::cout << "process ID:        " << std::to_string(getpid()) << '\n';
 std::string fileDisplayName = filename=="-" ? "standard input" : filename;
-std::cout << "Loading settings from " << fileDisplayName << "\n";
+std::cout << "settings file:     " << fileDisplayName << '\n';
 if (!mySettings.read(filename))
     {
     std::cerr << "Error: no settings found.\n";
     return 1;
     }
+std::cout << "mesh file:         " << mySettings.getPbName() << '\n';
+std::cout << "output directory:  " << mySettings.r_path_output_dir << " ";
 create_dir_if_needed(mySettings.r_path_output_dir);
 timing t_prm = timing(mySettings.tf, mySettings.dt_min, mySettings.dt_max);
 Fem fem = Fem(mySettings,t_prm);
@@ -223,7 +195,7 @@ if(mySettings.verbose)
     fem.infos();
     }
     
-std::cout<<"start computing..."<<std::endl;
+std::cout<<"computing..."<<std::endl;
 counter.tic();
 LinAlgebra linAlg(mySettings,fem.msh);
 
@@ -235,8 +207,6 @@ if (mySettings.stt_flag)
     chronoElec.tac();
     std::cout << "\tSTT total computing time: " << chronoElec.elapsed() << " s\n" << std::endl;
     }
-else
-    { std::cout << "no spin transfer torque" << std::endl; }
 
 scal_fmm::fmm myFMM(fem.msh,mySettings.verbose,mySettings.scalfmmNbTh);
 
