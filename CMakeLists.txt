@@ -110,9 +110,8 @@ else()
     set(DET_UTESTS false )
 endif()
 
-configure_file(./unit-tests/ut_config.h.in ./unit-tests/ut_config.h)
-
 if(${ENABLE_UTESTS})
+    configure_file(./unit-tests/ut_config.h.in ./unit-tests/ut_config.h)
     include(CTest)
     add_subdirectory(unit-tests)
 endif()
