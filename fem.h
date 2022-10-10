@@ -113,7 +113,7 @@ class Fem
     */
     void infos(void) const 
         {
-        std::cout << "This is feeLLGood SHA1= " + std::string(SHAnumber) << std::endl;
+        std::cout << "This is feeLLGood " + feellgood_version << std::endl;
         msh.infos();
         }
     

@@ -68,6 +68,16 @@ static int char_length(const std::string &s)
     return len;
 }
 
+// Return a string repeated count times.
+static std::string repeat(const std::string &s, int count)
+{
+    std::string result;
+    result.reserve(s.size() * count);
+    for (int i = 0; i < count; i++)
+        result.append(s);
+    return result;
+}
+
 // Return a string padded with spaces to a given length.
 static std::string pad(const std::string &s, int length)
 {
@@ -90,15 +100,21 @@ static std::string center(const std::string &s, int length)
 
 void prompt(void)
 {
-std::string name = std::string("feeLLGood ") + feellgood_version;
+std::string name = "feeLLGood " + feellgood_version;
+int width = name.size();
+std::string affiliation = "CNRS Grenoble – INP";
+width = std::max(width, char_length(affiliation));
+std::string url = "http://feellgood.neel.cnrs.fr";
+width = std::max(width, (int) url.size());
 std::string process = "process " + std::to_string(getpid());
-std::cout << "\t┌───────────────────────────────┐\n";
-std::cout << "\t│ " << center(name, 29) << " │\n";
-std::cout << "\t│ " << center("CNRS Grenoble – INP", 29) << " │\n";
-std::cout << "\t│ http://feellgood.neel.cnrs.fr │\n";
-std::cout << "\t├───────────────────────────────┤\n";
-std::cout << "\t│ " << center(process, 29) <<" │\n";
-std::cout << "\t└───────────────────────────────┘\n";
+std::string separator = repeat("─", width);
+std::cout << "\t┌─" << separator                  << "─┐\n";
+std::cout << "\t│ " << center(name, width)        << " │\n";
+std::cout << "\t│ " << center(affiliation, width) << " │\n";
+std::cout << "\t│ " << center(url, width)         << " │\n";
+std::cout << "\t├─" << separator                  << "─┤\n";
+std::cout << "\t│ " << center(process, width)     << " │\n";
+std::cout << "\t└─" << separator                  << "─┘\n";
 }
 
 std::string parseOptions(Settings &settings,int argc,char* argv[])
@@ -156,7 +172,6 @@ if (print_help)
 if (print_version)
     {
     std::cout << "feeLLGood " << feellgood_version << "\n";
-    std::cout << "compiled from git commit " << SHAnumber << "\n";
     exit(0);
     }
 if (print_defaults)
