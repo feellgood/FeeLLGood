@@ -86,9 +86,9 @@ sudo cp include/ANN/ANN.h /usr/local/include/
 cd ..
 
 # Download and install exprtk.
-# Use the version tagged "g20210303" by FreeBSD ports.
-# C.f. https://cgit.freebsd.org/ports/tree/math/exprtk/Makefile
-exprtk_sha1=ca5c577917646ddba3f71ce6d5dd7d01f351ee80
+# Use the version provided by Microsoft's vcpkg dependency manager:
+# https://github.com/microsoft/vcpkg/blob/master/ports/exprtk/portfile.cmake
+exprtk_sha1=806c519c91fd08ba4fa19380dbf3f6e42de9e2d1
 rm -rf exprtk-$exprtk_sha1/
 if [ ! -f "exprtk-$exprtk_sha1.zip" ]; then
     wget -nv https://github.com/ArashPartow/exprtk/archive/$exprtk_sha1.zip
