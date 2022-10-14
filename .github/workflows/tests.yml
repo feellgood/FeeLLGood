@@ -12,7 +12,7 @@ jobs:
 
     steps:
     - name: checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: install ccache
       run: sudo apt-get install ccache
@@ -23,7 +23,7 @@ jobs:
         cat machine-type.txt
 
     - name: restore cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/.ccache
         key: ccache-${{ hashFiles('machine-type.txt') }}-${{ github.sha }}
