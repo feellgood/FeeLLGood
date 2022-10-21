@@ -18,16 +18,18 @@ jobs:
       run: sudo apt-get install ccache
 
     - name: identify machine architecture
+      id: id-machine
       run: |
-        gcc -### -E -march=native - &> machine-type.txt
-        cat machine-type.txt
+        gcc -### -E -march=native - |& \
+        sed -En '/cc1/s/.*(arch=[[:alnum:]_-]+).*/\1/p' | \
+        tee -a $GITHUB_OUTPUT
 
     - name: restore cache
       uses: actions/cache@v3
       with:
         path: ~/.ccache
-        key: ccache-${{ hashFiles('machine-type.txt') }}-${{ github.sha }}
-        restore-keys: ccache-${{ hashFiles('machine-type.txt') }}-
+        key: ccache-${{ steps.id-machine.outputs.arch }}-${{ github.sha }}
+        restore-keys: ccache-${{ steps.id-machine.outputs.arch }}-
 
     - name: install dependencies
       run: |
