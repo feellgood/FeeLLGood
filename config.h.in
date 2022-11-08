@@ -32,6 +32,7 @@ typedef gmm::row_matrix	<read_vector>    read_matrix; /**< gmm read sparse matri
 
 const double mu0 = 1.25663706212e-6;/**< T A^-1 m */
 const double nu0 = 1./mu0;/**< \f$ \nu_0 = 1/\mu_0 \f$ */
+const double gamma0 = 1.76085963023e11 * mu0;/**< s^-1 A^-1 m */
 const double PLANCKS_H    	= 6.62607015e-34;   /**< kg m^2 / s */
 const double PLANCKS_HBAR 	= PLANCKS_H/(2*M_PI); /**< kg m^2 / s */
 const double CHARGE_ELECTRON 	= 1.602176634e-19;   /**< C */
