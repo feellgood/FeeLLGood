@@ -44,7 +44,7 @@ job_count=$(getconf _NPROCESSORS_ONLN)
 # Install required packages.
 packages="unzip make cmake git"
 if [[ "$ID" =~ centos|rocky ]]; then
-    packages="$packages wget gcc-c++ yaml-cpp-devel boost-devel python3"
+    packages="$packages wget gcc-c++ tbb-devel yaml-cpp-devel boost-devel python3"
     sudo dnf check-update -q || true
     sudo dnf upgrade -y libarchive
     sudo dnf config-manager --set-enabled powertools
@@ -57,7 +57,7 @@ if [[ "$ID" =~ centos|rocky ]]; then
     fi
     sudo dnf install -y $packages
 else  # Debian-like OS
-    packages="$packages g++ libyaml-cpp-dev libboost-dev"
+    packages="$packages g++ libtbb-dev libyaml-cpp-dev libboost-dev"
     sudo apt-get update -q
     if [ "$unit_tests" = "true" ]; then
         packages="$packages libboost-system-dev libboost-filesystem-dev libboost-test-dev"
