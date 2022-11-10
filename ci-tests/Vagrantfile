@@ -33,11 +33,6 @@ Vagrant.configure("2") do |config|
     machine.vm.box = "ubuntu/focal64"
   end
 
-  # Ubuntu 18.04 LTS "Bionic Beaver"
-  config.vm.define "ubuntu_bionic", autostart: false do |machine|
-    machine.vm.box = "ubuntu/bionic64"
-  end
-
   # Debian Testing, future Debian 12 "Bookworm"
   config.vm.define "debian_testing", autostart: false do |machine|
     machine.vm.box = "debian/testing64"
@@ -48,33 +43,9 @@ Vagrant.configure("2") do |config|
     machine.vm.box = "debian/bullseye64"
   end
 
-  # Debian 10 "Buster", released 2019-07-06
-  config.vm.define "debian_buster", autostart: false do |machine|
-    machine.vm.box = "debian/buster64"
-    machine.vm.synced_folder "..", "/home/vagrant/host-FeeLLGood",
-      disabled: true  # not supported
-  end
-
-  # Debian 9 "Stretch", released 2017-06-17
-  config.vm.define "debian_stretch", autostart: false do |machine|
-    machine.vm.box = "debian/stretch64"
-    machine.vm.synced_folder "..", "/home/vagrant/host-FeeLLGood",
-      disabled: true  # not supported
-  end
-
-  # CentOS 8, released 2019-09-24, EOL 2021-12-31
-  config.vm.define "centos_8", autostart: false do |machine|
-    machine.vm.box = "centos/8"
-    machine.vm.hostname = "centos-8"
-    machine.vm.synced_folder "..", "/home/vagrant/host-FeeLLGood",
-      disabled: true  # not supported
-  end
-
-  # Rocky Linux 8, released 2021-06-21 as 8.4 "Green Obsidian"
-  config.vm.define "rockylinux_8", autostart: false do |machine|
-    machine.vm.box = "rockylinux/8"
-    machine.vm.hostname = "rockylinux-8"
-    machine.disksize.size = "10GB"
+  # Rocky Linux 9, released 2022-07-14 as 9.0 "Blue Onyx"
+  config.vm.define "rockylinux_9", autostart: false do |machine|
+    machine.vm.box = "generic/rocky9"
   end
 
 end

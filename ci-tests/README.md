@@ -56,8 +56,8 @@ vagrant status
 ```
 
 to see the list of supported virtual machine images. These are named
-after the installed Linux distributions, e.g. `ubuntu_focal` or
-`rockylinux_8`. Next,
+after the installed Linux distributions, e.g. `ubuntu_jammy` or
+`rockylinux_9`. Next,
 
 ```shell
 vagrant up machine
@@ -76,8 +76,7 @@ to open a shell on the VM.
 If the image supports it, the parent of this directory is available
 read-only within the VM as `host-FeeLLGood`. It can be copied in order
 to test the working copy of the code, or cloned as a repository in order
-to test a committed version. If `host-FeeLLGood` is not available (which
-is currently the case on CentOS and older versions of Debian), the
+to test a committed version. If `host-FeeLLGood` is not available, the
 public repository should be cloned instead:
 
 ```shell

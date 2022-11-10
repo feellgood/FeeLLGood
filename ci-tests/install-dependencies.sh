@@ -44,11 +44,9 @@ job_count=$(getconf _NPROCESSORS_ONLN)
 # Install required packages.
 packages="unzip make cmake git"
 if [[ "$ID" =~ centos|rocky ]]; then
-    packages="$packages wget gcc-c++ tbb-devel yaml-cpp-devel boost-devel python3"
+    packages="$packages wget gcc-c++ tbb-devel yaml-cpp-devel boost-devel"
     sudo dnf check-update -q || true
-    sudo dnf upgrade -y libarchive
-    sudo dnf config-manager --set-enabled powertools
-    sudo dnf install -y epel-release
+    sudo dnf config-manager --set-enabled devel
     if [ "$unit_tests" = "true" ]; then
         : # No extra packages required for unit testing
     fi
