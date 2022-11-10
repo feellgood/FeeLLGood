@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <functional>
+#include <execution>
 
 #include "Utils/FTic.hpp"
 #include "linear_algebra.h"
@@ -107,6 +108,26 @@ counter.tic();
 
 base_projection(!RAND_DETERMINIST);
 
+std::for_each(std::execution::par,refMsh->tet.begin(),refMsh->tet.end(),[this,&Hext,&t_prm](Tetra::Tet & tet)
+	{
+	double K[3*Tetra::N][3*Tetra::N] = { {0} }; 
+        Pt::pt3D L[Tetra::N];
+            
+        tet.integrales(settings.paramTetra,t_prm,Hext,settings.recentering_direction,DW_vz,K, L);
+        tet.projection(K,L);
+	});
+
+std::for_each(std::execution::par,refMsh->fac.begin(),refMsh->fac.end(),[this](Facette::Fac & fac)
+	{
+	double Ks[3*Facette::N][3*Facette::N] = { {0} };
+        Pt::pt3D Ls[Facette::N];
+        
+        fac.integrales(settings.paramFacette,Ls);
+        fac.projection(Ks,Ls);
+	});
+
+
+
 write_matrix K_TH(2*NOD, 2*NOD);
 std::vector<double> L_TH(2*NOD,0);
 
@@ -116,11 +137,6 @@ for(int i=0;i<NbTH;i++)
         {
         std::for_each(refTetIt[i].first,refTetIt[i].second, [this,&Hext,&t_prm,&K_TH,&L_TH](Tetra::Tet & tet)
             {
-            double K[3*Tetra::N][3*Tetra::N] = { {0} }; 
-            Pt::pt3D L[Tetra::N];
-            
-            tet.integrales(settings.paramTetra,t_prm,Hext,settings.recentering_direction,DW_vz,K, L);
-            tet.projection(K,L);
             if(my_mutex.try_lock())
                 {
                 tet.assemblage_mat(K_TH);tet.assemblage_vect(L_TH);tet.treated = true;
@@ -134,11 +150,6 @@ tab_TH[NbTH] = std::thread( [this,&K_TH,&L_TH]()
     {
     std::for_each(refMsh->fac.begin(),refMsh->fac.end(), [this,&K_TH,&L_TH](Facette::Fac & fac)
         {
-        double Ks[3*Facette::N][3*Facette::N] = { {0} };
-        Pt::pt3D Ls[Facette::N];
-        
-        fac.integrales(settings.paramFacette,Ls);
-        fac.projection(Ks,Ls);
         
         if(my_mutex.try_lock())
             {

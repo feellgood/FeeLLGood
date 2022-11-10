@@ -44,7 +44,7 @@ if(${ENABLE_LTO})
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
-set( CMAKE_CXX_FLAGS "-DNDEBUG -Wall -Wextra -std=c++14 -fopenmp -O3 -march=native" CACHE STRING "C++ compiler flags used during builds." FORCE )
+set( CMAKE_CXX_FLAGS "-DNDEBUG -Wall -Wextra -std=c++17 -fopenmp -O3 -march=native" CACHE STRING "C++ compiler flags used during builds." FORCE )
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
 
@@ -65,7 +65,7 @@ add_custom_command(
 
 ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES} default-settings.o)
 
-TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm ANN)
+TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm ANN tbb)
 
 if(DEFINED withSharedLib)
     MESSAGE( "Shared lib generation " ${withSharedLib} )
