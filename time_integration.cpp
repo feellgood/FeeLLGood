@@ -120,9 +120,11 @@ for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target +=
         fem.DW_vz += fem.DW_dir*fem.msh.avg(Nodes::get_v_comp,Pt::IDX_Z)*fem.msh.l.z()/2.;
         
         linAlg.set_DW_vz(fem.DW_vz);
-        //int err = linAlg.monoThreadSolver(t_prm,nt);
+        
         Pt::pt3D Hext = settings.getValue(t_prm.get_t());
-        int err = linAlg.solver(Hext,t_prm,nt);  
+        
+        linAlg.prepareElements(Hext,t_prm);
+        int err = linAlg.solver(t_prm,nt);  
         fem.vmax = linAlg.get_v_max();
         
         if (err)

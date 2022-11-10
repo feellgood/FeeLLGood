@@ -9,8 +9,6 @@ projection and matrix assembly is multithreaded for tetrahedron, monothread for 
 #include <deque>
 #include <queue>
 #include <thread>
-#include <mutex>
-#include <future>
 #include <random>
 
 #include "gmm/gmm_precond_diagonal.h"
@@ -50,11 +48,11 @@ public:
 	/** pointer to diagonal preconditioner  */
 	gmm::diagonal_precond <read_matrix> *prc = nullptr;
 
-    /** mono thread solver , debug only */ 
-    //int monoThreadSolver(Pt::pt3D const& Hext,timing const& t_prm,long nt);
+    /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors) */
+    void prepareElements(Pt::pt3D const& Hext /**< [in] applied field */, timing const& t_prm /**< [in] */);
     
     /**  solver, uses bicgstab and gmres, sparse matrix and vector are filled with multiThreading */
-	int  solver(Pt::pt3D const& Hext /**< [in] applied field */, timing const& t_prm /**< [in] */,long nt /**< [in] */);
+	int  solver(timing const& t_prm /**< [in] */,long nt /**< [in] */);
 
     /** setter for DW_dz */
     inline void set_DW_vz(double vz /**< [in] */){DW_vz = vz;}    
@@ -75,9 +73,6 @@ private:
 	double DW_vz;/**< speed of the domain wall */
 	const Settings &settings;/**< settings */
     double v_max;/**< maximum speed */
-	
-	/** mutex to avoid improper access to sparse matrix */
-    std::mutex my_mutex;
     
     /** thread vector */
     std::vector<std::thread> tab_TH;
