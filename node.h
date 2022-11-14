@@ -54,7 +54,7 @@ inline void calc_ep() {ep = Pt::pt3D(theta_sph,phi_sph)*u0; ep.normalize(); }
 /**
 computes vector eq, it is the third vector of a base composed of  \f$ \left\lbrace u0,e_p , e_q = u0 \times e_p \right\rbrace \f$
  */
-inline void calc_eq() {eq = u0*ep; ep.normalize(); }
+inline void calc_eq() {eq = u0*ep; eq.normalize(); }
 
 /** setter for the local basis vector */
 inline void setBasis(const double r1,const double r2)
@@ -80,17 +80,11 @@ integration of the evolution of the magnetization for time step dt
 in a base composed of u0,ep,eq = u0*ep we have  
 \f$ v = v_p e_p + v_q e_q \f$
 and new magnetization value is : \f$ u = u_0 + v dt \f$ after normalization
-There is an algebraic simplification when developping \f$ v \f$ due to the fact that magnetization u0 is a unit vector, and \f$ v = v_p/r \hat{\zeta} \times u_0 + v_q/r (\hat{\zeta} - (u_0 \cdot \hat{\zeta}) u_0 )  \f$
-With \f$ \hat{\zeta} \f$ unit vector defined by theta_sph and phi_sph and \f$ r=sin(\hat{\zeta},u_0) \f$
-This formula needs less operator*
 */
 
 inline void make_evol(const double vp /**< [in] */,const double vq /**< [in] */,const double dt /**< [in] */)
 {
-Pt::pt3D zeta = Pt::pt3D(theta_sph,phi_sph); 
-double r = Pt::norme(zeta*u0);
-
-v = vp*ep + (vq/r)*(zeta - (Pt::pScal(u0,zeta))*u0);
+v = vp*ep + vq*eq;
 u = u0 + dt*v;
 u.normalize();
 }
