@@ -117,7 +117,7 @@ double Js =params[idxPrm].J;
 double Abis = 2.0*(params[idxPrm].A)/Js;
 double Kbis = 2.0*(params[idxPrm].K)/Js;
 double K3bis = 2.0*(params[idxPrm].K3)/Js;
-const double s_dt = THETA*prm_t.get_dt();//theta from theta scheme in config.h.in
+const double s_dt = THETA*prm_t.get_dt()*gamma0;//theta from theta scheme in config.h.in
 
 /*-------------------- INTERPOLATION --------------------*/
 pt3D Hd[NPI], dUdx[NPI], dUdy[NPI], dUdz[NPI];
@@ -160,7 +160,7 @@ for (int npi=0; npi<NPI; npi++)
     contrib_aniso += calc_aniso_uniax(npi,params[idxPrm].uk,Kbis,s_dt,U,V,H_aniso);
     contrib_aniso += calc_aniso_cub(npi, params[idxPrm].ex, params[idxPrm].ey, params[idxPrm].ez,K3bis,s_dt,U,V, H_aniso);
 
-    pt3D H = H_aniso + Hd[npi] + Hext + s_dt*Hv[npi];
+    pt3D H = H_aniso + Hd[npi] + Hext + (s_dt/gamma0)*Hv[npi];
     build_BE(npi, H, Abis, dUdx, dUdy, dUdz, BE);
 
     double uHm = add_STT_BE(npi,params[idxPrm].p_STT,Js,gradV,p_g,U,dUdx,dUdy,dUdz,BE);

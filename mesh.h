@@ -97,8 +97,8 @@ double updateNodes(std::vector<double> const& X,const double dt)
 
 	for(unsigned int i=0; i < NOD ; i++)
 	    {
-	    double vp = X[i];
-	    double vq = X[NOD+i];
+	    double vp = X[i]*gamma0;
+	    double vq = X[NOD+i]*gamma0;
 	    double v2 = vp*vp + vq*vq;
 	    if (v2>v2max) { v2max = v2; }
 	    node[i].make_evol(vp,vq,dt);    
