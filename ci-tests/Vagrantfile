@@ -15,8 +15,6 @@ Vagrant.configure("2") do |config|
     path: "install-dependencies.sh", args: "-d", privileged: false
 
   # Provide read-only access to the parent directory.
-  # This mount is disabled below in those few boxes that do not support
-  # it for lack of the VirtualBox guest additions.
   config.vm.synced_folder "..", "/home/vagrant/host-FeeLLGood",
     mount_options: ["ro"]
 

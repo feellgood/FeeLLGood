@@ -40,13 +40,12 @@ and 640&nbsp;elements), which is expected to be in the directory
 
 ## Manual testing
 
-Install [Vagrant][], [VirtualBox][] and the Vagrant disksize plugin:
+Install [Vagrant][] and [VirtualBox][]:
 
 ```shell
 curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
 sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
 sudo apt install vagrant virtualbox
-vagrant plugin install vagrant-disksize
 ```
 
 Then, in this directory, run

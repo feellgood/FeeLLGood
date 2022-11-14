@@ -39,14 +39,15 @@ job_count=$(getconf _NPROCESSORS_ONLN)
 ########################################################################
 # The following should match the documented installation procedure, save
 # for the following options added to some commands:
-# apt-get: -y, make: -j, wget: -nv, unzip: -q
+# apt-get: -y, dnf: -y, make: -j, wget: -nv, unzip: -q
 
 # Install required packages.
 packages="unzip make cmake git"
-if [[ "$ID" =~ centos|rocky ]]; then
+if [ "$ID" = "rocky" ]; then
     packages="$packages wget gcc-c++ tbb-devel yaml-cpp-devel boost-devel"
     sudo dnf check-update -q || true
-    sudo dnf config-manager --set-enabled devel
+    sudo dnf config-manager --set-enabled devel crb
+    sudo dnf install -y epel-release
     if [ "$unit_tests" = "true" ]; then
         : # No extra packages required for unit testing
     fi
