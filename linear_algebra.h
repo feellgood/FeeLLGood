@@ -11,6 +11,9 @@ projection and matrix assembly is multithreaded for tetrahedron, monothread for 
 #include <thread>
 #include <random>
 
+#include <mutex>
+#include <execution>
+
 #include "gmm/gmm_precond_diagonal.h"
 #include "gmm/gmm_iter.h"
 #include "gmm/gmm_solver_bicgstab.h"
@@ -33,13 +36,8 @@ class LinAlgebra
 public:
 	/** constructor */	
     inline LinAlgebra(Settings & s /**< [in] */,
-                      mesh & my_msh /**< [in] */) :  NbTH(s.solverNbTh),NOD(my_msh.getNbNodes()),refMsh(&my_msh),settings(s)
-    {
-    tab_TH.resize(NbTH+1);
-    refTetIt.resize(NbTH);
-    prepareItTet( refMsh->tet );
-    base_projection(!RAND_DETERMINIST);
-    }
+                      mesh & my_msh /**< [in] */) :  NOD(my_msh.getNbNodes()),refMsh(&my_msh),settings(s)
+        { base_projection(!RAND_DETERMINIST); }
     
     /** destructor */
     ~LinAlgebra ()
@@ -61,21 +59,12 @@ public:
     inline double get_v_max(void) {return v_max;}
     
 private:
-    /** number of threads, initialized by constructor */ 
-    const int NbTH;
-    
     const int NOD;/**< total number of nodes, also an offset for filling sparseMatrix, initialized by constructor */
     mesh *refMsh;/**< direct access to the mesh */
 	
-    /** vector of pair of iterators for the tetrahedrons for multithreading */
-	std::vector < std::pair<std::vector<Tetra::Tet>::iterator,std::vector<Tetra::Tet>::iterator> > refTetIt; 
-	
-	double DW_vz;/**< speed of the domain wall */
-	const Settings &settings;/**< settings */
+    double DW_vz;/**< speed of the domain wall */
+    const Settings &settings;/**< settings */
     double v_max;/**< maximum speed */
-    
-    /** thread vector */
-    std::vector<std::thread> tab_TH;
     
     /** will be used to obtain a seed for the random number generator engine */
     std::random_device rd;
@@ -83,17 +72,29 @@ private:
     /** update nodes.u and v values and find the maximum speed value  */
     void updateNodes(std::vector<double> const& X,const double dt);
     
-    /** prepare refTetIt pairs, used by constructor */
-    void prepareItTet(std::vector <Tetra::Tet> &myTet);
-    
     /** computes the local vector basis {ep,eq} in the tangeant plane for projection on the elements */
     void base_projection(bool determinist);
     
     /** template to insert coeff in sparse matrix K_TH and vector L_TH, T is Tetra or Facette */
     template <class T> void insertCoeff(std::vector<T> & container, write_matrix &K_TH, std::vector<double> &L_TH)
     {
-    std::for_each( container.begin(), container.end(), [&K_TH,&L_TH](T & my_elem)
-        { if(!my_elem.treated) {my_elem.assemblage_mat(K_TH);my_elem.assemblage_vect(L_TH);my_elem.treated = true;} } ); 
+    std::mutex my_mutex;
+
+    std::for_each(std::execution::par,container.begin(), container.end(),
+		[&my_mutex,&K_TH,&L_TH](T & my_elem)
+			{
+			if(my_mutex.try_lock())
+		 		{
+		 		my_elem.assemblage_mat(K_TH);my_elem.assemblage_vect(L_TH);my_elem.treated = true;
+		 		my_mutex.unlock();
+		 		}
+			});
+    
+    std::for_each( container.begin(), container.end(),
+    		[&K_TH,&L_TH](T & my_elem)
+        		{
+        		if(!my_elem.treated) {my_elem.assemblage_mat(K_TH);my_elem.assemblage_vect(L_TH);my_elem.treated = true;} 
+        		}); 
     }
     
 }; // fin class linAlgebra

@@ -1,10 +1,5 @@
-#include <algorithm>
-#include <functional>
-#include <mutex>
-
 #include "Utils/FTic.hpp"
 #include "linear_algebra.h"
-
 
 int LinAlgebra::solver(timing const& t_prm,long nt)
 {
@@ -14,39 +9,6 @@ counter.tic();
 
 write_matrix K_TH(2*NOD, 2*NOD);
 std::vector<double> L_TH(2*NOD,0);
-
-std::mutex my_mutex;
-
-for(int i=0;i<NbTH;i++) 
-    {
-    tab_TH[i] = std::thread( [this,&my_mutex,&K_TH,&L_TH,i]() //,&Hext,&t_prm
-        {
-        std::for_each(refTetIt[i].first,refTetIt[i].second, [&my_mutex,&K_TH,&L_TH](Tetra::Tet & tet)
-            {
-            if(my_mutex.try_lock())
-                {
-                tet.assemblage_mat(K_TH);tet.assemblage_vect(L_TH);tet.treated = true;
-                my_mutex.unlock();    
-                }
-            });//end for_each
-        }); //end thread
-    }
-
-tab_TH[NbTH] = std::thread( [this,&my_mutex,&K_TH,&L_TH]()
-    {
-    std::for_each(refMsh->fac.begin(),refMsh->fac.end(), [&my_mutex,&K_TH,&L_TH](Facette::Fac & fac)
-        {
-        
-        if(my_mutex.try_lock())
-            {
-            fac.assemblage_mat(K_TH);fac.assemblage_vect(L_TH);fac.treated =true;
-            my_mutex.unlock();    
-            }
-        });
-    }
-);//end thread
-
-for(int i=0;i<(NbTH+1);i++) {tab_TH[i].join();}
 
 insertCoeff<Tetra::Tet>(refMsh->tet,K_TH,L_TH);
 insertCoeff<Facette::Fac>(refMsh->fac,K_TH,L_TH);

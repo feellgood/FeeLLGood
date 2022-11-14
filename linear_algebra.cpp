@@ -1,4 +1,3 @@
-#include <execution>
 #include "linear_algebra.h"
 
 void LinAlgebra::updateNodes(std::vector<double> const& X,const double dt)
@@ -15,21 +14,6 @@ for(int i=0; i < NOD ; i++)
     }
 
 v_max = sqrt(v2max);
-}
-
-void LinAlgebra::prepareItTet(std::vector <Tetra::Tet> &myTet)
-{
-const size_t block_size = myTet.size()/NbTH;
-const int extra_blocks = myTet.size()%NbTH;
-std::vector<Tetra::Tet>::iterator it = myTet.begin();
-
-for (int i = 0; i < NbTH; i++)
-    {
-    refTetIt[i].first = it;
-    std::advance(it, block_size + (i<extra_blocks ? 1 : 0));
-    refTetIt[i].second = it;
-    }
-assert(refTetIt[NbTH-1].second == myTet.end());
 }
 
 void LinAlgebra::base_projection(bool determinist)
