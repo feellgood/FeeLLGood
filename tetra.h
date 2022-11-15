@@ -132,7 +132,7 @@ class Tet{
 		/** constructor for readMesh. It initializes weight hat function and dad(x|y|z) if \f$ | detJ | < \epsilon \f$ jacobian is considered degenerated
          unit tests : Tet_constructor; Tet_inner_tables
          */
-		inline Tet(const std::shared_ptr<Nodes::Node[]> _p_node,//const Nodes::NodeList _p_node /**< [in] pointer to the nodes */,
+		inline Tet(const std::shared_ptr<Nodes::Node[]> _p_node /**< [in] pointer to the nodes */,
                    const int _NOD /**< [in] total nb of nodes */,
                    const int _reg /**< [in] region number */,
                    const int _idx /**< [in] region index in region vector */,
