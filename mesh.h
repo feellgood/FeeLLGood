@@ -166,15 +166,13 @@ public:
     
 private:
     /** node container : the node list is not initialized by constructor, but later, while reading the mesh, by member function init_node */
-    Nodes::NodeList node;
-    
-    
+    std::shared_ptr<Nodes::Node[]> node;
     
     /** memory allocation for the nodes */
     inline void init_node(const int Nb)
         {
         nbNod = Nb;
-        node = Nodes::NodeList(new Nodes::Node[Nb]);
+        node = std::shared_ptr<Nodes::Node[]>  ( new Nodes::Node[Nb] );
         }
     
     /** total number of nodes read from mesh file */

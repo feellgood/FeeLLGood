@@ -85,8 +85,9 @@ BOOST_CHECK( test_result );
 BOOST_AUTO_TEST_CASE(Fac_calc_surf, * boost::unit_test::tolerance(UT_TOL))
 {
 std::cout << "calc_surf test" << std::endl;
+
 int nbNod = 3;
-Nodes::NodeList node(new Nodes::Node[nbNod]); 
+std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
 
 Pt::pt3D p1(1,0,0),p2(0,1,0),p3(1,1,0),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
 double theta_sph(0),phi_sph(0),phi0(0),phi(0),phiv0(0),phiv(0),V(0);
@@ -110,8 +111,9 @@ BOOST_TEST( f.calc_surf() == s );
 BOOST_AUTO_TEST_CASE(Fac_interpolation_pt3D, * boost::unit_test::tolerance(UT_TOL))
 {
 std::cout << "surf interpolation test" << std::endl;
+
 int nbNod = 3;
-Nodes::NodeList node(new Nodes::Node[nbNod]); 
+std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
 
 unsigned sd = my_seed();
 std::mt19937 gen(sd);
@@ -161,7 +163,7 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_double, * boost::unit_test::tolerance(UT_
 {
 std::cout << "surf interpolation test" << std::endl;
 int nbNod = 3;
-Nodes::NodeList node(new Nodes::Node[nbNod]); 
+std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
 
 unsigned sd = my_seed();
 std::mt19937 gen(sd);
@@ -209,7 +211,7 @@ BOOST_AUTO_TEST_CASE(Fac_potential_u, * boost::unit_test::tolerance(UT_TOL))
 {
 std::cout << "fac potential test on u" << std::endl;
 int nbNod = 3;
-Nodes::NodeList node(new Nodes::Node[nbNod]); 
+std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
 
 unsigned sd = my_seed(); 
 std::mt19937 gen(sd);
@@ -308,7 +310,7 @@ BOOST_AUTO_TEST_CASE(Fac_potential_v, * boost::unit_test::tolerance(UT_TOL))
 {
 std::cout << "fac potential test on v" << std::endl;
 int nbNod = 3;
-Nodes::NodeList node(new Nodes::Node[nbNod]); 
+std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
 
 unsigned sd = my_seed();
 std::mt19937 gen(sd);
@@ -409,7 +411,7 @@ std::cout << "fac test on Nodes::Pcoeff template" << std::endl;
 const int N = Facette::N;
 
 int nbNod = 3;
-Nodes::NodeList node(new Nodes::Node[nbNod]); 
+std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
 
 unsigned sd = my_seed();
 std::mt19937 gen(sd);

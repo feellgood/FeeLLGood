@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_SUITE(ut_anisotropy)
 BOOST_AUTO_TEST_CASE(anisotropy_uniax, * boost::unit_test::tolerance(10.0*UT_TOL))
 {
 int nbNod = 4;
-Nodes::NodeList node(new Nodes::Node[nbNod]); 
+std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
 
 unsigned sd = my_seed();
 std::mt19937 gen(sd);
@@ -119,7 +119,7 @@ for (int npi=0; npi<Tetra::NPI; npi++)
 BOOST_AUTO_TEST_CASE(anisotropy_cubic, * boost::unit_test::tolerance(10.0*UT_TOL))
 {
 int nbNod = 4;
-Nodes::NodeList node(new Nodes::Node[nbNod]); 
+std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
 
 unsigned sd = my_seed();
 std::mt19937 gen(sd);

@@ -184,33 +184,6 @@ template <class T,int N> void projection_mat(T &x,double (&A)[3*N][3*N])
        }
     }
 
-/**
- * This is a std::shared_ptr<Node> with the addition of operator[],
- * for compatibility with c++14 (operator[] is defined in C++17).
- */
-class NodeList : public std::shared_ptr<Node>
-{
-public:
-    /**
-     * Constructor from a regular pointer.
-     *
-     * On C++17, we could use std::shared_ptr<Node[]>, which would use
-     * the appropriate array deleter (delete[]). Since we want
-     * compatibility with C++14, we have to use std::shared_ptr<Node>,
-     * and specify a custom deleter, otherwise the "scalar" delete would
-     * be used.
-     */
-    NodeList(Node *p = nullptr)
-    : std::shared_ptr<Node>(p, std::default_delete<Node[]>())
-    {}
-
-    /** Array subscript operator */
-    Node& operator[](std::ptrdiff_t i) { return (&**this)[i]; }
-
-    /** Array subscript operator, `const` version */
-    const Node& operator[](std::ptrdiff_t i) const { return (&**this)[i]; }
-};
-    
 } //end namespace Nodes
 
 #endif /* node_h */
