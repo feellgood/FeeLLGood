@@ -41,6 +41,9 @@ const double BOHRS_MUB = CHARGE_ELECTRON*PLANCKS_HBAR/(2.*MASS_ELECTRON); /**< C
 /** for debugging purpose, some determinist pseudo random number for ep,eq vector basis can be used */
 #define RAND_DETERMINIST true
 
+/** do an extra orthonormalization of the (u0, ep, eq) basis in order to minimize the rounding errors */
+#define PARANOID_ORTHONORMALIZATION false
+
 /** theta of the theta integration scheme in time */
 #define THETA 0.5
 

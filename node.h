@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "config.h"
 #include "pt3D.h"
 
 /**
@@ -19,12 +20,11 @@ namespace Nodes
      *convenient enum mainly to access some data values in calculations, used by some templates 
      */
     enum index 
-        {IDX_p = 0,IDX_u0 = 1,IDX_v0 = 2,IDX_u = 3,IDX_v = 4,IDX_theta_sph = 5,IDX_phi_sph = 6,IDX_phi0 = 7,IDX_phi = 8,IDX_phiv0 = 9,IDX_phiv = 10};
+        {IDX_p = 0,IDX_u0 = 1,IDX_v0 = 2,IDX_u = 3,IDX_v = 4,IDX_phi0 = 5,IDX_phi = 6,IDX_phiv0 = 7,IDX_phiv = 8};
 
 /** \struct Node
 Node is containing physical point of coordinates \f$ p = (x,y,z) \f$, magnetization value at \f$ m(p,t) \f$. 
 Many other values for the computation of the scalar potential \f$ \phi \f$
-Angles theta_sph and phi_sph are defining a unit vector to build a local base u0,ep = u0*e(theta_sph,phi_sph), eq = u0*ep
 */
 struct Node {
 Pt::pt3D p;/**< Physical position p=(x,y,z)  of the node */
@@ -32,9 +32,6 @@ Pt::pt3D u0;/**< magnetization initial or reset value, used to store previous va
 Pt::pt3D v0;/**< initial or reset value, used to store previous value for time evolution */
 Pt::pt3D u;/**< magnetization value */
 Pt::pt3D v;/**< magnetization speed */
-
-double theta_sph;/**< theta angle for unit vector \f$ e_p = (\theta,\phi) \times u_0 \f$ in spherical coordinates  */
-double phi_sph;/**< phi angle for unit vector \f$ e_p = (\theta,\phi) \times u_0 \f$ in spherical coordinates  */
 
 Pt::pt3D ep;/**< local vector basis : \f$ e_p = \vec{rand} \times u0 \f$ , then normalized */
 Pt::pt3D eq;/**< local vector basis : \f$ e_q = u0 \times e_p \f$ , then normalized */
@@ -46,23 +43,40 @@ double phiv;/**< scalar potential associated to velocity */
 
 double V;/**< electrostatic potential (for STT) */
 
-/**
-computes vector ep, it is the second vector of a base composed of  \f$ \left\lbrace u0,e_p , e_q = u0 \times e_p \right\rbrace \f$
- */
-inline void calc_ep() {ep = Pt::pt3D(theta_sph,phi_sph)*u0; ep.normalize(); }
-
-/**
-computes vector eq, it is the third vector of a base composed of  \f$ \left\lbrace u0,e_p , e_q = u0 \times e_p \right\rbrace \f$
- */
-inline void calc_eq() {eq = u0*ep; eq.normalize(); }
-
 /** setter for the local basis vector */
-inline void setBasis(const double r1,const double r2)
+inline void setBasis(const double r)
 {
-theta_sph = r1;
-phi_sph = r2;
-calc_ep();
-calc_eq();
+// Choose for an initial ep the direction, among (X, Y, Z), which is further away from u0.
+double abs_x = fabs(u0.x()),
+       abs_y = fabs(u0.y()),
+       abs_z = fabs(u0.z());
+if (abs_x < abs_y)
+    { ep = abs_x<abs_z ? Pt::pt3D(Pt::IDX_X) : Pt::pt3D(Pt::IDX_Z); }
+else
+    { ep = abs_y<abs_z ? Pt::pt3D(Pt::IDX_Y) : Pt::pt3D(Pt::IDX_Z); }
+
+// Gram-Schmidt orthonormalization of (u0, ep).
+ep -= pScal(ep, u0) * u0;
+ep.normalize();
+
+// Complete the basis with a vector product.
+eq = u0 * ep;
+
+// Rotate (ep, eq) by the random angle.
+Pt::pt3D new_ep = cos(r) * ep - sin(r) * eq;
+eq = sin(r) * ep + cos(r) * eq;
+ep = new_ep;
+
+// The basis (u0, ep, eq) should already be orthonormal. An extra orthonormalization could reduce the rounding errors.
+if (PARANOID_ORTHONORMALIZATION)
+    {
+    // Modified Gram-Schmidt orthonormalization.
+    ep -= pScal(ep, u0) * u0;
+    ep.normalize();
+    eq -= pScal(eq, u0) * u0;
+    eq -= pScal(eq, ep) * ep;
+    eq.normalize();
+    }
 }
 
 /**

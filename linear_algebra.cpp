@@ -18,23 +18,20 @@ v_max = sqrt(v2max);
 
 void LinAlgebra::base_projection(bool determinist)
 {
-double r1,r2;
+double r;
     
 if(!determinist)
     {    
     std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
     std::uniform_real_distribution<> distrib(0.0,1.0);
-    
-    r1 = distrib(gen);
-    r2 = distrib(gen);
+    r = distrib(gen);
     }
 else
     {
-    r1 = rand() / (RAND_MAX+1.);
-    r2 = rand() / (RAND_MAX+1.);
+    r = rand() / (RAND_MAX+1.);
     }
 
-for(int i=0; i < NOD ; i++) refMsh->setNode(i).setBasis(M_PI*r1,M_2_PI*r2);
+for(int i=0; i < NOD ; i++) refMsh->setNode(i).setBasis(M_2_PI*r);
 }
 
 void LinAlgebra::prepareElements(Pt::pt3D const& Hext /**< [in] applied field */, timing const& t_prm /**< [in] */)
