@@ -49,12 +49,12 @@ std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
-double theta_sph(0),phi_sph(0),phi0(0),phi(0),phiv0(0),phiv(0);
+double phi0(0),phi(0),phiv0(0),phiv(0);
 
-Nodes::Node n0 = {p0,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n1 = {p1,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n2 = {p2,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n3 = {p3,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n0 = {p0,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n1 = {p1,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n2 = {p2,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n3 = {p3,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
 
 node[0] = n0;
 node[1] = n1;
@@ -129,12 +129,12 @@ int nbNod = 4;
 std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
 
 Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
-double theta_sph(0),phi_sph(0),phi0(0),phi(0),phiv0(0),phiv(0);
+double phi0(0),phi(0),phiv0(0),phiv(0);
 
-Nodes::Node n0 = {p0,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n1 = {p1,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n2 = {p2,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n3 = {p3,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n0 = {p0,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n1 = {p1,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n2 = {p2,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n3 = {p3,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
 
 node[0] = n0;
 node[1] = n1;
@@ -185,12 +185,12 @@ std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
-double theta_sph(0),phi_sph(0),phi0(0),phi(0),phiv0(0),phiv(0);
+double phi0(0),phi(0),phiv0(0),phiv(0);
 
-Nodes::Node n0 = {p0,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n1 = {p1,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n2 = {p2,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n3 = {p3,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n0 = {p0,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n1 = {p1,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n2 = {p2,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n3 = {p3,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
 
 node[0] = n0;
 node[1] = n1;
@@ -332,12 +332,12 @@ std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
-double theta_sph(0),phi_sph(0),phi0(0),phi(0),phiv0(0),phiv(0);
+double phi0(0),phi(0),phiv0(0),phiv(0);
 
-Nodes::Node n0 = {p0,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n1 = {p1,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n2 = {p2,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n3 = {p3,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n0 = {p0,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n1 = {p1,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n2 = {p2,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n3 = {p3,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
 
 node[0] = n0;
 node[1] = n1;
@@ -430,12 +430,12 @@ std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
-double theta_sph(0),phi_sph(0),phi0(0),phi(0),phiv0(0),phiv(0);
+double phi0(0),phi(0),phiv0(0),phiv(0);
 
-Nodes::Node n0 = {p0,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n1 = {p1,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n2 = {p2,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n3 = {p3,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n0 = {p0,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n1 = {p1,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n2 = {p2,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n3 = {p3,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
 
 node[0] = n0;
 node[1] = n1;
@@ -537,17 +537,17 @@ std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 Pt::pt3D p1(1,0,0),p2(0,1,0),p3(1,1,0),p4(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
-double theta_sph(0),phi_sph(0),phi0(0),phi(0),phiv0(0),phiv(0),V(0);
+double phi0(0),phi(0),phiv0(0),phiv(0),V(0);
 
-node[0] = {p1,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,V};
-node[1] = {p2,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,V};
-node[2] = {p3,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,V};
-node[3] = {p4,u0,v0,u,v,theta_sph,phi_sph,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,V};
+node[0] = {p1,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,V};
+node[1] = {p2,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,V};
+node[2] = {p3,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,V};
+node[3] = {p4,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,V};
 
 for(int i=0;i<nbNod;i++)
     {
     node[i].u0 = Pt::pt3D(M_PI*distrib(gen),2*M_PI*distrib(gen));
-    node[i].setBasis(M_PI*distrib(gen),2*M_PI*distrib(gen));
+    node[i].setBasis(2*M_PI*distrib(gen));
     }
 
 Tetra::Tet t(node,nbNod,0,0,1,2,3,4);//carefull with indices (starting from 1)

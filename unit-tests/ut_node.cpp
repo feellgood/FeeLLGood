@@ -57,42 +57,50 @@ BOOST_TEST(Nodes::get_p(n).norm() == 1.0);
 /* second lvl tests : pure mathematics   */
 /*---------------------------------------*/
 
+// Build a unit vector from the cylindrical coordinates (theta, z).
+// If theta and z are uniformly distributed in [-pi, pi] and [-1, 1]
+// respectively, the resulting vector is isotropically distributed.
+static Pt::pt3D unit_vector(double theta, double z)
+{
+double r = sqrt(1 - z*z);
+return Pt::pt3D(r * cos(theta), r * sin(theta), z);
+}
 
-BOOST_AUTO_TEST_CASE(node_e_p, * boost::unit_test::tolerance(100.0*UT_TOL))
+BOOST_AUTO_TEST_CASE(node_e_p, * boost::unit_test::tolerance(10.0*UT_TOL))
 {
 unsigned sd = my_seed();
 std::mt19937 gen(sd);
-std::uniform_real_distribution<> distrib(0.0,M_PI);
+std::uniform_real_distribution<> distrib(-1.0,1.0);
     
 Nodes::Node n;
 
-n.theta_sph = distrib(gen);
-n.phi_sph = 2*distrib(gen);
-n.u0 = Pt::pt3D(distrib(gen)-M_PI_2,distrib(gen)-M_PI_2,distrib(gen)-M_PI_2); // u0 should be a unit vector but the tests here check more
-n.calc_ep();
+// test the orthonormality of the basis (u0, ep, eq)
+n.u0 = unit_vector(M_PI * distrib(gen), distrib(gen));
+n.setBasis(M_PI * distrib(gen));
 
 if (!DET_UT) std::cout << "seed =" << sd << std::endl;
+BOOST_TEST(n.u0.norm() == 1.0);
 BOOST_TEST(n.ep.norm() == 1.0);
-BOOST_TEST( fabs(Pt::pScal(n.u0,n.ep)) == 0.0 );
+BOOST_TEST(n.eq.norm() == 1.0);
+BOOST_TEST(Pt::pScal(n.u0, n.ep) == 0.0);
+BOOST_TEST(Pt::pScal(n.ep, n.eq) == 0.0);
+BOOST_TEST(Pt::pScal(n.eq, n.u0) == 0.0);
 }
 
 BOOST_AUTO_TEST_CASE(node_evol, * boost::unit_test::tolerance(1e3*UT_TOL))
 {
 unsigned sd = my_seed();
 std::mt19937 gen(sd);
-std::uniform_real_distribution<> distrib(0.0,M_PI);
+std::uniform_real_distribution<> distrib(-1.0,1.0);
     
 Nodes::Node n;
 
-n.theta_sph = distrib(gen);
-n.phi_sph = 2*distrib(gen);
 double vp = distrib(gen);
 double vq = distrib(gen);
-double dt = distrib(gen);
+double dt = distrib(gen) + 1.0;
 
-n.u0 = Pt::pt3D(distrib(gen),2*distrib(gen)); 
-n.calc_ep();
-n.calc_eq();
+n.u0 = unit_vector(M_PI * distrib(gen), distrib(gen));
+n.setBasis(M_PI * distrib(gen));
 
 Pt::pt3D v = vp*n.ep + vq*n.eq;
 
