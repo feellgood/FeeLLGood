@@ -53,7 +53,7 @@ for (int npi=0; npi<NPI; npi++)
 return weightedScalarProd(dens);
 }
 
-void Fac::assemblage_mat(write_matrix &K) const
+void Fac::assemblage_mat(write_matrix &K,const int offset) const
 {
     for (int i=0; i < N; i++)
         {
@@ -62,8 +62,8 @@ void Fac::assemblage_mat(write_matrix &K) const
         for (int j=0; j < N; j++)
             {
             int j_= ind[j];
-            K(NOD+i_,j_) += Kp[i][j];      K(NOD+i_, NOD+j_) += Kp[  i][N+j];
-            K(    i_,j_) += Kp[N+i][j];    K(    i_, NOD+j_) += Kp[N+i][N+j];
+            K(offset+i_,j_) += Kp[i][j];      K(offset+i_, offset+j_) += Kp[  i][N+j];
+            K(    i_,j_) += Kp[N+i][j];    K(    i_, offset+j_) += Kp[N+i][N+j];
             }
         }
 }

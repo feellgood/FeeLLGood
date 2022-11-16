@@ -24,7 +24,9 @@ BOOST_CHECK(x != 0.0f);
 /*-----------------------------------------------------*/
 BOOST_AUTO_TEST_CASE(Tet_constructor)
 {
-Tetra::Tet tet(nullptr,0,0,0,0,0,0,0);
+std::vector<Nodes::Node> node(0);
+
+Tetra::Tet tet(node,0,0,0,0,0,0);
 
 BOOST_CHECK( (tet.getN() == Tetra::N) && (tet.getNPI() == Tetra::NPI) );
 }
@@ -42,7 +44,8 @@ BOOST_AUTO_TEST_CASE(Tet_inner_tables, * boost::unit_test::tolerance(UT_TOL))
 {
 // this test is dedicated to  check dadx,dady,dadz and weight tables, those values are initilized once by Tet constructor
 int nbNod = 4;
-std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
+//std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
+std::vector<Nodes::Node> node(nbNod);
 
 unsigned sd = my_seed();
 std::mt19937 gen(sd);
@@ -62,7 +65,7 @@ node[2] = n2;
 node[3] = n3;
 for (int i=0;i<nbNod;i++) { node[i].u0 = Pt::pt3D(M_PI*distrib(gen),2*M_PI*distrib(gen)); }
 
-Tetra::Tet t(node,nbNod,0,0,1,2,3,4);//carefull with indices (starting from 1)
+Tetra::Tet t(node,0,0,1,2,3,4);//carefull with indices (starting from 1)
 
 // ref code (with minimal adaptations of dad(x|y|z) in file Mesh_hat.cc of src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
 double _dadx[Tetra::N][Tetra::NPI];
@@ -126,7 +129,7 @@ BOOST_TEST( sqrt(result_w) == 0.0 );
 BOOST_AUTO_TEST_CASE(Tet_calc_vol, * boost::unit_test::tolerance(UT_TOL))
 {
 int nbNod = 4;
-std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
+std::vector<Nodes::Node> node(nbNod);
 
 Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
 double phi0(0),phi(0),phiv0(0),phiv(0);
@@ -141,7 +144,7 @@ node[1] = n1;
 node[2] = n2;
 node[3] = n3;
 
-Tetra::Tet t(node,nbNod,0,0,1,2,3,4);//carefull with indices (starting from 1)
+Tetra::Tet t(node,0,0,1,2,3,4);//carefull with indices (starting from 1)
 
 double result = 1/6.0;
 double vol = t.calc_vol();
@@ -178,7 +181,7 @@ return val;
 BOOST_AUTO_TEST_CASE(Tet_nod_interpolation, * boost::unit_test::tolerance(UT_TOL))
 {
 int nbNod = 4;
-std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
+std::vector<Nodes::Node> node(nbNod);
 
 unsigned sd = my_seed();
 std::mt19937 gen(sd);
@@ -203,7 +206,7 @@ for (int i=0;i<nbNod;i++)
     node[i].v0 = Pt::pt3D(M_PI*distrib(gen),2*M_PI*distrib(gen));
     }
 
-Tetra::Tet t(node,nbNod,0,0,1,2,3,4);//carefull with indices (starting from 1)
+Tetra::Tet t(node,0,0,1,2,3,4);//carefull with indices (starting from 1)
 
 // ref code (with minimal adaptations of integrales method in file MuMag_integrales.cc of src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
 double _u_nod[3][Tetra::N], _u[3][Tetra::NPI];
@@ -325,7 +328,7 @@ BOOST_TEST( n_dvdz == n_dVdz );
 BOOST_AUTO_TEST_CASE(Tet_nod_interpolation2, * boost::unit_test::tolerance(UT_TOL))
 {
 int nbNod = 4;
-std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
+std::vector<Nodes::Node> node(nbNod);
 
 unsigned sd = my_seed();
 std::mt19937 gen(sd);
@@ -350,7 +353,7 @@ for (int i=0;i<nbNod;i++)
     node[i].phiv0 = distrib(gen);
     }
 
-Tetra::Tet t(node,nbNod,0,0,1,2,3,4);//carefull with indices (starting from 1)
+Tetra::Tet t(node,0,0,1,2,3,4);//carefull with indices (starting from 1)
 
 // ref code (with minimal adaptations of integrales method in file MuMag_integrales.cc of src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
 double negphi0_nod[Tetra::N],Hdx[Tetra::NPI],Hdy[Tetra::NPI],Hdz[Tetra::NPI];
@@ -423,7 +426,7 @@ double AE[3*Tetra::N][3*Tetra::N] = {{0}};
 double AE_to_check[3*Tetra::N][3*Tetra::N] = {{0}};
 
 int nbNod = 4;
-std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
+std::vector<Nodes::Node> node(nbNod);
 
 unsigned sd = my_seed();
 std::mt19937 gen(sd);
@@ -444,7 +447,7 @@ node[3] = n3;
 
 for (int i=0;i<nbNod;i++) { node[i].u0 = Pt::pt3D(M_PI*distrib(gen),2*M_PI*distrib(gen)); }
 
-Tetra::Tet t(node,nbNod,0,0,1,2,3,4);//carefull with indices (starting from 1)
+Tetra::Tet t(node,0,0,1,2,3,4);//carefull with indices (starting from 1)
 
 double a= distrib(gen);
 double b= distrib(gen);
@@ -530,7 +533,7 @@ std::cout << "Tet test on Nodes::Pcoeff template" << std::endl;
 const int N = Tetra::N;
 
 int nbNod = 4;
-std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
+std::vector<Nodes::Node> node(nbNod);
 
 unsigned sd = my_seed();
 std::mt19937 gen(sd);
@@ -550,7 +553,8 @@ for(int i=0;i<nbNod;i++)
     node[i].setBasis(2*M_PI*distrib(gen));
     }
 
-Tetra::Tet t(node,nbNod,0,0,1,2,3,4);//carefull with indices (starting from 1)
+//Tetra::Tet t(node,nbNod,0,0,1,2,3,4);//carefull with indices (starting from 1)
+Tetra::Tet t(node,0,0,1,2,3,4);//carefull with indices (starting from 1)
 
 double P[2*N][3*N] = { {0} };
 for(int i=0;i<2*N;i++)

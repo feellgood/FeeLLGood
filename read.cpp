@@ -42,7 +42,7 @@ if(symb == "$MeshFormat")
     lookFor(mySets.verbose,msh,"$Nodes");
     
     double scale = mySets.getScale();
-
+    int nbNod;
     msh >> nbNod;
     init_node(nbNod);
 
@@ -74,7 +74,7 @@ if(symb == "$MeshFormat")
             case 4:{
                 int i0,i1,i2,i3;
                 msh >> i0 >> i1 >> i2 >> i3;
-                tet.push_back( Tetra::Tet(node,nbNod,reg,mySets.findTetraRegionIdx(reg),i0,i1,i2,i3) );
+                tet.push_back( Tetra::Tet(node,reg,mySets.findTetraRegionIdx(reg),i0,i1,i2,i3) );
                 break;
                 }
             default:
@@ -113,11 +113,11 @@ double t = stod(str.substr(idx));
 
 if(VERBOSE) { std::cout << ".sol file: " << str << " @ time t = " << t << std::endl; }
 
-for (int i=0; i<nbNod; i++)
+for (unsigned int i=0; i<node.size(); i++)
     {
     Nodes::Node & n = node[i];
     Nodes::Node node_;
-    int i_;
+    unsigned int i_;
     fin >> i_ >>  node_.p >> n.u >> n.phi;// carefull! >> is overloaded for class pt3D
 
     if (i!=i_)

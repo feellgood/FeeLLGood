@@ -66,7 +66,7 @@ if (save_period && (nt%save_period)==0)
 void mesh::savecfg_vtk(Settings const& settings,timing const& t_prm,const string fileName) const
 {
     const int TET = tet.size();
-    const int NOD = nbNod;
+    const int NOD = node.size();
 
 if(settings.verbose) { cout <<"\n -------------------\n " << fileName << endl; }
 
@@ -121,7 +121,7 @@ fout << "#time : " << t_prm.get_t() << endl;
 
 // fout << boost::format("%8d %+20.10f %+20.10f %+20.10f %+20.10f %+20.10f %+20.10f %+20.10e") % i % x % y % z % u1 % u2 % u3 % phi << endl;}
 
-for(int i=0;i<nbNod;i++)
+for(unsigned int i=0;i<node.size();i++)
         { 
         Pt::pt3D p = node[i].p/s;
         fout << i << "\t" << p << "\t" << node[i].u << "\t" << node[i].phi << '\t' << node[i].V << endl;

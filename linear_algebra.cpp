@@ -1,20 +1,7 @@
 #include "linear_algebra.h"
 
 void LinAlgebra::updateNodes(std::vector<double> const& X,const double dt)
-{
-double v2max = 0.0;
-
-for(int i=0; i < NOD ; i++)
-    {
-    double vp = X[i];
-    double vq = X[NOD+i];
-    double v2 = vp*vp + vq*vq;
-    if (v2>v2max) { v2max = v2; }
-    refMsh->setNode(i).make_evol(vp,vq,dt);    
-    }
-
-v_max = sqrt(v2max);
-}
+	{ v_max = refMsh->updateNodes(X,dt); }
 
 void LinAlgebra::base_projection(bool determinist)
 {
@@ -31,7 +18,7 @@ else
     r = rand() / (RAND_MAX+1.);
     }
 
-for(int i=0; i < NOD ; i++) refMsh->setNode(i).setBasis(M_2_PI*r);
+refMsh->setBasis(M_2_PI*r);
 }
 
 void LinAlgebra::prepareElements(Pt::pt3D const& Hext /**< [in] applied field */, timing const& t_prm /**< [in] */)

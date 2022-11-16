@@ -244,7 +244,7 @@ for (int npi=0; npi<NPI; npi++)
 return ( -param.J*weightedScalarProd(dens) );
 }
 
-void Tet::assemblage_mat(write_matrix &K) const
+void Tet::assemblage_mat(write_matrix &K,const int offset) const
 {
 for (int i=0; i < N; i++)
     {
@@ -253,8 +253,8 @@ for (int i=0; i < N; i++)
     for (int j=0; j < N; j++)
         {
         int j_= ind[j];
-        K(NOD+i_,j_) += Kp[i][j];      K(NOD+i_, NOD+j_) += Kp[  i][N+j];
-        K(    i_,j_) += Kp[N+i][j];    K(    i_, NOD+j_) += Kp[N+i][N+j];
+        K(offset+i_,j_) += Kp[i][j];      K(offset+i_, offset+j_) += Kp[  i][N+j];
+        K(    i_,j_) += Kp[N+i][j];    K(    i_, offset+j_) += Kp[N+i][N+j];
         }
     }    
 }
@@ -288,10 +288,10 @@ std::set<Facette::Fac> s;
 
 int ia=ind[0];int ib=ind[1];int ic=ind[2];int id=ind[3];
 
-s.insert( Facette::Fac(nullptr,0,reg,idxPrm,ia,ic,ib) );
-s.insert( Facette::Fac(nullptr,0,reg,idxPrm,ib,ic,id) );
-s.insert( Facette::Fac(nullptr,0,reg,idxPrm,ia,id,ic) );
-s.insert( Facette::Fac(nullptr,0,reg,idxPrm,ia,ib,id) );
+s.insert( Facette::Fac(refNode,0,reg,idxPrm,ia,ic,ib) );
+s.insert( Facette::Fac(refNode,0,reg,idxPrm,ib,ic,id) );
+s.insert( Facette::Fac(refNode,0,reg,idxPrm,ia,id,ic) );
+s.insert( Facette::Fac(refNode,0,reg,idxPrm,ia,ib,id) );
 
 return s;
 }

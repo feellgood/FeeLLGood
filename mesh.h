@@ -6,6 +6,7 @@
 */
 
 #include <set>
+#include <execution>
 
 #include "node.h"
 #include "facette.h"
@@ -20,7 +21,7 @@ class mesh
 {
 public:
     /** constructor  : read mesh, reorder indices and computes values related to the mesh : center and length along coordinates and diameter = max(l(x|y|z)), vol,surf */
-    inline mesh(Settings const& mySets /**< [in] */):nbNod(0)
+    inline mesh(Settings const& mySets /**< [in] */) //:nbNod(0)
         {
         readMesh(mySets);
         if(mySets.verbose) std::cout<< "mesh in memory." <<std::endl;
@@ -46,7 +47,7 @@ public:
         }
     
     /** return number of nodes  */
-    inline int getNbNodes(void) const { return nbNod; }
+    inline int getNbNodes(void) const { return node.size(); }//{ return nbNod; }
     
     /** return number of triangular fac */
     inline int getNbFacs(void) const { return fac.size(); }
@@ -57,12 +58,18 @@ public:
     /** getter : return node */
     inline const Nodes::Node getNode(const int i) const { return node[i]; }
     
-    /** setter : node */
-    inline Nodes::Node & setNode(const int i) {return node[i];}
+    /** setter for u0 */
+    inline void set_node_u0(const int i,Pt::pt3D const& val) { node[i].u0 = val; }
+    
+    /** fix to zero node[i].v */
+    inline void set_node_zero_v(const int i) { node[i].v = Pt::pt3D(0.,0.,0.); }
     
     /** setter : node potential */
     inline void setNodesPotential(read_vector const& Xr)
-        { for (int i=0; i < nbNod; i++) node[i].V = Xr[i]; }
+        { 
+        for (unsigned int i=0; i < node.size(); i++) node[i].V = Xr[i];
+        //for (int i=0; i < nbNod; i++) node[i].V = Xr[i]; 
+        }
     
     /** basic informations on the mesh */
     void infos(void) const
@@ -75,8 +82,35 @@ public:
         std::cout << "\t Total volume\t\t\t" << vol << std::endl;
         }
 
+/** call setBasis for all nodes */
+void setBasis(const double r)
+	{
+	std::for_each(std::execution::par,node.begin(),node.end(), [&r](Nodes::Node &nod){ nod.setBasis(r); } );
+	}
+
+double updateNodes(std::vector<double> const& X,const double dt)
+	{
+	double v2max = 0.0;
+	const int NOD = node.size();
+
+	for(unsigned int i=0; i < node.size() ; i++)
+	    {
+	    double vp = X[i];
+	    double vq = X[NOD+i];
+	    double v2 = vp*vp + vq*vq;
+	    if (v2>v2max) { v2max = v2; }
+	    node[i].make_evol(vp,vq,dt);    
+	    }
+
+	return sqrt(v2max);
+	}
+
+
     /** call evolution for all the nodes */
-   inline void evolution(void) { for(int i=0;i<nbNod;i++) node[i].evolution(); }
+   inline void evolution(void) 
+   {
+   std::for_each(std::execution::par,node.begin(),node.end(),[](Nodes::Node &nod) { nod.evolution(); } );
+   }
     
     /** isobarycenter */	
     Pt::pt3D c;
@@ -105,7 +139,10 @@ public:
     Demagnetizing field and energies don't need to be reset, because they won't be updated if failure is detected.
     I don't know how to cleanly reset "fem.DW_vz". BC
     */
-    inline void reset(void) { for(int i=0;i<nbNod;i++) node[i].reset(); }
+    inline void reset(void)
+    { 
+    std::for_each(std::execution::par,node.begin(),node.end(),[](Nodes::Node & nod){ nod.reset(); });
+    }
     
 
     /** read a solution from a file (tsv formated) and initialize fem struct to restart computation from that distribution, return time
@@ -117,7 +154,7 @@ public:
     /** computes an analytical initial magnetization distribution as a starting point for the simulation */
     inline void init_distrib(Settings const& mySets /**< [in] */)
         { 
-        for(int i=0;i<nbNod;i++)
+        for(unsigned int i=0;i< node.size();i++)
             {
             node[i].u0 = mySets.getValue( Nodes::get_p(node[i]) );
             node[i].u = node[i].u0; node[i].phi  = 0.; node[i].phiv = 0.;
@@ -164,20 +201,16 @@ public:
     /** setter for electrostatic potential */
     inline void set_elec_pot(const int i,const double val) {node[i].V = val;}
     
+    inline void set(const int i, std::function<void (Nodes::Node &,const double)> what_to_set,const double val)
+    	{ what_to_set(node[i],val); }
+    
 private:
-    /** node container : the node list is not initialized by constructor, but later, while reading the mesh, by member function init_node */
-    std::shared_ptr<Nodes::Node[]> node;
+
+    /** node container : not initialized by constructor, but later, while reading the mesh, by member function init_node */
+    std::vector< Nodes::Node > node;
     
     /** memory allocation for the nodes */
-    inline void init_node(const int Nb)
-        {
-        nbNod = Nb;
-        node = std::shared_ptr<Nodes::Node[]>  ( new Nodes::Node[Nb] );
-        }
-    
-    /** total number of nodes read from mesh file */
-    int nbNod;
-    
+    inline void init_node(const int Nb) { node.resize(Nb); }
     
 	/** reading mesh format 2.2 file function */
     void readMesh(Settings const& mySets);
@@ -187,7 +220,7 @@ private:
     inline double minNodes(const Pt::index coord) const
         {
         double _min = __DBL_MAX__;
-        for(int i=0;i<nbNod;i++)
+        for(unsigned int i=0;i<node.size();i++)
             {
             double val = node[i].p(coord);
             if (val < _min) _min = val;
@@ -199,7 +232,7 @@ private:
     inline double maxNodes(const Pt::index coord) const
         {
         double _max = __DBL_MIN__;
-        for(int i=0;i<nbNod;i++)
+        for(unsigned int i=0;i<node.size();i++)
             {
             double val = node[i].p(coord);
             if (val > _max) _max = val;
@@ -252,7 +285,7 @@ private:
                     {
                     for (int nrot=0; nrot<3; nrot++)
                         {
-                        Facette::Fac fc(getNbNodes());
+                        Facette::Fac fc(node,0,0,0,0,0,0);
                         fc.ind[(0+nrot)%3]=i0; fc.ind[(1+nrot)%3]=i1; fc.ind[(2+nrot)%3]=i2;
                         it=sf.find(fc);
                         if (it!=sf.end()) break;

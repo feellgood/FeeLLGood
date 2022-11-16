@@ -132,19 +132,18 @@ class Tet{
 		/** constructor for readMesh. It initializes weight hat function and dad(x|y|z) if \f$ | detJ | < \epsilon \f$ jacobian is considered degenerated
          unit tests : Tet_constructor; Tet_inner_tables
          */
-		inline Tet(const std::shared_ptr<Nodes::Node[]> _p_node /**< [in] pointer to the nodes */,
-                   const int _NOD /**< [in] total nb of nodes */,
+		inline Tet(const std::vector<Nodes::Node>  & _p_node /**< vector of nodes */,
                    const int _reg /**< [in] region number */,
                    const int _idx /**< [in] region index in region vector */,
                    const int i0 /**< [in] node index */,
                    const int i1 /**< [in] node index */,
                    const int i2 /**< [in] node index */,
-                   const int i3 /**< [in] node index */) : idxPrm(_idx),treated(false),NOD(_NOD),reg(_reg),refNode(_p_node)
+                   const int i3 /**< [in] node index */) : idxPrm(_idx),treated(false),reg(_reg),refNode(_p_node)
             {
             ind[0] = i0; ind[1] = i1; ind[2] = i2; ind[3] = i3;
             for (int i=0; i<N; i++) ind[i]--;           // convention Matlab/msh -> C++
             
-	if(NOD>0)
+	if(refNode.size()>0)
 		{
             	if (calc_vol() < 0.0) { std::swap(ind[2],ind[3]); }
             
@@ -341,11 +340,12 @@ class Tet{
         }
         
         /** matrix assembly using inner matrix in tetra */
-        void assemblage_mat(write_matrix &K) const;
+        void assemblage_mat(write_matrix &K,const int offset) const;
         
         /** vector assembly using inner vector in tetra */
-        inline void assemblage_vect(std::vector<double> &L) const
-            { for (int i=0; i < N; i++) { L[NOD+ind[i]] += Lp[i]; L[ind[i]] += Lp[N+i]; } }
+        inline void assemblage_vect(std::vector<double> &L,const int offset) const
+            { for (int i=0; i < N; i++) { L[offset+ind[i]] += Lp[i]; L[ind[i]] += Lp[N+i]; } }
+            //{ for (int i=0; i < N; i++) { L[NOD+ind[i]] += Lp[i]; L[ind[i]] += Lp[N+i]; } }
         
         /** getter for N ; unit tests : Tet_constructor */
 		inline int getN(void) const {return N;}
@@ -375,9 +375,8 @@ class Tet{
         std::set<Facette::Fac> ownedFac() const;
 
     private:
-        const int NOD;/**< total number of nodes, also an offset for filling sparseMatrix */
         const int reg;/**< .msh region number */
-        const std::shared_ptr<Nodes::Node[]> refNode;/**< direct access to the Nodes */
+        const std::vector<Nodes::Node> & refNode;/**< vector of nodes */
         
         /** template getter to access and copy some parts of the node vector of type T = double or Pt::pt3D  */
         template <class T> void getDataFromNode(std::function< T (Nodes::Node)> getter,T (&X_data)[N]) const

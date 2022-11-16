@@ -81,19 +81,19 @@ private:
     std::mutex my_mutex;
 
     std::for_each(std::execution::par,container.begin(), container.end(),
-		[&my_mutex,&K_TH,&L_TH](T & my_elem)
+		[this,&my_mutex,&K_TH,&L_TH](T & my_elem)
 			{
 			if(my_mutex.try_lock())
 		 		{
-		 		my_elem.assemblage_mat(K_TH);my_elem.assemblage_vect(L_TH);my_elem.treated = true;
+		 		my_elem.assemblage_mat(K_TH,NOD);my_elem.assemblage_vect(L_TH,NOD);my_elem.treated = true;
 		 		my_mutex.unlock();
 		 		}
 			});
     
     std::for_each( container.begin(), container.end(),
-    		[&K_TH,&L_TH](T & my_elem)
+    		[this,&K_TH,&L_TH](T & my_elem)
         		{
-        		if(!my_elem.treated) {my_elem.assemblage_mat(K_TH);my_elem.assemblage_vect(L_TH);my_elem.treated = true;} 
+        		if(!my_elem.treated) {my_elem.assemblage_mat(K_TH,NOD);my_elem.assemblage_vect(L_TH,NOD);my_elem.treated = true;} 
         		}); 
     }
     

@@ -97,8 +97,10 @@ for (int i=0; i<msh.getNbNodes(); i++)
     kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 
     int ns=nnIdx[0]; 
-    msh.setNode(i).u0 = msh.getNode(ns).u;     
-    msh.setNode(i).v  = Pt::pt3D(0.,0.,0.);     
+    //msh.setNode(i).u0 = msh.getNode(ns).u;     
+    msh.set_node_u0(i, msh.getNode(ns).u );
+    //msh.setNode(i).v  = Pt::pt3D(0.,0.,0.);     
+    msh.set_node_zero_v(i);
     }
     
 annDeallocPt(queryPt);

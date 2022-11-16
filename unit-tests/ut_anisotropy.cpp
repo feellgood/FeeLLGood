@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_SUITE(ut_anisotropy)
 BOOST_AUTO_TEST_CASE(anisotropy_uniax, * boost::unit_test::tolerance(10.0*UT_TOL))
 {
 int nbNod = 4;
-std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
+std::vector<Nodes::Node> node(nbNod);
 
 unsigned sd = my_seed();
 std::mt19937 gen(sd);
@@ -41,7 +41,7 @@ for (int i=0;i<nbNod;i++)
     node[i].v0 = Pt::pt3D(M_PI*distrib(gen),2*M_PI*distrib(gen));
     }
 
-Tetra::Tet t(node,nbNod,0,0,1,2,3,4);//carefull with indices (starting from 1)
+Tetra::Tet t(node,0,0,1,2,3,4);//carefull with indices (starting from 1)
 
 double dt = distrib(gen);
 
@@ -119,7 +119,7 @@ for (int npi=0; npi<Tetra::NPI; npi++)
 BOOST_AUTO_TEST_CASE(anisotropy_cubic, * boost::unit_test::tolerance(10.0*UT_TOL))
 {
 int nbNod = 4;
-std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
+std::vector<Nodes::Node> node(nbNod);
 
 unsigned sd = my_seed();
 std::mt19937 gen(sd);
@@ -144,7 +144,7 @@ for (int i=0;i<nbNod;i++)
     node[i].v0 = Pt::pt3D(M_PI*distrib(gen),2*M_PI*distrib(gen));
     }
 
-Tetra::Tet t(node,nbNod,0,0,1,2,3,4);//carefull with indices (starting from 1)
+Tetra::Tet t(node,0,0,1,2,3,4);//carefull with indices (starting from 1)
 
 double dt = distrib(gen);
 

@@ -132,6 +132,7 @@ class fmm
     /**
     computes the demag field, with (getter  = u,setter = phi) or (getter = v,setter = phi_v)
     */
+
     void demag(std::function<const Pt::pt3D (Nodes::Node)> getter,std::function<void (Nodes::Node &,const double)> setter,mesh &msh,Settings &settings)
         {
         FmmClass algo(&tree, &kernels);
@@ -165,7 +166,9 @@ class fmm
             for(int idxPart = 0 ; idxPart < nbParticlesInLeaf ; ++idxPart)
                 {
                 const int indexPartOrig = indexes[idxPart];
-                setter(msh.setNode(indexPartOrig), (potentials[idxPart]*norm + corr[indexPartOrig])/(4*M_PI));
+                //setter(msh.setNode(indexPartOrig), (potentials[idxPart]*norm + corr[indexPartOrig])/(4*M_PI));
+                msh.set(indexPartOrig,setter,(potentials[idxPart]*norm + corr[indexPartOrig])/(4*M_PI) );
+                //setter(msh.node[indexPartOrig], (potentials[idxPart]*norm + corr[indexPartOrig])/(4*M_PI));
                 }
             });
         }

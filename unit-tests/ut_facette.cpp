@@ -25,19 +25,12 @@ BOOST_CHECK(x != 0.0f);
 /* zero lvl tests : direct elementary member functions */ 
 /*-----------------------------------------------------*/
 
-BOOST_AUTO_TEST_CASE(Fac_constructor1)
-{
-std::cout << "1 param constructor" << std::endl;
-Facette::Fac f(0);
-
-std::cout << "indices:" << f.ind[0] << ";" << f.ind[1] <<";" << f.ind[2] << std::endl;
-BOOST_CHECK( (f.getN() == Facette::N) && (f.getNPI() == Facette::NPI) );
-}
 
 BOOST_AUTO_TEST_CASE(Fac_full_constructor)
 {
+std::vector<Nodes::Node> node;
 std::cout << "7 param constructor" << std::endl;
-Facette::Fac f(nullptr,0,0,0,0,0,0);
+Facette::Fac f(node,0,0,0,0,0,0);
 
 std::cout << "indices:" << f.ind[0] << ";" << f.ind[1] <<";" << f.ind[2] << std::endl;
 BOOST_CHECK( (f.getN() == Facette::N) && (f.getNPI() == Facette::NPI) );
@@ -55,13 +48,14 @@ unsigned sd = my_seed();
 std::mt19937_64 gen(sd);// random number generator: standard Mersenne twister initialized with seed
 std::uniform_int_distribution<int> distrib;
 
-Facette::Fac f(nullptr,0,0,0,0,0,0);
+std::vector<Nodes::Node> node;
+Facette::Fac f(node,0,0,0,0,0,0);
 bool test_result = !(f<f);// whatever is f, f<f must return false
 
 for(int i=0;i<100;i++)
     {
-    Facette::Fac f1(nullptr,0,0,0,distrib(gen),distrib(gen),distrib(gen));
-    Facette::Fac f2(nullptr,0,0,0,distrib(gen),distrib(gen),distrib(gen));
+    Facette::Fac f1(node,0,0,0,distrib(gen),distrib(gen),distrib(gen));
+    Facette::Fac f2(node,0,0,0,distrib(gen),distrib(gen),distrib(gen));
 
 /* ref code */
     bool val_ref=false;
@@ -87,7 +81,7 @@ BOOST_AUTO_TEST_CASE(Fac_calc_surf, * boost::unit_test::tolerance(UT_TOL))
 std::cout << "calc_surf test" << std::endl;
 
 int nbNod = 3;
-std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
+std::vector<Nodes::Node> node(nbNod);
 
 Pt::pt3D p1(1,0,0),p2(0,1,0),p3(1,1,0),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
 double phi0(0),phi(0),phiv0(0),phiv(0),V(0);
@@ -113,7 +107,7 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_pt3D, * boost::unit_test::tolerance(UT_TO
 std::cout << "surf interpolation test" << std::endl;
 
 int nbNod = 3;
-std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
+std::vector<Nodes::Node> node(nbNod);
 
 unsigned sd = my_seed();
 std::mt19937 gen(sd);
@@ -163,7 +157,7 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_double, * boost::unit_test::tolerance(UT_
 {
 std::cout << "surf interpolation test" << std::endl;
 int nbNod = 3;
-std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
+std::vector<Nodes::Node> node(nbNod);
 
 unsigned sd = my_seed();
 std::mt19937 gen(sd);
@@ -211,7 +205,7 @@ BOOST_AUTO_TEST_CASE(Fac_potential_u, * boost::unit_test::tolerance(UT_TOL))
 {
 std::cout << "fac potential test on u" << std::endl;
 int nbNod = 3;
-std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
+std::vector<Nodes::Node> node(nbNod);
 
 unsigned sd = my_seed(); 
 std::mt19937 gen(sd);
@@ -310,7 +304,7 @@ BOOST_AUTO_TEST_CASE(Fac_potential_v, * boost::unit_test::tolerance(UT_TOL))
 {
 std::cout << "fac potential test on v" << std::endl;
 int nbNod = 3;
-std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
+std::vector<Nodes::Node> node(nbNod);
 
 unsigned sd = my_seed();
 std::mt19937 gen(sd);
@@ -411,7 +405,7 @@ std::cout << "fac test on Nodes::Pcoeff template" << std::endl;
 const int N = Facette::N;
 
 int nbNod = 3;
-std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
+std::vector<Nodes::Node> node(nbNod);
 
 unsigned sd = my_seed();
 std::mt19937 gen(sd);

@@ -53,24 +53,23 @@ Face is a class containing the index references to nodes, it has a triangular sh
 */
 class Fac{
 	public:
-        /** constructor */
-        inline Fac(int _NOD /**< [in] */):idxPrm(0),treated(false),NOD(_NOD),reg(0),refNode(nullptr) { surf = 0.0; Ms = 0.0; ind[0]=ind[1]=ind[2]=0; }
 
         /** constructor used by readMesh */
-        inline Fac(const std::shared_ptr<Nodes::Node[]> _p_node /**< [in] pointer to the node */,
+        inline Fac(const std::vector<Nodes::Node> & _p_node /**< [in] vector of nodes */,
                    const int _NOD /**< [in] nb nodes */,
                    const int _reg /**< [in] region number */,
                    const int _idx /**< [in] region index in region vector */,
                    const int i0 /**< [in] node index */,
                    const int i1 /**< [in] node index */,
-                   const int i2 /**< [in] node index */) : idxPrm(_idx),treated(false),NOD(_NOD),reg(_reg),refNode(_p_node)
+                   const int i2 /**< [in] node index */) : idxPrm(_idx),treated(false),reg(_reg),refNode(_p_node)
         {
         ind[0]=i0;ind[1]=i1;ind[2]=i2;
-        if(NOD>0)
+        
+        if(_NOD>0)
             { // to force index to start from 0 (C++) instead of Matlab/msh convention
-            if((i0>0)&&(i0<=NOD)) { ind[0]--; } else std::cout<< "warning index i0 out of bounds in fac constructor" <<std::endl;
-            if((i1>0)&&(i1<=NOD)) { ind[1]--; } else std::cout<< "warning index i1 out of bounds in fac constructor" <<std::endl;
-            if((i2>0)&&(i2<=NOD)) { ind[2]--; } else std::cout<< "warning index i2 out of bounds in fac constructor" <<std::endl;
+            if((i0>0)&&(i0<=_NOD)) { ind[0]--; } else std::cout<< "warning index i0 out of bounds in fac constructor" <<std::endl;
+            if((i1>0)&&(i1<=_NOD)) { ind[1]--; } else std::cout<< "warning index i1 out of bounds in fac constructor" <<std::endl;
+            if((i2>0)&&(i2<=_NOD)) { ind[2]--; } else std::cout<< "warning index i2 out of bounds in fac constructor" <<std::endl;
             surf = calc_surf();
             }
         else
@@ -137,11 +136,12 @@ class Fac{
         }
         
         /** assemblage of the matrix elements from inner matrix in facette object */
-        void assemblage_mat(write_matrix &K) const;
+        void assemblage_mat(write_matrix &K,const int offset) const;
         
         /** assemblage of the vector elements from inner matrix in facette object */
-        inline void assemblage_vect(std::vector<double> &L) const
-            { for (int i=0; i < N; i++) { L[NOD+ind[i]] += Lp[i]; L[ind[i]] += Lp[N+i]; } }
+        inline void assemblage_vect(std::vector<double> &L,const int offset) const
+            //{ for (int i=0; i < N; i++) { L[NOD+ind[i]] += Lp[i]; L[ind[i]] += Lp[N+i]; } }
+        { for (int i=0; i < N; i++) { L[offset+ind[i]] += Lp[i]; L[ind[i]] += Lp[N+i]; } }
         
         /** getter for N */
         inline int getN(void) const {return N;}	
@@ -186,11 +186,10 @@ class Fac{
     inline double calc_surf(void) const { return 0.5*normal_vect().norm(); }
     
     private:
-        const int NOD;/**< number of nodes */
-        const int reg;/**< .msh region number */
+       const int reg;/**< .msh region number */
         
         /** direct access to the Nodes */
-        const std::shared_ptr<Nodes::Node[]> refNode;
+        const std::vector<Nodes::Node> & refNode;
         
         /** return normal to the triangular face, not normalized */
         inline Pt::pt3D normal_vect() const
