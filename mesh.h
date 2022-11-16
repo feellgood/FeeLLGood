@@ -88,12 +88,13 @@ void setBasis(const double r)
 	std::for_each(std::execution::par,node.begin(),node.end(), [&r](Nodes::Node &nod){ nod.setBasis(r); } );
 	}
 
+/** make_evol on all nodes, and returns v_max */
 double updateNodes(std::vector<double> const& X,const double dt)
 	{
 	double v2max = 0.0;
-	const int NOD = node.size();
+	const unsigned int NOD = node.size();
 
-	for(unsigned int i=0; i < node.size() ; i++)
+	for(unsigned int i=0; i < NOD ; i++)
 	    {
 	    double vp = X[i];
 	    double vq = X[NOD+i];
@@ -201,6 +202,7 @@ double updateNodes(std::vector<double> const& X,const double dt)
     /** setter for electrostatic potential */
     inline void set_elec_pot(const int i,const double val) {node[i].V = val;}
     
+    /** setter for node[i]; what_to_set will fix what is the part of the node struct to set (usefull for fmm_demag.h) */
     inline void set(const int i, std::function<void (Nodes::Node &,const double)> what_to_set,const double val)
     	{ what_to_set(node[i],val); }
     
