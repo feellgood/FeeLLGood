@@ -47,9 +47,10 @@ class Fem
             E_zeeman0 = E_zeeman = 0.0;
             Etot0 = Etot = 0.0;
             
+            if (mySets.verbose) { std::cout << "Approximate nearest neighbors:\n"; }
             pts= annAllocPts(msh.getNbNodes(), Pt::DIM);
             if(!pts) { std::cout<< "ANN memory error while allocating points" <<std::endl; SYSTEM_ERROR; }
-            else if (mySets.verbose) { std::cout << "ANN pts allocated." << std::endl; }
+            else if (mySets.verbose) { std::cout << "  points allocated\n"; }
             
             for(int i=0;i<msh.getNbNodes();i++)
                 { 
@@ -58,12 +59,12 @@ class Fem
                 this->pts[i][2] = msh.getNode(i).p.z(); 
                 }
             
-            if(mySets.verbose) {std::cout<< "start building ANN kd_tree..." <<std::endl;}
+            if(mySets.verbose) { std::cout << "  building kd_tree\n"; }
             
             kdtree = new ANNkd_tree(pts, msh.getNbNodes(), Pt::DIM);
             if (!kdtree) { std::cout<< "ANN memory error while allocating kd_tree" <<std::endl; SYSTEM_ERROR; }
             
-            if(mySets.verbose) { std::cout << "ANN kd_tree allocated." << std::endl; }
+            if(mySets.verbose) { std::cout << "  kd_tree allocated\n"; }
             
             
             
@@ -107,15 +108,6 @@ class Fem
 	
 	/** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh */
 	mesh msh;
-    
-    /**
-    print some informations of fem container
-    */
-    void infos(void) const 
-        {
-        std::cout << "This is feeLLGood " + feellgood_version << std::endl;
-        msh.infos();
-        }
     
     /** computes all the energies */
     void energy(double const t /**< [in] time in second, used to compute zeeman contribution if applied field is time dependant */,

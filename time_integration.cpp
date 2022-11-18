@@ -109,10 +109,14 @@ for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target +=
 
         if(settings.verbose)
             {
-            std::cout << " ------------------------------\n";
-            if (flag) std::cout << "    t  : same (" << flag << ")";
-            else std::cout << "nt_output = " << nt_output << ", nt = " << nt << ", t = " << t_prm.get_t();
-            std::cout << ", dt = " << t_prm.get_dt() ;
+            std::cout << std::string(64, '-') << '\n';  // separator
+            if (flag)
+                std::cout << "  TRYING AGAIN with a smaller time step: "
+                          << "retry " << flag << '\n';
+            std::cout << "evol step = " << nt_output
+                      << ", step = " << nt
+                      << ", t = " << t_prm.get_t()
+                      << ", dt = " << t_prm.get_dt() << '\n';
             }
         if (t_prm.is_dt_TooSmall()) { fem.msh.reset();break; }
 
@@ -138,7 +142,7 @@ for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target +=
         double dumax = t_prm.get_dt()*fem.vmax;
         stats.good_dt.add(t_prm.get_dt());
         stats.good_dumax.add(dumax);
-        if(settings.verbose) { std::cout << "\t dumax = " << dumax << ",  vmax = "<< fem.vmax << std::endl; }
+        if(settings.verbose) { std::cout << "  -> dumax = " << dumax << ",  vmax = "<< fem.vmax << std::endl; }
                 
         stepper.set_soft_limit(settings.DUMAX / fem.vmax / 2);
         if (dumax > settings.DUMAX)
@@ -180,7 +184,7 @@ for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target +=
     fem.saver(settings,t_prm,fout,nt_output++);
     }// end for
 
-if (t_prm.is_dt_TooSmall()) { std::cout << " aborted:  dt < DTMIN"; }
+if (t_prm.is_dt_TooSmall()) { std::cout << "\n**ABORTED**: dt < DTMIN\n"; }
         
 fout.close();
 print_stats(stats);

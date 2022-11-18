@@ -80,8 +80,11 @@ class fmm
             
             counter.tac();
             if(VERBOSE) 
-                { std::cout << "Nodes, volume & surface charges inserted.\nDone (Creating and Inserting Particles = " 
-                    << counter.elapsed() << "s), using " << ScalfmmNbThreads << " threads.\n" << std::endl; }  
+                {
+                std::cout << "Magnetostatics: particles inserted, using "
+                          << ScalfmmNbThreads << " threads, in "
+                          << counter.elapsed() << " s.\n";
+                }
             }
         
         /**
@@ -96,7 +99,7 @@ class fmm
         demag(Nodes::get_v, Nodes::set_phiv, msh, mySettings);
 
         counter.tac();
-        if(mySettings.verbose) { std::cout << "Magnetostatics done in " << counter.elapsed() << " s." << std::endl; }
+        if(mySettings.verbose) { std::cout << "magnetostatics done in " << counter.elapsed() << " s.\n"; }
         }
         
     private:

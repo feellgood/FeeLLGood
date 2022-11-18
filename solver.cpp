@@ -15,7 +15,7 @@ insertCoeff<Facette::Fac>(refMsh->fac,K_TH,L_TH);
 
 counter.tac();
 
-if(settings.verbose) { std::cout << "..matrix assembly done in " << counter.elapsed() << "s" << std::endl; }
+if(settings.verbose) { std::cout << "matrix assembly done in " << counter.elapsed() << " s.\n"; }
 
 read_matrix Kr(2*NOD,2*NOD);
 gmm::copy(K_TH, Kr);
@@ -44,7 +44,13 @@ gmm::bicgstab(Kr, X, L_TH, *prc, bicg_iter);
 if (!(bicg_iter.converged() )) 
     {
     counter.tac();
-	if(settings.verbose) { std::cout << "bicg FAILED in " << bicg_iter.get_iteration() << "iterations, duration: " << counter.elapsed() << " s" << std::endl; }
+	if(settings.verbose)
+        {
+        std::cout << "solver: bicg (prc "
+                  << (nt % (settings.REFRESH_PRC)) << ") FAILED after "
+                  << bicg_iter.get_iteration() << " iterations, in "
+                  << counter.elapsed() << " s.\n";
+        }
     gmm::diagonal_precond <read_matrix>  gmr_prc (Kr);
     counter.tic();
     
@@ -53,17 +59,32 @@ if (!(bicg_iter.converged() ))
 
 if (!(gmr_iter.converged() )) {
 	counter.tac();
-    if(settings.verbose) { std::cout << "gmres FAILED in " << gmr_iter.get_iteration() << "iterations, duration: " << counter.elapsed() << " s" << std::endl; }
+    if(settings.verbose)
+        {
+        std::cout << "solver: gmres FAILED after "
+                  << gmr_iter.get_iteration() << " iterations, in "
+                  << counter.elapsed() << " s.\n";
+        }
     return 1;
     }
     else {counter.tac();
-        if(settings.verbose) { std::cout << "v-solve in " << gmr_iter.get_iteration() << " iterations (gmres) duration: " << counter.elapsed() << " s" << std::endl; }
+        if(settings.verbose)
+            {
+            std::cout << "solver: gmres converged in "
+                      << gmr_iter.get_iteration() << " iterations, "
+                      << counter.elapsed() << " s.\n";
+            }
         }
     }
 else 
     {counter.tac();
-    if(settings.verbose) { std::cout << "v-solve converged in " << bicg_iter.get_iteration() << " (bicg,prc-" << (nt % (settings.REFRESH_PRC)) << ") :duration: " 
-<< counter.elapsed() << " s" << std::endl; }
+    if(settings.verbose)
+        {
+        std::cout << "solver: bicg (prc "
+                  << (nt % (settings.REFRESH_PRC)) << ") converged in "
+                  << bicg_iter.get_iteration() << " iterations, "
+                  << counter.elapsed() << " s.\n";
+        }
     }
 
 updateNodes(X,t_prm.get_dt());

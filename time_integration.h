@@ -29,8 +29,9 @@ class timing
     /** some informations */
     inline void infos()
     {
-    std::cout << "\t final time of the simulation\t\t" << tf << std::endl;
-    std::cout << "\t initial time step\t" << dt << std::endl << std::endl;
+    std::cout << "simulation:\n";
+    std::cout << "  final time:         " << tf << '\n';
+    std::cout << "  initial time step:  " << dt << '\n';
     }
 
     /** getter for time step dt */

@@ -24,9 +24,9 @@ public:
     inline mesh(Settings const& mySets /**< [in] */) //:nbNod(0)
         {
         readMesh(mySets);
-        if(mySets.verbose) std::cout<< "mesh in memory." <<std::endl;
+        if(mySets.verbose) std::cout << "Mesh in memory:\n";
         indexReorder(mySets);// reordering of index nodes for facette orientation, also some modifications on fac::Ms
-        if(mySets.verbose) std::cout<< "mesh reindexed." <<std::endl;
+        if(mySets.verbose) std::cout << "  reindexed\n";
         
         double xmin = minNodes(Pt::IDX_X);
         double xmax = maxNodes(Pt::IDX_X);
@@ -43,7 +43,7 @@ public:
         vol = std::accumulate(tet.begin(),tet.end(),0.0,[](double x,Tetra::Tet const& te){return x + te.calc_vol();} );
         surf = std::accumulate(fac.begin(),fac.end(),0.0,[](double x,Facette::Fac const& fa){return x + fa.calc_surf();} );
         
-        if(mySets.verbose) std::cout<< "mesh geometry computed." <<std::endl;
+        if(mySets.verbose) std::cout << "  computed geometry\n";
         }
     
     /** return number of nodes  */
@@ -74,12 +74,13 @@ public:
     /** basic informations on the mesh */
     void infos(void) const
         {
-        std::cout << "\t diam bounding box ="<< diam << std::endl;
-        std::cout << "\t nodes\t\t\t" << getNbNodes() << std::endl;
-        std::cout << "\t faces\t\t\t" << fac.size() << std::endl;
-        std::cout << "\t tetraedrons\t\t" << tet.size() << std::endl;
-        std::cout << "\t Total surface\t\t"  << surf << std::endl;
-        std::cout << "\t Total volume\t\t\t" << vol << std::endl;
+        std::cout << "mesh:\n";
+        std::cout << "  bounding box diam:  " << diam << '\n';
+        std::cout << "  nodes:              " << getNbNodes() << '\n';
+        std::cout << "  faces:              " << fac.size() << '\n';
+        std::cout << "  tetraedrons:        " << tet.size() << '\n';
+        std::cout << "  total surface:      " << surf << '\n';
+        std::cout << "  total volume:       " << vol << '\n';
         }
 
 /** call setBasis for all nodes */

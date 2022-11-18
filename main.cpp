@@ -192,7 +192,7 @@ if(mySettings.verbose)
     mySettings.infos();
     std::cout << "-- end of settings -----------------------------\n";
     t_prm.infos();
-    fem.infos();
+    fem.msh.infos();
     }
     
 std::cout<<"computing..."<<std::endl;

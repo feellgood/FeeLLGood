@@ -47,5 +47,5 @@ std::for_each(msh.fac.begin(),msh.fac.end(),[this,&settings](Facette::Fac const&
 calc_Etot();
 
 if (settings.verbose && (Etot > Etot0))
-    { std::cout << "Warning energy increases! : Etot= " << Etot << " ; Etot0 = "<< Etot0 << std::endl; }
+    { std::cout << "WARNING: energy increased from " << Etot0 << " to " << Etot << "\n"; }
 }

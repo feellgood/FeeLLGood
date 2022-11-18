@@ -24,10 +24,11 @@ if (verbose) on_fail_msg_error(f_in,"could not find beacon " + strWhat);
 
 void mesh::readMesh(Settings const& mySets)
 {
+if(mySets.verbose) { std::cout << "Reading mesh file " << mySets.getPbName() << ":\n"; }
 std::string symb;
 std::ifstream msh( mySets.getPbName() );
 
-on_fail_msg_error(msh,"cannot open file " + mySets.getPbName() );
+on_fail_msg_error(msh,"cannot open file");
 
 msh >> symb;
 if(symb == "$MeshFormat")
@@ -36,7 +37,7 @@ if(symb == "$MeshFormat")
     msh >> mshFormat;
     if(mshFormat == "2.2" ) 
         {
-        if(mySets.verbose) {std::cout << "mesh file format 2.2" << std::endl;} 
+        if(mySets.verbose) {std::cout << "  file format: 2.2\n";}
         int tags, reg, TYP;
   
     lookFor(mySets.verbose,msh,"$Nodes");
@@ -58,7 +59,7 @@ if(symb == "$MeshFormat")
 
     int nbElem;
     msh >> nbElem; 
-    if(mySets.verbose) {std::cout <<"nb Elem: "<< nbElem <<std::endl;}
+    if(mySets.verbose) {std::cout << "  element count: " << nbElem << '\n';}
     while((msh >> symb)&&(symb != "$EndElements")&&(! msh.fail() ) ) 
         {
         msh >> TYP >> tags >> reg;
@@ -90,7 +91,7 @@ if(symb == "$MeshFormat")
 
 if (! msh.fail())
     {
-    if(mySets.verbose) std::cout<< "closing mesh" <<std::endl;
+    if(mySets.verbose) std::cout<< "  closing file\n";
     msh.close();
     }
 else
