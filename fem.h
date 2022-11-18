@@ -45,7 +45,8 @@ class Fem
             E_aniso0 = E_aniso = 0.0;
             E_demag0 = E_demag = 0.0;
             E_zeeman0 = E_zeeman = 0.0;
-            Etot0 = Etot = 0.0;
+            Etot0 = INFINITY;  // avoid "WARNING: energy increased" on first time step
+            Etot = 0.0;
             
             if (mySets.verbose) { std::cout << "Approximate nearest neighbors:\n"; }
             pts= annAllocPts(msh.getNbNodes(), Pt::DIM);
