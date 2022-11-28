@@ -48,26 +48,30 @@ class Fem
             Etot0 = INFINITY;  // avoid "WARNING: energy increased" on first time step
             Etot = 0.0;
             
-            if (mySets.verbose) { std::cout << "Approximate nearest neighbors:\n"; }
-            pts= annAllocPts(msh.getNbNodes(), Pt::DIM);
-            if(!pts) { std::cout<< "ANN memory error while allocating points" <<std::endl; SYSTEM_ERROR; }
-            else if (mySets.verbose) { std::cout << "  points allocated\n"; }
+            recenter_mem = false;
+            if(mySets.recenter)
+            	{
+            	if (mySets.verbose) { std::cout << "Approximate nearest neighbors:\n"; }
+            	pts= annAllocPts(msh.getNbNodes(), Pt::DIM);
+            	if(!pts) { std::cout<< "ANN memory error while allocating points" <<std::endl; SYSTEM_ERROR; }
+            	else if (mySets.verbose) { std::cout << "  points allocated\n"; }
+            	
+            	for(int i=0;i<msh.getNbNodes();i++)
+            	    { 
+            	    this->pts[i][0] = msh.getNode(i).p.x();
+            	    this->pts[i][1] = msh.getNode(i).p.y();
+            	    this->pts[i][2] = msh.getNode(i).p.z(); 
+            	    }
             
-            for(int i=0;i<msh.getNbNodes();i++)
-                { 
-                this->pts[i][0] = msh.getNode(i).p.x();
-                this->pts[i][1] = msh.getNode(i).p.y();
-                this->pts[i][2] = msh.getNode(i).p.z(); 
-                }
+            	if(mySets.verbose) { std::cout << "  building kd_tree\n"; }
             
-            if(mySets.verbose) { std::cout << "  building kd_tree\n"; }
-            
-            kdtree = new ANNkd_tree(pts, msh.getNbNodes(), Pt::DIM);
-            if (!kdtree) { std::cout<< "ANN memory error while allocating kd_tree" <<std::endl; SYSTEM_ERROR; }
-            
-            if(mySets.verbose) { std::cout << "  kd_tree allocated\n"; }
-            
-            
+            	kdtree = new ANNkd_tree(pts, msh.getNbNodes(), Pt::DIM);
+            	if (!kdtree) { std::cout<< "ANN memory error while allocating kd_tree" <<std::endl; SYSTEM_ERROR; }
+		recenter_mem = true;		
+		            
+            	if(mySets.verbose) { std::cout << "  kd_tree allocated\n"; }
+            	}
+            else if(mySets.verbose) { std::cout << "No recentering.\n"; }
             
             if (mySets.restoreFileName == "")
                 {
@@ -79,12 +83,12 @@ class Fem
                 t_prm.set_t(_t);    
                 }
                     
-            direction(Pt::IDX_Z);/* determination de la direction de propagation de la paroi */
+            if(mySets.recenter) { direction(Pt::IDX_Z); }/* determination de la direction de propagation de la paroi : uses ann and kd tree_search */
             }
     
     /** destructor */
     ~Fem ()
-        { annDeallocPts(pts); delete kdtree; }
+        { if(recenter_mem) { annDeallocPts(pts); delete kdtree;} }
     
     
     double vmax;/**< maximum speed of magnetization */
@@ -146,6 +150,7 @@ class Fem
     bool recenter(double thres/**< [in] threshold parameter */,char recentering_direction /**< [in] X|Y|Z */);
 
     private:
+    bool recenter_mem;
     ANNkd_tree* kdtree;/**< ANN kdtree to find efficiently the closest set of nodes to a physical point in the mesh  */
     ANNpointArray pts;/**< container for the building of the kdtree (handled by ANN library) */
 
