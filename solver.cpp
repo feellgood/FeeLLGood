@@ -26,8 +26,8 @@ gmm::iteration bicg_iter(1e-6);
 gmm::iteration gmr_iter(1e-6);
 bicg_iter.set_maxiter(settings.MAXITER);
 gmr_iter.set_maxiter(settings.MAXITER);
-bicg_iter.set_noisy(false);//VERBOSE
-gmr_iter.set_noisy(false);//VERBOSE
+bicg_iter.set_noisy(settings.verbose);
+gmr_iter.set_noisy(settings.verbose);
 
 if (!nt) 
     { prc = new gmm::diagonal_precond <read_matrix> (Kr); }
