@@ -66,6 +66,8 @@ private:
     const Settings &settings;/**< settings */
     double v_max;/**< maximum speed */
     
+    long prc_time_step = -1;/**< time step when prc was built */
+    
     /** will be used to obtain a seed for the random number generator engine */
     std::random_device rd;
     

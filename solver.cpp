@@ -29,13 +29,12 @@ gmr_iter.set_maxiter(settings.MAXITER);
 bicg_iter.set_noisy(settings.verbose);
 gmr_iter.set_noisy(settings.verbose);
 
-if (!nt) 
-    { prc = new gmm::diagonal_precond <read_matrix> (Kr); }
-else if (!(nt % (settings.REFRESH_PRC)))
-    {
-    delete prc;
-    prc = new gmm::diagonal_precond <read_matrix> (Kr);
-    } 
+if (!prc || (nt - prc_time_step >= settings.REFRESH_PRC))
+	{
+	if (prc) { delete prc; }
+ 	prc = new gmm::diagonal_precond <read_matrix> (Kr);
+ 	prc_time_step = nt;
+ 	}
 
 counter.tic();
 //gmm::clear(X); // no need to clear X,it is zero initialized 
