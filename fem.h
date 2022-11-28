@@ -150,7 +150,7 @@ class Fem
     bool recenter(double thres/**< [in] threshold parameter */,char recentering_direction /**< [in] X|Y|Z */);
 
     private:
-    bool recenter_mem;
+    bool recenter_mem;/**< flag to know if kdtree and pts are allocated */
     ANNkd_tree* kdtree;/**< ANN kdtree to find efficiently the closest set of nodes to a physical point in the mesh  */
     ANNpointArray pts;/**< container for the building of the kdtree (handled by ANN library) */
 
