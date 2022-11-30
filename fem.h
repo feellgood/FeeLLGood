@@ -38,7 +38,7 @@ class Fem
         inline Fem(Settings const& mySets,timing &t_prm):msh(mySets)
             {
             vmax  = 0.0;
-            DW_vz = DW_vz0 = 0.0;
+            DW_vz = 0.0;
             DW_z  = 0.0;
             
             E_exch0 = E_exch = 0.0;
@@ -103,7 +103,6 @@ class Fem
 	double E_demag; /**< demagnetizing energy  */
     double E_zeeman; /**< zeeman energy  */
     
-	double DW_vz0;/**< initial speed of the domain wall */
 	double DW_vz;/**< speed of the domain wall along z */
 	double DW_dir;/**< direction of the domain wall */
 	double DW_z; /**< domain wall displacement along Oz */

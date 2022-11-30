@@ -183,7 +183,6 @@ for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target +=
         else
             t_prm.inc_t();
 
-        fem.DW_vz0 = fem.DW_vz;/* mise a jour de la vitesse du dernier referentiel et deplacement de paroi */ 
         fem.DW_z  += fem.DW_vz*t_prm.get_dt();
         if(settings.recenter) fem.recenter(settings.threshold,settings.recentering_direction);
         }//endwhile
