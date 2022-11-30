@@ -154,6 +154,7 @@ void Settings::infos()
     if (recenter) {
         std::cout << "  direction: ";
         switch (recentering_direction) {
+            case Pt::IDX_UNDEF: std::cout << "UNDEF\n"; break; 
             case Pt::IDX_X: std::cout << "X\n"; break;
             case Pt::IDX_Y: std::cout << "Y\n"; break;
             case Pt::IDX_Z: std::cout << "Z\n"; break;

@@ -165,13 +165,16 @@ for (int npi=0; npi<NPI; npi++)
 
     double uHm = add_STT_BE(npi,params[idxPrm].p_STT,Js,gradV,p_g,U,dUdx,dUdy,dUdz,BE);
     
+    if(idx_dir != Pt::IDX_UNDEF)
+    {
     if (idx_dir == Pt::IDX_Z)
         add_drift_BE(npi,alpha,s_dt,Vdrift,U,V,dUdz,dVdz,BE);
     else if (idx_dir == Pt::IDX_Y)
         add_drift_BE(npi,alpha,s_dt,Vdrift,U,V,dUdy,dVdy,BE);
     else if (idx_dir == Pt::IDX_X)
         add_drift_BE(npi,alpha,s_dt,Vdrift,U,V,dUdx,dVdx,BE);
-
+    }
+    
     double uHeff = -Abis*(norme2(dUdx[npi]) + norme2(dUdy[npi]) + norme2(dUdz[npi])); 
 	uHeff +=  uHm + pScal(U[npi], Hext + Hd[npi]) + contrib_aniso;
 

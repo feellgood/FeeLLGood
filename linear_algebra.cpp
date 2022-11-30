@@ -25,12 +25,19 @@ void LinAlgebra::prepareElements(Pt::pt3D const& Hext /**< [in] applied field */
 {
 base_projection(!RAND_DETERMINIST);
 
-std::for_each(std::execution::par,refMsh->tet.begin(),refMsh->tet.end(),[this,&Hext,&t_prm](Tetra::Tet & tet)
+Pt::index idx_dir;
+
+if (!settings.recenter)
+	{ idx_dir = Pt::IDX_UNDEF; }
+else
+	{ idx_dir = settings.recentering_direction; }
+
+std::for_each(std::execution::par,refMsh->tet.begin(),refMsh->tet.end(),[this,&Hext,&t_prm,idx_dir](Tetra::Tet & tet)
 	{
 	double K[3*Tetra::N][3*Tetra::N] = { {0} }; 
         Pt::pt3D L[Tetra::N];
             
-        tet.integrales(settings.paramTetra,t_prm,Hext,settings.recentering_direction,DW_vz,K, L);
+        tet.integrales(settings.paramTetra,t_prm,Hext,idx_dir,DW_vz,K,L);
         tet.projection(K,L);
 	});
 

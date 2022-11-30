@@ -28,7 +28,7 @@ namespace Pt
      *convenient enum mainly to avoid direct indices values to specify coordinates in calculations 
      */
     enum index 
-        {IDX_X = 0,IDX_Y = 1,IDX_Z = 2};
+        {IDX_UNDEF = -1,IDX_X = 0,IDX_Y = 1,IDX_Z = 2};
 
 /**
 sign(x) = 1.0 if x>0, otherwise -1.0
@@ -75,7 +75,8 @@ public:
     inline pt3D(const enum index idx)
         {
         _x[IDX_X] = 0;_x[IDX_Y] = 0;_x[IDX_Z] = 0;
-        _x[idx] = 1.0;}
+        if(idx != IDX_UNDEF) _x[idx] = 1.0;
+        }
     
     
      inline pt3D(const pt3D & p) { memcpy(_x,p._x,sizeof _x); }

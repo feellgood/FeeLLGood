@@ -143,9 +143,12 @@ for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target +=
         if (t_prm.is_dt_TooSmall()) { fem.msh.reset();break; }
 
         /* changement de referentiel */
-        fem.DW_vz += fem.DW_dir*fem.msh.avg(Nodes::get_v_comp,Pt::IDX_Z)*fem.msh.l.z()/2.;
-        
-        linAlg.set_DW_vz(fem.DW_vz);
+        if(settings.recenter)
+        	{
+        	fem.DW_vz += fem.DW_dir*fem.msh.avg(Nodes::get_v0_comp,settings.recentering_direction)*Pt::pScal( Pt::pt3D(settings.recentering_direction), fem.msh.l)/2.;
+        	//fem.DW_vz += fem.DW_dir*fem.msh.avg(Nodes::get_v0_comp,Pt::IDX_Z)*fem.msh.l.z()/2.;
+        	linAlg.set_DW_vz(fem.DW_vz);
+        	}
         
         Pt::pt3D Hext = settings.getValue(t_prm.get_t());
         

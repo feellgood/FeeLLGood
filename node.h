@@ -126,6 +126,9 @@ inline double get_u_comp(Node const& n /**< [in] */, Pt::index idx /**< [in] */)
 /** getter for v component */
 inline double get_v_comp(Node const& n /**< [in] */ ,Pt::index idx /**< [in] */) {return n.v(idx);}
 
+/** getter for v0 component */
+inline double get_v0_comp(Node const& n /**< [in] */ ,Pt::index idx /**< [in] */) {return n.v0(idx);}
+
 /** getter for phi */
 inline double get_phi(Node const& n /**< [in] */) {return n.phi;}
 
