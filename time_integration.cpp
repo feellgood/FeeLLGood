@@ -140,7 +140,12 @@ for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target +=
                       << ", t = " << t_prm.get_t()
                       << ", dt = " << t_prm.get_dt() << '\n';
             }
-        if (t_prm.is_dt_TooSmall()) { break; }
+
+        if (t_prm.is_dt_TooSmall())
+            {
+            std::cout << "\n**ABORTED**: dt < DTMIN\n";
+            goto bailout;
+            }
 
         /* changement de referentiel */
         if(settings.recenter)
@@ -189,8 +194,7 @@ for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target +=
     fem.saver(settings,t_prm,fout,nt_output++);
     }// end for
 
-if (t_prm.is_dt_TooSmall()) { std::cout << "\n**ABORTED**: dt < DTMIN\n"; }
-        
+bailout:
 fout.close();
 print_stats(stats);
 return nt;
