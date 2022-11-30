@@ -61,6 +61,26 @@ else
 puts("    [*] ranges given as (geometric mean) ± (relative stddev)");
 }
 
+/** Check whether we received a signal politely asking us to terminate.
+ * If so, then save the current state and exit. */
+static void exit_if_signal_received(const Fem &fem, const Settings &settings,
+        const timing &t_prm, const Stats &stats)
+{
+extern volatile sig_atomic_t received_signal;  // set by signal_handler() in main.cpp
+if (!received_signal) return;
+const char *signal_name = received_signal==SIGINT ? "SIGINT" :
+        received_signal==SIGTERM ? "SIGTERM" : "signal";
+std::cout << "Received " << signal_name
+        << ": saving the magnetization configuration...\n";
+std::string fileName = settings.r_path_output_dir + '/'
+    + settings.getSimName() + "_at_exit.sol";
+fem.msh.savesol(fileName, t_prm, settings.getScale());
+std::cout << "Magnetization configuration saved to "
+    << fileName << "\nTerminating.\n";
+print_stats(stats);
+exit(1);
+}
+
 /** compute all quantitites at time t */
 inline void compute_all(Fem &fem,Settings &settings,scal_fmm::fmm &myFMM,double t)
     {
@@ -104,6 +124,8 @@ for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target +=
     // Loop over the integration time steps within a visible step.
     while (t_prm.get_t() < t_target)
         {
+        exit_if_signal_received(fem, settings, t_prm, stats);
+
         t_prm.set_dt( stepper(t_target - t_prm.get_t()) );
         bool last_step = (t_prm.get_dt() == t_target - t_prm.get_t());
 
@@ -161,25 +183,6 @@ for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target +=
         fem.DW_vz0 = fem.DW_vz;/* mise a jour de la vitesse du dernier referentiel et deplacement de paroi */ 
         fem.DW_z  += fem.DW_vz*t_prm.get_dt();
         if(settings.recenter) fem.recenter(settings.threshold,settings.recentering_direction);
-
-        // If we were just politely asked to terminate,
-        // save the state right now and bail out.
-        extern volatile sig_atomic_t received_signal;
-        if (received_signal)
-            {
-            const char *signal_name = received_signal==SIGINT ? "SIGINT" :
-                    received_signal==SIGTERM ? "SIGTERM" : "signal";
-            std::cout << "Received " << signal_name
-                    << ": saving the magnetization configuration...\n";
-            std::string fileName = settings.r_path_output_dir + '/'
-                + settings.getSimName() + "_at_exit.sol";
-            fem.msh.savesol(fileName, t_prm, settings.getScale());
-            std::cout << "Magnetization configuration saved to "
-                << fileName << "\nTerminating.\n";
-            print_stats(stats);
-            exit(1);
-            }
-            
         }//endwhile
     fem.saver(settings,t_prm,fout,nt_output++);
     }// end for
