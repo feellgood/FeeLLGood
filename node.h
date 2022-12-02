@@ -28,18 +28,18 @@ Many other values for the computation of the scalar potential \f$ \phi \f$
 */
 struct Node {
 Pt::pt3D p;/**< Physical position p=(x,y,z)  of the node */
-Pt::pt3D u0;/**< magnetization initial or reset value, used to store previous value for time evolution */
-Pt::pt3D v0;/**< initial or reset value, used to store previous value for time evolution */
-Pt::pt3D u;/**< magnetization value */
-Pt::pt3D v;/**< magnetization speed */
+Pt::pt3D u0;/**< magnetization at the start of the current time step */
+Pt::pt3D v0;/**< magnetization speed at the start of the current time step */
+Pt::pt3D u;/**< magnetization after the current time step */
+Pt::pt3D v;/**< magnetization speed after the current time step */
 
 Pt::pt3D ep;/**< local vector basis : \f$ e_p = \vec{rand} \times u0 \f$ , then normalized */
 Pt::pt3D eq;/**< local vector basis : \f$ e_q = u0 \times e_p \f$ , then normalized */
 
-double phi0;/**< scalar potential initial or reset value, used to store previous value for time evolution */
-double phi;/**< scalar potential value */
-double phiv0;/**< initial or reset value, used to store previous value for time evolution */
-double phiv;/**< scalar potential associated to velocity */
+double phi0;/**< scalar potential at the start of the current time step */
+double phi;/**< scalar potential after the current time step */
+double phiv0;/**< scalar potential of velocity at the start of the current time step */
+double phiv;/**< scalar potential of velocity after the current time step */
 
 double V;/**< electrostatic potential (for STT) */
 
@@ -78,11 +78,6 @@ if (PARANOID_ORTHONORMALIZATION)
     eq.normalize();
     }
 }
-
-/**
-reset the node magnetization, speed, phi, and phiv
-*/
-inline void reset(void) { u=u0; v=v0; phi = phi0; phiv = phiv0;}
 
 /** 
 preparation of the quantities u0,v0,phi0,phiv0 for incomming time-step

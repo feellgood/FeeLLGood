@@ -140,7 +140,7 @@ for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target +=
                       << ", t = " << t_prm.get_t()
                       << ", dt = " << t_prm.get_dt() << '\n';
             }
-        if (t_prm.is_dt_TooSmall()) { fem.msh.reset();break; }
+        if (t_prm.is_dt_TooSmall()) { break; }
 
         /* changement de referentiel */
         if(settings.recenter)

@@ -135,17 +135,6 @@ double updateNodes(std::vector<double> const& X,const double dt)
      /** tetrahedron container */
 	std::vector <Tetra::Tet>  tet;
     
-    /**
-    reset the nodes struct to restart another step time simulation
-    Undo the action of one or many "vsolve" runs in case of failure.
-    Demagnetizing field and energies don't need to be reset, because they won't be updated if failure is detected.
-    I don't know how to cleanly reset "fem.DW_vz". BC
-    */
-    inline void reset(void)
-    { 
-    std::for_each(std::execution::par,node.begin(),node.end(),[](Nodes::Node & nod){ nod.reset(); });
-    }
-    
 
     /** read a solution from a file (tsv formated) and initialize fem struct to restart computation from that distribution, return time
     */
