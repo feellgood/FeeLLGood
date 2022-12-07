@@ -70,13 +70,19 @@ extern volatile sig_atomic_t received_signal;  // set by signal_handler() in mai
 if (!received_signal) return;
 const char *signal_name = received_signal==SIGINT ? "SIGINT" :
         received_signal==SIGTERM ? "SIGTERM" : "signal";
-std::cout << "Received " << signal_name
-        << ": saving the magnetization configuration...\n";
-std::string fileName = settings.r_path_output_dir + '/'
-    + settings.getSimName() + "_at_exit.sol";
-fem.msh.savesol(fileName, t_prm, settings.getScale());
-std::cout << "Magnetization configuration saved to "
-    << fileName << "\nTerminating.\n";
+std::cout << "Received " << signal_name;
+
+if(settings.save_period > 0)
+	{
+	std::cout << ": saving the magnetization configuration...\n";
+	std::string fileName = settings.r_path_output_dir + '/' + settings.getSimName() + "_at_exit.sol";
+	fem.msh.savesol(fileName, t_prm, settings.getScale());
+	std::cout << "Magnetization configuration saved to " << fileName << "\n";
+	}
+else
+	{ std::cout << ": magnetization configuration not saved.\n"; }
+std::cout << "Terminating.\n";
+
 print_stats(stats);
 exit(1);
 }

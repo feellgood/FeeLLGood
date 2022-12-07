@@ -205,11 +205,11 @@ void Settings::read(YAML::Node yaml)
         assign(withVtk, outputs["vtk_file"]);
         assign(time_step, outputs["evol_time_step"]);
         YAML::Node take_photo = outputs["take_photo"];
-        if (take_photo.Scalar() == "false") {
-            save_period = 0;
-        } else {
+        if (take_photo.Scalar() == "false") { save_period = 0; }
+        else if (take_photo.Scalar() == "true") { save_period = 1; }
+        else {
             if (assign(save_period, take_photo) && save_period < 0)
-                save_period = 0;
+                { save_period = 0;}
         }
         YAML::Node columns = outputs["evol_columns"];
         if (columns) {
