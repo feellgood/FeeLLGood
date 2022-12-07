@@ -197,6 +197,7 @@ for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target +=
         fem.DW_z  += fem.DW_vz*t_prm.get_dt();
         if(settings.recenter) fem.recenter(settings.threshold,settings.recentering_direction);
         }//endwhile
+    if(!settings.verbose) { std::cout << "\t " << 100.0*t_prm.get_t()/t_prm.tf << " % done." << std::endl; }
     fem.saver(settings,t_prm,fout,nt_output++);
     }// end for
 
