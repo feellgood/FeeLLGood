@@ -44,19 +44,19 @@ job_count=$(getconf _NPROCESSORS_ONLN)
 # Install required packages.
 packages="unzip make cmake git"
 if [ "$ID" = "rocky" ]; then
-    packages="$packages wget gcc-c++ tbb-devel yaml-cpp-devel boost-devel"
+    packages="$packages wget gcc-c++ tbb-devel yaml-cpp-devel"
     sudo dnf check-update -q || true
     sudo dnf config-manager --set-enabled devel crb
     sudo dnf install -y epel-release
     if [ "$unit_tests" = "true" ]; then
-        : # No extra packages required for unit testing
+        packages="$packages boost-devel"
     fi
     if [ "$doxygen" = "true" ]; then
         packages="$packages doxygen"
     fi
     sudo dnf install -y $packages
 else  # Debian-like OS
-    packages="$packages g++ libtbb-dev libyaml-cpp-dev libboost-dev"
+    packages="$packages g++ libtbb-dev libyaml-cpp-dev"
     sudo apt-get update -q
     if [ "$unit_tests" = "true" ]; then
         packages="$packages libboost-system-dev libboost-filesystem-dev libboost-test-dev"
