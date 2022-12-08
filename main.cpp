@@ -195,7 +195,6 @@ if(mySettings.verbose)
     fem.msh.infos();
     }
     
-std::cout<<"computing..."<<std::endl;
 counter.tic();
 LinAlgebra linAlg(mySettings,fem.msh);
 

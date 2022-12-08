@@ -61,6 +61,27 @@ else
 puts("    [*] ranges given as (geometric mean) ± (relative stddev)");
 }
 
+/** Periodically show the percentage of work done, together with an
+ * ASCII-art spinner. End the output with CR in order to keep the cursor
+ * on the same line, which then gets overwritten on the next update. */
+static void show_progress(double fraction_done)
+{
+const char spinner[] = "|/-\\";
+const std::chrono::duration<double> min_period(0.5);
+static int spinner_pos = 0;
+static std::chrono::time_point<std::chrono::steady_clock> last_update;
+
+auto now = std::chrono::steady_clock::now();
+if (now - last_update < min_period && fraction_done < 1) return;
+last_update = now;
+
+printf("progress:          %.2f%% %c\r",
+    100 * fraction_done, spinner[spinner_pos]);
+spinner_pos = (spinner_pos + 1) % 4;
+if (fraction_done == 1) putchar('\n');  // move to the next line when done
+fflush(stdout);
+}
+
 /** Check whether we received a signal politely asking us to terminate.
  * If so, then save the current state and exit. */
 static void exit_if_signal_received(const Fem &fem, const Settings &settings,
@@ -70,7 +91,7 @@ extern volatile sig_atomic_t received_signal;  // set by signal_handler() in mai
 if (!received_signal) return;
 const char *signal_name = received_signal==SIGINT ? "SIGINT" :
         received_signal==SIGTERM ? "SIGTERM" : "signal";
-std::cout << "Received " << signal_name;
+std::cout << "\nReceived " << signal_name;
 
 if(settings.save_period > 0)
 	{
@@ -196,10 +217,11 @@ for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target +=
 
         fem.DW_z  += fem.DW_vz*t_prm.get_dt();
         if(settings.recenter) fem.recenter(settings.threshold,settings.recentering_direction);
+        if (!settings.verbose) show_progress(t_prm.get_t()/t_prm.tf);
         }//endwhile
-    if(!settings.verbose) { std::cout << "\t " << 100.0*t_prm.get_t()/t_prm.tf << " % done." << std::endl; }
     fem.saver(settings,t_prm,fout,nt_output++);
     }// end for
+    if (!settings.verbose) show_progress(1.0);  // show we are done
 
 bailout:
 fout.close();
