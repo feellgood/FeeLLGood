@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # to install vtk for python type the following command:
 # python -m pip install --upgrade --user vtk
 
