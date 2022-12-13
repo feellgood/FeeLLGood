@@ -14,12 +14,21 @@ def get_params():
    '''
     parser = argparse.ArgumentParser(description=description, epilog=epilogue,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('vtkFileName', help='truc.vtu')
+    parser.add_argument('fileName', help='render a .vtu file')
+    
+    parser.add_argument('-P', '--percent',
+    default=100,
+    help='Percentage of the field vectors rendered'
+    )
     args = parser.parse_args()
-    return args.vtkFileName
+    
+    return args
 
 def main():
-    fileName = get_params()
+    my_args = get_params()
+    fileName = my_args.fileName
+    perc = my_args.percent
+    #print( "fileName = ", fileName , "percentage = ", perc  )
     print("This is show python script, using VTK version " + vtk.vtkVersion.GetVTKVersion()," rendering ", fileName)
     path, ext = os.path.splitext(fileName)
     ext = ext.lower()
@@ -31,7 +40,10 @@ def main():
     reader.SetFileName(fileName)
     reader.Update()
     output = reader.GetOutput()
+    #print(output)
 
+    if(float(perc) < 100):
+        print("let's subsample!") # we could use a vtkTransformFilter to subsample
 #    contour = vtk.vtkContourFilter()
 #    contour.SetInputData(output)
 #    contour.ComputeNormalsOn()
@@ -56,7 +68,7 @@ def main():
     arrow.SetShaftRadius(0.03)
 
     glyph = vtk.vtkGlyph3D()
-    glyph.SetInputData(reader.GetOutput())#(ugrid)
+    glyph.SetInputData(output)  #(reader.GetOutput())#(ugrid)
     glyph.SetSourceConnection(arrow.GetOutputPort())
     glyph.SetVectorModeToUseVector() # to use the vector input data
     glyph.SetColorModeToColorByVector() #SetColorModeToColorByScalar()

@@ -11,6 +11,7 @@ class mesh(object):
     def __init__ (self,fileName):
         self.Nodes = []
         self.Tet = []
+        self.Fac = []
         mshFile = open(fileName,'r')
         count = 0
         current_line =''
@@ -43,12 +44,15 @@ class mesh(object):
         while current_line.strip() != '$EndElements':
             current_line = mshFile.readline()
             ls = re.sub('\s+','\t',current_line).strip().split("\t") 
-            if len(ls) == 9: # we only consider tetrahedrons, assuming there is no other objects than triangles and tetrahedrons in the Elements list
+            if len(ls) == 9: # tetrahedrons
                 self.Tet.append( [int(ls[5])-1,int(ls[6])-1,int(ls[7])-1,int(ls[8])-1 ])
+            elif len(ls) == 8: # triangles
+            	self.Fac.append( [int(ls[5])-1,int(ls[6])-1,int(ls[7])-1] )
         mshFile.close()
+        self.infos()
 
     def infos(self):
-        print("nb Nodes: ",len(self.Nodes),"\tnb Tetrahedrons: ",len(self.Tet))
+        print("nb Nodes: ",len(self.Nodes),"\tnb Tetrahedrons: ",len(self.Tet),"\tnb Triangles: ",len(self.Fac))
 
 class data(object):
     def __init__(self,fileName,list_idx):
@@ -112,8 +116,6 @@ def main():
         sys.exit(1)
     
     msh = mesh(meshFileName)
-    #msh.infos()
-
     my_data = data(solFileName,indices)
     
     points = vtk.vtkPoints()

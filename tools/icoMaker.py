@@ -1,10 +1,8 @@
+#!/usr/bin/env python3
 # python -m pip install -U pip
 # sudo python -m pip install -U matplotlib
 
 from math import sqrt
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import axes3d
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 import numpy as np
 
@@ -37,37 +35,4 @@ class Ico(object):
         meshFile.close()
         print("mesh file " + meshFileName + " generated.")
 
-# the following method is only to have a 3D view of the icosahedron, useless if you do not want to see it
-    def show(self):
-        fig = plt.figure()
-        ax = fig.add_subplot(111,projection='3d')
 
-        ax.set_xlabel('X')
-        ax.set_xlim3d(-2, 2)
-        ax.set_ylabel('Y')
-        ax.set_ylim3d(-2, 2)
-        ax.set_zlabel('Z')
-        ax.set_zlim3d(-2, 2)
-
-        r1 = [ self.pts[0], self.pts[2], self.pts[3], self.pts[1] ] 
-        r2 = [ self.pts[4], self.pts[5], self.pts[7], self.pts[6] ]
-        r3 = [ self.pts[8], self.pts[10], self.pts[11], self.pts[9] ]
-
-        triangle3D = []
-        for i in range(0,len(self.f_idx)):
-            triangle3D.append( [self.pts[ self.f_idx[i][0] ],self.pts[ self.f_idx[i][1] ],self.pts[ self.f_idx[i][2] ]] )
-
-        triangle3D.append(r1)
-        triangle3D.append(r2)
-        triangle3D.append(r3)
-
-        fc = []
-        for i in range(1,len(self.f_idx)+1):
-            fc.append( (i/20,0,0,0.2) )
-
-        fc.append( (1,1,0,0.4) )
-        fc.append( (0,1,0,0.4) )
-        fc.append( (0,0,1,0.4) )
-
-        ax.add_collection3d( Poly3DCollection( triangle3D, facecolors=fc, linewidths=1))
-        plt.show()
