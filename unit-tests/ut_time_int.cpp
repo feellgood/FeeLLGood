@@ -67,20 +67,20 @@ double X= distrib(gen);
 timing prm_t = timing(1e-8,1e-14,1e-9);
 
 // ref code (with minimal adaptations of MuMag_Integrales.cc of src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
-double dt = prm_t.get_dt();
+double reduced_dt = gamma0*prm_t.get_dt();
 double alpha = alpha_LLG;
 double uHeff = X;
 double r = 0.1;                             
-double M = 2.*alpha*r/dt;                   
+double M = 2.*alpha*r/reduced_dt;
 
 double alfa=0.;
     if (uHeff>0.){
-       if (uHeff>M) alfa=alpha+dt/2.*M;
-       else alfa=alpha+dt/2.*uHeff;
+       if (uHeff>M) alfa=alpha+reduced_dt/2.*M;
+       else alfa=alpha+reduced_dt/2.*uHeff;
        }
     else{
-       if (uHeff<-M) alfa=alpha/(1.+dt/(2.*alpha)*M);
-       else alfa=alpha/(1.-dt/(2.*alpha)*uHeff);
+       if (uHeff<-M) alfa=alpha/(1.+reduced_dt/(2.*alpha)*M);
+       else alfa=alpha/(1.-reduced_dt/(2.*alpha)*uHeff);
        }
 
 // end ref code
