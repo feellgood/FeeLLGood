@@ -40,7 +40,7 @@ outputs:
 
   # The global quantities listed under ‘evol_columns’ will be saved to
   # the evolution file on this time step.
-  evol_time_step: 1e-7
+  evol_time_step: 5e-13
 
   # Global quantities that should be periodically saved to the evolution
   # file. In addition to the defaults below, the following quantities
@@ -200,7 +200,7 @@ demagnetizing_field_solver:
 time_integration:
 
   # Time at which to terminate the simulation.
-  final_time: 1.5e-5
+  final_time: 1e-10
 
   # Limit on the maximum variation of the reduced magnetization in a
   # single time step.
@@ -208,7 +208,7 @@ time_integration:
 
   # Minimal time step. If the solver cannot converge with this time
   # step, the simulation will be aborted.
-  min(dt): 1e-11
+  min(dt): 1e-16
 
   # Maximal time step.
-  max(dt): 5e-8
+  max(dt): 5e-13
