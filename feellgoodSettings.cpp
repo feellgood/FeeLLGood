@@ -166,7 +166,6 @@ void Settings::infos()
     std::cout << "spin_transfer_torque:\n";
     std::cout << "  enable: " << str(stt_flag) << "\n";
     if (stt_flag) {
-        std::cout << "  gamma0: " << p_stt.gamma0 << "\n";
         std::cout << "  sigma: " << p_stt.sigma << "\n";
         std::cout << "  dens_state: " << p_stt.N0 << "\n";
         std::cout << "  beta: " << p_stt.beta << "\n";
@@ -263,7 +262,6 @@ void Settings::read(YAML::Node yaml)
                 p.p_STT.sigma = 1.0;
                 p.p_STT.lJ = 1.0;
                 p.p_STT.lsf = 1.0;
-                p.p_STT.gamma0 = 1.0;
                 p.p_STT.func = [](Pt::pt3D){ return 1; };
 
                 paramTetra.push_back(p);
@@ -337,7 +335,6 @@ void Settings::read(YAML::Node yaml)
     YAML::Node stt = yaml["spin_transfer_torque"];
     if (stt) {
         assign(stt_flag, stt["enable"]);
-        assign(p_stt.gamma0, stt["gamma0"]);
         assign(p_stt.sigma, stt["sigma"]);
         assign(p_stt.N0, stt["dens_state"]);
         assign(p_stt.beta, stt["beta"]);

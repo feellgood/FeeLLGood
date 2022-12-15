@@ -62,7 +62,6 @@ struct STT
     double sigma;/**< Conductivity Ohm^-1 nm^-1 */
     double lJ;/**< length */
     double lsf;/**< spin flip length */
-    double gamma0;/**< gyromagnetic constant (to check) */
     std::function<double (Pt::pt3D)> func;/**< function to take into account spacial variation of current density (input is gauss point) */
         
     std::vector<std::pair<int,double> > boundaryCond; /**< all the boundary conditions, first is the region number, second the associated value  */

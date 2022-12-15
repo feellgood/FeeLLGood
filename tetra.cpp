@@ -4,6 +4,8 @@
 
 #include <set>
 
+#include "config.h" // to get gamma0 consant
+
 #include "tetra.h"
 #include "pt3D.h"
 #include "tiny.h"
@@ -55,7 +57,7 @@ const double D0 = 2.0*p_stt.sigma/(Pt::sq(CHARGE_ELECTRON)*p_stt.N0);
 
 const double pf=Pt::sq(p_stt.lJ)/(D0*(1.+ksi*ksi)) * BOHRS_MUB*p_stt.beta/CHARGE_ELECTRON;
 
-const double prefactor = D0/Pt::sq(p_stt.lJ)/(p_stt.gamma0*nu0*Js);
+const double prefactor = D0/Pt::sq(p_stt.lJ)/(gamma0*nu0*Js);
 
 Pt::pt3D j_grad_u = -p_stt.sigma*Pt::pt3D(Pt::pScal(gradV[npi],Pt::pt3D(dUdx[npi](Pt::IDX_X),dUdy[npi](Pt::IDX_X),dUdz[npi](Pt::IDX_X)) ),
                                  Pt::pScal(gradV[npi],Pt::pt3D(dUdx[npi](Pt::IDX_Y),dUdy[npi](Pt::IDX_Y),dUdz[npi](Pt::IDX_Y)) ),
