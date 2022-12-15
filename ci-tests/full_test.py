@@ -2,59 +2,44 @@
 
 import os
 import sys
+import json
 import subprocess
 from math import sqrt
 
 # Move to the script's directory.
 os.chdir(sys.path[0])
 
-sys.path.insert(0,'../tools')
-from settingsMaker import Settings
-
-mySettings = Settings("../examples/ellipsoid.msh")
-
 MaxNbThreads = int(subprocess.check_output(["getconf","_NPROCESSORS_ONLN"]))
 nbThreads = (MaxNbThreads + 4) // 3 # ellipsoid.msh is small, maxnbthreads is counterproductive
 
-mySettings["finite_element_solver"]["nb_threads"] = nbThreads
-mySettings["finite_element_solver"]["max(iter)"] = 500
+settings = {
+    "outputs": {
+        "file_basename": "full_test",
+        "evol_time_step": 1e-12,
+        "take_photo": False
+    },
+    "mesh": {
+        "filename": "../examples/ellipsoid.msh",
+        "scaling_factor": 1e-10,
+        "volume_regions": { "300": {} },
+        "surface_regions": { "200": {} }
+    },
+    "initial_magnetization": [0, 0, 1],
+    "Bext": [1, 0, -1],
+    "finite_element_solver": { "nb_threads": nbThreads },
+    "demagnetizing_field_solver": { "nb_threads": nbThreads },
+    "time_integration": {
+        "final_time": 2e-11,
+        "min(dt)": 5e-14,
+        "max(dt)": 3.5e-13,
+        "max(du)": 0.1
+    }
+}
 
-mySettings["demagnetizing_field_solver"]["nb_threads"] = nbThreads
-
-mySettings["outputs"]["evol_columns"] = ["t","<Mx>","<My>","<Mz>","E_ex","E_demag","E_zeeman","E_tot"]
-mySettings["outputs"]["take_photo"] = 100
-mySettings["outputs"]["directory"] = "test_data_out/"
-mySettings["outputs"]["file_basename"] = "ellipsoid"
-
-mySettings["outputs"]["evol_time_step"] = 1e-12
-
-mySettings["mesh"]["scaling_factor"] = 1e-10
-
-mySettings["Bext"] = [1, 0, -1]
-
-#carefull here, volume and region names must be stringified integers
-vol_region_name = "300"
-surf_region_name = "200"
-
-mySettings.createVolRegion( vol_region_name )
-mySettings.createSurfRegion( surf_region_name )
-mySettings["mesh"]["volume_regions"][vol_region_name]["alpha_LLG"] = 0.5
-
-mySettings["time_integration"]["final_time"] = 2e-11
-mySettings["time_integration"]["min(dt)"] = 5e-14
-mySettings["time_integration"]["max(dt)"] = 3.5e-13
-
-mySettings["time_integration"]["max(du)"] = 0.1
-
-mySettings["initial_magnetization"] = [0, 0, 1]
-
-JSON_fileName = 'full_test_settings.json'
-mySettings.write(JSON_fileName)
-
-val = subprocess.run(["../feellgood",JSON_fileName])
+val = subprocess.run(["../feellgood", "-"], input=json.dumps(settings), text=True)
 
 if(val.returncode==0):
-	with open(mySettings["outputs"]["directory"] + mySettings["outputs"]["file_basename"] + ".evol","r") as f:
+	with open("full_test.evol","r") as f:
 		for line in f:
 			pass
 		lastLine = line
