@@ -16,10 +16,6 @@ mySettings = Settings("../examples/ellipsoid.msh")
 MaxNbThreads = int(subprocess.check_output(["getconf","_NPROCESSORS_ONLN"]))
 nbThreads = (MaxNbThreads + 4) // 3 # ellipsoid.msh is small, maxnbthreads is counterproductive
 
-# All times are scaled by this factor in order to match the "reduced
-# times" used by previous versions of feeLLGood.
-gamma0 = 221276.147254
-
 mySettings["finite_element_solver"]["nb_threads"] = nbThreads
 mySettings["finite_element_solver"]["max(iter)"] = 500
 
@@ -30,7 +26,7 @@ mySettings["outputs"]["take_photo"] = 100
 mySettings["outputs"]["directory"] = "test_data_out/"
 mySettings["outputs"]["file_basename"] = "ellipsoid"
 
-mySettings["outputs"]["evol_time_step"] = 1e-7 / gamma0
+mySettings["outputs"]["evol_time_step"] = 1e-12
 
 mySettings["mesh"]["scaling_factor"] = 1e-10
 
@@ -44,9 +40,9 @@ mySettings.createVolRegion( vol_region_name )
 mySettings.createSurfRegion( surf_region_name )
 mySettings["mesh"]["volume_regions"][vol_region_name]["alpha_LLG"] = 0.5
 
-mySettings["time_integration"]["final_time"] = 1.5e-5 / gamma0
-mySettings["time_integration"]["min(dt)"] = 1e-11 / gamma0
-mySettings["time_integration"]["max(dt)"] = 0.5e-7 / gamma0
+mySettings["time_integration"]["final_time"] = 2e-11
+mySettings["time_integration"]["min(dt)"] = 5e-14
+mySettings["time_integration"]["max(dt)"] = 3.5e-13
 
 mySettings["time_integration"]["max(du)"] = 0.1
 
@@ -67,9 +63,9 @@ if(val.returncode==0):
 	mx = float(data[1])
 	my = float(data[2])
 	mz = float(data[3])
-	X = 0.600566
-	Y = -0.00193843
-	Z = -0.799573
+	X = 0.323478
+	Y = 0.377806
+	Z = -0.867539
 	distance = sqrt((X-mx)**2+(Y-my)**2+(Z-mz)**2)
 	threshold = 1e-5
 	success = distance < threshold
