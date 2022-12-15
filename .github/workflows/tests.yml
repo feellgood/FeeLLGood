@@ -27,7 +27,7 @@ jobs:
     - name: restore cache
       uses: actions/cache@v3
       with:
-        path: ~/.ccache
+        path: ~/.cache/ccache
         key: ccache-${{ steps.id-machine.outputs.arch }}-${{ github.sha }}
         restore-keys: ccache-${{ steps.id-machine.outputs.arch }}-
 
