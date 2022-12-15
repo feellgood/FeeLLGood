@@ -37,8 +37,8 @@ class Settings(object):
 
     ## \brief define spin_polarized_current
     # uk and beta input parameters defining spin transfert torque
-    def createSTT(self,volRegRef,gamma0,sigma,N0,beta,l_J,l_sf,bc_surf_reg_ref1,bc_val1,bc_surf_reg_ref2,bc,bc_val2):
-        self.mySets["spin_transfer_torque"] = {"enable": True, "volume_region_reference" : str(volRegRef), "gamma0" : gamma0, "sigma" : sigma,"dens_state" : N0, "beta" : beta,"l_J" : l_J,"l_sf" : l_sf,"boundary_conditions" : {  str(bc_surf_reg_ref1) : { "V" : bc_val1 } ,  str(bc_surf_reg_ref2) : { "V" : bc_val2 } } }
+    def createSTT(self,volRegRef,sigma,N0,beta,l_J,l_sf,bc_surf_reg_ref1, bc_val1, bc_surf_reg_ref2, bc_val2):
+        self.mySets["spin_transfer_torque"] = {"enable": True, "volume_region_reference" : str(volRegRef), "sigma" : sigma,"dens_state" : N0, "beta" : beta,"l_J" : l_J,"l_sf" : l_sf,"boundary_conditions" : [ [ str(bc_surf_reg_ref1) , bc_val1 ] , [ str(bc_surf_reg_ref2) , bc_val2 ] ] }
 
     ## \brief define recentering
     # direction and threshold input parameters defining recentering
@@ -77,15 +77,7 @@ class Settings(object):
             if "boundary_conditions" not in self.mySets["spin_transfer_torque"]:
                 print("undefined boundary conditions.")
             elif len(self.mySets["spin_transfer_torque"]["boundary_conditions"]) == 2 :
-                bc = self.mySets["spin_transfer_torque"]["boundary_conditions"]
-                nbV=0
-                for i in bc.values():
-                    if isinstance(i,dict) and "V" in i.keys():
-                        nbV += 1
-                if nbV == 2:
-                    print("Dirichlet boundary conditions.")
-                else:
-                    print("not supported boundary conditions.")
+                print("Dirichlet boundary conditions.")
             else :
                 print("wrong number of boundary conditions, should be 2.")
     
