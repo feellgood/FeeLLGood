@@ -20,16 +20,17 @@ mySettings["demagnetizing_field_solver"]["nb_threads"] = 4 # MaxNbThreads
 mySettings["outputs"]["evol_columns"] = ["t","<Mx>","<My>","<Mz>","<dMx/dt>","<dMy/dt>","<dMz/dt>","Hx","Hy","Hz","E_ex","E_demag","E_zeeman","E_tot"]
 mySettings["outputs"]["take_photo"] = 500
 mySettings["outputs"]["directory"] = "test_data_out/"
+mySettings["outputs"]["file_basename"] = "ellipsoid"
 
-mySettings["outputs"]["evol_time_step"] = 0.1e-9
+mySettings["outputs"]["evol_time_step"] = 5e-16
 
 mySettings["mesh"]["scaling_factor"] = 1e-10
 
 mySettings["mesh"]["volume_regions"]["300"]["alpha_LLG"] = 0.05
 
-mySettings["time_integration"]["final_time"] = 0.2e-7
-mySettings["time_integration"]["min(dt)"] = 0.1e-11
-mySettings["time_integration"]["max(dt)"] = 0.5e-10
+mySettings["time_integration"]["final_time"] = 1e-13
+mySettings["time_integration"]["min(dt)"] = 5e-18
+mySettings["time_integration"]["max(dt)"] = 2.5e-16
 
 mySettings["time_integration"]["max(du)"] = 0.1
 

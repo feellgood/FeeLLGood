@@ -8,8 +8,6 @@ mySettings = Settings("ellipsoid.msh")
 mySettings.createVolRegion( "300" )
 mySettings.createSurfRegion( "200" )
 
-print("output directory is " + mySettings["outputs"]["directory"] )
-
 myFields = {"B0" : 0.01, "B1" : 0.02 , "B2": 0.04}
 
 for B in myFields:
