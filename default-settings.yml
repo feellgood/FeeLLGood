@@ -167,7 +167,6 @@ Bext: [0, 0, 0]
 # progress, not ready for general use.
 spin_transfer_torque:
   enable: false
-  gamma0: 0
   sigma: 1.0
   dens_state: 1.0
   beta: 0
