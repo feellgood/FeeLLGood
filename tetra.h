@@ -64,7 +64,7 @@ struct STT
     double lsf;/**< spin flip length */
     std::function<double (Pt::pt3D)> func;/**< function to take into account spacial variation of current density (input is gauss point) */
         
-    std::vector<std::pair<int,double> > boundaryCond; /**< all the boundary conditions, first is the region number, second the associated value  */
+    std::vector<std::pair<std::string,double> > boundaryCond; /**< boundary conditions, first is the surface region name, second the associated value  */
     };
     
 /** \class prm

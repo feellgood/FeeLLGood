@@ -38,7 +38,7 @@ class Settings(object):
     ## \brief define spin_polarized_current
     # uk and beta input parameters defining spin transfert torque
     def createSTT(self,volRegRef,sigma,N0,beta,l_J,l_sf,bc_surf_reg_ref1, bc_val1, bc_surf_reg_ref2, bc_val2):
-        self.mySets["spin_transfer_torque"] = {"enable": True, "volume_region_reference" : str(volRegRef), "sigma" : sigma,"dens_state" : N0, "beta" : beta,"l_J" : l_J,"l_sf" : l_sf,"boundary_conditions" : [ [ str(bc_surf_reg_ref1) , bc_val1 ] , [ str(bc_surf_reg_ref2) , bc_val2 ] ] }
+        self.mySets["spin_transfer_torque"] = {"enable": True, "volume_region_reference" : str(volRegRef), "sigma" : sigma,"dens_state" : N0, "beta" : beta,"l_J" : l_J,"l_sf" : l_sf,"boundary_conditions" : { { str(bc_surf_reg_ref1) : bc_val1 } , { str(bc_surf_reg_ref2) : bc_val2 } } }
 
     ## \brief define recentering
     # direction and threshold input parameters defining recentering

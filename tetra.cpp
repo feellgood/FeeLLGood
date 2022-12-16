@@ -4,7 +4,7 @@
 
 #include <set>
 
-#include "config.h" // to get gamma0 consant
+#include "config.h" // to get gamma0 constant
 
 #include "tetra.h"
 #include "pt3D.h"

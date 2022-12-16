@@ -172,7 +172,16 @@ void Settings::infos()
         std::cout << "  l_J: " << p_stt.lJ << "\n";
         std::cout << "  l_sf: " << p_stt.lsf << "\n";
         std::cout << "  volume_region_reference: " << p_stt.reg << "\n";
+    	std::cout << "  boundary_conditions:\n";
+    	
+    	if(p_stt.boundaryCond.size()>0)
+    		{
+    		for(unsigned int i=0; i < p_stt.boundaryCond.size()-1 ; i++)
+    			{ std::cout << "    \"" << p_stt.boundaryCond[i].first << "\"" << ": " << p_stt.boundaryCond[i].second <<",\n"; }
+    		std::cout << "    \"" << p_stt.boundaryCond.back().first << "\"" << ": " << p_stt.boundaryCond.back().second <<std::endl;
+    		}
     }
+    
     std::cout << "finite_element_solver:\n";
     std::cout << "  nb_threads: " << solverNbTh << "\n";
     std::cout << "  max(iter): " << MAXITER << "\n";
@@ -342,6 +351,23 @@ void Settings::read(YAML::Node yaml)
         assign(p_stt.lsf, stt["l_sf"]);
         assign(p_stt.reg, stt["volume_region_reference"]);
         p_stt.func = [](Pt::pt3D){ return 1; };
+        
+        YAML::Node bound_cond = stt["boundary_conditions"];
+        if (bound_cond)
+        	{
+        	if (!bound_cond.IsMap())
+                	error("stt.boundary_conditions should be a map.");
+        	else
+        		{
+        		for (auto it = bound_cond.begin(); it != bound_cond.end(); ++it)
+        			{
+                		std::string name = it->first.as<std::string>();
+                		double V = it->second.as<double>();
+        			p_stt.boundaryCond.push_back(std::make_pair(name,V)); 
+        			//std::cout<< "surf name : " << name << "\tV = " << V <<std::endl;
+        			}
+        		}
+        	}
     }  // spin_transfer_torque
 
     // The number of available processors (actually, hardware threads)
