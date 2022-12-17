@@ -172,14 +172,16 @@ void Settings::infos()
         std::cout << "  l_J: " << p_stt.lJ << "\n";
         std::cout << "  l_sf: " << p_stt.lsf << "\n";
         std::cout << "  volume_region_reference: " << p_stt.reg << "\n";
-    	std::cout << "  boundary_conditions:\n";
-    	
-    	if(p_stt.boundaryCond.size()>0)
-    		{
-    		for(unsigned int i=0; i < p_stt.boundaryCond.size()-1 ; i++)
-    			{ std::cout << "    \"" << p_stt.boundaryCond[i].first << "\"" << ": " << p_stt.boundaryCond[i].second <<",\n"; }
-    		std::cout << "    \"" << p_stt.boundaryCond.back().first << "\"" << ": " << p_stt.boundaryCond.back().second <<std::endl;
-    		}
+        std::cout << "  boundary_conditions:";
+        if (p_stt.boundaryCond.size() == 0) {
+            std::cout << " {}\n";  // empty map
+        } else {
+            std::cout << "\n";
+            for (unsigned int i = 0; i < p_stt.boundaryCond.size(); i++) {
+                std::cout << "    \"" << p_stt.boundaryCond[i].first
+                    << "\": " << p_stt.boundaryCond[i].second << "\n";
+            }
+        }
     }
     
     std::cout << "finite_element_solver:\n";
