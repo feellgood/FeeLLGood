@@ -2,7 +2,6 @@
 #include "feellgoodSettings.h"
 #include "pt3D.h"
 
-
 void on_fail_msg_error(std::ifstream &f_in, const std::string strWhat)
 {
 if (f_in.fail())
@@ -13,12 +12,14 @@ if (f_in.fail())
 }
 
 
-void lookFor(const bool verbose, std::ifstream &f_in, const std::string strWhat)
+bool lookFor(const bool _b, std::ifstream &f_in, const std::string strWhat)
 {
 std::string symb = "";
-while (symb != strWhat) {f_in >> symb;}
+while ( (f_in.peek()!=EOF) && (symb != strWhat)) {f_in >> symb;}
 
-if (verbose) on_fail_msg_error(f_in,"could not find beacon " + strWhat);
+if (_b) on_fail_msg_error(f_in,"could not find beacon " + strWhat);
+
+return !(f_in.fail());
 }
 
 
@@ -39,25 +40,75 @@ if(symb == "$MeshFormat")
         {
         if(mySets.verbose) {std::cout << "  file format: 2.2\n";}
         int tags, reg, TYP;
+
+
+	bool beaconFound = lookFor(false,msh,"$PhysicalNames");
+	
+	int nbRegNames;
+	if (beaconFound)
+		{
+		msh >> nbRegNames;
+		if(mySets.verbose) { std::cout << "found $PhysicalNames beacon : " << nbRegNames <<" reg names.\n"; }
+		
+		while((msh >> symb)&&(symb != "$EndPhysicalNames")&&(! msh.fail() ) ) 
+        		{
+        		std::string name;
+        		msh >> tags  >> name;
+        		
+        		switch( stoi(symb) ){
+        			case 2:{
+        				surfRegNames[name] = tags;
+        			break;}
+        			case 3:{
+        				volRegNames[name] = tags;
+        			break;}
+        			default:
+        				std::cerr<< "unknown type in mesh $PhysicalNames" <<std::endl;
+        			break;
+        			}
+        		}
+        	if(mySets.verbose)
+        		{
+        		std::map<std::string, int>::iterator it;
+   			for(it=surfRegNames.begin(); it!=surfRegNames.end(); ++it){ std::cout << it->first << " => " << it->second << '\n';}
+        		for(it=volRegNames.begin(); it!=volRegNames.end(); ++it){ std::cout << it->first << " => " << it->second << '\n';}
+        		}
+        	
+		}
+  	else
+  		{
+  		if (mySets.verbose)
+  			{ std::cout << "No $PhysicalNames defined.\n"; }
+  		
+  		msh.clear(); 
+  		msh.seekg(std::ios::beg); 
+  		}
   
-    lookFor(mySets.verbose,msh,"$Nodes");
+    beaconFound = lookFor(true,msh,"$Nodes");
     
     double scale = mySets.getScale();
     int nbNod;
-    msh >> nbNod;
-    init_node(nbNod);
-
-    for (int i=0; i<nbNod; i++)
+    
+    if (beaconFound)
         {
-        msh >> symb >> node[i].p;
-        node[i].p.rescale(scale);
-        }
+        msh >> nbNod;
+        init_node(nbNod);
 
+        for (int i=0; i<nbNod; i++)
+            {
+            msh >> symb >> node[i].p;
+            node[i].p.rescale(scale);
+            }
+        }
+        
     on_fail_msg_error(msh,"error while reading nodes" );
     
-    lookFor(mySets.verbose,msh,"$Elements");
+    beaconFound = lookFor(true,msh,"$Elements");
 
     int nbElem;
+    
+    if (beaconFound)
+    {
     msh >> nbElem; 
     if(mySets.verbose) {std::cout << "  element count: " << nbElem << '\n';}
     while((msh >> symb)&&(symb != "$EndElements")&&(! msh.fail() ) ) 
@@ -83,7 +134,7 @@ if(symb == "$MeshFormat")
             break;
             }
         }
-
+    }
         on_fail_msg_error(msh,"error while reading elements" );
         }
     else { std::cout <<"mesh file format " << mshFormat << " not supported." << std::endl; SYSTEM_ERROR; }

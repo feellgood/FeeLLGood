@@ -7,6 +7,7 @@
 
 #include <set>
 #include <execution>
+#include <map>
 
 #include "node.h"
 #include "facette.h"
@@ -200,6 +201,10 @@ private:
 
     /** node container : not initialized by constructor, but later, while reading the mesh, by member function init_node */
     std::vector< Nodes::Node > node;
+    
+    std::map< std::string ,int> surfRegNames;
+    
+    std::map< std::string ,int> volRegNames;
     
     /** memory allocation for the nodes */
     inline void init_node(const int Nb) { node.resize(Nb); }
