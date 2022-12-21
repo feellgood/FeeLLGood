@@ -4,16 +4,28 @@ import json
 import numpy as np
 
 sys.path.insert(0,'../tools')
-from cuboidMaker import Cuboid
+from cylinderMaker import Cylinder
 from settingsMaker import Settings
 
-rectangle = Cuboid([-2,-2,-2],[2,2,2],4,4,4)
-meshFileName = 'rectangle.msh'
-vol_regName = "300"
-surf_regName = "200"
 
-bc1_regName = "201"
-bc2_regName = "202"
+mesh_size = 0.5
+r = 1
+t=10
+
+
+meshFileName = 'my_beautiful_cylinder.msh'
+vol_regName = "300" #"bulk"
+surf_regName = "200" #"frontier(bulk)"
+
+cyl = Cylinder(r,t,mesh_size,surf_regName,vol_regName)
+
+#surfaces for boundary conditions
+bc1_regName = "S_left"
+bc2_regName = "S_right"
+cyl.addEdgeSurf(bc1_regName,bc2_regName)
+
+
+cyl.make(meshFileName)
 
 settings = {
     "outputs": {
@@ -50,9 +62,6 @@ settings = {
     }
 }
 
-rectangle.add_sub_surface(bc1_regName, lambda x,y,z: z== -2 )
-rectangle.add_sub_surface(bc2_regName, lambda x,y,z: z== 2 )
-rectangle.make(meshFileName,vol_regName,surf_regName)
 
 #with open("rect_stt.json",'w') as outfile:
 #    json.dump(settings,outfile,indent = 4)

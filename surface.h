@@ -17,6 +17,10 @@ namespace Surface
 
 const int DIM = 2; /**< surface mathematical dimension */
 
+
+/** \class Surf
+Surf is a class containing the index references to triangular facettes, it has to be oriented
+*/
 class Surf{
 	public:
 		/** constructor used by readMesh */
