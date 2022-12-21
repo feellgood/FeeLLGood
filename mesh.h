@@ -12,6 +12,7 @@
 #include "node.h"
 #include "facette.h"
 #include "tetra.h"
+#include "surface.h"
 
 #include "feellgoodSettings.h"
 
@@ -136,6 +137,9 @@ double updateNodes(std::vector<double> const& X,const double dt)
      /** tetrahedron container */
 	std::vector <Tetra::Tet>  tet;
     
+    /** surface container */
+	std::vector <Surface::Surf>  s;
+    
 
     /** read a solution from a file (tsv formated) and initialize fem struct to restart computation from that distribution, return time
     */
@@ -209,7 +213,7 @@ private:
     /** memory allocation for the nodes */
     inline void init_node(const int Nb) { node.resize(Nb); }
     
-	/** reading mesh format 2.2 file function */
+	/** reading mesh format 2.2 text file function */
     void readMesh(Settings const& mySets);
 
     
