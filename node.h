@@ -41,7 +41,7 @@ double phi;/**< scalar potential after the current time step */
 double phiv0;/**< scalar potential of velocity at the start of the current time step */
 double phiv;/**< scalar potential of velocity after the current time step */
 
-double V;/**< electrostatic potential (for STT) */
+//double V;/**< electrostatic potential (for STT) */
 
 /** setter for the local basis vector */
 inline void setBasis(const double r)

@@ -1,8 +1,8 @@
 #ifndef spinTransferTorque_h
 #define spinTransferTorque_h
 
+#include "config.h"
 #include "pt3D.h"
-
 
 /** \struct STT
  container for Spin Transfert Torque constants, Thiaville model, Dirichlet boundary conditions (potential fixed value on two or more surfaces)
@@ -20,6 +20,21 @@ struct STT
         
     std::vector<std::pair<std::string,double> > boundaryCond; /**< boundary conditions, first is the surface region name, second the associated value  */
     
+    /** electrostatic potential */ 
+    std::vector<double> V; // size of the vector of nodes
+    
+    
+    /** setter : node potential */
+    inline void setNodesPotential(read_vector const& Xr)
+        { 
+        for (unsigned int i=0; i < V.size(); i++) V[i] = Xr[i];
+        }
+    
+    /** getter for electrostatic potential */
+    inline double get_elec_pot(const int i) const {return V[i];}
+    
+    /** setter for electrostatic potential */
+    inline void set_elec_pot(const int i,const double val) {V[i] = val;}
     
     };
     

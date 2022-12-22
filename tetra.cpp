@@ -17,6 +17,32 @@
 using namespace Tetra;
 using namespace Pt;
 
+//usefull for STT : need the gradient(V)
+    void calc_gradV(STT const& p_stt,Tetra::Tet const& tet,Pt::pt3D (&gradV)[NPI])
+    	{
+    	if(p_stt.V.size()>0)
+		{
+		for (int npi=0; npi<Tetra::NPI; npi++) 
+    			{ 
+    			double vx(0),vy(0),vz(0);
+    
+    			for (int i=0; i<Tetra::N; i++)
+        			{
+        			const double V = p_stt.V[ tet.ind[i] ];
+        			vx += V*tet.dadx[i][npi];
+        			vy += V*tet.dady[i][npi];
+        			vz += V*tet.dadz[i][npi];
+        			}
+    
+    			gradV[npi] = Pt::pt3D(vx,vy,vz);
+    			}
+		}
+//tiny::transposed_mult<double, N, NPI> (V_nod, dadx, dVdx);
+//tiny::transposed_mult<double, N, NPI> (V_nod, dady, dVdy);
+//tiny::transposed_mult<double, N, NPI> (V_nod, dadz, dVdz);
+    	
+    	}
+
 
 void Tet::lumping(int const& npi,double alpha_eff,double prefactor, double (&AE)[3*N][3*N]) const
 {
@@ -137,21 +163,7 @@ interpolation(Nodes::get_p,p_g);
 
 Pt::pt3D gradV[NPI];
 
-for (int npi=0; npi<Tetra::NPI; npi++) 
-    { 
-    double vx(0),vy(0),vz(0);
-    for (int i=0; i<Tetra::N; i++)
-        {
-        vx += (refNode[ind[i]].V)*dadx[i][npi];
-        vy += (refNode[ind[i]].V)*dady[i][npi]; 
-        vz += (refNode[ind[i]].V)*dadz[i][npi];
-        }
-    gradV[npi] = Pt::pt3D(vx,vy,vz);
-    }
-//tiny::transposed_mult<double, N, NPI> (V_nod, dadx, dVdx);
-//tiny::transposed_mult<double, N, NPI> (V_nod, dady, dVdy);
-//tiny::transposed_mult<double, N, NPI> (V_nod, dadz, dVdz);
-
+calc_gradV(params[idxPrm].p_STT,*this,gradV);
 // end STT
 
 for (int npi=0; npi<NPI; npi++)

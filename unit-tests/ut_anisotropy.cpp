@@ -25,10 +25,10 @@ std::uniform_real_distribution<> distrib(0.0,1.0);
 Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0);
 double phi0(0),phi(0),phiv0(0),phiv(0);
 
-Nodes::Node n0 = {p0,u0,v0,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n1 = {p1,u0,v0,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n2 = {p2,u0,v0,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n3 = {p3,u0,v0,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n0 = {p0,u0,v0,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+Nodes::Node n1 = {p1,u0,v0,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+Nodes::Node n2 = {p2,u0,v0,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+Nodes::Node n3 = {p3,u0,v0,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
 
 node[0] = n0;
 node[1] = n1;
@@ -128,10 +128,10 @@ std::uniform_real_distribution<> distrib(0.0,1.0);
 Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0);
 double phi0(0),phi(0),phiv0(0),phiv(0);
 
-Nodes::Node n0 = {p0,u0,v0,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n1 = {p1,u0,v0,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n2 = {p2,u0,v0,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n3 = {p3,u0,v0,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n0 = {p0,u0,v0,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+Nodes::Node n1 = {p1,u0,v0,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+Nodes::Node n2 = {p2,u0,v0,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+Nodes::Node n3 = {p3,u0,v0,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
 
 node[0] = n0;
 node[1] = n1;

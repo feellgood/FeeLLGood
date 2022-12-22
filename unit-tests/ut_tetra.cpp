@@ -54,10 +54,10 @@ std::uniform_real_distribution<> distrib(0.0,1.0);
 Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
 double phi0(0),phi(0),phiv0(0),phiv(0);
 
-Nodes::Node n0 = {p0,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n1 = {p1,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n2 = {p2,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n3 = {p3,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n0 = {p0,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+Nodes::Node n1 = {p1,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+Nodes::Node n2 = {p2,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+Nodes::Node n3 = {p3,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
 
 node[0] = n0;
 node[1] = n1;
@@ -134,10 +134,10 @@ std::vector<Nodes::Node> node(nbNod);
 Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
 double phi0(0),phi(0),phiv0(0),phiv(0);
 
-Nodes::Node n0 = {p0,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n1 = {p1,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n2 = {p2,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n3 = {p3,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n0 = {p0,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+Nodes::Node n1 = {p1,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+Nodes::Node n2 = {p2,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+Nodes::Node n3 = {p3,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
 
 node[0] = n0;
 node[1] = n1;
@@ -190,10 +190,10 @@ std::uniform_real_distribution<> distrib(0.0,1.0);
 Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
 double phi0(0),phi(0),phiv0(0),phiv(0);
 
-Nodes::Node n0 = {p0,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n1 = {p1,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n2 = {p2,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n3 = {p3,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n0 = {p0,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+Nodes::Node n1 = {p1,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+Nodes::Node n2 = {p2,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+Nodes::Node n3 = {p3,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
 
 node[0] = n0;
 node[1] = n1;
@@ -337,10 +337,10 @@ std::uniform_real_distribution<> distrib(0.0,1.0);
 Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
 double phi0(0),phi(0),phiv0(0),phiv(0);
 
-Nodes::Node n0 = {p0,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n1 = {p1,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n2 = {p2,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n3 = {p3,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n0 = {p0,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+Nodes::Node n1 = {p1,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+Nodes::Node n2 = {p2,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+Nodes::Node n3 = {p3,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
 
 node[0] = n0;
 node[1] = n1;
@@ -435,10 +435,10 @@ std::uniform_real_distribution<> distrib(0.0,1.0);
 Pt::pt3D p0(0,0,0),p1(1,0,0),p2(0,1,0),p3(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
 double phi0(0),phi(0),phiv0(0),phiv(0);
 
-Nodes::Node n0 = {p0,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n1 = {p1,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n2 = {p2,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
-Nodes::Node n3 = {p3,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,0};
+Nodes::Node n0 = {p0,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+Nodes::Node n1 = {p1,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+Nodes::Node n2 = {p2,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+Nodes::Node n3 = {p3,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
 
 node[0] = n0;
 node[1] = n1;
@@ -540,12 +540,12 @@ std::mt19937 gen(sd);
 std::uniform_real_distribution<> distrib(0.0,1.0);
 
 Pt::pt3D p1(1,0,0),p2(0,1,0),p3(1,1,0),p4(0,0,1),u0(0,0,0),v0(0,0,0),u(0,0,0),v(0,0,0);
-double phi0(0),phi(0),phiv0(0),phiv(0),V(0);
+double phi0(0),phi(0),phiv0(0),phiv(0);
 
-node[0] = {p1,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,V};
-node[1] = {p2,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,V};
-node[2] = {p3,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,V};
-node[3] = {p4,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv,V};
+node[0] = {p1,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+node[1] = {p2,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+node[2] = {p3,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
+node[3] = {p4,u0,v0,u,v,Pt::pt3D(0,0,0),Pt::pt3D(0,0,0),phi0,phi,phiv0,phiv};
 
 for(int i=0;i<nbNod;i++)
     {

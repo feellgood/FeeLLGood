@@ -68,12 +68,7 @@ public:
     /** fix to zero node[i].v */
     inline void set_node_zero_v(const int i) { node[i].v = Pt::pt3D(0.,0.,0.); }
     
-    /** setter : node potential */
-    inline void setNodesPotential(read_vector const& Xr)
-        { 
-        for (unsigned int i=0; i < node.size(); i++) node[i].V = Xr[i];
-        //for (int i=0; i < nbNod; i++) node[i].V = Xr[i]; 
-        }
+    
     
     /** basic informations on the mesh */
     void infos(void) const
@@ -192,12 +187,6 @@ double updateNodes(std::vector<double> const& X,const double dt)
     std::for_each(fac.begin(),fac.end(),[&srcDen,&corr,getter,&nsrc](Facette::Fac const& fac)
         { fac.charges(getter,srcDen,corr,nsrc); });// end for_each on fac
     }
-    
-    /** getter for electrostatic potential */
-    inline double get_elec_pot(const int i) const {return node[i].V;}
-    
-    /** setter for electrostatic potential */
-    inline void set_elec_pot(const int i,const double val) {node[i].V = val;}
     
     /** setter for node[i]; what_to_set will fix what is the part of the node struct to set (usefull for fmm_demag.h) */
     inline void set(const int i, std::function<void (Nodes::Node &,const double)> what_to_set,const double val)

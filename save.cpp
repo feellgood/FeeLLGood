@@ -124,7 +124,7 @@ fout << "#time : " << t_prm.get_t() << endl;
 for(unsigned int i=0;i<node.size();i++)
         { 
         Pt::pt3D p = node[i].p/s;
-        fout << i << "\t" << p << "\t" << node[i].u << "\t" << node[i].phi << '\t' << node[i].V << endl;
+        fout << i << "\t" << p << "\t" << node[i].u << "\t" << node[i].phi << endl;
         }
 
 fout.close();

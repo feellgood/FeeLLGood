@@ -26,10 +26,10 @@ this class is containing both data and a solver to compute potential from dirich
 class electrostatSolver {
 public:
     /** constructor */
-    inline electrostatSolver(Mesh::mesh const& _msh /**< [in] reference to the mesh */, STT const& p_stt /**< all spin transfer torque parameters */,
+    inline electrostatSolver(Mesh::mesh const& _msh /**< [in] reference to the mesh */, STT const& _p_stt /**< all spin transfer torque parameters */,
                              const double _tol /**< [in] tolerance for solvers */,
                              const bool v /**< [in] verbose bool */,
-                             const int max_iter /**< [in] maximum number of iteration */ ): msh(_msh), NOD(msh.getNbNodes()), TET(msh.getNbTets()), FAC(msh.getNbFacs()), verbose(v), MAXITER(max_iter) 
+                             const int max_iter /**< [in] maximum number of iteration */ ): msh(_msh), p_stt(_p_stt), NOD(msh.getNbNodes()), TET(msh.getNbTets()), FAC(msh.getNbFacs()), verbose(v), MAXITER(max_iter) 
                              {
                              
                              sigma_values.insert( std::pair<int,double>(p_stt.reg,p_stt.sigma) );
@@ -41,6 +41,8 @@ public:
 private:
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh ( const ref ) */
 	Mesh::mesh msh;
+	
+	STT p_stt;
     
     /** number of nodes */
     const int NOD;
@@ -193,7 +195,7 @@ iter.set_noisy(verbose);
 gmm::bicgstab(Kr, Xw, Lr, gmm::diagonal_precond <read_matrix>(Kr), iter);
 
 read_vector Xr(NOD); gmm::copy(Xw, Xr);
-msh.setNodesPotential(Xr);
+p_stt.setNodesPotential(Xr);
 return 0;
 }
 
