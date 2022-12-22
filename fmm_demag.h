@@ -59,7 +59,7 @@ class fmm
     {
     public:
         /** constructor, initialize memory for tree, kernel, sources corrections, initialize all sources */
-        inline fmm(mesh &msh,bool VERBOSE,const int ScalfmmNbThreads): NOD(msh.getNbNodes()) ,FAC( msh.getNbFacs()) , TET( msh.getNbTets()) , SRC( FAC * Facette::NPI + TET * Tetra::NPI) , tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels( NbLevels, boxWidth, boxCenter)
+        inline fmm(Mesh::mesh &msh,bool VERBOSE,const int ScalfmmNbThreads): NOD(msh.getNbNodes()) ,FAC( msh.getNbFacs()) , TET( msh.getNbTets()) , SRC( FAC * Facette::NPI + TET * Tetra::NPI) , tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels( NbLevels, boxWidth, boxCenter)
             {
             omp_set_num_threads(ScalfmmNbThreads);
             norm = 1./(2.*msh.diam);
@@ -90,7 +90,7 @@ class fmm
         /**
         launch the calculation of the demag field with second order corrections
         */
-        void calc_demag(mesh &msh,Settings &mySettings)
+        void calc_demag(Mesh::mesh &msh,Settings &mySettings)
         {
         FTic counter;
         counter.tic();
@@ -136,7 +136,7 @@ class fmm
     computes the demag field, with (getter  = u,setter = phi) or (getter = v,setter = phi_v)
     */
 
-    void demag(std::function<const Pt::pt3D (Nodes::Node)> getter,std::function<void (Nodes::Node &,const double)> setter,mesh &msh,Settings &settings)
+    void demag(std::function<const Pt::pt3D (Nodes::Node)> getter,std::function<void (Nodes::Node &,const double)> setter, Mesh::mesh &msh, Settings &settings)
         {
         FmmClass algo(&tree, &kernels);
         

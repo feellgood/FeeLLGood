@@ -111,7 +111,7 @@ class Fem
 	double Etot;/**< total energy */
 	
 	/** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh */
-	mesh msh;
+	Mesh::mesh msh;
     
     /** computes all the energies */
     void energy(double const t /**< [in] time in second, used to compute zeeman contribution if applied field is time dependant */,

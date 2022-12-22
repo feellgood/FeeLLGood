@@ -18,13 +18,15 @@
 #include "facette.h"
 #include "tiny.h"
 
+#include "spinTransferTorque.h"
+
 /** \class electrostatSolver
 this class is containing both data and a solver to compute potential from dirichlet boundary conditions problem for the current density flowing in the sample.
 */
 class electrostatSolver {
 public:
     /** constructor */
-    inline electrostatSolver(mesh const& _msh /**< [in] reference to the mesh */, Tetra::STT const& p_stt /**< all spin transfer torque parameters */,
+    inline electrostatSolver(Mesh::mesh const& _msh /**< [in] reference to the mesh */, STT const& p_stt /**< all spin transfer torque parameters */,
                              const double _tol /**< [in] tolerance for solvers */,
                              const bool v /**< [in] verbose bool */,
                              const int max_iter /**< [in] maximum number of iteration */ ): msh(_msh), NOD(msh.getNbNodes()), TET(msh.getNbTets()), FAC(msh.getNbFacs()), verbose(v), MAXITER(max_iter) 
@@ -38,7 +40,7 @@ public:
 
 private:
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh ( const ref ) */
-	mesh msh;
+	Mesh::mesh msh;
     
     /** number of nodes */
     const int NOD;

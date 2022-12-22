@@ -25,7 +25,7 @@ class Cylinder(object):
         self.n2 = name2
         self.withExtraSurf = True
     
-    def make(self,meshFileName):
+    def make(self,meshFileName,naming):
         """ write cylinder mesh file in gmsh 2.2 text format """
         
         gmsh.initialize()
@@ -55,7 +55,8 @@ class Cylinder(object):
 
         surface_tag = 200
         gmsh.model.addPhysicalGroup(2,[surf, out[0][1], out[2][1], out[3][1], out[4][1], out[5][1]],surface_tag)
-        gmsh.model.setPhysicalName(2,surface_tag,self.surfName)
+        if naming :
+                gmsh.model.setPhysicalName(2,surface_tag,self.surfName)
 
         if self.withExtraSurf :
                 surface_tag_left = 201
@@ -66,25 +67,26 @@ class Cylinder(object):
                 gmsh.model.addPhysicalGroup(2,[ out[0][1] ],surface_tag_right)
                 gmsh.model.setPhysicalName(2,surface_tag_right,self.n2)
 
-                volume_tag = 300
-                gmsh.model.addPhysicalGroup(3,[out[1][1]],volume_tag)
+        volume_tag = 300
+        gmsh.model.addPhysicalGroup(3,[out[1][1]],volume_tag)
+        if naming :
                 gmsh.model.setPhysicalName(3,volume_tag,self.volName)
 
-                gmsh.model.geo.synchronize() # we have to synchronize before the call to 'generate' to build the mesh
-                gmsh.model.mesh.generate(3) # 3 is the dimension of the mesh
+        gmsh.model.geo.synchronize() # we have to synchronize before the call to 'generate' to build the mesh
+        gmsh.model.mesh.generate(3) # 3 is the dimension of the mesh
 
-                gmsh.option.set_number("Mesh.MshFileVersion", 2.2) # to force mesh file format to 2.2
+        gmsh.option.set_number("Mesh.MshFileVersion", 2.2) # to force mesh file format to 2.2
 
-                gmsh.write(meshFileName)
+        gmsh.write(meshFileName)
 
-                nbNodes = gmsh.option.get_number("Mesh.NbNodes")
-                nbTriangles = gmsh.option.get_number("Mesh.NbTriangles")
-                nbTetra = gmsh.option.get_number("Mesh.NbTetrahedra")
+        nbNodes = gmsh.option.get_number("Mesh.NbNodes")
+        nbTriangles = gmsh.option.get_number("Mesh.NbTriangles")
+        nbTetra = gmsh.option.get_number("Mesh.NbTetrahedra")
 
 # uncomment next line to see a graphic rendering of the mesh
-                #gmsh.fltk.run()
+        #gmsh.fltk.run()
                 
-                gmsh.finalize()
+        gmsh.finalize()
         
-                print("mesh file " + meshFileName + " generated, nb nodes =" + str(nbNodes) + " , nb tetra =" +str(nbTetra) )
+        print("mesh file " + meshFileName + " generated, nb nodes =" + str(nbNodes) + " , nb tetra =" +str(nbTetra) )
 

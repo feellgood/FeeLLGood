@@ -10,6 +10,8 @@
 
 #include "gmm/gmm_kernel.h"
 
+#include "spinTransferTorque.h"
+
 #include "config.h"
 #include "node.h"
 #include "tiny.h"
@@ -50,22 +52,7 @@ constexpr double a[N][NPI] = {{1.-u[0]-v[0]-w[0],1.-u[1]-v[1]-w[1],1.-u[2]-v[2]-
 {u[0],u[1],u[2],u[3],u[4]}, {v[0],v[1],v[2],v[3],v[4]}, {w[0],w[1],w[2],w[3],w[4]}};
 
 
-/** \class STT
- container for Spin Transfert Torque constants, Thiaville model, Dirichlet boundary conditions (potential fixed value on two or more surfaces)
- */
 
-struct STT
-    {
-    int reg;/**< volume region number */
-    double beta;/**< \f$ \beta \f$ is polarization rate of the current */    
-    double N0;/**< density of states at Fermi level, units : J^-1 nm^-3  */
-    double sigma;/**< Conductivity Ohm^-1 nm^-1 */
-    double lJ;/**< length */
-    double lsf;/**< spin flip length */
-    std::function<double (Pt::pt3D)> func;/**< function to take into account spacial variation of current density (input is gauss point) */
-        
-    std::vector<std::pair<std::string,double> > boundaryCond; /**< boundary conditions, first is the surface region name, second the associated value  */
-    };
     
 /** \class prm
 region number and material constants

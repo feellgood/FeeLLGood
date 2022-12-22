@@ -17,6 +17,7 @@
 #include "time_integration.h"
 #include "tetra.h"
 #include "facette.h"
+#include "spinTransferTorque.h"
 
 /** \class Settings
 container class to store many setting parameters, such as file names, parameters for the solver, output file format. It also handles text user interation through terminal, and some parsing functions. 
@@ -68,7 +69,7 @@ class Settings{
 	int solverNbTh;/**< nb of threads for the finite element solver */
 	int scalfmmNbTh;/**< nb of threads for the computation of the demag field with scalfmm */
     
-    Tetra::STT p_stt;/**< spin transfert torque parameters */
+    STT p_stt;/**< spin transfert torque parameters */
     
     bool stt_flag;/**< if spin transfer torque p_stt is fully initialized and boundary conditions ok, stt_flag is set to true */
     

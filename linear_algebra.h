@@ -36,7 +36,7 @@ class LinAlgebra
 public:
 	/** constructor */	
     inline LinAlgebra(Settings & s /**< [in] */,
-                      mesh & my_msh /**< [in] */) :  NOD(my_msh.getNbNodes()),refMsh(&my_msh),settings(s)
+                      Mesh::mesh & my_msh /**< [in] */) :  NOD(my_msh.getNbNodes()),refMsh(&my_msh),settings(s)
         { base_projection(!RAND_DETERMINIST); }
     
     /** destructor */
@@ -60,7 +60,7 @@ public:
     
 private:
     const int NOD;/**< total number of nodes, also an offset for filling sparseMatrix, initialized by constructor */
-    mesh *refMsh;/**< direct access to the mesh */
+    Mesh::mesh *refMsh;/**< direct access to the mesh */
 	
     double DW_vz;/**< speed of the domain wall */
     const Settings &settings;/**< settings */

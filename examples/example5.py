@@ -25,7 +25,7 @@ bc2_regName = "S_right"
 cyl.addEdgeSurf(bc1_regName,bc2_regName)
 
 
-cyl.make(meshFileName)
+cyl.make(meshFileName,False)
 
 settings = {
     "outputs": {

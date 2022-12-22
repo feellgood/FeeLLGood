@@ -19,6 +19,8 @@
 /** \class mesh
 class for storing the mesh, including mesh geometry values, containers for the nodes, triangular faces and tetrahedrons. nodes data are not public. They are accessible only through getter and setter.
 */
+namespace Mesh {
+
 class mesh
 {
 public:
@@ -138,7 +140,7 @@ double updateNodes(std::vector<double> const& X,const double dt)
 	std::vector <Tetra::Tet>  tet;
     
     /** surface container */
-	std::vector <Surface::Surf>  s;
+	std::vector <Mesh::Surf>  s;
     
 
     /** read a solution from a file (tsv formated) and initialize fem struct to restart computation from that distribution, return time
@@ -206,9 +208,9 @@ private:
     /** node container : not initialized by constructor, but later, while reading the mesh, by member function init_node */
     std::vector< Nodes::Node > node;
     
-    std::map< std::string ,int> surfRegNames;
+    std::map< int, std::string > surfRegNames;
     
-    std::map< std::string ,int> volRegNames;
+    std::map< int, std::string > volRegNames;
     
     /** memory allocation for the nodes */
     inline void init_node(const int Nb) { node.resize(Nb); }
@@ -307,5 +309,7 @@ private:
             }); //end for_each
         }
 };
+
+} //end namespace Mesh
 
 #endif

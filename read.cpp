@@ -2,6 +2,7 @@
 #include "feellgoodSettings.h"
 #include "pt3D.h"
 
+
 void on_fail_msg_error(std::ifstream &f_in, const std::string strWhat)
 {
 if (f_in.fail())
@@ -22,6 +23,7 @@ if (_b) on_fail_msg_error(f_in,"could not find beacon " + strWhat);
 return !(f_in.fail());
 }
 
+namespace Mesh {
 
 void mesh::readMesh(Settings const& mySets)
 {
@@ -57,10 +59,10 @@ if(symb == "$MeshFormat")
         		
         		switch( stoi(symb) ){
         			case 2:{
-        				surfRegNames[name] = tags;
+        				surfRegNames[tags] = name;
         			break;}
         			case 3:{
-        				volRegNames[name] = tags;
+        				volRegNames[tags] = name;
         			break;}
         			default:
         				std::cerr<< "unknown type in mesh $PhysicalNames" <<std::endl;
@@ -69,7 +71,7 @@ if(symb == "$MeshFormat")
         		}
         	if(mySets.verbose)
         		{
-        		std::map<std::string, int>::iterator it;
+        		std::map< int, std::string>::iterator it;
    			for(it=surfRegNames.begin(); it!=surfRegNames.end(); ++it){ std::cout << it->first << " => " << it->second << '\n';}
         		for(it=volRegNames.begin(); it!=volRegNames.end(); ++it){ std::cout << it->first << " => " << it->second << '\n';}
         		}
@@ -103,6 +105,12 @@ if(symb == "$MeshFormat")
         
     on_fail_msg_error(msh,"error while reading nodes" );
     
+    for(auto it = surfRegNames.begin(); it != surfRegNames.end(); ++it)
+    	{
+    	s.push_back( Mesh::Surf(node,it->first,it->second) );
+    	}
+    
+    
     beaconFound = lookFor(true,msh,"$Elements");
 
     int nbElem;
@@ -120,7 +128,17 @@ if(symb == "$MeshFormat")
             case 2:{
                 int i0,i1,i2;
                 msh >> i0 >> i1 >> i2;
-                fac.push_back( Facette::Fac(node,nbNod,reg,mySets.findFacetteRegionIdx(reg),i0,i1,i2 ) );
+                if(auto search = surfRegNames.find(reg); search !=surfRegNames.end() ) 
+                	{// found named surface (for STT bc's)
+                	for( auto it = s.begin(); it != s.end(); ++it )
+                		{
+                		if (it->getRegion() == search->first ) { it->push_back( Mesh::Triangle(node,i0,i1,i2) ); }
+                		}
+                	}
+                
+                
+                else // unnamed surface
+                	fac.push_back( Facette::Fac(node,nbNod,reg,mySets.findFacetteRegionIdx(reg),i0,i1,i2 ) );
                 break;
                 }
             case 4:{
@@ -189,4 +207,6 @@ fin.close();
 
 return t;
 }
+
+} // end namespace
 

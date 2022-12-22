@@ -63,7 +63,7 @@ if (save_period && (nt%save_period)==0)
     }
 }
 
-void mesh::savecfg_vtk(Settings const& settings,timing const& t_prm,const string fileName) const
+void Mesh::mesh::savecfg_vtk(Settings const& settings,timing const& t_prm,const string fileName) const
 {
     const int TET = tet.size();
     const int NOD = node.size();
@@ -108,7 +108,7 @@ for(int i=0;i<NOD;i++) {fout << node[i].u << endl;}
 //fout << boost::format("%+20.10e %+20.10e %+20.10e") % u1 % u2 % u3 << endl;
 }
 
-void mesh::savesol(const string fileName,timing const& t_prm, const double s) const
+void Mesh::mesh::savesol(const string fileName,timing const& t_prm, const double s) const
 {
 ofstream fout(fileName, ios::out);
 if (fout.fail())
@@ -130,7 +130,7 @@ for(unsigned int i=0;i<node.size();i++)
 fout.close();
 }
 
-void mesh::saveH(const string fileName,const double t,const double scale) const
+void Mesh::mesh::saveH(const string fileName,const double t,const double scale) const
 {
 std::cout << " " << fileName <<"\n -------------------\n" << std::endl;
 
