@@ -296,6 +296,7 @@ void Settings::read(YAML::Node yaml)
                 assign(p.Ks, surface["Ks"]);
                 assign(p.uk, surface["uk"]);
                 paramFacette.push_back(p);
+                if (verbose) std::cout<<"push_back on paramFacette \n";
             }
         }  // mesh.surface_regions
     }  // mesh

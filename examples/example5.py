@@ -37,8 +37,8 @@ settings = {
     "mesh": {
         "filename": meshFileName,
         "scaling_factor": 1e-9,
-        "volume_regions": { "300": { "alpha_LLG" : 0.02 } },
-        "surface_regions": { "200": {} }
+        "volume_regions": { vol_regName: { "alpha_LLG" : 0.02 } },
+        "surface_regions": { surf_regName: {} }
     },
     "initial_magnetization": ["x", "y", 0],
     "Bext": [1, 0, -1],

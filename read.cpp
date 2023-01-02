@@ -135,10 +135,9 @@ if(symb == "$MeshFormat")
                 		if (it->getRegion() == search->first ) { it->push_back( Mesh::Triangle(node,i0,i1,i2) ); }
                 		}
                 	
-                	//fac.push_back( Facette::Fac(node,nbNod,reg,mySets.findFacetteRegionIdx( search-> second ),i0,i1,i2 ) );
                 	int idx = mySets.findFacetteRegionIdx( search->second );
-                	if (idx == -1) {std::cout << "oulala facette!\n";exit(1);}   
-                	else fac.push_back( Facette::Fac(node,nbNod,idx,i0,i1,i2 ) );
+                	if (idx > -1) 
+                		fac.push_back( Facette::Fac(node,nbNod,idx,i0,i1,i2 ) ); // we only want to store in fac vector the facettes for micromag problem, nothing for bc for stt  
                 	}
                 else { std::cout << "mesh reading error : unnamed surface region" << std::endl; }// unnamed surface
                 	
@@ -149,10 +148,9 @@ if(symb == "$MeshFormat")
                 msh >> i0 >> i1 >> i2 >> i3;
                 if(auto search = volRegNames.find(reg); search != volRegNames.end() )
                 	{// found named volume
-                	//tet.push_back( Tetra::Tet(node,reg,mySets.findTetraRegionIdx( search->second ),i0,i1,i2,i3) );
                 	int idx = mySets.findTetraRegionIdx( search->second );
-                	if (idx == -1) {std::cout << "oulala tetra!\n";exit(1);}   
-                	else tet.push_back( Tetra::Tet(node,idx,i0,i1,i2,i3) );
+                	if (idx > -1)
+                		tet.push_back( Tetra::Tet(node,idx,i0,i1,i2,i3) );   
                 	}
                 else { std::cout << "mesh reading error : unnamed volume region" << std::endl; }
                 break;

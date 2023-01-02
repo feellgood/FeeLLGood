@@ -10,7 +10,7 @@
 
 struct STT
     {
-    int reg;/**< volume region number */
+    std::string reg;/**< volume region name */
     double beta;/**< \f$ \beta \f$ is polarization rate of the current */    
     double N0;/**< density of states at Fermi level, units : J^-1 nm^-3  */
     double sigma;/**< Conductivity Ohm^-1 nm^-1 */

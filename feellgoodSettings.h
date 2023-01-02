@@ -127,8 +127,13 @@ class Settings{
 	inline int findFacetteRegionIdx(const std::string name /**< [in] */) const
 	{ 
 	std::vector<Facette::prm>::const_iterator result = std::find_if(paramFacette.begin(),paramFacette.end(),[name](Facette::prm const& p){return(p.regName == name); }  ); 
-	if (result == paramFacette.end()) return -1;
-	else {return std::distance(paramFacette.begin(),result);}	
+	int idx(-2);
+	
+	if (result == paramFacette.end())
+		{ idx = -1; }
+	else
+		{ idx = std::distance(paramFacette.begin(),result);}	
+	return idx;
 	};
 	
     /** parser magnetization compiler */

@@ -32,7 +32,7 @@ public:
                              const int max_iter /**< [in] maximum number of iteration */ ): msh(_msh), p_stt(_p_stt), NOD(msh.getNbNodes()), TET(msh.getNbTets()), FAC(msh.getNbFacs()), verbose(v), MAXITER(max_iter) 
                              {
                              
-                             sigma_values.insert( std::pair<int,double>(p_stt.reg,p_stt.sigma) );
+                             sigma_values.insert( std::pair<std::string,double>(p_stt.reg,p_stt.sigma) );
                                 
                             if(verbose) { infos(); }
                             solve(_tol);
@@ -57,7 +57,7 @@ private:
     /** maximum number of iteration for biconjugate stabilized gradient */
     const int MAXITER; //fixed to 5000 in ref code
     
-    std::map<int,double> sigma_values;/**< conductivity region volume table */
+    std::map<std::string,double> sigma_values;/**< conductivity region volume table */
     
     /** boundary conditions : table of voltage (int is a surface region) */
     std::map<int,double> V_values; 
@@ -66,7 +66,7 @@ private:
     inline void infos(void) 
         {
         std::for_each(sigma_values.begin(),sigma_values.end(),
-                      [](std::pair<int,double> const& p)
+                      [](std::pair<std::string,double> const& p)
                       { std::cout << "reg: " << p.first << "\tsigma :" << p.second << std::endl; } );
         
         std::for_each(V_values.begin(),V_values.end(),
