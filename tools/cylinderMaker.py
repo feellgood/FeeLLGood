@@ -25,7 +25,7 @@ class Cylinder(object):
         self.n2 = name2
         self.withExtraSurf = True
     
-    def make(self,meshFileName,naming):
+    def make(self,meshFileName):
         """ write cylinder mesh file in gmsh 2.2 text format """
         
         gmsh.initialize()
@@ -55,8 +55,7 @@ class Cylinder(object):
 
         surface_tag = 200
         gmsh.model.addPhysicalGroup(2,[surf, out[0][1], out[2][1], out[3][1], out[4][1], out[5][1]],surface_tag)
-        if naming :
-                gmsh.model.setPhysicalName(2,surface_tag,self.surfName)
+        gmsh.model.setPhysicalName(2,surface_tag,self.surfName)
 
         if self.withExtraSurf :
                 surface_tag_left = 201
@@ -69,8 +68,7 @@ class Cylinder(object):
 
         volume_tag = 300
         gmsh.model.addPhysicalGroup(3,[out[1][1]],volume_tag)
-        if naming :
-                gmsh.model.setPhysicalName(3,volume_tag,self.volName)
+        gmsh.model.setPhysicalName(3,volume_tag,self.volName)
 
         gmsh.model.geo.synchronize() # we have to synchronize before the call to 'generate' to build the mesh
         gmsh.model.mesh.generate(3) # 3 is the dimension of the mesh

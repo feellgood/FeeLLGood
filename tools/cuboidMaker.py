@@ -129,8 +129,21 @@ class Cuboid(object):
     def make(self,meshFileName,volRegionName,surfRegionName):
         """ write mesh file in gmsh 2.2 format """
         meshFile = open(meshFileName,'w')
-        meshFile.write("$MeshFormat\n2.2\t0\t8\n$EndMeshFormat\n$Nodes\n")
-        meshFile.write(str(len(self.pts))+"\n")
+        meshFile.write("$MeshFormat\n2.2\t0\t8\n$EndMeshFormat\n")
+        nbTotNames = 2 + len(self.subSurfRegName)
+        meshFile.write("$PhysicalNames\n" + str(nbTotNames) + "\n")
+        surfRegionTag = 200
+        if (len(self.subSurfRegName) < 99):
+            volRegionTag = 300 
+        else:
+            volRegionTag = 300 + len(self.subSurfRegName)
+        meshFile.write("2 " + str(surfRegionTag) + ' \"' + surfRegionName + '\"\n')
+        meshFile.write("3 " + str(volRegionTag) + ' \"' + volRegionName + '\"\n')
+        
+        for i in range(0,len(self.subSurfRegName)):
+            meshFile.write( "2 " + str(surfRegionTag + 1 + i) + ' \"' + self.subSurfRegName[i] +'\"\n'  )
+        meshFile.write("$EndPhysicalNames\n")
+        meshFile.write("$Nodes\n" + str(len(self.pts))+"\n")
         for i in range(0,len(self.pts)):
             meshFile.write( str(self.pts[i][0])+"\t"+str(self.pts[i][1])+"\t"+str(self.pts[i][2])+"\t"+str(self.pts[i][3]) + "\n" )
         meshFile.write("$EndNodes\n$Elements\n")
@@ -139,11 +152,11 @@ class Cuboid(object):
         idx=1
         for i in range(0,len(self.Tet)):
             s = self.stringTet(i)
-            meshFile.write( str(idx)+"\t4\t2\t" + volRegionName + "\t1\t" + s + "\n" )
+            meshFile.write( str(idx)+"\t4\t2\t" + volRegionTag + "\t1\t" + s + "\n" )
             idx += 1
         for i in range(0,len(self.Fac)):
             s = self.stringFac(self.Fac,i)
-            meshFile.write( str(idx)+"\t2\t2\t" + surfRegionName + "\t1\t"+ s + "\n" )
+            meshFile.write( str(idx)+"\t2\t2\t" + surfRegionTag + "\t1\t"+ s + "\n" )
             idx += 1
         for i in range(0,len(self.subSurf)):
             for j in range(0,len(self.subSurf[i])):

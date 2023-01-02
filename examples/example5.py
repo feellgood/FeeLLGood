@@ -14,8 +14,8 @@ t=10
 
 
 meshFileName = 'my_beautiful_cylinder.msh'
-vol_regName = "300" #"bulk"
-surf_regName = "200" #"frontier(bulk)"
+vol_regName = "bulk"
+surf_regName = "frontier(bulk)"
 
 cyl = Cylinder(r,t,mesh_size,surf_regName,vol_regName)
 
@@ -25,7 +25,7 @@ bc2_regName = "S_right"
 cyl.addEdgeSurf(bc1_regName,bc2_regName)
 
 
-cyl.make(meshFileName,False)
+cyl.make(meshFileName)
 
 settings = {
     "outputs": {

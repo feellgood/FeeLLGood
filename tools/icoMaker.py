@@ -6,7 +6,7 @@ from math import sqrt
 import numpy as np
 
 # Ico class
-# make builds a mesh of an icosahedron format2.2, each tetrahedron is built with a outer face of the icosahedron linked to the barycenter of the icosahedron (zero). The mesh file is directly written in the output textfile, without calling gmsh module.
+# make builds a mesh of an icosahedron format 2.2, each tetrahedron is built with a outer face of the icosahedron linked to the barycenter of the icosahedron (zero). The mesh file is directly written in the output textfile, without calling gmsh module.
 # https://fr.wikipedia.org/wiki/Icosa%C3%A8dre
 
 class Ico(object):
@@ -18,16 +18,22 @@ class Ico(object):
 
     def make(self,meshFileName,volRegionName,surfRegionName):
         meshFile = open(meshFileName,'w')
-        meshFile.write("$MeshFormat\n2.2\t0\t8\n$EndMeshFormat\n$Nodes\n")
-        meshFile.write(str(len(self.pts))+"\n")
+        meshFile.write("$MeshFormat\n2.2\t0\t8\n$EndMeshFormat\n")
+        meshFile.write("$PhysicalNames\n2\n")
+        surfRegionTag = 200
+        volRegionTag = 300
+        meshFile.write("2 " + str(surfRegionTag) + ' \"' + surfRegionName + '\"\n')
+        meshFile.write("3 " + str(volRegionTag) + ' \"' + volRegionName + '\"\n')
+        meshFile.write("$EndPhysicalNames\n")
+        meshFile.write("$Nodes\n" + str(len(self.pts))+"\n")
         for i in range(0,len(self.pts)):
             meshFile.write( str(i+1)+"\t"+str(self.pts[i][0])+"\t"+str(self.pts[i][1])+"\t"+str(self.pts[i][2]) + "\n" )
         meshFile.write("$EndNodes\n$Elements\n")
         meshFile.write(str(2*len(self.f_idx))+"\n")
         for i in range(0,len(self.f_idx)):
-            meshFile.write( str(i+1)+"\t4\t2\t" + volRegionName + "\t1\t13\t"+str(1+self.f_idx[i][0])+"\t"+str(1+self.f_idx[i][1])+"\t"+str(1+self.f_idx[i][2]) + "\n" )
+            meshFile.write( str(i+1)+"\t4\t2\t" + volRegionTag + "\t1\t13\t"+str(1+self.f_idx[i][0])+"\t"+str(1+self.f_idx[i][1])+"\t"+str(1+self.f_idx[i][2]) + "\n" )
         for i in range(0,len(self.f_idx)):
-            meshFile.write( str(len(self.f_idx)+i+1)+"\t2\t2\t" + surfRegionName + "\t1\t"+str(1+self.f_idx[i][0])+"\t"+str(1+self.f_idx[i][1])+"\t"+str(1+self.f_idx[i][2]) + "\n" )
+            meshFile.write( str(len(self.f_idx)+i+1)+"\t2\t2\t" + surfRegionTag + "\t1\t"+str(1+self.f_idx[i][0])+"\t"+str(1+self.f_idx[i][1])+"\t"+str(1+self.f_idx[i][2]) + "\n" )
 
         meshFile.write("$EndElements\n")
         meshFile.close()
