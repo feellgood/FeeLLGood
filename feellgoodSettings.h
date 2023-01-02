@@ -94,11 +94,16 @@ class Settings{
 	std::vector<Tetra::prm> paramTetra;
 
 	/** \return index of the region in volume region container  */
-	inline int findTetraRegionIdx(const int r /**< [in] */) const
-	{ 
-	std::vector<Tetra::prm>::const_iterator result = std::find_if(paramTetra.begin(),paramTetra.end(),[r](Tetra::prm const& p){return(p.reg == r); }  ); 
-	if (result == paramTetra.end()) return -1;
-	else {return std::distance(paramTetra.begin(),result);}	
+	inline int findTetraRegionIdx(const std::string name /**< [in] */) const
+	{
+	std::vector<Tetra::prm>::const_iterator result = std::find_if(paramTetra.begin(),paramTetra.end(),[name](Tetra::prm const& p){return(p.regName == name); }  ); 
+	
+	int idx(-2);
+	if (result == paramTetra.end()) 
+		{idx = -1;}
+	else
+		{idx = std::distance(paramTetra.begin(),result);}	
+	return idx;
 	};
 	
 	/** this vector contains the material parameters for all regions for all the facettes */
@@ -119,9 +124,9 @@ class Settings{
     double dt_max;  /**< maximal time step */
     
 	/** \return index of the region in surface region container  */
-	inline int findFacetteRegionIdx(const int r /**< [in] */) const
+	inline int findFacetteRegionIdx(const std::string name /**< [in] */) const
 	{ 
-	std::vector<Facette::prm>::const_iterator result = std::find_if(paramFacette.begin(),paramFacette.end(),[r](Facette::prm const& p){return(p.reg == r); }  ); 
+	std::vector<Facette::prm>::const_iterator result = std::find_if(paramFacette.begin(),paramFacette.end(),[name](Facette::prm const& p){return(p.regName == name); }  ); 
 	if (result == paramFacette.end()) return -1;
 	else {return std::distance(paramFacette.begin(),result);}	
 	};

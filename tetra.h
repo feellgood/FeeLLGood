@@ -59,7 +59,7 @@ region number and material constants
 */
 struct prm
 	{
-	int reg;/**< region number */	
+	std::string regName;/**< region name */	
 	double alpha_LLG;/**< \f$ \alpha \f$ damping parameter */
 	double A;/**< exchange constant stiffness */
 	double J;/**< \f$ M_s = \nu_0 J \f$ */
@@ -75,7 +75,7 @@ struct prm
 	/** print the struct parameters */
 	inline void infos()
 		{
-		std::cout<< "volume region number = " << reg <<std::endl;
+		std::cout<< "volume region name = " << regName <<std::endl;
 		std::cout<< "alpha_LLG = " << alpha_LLG <<std::endl;
 		std::cout<< "A = " << A <<std::endl;
 		std::cout<< "J = " << J <<std::endl;
@@ -119,12 +119,11 @@ class Tet{
          unit tests : Tet_constructor; Tet_inner_tables
          */
 		inline Tet(const std::vector<Nodes::Node>  & _p_node /**< vector of nodes */,
-                   const int _reg /**< [in] region number */,
                    const int _idx /**< [in] region index in region vector */,
                    const int i0 /**< [in] node index */,
                    const int i1 /**< [in] node index */,
                    const int i2 /**< [in] node index */,
-                   const int i3 /**< [in] node index */) : idxPrm(_idx),treated(false),reg(_reg),refNode(_p_node)
+                   const int i3 /**< [in] node index */) : idxPrm(_idx),treated(false),refNode(_p_node)
             {
             ind[0] = i0; ind[1] = i1; ind[2] = i2; ind[3] = i3;
             for (int i=0; i<N; i++) ind[i]--;           // convention Matlab/msh -> C++
@@ -266,12 +265,14 @@ class Tet{
         }
 		
 		/** basic infos */		
-	inline void infos() const {std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2]<< "\t"<< ind[3] <<std::endl;};
+	inline void infos() const //{std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2]<< "\t"<< ind[3] <<std::endl;};
+		{std::cout << "idxPrm: " << idxPrm << "ind: "<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2]<< "\t"<< ind[3] <<std::endl;};
 		
         /** more infos */		
 	inline void infos(Nodes::index idx) const 
             {
-            std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2]<< "\t"<< ind[3] <<std::endl;
+            infos();
+            
             switch(idx)
                 {
                 case Nodes::IDX_p : for(int i=0;i<N;i++) {std::cout<<"p_" << i<<  (refNode[ ind[i] ]).p  <<std::endl;} break;
@@ -342,9 +343,6 @@ class Tet{
 		/** getter for node */
 		inline const Nodes::Node & getNode(const int i) {return refNode[ind[i]];}
         
-		/** getter for region */
-		inline int getRegion(void) const {return reg;}
-		
 		/** \return \f$ |J| \f$ build Jacobian \f$ J \f$ */
         double Jacobian(double (&J)[Pt::DIM][Pt::DIM]);
         
@@ -361,7 +359,6 @@ class Tet{
         std::set<Facette::Fac> ownedFac() const;
 
     private:
-        const int reg;/**< .msh region number */
         const std::vector<Nodes::Node> & refNode;/**< vector of nodes */
         
         /** template getter to access and copy some parts of the node vector of type T = double or Pt::pt3D  */

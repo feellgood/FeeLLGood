@@ -157,14 +157,16 @@ interpolation(Nodes::get_v0,V,dVdx,dVdy,dVdz);
 interpolation(Nodes::get_phi0,Hd);
 interpolation(Nodes::get_phiv0,Hv);
 
+
 // for STT
 Pt::pt3D p_g[NPI];
 interpolation(Nodes::get_p,p_g);
 
 Pt::pt3D gradV[NPI];
 
-calc_gradV(params[idxPrm].p_STT,*this,gradV);
+//calc_gradV(params[idxPrm].p_STT,*this,gradV); // should be computed only when stt needed
 // end STT
+
 
 for (int npi=0; npi<NPI; npi++)
     {
@@ -177,7 +179,7 @@ for (int npi=0; npi<NPI; npi++)
     pt3D H = H_aniso + Hd[npi] + Hext + (s_dt/gamma0)*Hv[npi];
     build_BE(npi, H, Abis, dUdx, dUdy, dUdz, BE);
 
-    double uHm = add_STT_BE(npi,params[idxPrm].p_STT,Js,gradV,p_g,U,dUdx,dUdy,dUdz,BE);
+    double uHm = 0; // add_STT_BE(npi,params[idxPrm].p_STT,Js,gradV,p_g,U,dUdx,dUdy,dUdz,BE); // should be computed only when stt needed
     
     if(idx_dir != Pt::IDX_UNDEF)
     {
@@ -304,11 +306,16 @@ std::set<Facette::Fac> Tet::ownedFac() const
 std::set<Facette::Fac> s;
 
 int ia=ind[0];int ib=ind[1];int ic=ind[2];int id=ind[3];
-
+/*
 s.insert( Facette::Fac(refNode,0,reg,idxPrm,ia,ic,ib) );
 s.insert( Facette::Fac(refNode,0,reg,idxPrm,ib,ic,id) );
 s.insert( Facette::Fac(refNode,0,reg,idxPrm,ia,id,ic) );
 s.insert( Facette::Fac(refNode,0,reg,idxPrm,ia,ib,id) );
+*/
+s.insert( Facette::Fac(refNode,0,idxPrm,ia,ic,ib) );
+s.insert( Facette::Fac(refNode,0,idxPrm,ib,ic,id) );
+s.insert( Facette::Fac(refNode,0,idxPrm,ia,id,ic) );
+s.insert( Facette::Fac(refNode,0,idxPrm,ia,ib,id) );
 
 return s;
 }

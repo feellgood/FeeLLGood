@@ -1,6 +1,11 @@
 $MeshFormat
 2.2	0	8
 $EndMeshFormat
+$PhysicalNames
+2
+2 200 "ellipsoid_surface"
+3 300 "ellipsoid_volume"
+$EndPhysicalNames
 $Nodes
 163
 1	-0.6151507	3.82503574	-4.97667367

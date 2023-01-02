@@ -20,8 +20,8 @@ struct STT
         
     std::vector<std::pair<std::string,double> > boundaryCond; /**< boundary conditions, first is the surface region name, second the associated value  */
     
-    /** electrostatic potential */ 
-    std::vector<double> V; // size of the vector of nodes
+    /** electrostatic potential values for boundary conditions, V.size() is the size of the vector of nodes */ 
+    std::vector<double> V;
     
     
     /** setter : node potential */

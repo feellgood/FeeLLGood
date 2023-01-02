@@ -41,7 +41,7 @@ for (int i=0;i<nbNod;i++)
     node[i].v0 = Pt::pt3D(M_PI*distrib(gen),2*M_PI*distrib(gen));
     }
 
-Tetra::Tet t(node,0,0,1,2,3,4);//carefull with indices (starting from 1)
+Tetra::Tet t(node,0,1,2,3,4);//carefull with indices (starting from 1)
 
 double dt = distrib(gen);
 
@@ -144,7 +144,7 @@ for (int i=0;i<nbNod;i++)
     node[i].v0 = Pt::pt3D(M_PI*distrib(gen),2*M_PI*distrib(gen));
     }
 
-Tetra::Tet t(node,0,0,1,2,3,4);//carefull with indices (starting from 1)
+Tetra::Tet t(node,0,1,2,3,4);//carefull with indices (starting from 1)
 
 double dt = distrib(gen);
 

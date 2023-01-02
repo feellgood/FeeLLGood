@@ -24,7 +24,6 @@ refMsh->setBasis(M_2_PI*r);
 void LinAlgebra::prepareElements(Pt::pt3D const& Hext /**< [in] applied field */, timing const& t_prm /**< [in] */)
 {
 base_projection(!RAND_DETERMINIST);
-
 Pt::index idx_dir;
 
 if (!settings.recenter)

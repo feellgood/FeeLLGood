@@ -29,8 +29,8 @@ BOOST_CHECK(x != 0.0f);
 BOOST_AUTO_TEST_CASE(Fac_full_constructor)
 {
 std::vector<Nodes::Node> node;
-std::cout << "7 param constructor" << std::endl;
-Facette::Fac f(node,0,0,0,0,0,0);
+std::cout << "6 param constructor" << std::endl;
+Facette::Fac f(node,0,0,0,0,0);
 
 std::cout << "indices:" << f.ind[0] << ";" << f.ind[1] <<";" << f.ind[2] << std::endl;
 BOOST_CHECK( (f.getN() == Facette::N) && (f.getNPI() == Facette::NPI) );
@@ -49,13 +49,13 @@ std::mt19937_64 gen(sd);// random number generator: standard Mersenne twister in
 std::uniform_int_distribution<int> distrib;
 
 std::vector<Nodes::Node> node;
-Facette::Fac f(node,0,0,0,0,0,0);
+Facette::Fac f(node);
 bool test_result = !(f<f);// whatever is f, f<f must return false
 
 for(int i=0;i<100;i++)
     {
-    Facette::Fac f1(node,0,0,0,distrib(gen),distrib(gen),distrib(gen));
-    Facette::Fac f2(node,0,0,0,distrib(gen),distrib(gen),distrib(gen));
+    Facette::Fac f1(node,0,0,distrib(gen),distrib(gen),distrib(gen));
+    Facette::Fac f2(node,0,0,distrib(gen),distrib(gen),distrib(gen));
 
 /* ref code */
     bool val_ref=false;
@@ -94,7 +94,7 @@ node[0] = n1;
 node[1] = n2;
 node[2] = n3;
 
-Facette::Fac f(node,nbNod,0,0,1,2,3);// carefull with the index shift
+Facette::Fac f(node,nbNod,0,1,2,3);// carefull with the index shift
 
 std::cout << "indices:" << f.ind[0] << ";" << f.ind[1] <<";" << f.ind[2] << std::endl;
 
@@ -129,7 +129,7 @@ node[0].u0 = Pt::pt3D(M_PI*distrib(gen),2*M_PI*distrib(gen));
 node[1].u0 = Pt::pt3D(M_PI*distrib(gen),2*M_PI*distrib(gen));
 node[2].u0 = Pt::pt3D(M_PI*distrib(gen),2*M_PI*distrib(gen));
 
-Facette::Fac f(node,nbNod,0,0,1,2,3);// carefull with the index shift
+Facette::Fac f(node,nbNod,0,1,2,3);// carefull with the index shift
 
 Pt::pt3D _u[Facette::NPI];
 f.interpolation<Pt::pt3D>(Nodes::get_u0,_u);
@@ -178,7 +178,7 @@ node[0].phi0 = distrib(gen);
 node[1].phi0 = distrib(gen);
 node[2].phi0 = distrib(gen);
 
-Facette::Fac f(node,nbNod,0,0,1,2,3);// carefull with the index shift
+Facette::Fac f(node,nbNod,0,1,2,3);// carefull with the index shift
 
 double _p[Facette::NPI];
 f.interpolation<double>(Nodes::get_phi0,_p);
@@ -225,7 +225,7 @@ node[0] = n1;
 node[1] = n2;
 node[2] = n3;
 
-Facette::Fac f(node,nbNod,0,0,1,2,3);// carefull with the index shift
+Facette::Fac f(node,nbNod,0,1,2,3);// carefull with the index shift
 f.Ms = distrib(gen);
 
 int i =0;
@@ -324,7 +324,7 @@ node[0] = n1;
 node[1] = n2;
 node[2] = n3;
 
-Facette::Fac f(node,nbNod,0,0,1,2,3);// carefull with the index shift
+Facette::Fac f(node,nbNod,0,1,2,3);// carefull with the index shift
 f.Ms = distrib(gen);
 
 int i =0;
@@ -424,7 +424,7 @@ for(int i=0;i<nbNod;i++)
     node[i].setBasis(2*M_PI*distrib(gen));
     }
     
-Facette::Fac f(node,nbNod,0,0,1,2,3);// carefull with the index shift
+Facette::Fac f(node,nbNod,0,1,2,3);// carefull with the index shift
 
 double P[2*N][3*N]= { {0} };
 for(int i=0;i<2*N;i++)

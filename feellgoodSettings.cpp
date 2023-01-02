@@ -116,9 +116,9 @@ void Settings::infos()
     std::cout << "  scaling_factor: " << _scale << "\n";
     std::cout << "  volume_regions:\n";
     for (auto it = paramTetra.begin(); it != paramTetra.end(); ++it) {
-        if (it->reg == -1)  // skip __default__
+        if (it->regName == "-1")  // skip __default__
             continue;
-        std::cout << "    " << it->reg << ":\n";
+        std::cout << "    " << it->regName << ":\n";
         std::cout << "      Ae: " << it->A << "\n";
         std::cout << "      Js: " << it->J << "\n";
         std::cout << "      K: " << it->K << "\n";
@@ -134,9 +134,9 @@ void Settings::infos()
     }
     std::cout << "  surface_regions:\n";
     for (auto it = paramFacette.begin(); it != paramFacette.end(); ++it) {
-        if (it->reg == -1)  // skip __default__
+        if (it->regName == "-1")  // skip __default__
             continue;
-        std::cout << "    " << it->reg << ":\n";
+        std::cout << "    " << it->regName << ":\n";
         std::cout << "      suppress_charges: "
             << str(it->suppress_charges) << "\n";
         std::cout << "      Ks: " << it->Ks << "\n";
@@ -245,7 +245,7 @@ void Settings::read(YAML::Node yaml)
         if (volumes) {
             if (!volumes.IsMap())
                 error("mesh.volume_regions should be a map.");
-            int default_idx = findTetraRegionIdx(-1);
+            int default_idx = findTetraRegionIdx("-1");
             Tetra::prm *default_volume = nullptr;
             if (default_idx > -1)
                 default_volume = &paramTetra[default_idx];
@@ -254,7 +254,7 @@ void Settings::read(YAML::Node yaml)
                 YAML::Node volume = it->second;
                 Tetra::prm p;
                 if (default_volume) p = *default_volume;
-                p.reg = name=="__default__" ? -1 : stoi(name);
+                p.regName = name=="__default__" ? "-1" : name;
                 assign(p.A, volume["Ae"]);
                 assign(p.J, volume["Js"]);
                 assign(p.K, volume["K"]);
@@ -282,7 +282,7 @@ void Settings::read(YAML::Node yaml)
         if (surfaces) {
             if (!surfaces.IsMap())
                 error("mesh.surface_regions should be a map.");
-            int default_idx = findFacetteRegionIdx(-1);
+            int default_idx = findFacetteRegionIdx("-1");
             Facette::prm *default_surface = nullptr;
             if (default_idx > -1)
                 default_surface = &paramFacette[default_idx];
@@ -291,7 +291,7 @@ void Settings::read(YAML::Node yaml)
                 YAML::Node surface = it->second;
                 Facette::prm p;
                 if (default_surface) p = *default_surface;
-                p.reg = name=="__default__" ? -1 : stoi(name);
+                p.regName = name=="__default__" ? "-1" : name;
                 assign(p.suppress_charges, surface["suppress_charges"]);
                 assign(p.Ks, surface["Ks"]);
                 assign(p.uk, surface["uk"]);

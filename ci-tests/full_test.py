@@ -21,8 +21,8 @@ settings = {
     "mesh": {
         "filename": "../examples/ellipsoid.msh",
         "scaling_factor": 1e-10,
-        "volume_regions": { "300": {} },
-        "surface_regions": { "200": {} }
+        "volume_regions": { "ellipsoid_volume": {} },
+        "surface_regions": { "ellipsoid_surface": {} }
     },
     "initial_magnetization": [0, 0, 1],
     "Bext": [1, 0, -1],

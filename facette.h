@@ -31,7 +31,7 @@ region number and material constants
 */
 struct prm
 	{
-	int reg;/**< region number */	
+	std::string regName;/**< region name */	
 	bool suppress_charges; /**< suppress charges if true */
 	double Ks;/**< uniaxial surface anisotropy constant */	
 	Pt::pt3D uk; /**< anisotropy axis */	
@@ -39,7 +39,7 @@ struct prm
 	/** print the struct parameters */
 	inline void infos()
 		{
-		std::cout<< "surface region number = " << reg << "suppress charges = " << suppress_charges <<std::endl;
+		std::cout<< "surface region name = " << regName << " ; suppress charges = " << suppress_charges <<std::endl;
 		
 		if(Ks!=0)
 			{ std::cout<< "Ks*a = "<<Ks << "*[ " << uk << "]" << std::endl; }
@@ -53,15 +53,16 @@ Face is a class containing the index references to nodes, it has a triangular sh
 */
 class Fac{
 	public:
+	/** constructor for some unit tests */
+	inline Fac(const std::vector<Nodes::Node> & _p_node /**< [in] vector of nodes */) : refNode(_p_node) { idxPrm = ind[0] = ind[1] = ind[2] = 0; }
 
         /** constructor used by readMesh */
         inline Fac(const std::vector<Nodes::Node> & _p_node /**< [in] vector of nodes */,
                    const int _NOD /**< [in] nb nodes */,
-                   const int _reg /**< [in] region number */,
                    const int _idx /**< [in] region index in region vector */,
                    const int i0 /**< [in] node index */,
                    const int i1 /**< [in] node index */,
-                   const int i2 /**< [in] node index */) : idxPrm(_idx),treated(false),reg(_reg),refNode(_p_node)
+                   const int i2 /**< [in] node index */) : idxPrm(_idx),treated(false),refNode(_p_node)
         {
         ind[0]=i0;ind[1]=i1;ind[2]=i2;
         
@@ -113,7 +114,8 @@ class Fac{
             { interpolation<Pt::pt3D>(getter,result); }
      
         /** basic infos */		
-        inline void infos() const {std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2] <<std::endl;};
+        inline void infos() const //{std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2] <<std::endl;};
+        {std::cout<< "idxPrm:" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2] <<std::endl;};
         
         /** computes the integral contribution of the triangular face */
         void integrales(std::vector<Facette::prm> const& params /**< [in] */, Pt::pt3D (&BE)[N] /**< [out] */) const;
@@ -152,9 +154,6 @@ class Fac{
         /** getter for node */
 		inline const Nodes::Node & getNode(const int i) {return refNode[ind[i]];}
         
-        /** getter for region */
-        inline int getRegion(void) const {return reg;}
-
         /** computes weight coefficients */
         inline double weight(const int i) const { return 2.0*surf*Facette::pds[i]; }
         
@@ -186,8 +185,6 @@ class Fac{
     inline double calc_surf(void) const { return 0.5*normal_vect().norm(); }
     
     private:
-       const int reg;/**< .msh region number */
-        
         /** direct access to the Nodes */
         const std::vector<Nodes::Node> & refNode;
         

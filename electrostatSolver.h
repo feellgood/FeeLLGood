@@ -86,13 +86,10 @@ private:
     { for (int ie=0; ie<Facette::N; ie++) { L[ fac.ind[ie] ] += Le[ie]; } }
     
     
-    /** compute integrales for matrix coefficients,input from tet */
-    void integrales(Tetra::Tet const& tet, gmm::dense_matrix <double> &AE)
-    { //sigma is the region conductivity
-    std::map<int,double>::iterator it = sigma_values.find(tet.getRegion()); 
-    if (it != sigma_values.end() ) 
-        {
-        double sigma = it->second;
+    /** compute integrales for matrix coefficients,input from tet ; sigma is the region conductivity */
+    void integrales(Tetra::Tet const& tet, double sigma, gmm::dense_matrix <double> &AE)
+    {
+    
     
         for (int npi=0; npi<Tetra::NPI; npi++)
             {
@@ -110,19 +107,13 @@ private:
                     }
                 }
             }
-        }
     }
     
     /** compute integrales for vector coefficients, input from facette */
-void integrales(Facette::Fac const& fac, std::vector <double> &BE, std::map<int,double> & bc_vals)
+void integrales(Facette::Fac const& fac,double pot_val, std::vector <double> &BE)
     {
-    std::map<int,double>::iterator it = bc_vals.find(fac.getRegion()); 
-    if (it != bc_vals.end() )
-        {
-        double val = it->second;
-        for (int npi=0; npi<Facette::NPI; npi++)
-            { for (int ie=0; ie<Facette::N; ie++) { BE[ie] -= Facette::a[ie][npi]*val*fac.weight(npi); } }
-        }
+    for (int npi=0; npi<Facette::NPI; npi++)
+            { for (int ie=0; ie<Facette::N; ie++) { BE[ie] -= Facette::a[ie][npi]*pot_val*fac.weight(npi); } }
     }
 
     /** fill matrix and vector to solve potential values on each node */
@@ -131,14 +122,16 @@ void prepareData(write_matrix &Kw, write_vector & Lw)
 for (int ne=0; ne<TET; ne++){
     Tetra::Tet const& tet = msh.tet[ne];
     gmm::dense_matrix <double> K(Tetra::N, Tetra::N);
-    integrales(tet, K);
+    double sigma = 0;// to find in volume region of p_stt
+    integrales(tet,sigma, K);
     assembling_mat(tet, K, Kw);
     }
 
 for (int ne=0; ne<FAC; ne++){
     Facette::Fac const& fac = msh.fac[ne];
     std::vector <double> L(Facette::N);
-    integrales(fac, L, V_values);  // carefull here : boundary conditions on V : to check      
+    double pot_val =0; // to find in V_values
+    integrales(fac, pot_val, L);     
     assembling_vect(fac, L, Lw);
     }    
 }
@@ -159,7 +152,7 @@ if(verbose) { std::cout << "boundary conditions..." << std::endl; }
 for (int ne=0; ne<FAC; ne++)
     {
     Facette::Fac const& fac = msh.fac[ne];
-    std::map<int,double>::iterator it = V_values.find(fac.getRegion()); 
+    std::map<int,double>::iterator it = V_values.find(fac.idxPrm); // might not be idxPrm 
         
     if (it != V_values.end() ) 
         {

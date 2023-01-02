@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 # python -m pip install -U pip
-# sudo python -m pip install -U matplotlib
 
 from math import sqrt
 
 import numpy as np
 
-# Ico class contains two methods
-# make builds a mesh of an icosahedron format2.2, each tetrahedron is a face of the icosahedron linked to its center.
-# show is a 3D view of the icosahedron
+# Ico class
+# make builds a mesh of an icosahedron format2.2, each tetrahedron is built with a outer face of the icosahedron linked to the barycenter of the icosahedron (zero). The mesh file is directly written in the output textfile, without calling gmsh module.
 # https://fr.wikipedia.org/wiki/Icosa%C3%A8dre
 
 class Ico(object):
