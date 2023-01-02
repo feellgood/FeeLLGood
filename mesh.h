@@ -16,11 +16,12 @@
 
 #include "feellgoodSettings.h"
 
+
+namespace Mesh {
+
 /** \class mesh
 class for storing the mesh, including mesh geometry values, containers for the nodes, triangular faces and tetrahedrons. nodes data are not public. They are accessible only through getter and setter.
 */
-namespace Mesh {
-
 class mesh
 {
 public:
@@ -197,8 +198,10 @@ private:
     /** node container : not initialized by constructor, but later, while reading the mesh, by member function init_node */
     std::vector< Nodes::Node > node;
     
+    /** map of the surface region physical names from mesh file */
     std::map< int, std::string > surfRegNames;
     
+    /** map of the volume region physical names from mesh file */
     std::map< int, std::string > volRegNames;
     
     /** memory allocation for the nodes */

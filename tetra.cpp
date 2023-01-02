@@ -75,7 +75,7 @@ for (int i=0; i<N; i++)
     }
 }
 
-double Tet::add_STT_BE(int const& npi, STT p_stt,double Js, Pt::pt3D (&gradV)[NPI], Pt::pt3D (&p_g)[NPI], Pt::pt3D (&U)[NPI], Pt::pt3D (&dUdx)[NPI],Pt::pt3D (&dUdy)[NPI],Pt::pt3D (&dUdz)[NPI], Pt::pt3D (&BE)[N]) const
+double Tet::add_STT_BE(int const& npi, STT p_stt, double Js, Pt::pt3D (&gradV)[NPI], Pt::pt3D (&p_g)[NPI], Pt::pt3D (&U)[NPI], Pt::pt3D (&dUdx)[NPI],Pt::pt3D (&dUdy)[NPI],Pt::pt3D (&dUdz)[NPI], Pt::pt3D (&BE)[N]) const
 {
 const double ksi = Pt::sq(p_stt.lJ/p_stt.lsf);// this is in Thiaville notations beta_DW
 

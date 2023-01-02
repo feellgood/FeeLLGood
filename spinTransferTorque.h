@@ -26,9 +26,8 @@ struct STT
     
     /** setter : node potential */
     inline void setNodesPotential(read_vector const& Xr)
-        { 
-        for (unsigned int i=0; i < V.size(); i++) V[i] = Xr[i];
-        }
+       //{ std::copy(Xr.begin(),Xr.end(), back_inserter(V)); } // gmm read_vector does not support that copy due to back_inserter calling operator=
+    { for (unsigned int i=0; i < V.size(); i++) V[i] = Xr[i]; }
     
     /** getter for electrostatic potential */
     inline double get_elec_pot(const int i) const {return V[i];}

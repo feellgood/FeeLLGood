@@ -12,6 +12,9 @@ namespace Mesh
 {
 const int TRIANGLE_NB_SOMMITS = 3; /**< number of sommits */
 
+/** \class Triangle
+geometrical triangle : three indices refering to nodes
+*/
 class Triangle {
 	public:
 		/** constructor used by readMesh */

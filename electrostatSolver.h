@@ -42,6 +42,7 @@ private:
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh ( const ref ) */
 	Mesh::mesh msh;
 	
+	/** spin transfer torque parameters */
 	STT p_stt;
     
     /** number of nodes */
