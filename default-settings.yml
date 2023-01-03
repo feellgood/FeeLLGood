@@ -13,8 +13,8 @@
 #   mesh:                   # ‘mesh’ section
 #     filename: foo.msh     # a setting in the ‘mesh’ section
 #     volume_regions:       # a sub-section of ‘mesh’
-#       300:                # a sub-section of ‘volume_regions’
-#         Ae: 1.5e-11       # a setting in the ‘300’ section
+#       main_volume:        # a sub-section of ‘volume_regions’
+#         Ae: 1.5e-11       # a setting in the ‘main_volume’ section
 #
 # For a short primer on the YAML syntax, see
 # https://getopentest.org/reference/yaml-primer.html
@@ -93,7 +93,7 @@ mesh:
     # Defaults that apply to all regions. Note that ‘__default__’ is not
     # a valid region name: it is a placeholder for the defaults. In the
     # user-supplied configuration file, ‘__default__’ should be replaced
-    # by the region name, typically a number starting at 300.
+    # by the region name.
     __default__:
 
       # Exchange constant.
