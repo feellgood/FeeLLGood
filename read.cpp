@@ -70,10 +70,10 @@ if(symb == "$MeshFormat")
         		}
         	if(mySets.verbose)
         		{
-        		std::cout << "found " << nbRegNames <<" region names.\n";
+        		std::cout << "  found " << nbRegNames <<" regions:\n";
         		std::map< int, std::string>::iterator it;
-   			for(it=surfRegNames.begin(); it!=surfRegNames.end(); ++it){ std::cout << it->first << " => " << it->second << '\n';}
-        		for(it=volRegNames.begin(); it!=volRegNames.end(); ++it){ std::cout << it->first << " => " << it->second << '\n';}
+   			for(it=surfRegNames.begin(); it!=surfRegNames.end(); ++it){ std::cout << "    " << it->first << ": " << it->second << '\n';}
+        		for(it=volRegNames.begin(); it!=volRegNames.end(); ++it){ std::cout << "    " << it->first << ": " << it->second << '\n';}
         		}
         	
 		}
