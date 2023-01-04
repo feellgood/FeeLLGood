@@ -70,15 +70,24 @@ const char spinner[] = "|/-\\";
 const std::chrono::duration<double> min_period(0.5);
 static int spinner_pos = 0;
 static std::chrono::time_point<std::chrono::steady_clock> last_update;
+static bool done = false;
+
+if (done) return;
+if (fraction_done == 1)
+    {
+    // Erase spinner and move to the next line.
+    puts("progress:          100.00%  ");
+    done = true;
+    return;
+    }
 
 auto now = std::chrono::steady_clock::now();
-if (now - last_update < min_period && fraction_done < 1) return;
+if (now - last_update < min_period) return;
 last_update = now;
 
 printf("progress:          %.2f%% %c\r",
     100 * fraction_done, spinner[spinner_pos]);
 spinner_pos = (spinner_pos + 1) % 4;
-if (fraction_done == 1) putchar('\n');  // move to the next line when done
 fflush(stdout);
 }
 
