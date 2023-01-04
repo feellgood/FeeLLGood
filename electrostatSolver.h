@@ -38,6 +38,45 @@ public:
                             solve(_tol);
                             }
 
+/** computes the gradient(V) for tetra tet */
+    void calc_gradV(Tetra::Tet const& tet,Pt::pt3D (&gradV)[Tetra::NPI]) const
+    	{
+    	if(V.size()>0)
+		{
+		for (int npi=0; npi<Tetra::NPI; npi++) 
+    			{ 
+    			double vx(0),vy(0),vz(0);
+    
+    			for (int i=0; i<Tetra::N; i++)
+        			{
+        			const double V_tet = V[ tet.ind[i] ];
+        			vx += V_tet*tet.dadx[i][npi];
+        			vy += V_tet*tet.dady[i][npi];
+        			vz += V_tet*tet.dadz[i][npi];
+        			}
+    
+    			gradV[npi] = Pt::pt3D(vx,vy,vz);
+    			}
+		}
+//tiny::transposed_mult<double, N, NPI> (V_nod, dadx, dVdx);
+//tiny::transposed_mult<double, N, NPI> (V_nod, dady, dVdy);
+//tiny::transposed_mult<double, N, NPI> (V_nod, dadz, dVdz);
+    	}
+
+void calc_Hm_STT(Tetra::Tet const& tet, Pt::pt3D (&gradV)[Tetra::NPI], Pt::pt3D (&Hm)[Tetra::NPI]) const
+{
+Pt::pt3D p_g[Tetra::NPI];
+tet.interpolation(Nodes::get_p,p_g);
+
+for (int npi=0; npi<Tetra::NPI; npi++)
+    {
+    Hm[npi] = -p_stt.sigma*p_stt.func(p_g[npi])*gradV[npi]*p_g[npi];
+    }
+}
+
+/** electrostatic potential values for boundary conditions, V.size() is the size of the vector of nodes */ 
+    std::vector<double> V;
+
 private:
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh ( const ref ) */
 	Mesh::mesh msh;
@@ -188,8 +227,8 @@ iter.set_noisy(verbose);
 
 gmm::bicgstab(Kr, Xw, Lr, gmm::diagonal_precond <read_matrix>(Kr), iter);
 
-read_vector Xr(NOD); gmm::copy(Xw, Xr);
-p_stt.setNodesPotential(Xr);
+V.resize(NOD);
+gmm::copy(Xw, V);
 return 0;
 }
 

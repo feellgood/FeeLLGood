@@ -286,7 +286,7 @@ class Tet{
         void lumping(int const& npi,double alpha_eff,double prefactor, double (&AE)[3*N][3*N]) const;
         
         /** STT contribution to vector BE */
-        double add_STT_BE(int const& npi, STT p_stt, double Js, Pt::pt3D (&gradV)[NPI], Pt::pt3D (&p_g)[NPI], Pt::pt3D (&U)[NPI], Pt::pt3D (&dUdx)[NPI],Pt::pt3D (&dUdy)[NPI],Pt::pt3D (&dUdz)[NPI], Pt::pt3D (&BE)[N]) const;
+        void add_STT_BE(int const& npi, STT p_stt, double Js, Pt::pt3D (&gradV)[NPI], Pt::pt3D (&Hm)[NPI], Pt::pt3D (&U)[NPI], Pt::pt3D (&dUdx)[NPI],Pt::pt3D (&dUdy)[NPI],Pt::pt3D (&dUdz)[NPI], Pt::pt3D (&BE)[N]) const;
         
         /** drift contribution due to eventual recentering to vector BE */
         void add_drift_BE(int const& npi, double alpha, double s_dt, double Vdrift, Pt::pt3D (&U)[NPI], Pt::pt3D (&V)[NPI], Pt::pt3D (&dUd_)[NPI], Pt::pt3D (&dVd_)[NPI], Pt::pt3D (&BE)[N]) const;

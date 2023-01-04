@@ -17,32 +17,6 @@
 using namespace Tetra;
 using namespace Pt;
 
-//usefull for STT : need the gradient(V)
-    void calc_gradV(STT const& p_stt,Tetra::Tet const& tet,Pt::pt3D (&gradV)[NPI])
-    	{
-    	if(p_stt.V.size()>0)
-		{
-		for (int npi=0; npi<Tetra::NPI; npi++) 
-    			{ 
-    			double vx(0),vy(0),vz(0);
-    
-    			for (int i=0; i<Tetra::N; i++)
-        			{
-        			const double V = p_stt.V[ tet.ind[i] ];
-        			vx += V*tet.dadx[i][npi];
-        			vy += V*tet.dady[i][npi];
-        			vz += V*tet.dadz[i][npi];
-        			}
-    
-    			gradV[npi] = Pt::pt3D(vx,vy,vz);
-    			}
-		}
-//tiny::transposed_mult<double, N, NPI> (V_nod, dadx, dVdx);
-//tiny::transposed_mult<double, N, NPI> (V_nod, dady, dVdy);
-//tiny::transposed_mult<double, N, NPI> (V_nod, dadz, dVdz);
-    	
-    	}
-
 
 void Tet::lumping(int const& npi,double alpha_eff,double prefactor, double (&AE)[3*N][3*N]) const
 {
@@ -75,7 +49,8 @@ for (int i=0; i<N; i++)
     }
 }
 
-double Tet::add_STT_BE(int const& npi, STT p_stt, double Js, Pt::pt3D (&gradV)[NPI], Pt::pt3D (&p_g)[NPI], Pt::pt3D (&U)[NPI], Pt::pt3D (&dUdx)[NPI],Pt::pt3D (&dUdy)[NPI],Pt::pt3D (&dUdz)[NPI], Pt::pt3D (&BE)[N]) const
+
+void Tet::add_STT_BE(int const& npi, STT p_stt, double Js, Pt::pt3D (&gradV)[NPI], Pt::pt3D (&Hm)[NPI], Pt::pt3D (&U)[NPI], Pt::pt3D (&dUdx)[NPI],Pt::pt3D (&dUdy)[NPI],Pt::pt3D (&dUdz)[NPI], Pt::pt3D (&BE)[N]) const
 {
 const double ksi = Pt::sq(p_stt.lJ/p_stt.lsf);// this is in Thiaville notations beta_DW
 
@@ -90,12 +65,10 @@ Pt::pt3D j_grad_u = -p_stt.sigma*Pt::pt3D(Pt::pScal(gradV[npi],Pt::pt3D(dUdx[npi
                                  Pt::pScal(gradV[npi],Pt::pt3D(dUdx[npi](Pt::IDX_Z),dUdy[npi](Pt::IDX_Z),dUdz[npi](Pt::IDX_Z)) ));
 
 Pt::pt3D m = pf*(ksi*j_grad_u+U[npi]*j_grad_u);
-Pt::pt3D Hm = -p_stt.sigma*p_stt.func(p_g[npi])*gradV[npi]*p_g[npi];
 
 for (int i=0; i<N; i++)
-    { BE[i] += weight[npi]*a[i][npi]*(Hm + prefactor*m); }
+    { BE[i] += weight[npi]*a[i][npi]*(Hm[npi] + prefactor*m); }
 
-return Pt::pScal(U[npi],Hm);
 }
 
 void Tet::add_drift_BE(int const& npi, double alpha, double s_dt, double Vdrift, Pt::pt3D (&U)[NPI], Pt::pt3D (&V)[NPI], Pt::pt3D (&dUd_)[NPI], Pt::pt3D (&dVd_)[NPI], Pt::pt3D (&BE)[N]) const
@@ -158,13 +131,13 @@ interpolation(Nodes::get_phi0,Hd);
 interpolation(Nodes::get_phiv0,Hv);
 
 
-// for STT
-Pt::pt3D p_g[NPI];
-interpolation(Nodes::get_p,p_g);
+// for STT , should be computed only when stt needed
 
 Pt::pt3D gradV[NPI];
+//calc_gradV(*this,gradV); 
 
-//calc_gradV(params[idxPrm].p_STT,*this,gradV); // should be computed only when stt needed
+Pt::pt3D Hm[NPI];
+//calc_Hm_STT(*this,gradV,Hm);
 // end STT
 
 
@@ -179,7 +152,7 @@ for (int npi=0; npi<NPI; npi++)
     pt3D H = H_aniso + Hd[npi] + Hext + (s_dt/gamma0)*Hv[npi];
     build_BE(npi, H, Abis, dUdx, dUdy, dUdz, BE);
 
-    double uHm = 0; // add_STT_BE(npi,params[idxPrm].p_STT,Js,gradV,p_g,U,dUdx,dUdy,dUdz,BE); // should be computed only when stt needed
+    add_STT_BE(npi,params[idxPrm].p_STT,Js,gradV,Hm,U,dUdx,dUdy,dUdz,BE); // should be computed only when stt needed
     
     if(idx_dir != Pt::IDX_UNDEF)
     {
@@ -192,7 +165,7 @@ for (int npi=0; npi<NPI; npi++)
     }
     
     double uHeff = -Abis*(norme2(dUdx[npi]) + norme2(dUdy[npi]) + norme2(dUdz[npi])); 
-	uHeff +=  uHm + pScal(U[npi], Hext + Hd[npi]) + contrib_aniso;
+	uHeff += pScal(U[npi], Hext + Hm[npi] + Hd[npi]) + contrib_aniso; // Hm[npi] should be added only when stt needed
 
     lumping(npi, prm_t.calc_alpha_eff(alpha,uHeff), prm_t.prefactor*s_dt*Abis, AE);
     }
