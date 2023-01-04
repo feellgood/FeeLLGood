@@ -40,12 +40,12 @@ mesh:
   filename: ../ellipsoid.msh
   scaling_factor: 1e-9
   volume_regions:
-    300:
+    ellipsoid_volume:
       Ae: 1e-11
       Js: 1
       alpha_LLG: 0.05
   surface_regions:
-    200:  # use defaults
+    ellipsoid_surface:  # use defaults
 initial_magnetization: [0, 0, 1]
 Bext: [
     $amplitude * cos(2 * pi * {FREQUENCY}e9 * (t - $duration)),

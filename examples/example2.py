@@ -7,8 +7,8 @@ sys.path.insert(0,'../tools')
 from settingsMaker import Settings
 
 mySettings = Settings("ellipsoid.msh")
-mySettings.createVolRegion( "300" )
-mySettings.createSurfRegion( "200" )
+mySettings.createVolRegion( "ellipsoid_volume" )
+mySettings.createSurfRegion( "ellipsoid_surface" )
 
 MaxNbThreads = int(subprocess.check_output(["getconf","_NPROCESSORS_ONLN"]))
 
@@ -26,7 +26,7 @@ mySettings["outputs"]["evol_time_step"] = 5e-16
 
 mySettings["mesh"]["scaling_factor"] = 1e-10
 
-mySettings["mesh"]["volume_regions"]["300"]["alpha_LLG"] = 0.05
+mySettings["mesh"]["volume_regions"]["ellipsoid_volume"]["alpha_LLG"] = 0.05
 
 mySettings["time_integration"]["final_time"] = 1e-13
 mySettings["time_integration"]["min(dt)"] = 5e-18
