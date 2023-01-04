@@ -31,9 +31,9 @@ class Ico(object):
         meshFile.write("$EndNodes\n$Elements\n")
         meshFile.write(str(2*len(self.f_idx))+"\n")
         for i in range(0,len(self.f_idx)):
-            meshFile.write( str(i+1)+"\t4\t2\t" + volRegionTag + "\t1\t13\t"+str(1+self.f_idx[i][0])+"\t"+str(1+self.f_idx[i][1])+"\t"+str(1+self.f_idx[i][2]) + "\n" )
+            meshFile.write( str(i+1)+"\t4\t2\t" + str(volRegionTag) + "\t1\t13\t"+str(1+self.f_idx[i][0])+"\t"+str(1+self.f_idx[i][1])+"\t"+str(1+self.f_idx[i][2]) + "\n" )
         for i in range(0,len(self.f_idx)):
-            meshFile.write( str(len(self.f_idx)+i+1)+"\t2\t2\t" + surfRegionTag + "\t1\t"+str(1+self.f_idx[i][0])+"\t"+str(1+self.f_idx[i][1])+"\t"+str(1+self.f_idx[i][2]) + "\n" )
+            meshFile.write( str(len(self.f_idx)+i+1)+"\t2\t2\t" + str(surfRegionTag) + "\t1\t"+str(1+self.f_idx[i][0])+"\t"+str(1+self.f_idx[i][1])+"\t"+str(1+self.f_idx[i][2]) + "\n" )
 
         meshFile.write("$EndElements\n")
         meshFile.close()

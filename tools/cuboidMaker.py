@@ -152,11 +152,11 @@ class Cuboid(object):
         idx=1
         for i in range(0,len(self.Tet)):
             s = self.stringTet(i)
-            meshFile.write( str(idx)+"\t4\t2\t" + volRegionTag + "\t1\t" + s + "\n" )
+            meshFile.write( str(idx)+"\t4\t2\t" + str(volRegionTag) + "\t1\t" + s + "\n" )
             idx += 1
         for i in range(0,len(self.Fac)):
             s = self.stringFac(self.Fac,i)
-            meshFile.write( str(idx)+"\t2\t2\t" + surfRegionTag + "\t1\t"+ s + "\n" )
+            meshFile.write( str(idx)+"\t2\t2\t" + str(surfRegionTag) + "\t1\t"+ s + "\n" )
             idx += 1
         for i in range(0,len(self.subSurf)):
             for j in range(0,len(self.subSurf[i])):
