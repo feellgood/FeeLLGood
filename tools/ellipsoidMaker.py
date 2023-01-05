@@ -24,7 +24,6 @@ class Ellipsoid(object):
         gmsh.initialize()
 
         gmsh.model.add("ellipsoid")
-        
         sph = gmsh.model.occ.addSphere(0,0,0,self.r1)
         gmsh.model.occ.dilate([(3,sph)],0,0,0,1,1,self.r2)
         gmsh.model.occ.synchronize() # we have to sync before calling addPhysicalGroup
@@ -40,7 +39,19 @@ class Ellipsoid(object):
         gmsh.model.setPhysicalName(3,volume_tag,self.volName)
 
         gmsh.model.occ.synchronize() # we have to synchronize before the call to 'generate' to build the mesh
-        gmsh.model.mesh.generate(3) # 3 is the dimension of the mesh
+        
+        eps = 1e-3
+        xmin = -self.r1 - eps
+        ymin = -self.r1 - eps
+        zmin = -self.r2 - eps
+        xmax = self.r1 + eps
+        ymax = self.r1 + eps
+        zmax = self.r2 + eps
+        
+        objects = gmsh.model.getEntitiesInBoundingBox(xmin,ymin,zmin,xmax,ymax,zmax, dim = 0)
+        gmsh.model.mesh.setSize(objects,self.msh_s)
+        
+        gmsh.model.mesh.generate(dim = 3)
 
         gmsh.option.set_number("Mesh.MshFileVersion", 2.2) # to force mesh file format to 2.2
 
