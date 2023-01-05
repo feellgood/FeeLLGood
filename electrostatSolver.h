@@ -29,7 +29,7 @@ public:
     inline electrostatSolver(Mesh::mesh const& _msh /**< [in] reference to the mesh */, STT const& _p_stt /**< all spin transfer torque parameters */,
                              const double _tol /**< [in] tolerance for solvers */,
                              const bool v /**< [in] verbose bool */,
-                             const int max_iter /**< [in] maximum number of iteration */ ): msh(_msh), p_stt(_p_stt), NOD(msh.getNbNodes()), TET(msh.getNbTets()), FAC(msh.getNbFacs()), verbose(v), MAXITER(max_iter) 
+                             const int max_iter /**< [in] maximum number of iteration */ ): msh(_msh), p_stt(_p_stt), verbose(v), MAXITER(max_iter) 
                              {
                              
                              sigma_values.insert( std::pair<std::string,double>(p_stt.reg,p_stt.sigma) );
@@ -84,12 +84,7 @@ private:
 	/** spin transfer torque parameters */
 	STT p_stt;
     
-    /** number of nodes */
-    const int NOD;
-    /** number of tet */
-    const int TET;
-    /** number of fac */
-    const int FAC;
+    
     /** if verbose set to true, some printing are sent to terminal */
     const bool verbose;
 
@@ -158,7 +153,7 @@ void integrales(Facette::Fac const& fac,double pot_val, std::vector <double> &BE
     /** fill matrix and vector to solve potential values on each node */
 void prepareData(write_matrix &Kw, write_vector & Lw)
 {
-for (int ne=0; ne<TET; ne++){
+for (unsigned int ne=0; ne < msh.tet.size(); ne++){
     Tetra::Tet const& tet = msh.tet[ne];
     gmm::dense_matrix <double> K(Tetra::N, Tetra::N);
     double sigma = 0;// to find in volume region of p_stt
@@ -166,7 +161,7 @@ for (int ne=0; ne<TET; ne++){
     assembling_mat(tet, K, Kw);
     }
 
-for (int ne=0; ne<FAC; ne++){
+for (unsigned int ne=0; ne < msh.fac.size(); ne++){
     Facette::Fac const& fac = msh.fac[ne];
     std::vector <double> L(Facette::N);
     double pot_val =0; // to find in V_values
@@ -178,6 +173,11 @@ for (int ne=0; ne<FAC; ne++){
 /** solver, using biconjugate stabilized gradient, with diagonal preconditionner */
 int solve(const double iter_tol)
 {
+const int NOD = msh.getNbNodes();
+
+const int FAC = msh.fac.size();
+
+
 write_matrix Kw(NOD, NOD);
 write_vector Lw(NOD);
 write_vector Xw(NOD);

@@ -107,7 +107,7 @@ if(symb == "$MeshFormat")
     
     for(auto it = surfRegNames.begin(); it != surfRegNames.end(); ++it)
     	{
-    	s.push_back( Mesh::Surf(node,it->first,it->second) );
+    	s.push_back( Mesh::Surf(node,it->second) );
     	}
     
     
@@ -132,7 +132,7 @@ if(symb == "$MeshFormat")
                 	{// found named surface
                 	for( auto it = s.begin(); it != s.end(); ++it )
                 		{
-                		if (it->getRegion() == search->first ) { it->push_back( Mesh::Triangle(node,i0,i1,i2) ); }
+                		if (it->getName() == search->second ) { it->push_back( Mesh::Triangle(node,i0,i1,i2) ); }
                 		}
                 	
                 	int idx = mySets.findFacetteRegionIdx( search->second );
