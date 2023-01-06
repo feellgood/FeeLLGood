@@ -34,13 +34,16 @@ class Surf{
 		/** getter for the number of triangular facettes */
 		inline int getNbElem(void) { return elem.size(); }
 	
+		/** triangles of the surface */
+		std::vector<Mesh::Triangle> elem; // should become private
+	
 	private:
 		const std::string name;/**< physical gmsh name */
 		
 		/** direct access to the Nodes */
         	const std::vector<Nodes::Node> & refNode;
 		
-		std::vector<Mesh::Triangle> elem;/**< triangles of the surface */
+		
 		
 };//end class Surf
 

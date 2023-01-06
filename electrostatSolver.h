@@ -93,19 +93,19 @@ private:
     
     std::map<std::string,double> sigma_values;/**< conductivity region volume table */
     
-    /** boundary conditions : table of voltage (int is a surface region) */
-    std::map<int,double> V_values; 
+    /** boundary conditions : table of voltage (string is a surface region name) : string is the name of a surface */
+    //std::map<std::string,double> V_values;
  
     /** basic informations on boundary conditions */
     inline void infos(void) 
         {
         std::for_each(sigma_values.begin(),sigma_values.end(),
                       [](std::pair<std::string,double> const& p)
-                      { std::cout << "reg: " << p.first << "\tsigma :" << p.second << std::endl; } );
+                      { std::cout << "regName: " << p.first << "\tsigma :" << p.second << std::endl; } );
         
-        std::for_each(V_values.begin(),V_values.end(),
-                      [](std::pair<int,double> const& p)
-                      { std::cout << "reg: " << p.first << "\tV :" << p.second << std::endl; } );
+        std::for_each(p_stt.boundaryCond.begin(),p_stt.boundaryCond.end(),
+                      [](std::pair<std::string,double> const& p)
+                      { std::cout << "regName: " << p.first << "\tV :" << p.second << std::endl; } );
         }
         
     /** assemble the matrix K from tet and Ke inputs */
@@ -175,9 +175,6 @@ int solve(const double iter_tol)
 {
 const int NOD = msh.getNbNodes();
 
-const int FAC = msh.fac.size();
-
-
 write_matrix Kw(NOD, NOD);
 write_vector Lw(NOD);
 write_vector Xw(NOD);
@@ -186,12 +183,40 @@ prepareData(Kw,Lw);
 
 read_matrix  Kr(NOD, NOD);    gmm::copy(Kw, Kr);
 
-if(verbose) { std::cout << "boundary conditions..." << std::endl; }
+if(verbose) { std::cout << "Dirichlet boundary conditions..." << std::endl; }
+
+std::for_each( p_stt.boundaryCond.begin(),p_stt.boundaryCond.end(), [this,&Kw,&Lw,&Xw](auto const& it) 
+	{ 
+	double V = it.second;
+	std::string name = it.first;
+	
+	auto surf_it = std::find_if(msh.s.begin(),msh.s.end(), [name] (Mesh::Surf const& _s) { return (_s.getName() == name); }  );
+	
+	if(surf_it != msh.s.end())
+		{
+		//std::cout << "trouvé! : surfName = " << surf_it->getName() << "potentiel associé : "<< V << std::endl;
+		
+		std::for_each( surf_it->elem.begin(),surf_it->elem.end(), [V,&Kw,&Lw,&Xw](Mesh::Triangle const& tri)
+			{
+			
+			for (int ie=0; ie<Facette::N ; ie++) // should be Triangle::N
+				{
+				const int i= tri.ind[ie];
+				std::for_each(mat_row(Kw, i).begin(),mat_row(Kw, i).end(), [](std::pair<const long unsigned int, double> & _it) { _it.second = 0.0; } );
+            			Kw(i, i) =  1e9;
+            			Lw[i]    =  V*1e9;  
+            			Xw[i]    =  V;
+				}
+			});
+		}
+	} );
+
 // conditions de Dirichlet
-for (int ne=0; ne<FAC; ne++)
+/*
+for (unsigned int ne=0; ne<msh.fac.size(); ne++)
     {
     Facette::Fac const& fac = msh.fac[ne];
-    std::map<int,double>::iterator it = V_values.find(fac.idxPrm); // might not be idxPrm 
+    std::map<std::string,double>::iterator it = V_values.find(fac.idxPrm); // might not be idxPrm 
         
     if (it != V_values.end() ) 
         {
@@ -206,6 +231,7 @@ for (int ne=0; ne<FAC; ne++)
             }
         }
     }
+*/
 
 if(verbose) { std::cout << "line weighting..." << std::endl; }
 /* equilibrage des lignes */
