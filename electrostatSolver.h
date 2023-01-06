@@ -156,7 +156,7 @@ void prepareData(write_matrix &Kw, write_vector & Lw)
 for (unsigned int ne=0; ne < msh.tet.size(); ne++){
     Tetra::Tet const& tet = msh.tet[ne];
     gmm::dense_matrix <double> K(Tetra::N, Tetra::N);
-    double sigma = 0;// to find in volume region of p_stt
+    double sigma = p_stt.sigma;
     integrales(tet,sigma, K);
     assembling_mat(tet, K, Kw);
     }
@@ -194,11 +194,8 @@ std::for_each( p_stt.boundaryCond.begin(),p_stt.boundaryCond.end(), [this,&Kw,&L
 	
 	if(surf_it != msh.s.end())
 		{
-		//std::cout << "trouvé! : surfName = " << surf_it->getName() << "potentiel associé : "<< V << std::endl;
-		
 		std::for_each( surf_it->elem.begin(),surf_it->elem.end(), [V,&Kw,&Lw,&Xw](Mesh::Triangle const& tri)
 			{
-			
 			for (int ie=0; ie<Facette::N ; ie++) // should be Triangle::N
 				{
 				const int i= tri.ind[ie];
@@ -210,8 +207,6 @@ std::for_each( p_stt.boundaryCond.begin(),p_stt.boundaryCond.end(), [this,&Kw,&L
 			});
 		}
 	} );
-
-// conditions de Dirichlet
 /*
 for (unsigned int ne=0; ne<msh.fac.size(); ne++)
     {
