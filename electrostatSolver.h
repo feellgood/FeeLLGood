@@ -31,12 +31,9 @@ public:
                              const bool v /**< [in] verbose bool */,
                              const int max_iter /**< [in] maximum number of iteration */ ): msh(_msh), p_stt(_p_stt), verbose(v), MAXITER(max_iter) 
                              {
-                             
-                             sigma_values.insert( std::pair<std::string,double>(p_stt.reg,p_stt.sigma) );
-                                
-                            if(verbose) { infos(); }
-                            solve(_tol);
-                            }
+                             if(verbose) { std::cout << "Dirichlet boundary conditions..." << std::endl; infos(); }
+                             solve(_tol);
+                             }
 
 /** computes the gradient(V) for tetra tet */
     void calc_gradV(Tetra::Tet const& tet,Pt::pt3D (&gradV)[Tetra::NPI]) const
@@ -69,9 +66,7 @@ Pt::pt3D p_g[Tetra::NPI];
 tet.interpolation(Nodes::get_p,p_g);
 
 for (int npi=0; npi<Tetra::NPI; npi++)
-    {
-    Hm[npi] = -p_stt.sigma*p_stt.func(p_g[npi])*gradV[npi]*p_g[npi];
-    }
+    { Hm[npi] = -p_stt.sigma*gradV[npi]*p_g[npi]; }
 }
 
 /** electrostatic potential values for boundary conditions, V.size() is the size of the vector of nodes */ 
@@ -91,17 +86,10 @@ private:
     /** maximum number of iteration for biconjugate stabilized gradient */
     const int MAXITER; //fixed to 5000 in ref code
     
-    std::map<std::string,double> sigma_values;/**< conductivity region volume table */
-    
-    /** boundary conditions : table of voltage (string is a surface region name) : string is the name of a surface */
-    //std::map<std::string,double> V_values;
- 
     /** basic informations on boundary conditions */
     inline void infos(void) 
         {
-        std::for_each(sigma_values.begin(),sigma_values.end(),
-                      [](std::pair<std::string,double> const& p)
-                      { std::cout << "regName: " << p.first << "\tsigma :" << p.second << std::endl; } );
+        std::cout << "sigma: " << p_stt.sigma << std::endl;
         
         std::for_each(p_stt.boundaryCond.begin(),p_stt.boundaryCond.end(),
                       [](std::pair<std::string,double> const& p)
@@ -183,8 +171,7 @@ prepareData(Kw,Lw);
 
 read_matrix  Kr(NOD, NOD);    gmm::copy(Kw, Kr);
 
-if(verbose) { std::cout << "Dirichlet boundary conditions..." << std::endl; }
-
+//Dirichlet boundary conditions
 std::for_each( p_stt.boundaryCond.begin(),p_stt.boundaryCond.end(), [this,&Kw,&Lw,&Xw](auto const& it) 
 	{ 
 	double V = it.second;

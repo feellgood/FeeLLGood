@@ -171,7 +171,6 @@ void Settings::infos()
         std::cout << "  beta: " << p_stt.beta << "\n";
         std::cout << "  l_J: " << p_stt.lJ << "\n";
         std::cout << "  l_sf: " << p_stt.lsf << "\n";
-        std::cout << "  volume_region_reference: " << p_stt.reg << "\n";
         std::cout << "  boundary_conditions:";
         if (p_stt.boundaryCond.size() == 0) {
             std::cout << " {}\n";  // empty map
@@ -273,8 +272,7 @@ void Settings::read(YAML::Node yaml)
                 p.p_STT.sigma = 1.0;
                 p.p_STT.lJ = 1.0;
                 p.p_STT.lsf = 1.0;
-                p.p_STT.func = [](Pt::pt3D){ return 1; };
-
+                
                 paramTetra.push_back(p);
             }
         }  // mesh.volume_regions
@@ -351,8 +349,6 @@ void Settings::read(YAML::Node yaml)
         assign(p_stt.beta, stt["beta"]);
         assign(p_stt.lJ, stt["l_J"]);
         assign(p_stt.lsf, stt["l_sf"]);
-        assign(p_stt.reg, stt["volume_region_reference"]);
-        p_stt.func = [](Pt::pt3D){ return 1; };
         
         YAML::Node bound_cond = stt["boundary_conditions"];
         if (bound_cond)

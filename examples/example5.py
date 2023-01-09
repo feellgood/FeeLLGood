@@ -52,7 +52,6 @@ settings = {
     },
     "spin_transfer_torque" : {
     "enable": True,
-    "volume_region_reference": vol_regName,
     "sigma": 1,
     "dens_state": 42,
     "beta": 1,
