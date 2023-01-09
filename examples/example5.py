@@ -57,6 +57,7 @@ settings = {
     "beta": 1,
     "l_J": 1,
     "l_sf": 1,
+    "V_file": False,
     "boundary_conditions": { bc1_regName: 1.2345, bc2_regName: -3.14 }
     }
 }

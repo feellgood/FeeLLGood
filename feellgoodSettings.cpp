@@ -171,6 +171,7 @@ void Settings::infos()
         std::cout << "  beta: " << p_stt.beta << "\n";
         std::cout << "  l_J: " << p_stt.lJ << "\n";
         std::cout << "  l_sf: " << p_stt.lsf << "\n";
+        std::cout << "  V_file: " << str(p_stt.V_file) << "\n";
         std::cout << "  boundary_conditions:";
         if (p_stt.boundaryCond.size() == 0) {
             std::cout << " {}\n";  // empty map
@@ -349,6 +350,7 @@ void Settings::read(YAML::Node yaml)
         assign(p_stt.beta, stt["beta"]);
         assign(p_stt.lJ, stt["l_J"]);
         assign(p_stt.lsf, stt["l_sf"]);
+        assign(p_stt.V_file, stt["V_file"]);
         
         YAML::Node bound_cond = stt["boundary_conditions"];
         if (bound_cond)

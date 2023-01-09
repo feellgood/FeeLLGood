@@ -15,7 +15,7 @@ struct STT
     double sigma;/**< Conductivity Ohm^-1 nm^-1 */
     double lJ;/**< length */
     double lsf;/**< spin flip length */
-        
+    bool V_file;    
     std::vector<std::pair<std::string,double> > boundaryCond; /**< boundary conditions, first is the surface region name, second the associated value  */
     };
     

@@ -172,7 +172,7 @@ spin_transfer_torque:
   beta: 0
   l_J: 1.0
   l_sf: 1.0
-  volume_region_reference:
+  V_file: false
 
 # Parameters of the solver.
 finite_element_solver:

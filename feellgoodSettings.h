@@ -27,7 +27,7 @@ class Settings{
     /** default constructor */
     Settings();
 
-    /** print out the YAML document defining the default settigs */
+    /** print out the YAML document defining the default settings */
     static void dumpDefaults();
     
     /** some prints sent to terminal */	
