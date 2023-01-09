@@ -4,6 +4,7 @@
  */
 
 #include <map>
+#include <iostream>
 
 #include "gmm/gmm_iter.h"
 #include "gmm/gmm_solver_bicgstab.h"
@@ -33,6 +34,12 @@ public:
                              {
                              if(verbose) { std::cout << "Dirichlet boundary conditions..." << std::endl; infos(); }
                              solve(_tol);
+                             if (p_stt.V_file) 
+                             	{
+                             	std::string fileName = "V.sol";
+                             	std::cout << "writing electrostatic potential solutions in file " << fileName << std::endl; 
+                             	savesol(fileName);
+                             	}
                              }
 
 /** computes the gradient(V) for tetra tet */
@@ -85,6 +92,21 @@ private:
 
     /** maximum number of iteration for biconjugate stabilized gradient */
     const int MAXITER; //fixed to 5000 in ref code
+    
+    
+    /** save in a text file the solution of the electrostatic problem. Potential is solved on the nodes. */
+    void savesol(const std::string fileName) const
+	{
+	std::ofstream fout(fileName, std::ios::out);
+	if (fout.fail())
+	    {
+	    std::cout << "cannot open file " << fileName << std::endl;
+	    SYSTEM_ERROR;
+	    }
+	for(unsigned int i=0;i<V.size();i++) { fout << i << "\t" << V[i] << std::endl; }
+
+	fout.close();
+	}
     
     /** basic informations on boundary conditions */
     inline void infos(void) 
