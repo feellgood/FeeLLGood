@@ -77,51 +77,59 @@ public:
                              const int max_iter /**< [in] maximum number of iteration */ ): msh(_msh), p_stt(_p_stt), verbose(v), MAXITER(max_iter) 
                              {
                              if(verbose) { std::cout << "Dirichlet boundary conditions..." << std::endl; infos(); }
-                             solve(_tol);
-                             if (p_stt.V_file) 
-                             	{
-                             	std::string fileName = "V.sol";
-                             	std::cout << "writing electrostatic potential solutions in file " << fileName << std::endl; 
-                             	savesol(fileName);
+                             bool has_converged = solve(_tol);
+                             if(has_converged)
+                             	{	
+                             	if (p_stt.V_file) 
+                             		{
+                             		std::string fileName = "V.sol";
+                             		if(verbose) std::cout << "writing electrostatic potential solutions in file " << fileName << std::endl; 
+                             		savesol(fileName);
+                             		}
+                             	std::for_each(msh.tet.begin(),msh.tet.end(), [this]( Tetra::Tet const& tet )
+                             		{
+                             		std::array<Pt::pt3D,Tetra::NPI> _gradV;
+                             		//Pt::pt3D gradV[Tetra::NPI];
+					calc_gradV(tet,_gradV);
+					gradV.push_back(_gradV);
+
+					std::array<Pt::pt3D,Tetra::NPI> _Hm;
+					calc_Hm(tet,_gradV,_Hm);
+                             		Hm.push_back(_Hm);
+                             		} );
+                             	
                              	}
+                             else { std::cerr << "electroStat solver has not converged (STT mandatory operation)" << std::endl; exit(1); }
                              }
 
 /** computes the gradient(V) for tetra tet */
-    void calc_gradV(Tetra::Tet const& tet,Pt::pt3D (&gradV)[Tetra::NPI]) const
-    	{
-    	if(V.size()>0)
-		{
-		for (int npi=0; npi<Tetra::NPI; npi++) 
-    			{ 
-    			double vx(0),vy(0),vz(0);
-    
-    			for (int i=0; i<Tetra::N; i++)
-        			{
-        			const double V_tet = V[ tet.ind[i] ];
-        			vx += V_tet*tet.dadx[i][npi];
-        			vy += V_tet*tet.dady[i][npi];
-        			vz += V_tet*tet.dadz[i][npi];
-        			}
-    
-    			gradV[npi] = Pt::pt3D(vx,vy,vz);
-    			}
-		}
-//tiny::transposed_mult<double, N, NPI> (V_nod, dadx, dVdx);
-//tiny::transposed_mult<double, N, NPI> (V_nod, dady, dVdy);
-//tiny::transposed_mult<double, N, NPI> (V_nod, dadz, dVdz);
+void calc_gradV(Tetra::Tet const& tet, std::array<Pt::pt3D,Tetra::NPI> & _gradV) const
+    {
+    for (int npi=0; npi<Tetra::NPI; npi++) 
+    	{ 
+    	double vx(0),vy(0),vz(0);
+      	for (int i=0; i<Tetra::N; i++)
+       	{
+        	const double V_tet = V[ tet.ind[i] ];
+        	vx += V_tet*tet.dadx[i][npi];
+        	vy += V_tet*tet.dady[i][npi];
+        	vz += V_tet*tet.dadz[i][npi];
+        	}
+    	_gradV[npi] = Pt::pt3D(vx,vy,vz);
     	}
+    }
 
-void calc_Hm_STT(Tetra::Tet const& tet, Pt::pt3D (&gradV)[Tetra::NPI], Pt::pt3D (&Hm)[Tetra::NPI]) const
+
+/** computes Hm contributions for each npi for tetrahedron tet */
+void calc_Hm(Tetra::Tet const& tet, std::array<Pt::pt3D,Tetra::NPI> const& _gradV, std::array<Pt::pt3D,Tetra::NPI> & _Hm ) const
 {
 Pt::pt3D p_g[Tetra::NPI];
 tet.interpolation(Nodes::get_p,p_g);
 
-for (int npi=0; npi<Tetra::NPI; npi++)
-    { Hm[npi] = -p_stt.sigma*gradV[npi]*p_g[npi]; }
+for (int npi=0; npi<Tetra::NPI; npi++) { _Hm[npi] = -p_stt.sigma*_gradV[npi]*p_g[npi]; }
 }
 
-/** electrostatic potential values for boundary conditions, V.size() is the size of the vector of nodes */ 
-    std::vector<double> V;
+
 
 private:
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh ( const ref ) */
@@ -135,8 +143,17 @@ private:
     const bool verbose;
 
     /** maximum number of iteration for biconjugate stabilized gradient */
-    const int MAXITER; //fixed to 5000 in ref code
+    const unsigned int MAXITER; //fixed to 5000 in ref code
     
+/** electrostatic potential values for boundary conditions, V.size() is the size of the vector of nodes */ 
+    std::vector<double> V;
+
+/** table of the gradients of the potential, gradV.size() is the number of tetra */
+std::vector< std::array<Pt::pt3D,Tetra::NPI> > gradV;
+
+/** table of the Hm vectors (contribution of the STT to the tet::integrales) ; Hm.size() is the number of tetra */
+std::vector< std::array<Pt::pt3D,Tetra::NPI> > Hm;
+
     
     /** save in a text file the solution of the electrostatic problem. Potential is solved on the nodes. */
     void savesol(const std::string fileName) const
@@ -248,7 +265,7 @@ gmm::bicgstab(Kr, Xw, Lr, gmm::diagonal_precond <read_matrix>(Kr), iter);
 
 V.resize(NOD);
 gmm::copy(Xw, V);
-return 0;
+return (iter.get_iteration() < MAXITER);
 }
 
 }; //end class electrostatSolver

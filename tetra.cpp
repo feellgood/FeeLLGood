@@ -165,7 +165,7 @@ for (int npi=0; npi<NPI; npi++)
     }
     
     double uHeff = -Abis*(norme2(dUdx[npi]) + norme2(dUdy[npi]) + norme2(dUdz[npi])); 
-	uHeff += pScal(U[npi], Hext + Hm[npi] + Hd[npi]) + contrib_aniso; // Hm[npi] should be added only when stt needed
+    uHeff += pScal(U[npi], Hext + Hm[npi] + Hd[npi]) + contrib_aniso; // Hm[npi] should be added only when stt needed
 
     lumping(npi, prm_t.calc_alpha_eff(alpha,uHeff), prm_t.prefactor*s_dt*Abis, AE);
     }
