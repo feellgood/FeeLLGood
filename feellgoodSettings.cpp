@@ -246,14 +246,11 @@ void Settings::read(YAML::Node yaml)
             if (!volumes.IsMap())
                 error("mesh.volume_regions should be a map.");
             int default_idx = findTetraRegionIdx("__default__");
-            Tetra::prm *default_volume = nullptr;
-            if (default_idx > -1)
-                default_volume = &paramTetra[default_idx];
             for (auto it = volumes.begin(); it != volumes.end(); ++it) {
                 std::string name = it->first.as<std::string>();
                 YAML::Node volume = it->second;
                 Tetra::prm p;
-                if (default_volume) p = *default_volume;
+                if (default_idx >= 0) p = paramTetra[default_idx];
                 p.regName = name;
                 assign(p.A, volume["Ae"]);
                 assign(p.J, volume["Js"]);
@@ -282,14 +279,11 @@ void Settings::read(YAML::Node yaml)
             if (!surfaces.IsMap())
                 error("mesh.surface_regions should be a map.");
             int default_idx = findFacetteRegionIdx("__default__");
-            Facette::prm *default_surface = nullptr;
-            if (default_idx > -1)
-                default_surface = &paramFacette[default_idx];
             for (auto it = surfaces.begin(); it != surfaces.end(); ++it) {
                 std::string name = it->first.as<std::string>();
                 YAML::Node surface = it->second;
                 Facette::prm p;
-                if (default_surface) p = *default_surface;
+                if (default_idx >= 0) p = paramFacette[default_idx];
                 p.regName = name;
                 assign(p.suppress_charges, surface["suppress_charges"]);
                 assign(p.Ks, surface["Ks"]);
