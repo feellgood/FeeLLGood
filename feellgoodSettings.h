@@ -59,6 +59,9 @@ class Settings{
 	
 	bool verbose;/**< if true the user gets many printing feedback in terminal */
 	
+	bool set_manual_seed;
+	int seed_val;
+	
 	double time_step;/**< energy saved every time_step */
 	int save_period;/**< magnetic configuration saved every save_period time steps */
 	

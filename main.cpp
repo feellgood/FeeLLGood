@@ -91,6 +91,7 @@ bool print_help = false;
 bool print_version = false;
 bool print_defaults = false;
 bool verify = false;
+
 struct Option
     {
     std::string short_opt, long_opt;
@@ -104,6 +105,7 @@ struct Option options[] =
     {"", "--print-defaults", "print default settings and exit", &print_defaults},
     {"", "--verify", "verify a settings file and exit", &verify},
     {"-v", "--verbose", "enable verbose mode", &settings.verbose},
+    {"", "--seed", "enable fixed seed for random number generator",&settings.set_manual_seed},
     {"", "", nullptr, nullptr}  // sentinel
     };
 
@@ -147,12 +149,19 @@ if (print_defaults)
     Settings::dumpDefaults();
     exit(0);
     }
-if (optind != argc - 1)
+if(settings.set_manual_seed)
+	{ settings.seed_val = std::stoi(argv[argc-2]); }
+	
+if ((!settings.set_manual_seed)&&(optind != argc - 1))
     {
     std::cerr << "Usage: feellgood [options] config_file.yml\n";
     exit(1);
     }
+
+if(settings.set_manual_seed) optind++;
+
 std::string filename = argv[optind];
+
 if (verify)
     {
     settings.read(filename);
@@ -197,6 +206,13 @@ if(mySettings.verbose)
     
 counter.tic();
 LinAlgebra linAlg(mySettings,fem.msh);
+
+if (mySettings.set_manual_seed)
+	{
+	linAlg.set_seed(mySettings.seed_val); 
+	//if(mySettings.verbose) 
+		std::cout<<"user defined seed = "<< mySettings.seed_val<<std::endl;
+	}
 
 if (mySettings.stt_flag)
     {
