@@ -9,7 +9,6 @@
 #include "tetra.h"
 #include "pt3D.h"
 #include "tiny.h"
-#include "matBlocDiag.h"
 #include "time_integration.h"
 
 #include "facette.h"

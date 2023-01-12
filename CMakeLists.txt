@@ -43,7 +43,7 @@ set( CMAKE_CXX_FLAGS "-DNDEBUG -Wall -Wextra -std=c++17 -fopenmp -O3 -march=nati
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
 
-SET(HEADERS config.h pt3D.h node.h matBlocDiag.h mag_parser.h mesh.h electrostatSolver.h spinTransferTorque.h
+SET(HEADERS config.h pt3D.h node.h mag_parser.h mesh.h electrostatSolver.h spinTransferTorque.h
     time_integration.h feellgoodSettings.h tetra.h facette.h triangle.h surface.h linear_algebra.h
     log-stats.h)
 
