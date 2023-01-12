@@ -85,12 +85,14 @@ std::cout << "\t│ http://feellgood.neel.cnrs.fr │\n";
 std::cout << "\t└───────────────────────────────┘\n";
 }
 
-std::string parseOptions(Settings &settings,int argc,char* argv[])
+std::string parseOptions(Settings &settings,
+      int argc, char* argv[], unsigned int &random_seed)
 {
 bool print_help = false;
 bool print_version = false;
 bool print_defaults = false;
 bool verify = false;
+bool use_fixed_seed = false;
 struct Option
     {
     std::string short_opt, long_opt;
@@ -104,6 +106,7 @@ struct Option options[] =
     {"", "--print-defaults", "print default settings and exit", &print_defaults},
     {"", "--verify", "verify a settings file and exit", &verify},
     {"-v", "--verbose", "enable verbose mode", &settings.verbose},
+    {"", "--seed", "set random seed", &use_fixed_seed},
     {"", "", nullptr, nullptr}  // sentinel
     };
 
@@ -117,6 +120,10 @@ for (optind = 1; optind < argc; optind++)
         if (opt == o->short_opt || opt == o->long_opt)
             {
             *o->setting = true;
+            if (o->long_opt == "--seed" && optind < argc - 1)
+               {
+               random_seed = atol(argv[++optind]);
+               }
             break;
             }
         }
@@ -159,6 +166,12 @@ if (verify)
     settings.infos();
     exit(0);
     }
+if (!use_fixed_seed)
+   {
+   // Use a truly random seed.
+   std::random_device rd;
+   random_seed = rd();
+   }
 return filename;
 }
 
@@ -167,12 +180,15 @@ int main(int argc,char* argv[])
 Settings mySettings;
 FTic counter;
 
-std::string filename = parseOptions(mySettings,argc,argv);
+unsigned int random_seed;
+std::string filename = parseOptions(mySettings, argc, argv, random_seed);
+srand(random_seed);
 prompt();
 if (mySettings.verbose)
     std::cout << "verbose mode:      on\n";
 std::cout << "feeLLGood version: " << feellgood_version << '\n';
 std::cout << "process ID:        " << std::to_string(getpid()) << '\n';
+std::cout << "random seed:       " << random_seed << '\n';
 std::string fileDisplayName = filename=="-" ? "standard input" : filename;
 std::cout << "settings file:     " << fileDisplayName << '\n';
 if (!mySettings.read(filename))

@@ -37,7 +37,7 @@ public:
 	/** constructor */	
     inline LinAlgebra(Settings & s /**< [in] */,
                       Mesh::mesh & my_msh /**< [in] */) :  NOD(my_msh.getNbNodes()),refMsh(&my_msh),settings(s)
-        { base_projection(!RAND_DETERMINIST); }
+        { base_projection(); }
     
     /** destructor */
     ~LinAlgebra ()
@@ -68,14 +68,11 @@ private:
     
     long prc_time_step = -1;/**< time step when prc was built */
     
-    /** will be used to obtain a seed for the random number generator engine */
-    std::random_device rd;
-    
     /** update nodes.u and v values and find the maximum speed value  */
     void updateNodes(std::vector<double> const& X,const double dt);
     
     /** computes the local vector basis {ep,eq} in the tangeant plane for projection on the elements */
-    void base_projection(bool determinist);
+    void base_projection();
     
     /** template to insert coeff in sparse matrix K_TH and vector L_TH, T is Tetra or Facette */
     template <class T> void insertCoeff(std::vector<T> & container, write_matrix &K_TH, std::vector<double> &L_TH)

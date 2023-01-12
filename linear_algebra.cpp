@@ -3,27 +3,18 @@
 void LinAlgebra::updateNodes(std::vector<double> const& X,const double dt)
 	{ v_max = refMsh->updateNodes(X,dt); }
 
-void LinAlgebra::base_projection(bool determinist)
+void LinAlgebra::base_projection()
 {
-double r;
-    
-if(!determinist)
-    {    
-    std::mt19937 gen(rd());// random number generator: standard Mersenne twister initialized with seed rd()
-    std::uniform_real_distribution<> distrib(0.0,1.0);
-    r = distrib(gen);
-    }
-else
-    {
-    r = rand() / (RAND_MAX+1.);
-    }
+std::mt19937 gen(rand());// random number generator: standard Mersenne twister initialized with pseudo-random seed
+std::uniform_real_distribution<> distrib(0.0, 1.0);
+double r = distrib(gen);
 
 refMsh->setBasis(M_2_PI*r);
 }
 
 void LinAlgebra::prepareElements(Pt::pt3D const& Hext /**< [in] applied field */, timing const& t_prm /**< [in] */)
 {
-base_projection(!RAND_DETERMINIST);
+base_projection();
 Pt::index idx_dir;
 
 if (!settings.recenter)

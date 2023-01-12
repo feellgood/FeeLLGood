@@ -39,9 +39,6 @@ const double CHARGE_ELECTRON 	= 1.602176634e-19;   /**< C */
 const double MASS_ELECTRON 	= 9.1093837015e-31;   /**< kg */
 const double BOHRS_MUB = CHARGE_ELECTRON*PLANCKS_HBAR/(2.*MASS_ELECTRON); /**< C.m^2 */
 
-/** for debugging purpose, some determinist pseudo random number for ep,eq vector basis can be used */
-#define RAND_DETERMINIST true
-
 /** do an extra orthonormalization of the (u0, ep, eq) basis in order to minimize the rounding errors */
 #define PARANOID_ORTHONORMALIZATION false
 
