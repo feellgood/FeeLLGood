@@ -89,7 +89,6 @@ static const std::string str(Pt::pt3D v)
 Settings::Settings()
 {
     verbose = false;
-    set_manual_seed = false;
     withTsv = true;
     read(YAML::Load(get_default_yaml()));  // load defaults
 }

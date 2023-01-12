@@ -35,7 +35,7 @@ settings = {
         "max(du)": 0.1
     }
 }
-#val = subprocess.run(["../feellgood","--seed", "42", "-"], input=json.dumps(settings), text=True)
+
 val = subprocess.run(["../feellgood", "-"], input=json.dumps(settings), text=True)
 
 if(val.returncode==0):

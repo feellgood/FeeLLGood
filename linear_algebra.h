@@ -52,9 +52,6 @@ public:
     /**  solver, uses bicgstab and gmres, sparse matrix and vector are filled with multiThreading */
 	int  solver(timing const& t_prm /**< [in] */,long nt /**< [in] */);
 
-	/** initialize seed random numbers when generated with rand() : usefull for base_projection() */
-    inline void set_seed(int s) { srand(s); }
-    
     /** setter for DW_dz */
     inline void set_DW_vz(double vz /**< [in] */){DW_vz = vz;}    
 
