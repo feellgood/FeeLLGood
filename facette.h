@@ -62,7 +62,7 @@ class Fac{
                    const int _idx /**< [in] region index in region vector */,
                    const int i0 /**< [in] node index */,
                    const int i1 /**< [in] node index */,
-                   const int i2 /**< [in] node index */) : idxPrm(_idx),treated(false),refNode(_p_node)
+                   const int i2 /**< [in] node index */) : idxPrm(_idx),refNode(_p_node)
         {
         ind[0]=i0;ind[1]=i1;ind[2]=i2;
         
@@ -82,7 +82,6 @@ class Fac{
 		double surf;/**< surface of the element */
 		double Ms; /**< magnetization at saturation of the face */    
 		int ind[N];/**< indices table of the nodes */
-		bool treated;/**< flag */
 
         /** weighted scalar product : factorized formulation: weight(1)=weight(2)=weight(3) */
         inline double weightedScalarProd(const double (&X)[NPI] /**< [in] */) const
@@ -134,7 +133,6 @@ class Fac{
         {
         Nodes::projection_mat<Facette::Fac,N>(*this,K);
         Nodes::projection_vect<Facette::Fac,N>(*this,L);
-        treated = false;
         }
         
         /** assemblage of the matrix elements from inner matrix in facette object */

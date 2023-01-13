@@ -123,7 +123,7 @@ class Tet{
                    const int i0 /**< [in] node index */,
                    const int i1 /**< [in] node index */,
                    const int i2 /**< [in] node index */,
-                   const int i3 /**< [in] node index */) : idxPrm(_idx),treated(false),refNode(_p_node)
+                   const int i3 /**< [in] node index */) : idxPrm(_idx),refNode(_p_node)
             {
             ind[0] = i0; ind[1] = i1; ind[2] = i2; ind[3] = i3;
             for (int i=0; i<N; i++) ind[i]--;           // convention Matlab/msh -> C++
@@ -159,8 +159,6 @@ class Tet{
 		double dadx[N][NPI];/**< variations of hat function along x directions */
 		double dady[N][NPI];/**< variations of hat function along y directions */
 		double dadz[N][NPI];/**< variations of hat function along z directions */
-        
-        bool treated;/**< flag */
 
         /** weighted scalar product */
         inline double weightedScalarProd(const double (&X)[NPI]) const
@@ -323,7 +321,6 @@ class Tet{
         {
         Nodes::projection_mat<Tetra::Tet,N>(*this,K);
         Nodes::projection_vect<Tetra::Tet,N>(*this,L);
-        treated = false;
         }
         
         /** matrix assembly using inner matrix in tetra */

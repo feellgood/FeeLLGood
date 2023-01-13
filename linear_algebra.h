@@ -77,23 +77,9 @@ private:
     /** template to insert coeff in sparse matrix K_TH and vector L_TH, T is Tetra or Facette */
     template <class T> void insertCoeff(std::vector<T> & container, write_matrix &K_TH, std::vector<double> &L_TH)
     {
-    std::mutex my_mutex;
-
-    std::for_each(std::execution::par,container.begin(), container.end(),
-		[this,&my_mutex,&K_TH,&L_TH](T & my_elem)
-			{
-			if(my_mutex.try_lock())
-		 		{
-		 		my_elem.assemblage_mat(K_TH,NOD);my_elem.assemblage_vect(L_TH,NOD);my_elem.treated = true;
-		 		my_mutex.unlock();
-		 		}
-			});
-    
     std::for_each( container.begin(), container.end(),
     		[this,&K_TH,&L_TH](T & my_elem)
-        		{
-        		if(!my_elem.treated) {my_elem.assemblage_mat(K_TH,NOD);my_elem.assemblage_vect(L_TH,NOD);my_elem.treated = true;} 
-        		}); 
+    			{my_elem.assemblage_mat(K_TH,NOD);my_elem.assemblage_vect(L_TH,NOD);});
     }
     
 }; // fin class linAlgebra
