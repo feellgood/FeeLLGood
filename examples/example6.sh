@@ -33,6 +33,7 @@ cat > settings-template.yml <<EOF
 outputs:
   file_basename: response_{FREQUENCY}GHz
   evol_time_step: 5e-12
+  final_time: $duration
   evol_columns: [t, <Mx>, <My>, <Mz>]
   evol_header: true
   take_photo: false
@@ -53,7 +54,6 @@ Bext: [
     0
 ]
 time_integration:
-  final_time: $duration
   max(du): 0.01
   min(dt): 2e-14
   max(dt): 2e-12

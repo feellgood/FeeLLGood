@@ -19,6 +19,7 @@ mySettings["demagnetizing_field_solver"]["nb_threads"] = 32 # MaxNbThreads
 mySettings["outputs"]["file_basename"] = "rectangle"
 
 mySettings["outputs"]["evol_time_step"] = 2.5e-17
+mySettings["outputs"]["final_time"] = 2.5e-15
 mySettings["outputs"]["evol_columns"] = [ "t", "<Mx>", "<My>", "<Mz>", "E_ex", "E_aniso", "E_demag", "E_tot" ]
 
 mySettings["outputs"]["take_photo"] = 500
@@ -37,7 +38,6 @@ mySettings["mesh"]["volume_regions"]["whole_volume"]["Ae"] = 13e-12
 
 mySettings["mesh"]["volume_regions"]["whole_volume"]["alpha_LLG"] = 0.02
 
-mySettings["time_integration"]["final_time"] = 2.5e-15
 mySettings["time_integration"]["min(dt)"] = 5e-24
 mySettings["time_integration"]["max(dt)"] = 5e-15
 

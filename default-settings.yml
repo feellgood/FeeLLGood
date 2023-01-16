@@ -42,6 +42,9 @@ outputs:
   # the evolution file on this time step.
   evol_time_step: 5e-13
 
+  # Time at which to terminate the simulation.
+  final_time: 1e-10
+
   # Global quantities that should be periodically saved to the evolution
   # file. In addition to the defaults below, the following quantities
   # are also available:
@@ -197,9 +200,6 @@ demagnetizing_field_solver:
 
 # Parameters for the integration of the dynamic equation.
 time_integration:
-
-  # Time at which to terminate the simulation.
-  final_time: 1e-10
 
   # Limit on the maximum variation of the reduced magnetization in a
   # single time step.

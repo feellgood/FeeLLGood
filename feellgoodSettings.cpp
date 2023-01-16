@@ -104,6 +104,7 @@ void Settings::infos()
     std::cout << "  directory: " << r_path_output_dir << "\n";
     std::cout << "  file_basename: " << simName << "\n";
     std::cout << "  evol_time_step: " << time_step << "\n";
+    std::cout << "  final_time: " << tf << "\n";
     std::cout << "  evol_columns:\n";
     for (auto it = evol_columns.begin(); it != evol_columns.end(); ++it) {
         std::cout << "    - " << *it << "\n";
@@ -191,7 +192,6 @@ void Settings::infos()
     std::cout << "demagnetizing_field_solver:\n";
     std::cout << "  nb_threads: " << scalfmmNbTh << "\n";
     std::cout << "time_integration:\n";
-    std::cout << "  final_time: " << tf << "\n";
     std::cout << "  max(du): " << DUMAX << "\n";
     std::cout << "  min(dt): " << dt_min << "\n";
     std::cout << "  max(dt): " << dt_max << "\n";
@@ -214,6 +214,7 @@ void Settings::read(YAML::Node yaml)
         assign(simName, outputs["file_basename"]);
         assign(withVtk, outputs["vtk_file"]);
         assign(time_step, outputs["evol_time_step"]);
+        assign(tf, outputs["final_time"]);
         YAML::Node take_photo = outputs["take_photo"];
         if (take_photo.Scalar() == "true") {  // catch an easy mistake
             error("outputs.take_photo should be an integer or `false'.");
@@ -389,7 +390,6 @@ void Settings::read(YAML::Node yaml)
         assign(DUMAX, time_integration["max(du)"]);
         assign(dt_min, time_integration["min(dt)"]);
         assign(dt_max, time_integration["max(dt)"]);
-        assign(tf, time_integration["final_time"]);
     }  // time_integration
 
     // outputs.file_basename defaults to base name of mesh.filename.

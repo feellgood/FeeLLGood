@@ -18,6 +18,7 @@ mySettings = Settings(meshFileName)
 mySettings["outputs"]["file_basename"] = "ico"
 
 mySettings["outputs"]["evol_time_step"] = 1e-17
+mySettings["outputs"]["final_time"] = 5e-14
 mySettings["outputs"]["evol_columns"] = [ "t", "<Mx>", "<My>", "<Mz>", "E_ex", "E_aniso", "E_demag","E_zeeman", "E_tot" ]
 
 mySettings["outputs"]["take_photo"] = 1000
@@ -36,7 +37,6 @@ mySettings["mesh"]["volume_regions"]["whole_volume"]["Ae"] = 10e-12
 
 mySettings["mesh"]["volume_regions"]["whole_volume"]["alpha_LLG"] = 0.05
 
-mySettings["time_integration"]["final_time"] = 5e-14
 mySettings["time_integration"]["min(dt)"] = 5e-18
 mySettings["time_integration"]["max(dt)"] = 5e-16
 

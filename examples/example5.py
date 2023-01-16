@@ -31,6 +31,7 @@ settings = {
     "outputs": {
         "file_basename": "test_ex5",
         "evol_time_step": 1e-12,
+        "final_time": 2e-11,
         "evol_columns": [ "t", "<Mx>", "<My>", "<Mz>", "E_tot" ],
         "take_photo": False
     },
@@ -45,7 +46,6 @@ settings = {
     "finite_element_solver": { "nb_threads": 32 },
     "demagnetizing_field_solver": { "nb_threads": 32 },
     "time_integration": {
-        "final_time": 2e-11,
         "min(dt)": 5e-14,
         "max(dt)": 3.5e-13,
         "max(du)": 0.1

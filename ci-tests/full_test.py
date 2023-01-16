@@ -16,6 +16,7 @@ settings = {
     "outputs": {
         "file_basename": "full_test",
         "evol_time_step": 1e-12,
+        "final_time": 2e-11,
         "take_photo": False
     },
     "mesh": {
@@ -29,7 +30,6 @@ settings = {
     "finite_element_solver": { "nb_threads": nbThreads },
     "demagnetizing_field_solver": { "nb_threads": nbThreads },
     "time_integration": {
-        "final_time": 2e-11,
         "min(dt)": 5e-14,
         "max(dt)": 3.5e-13,
         "max(du)": 0.1

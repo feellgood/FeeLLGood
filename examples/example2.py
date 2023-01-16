@@ -23,12 +23,12 @@ mySettings["outputs"]["directory"] = "test_data_out/"
 mySettings["outputs"]["file_basename"] = "ellipsoid"
 
 mySettings["outputs"]["evol_time_step"] = 5e-16
+mySettings["outputs"]["final_time"] = 1e-13
 
 mySettings["mesh"]["scaling_factor"] = 1e-10
 
 mySettings["mesh"]["volume_regions"]["ellipsoid_volume"]["alpha_LLG"] = 0.05
 
-mySettings["time_integration"]["final_time"] = 1e-13
 mySettings["time_integration"]["min(dt)"] = 5e-18
 mySettings["time_integration"]["max(dt)"] = 2.5e-16
 
