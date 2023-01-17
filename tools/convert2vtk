@@ -63,17 +63,22 @@ class data(object):
         self.check_idx(lines[1],list_idx)
         self.Mag.SetNumberOfComponents(len(list_idx))
 
-        # first .sol line is always "#t = xxx", so it is skipped starting from i=1
-        for i in range(1,len(lines)):
+        for i in range(0,len(lines)):
             ls = self.filter(lines[i])
             vector = []
-            for idx in list_idx:
-                vector.append(float(ls[idx]))
-            self.Mag.InsertNextTuple(vector)
+            if len(ls)>0:
+            	for idx in list_idx:
+            	    vector.append(float(ls[idx]))
+            	self.Mag.InsertNextTuple(vector)
+            
                 
     def filter(self,line):# the separator is either a '\t' or a spaces, because some people may post-treat .sol files
-        filtered_line = re.sub('\s+','\t',line)
-        return filtered_line.strip().split('\t')
+        if not line.startswith('#'):
+        	filtered_line = re.sub('\s+','\t',line)
+        	return filtered_line.strip().split('\t')
+        else:
+        	return []
+        
 
     def check_idx(self,line,list_idx):
         ls = self.filter(line)
