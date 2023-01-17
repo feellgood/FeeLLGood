@@ -79,7 +79,7 @@ class data(object):
         ls = self.filter(line)
         for i in list_idx:
             if (i > len(ls))or i<0:
-                print("error: index out of bounds.")
+                print("error: index out of bounds : index = ",i )
                 sys.exit(1)
 
 

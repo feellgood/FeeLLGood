@@ -164,6 +164,7 @@ std::vector< std::array<Pt::pt3D,Tetra::NPI> > Hm;
 	    std::cout << "cannot open file " << fileName << std::endl;
 	    SYSTEM_ERROR;
 	    }
+	fout << "#index\tV" <<std::endl;
 	for(unsigned int i=0;i<V.size();i++) { fout << i << "\t" << V[i] << std::endl; }
 
 	fout.close();
