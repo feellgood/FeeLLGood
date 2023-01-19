@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# see https://gmsh.info/doc/texinfo/gmsh.html#x1 for more on parsing mesh with python
+
+import gmsh
 import vtk
 #from vtk.numpy_interface import dataset_adapter as dsa
 import sys
@@ -9,50 +12,60 @@ import re
 
 class mesh(object):
     def __init__ (self,fileName):
-        self.Nodes = []
+        
         self.Tet = []
-        self.Fac = []
-        mshFile = open(fileName,'r')
-        count = 0
-        current_line =''
-        while current_line.strip() != '$MeshFormat':
-            current_line = mshFile.readline()
+        self.Names = []
+        
+        gmsh.initialize()
+        gmsh.option.setNumber("General.Terminal",False) # to silent gmsh
+        gmsh.open(fileName)
+        
+        if gmsh.model.getDimension() != 3:
+            print('Error : convert2vtk does not support Model ' + gmsh.model.getCurrent() + ' : it is not 3D')
+        
+        # Get all the mesh nodes:
+        nodeTags, nodeCoords, nodeParams = gmsh.model.mesh.getNodes()
+        self.Nodes = np.empty([len(nodeTags),3],dtype=float)
 
-        mshFormat = mshFile.readline()
-        if mshFormat.strip() != "2.2\t0\t8\n":
-            print("mesh format = 2.2")
-        else:
-            print("cannot read " + fileName + "file, wrong format, 2.2 required.")
-            sys.exit(1)
-
-        while current_line.strip() != '$Nodes':
-            current_line = mshFile.readline()
+        for n in range(0,len(nodeTags)):
+            idx = int(nodeTags[n])-1
+            self.Nodes[idx][0] = nodeCoords[3*n]
+            self.Nodes[idx][1] = nodeCoords[3*n + 1]
+            self.Nodes[idx][2] = nodeCoords[3*n + 2]
+        
+        entities_3D = gmsh.model.getEntities(dim = 3)
+        for e in entities_3D:
+            dim = 3
+            tag = e[1]
             
-        current_line = mshFile.readline()
-        print("\treading " + current_line[0:len(current_line)-1] + " nodes...")
+            # Get the mesh elements for the entity (dim, tag):
+            elemTypes, elemTags, elemNodeTags = gmsh.model.mesh.getElements(dim, tag)
+            
+            if len(elemTypes) != 1:
+                print("Error : convert2vtk only handles mesh with tetrahedron elements")
+                exit(1)
+    
+            for n in range(0,len(elemTags[0])):
+                idx = int(elemTags[0][n])-1 
+                i0 = int(elemNodeTags[0][4*n])
+                i1 = int(elemNodeTags[0][4*n+1])
+                i2 = int(elemNodeTags[0][4*n+2])
+                i3 = int(elemNodeTags[0][4*n+3])
+                self.Tet.append([ i0-1 , i1-1, i2-1, i3-1 ])
+            # * Does the entity belong to physical groups?
+            physicalTags = gmsh.model.getPhysicalGroupsForEntity(dim, tag)
+            if len(physicalTags):
+                s = ''
+                for p in physicalTags:
+                    self.Names.append( gmsh.model.getPhysicalName(dim, p))
 
-        while current_line.strip() != '$EndNodes':
-            current_line = mshFile.readline()
-            ls = re.sub('\s+','\t',current_line).strip().split("\t")
-            if len(ls) == 4:
-                self.Nodes.append( [float(ls[1]),float(ls[2]),float(ls[3]) ])
+        gmsh.clear()
+        gmsh.finalize()
+#        self.infos()
 
-        current_line = mshFile.readline()
-        current_line = mshFile.readline()
-        print("\treading " + current_line[0:len(current_line)-1] + " Elements...")
- 
-        while current_line.strip() != '$EndElements':
-            current_line = mshFile.readline()
-            ls = re.sub('\s+','\t',current_line).strip().split("\t") 
-            if len(ls) == 9: # tetrahedrons
-                self.Tet.append( [int(ls[5])-1,int(ls[6])-1,int(ls[7])-1,int(ls[8])-1 ])
-            elif len(ls) == 8: # triangles
-            	self.Fac.append( [int(ls[5])-1,int(ls[6])-1,int(ls[7])-1] )
-        mshFile.close()
-        self.infos()
 
     def infos(self):
-        print("nb Nodes: ",len(self.Nodes),"\tnb Tetrahedrons: ",len(self.Tet),"\tnb Triangles: ",len(self.Fac))
+        print("nb Nodes: ",len(self.Nodes),"\tnb Tetrahedrons: ",len(self.Tet), "\tphysical names: ", self.Names)
 
 class data(object):
     def __init__(self,fileName,list_idx):
@@ -72,8 +85,8 @@ class data(object):
             	self.Mag.InsertNextTuple(vector)
             
                 
-    def filter(self,line):# the separator is either a '\t' or a spaces, because some people may post-treat .sol files
-        if not line.startswith('#'):
+    def filter(self,line):# the separator is either a '\t' or spaces, because s.sol files may be post-treated
+        if not line.startswith('#'): # to ignore comments
         	filtered_line = re.sub('\s+','\t',line)
         	return filtered_line.strip().split('\t')
         else:
@@ -90,14 +103,15 @@ class data(object):
 
 def get_params():
     import argparse
-    description = 'convert .sol to .vtk using gmsh mesh.'
+    description = 'convert .sol to .vtu using gmsh mesh and .sol file'
     epilogue = '''
- convert feellgood output .sol files to .vtk file using mesh in gmsh version 2.2 format 
+ build a .vtu file from feellgood output .sol file and .msh mesh file 
    '''
     parser = argparse.ArgumentParser(description=description, epilog=epilogue,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('mshFileName', help='a mesh file in gmsh 2.2 text format with .msh extension')
+    parser.add_argument('mshFileName', help='a mesh file in gmsh format with .msh extension')
     parser.add_argument('solFileName', help='a .sol feellgood file')
+    parser.add_argument('--version',action='version',version= __version__,help='show the version number')
     parser.add_argument('integers',metavar='N',type=int, nargs='*', help='indices of the column to copy into output .vtu file')
     args = parser.parse_args()
     indices = []
@@ -109,14 +123,12 @@ def get_params():
     return [args.mshFileName,args.solFileName,indices]
 
 def main():
-    print("This is convert2vtk python script, using vtk version " + vtk.vtkVersion.GetVTKVersion())
+    #print("This is convert2vtk ", __version__ ,", using VTK " + vtk.vtkVersion.GetVTKVersion(), " and GMSH " + gmsh.__version__ )
     [meshFileName, solFileName, indices] = get_params()
 
     path, ext = os.path.splitext(meshFileName)
     ext = ext.lower()
-    if ext == '.msh':
-        print("input mesh file is ", meshFileName)
-    else:
+    if ext != '.msh':
         print("extension " + ext + "not recognized.")
         sys.exit(1)
     
@@ -136,23 +148,24 @@ def main():
     for i in range(0,len(msh.Tet)):
         ugrid.InsertNextCell(vtk.VTK_TETRA,4,msh.Tet[i])
 
+    newFileName = solFileName[0:solFileName.rfind('.')]
+    newFileName += ".vtu"
+    
     #the vectors are fixed on each nodes, so we have to associate them to ugrid as Points, not to the cells = tetrahedrons
     if len(indices) == 3:
-        print("save data as 3D vectors, using ", indices ," columns")
+        print( newFileName ,"saved as 3D vectors, using ", indices ," columns")
         ugrid.GetPointData().SetVectors(my_data.Mag)
     else:
-        print("save data as " + str(len(indices)) + "D scalars, using ", indices ," columns")
+        print(newFileName ,"saved as " + str(len(indices)) + "D scalars, using ", indices ," column(s)")
         ugrid.GetPointData().SetScalars(my_data.Mag)
 
     writer = vtk.vtkXMLUnstructuredGridWriter()
-    newFileName = solFileName[0:solFileName.rfind('.')]
-    newFileName += ".vtu"
+    
     writer.SetFileName(newFileName)
     writer.SetInputData(ugrid)
-    
     #writer.SetDataModeToAscii() #available only if XML
     writer.Write()
-    print("VTK file " + newFileName + " written.")
 
+__version__ = '1.0.0'
 if __name__ == "__main__":
     main()
