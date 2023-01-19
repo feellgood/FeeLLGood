@@ -29,7 +29,7 @@ class Cylinder(object):
         """ write cylinder mesh file in gmsh 2.2 text format """
         
         gmsh.initialize()
-
+        gmsh.option.setNumber("General.Terminal",False) # to silent gmsh
         gmsh.model.add("cyl")
         
         p_origin = gmsh.model.geo.addPoint(0,0,-0.5*self.t,self.msh_s)

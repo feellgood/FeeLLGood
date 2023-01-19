@@ -19,10 +19,10 @@ class Ellipsoid(object):
         self.volName = volName
     
     def make(self,meshFileName):
-        """ write ellpipsoid mesh file in gmsh 2.2 text format """
+        """ write ellipsoid mesh file in gmsh 2.2 text format """
         
         gmsh.initialize()
-
+        gmsh.option.setNumber("General.Terminal",False) # to silent gmsh
         gmsh.model.add("ellipsoid")
         sph = gmsh.model.occ.addSphere(0,0,0,self.r1)
         gmsh.model.occ.dilate([(3,sph)],0,0,0,1,1,self.r2)
