@@ -71,19 +71,22 @@ this class is containing both data and a solver to compute potential from dirich
 class electrostatSolver {
 public:
     /** constructor */
-    inline electrostatSolver(Mesh::mesh const& _msh /**< [in] reference to the mesh */, STT const& _p_stt /**< all spin transfer torque parameters */,
+    inline electrostatSolver(Mesh::mesh const& _msh /**< [in] reference to the mesh */,
+    				STT const& _p_stt /**< all spin transfer torque parameters */,
                              const double _tol /**< [in] tolerance for solvers */,
                              const bool v /**< [in] verbose bool */,
                              const int max_iter /**< [in] maximum number of iteration */ ): msh(_msh), p_stt(_p_stt), verbose(v), MAXITER(max_iter) 
                              {
-                             if(verbose) { std::cout << "Dirichlet boundary conditions..." << std::endl; infos(); }
+                             if(verbose)
+                             	{ std::cout << "Dirichlet boundary conditions..." << std::endl; infos(); }
                              bool has_converged = solve(_tol);
                              if(has_converged)
                              	{	
                              	if (p_stt.V_file) 
                              		{
                              		std::string fileName = "V.sol";
-                             		if(verbose) std::cout << "writing electrostatic potential solutions in file " << fileName << std::endl; 
+                             		if(verbose)
+                             			{ std::cout << "writing electrostatic potential solutions in file " << fileName << std::endl; }
                              		savesol(fileName);
                              		}
                              	std::for_each(msh.tet.begin(),msh.tet.end(), [this]( Tetra::Tet const& tet )
@@ -126,19 +129,19 @@ void calc_Hm(Tetra::Tet const& tet, std::array<Pt::pt3D,Tetra::NPI> const& _grad
 Pt::pt3D p_g[Tetra::NPI];
 tet.interpolation(Nodes::get_p,p_g);
 
-for (int npi=0; npi<Tetra::NPI; npi++) { _Hm[npi] = -p_stt.sigma*_gradV[npi]*p_g[npi]; }
+for (int npi=0; npi<Tetra::NPI; npi++)
+	{ _Hm[npi] = -p_stt.sigma*_gradV[npi]*p_g[npi]; }
 }
 
 
 
 private:
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh ( const ref ) */
-	Mesh::mesh msh;
+    Mesh::mesh msh;
 	
-	/** spin transfer torque parameters */
-	STT p_stt;
-    
-    
+    /** spin transfer torque parameters */
+    STT p_stt;
+
     /** if verbose set to true, some printing are sent to terminal */
     const bool verbose;
 
@@ -180,8 +183,6 @@ std::vector< std::array<Pt::pt3D,Tetra::NPI> > Hm;
                       { std::cout << "regName: " << p.first << "\tV :" << p.second << std::endl; } );
         }
         
-
-
     /** fill matrix and vector to solve potential values on each node */
 void prepareData(write_matrix &Kw, write_vector & Lw)
 {
@@ -207,7 +208,7 @@ std::for_each(msh.fac.begin(),msh.fac.end(), [this,pot_val,&Lw]( Facette::Fac co
 		});
 }
 
-/** solver, using biconjugate stabilized gradient, with diagonal preconditionner */
+/** solver, using biconjugate stabilized gradient, with diagonal preconditionner and Dirichlet boundary conditions */
 int solve(const double iter_tol)
 {
 const int NOD = msh.getNbNodes();
@@ -220,7 +221,6 @@ prepareData(Kw,Lw);
 
 read_matrix  Kr(NOD, NOD);    gmm::copy(Kw, Kr);
 
-//Dirichlet boundary conditions
 std::for_each( p_stt.boundaryCond.begin(),p_stt.boundaryCond.end(), [this,&Kw,&Lw,&Xw](auto const& it) 
 	{ 
 	double V = it.second;
@@ -244,8 +244,9 @@ std::for_each( p_stt.boundaryCond.begin(),p_stt.boundaryCond.end(), [this,&Kw,&L
 		}
 	} );
 
-if(verbose) { std::cout << "line weighting..." << std::endl; }
-/* equilibrage des lignes */
+if(verbose)
+    { std::cout << "line weighting..." << std::endl; }
+
 for (int i=0; i<NOD; i++)
     {
     double norme=gmm::vect_norminf(mat_row(Kw, i));
@@ -256,7 +257,8 @@ for (int i=0; i<NOD; i++)
 gmm::copy(Kw, Kr);
 read_vector  Lr(NOD);        gmm::copy(Lw, Lr);
 
-if(verbose) { std::cout << "solving ..." << std::endl; }
+if(verbose)
+    { std::cout << "solving ..." << std::endl; }
 
 gmm::iteration iter(iter_tol);
 iter.set_maxiter(MAXITER);

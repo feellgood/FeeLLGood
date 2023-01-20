@@ -75,7 +75,8 @@ install(TARGETS feellgood RUNTIME DESTINATION bin)
 install(PROGRAMS ./tools/convert2vtk DESTINATION bin)
 
 #===========================================================================
-# unit tests, by default it is not built. you have to switch it ON while cmaking to build the unit tests and to be able to call 'make test' afterward:
+# unit tests, by default it is not built.
+# you have to switch it ON while cmaking to build the unit tests and to be able to call 'make test' afterward:
 #  cmake . -DENABLE_UTESTS=ON
 # NB: ENABLE_UTESTS value is written in CMakeCache.txt
 #===========================================================================

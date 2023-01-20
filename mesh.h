@@ -26,7 +26,7 @@ class mesh
 {
 public:
     /** constructor  : read mesh, reorder indices and computes values related to the mesh : center and length along coordinates and diameter = max(l(x|y|z)), vol,surf */
-    inline mesh(Settings const& mySets /**< [in] */) //:nbNod(0)
+    inline mesh(Settings const& mySets /**< [in] */)
         {
         readMesh(mySets);
         if(mySets.verbose) std::cout << "Mesh in memory:\n";
@@ -52,7 +52,7 @@ public:
         }
     
     /** return number of nodes  */
-    inline int getNbNodes(void) const { return node.size(); }//{ return nbNod; }
+    inline int getNbNodes(void) const { return node.size(); }
     
     /** return number of triangular fac */
     inline int getNbFacs(void) const { return fac.size(); }
@@ -68,9 +68,7 @@ public:
     
     /** fix to zero node[i].v */
     inline void set_node_zero_v(const int i) { node[i].v = Pt::pt3D(0.,0.,0.); }
-    
-    
-    
+
     /** basic informations on the mesh */
     void infos(void) const
         {
@@ -159,13 +157,14 @@ double updateNodes(std::vector<double> const& X,const double dt)
     average component of either u or v through getter on the whole set of tetetrahedron
     */
     double avg(std::function<double (Nodes::Node,Pt::index)> getter /**< [in] */,Pt::index d /**< [in] */) const
-    {// syntaxe pénible avec opérateur binaire dans la lambda pour avoir un += sur la fonction voulue, with C++17 we should use reduce instead of accumulate here
-    double sum = std::accumulate(tet.begin(),tet.end(),0.0, [getter,&d](double s,Tetra::Tet const& te)
-                            {
-                            double val[Tetra::NPI]; 
-                            te.interpolation(getter,d,val); 
-                            return (s + te.weightedScalarProd(val));    
-                            } );
+    {
+    double sum = std::transform_reduce(std::execution::par,tet.begin(),tet.end(),0.0, std::plus{}, [getter,&d](Tetra::Tet const& te)
+    	{
+    	double val[Tetra::NPI]; 
+        te.interpolation(getter,d,val); 
+        return te.weightedScalarProd(val);
+    	});
+    
     return sum/vol;
     }
 
@@ -176,17 +175,17 @@ double updateNodes(std::vector<double> const& X,const double dt)
     void savesol(const std::string fileName /**< [in] */,timing const& t_prm /**< [in] */,const double s /**< [in] */) const;
 
     /** save the demagnetizing field values, including idx and npi indices, for debug use */
-    void saveH(const std::string fileName /**< [in] */,const double t/**< [in] */,const double scale /**< [in] */) const;
+    void saveH(bool verbose,const std::string fileName /**< [in] */,const double t/**< [in] */,const double scale /**< [in] */) const;
     
     /** computes all charges for the demag field to feed a tree in the fast multipole algo (scalfmm) */
     void calc_charges(std::function<const Pt::pt3D (Nodes::Node)> getter,std::vector<double> & srcDen,std::vector<double> & corr,Settings const& settings)
     {
     int nsrc = 0;
     std::for_each(tet.begin(),tet.end(),[&srcDen,getter,&nsrc,&settings](Tetra::Tet const& tet)              
-        { tet.charges(getter,srcDen,nsrc, nu0 * settings.paramTetra[tet.idxPrm].J ); });//end for_each on tet
+        { tet.charges(getter,srcDen,nsrc, nu0 * settings.paramTetra[tet.idxPrm].J ); });
 
     std::for_each(fac.begin(),fac.end(),[&srcDen,&corr,getter,&nsrc](Facette::Fac const& fac)
-        { fac.charges(getter,srcDen,corr,nsrc); });// end for_each on fac
+        { fac.charges(getter,srcDen,corr,nsrc); });
     }
     
     /** setter for node[i]; what_to_set will fix what is the part of the node struct to set (usefull for fmm_demag.h) */
@@ -195,7 +194,7 @@ double updateNodes(std::vector<double> const& X,const double dt)
     
 private:
 
-    /** node container : not initialized by constructor, but later, while reading the mesh, by member function init_node */
+    /** node container: not initialized by constructor, but later while reading the mesh by member function init_node */
     std::vector< Nodes::Node > node;
     
     /** map of the surface region physical names from mesh file */
@@ -280,7 +279,6 @@ private:
                     {
                     for (int nrot=0; nrot<3; nrot++)
                         {
-                        //Facette::Fac fc(node,0,0,0,0,0,0);
                         Facette::Fac fc(node,0,0,0,0,0);
                         fc.ind[(0+nrot)%3]=i0; fc.ind[(1+nrot)%3]=i1; fc.ind[(2+nrot)%3]=i2;
                         it=sf.find(fc);

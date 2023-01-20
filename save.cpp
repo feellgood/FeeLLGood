@@ -17,7 +17,8 @@ int save_period = settings.save_period;
 // fout << boost::format("%+20.10e %+20.10e %+20.10e %+20.10e %+20.10e %+20.10e %+20.10e")% Ee % Ea % Ed % Ez % Etot % DW_z % DW_vz<< endl;
 
 for(unsigned int i = 0;i<settings.evol_columns.size();i++)
-    {std::string sep;
+    {
+    std::string sep;
     const std::string & keyVal = settings.evol_columns[i];
     if(i == settings.evol_columns.size() - 1) {sep = "\n";} else {sep = "\t";}
 
@@ -130,9 +131,10 @@ for(unsigned int i=0;i<node.size();i++)
 fout.close();
 }
 
-void Mesh::mesh::saveH(const string fileName,const double t,const double scale) const
+void Mesh::mesh::saveH(bool verbose,const string fileName,const double t,const double scale) const
 {
-std::cout << " " << fileName <<"\n -------------------\n" << std::endl;
+if (verbose)
+	{ std::cout << " " << fileName <<"\n -------------------\n" << std::endl; }
 
 ofstream fout(fileName, ios::out);
 if (fout.fail())
@@ -145,21 +147,16 @@ fout << "#time : "<< t << endl;
 int idx_tet=0;
 std::for_each(tet.begin(),tet.end(),[&idx_tet,&fout,scale](Tetra::Tet const &te) 
     {
-    
-    /*------------------- INTERPOL --------------------*/
     Pt::pt3D gauss[Tetra::NPI];
     double Hdx[Tetra::NPI], Hdy[Tetra::NPI], Hdz[Tetra::NPI];
 
     te.interpolation(Nodes::get_p,gauss);
     te.interpolation(Nodes::get_phi,Hdx,Hdy,Hdz);
-    /*---------------------------------------------------*/
     
     for (int npi=0; npi<Tetra::NPI; npi++)
         {
-	    Pt::pt3D p = gauss[npi]/scale;
-	    
-        fout << idx_tet << " " << npi << " " << p << " "<< Hdx[npi] << " " << Hdy[npi] << " " << Hdz[npi] << endl;
-        // " %8d %3d %+20.10f %+20.10f %+20.10f %+20.10e %+20.10e %+20.10e"
+	Pt::pt3D p = gauss[npi]/scale;
+	fout << idx_tet << " " << npi << " " << p << " "<< Hdx[npi] << " " << Hdy[npi] << " " << Hdz[npi] << endl;
         }
     idx_tet++;
     }
