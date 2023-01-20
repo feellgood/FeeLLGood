@@ -20,18 +20,18 @@
 namespace Mesh {
 
 /** \class mesh
-class for storing the mesh, including mesh geometry values, containers for the nodes, triangular faces and tetrahedrons. nodes data are not public. They are accessible only through getter and setter.
+class for storing the mesh, including mesh geometry values, containers for the nodes, triangular faces and tetrahedrons.
+ nodes data are private. They are accessible only through getter and setter.
 */
 class mesh
 {
 public:
-    /** constructor  : read mesh, reorder indices and computes values related to the mesh : center and length along coordinates and diameter = max(l(x|y|z)), vol,surf */
+    /** constructor : read mesh file, reorder indices and computes some values related to the mesh :
+     center and length along coordinates and diameter = max(l(x|y|z)), volume and surface */
     inline mesh(Settings const& mySets /**< [in] */)
         {
         readMesh(mySets);
-        if(mySets.verbose) std::cout << "Mesh in memory:\n";
         indexReorder(mySets);// reordering of index nodes for facette orientation, also some modifications on fac::Ms
-        if(mySets.verbose) std::cout << "  reindexed\n";
         
         double xmin = minNodes(Pt::IDX_X);
         double xmax = maxNodes(Pt::IDX_X);
@@ -45,10 +45,12 @@ public:
         l = Pt::pt3D(xmax - xmin,ymax - ymin,zmax - zmin);
         diam = l.maxLength();
         c = Pt::pt3D(0.5*(xmax + xmin),0.5*(ymax + ymin),0.5*(zmax + zmin));
-        vol = std::accumulate(tet.begin(),tet.end(),0.0,[](double x,Tetra::Tet const& te){return x + te.calc_vol();} );
-        surf = std::accumulate(fac.begin(),fac.end(),0.0,[](double x,Facette::Fac const& fa){return x + fa.calc_surf();} );
         
-        if(mySets.verbose) std::cout << "  computed geometry\n";
+        vol = std::transform_reduce(std::execution::par,tet.begin(),tet.end(),0.0, std::plus{},
+                                    [](Tetra::Tet const& te) {return te.calc_vol();} );
+
+        surf = std::transform_reduce(std::execution::par, fac.begin(), fac.end(),0.0, std::plus{},
+                                    [](Facette::Fac const& fa) {return fa.calc_surf();} );
         }
     
     /** return number of nodes  */
@@ -298,6 +300,8 @@ private:
                     }//end perm
                 }
             }); //end for_each
+        if(settings.verbose)
+            { std::cout << "  reindexed\n"; }
         }
 };
 
