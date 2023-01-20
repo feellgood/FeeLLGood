@@ -177,7 +177,7 @@ double updateNodes(std::vector<double> const& X,const double dt)
     void savesol(const std::string fileName /**< [in] */,timing const& t_prm /**< [in] */,const double s /**< [in] */) const;
 
     /** save the demagnetizing field values, including idx and npi indices, for debug use */
-    void saveH(bool verbose,const std::string fileName /**< [in] */,const double t/**< [in] */,const double scale /**< [in] */) const;
+    void saveH(bool verbose /**< [in] */,const std::string fileName /**< [in] */,const double t/**< [in] */,const double scale /**< [in] */) const;
     
     /** computes all charges for the demag field to feed a tree in the fast multipole algo (scalfmm) */
     void calc_charges(std::function<const Pt::pt3D (Nodes::Node)> getter,std::vector<double> & srcDen,std::vector<double> & corr,Settings const& settings)
@@ -211,29 +211,28 @@ private:
 	/** reading mesh format 2.2 text file function */
     void readMesh(Settings const& mySets);
 
+    /** loop on nodes to apply predicate 'whatTodo'  */
+    double doOnNodes(const double init_val,const Pt::index coord, std::function<bool(double,double)> whatToDo) const
+        {
+        double result(init_val);
+        std::for_each(node.begin(),node.end(), [&result,coord,whatToDo](Nodes::Node const& n)
+                    {
+                    double val = n.p(coord);
+                    if( whatToDo(val,result)) result = val;
+                    }  );
+        return result;
+        }
     
 	/** return the minimum of all nodes coordinate along coord axis */
     inline double minNodes(const Pt::index coord) const
         {
-        double _min = __DBL_MAX__;
-        for(unsigned int i=0;i<node.size();i++)
-            {
-            double val = node[i].p(coord);
-            if (val < _min) _min = val;
-            }
-        return _min;
+        return doOnNodes(__DBL_MAX__ , coord, [](double a, double b){return a<b;} );
         }
 
     /** return the maximum of all nodes coordinate along coord axis */
     inline double maxNodes(const Pt::index coord) const
         {
-        double _max = __DBL_MIN__;
-        for(unsigned int i=0;i<node.size();i++)
-            {
-            double val = node[i].p(coord);
-            if (val > _max) _max = val;
-            }
-        return _max;
+        return doOnNodes(__DBL_MIN__ , coord, [](double a, double b){return a>b;} );
         }
     
     /** redefine orientation of triangular faces in accordance with the tetrahedron
