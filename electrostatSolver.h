@@ -87,7 +87,7 @@ public:
                              		std::string fileName = "V.sol";
                              		if(verbose)
                                         { std::cout << "writing electrostatic potential solutions to file " << fileName << std::endl; }
-                                    bool iznogood = savesol(fileName);
+                                    bool iznogood = msh.savesol(precision,fileName,"##columns: index\tV\n",V);
                                     if (verbose && iznogood)
                                         { std::cout << "file "<< fileName <<" status : " << iznogood <<std::endl; }
                              		}
@@ -150,34 +150,19 @@ private:
 
     /** maximum number of iteration for biconjugate stabilized gradient */
     const unsigned int MAXITER; //fixed to 5000 in ref code
-    
-/** electrostatic potential values for boundary conditions, V.size() is the size of the vector of nodes */ 
+
+    /** electrostatic potential values for boundary conditions, V.size() is the size of the vector of nodes */ 
     std::vector<double> V;
 
-/** table of the gradients of the potential, gradV.size() is the number of tetra */
+    /** table of the gradients of the potential, gradV.size() is the number of tetra */
     std::vector< std::array<Pt::pt3D,Tetra::NPI> > gradV;
 
-/** table of the Hm vectors (contribution of the STT to the tet::integrales) ; Hm.size() is the number of tetra */
+    /** table of the Hm vectors (contribution of the STT to the tet::integrales) ; Hm.size() is the number of tetra */
     std::vector< std::array<Pt::pt3D,Tetra::NPI> > Hm;
 
-    
-    /** save in a text file the solution of the electrostatic problem. Potential is solved on the nodes. */
-    bool savesol(const std::string fileName) const
-    {
-    std::ofstream fout(fileName, std::ios::out);
-    if (fout.fail())
-        {
-        std::cout << "cannot open file " << fileName << std::endl;
-        SYSTEM_ERROR;
-        }
-	fout << "##columns:index\tV\n";
-	for(unsigned int i=0;i<V.size();i++)
-		{ fout << i << "\t" << V[i] << std::endl; }
+    /** number of digits in the optional output file */
+    const int precision = 7;
 
-	fout.close();
-	return !(fout.good());
-	}
-    
     /** basic informations on boundary conditions */
     inline void infos(void) 
         {

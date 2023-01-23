@@ -177,8 +177,11 @@ double updateNodes(std::vector<double> const& X,const double dt)
     void savesol(const int precision /**< [in] numeric precision in .sol output text file */,
     const std::string fileName /**< [in] */,std::string const& metadata /**< [in] */,const double s /**< [in] */) const;
 
+    /** text file (tsv) writing function for a solution of a side problem, used by electrostatSolver */
+    bool savesol(const int precision, const std::string fileName, std::string const& metadata, std::vector<double> const& val) const;
+
     /** save the demagnetizing field values, including idx and npi indices, for debug use */
-    void saveH(bool verbose /**< [in] */,const std::string fileName /**< [in] */,const double t/**< [in] */,const double scale /**< [in] */) const;
+    void saveH(const std::string fileName /**< [in] */,const double t/**< [in] */,const double scale /**< [in] */) const;
     
     /** computes all charges for the demag field to feed a tree in the fast multipole algo (scalfmm) */
     void calc_charges(std::function<const Pt::pt3D (Nodes::Node)> getter,std::vector<double> & srcDen,std::vector<double> & corr,Settings const& settings)
