@@ -33,12 +33,24 @@ class Settings{
     /** some prints sent to terminal */	
     void infos(void);
 
+	/** build a metadata string for .sol text files */
+	std::string buildMetadata(double t,std::string columnsTitle) const;
+
     /** read settings from a parsed YAML document */
 	void read(YAML::Node);
 	
     /** read settings from a YAML file. Returns true if a non-empty configuration is found. */
 	bool read(std::string filename);
-	
+
+    /** returns numeric precision for .sol output text files */
+    inline int getPrecision(void) const {return precision;}
+
+    /** getter for fileDisplayName */
+    inline std::string getFileDisplayName(void) const {return fileDisplayName;}
+
+    /** setter for fileDisplayName */
+    inline void setFileDisplayName(std::string _s) {fileDisplayName = _s;}
+
 	inline void setPbName(std::string str) {pbName = str;} /**< setter for .msh file name  */
 	inline std::string getPbName(void) const {return pbName;}/**< getter for problem file name */
 
@@ -158,7 +170,8 @@ class Settings{
     
     
 	private:
-	
+	int precision;/**< numeric precision for .sol output text files */
+	std::string fileDisplayName;/**< parameters file name : either a yaml file or standard input */
 	double _scale;/**< scaling factor from gmsh files to feellgood */
 	std::string simName;/**< simulation name */
 	std::string pbName;     /**< mesh file, gmsh file format */

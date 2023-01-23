@@ -106,7 +106,8 @@ if(settings.save_period > 0)
 	{
 	std::cout << ": saving the magnetization configuration...\n";
 	std::string fileName = settings.r_path_output_dir + '/' + settings.getSimName() + "_at_exit.sol";
-	fem.msh.savesol(fileName, t_prm, settings.getScale());
+	std::string metadata = settings.buildMetadata(t_prm.get_t(),"idx\tx\ty\tz\tmx\tmy\tmz\tphi");
+	fem.msh.savesol(settings.getPrecision(), fileName, metadata, settings.getScale());
 	std::cout << "Magnetization configuration saved to " << fileName << "\n";
 	}
 else

@@ -189,8 +189,8 @@ if (mySettings.verbose)
 std::cout << "feeLLGood version: " << feellgood_version << '\n';
 std::cout << "process ID:        " << std::to_string(getpid()) << '\n';
 std::cout << "random seed:       " << random_seed << '\n';
-std::string fileDisplayName = filename=="-" ? "standard input" : filename;
-std::cout << "settings file:     " << fileDisplayName << '\n';
+mySettings.setFileDisplayName( filename=="-" ? "standard input" : filename );
+std::cout << "settings file:     " << mySettings.getFileDisplayName() << '\n';
 if (!mySettings.read(filename))
     {
     std::cerr << "Error: no settings found.\n";

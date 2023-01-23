@@ -52,24 +52,26 @@ if (save_period && (nt%save_period)==0)
     if (settings.withVtk)
         {
         string str = baseName + "_iter" + to_string(nt) + ".vtk";
-        msh.savecfg_vtk(settings,t_prm,str);
+        msh.savecfg_vtk(t_prm,str);
         }
     
     string str = baseName + "_iter" + to_string(nt) + ".sol";
  
-    if(settings.verbose) { cout << " " << str << endl; }    
-    msh.savesol(str,t_prm,settings.getScale());
-    if(settings.verbose) { cout << "all nodes written." << endl; }
+    if(settings.verbose)
+        { cout << " " << str << endl; }
+
+    string metadata = settings.buildMetadata(t_prm.get_t(),"idx\tx\ty\tz\tmx\tmy\tmz\tphi");
+    msh.savesol(settings.getPrecision(),str,metadata,settings.getScale());
+    if(settings.verbose)
+        { cout << "all nodes written." << endl; }
     //    saveH(str);
     }
 }
 
-void Mesh::mesh::savecfg_vtk(Settings const& settings,timing const& t_prm,const string fileName) const
+void Mesh::mesh::savecfg_vtk(timing const& t_prm,const string fileName) const
 {
     const int TET = tet.size();
     const int NOD = node.size();
-
-if(settings.verbose) { cout <<"\n -------------------\n " << fileName << endl; }
 
 ofstream fout(fileName, ios::out);
 if (fout.fail())
@@ -84,19 +86,22 @@ fout << "ASCII" << endl;
 fout << "DATASET UNSTRUCTURED_GRID" << endl;
 fout << "POINTS "<< NOD << " float" << endl;
 
-for(int i=0;i<NOD;i++) {fout << node[i].p << endl;}
+for(int i=0;i<NOD;i++)
+    {fout << node[i].p << endl;}
 
 fout << "CELLS " << setw(8) << TET << "\t" << setw(8) << (5*TET) << endl;
 
 std::for_each(tet.begin(),tet.end(),[&fout](Tetra::Tet const &te)
     {
     fout << setw(8) << Tetra::N;    
-    for (int i=0; i<Tetra::N; i++) { fout << setw(8) << te.ind[i]; }
+    for (int i=0; i<Tetra::N; i++) 
+        { fout << setw(8) << te.ind[i]; }
     fout << endl;    
     });
 
 fout << "CELL_TYPES " << setw(8) << TET << endl;
-for (int t=0; t<TET; t++) { fout << setw(8) << 10 << endl; }
+for (int t=0; t<TET; t++)
+    { fout << setw(8) << 10 << endl; }
 
 fout <<"POINT_DATA " << setw(8) << NOD << endl;
 fout <<"SCALARS phi float 1" << endl;
@@ -109,27 +114,25 @@ for(int i=0;i<NOD;i++) {fout << node[i].u << endl;}
 //fout << boost::format("%+20.10e %+20.10e %+20.10e") % u1 % u2 % u3 << endl;
 }
 
-void Mesh::mesh::savesol(const string fileName,timing const& t_prm, const double s) const
-{
-ofstream fout(fileName, ios::out);
-if (fout.fail())
+void Mesh::mesh::savesol(const int precision, const string fileName, string const& metadata, const double s) const
     {
-    std::cout << "cannot open file " << fileName << std::endl;
-    SYSTEM_ERROR;
-    }
-//fout << boost::format("#time : %+20.10e ") % fem.t << endl;
-fout << "#time : " << t_prm.get_t() << endl;
+    ofstream fout(fileName, ios::out);
+    if (fout.fail())
+        {
+        std::cout << "cannot open file " << fileName << std::endl;
+        SYSTEM_ERROR;
+        }
 
-// fout << boost::format("%8d %+20.10f %+20.10f %+20.10f %+20.10f %+20.10f %+20.10f %+20.10e") % i % x % y % z % u1 % u2 % u3 % phi << endl;}
+    fout << metadata << std::scientific << std::setprecision(precision);
 
-for(unsigned int i=0;i<node.size();i++)
+    for(unsigned int i=0;i<node.size();i++)
         { 
         Pt::pt3D p = node[i].p/s;
         fout << i << "\t" << p << "\t" << node[i].u << "\t" << node[i].phi << endl;
         }
 
-fout.close();
-}
+    fout.close();
+    }
 
 void Mesh::mesh::saveH(bool verbose,const string fileName,const double t,const double scale) const
 {

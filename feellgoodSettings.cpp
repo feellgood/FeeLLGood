@@ -88,6 +88,7 @@ static const std::string str(Pt::pt3D v)
 
 Settings::Settings()
 {
+    precision = 7; // precision is 7 digits : smaller digits of node::potential phi are varying due to residual errors  
     verbose = false;
     withTsv = true;
     read(YAML::Load(get_default_yaml()));  // load defaults
@@ -196,6 +197,17 @@ void Settings::infos()
     std::cout << "  min(dt): " << dt_min << "\n";
     std::cout << "  max(dt): " << dt_max << "\n";
 }
+
+std::string Settings::buildMetadata(double t,std::string columnsTitle) const
+	{
+	std::ostringstream ss;
+	ss << "##feeLLGood version: " << feellgood_version << std::endl;
+	ss << "##settings file: " << getFileDisplayName() << std::endl;
+	ss << "##mesh file: " << getPbName() << std::endl;
+	ss << "##time: "<<std::scientific << t << std::endl;
+    ss << "##columns: " << columnsTitle << std::endl;
+    return ss.str();
+	}
 
 void Settings::read(YAML::Node yaml)
 {

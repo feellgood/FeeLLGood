@@ -16,7 +16,11 @@ struct STT
     double lJ;/**< length */
     double lsf;/**< spin flip length */
     bool V_file;/**< if true a text file V.sol is generated. It contains the solution of the electrostatic problem on the nodes of the mesh */    
-    std::vector<std::pair<std::string,double> > boundaryCond; /**< boundary conditions, first is the surface region name, second the associated value  */
+    
+    /** boundary conditions, stored as a vector of pairs. 
+    First element of the pair is the surface region name given in the mesh by its physical name;
+    Second element is the electrostatic potential associated value  */
+    std::vector<std::pair<std::string,double> > boundaryCond; 
     };
     
 #endif
