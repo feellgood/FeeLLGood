@@ -178,7 +178,8 @@ double updateNodes(std::vector<double> const& X,const double dt)
     const std::string fileName /**< [in] */,std::string const& metadata /**< [in] */,const double s /**< [in] */) const;
 
     /** text file (tsv) writing function for a solution of a side problem, used by electrostatSolver */
-    bool savesol(const int precision, const std::string fileName, std::string const& metadata, std::vector<double> const& val) const;
+    bool savesol(const int precision /**< [in] */, const std::string fileName /**< [in] */,
+     std::string const& metadata /**< [in] */, std::vector<double> const& val /**< [in] */) const;
 
     /** save the demagnetizing field values, including idx and npi indices, for debug use */
     void saveH(const std::string fileName /**< [in] */,const double t/**< [in] */,const double scale /**< [in] */) const;

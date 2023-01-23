@@ -110,7 +110,7 @@ for(int i=0;i<NOD;i++)
     {fout << node[i].u << endl;}
 }
 
-void Mesh::mesh::savesol(const int precision, const string fileName, string const& metadata, const double s) const
+void Mesh::mesh::savesol(const int precision, const std::string fileName, std::string const& metadata, const double s) const
     {
     ofstream fout(fileName, ios::out);
     if (fout.fail())
@@ -130,7 +130,7 @@ void Mesh::mesh::savesol(const int precision, const string fileName, string cons
     fout.close();
     }
 
-bool Mesh::mesh::savesol(const int precision, const string fileName, string const& metadata, std::vector<double> const& val) const
+bool Mesh::mesh::savesol(const int precision, const std::string fileName, std::string const& metadata, std::vector<double> const& val) const
     {
     ofstream fout(fileName, ios::out);
     if (fout.fail())
