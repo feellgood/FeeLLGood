@@ -137,28 +137,6 @@ for (int npi=0; npi<Tetra::NPI; npi++)
 	{ _Hm[npi] = -p_stt.sigma*_gradV[npi]*p_g[npi]; }
 }
 
-void add_STT_BE(Tetra::Tet & tet, int const& npi,int const idxTet, double Js, Pt::pt3D &U, Pt::pt3D &dUdx,Pt::pt3D &dUdy, Pt::pt3D &dUdz, Pt::pt3D (&BE)[Tetra::N]) const
-    {
-    const double ksi = Pt::sq(p_stt.lJ/p_stt.lsf);// this is in Thiaville notations beta_DW
-
-    const double D0 = 2.0*p_stt.sigma/(Pt::sq(CHARGE_ELECTRON)*p_stt.N0);
-
-    const double pf=Pt::sq(p_stt.lJ)/(D0*(1.+ksi*ksi)) * BOHRS_MUB*p_stt.beta/CHARGE_ELECTRON;
-
-    const double prefactor = D0/Pt::sq(p_stt.lJ)/(gamma0*nu0*Js);
-
-	std::array<Pt::pt3D,Tetra::NPI> const& _gV = gradV[idxTet];
-
-    Pt::pt3D j_grad_u = -p_stt.sigma*Pt::pt3D(Pt::pScal(_gV[npi],Pt::pt3D(dUdx(Pt::IDX_X),dUdy(Pt::IDX_X),dUdz(Pt::IDX_X)) ),
-                                 Pt::pScal(_gV[npi],Pt::pt3D(dUdx(Pt::IDX_Y),dUdy(Pt::IDX_Y),dUdz(Pt::IDX_Y)) ),
-                                 Pt::pScal(_gV[npi],Pt::pt3D(dUdx(Pt::IDX_Z),dUdy(Pt::IDX_Z),dUdz(Pt::IDX_Z)) ));
-
-    Pt::pt3D m = pf*(ksi*j_grad_u+U*j_grad_u);
-
-    for (int i=0; i<Tetra::N; i++)
-        { BE[i] += tet.weight[npi]*Tetra::a[i][npi]*(Hm[idxTet][npi] + prefactor*m); }
-	}
-
 /** affect extraField function and extraCoeffs_BE function for all the tetrahedrons */
 void prepareExtras(void)
 	{
