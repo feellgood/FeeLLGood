@@ -219,6 +219,7 @@ if (mySettings.stt_flag)
     FTic chronoElec;
     chronoElec.tic();    
     electrostatSolver pot_solver = electrostatSolver(fem.msh,mySettings.p_stt,1e-8,mySettings.verbose,5000); 
+    pot_solver.prepareExtras();
     chronoElec.tac();
     std::cout << "\tSTT total computing time: " << chronoElec.elapsed() << " s\n" << std::endl;
     }

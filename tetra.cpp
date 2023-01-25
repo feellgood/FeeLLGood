@@ -48,28 +48,6 @@ for (int i=0; i<N; i++)
     }
 }
 
-
-void Tet::add_STT_BE(int const& npi, STT p_stt, double Js, Pt::pt3D (&gradV)[NPI], Pt::pt3D (&Hm)[NPI], Pt::pt3D (&U)[NPI], Pt::pt3D (&dUdx)[NPI],Pt::pt3D (&dUdy)[NPI],Pt::pt3D (&dUdz)[NPI], Pt::pt3D (&BE)[N]) const
-{
-const double ksi = Pt::sq(p_stt.lJ/p_stt.lsf);// this is in Thiaville notations beta_DW
-
-const double D0 = 2.0*p_stt.sigma/(Pt::sq(CHARGE_ELECTRON)*p_stt.N0);
-
-const double pf=Pt::sq(p_stt.lJ)/(D0*(1.+ksi*ksi)) * BOHRS_MUB*p_stt.beta/CHARGE_ELECTRON;
-
-const double prefactor = D0/Pt::sq(p_stt.lJ)/(gamma0*nu0*Js);
-
-Pt::pt3D j_grad_u = -p_stt.sigma*Pt::pt3D(Pt::pScal(gradV[npi],Pt::pt3D(dUdx[npi](Pt::IDX_X),dUdy[npi](Pt::IDX_X),dUdz[npi](Pt::IDX_X)) ),
-                                 Pt::pScal(gradV[npi],Pt::pt3D(dUdx[npi](Pt::IDX_Y),dUdy[npi](Pt::IDX_Y),dUdz[npi](Pt::IDX_Y)) ),
-                                 Pt::pScal(gradV[npi],Pt::pt3D(dUdx[npi](Pt::IDX_Z),dUdy[npi](Pt::IDX_Z),dUdz[npi](Pt::IDX_Z)) ));
-
-Pt::pt3D m = pf*(ksi*j_grad_u+U[npi]*j_grad_u);
-
-for (int i=0; i<N; i++)
-    { BE[i] += weight[npi]*a[i][npi]*(Hm[npi] + prefactor*m); }
-
-}
-
 void Tet::add_drift_BE(int const& npi, double alpha, double s_dt, double Vdrift, Pt::pt3D (&U)[NPI], Pt::pt3D (&V)[NPI], Pt::pt3D (&dUd_)[NPI], Pt::pt3D (&dVd_)[NPI], Pt::pt3D (&BE)[N]) const
 {// the artificial drift from eventual recentering is along x,y or z
 double w = weight[npi];
@@ -129,17 +107,6 @@ interpolation(Nodes::get_v0,V,dVdx,dVdy,dVdz);
 interpolation(Nodes::get_phi0,Hd);
 interpolation(Nodes::get_phiv0,Hv);
 
-
-// for STT , should be computed only when stt needed
-
-Pt::pt3D gradV[NPI];
-//calc_gradV(*this,gradV); 
-
-Pt::pt3D Hm[NPI];
-//calc_Hm_STT(*this,gradV,Hm);
-// end STT
-
-
 for (int npi=0; npi<NPI; npi++)
     {
     pt3D H_aniso;
@@ -151,7 +118,11 @@ for (int npi=0; npi<NPI; npi++)
     pt3D H = H_aniso + Hd[npi] + Hext + (s_dt/gamma0)*Hv[npi];
     build_BE(npi, H, Abis, dUdx, dUdy, dUdz, BE);
 
-    add_STT_BE(npi,params[idxPrm].p_STT,Js,gradV,Hm,U,dUdx,dUdy,dUdz,BE); // should be computed only when stt needed
+    //STT
+    Pt::pt3D Hm;
+    extraField(npi,Hm);
+    extraCoeffs_BE(npi,Js,U[npi],dUdx[npi],dUdy[npi],dUdz[npi],BE);
+    //STT
     
     if(idx_dir != Pt::IDX_UNDEF)
     {
@@ -163,8 +134,8 @@ for (int npi=0; npi<NPI; npi++)
         add_drift_BE(npi,alpha,s_dt,Vdrift,U,V,dUdx,dVdx,BE);
     }
     
-    double uHeff = -Abis*(norme2(dUdx[npi]) + norme2(dUdy[npi]) + norme2(dUdz[npi])); 
-    uHeff += pScal(U[npi], Hext + Hm[npi] + Hd[npi]) + contrib_aniso; // Hm[npi] should be added only when stt needed
+    double uHeff = contrib_aniso - Abis*(norme2(dUdx[npi]) + norme2(dUdy[npi]) + norme2(dUdz[npi])); 
+    uHeff += pScal(U[npi], Hext + Hm + Hd[npi]); // Hm[npi] should be added only when stt needed
 
     lumping(npi, prm_t.calc_alpha_eff(alpha,uHeff), prm_t.prefactor*s_dt*Abis, AE);
     }
@@ -274,20 +245,19 @@ return Pt::pTriple(p1-p0,p2-p0,p3-p0)/6.0;
 }
 
 std::set<Facette::Fac> Tet::ownedFac() const
-{
-std::set<Facette::Fac> s;
+    {
+    std::set<Facette::Fac> s;
 
-int ia=ind[0];int ib=ind[1];int ic=ind[2];int id=ind[3];
-/*
-s.insert( Facette::Fac(refNode,0,reg,idxPrm,ia,ic,ib) );
-s.insert( Facette::Fac(refNode,0,reg,idxPrm,ib,ic,id) );
-s.insert( Facette::Fac(refNode,0,reg,idxPrm,ia,id,ic) );
-s.insert( Facette::Fac(refNode,0,reg,idxPrm,ia,ib,id) );
-*/
-s.insert( Facette::Fac(refNode,0,idxPrm,ia,ic,ib) );
-s.insert( Facette::Fac(refNode,0,idxPrm,ib,ic,id) );
-s.insert( Facette::Fac(refNode,0,idxPrm,ia,id,ic) );
-s.insert( Facette::Fac(refNode,0,idxPrm,ia,ib,id) );
+    const int ia=ind[0];
+    const int ib=ind[1];
+    const int ic=ind[2];
+    const int id=ind[3];
 
-return s;
-}
+    s.insert( Facette::Fac(refNode,0,idxPrm,ia,ic,ib) );
+    s.insert( Facette::Fac(refNode,0,idxPrm,ib,ic,id) );
+    s.insert( Facette::Fac(refNode,0,idxPrm,ia,id,ic) );
+    s.insert( Facette::Fac(refNode,0,idxPrm,ia,ib,id) );
+
+    return s;
+    }
+

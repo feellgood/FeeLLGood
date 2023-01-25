@@ -34,7 +34,7 @@
     { for (int ie=0; ie<Facette::N; ie++) { L[ fac.ind[ie] ] += Le[ie]; } }
     
     
-    /** compute integrales for matrix coefficients,input from tet ; sigma is the region conductivity */
+    /** compute side problem (electrostatic potential on the nodes) integrales for matrix coefficients,input from tet ; sigma is the region conductivity */
     void integrales(Tetra::Tet const& tet, double sigma, gmm::dense_matrix <double> &AE)
     {
     for (int npi=0; npi<Tetra::NPI; npi++)
@@ -62,7 +62,8 @@
 void integrales(Facette::Fac const& fac,double pot_val, std::vector <double> &BE)
     {
     for (int npi=0; npi<Facette::NPI; npi++)
-            { for (int ie=0; ie<Facette::N; ie++) { BE[ie] -= Facette::a[ie][npi]*pot_val*fac.weight(npi); } }
+        for (int ie=0; ie<Facette::N; ie++)
+            { BE[ie] -= Facette::a[ie][npi]*pot_val*fac.weight(npi); }
     }
 
 /** \class electrostatSolver
@@ -136,7 +137,56 @@ for (int npi=0; npi<Tetra::NPI; npi++)
 	{ _Hm[npi] = -p_stt.sigma*_gradV[npi]*p_g[npi]; }
 }
 
+void add_STT_BE(Tetra::Tet & tet, int const& npi,int const idxTet, double Js, Pt::pt3D &U, Pt::pt3D &dUdx,Pt::pt3D &dUdy, Pt::pt3D &dUdz, Pt::pt3D (&BE)[Tetra::N]) const
+    {
+    const double ksi = Pt::sq(p_stt.lJ/p_stt.lsf);// this is in Thiaville notations beta_DW
 
+    const double D0 = 2.0*p_stt.sigma/(Pt::sq(CHARGE_ELECTRON)*p_stt.N0);
+
+    const double pf=Pt::sq(p_stt.lJ)/(D0*(1.+ksi*ksi)) * BOHRS_MUB*p_stt.beta/CHARGE_ELECTRON;
+
+    const double prefactor = D0/Pt::sq(p_stt.lJ)/(gamma0*nu0*Js);
+
+	std::array<Pt::pt3D,Tetra::NPI> const& _gV = gradV[idxTet];
+
+    Pt::pt3D j_grad_u = -p_stt.sigma*Pt::pt3D(Pt::pScal(_gV[npi],Pt::pt3D(dUdx(Pt::IDX_X),dUdy(Pt::IDX_X),dUdz(Pt::IDX_X)) ),
+                                 Pt::pScal(_gV[npi],Pt::pt3D(dUdx(Pt::IDX_Y),dUdy(Pt::IDX_Y),dUdz(Pt::IDX_Y)) ),
+                                 Pt::pScal(_gV[npi],Pt::pt3D(dUdx(Pt::IDX_Z),dUdy(Pt::IDX_Z),dUdz(Pt::IDX_Z)) ));
+
+    Pt::pt3D m = pf*(ksi*j_grad_u+U*j_grad_u);
+
+    for (int i=0; i<Tetra::N; i++)
+        { BE[i] += tet.weight[npi]*Tetra::a[i][npi]*(Hm[idxTet][npi] + prefactor*m); }
+	}
+
+/** affect extraField function and extraCoeffs_BE function for all the tetrahedrons */
+void prepareExtras(void)
+	{
+	std::for_each(msh.tet.begin(),msh.tet.end(), [this]( Tetra::Tet & tet )
+		{
+		const int _idx = tet.idx;
+		tet.extraField = [this,_idx]( int npi, Pt::pt3D & _Hm ) { _Hm = this->Hm[_idx][npi]; } ;
+
+		tet.extraCoeffs_BE = [this,&tet,_idx](int npi,double Js,Pt::pt3D &U,Pt::pt3D &dUdx,Pt::pt3D &dUdy,Pt::pt3D &dUdz, Pt::pt3D (&BE)[Tetra::N] )
+			{
+			const double ksi = Pt::sq(p_stt.lJ/p_stt.lsf);// this is in Thiaville notations beta_DW
+			const double D0 = 2.0*p_stt.sigma/(Pt::sq(CHARGE_ELECTRON)*p_stt.N0);
+			const double pf=Pt::sq(p_stt.lJ)/(D0*(1.+ksi*ksi)) * BOHRS_MUB*p_stt.beta/CHARGE_ELECTRON;
+            const double prefactor = D0/Pt::sq(p_stt.lJ)/(gamma0*nu0*Js);
+
+	        Pt::pt3D const& _gV = gradV[_idx][npi];
+
+            Pt::pt3D j_grad_u = -p_stt.sigma*Pt::pt3D(Pt::pScal(_gV,Pt::pt3D(dUdx(Pt::IDX_X),dUdy(Pt::IDX_X),dUdz(Pt::IDX_X)) ),
+                                 Pt::pScal(_gV,Pt::pt3D(dUdx(Pt::IDX_Y),dUdy(Pt::IDX_Y),dUdz(Pt::IDX_Y)) ),
+                                 Pt::pScal(_gV,Pt::pt3D(dUdx(Pt::IDX_Z),dUdy(Pt::IDX_Z),dUdz(Pt::IDX_Z)) ));
+
+            Pt::pt3D m = pf*(ksi*j_grad_u+U*j_grad_u);
+
+            for (int i=0; i<Tetra::N; i++)
+                { BE[i] += tet.weight[npi]*Tetra::a[i][npi]*(Hm[_idx][npi] + prefactor*m); }
+			};
+		});
+	}
 
 private:
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh ( const ref ) */

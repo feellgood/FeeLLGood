@@ -129,7 +129,7 @@ class Tet{
             for (int i=0; i<N; i++) ind[i]--;           // convention Matlab/msh -> C++
             
 	if(refNode.size()>0)
-		{
+		        {
             	if (calc_vol() < 0.0) { std::swap(ind[2],ind[3]); }
             
             	double J[Pt::DIM][Pt::DIM];//we have to rebuild the jacobian in case of ill oriented tetrahedron 
@@ -151,7 +151,11 @@ class Tet{
             	    weight[j]    = detJ * Tetra::pds[j];
             	    }   
             	} 
-	}
+	        idx = 0;
+            // do nothing lambda's (usefull for spin transfer torque)
+	        extraField = [] (int, Pt::pt3D &) {};
+	        extraCoeffs_BE = [](int, double, Pt::pt3D &, Pt::pt3D &, Pt::pt3D &, Pt::pt3D &, Pt::pt3D (&)[N] ) {};
+	        }
 		
 		int idxPrm;/**< index of the material parameters of the tetrahedron */		
 		int ind[N];/**< indices to the nodes */
@@ -258,13 +262,14 @@ class Tet{
         {
         double scalar_nod[N];    
         
-        for (int i=0; i<N; i++) scalar_nod[i] =  getter( refNode[ ind[i] ] ,idx);
+        for (int i=0; i<N; i++)
+            { scalar_nod[i] = getter( refNode[ ind[i] ] ,idx); }
         tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result);
         }
 		
 		/** basic infos */		
-	inline void infos() const //{std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2]<< "\t"<< ind[3] <<std::endl;};
-		{std::cout << "idxPrm: " << idxPrm << "ind: "<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2]<< "\t"<< ind[3] <<std::endl;};
+	inline void infos() const
+		{ std::cout << "idxPrm: " << idxPrm << "ind: "<< ind[0]<< "\t"<< ind[1]<< "\t"<< ind[2]<< "\t"<< ind[3] << std::endl; };
 		
         /** more infos */		
 	inline void infos(Nodes::index idx) const 
@@ -282,9 +287,6 @@ class Tet{
         
         /** AE matrix filling */
         void lumping(int const& npi,double alpha_eff,double prefactor, double (&AE)[3*N][3*N]) const;
-        
-        /** STT contribution to vector BE */
-        void add_STT_BE(int const& npi, STT p_stt, double Js, Pt::pt3D (&gradV)[NPI], Pt::pt3D (&Hm)[NPI], Pt::pt3D (&U)[NPI], Pt::pt3D (&dUdx)[NPI],Pt::pt3D (&dUdy)[NPI],Pt::pt3D (&dUdz)[NPI], Pt::pt3D (&BE)[N]) const;
         
         /** drift contribution due to eventual recentering to vector BE */
         void add_drift_BE(int const& npi, double alpha, double s_dt, double Vdrift, Pt::pt3D (&U)[NPI], Pt::pt3D (&V)[NPI], Pt::pt3D (&dUd_)[NPI], Pt::pt3D (&dVd_)[NPI], Pt::pt3D (&BE)[N]) const;
@@ -350,14 +352,24 @@ class Tet{
         double Lp[2*N];
         
         /** computes volume of the tetrahedron ; unit test Tet_calc_vol */
-	double calc_vol(void) const;
+        double calc_vol(void) const;
 
         /** return a set of the four facettes of the tetrahedron */
         std::set<Facette::Fac> ownedFac() const;
 
-    private:
-        const std::vector<Nodes::Node> & refNode;/**< vector of nodes */
+        /** idx is the index of the tetrahedron in the vector of tetrahedron */
+        int idx;
+
+        /** for extra contribution to the effective field, such as spin transfert torque Hm */
+        std::function<void(int npi, Pt::pt3D &Hm)> extraField;
         
+        /** for extra contribution to the matrix BE, such as spin transfert torque contribs */
+        std::function<void(int npi,double Js,Pt::pt3D &U,Pt::pt3D &dUdx,Pt::pt3D &dUdy,Pt::pt3D &dUdz, Pt::pt3D (&BE)[N] )> extraCoeffs_BE;
+
+    private:
+        /** vector of nodes */
+        const std::vector<Nodes::Node> & refNode;
+
         /** template getter to access and copy some parts of the node vector of type T = double or Pt::pt3D  */
         template <class T> void getDataFromNode(std::function< T (Nodes::Node)> getter,T (&X_data)[N]) const
             { for (int i=0; i<N; i++) X_data[i] = getter(refNode[ ind[i] ]); }
