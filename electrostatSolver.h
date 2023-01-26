@@ -144,14 +144,13 @@ void prepareExtras(void)
 	{
 	std::for_each(msh.tet.begin(),msh.tet.end(), [this]( Tetra::Tet & tet )
 		{
-		const int _idx = tet.idx;
-		tet.extraField = [this,_idx]( int npi, Pt::pt3D & _H ) { _H += this->Hm[_idx][npi]; } ;
+		tet.extraField = [this,&tet]( int npi, Pt::pt3D & _H ) { _H += this->Hm[tet.idx][npi]; } ;
 
-		tet.extraCoeffs_BE = [this,&tet,_idx](int npi,double Js,Pt::pt3D &U,Pt::pt3D &dUdx,Pt::pt3D &dUdy,Pt::pt3D &dUdz, Pt::pt3D (&BE)[Tetra::N] )
+		tet.extraCoeffs_BE = [this,&tet](int npi,double Js,Pt::pt3D &U,Pt::pt3D &dUdx,Pt::pt3D &dUdy,Pt::pt3D &dUdz, Pt::pt3D (&BE)[Tetra::N] )
 			{
 			const double prefactor = D0/Pt::sq(p_stt.lJ)/(gamma0*nu0*Js);
 
-	        Pt::pt3D const& _gV = gradV[_idx][npi];
+	        Pt::pt3D const& _gV = gradV[tet.idx][npi];
 
             Pt::pt3D j_grad_u = -p_stt.sigma*Pt::pt3D(Pt::pScal(_gV,Pt::pt3D(dUdx(Pt::IDX_X),dUdy(Pt::IDX_X),dUdz(Pt::IDX_X)) ),
                                  Pt::pScal(_gV,Pt::pt3D(dUdx(Pt::IDX_Y),dUdy(Pt::IDX_Y),dUdz(Pt::IDX_Y)) ),
@@ -160,7 +159,7 @@ void prepareExtras(void)
             Pt::pt3D m = pf*(ksi*j_grad_u+U*j_grad_u);
 
             for (int i=0; i<Tetra::N; i++)
-                { BE[i] += tet.weight[npi]*Tetra::a[i][npi]*(Hm[_idx][npi] + prefactor*m); }
+                { BE[i] += tet.weight[npi]*Tetra::a[i][npi]*(Hm[tet.idx][npi] + prefactor*m); }
 			};
 		});
 	}

@@ -173,6 +173,9 @@ if (! msh.fail())
     }
 else
     { std::cout<< "error before closing mesh." <<std::endl; SYSTEM_ERROR; }
+
+for(unsigned int i=0;i<tet.size();i++)
+	{ tet[i].idx = i; }
 }
 
 double mesh::readSol(bool VERBOSE,double scaling, const std::string fileName)
