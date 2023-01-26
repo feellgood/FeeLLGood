@@ -37,9 +37,9 @@ mySettings["time_integration"]["max(du)"] = 0.1
 mySettings["initial_magnetization"] = [0.01, 0, 0.99]
 
 if(os.path.exists(mySettings["outputs"]["directory"]) and os.path.isdir(mySettings["outputs"]["directory"]) ):
-	print("directory " + mySettings["outputs"]["directory"] + " already exists.")
+    print("directory " + mySettings["outputs"]["directory"] + " already exists.")
 else:
-	os.system("mkdir " + mySettings["outputs"]["directory"])
+    os.system("mkdir " + mySettings["outputs"]["directory"])
 
 
 A = 1.0
@@ -53,46 +53,46 @@ myFile = open("FerroRes.txt","w")
 myFile.write("#f	MinMax\n")
 os.chdir(currentPath)
 for i in range(0,nbStepsFrequency) :
-	freq = startFrequency + i*(stopFrequency - startFrequency)/(nbStepsFrequency-1)
-	omega = 2*pi*freq
-	mySettings["Bext"] = [f"{A}*cos({omega}*t)", f"{A}*sin({omega}*t)", "0"]
-	
-	mySettings.write('mySettings.json')
-	val = subprocess.run(["../feellgood","-v","mySettings.json"])
+    freq = startFrequency + i*(stopFrequency - startFrequency)/(nbStepsFrequency-1)
+    omega = 2*pi*freq
+    mySettings["Bext"] = [f"{A}*cos({omega}*t)", f"{A}*sin({omega}*t)", "0"]
 
-	amplitudeX = 0
-	amplitudeY = 0
-	if(val.returncode==0):
-		print("FeeLLGood terminated correctly")
-		minMx = 1
-		maxMx = -1
-		minMy = 1
-		maxMy = -1
-		with open(mySettings["outputs"]["directory"] + mySettings["outputs"]["file_basename"] + ".evol","r") as f:
-			for line in f:
-				lastLine = line
-				data = lastLine.split()
-				if (data[0] != "#"):
-					t = float(data[0])		
-					mx = float(data[1])
-					my = float(data[2])
-					#print("values= " + str(t) +";"+ str(mx) +";"+ str(my))
-					if(t>1e-8):
-						if(minMx>mx):
-							minMx = mx
-						if(maxMx<mx):
-							maxMx = mx
-				
-						if(minMy>my):
-							minMy = my
-						if(maxMy<my):
-							maxMy = my
-		f.close()
-		amplitudeX = maxMx - minMx
-		amplitudeY = maxMy - minMy
-		print("f=" +str(freq) + " amplitudeX= " + str(amplitudeX) + " amplitudeY= " + str(amplitudeY))
-	myFile.write(str(freq) + "\t" + str(sqrt(amplitudeX**2 + amplitudeY**2)) + "\n")
-	myFile.flush()
+    mySettings.write('mySettings.json')
+    val = subprocess.run(["../feellgood","-v","mySettings.json"])
+
+    amplitudeX = 0
+    amplitudeY = 0
+    if(val.returncode==0):
+        print("FeeLLGood terminated correctly")
+        minMx = 1
+        maxMx = -1
+        minMy = 1
+        maxMy = -1
+        with open(mySettings["outputs"]["directory"] + mySettings["outputs"]["file_basename"] + ".evol","r") as f:
+            for line in f:
+                lastLine = line
+                data = lastLine.split()
+                if (data[0] != "#"):
+                    t = float(data[0])
+                    mx = float(data[1])
+                    my = float(data[2])
+                    #print("values= " + str(t) +";"+ str(mx) +";"+ str(my))
+                    if(t>1e-8):
+                        if(minMx>mx):
+                            minMx = mx
+                        if(maxMx<mx):
+                            maxMx = mx
+
+                        if(minMy>my):
+                            minMy = my
+                        if(maxMy<my):
+                            maxMy = my
+        f.close()
+        amplitudeX = maxMx - minMx
+        amplitudeY = maxMy - minMy
+        print("f=" +str(freq) + " amplitudeX= " + str(amplitudeX) + " amplitudeY= " + str(amplitudeY))
+    myFile.write(str(freq) + "\t" + str(sqrt(amplitudeX**2 + amplitudeY**2)) + "\n")
+    myFile.flush()
 myFile.close()
 sys.exit(0)
 

@@ -61,7 +61,7 @@ class Cylinder(object):
                 surface_tag_left = 201
                 gmsh.model.addPhysicalGroup(2,[surf],surface_tag_left)
                 gmsh.model.setPhysicalName(2,surface_tag_left,self.n1)
-	
+
                 surface_tag_right = 202
                 gmsh.model.addPhysicalGroup(2,[ out[0][1] ],surface_tag_right)
                 gmsh.model.setPhysicalName(2,surface_tag_right,self.n2)
