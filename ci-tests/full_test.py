@@ -39,43 +39,43 @@ settings = {
 val = subprocess.run(["../feellgood", "-"], input=json.dumps(settings), text=True)
 
 if(val.returncode==0):
-	with open("full_test.evol","r") as f:
-		for line in f:
-			pass
-		lastLine = line
-	f.close()
-	data = lastLine.split()
-	mx = float(data[1])
-	my = float(data[2])
-	mz = float(data[3])
-	X = 0.323478
-	Y = 0.377806
-	Z = -0.867539
-	distance = sqrt((X-mx)**2+(Y-my)**2+(Z-mz)**2)
-	threshold = 1e-5
-	success = distance < threshold
-	print("feeLLGood terminated successfully")
-	print(f"final average reduced magnetization = ({mx}, {my}, {mz})")
-	print("distance from expected value        = %.2e" % distance)
-	print("threshold of acceptability          = %.2e" % threshold)
+    with open("full_test.evol","r") as f:
+        for line in f:
+            pass
+        lastLine = line
+    f.close()
+    data = lastLine.split()
+    mx = float(data[1])
+    my = float(data[2])
+    mz = float(data[3])
+    X = 0.323478
+    Y = 0.377806
+    Z = -0.867539
+    distance = sqrt((X-mx)**2+(Y-my)**2+(Z-mz)**2)
+    threshold = 1e-5
+    success = distance < threshold
+    print("feeLLGood terminated successfully")
+    print(f"final average reduced magnetization = ({mx}, {my}, {mz})")
+    print("distance from expected value        = %.2e" % distance)
+    print("threshold of acceptability          = %.2e" % threshold)
 else:
-	print("feeLLGood failed: exit status = " + str(val.returncode))
-	success = False
+    print("feeLLGood failed: exit status = " + str(val.returncode))
+    success = False
 
 # Use ANSI colors if printing to a terminal.
 if sys.stdout.isatty():
-	green  = "\x1b[1;32m"
-	red    = "\x1b[1;31m"
-	normal = "\x1b[m"
+    green  = "\x1b[1;32m"
+    red    = "\x1b[1;31m"
+    normal = "\x1b[m"
 else:
-	green  = ""
-	red    = ""
-	normal = ""
+    green  = ""
+    red    = ""
+    normal = ""
 
 # Report success status.
 if success:
-	print(f"test {green}PASSED{normal}")
-	sys.exit(0)
+    print(f"test {green}PASSED{normal}")
+    sys.exit(0)
 else:
-	print(f"test {red}FAILED{normal}")
-	sys.exit(1)
+    print(f"test {red}FAILED{normal}")
+    sys.exit(1)
