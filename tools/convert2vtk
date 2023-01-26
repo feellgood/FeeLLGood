@@ -111,7 +111,7 @@ def get_params():
     parser.add_argument('mshFileName', help='a mesh file in gmsh format with .msh extension')
     parser.add_argument('solFileName', help='a .sol feellgood file')
     parser.add_argument('--version',action='version',version= __version__,help='show the version number')
-    parser.add_argument('integers',metavar='N',type=int, nargs='*', help='indices of the column to copy into output .vtu file')
+    parser.add_argument('integers',metavar='N',type=int, nargs='*', help='0-based indices of the columns to copy into output .vtu file')
     args = parser.parse_args()
     indices = []
     if len(args.integers)>0:
