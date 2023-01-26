@@ -78,6 +78,10 @@ public:
                              const bool v /**< [in] verbose bool */,
                              const int max_iter /**< [in] maximum number of iteration */ ): msh(_msh), p_stt(_p_stt), verbose(v), MAXITER(max_iter) 
                              {
+                             ksi = Pt::sq(p_stt.lJ/p_stt.lsf);
+                             D0 = 2.0*p_stt.sigma/(Pt::sq(CHARGE_ELECTRON)*p_stt.N0);
+                             pf = Pt::sq(p_stt.lJ)/(D0*(1.+ksi*ksi)) * BOHRS_MUB*p_stt.beta/CHARGE_ELECTRON;
+
                              if(verbose)
                              	{ std::cout << "Dirichlet boundary conditions..." << std::endl; infos(); }
                              bool has_converged = solve(_tol);
@@ -147,10 +151,7 @@ void prepareExtras(void)
 
 		tet.extraCoeffs_BE = [this,&tet,_idx](int npi,double Js,Pt::pt3D &U,Pt::pt3D &dUdx,Pt::pt3D &dUdy,Pt::pt3D &dUdz, Pt::pt3D (&BE)[Tetra::N] )
 			{
-			const double ksi = Pt::sq(p_stt.lJ/p_stt.lsf);// this is in Thiaville notations beta_DW
-			const double D0 = 2.0*p_stt.sigma/(Pt::sq(CHARGE_ELECTRON)*p_stt.N0);
-			const double pf=Pt::sq(p_stt.lJ)/(D0*(1.+ksi*ksi)) * BOHRS_MUB*p_stt.beta/CHARGE_ELECTRON;
-            const double prefactor = D0/Pt::sq(p_stt.lJ)/(gamma0*nu0*Js);
+			const double prefactor = D0/Pt::sq(p_stt.lJ)/(gamma0*nu0*Js);
 
 	        Pt::pt3D const& _gV = gradV[_idx][npi];
 
@@ -167,9 +168,18 @@ void prepareExtras(void)
 	}
 
 private:
+    /** ksi is in Thiaville notations beta_DW */
+    double ksi;
+
+	/** density of states */
+    double D0;
+
+    /** a prefactor for BE coefficient coefficients*/
+    double pf;
+    
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh ( const ref ) */
     Mesh::mesh msh;
-	
+
     /** spin transfer torque parameters */
     STT p_stt;
 
