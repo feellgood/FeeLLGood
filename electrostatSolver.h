@@ -21,7 +21,6 @@
 
 #include "spinTransferTorque.h"
 
-
     /** assemble the matrix K from tet and Ke inputs */
     inline void assembling_mat(Tetra::Tet const& tet, gmm::dense_matrix <double> const &Ke, write_matrix &K)
     {
@@ -73,10 +72,11 @@ class electrostatSolver {
 public:
     /** constructor */
     inline electrostatSolver(Mesh::mesh const& _msh /**< [in] reference to the mesh */,
-    				STT const& _p_stt /**< all spin transfer torque parameters */,
+                             STT const& _p_stt /**< all spin transfer torque parameters */,
                              const double _tol /**< [in] tolerance for solvers */,
                              const bool v /**< [in] verbose bool */,
-                             const int max_iter /**< [in] maximum number of iteration */ ): msh(_msh), p_stt(_p_stt), verbose(v), MAXITER(max_iter) 
+                             const int max_iter /**< [in] maximum number of iteration */ ):
+                             msh(_msh), p_stt(_p_stt), verbose(v), MAXITER(max_iter), precision(PRECISION_STT)
                              {
                              ksi = Pt::sq(p_stt.lJ/p_stt.lsf);
                              D0 = 2.0*p_stt.sigma/(Pt::sq(CHARGE_ELECTRON)*p_stt.N0);
@@ -98,9 +98,8 @@ public:
                              		}
                              	std::for_each(msh.tet.begin(),msh.tet.end(), [this]( Tetra::Tet const& tet )
                              		{
-                             		std::array<Pt::pt3D,Tetra::NPI> _gradV;
-                             		//Pt::pt3D gradV[Tetra::NPI];
-									calc_gradV(tet,_gradV);
+                                    std::array<Pt::pt3D,Tetra::NPI> _gradV;
+                                    calc_gradV(tet,_gradV);
 									gradV.push_back(_gradV);
 
 									std::array<Pt::pt3D,Tetra::NPI> _Hm;
@@ -129,7 +128,6 @@ void calc_gradV(Tetra::Tet const& tet, std::array<Pt::pt3D,Tetra::NPI> & _gradV)
     	_gradV[npi] = Pt::pt3D(vx,vy,vz);
     	}
     }
-
 
 /** computes Hm contributions for each npi for tetrahedron tet */
 void calc_Hm(Tetra::Tet const& tet, std::array<Pt::pt3D,Tetra::NPI> const& _gradV, std::array<Pt::pt3D,Tetra::NPI> & _Hm ) const
@@ -189,6 +187,9 @@ private:
     /** maximum number of iteration for biconjugate stabilized gradient */
     const unsigned int MAXITER; //fixed to 5000 in ref code
 
+    /** number of digits in the optional output file */
+    const int precision;
+
     /** electrostatic potential values for boundary conditions, V.size() is the size of the vector of nodes */ 
     std::vector<double> V;
 
@@ -197,9 +198,6 @@ private:
 
     /** table of the Hm vectors (contribution of the STT to the tet::integrales) ; Hm.size() is the number of tetra */
     std::vector< std::array<Pt::pt3D,Tetra::NPI> > Hm;
-
-    /** number of digits in the optional output file */
-    const int precision = 7;
 
     /** basic informations on boundary conditions */
     inline void infos(void) 
@@ -212,29 +210,28 @@ private:
         }
         
     /** fill matrix and vector to solve potential values on each node */
-void prepareData(write_matrix &Kw, write_vector & Lw)
-{
-const double sigma = p_stt.sigma;
+    void prepareData(write_matrix &Kw, write_vector & Lw)
+        {
+        const double sigma = p_stt.sigma;
 
-std::for_each(msh.tet.begin(),msh.tet.end(), [this,sigma,&Kw]( Tetra::Tet const& tet )
-		{  
-		gmm::dense_matrix <double> K(Tetra::N, Tetra::N);
-		integrales(tet,sigma, K);
-    		assembling_mat(tet, K, Kw);
-		});
+        std::for_each(msh.tet.begin(),msh.tet.end(), [this,sigma,&Kw]( Tetra::Tet const& tet )
+            {
+            gmm::dense_matrix <double> K(Tetra::N, Tetra::N);
+            integrales(tet,sigma, K);
+            assembling_mat(tet, K, Kw);
+            });
 
+        double pot_val = 0; // we initialize pot_val to the average of the potentials set by the boundary conditions (does not seem to change convergence speed whatever value it is ..)
+        std::for_each( p_stt.boundaryCond.begin(),p_stt.boundaryCond.end(), [&pot_val](auto const& it) { pot_val += it.second;} );
+        pot_val /= p_stt.boundaryCond.size();
 
-double pot_val = 0; // we initialize pot_val to the average of the potentials set by the boundary conditions (does not seem to change convergence speed whatever value it is ..)
-std::for_each( p_stt.boundaryCond.begin(),p_stt.boundaryCond.end(), [&pot_val](auto const& it) { pot_val += it.second;} );
-pot_val /= p_stt.boundaryCond.size();
-
-std::for_each(msh.fac.begin(),msh.fac.end(), [this,pot_val,&Lw]( Facette::Fac const& fac )
-		{
-		std::vector <double> L(Facette::N);
-		integrales(fac, pot_val, L);     
-    		assembling_vect(fac, L, Lw);
-		});
-}
+        std::for_each(msh.fac.begin(),msh.fac.end(), [this,pot_val,&Lw]( Facette::Fac const& fac )
+		    {
+		    std::vector <double> L(Facette::N);
+		    integrales(fac, pot_val, L);
+            assembling_vect(fac, L, Lw);
+		    });
+        }
 
 /** solver, using biconjugate stabilized gradient, with diagonal preconditionner and Dirichlet boundary conditions */
 int solve(const double iter_tol)
