@@ -145,7 +145,7 @@ void prepareExtras(void)
 	std::for_each(msh.tet.begin(),msh.tet.end(), [this]( Tetra::Tet & tet )
 		{
 		const int _idx = tet.idx;
-		tet.extraField = [this,_idx]( int npi, Pt::pt3D & _Hm ) { _Hm = this->Hm[_idx][npi]; } ;
+		tet.extraField = [this,_idx]( int npi, Pt::pt3D & _H ) { _H += this->Hm[_idx][npi]; } ;
 
 		tet.extraCoeffs_BE = [this,&tet,_idx](int npi,double Js,Pt::pt3D &U,Pt::pt3D &dUdx,Pt::pt3D &dUdy,Pt::pt3D &dUdz, Pt::pt3D (&BE)[Tetra::N] )
 			{

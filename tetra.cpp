@@ -117,25 +117,22 @@ for (int npi=0; npi<NPI; npi++)
 
     pt3D H = H_aniso + Hd[npi] + Hext + (s_dt/gamma0)*Hv[npi];
     build_BE(npi, H, Abis, dUdx, dUdy, dUdz, BE);
-
-    //STT
-    Pt::pt3D Hm;
-    extraField(npi,Hm);
-    extraCoeffs_BE(npi,Js,U[npi],dUdx[npi],dUdy[npi],dUdz[npi],BE);
-    //STT
+    extraCoeffs_BE(npi,Js,U[npi],dUdx[npi],dUdy[npi],dUdz[npi],BE);//STT
     
     if(idx_dir != Pt::IDX_UNDEF)
-    {
-    if (idx_dir == Pt::IDX_Z)
-        add_drift_BE(npi,alpha,s_dt,Vdrift,U,V,dUdz,dVdz,BE);
-    else if (idx_dir == Pt::IDX_Y)
-        add_drift_BE(npi,alpha,s_dt,Vdrift,U,V,dUdy,dVdy,BE);
-    else if (idx_dir == Pt::IDX_X)
-        add_drift_BE(npi,alpha,s_dt,Vdrift,U,V,dUdx,dVdx,BE);
-    }
+        {
+        if (idx_dir == Pt::IDX_Z)
+            add_drift_BE(npi,alpha,s_dt,Vdrift,U,V,dUdz,dVdz,BE);
+        else if (idx_dir == Pt::IDX_Y)
+            add_drift_BE(npi,alpha,s_dt,Vdrift,U,V,dUdy,dVdy,BE);
+        else if (idx_dir == Pt::IDX_X)
+            add_drift_BE(npi,alpha,s_dt,Vdrift,U,V,dUdx,dVdx,BE);
+        }
     
+    H = Hext + Hd[npi];
+    extraField(npi,H); // add STT contribution to the effective field H
     double uHeff = contrib_aniso - Abis*(norme2(dUdx[npi]) + norme2(dUdy[npi]) + norme2(dUdz[npi])); 
-    uHeff += pScal(U[npi], Hext + Hm + Hd[npi]); // Hm[npi] should be added only when stt needed
+    uHeff += pScal(U[npi], H);
 
     lumping(npi, prm_t.calc_alpha_eff(alpha,uHeff), prm_t.prefactor*s_dt*Abis, AE);
     }
