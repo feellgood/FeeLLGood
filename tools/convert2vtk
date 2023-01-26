@@ -73,13 +73,13 @@ class data(object):
         magFile = open(fileName,'r')
         lines = magFile.readlines()
         magFile.close()
-        self.check_idx(lines[1],list_idx)
         self.Mag.SetNumberOfComponents(len(list_idx))
 
         for i in range(0,len(lines)):
             ls = self.filter(lines[i])
             vector = []
             if len(ls)>0:
+                self.check_idx(ls,list_idx)
                 for idx in list_idx:
                     vector.append(float(ls[idx]))
                 self.Mag.InsertNextTuple(vector)
@@ -93,8 +93,7 @@ class data(object):
             return []
         
 
-    def check_idx(self,line,list_idx):
-        ls = self.filter(line)
+    def check_idx(self,ls,list_idx):
         for i in list_idx:
             if (i > len(ls))or i<0:
                 print("error: index out of bounds : index = ",i )
