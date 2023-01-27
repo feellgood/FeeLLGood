@@ -55,8 +55,8 @@ if (save_period && (nt%save_period)==0)
     if(settings.verbose)
         { cout << " " << str << endl; }
 
-    string metadata = settings.buildMetadata(t_prm.get_t(),"idx\tx\ty\tz\tmx\tmy\tmz\tphi");
-    msh.savesol(settings.getPrecision(),str,metadata,settings.getScale());
+    string metadata = settings.buildMetadata(t_prm.get_t(),"idx\tmx\tmy\tmz\tphi");
+    msh.savesol(settings.getPrecision(),str,metadata);
     if(settings.verbose)
         { cout << "all nodes written." << endl; }
     //saveH(str,t_prm.get_t(),settings.getScale());
@@ -110,7 +110,7 @@ for(int i=0;i<NOD;i++)
     {fout << node[i].u << endl;}
 }
 
-void Mesh::mesh::savesol(const int precision, const std::string fileName, std::string const& metadata, const double s) const
+void Mesh::mesh::savesol(const int precision, const std::string fileName, std::string const& metadata) const
     {
     ofstream fout(fileName, ios::out);
     if (fout.fail())
@@ -122,10 +122,7 @@ void Mesh::mesh::savesol(const int precision, const std::string fileName, std::s
     fout << metadata << std::scientific << std::setprecision(precision);
 
     for(unsigned int i=0;i<node.size();i++)
-        { 
-        Pt::pt3D p = node[i].p/s;
-        fout << i << "\t" << p << "\t" << node[i].u << "\t" << node[i].phi << endl;
-        }
+        { fout << i << "\t" << node[i].u << "\t" << node[i].phi << endl; }
 
     fout.close();
     }
@@ -161,7 +158,7 @@ void Mesh::mesh::saveH(const string fileName,const double t,const double scale) 
         std::cout << "cannot open file " << fileName << std::endl;
         SYSTEM_ERROR;
         }
-    fout << "#time : "<< t << endl;
+    fout << "##time: "<< t << endl;
 
     int idx_tet=0;
     std::for_each(tet.begin(),tet.end(),[&idx_tet,&fout,scale](Tetra::Tet const &te)

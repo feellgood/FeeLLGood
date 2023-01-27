@@ -74,16 +74,12 @@ class Fem
             else if(mySets.verbose) { std::cout << "No recentering.\n"; }
             
             if (mySets.restoreFileName == "")
-                {
-                msh.init_distrib(mySets);
-                }
+                { msh.init_distrib(mySets); }
             else
-                {
-                double _t = msh.readSol(mySets.verbose,mySets.getScale(), mySets.restoreFileName);
-                t_prm.set_t(_t);    
-                }
+                { t_prm.set_t( msh.readSol(mySets.verbose, mySets.restoreFileName) ); }
                     
-            if(mySets.recenter) { direction(Pt::IDX_Z); }/* determination de la direction de propagation de la paroi : uses ann and kd tree_search */
+            if(mySets.recenter)
+                { direction(Pt::IDX_Z); }/* DW propagation direction for recentering */
             }
     
     /** destructor */

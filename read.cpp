@@ -178,42 +178,49 @@ for(unsigned int i=0;i<tet.size();i++)
 	{ tet[i].idx = i; }
 }
 
-double mesh::readSol(bool VERBOSE,double scaling, const std::string fileName)
+double mesh::readSol(bool VERBOSE, const std::string fileName)
 {
+double t(0);
 std::ifstream fin(fileName, std::ifstream::in);
 
 on_fail_msg_error(fin, "cannot open file: " + fileName );
 
 std::string str;
 getline(fin, str);
+while ((fin.peek() != EOF)&&(str[0]=='#' && str[1]!='#'))
+    { getline(fin, str); } // to skip comments (if any)
 
-unsigned long idx = str.find("##time:");
-idx +=2;
+unsigned long idx;
+bool flag_t = false;
+while ((fin.peek() != EOF)&&(str[0]=='#' && str[1]=='#'))
+    {
+    idx = str.find("##time:");
+    if (std::string::npos != idx)
+        {//found beacon "##time:"
+        t = stod(str.substr(idx+7));
+        flag_t = true;
+        break;
+        }
+    getline(fin, str);
+    }
+getline(fin, str);// to skip ##columns line
 
-double t = stod(str.substr(idx));
+if (!flag_t)
+    { std::cerr << "error: no ##time: beacon in input .sol file " << fileName << std::endl; SYSTEM_ERROR; }
 
 if(VERBOSE)
-    { std::cout << ".sol file: " << str << " @ time t = " << t << std::endl; }
+    { std::cout << ".sol file: " << fileName << " @ time t = " << t << std::endl; }
 
 for (unsigned int i=0; i<node.size(); i++)
     {
     Nodes::Node & n = node[i];
-    Nodes::Node node_;
     unsigned int i_;
-    fin >> i_ >>  node_.p >> n.u >> n.phi;// carefull! >> is overloaded for class pt3D
-
+    fin >> i_ >> n.u >> n.phi;
     if (i!=i_)
         {
-        if(VERBOSE)
-            { std::cerr << ".sol file mismatch with mesh nodes"<< std::endl; }
+        std::cerr << "error: mesh node index mismatch between mesh and input .sol file" << std::endl;
         fin.close();
         SYSTEM_ERROR;
-        }
-    else
-        {
-        node_.p.rescale(scaling);
-        if (( Pt::norme2(n.p - node_.p) > Pt::sq(diam * scaling))&&VERBOSE) 
-            { std::cerr << "WARNING difference in node positions"  << i  << "\t" << n.p << std::endl << i_ << "\t" << node_.p << std::endl; }
         }
     }
 fin.close();    			     

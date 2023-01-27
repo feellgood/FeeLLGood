@@ -117,7 +117,7 @@ def get_params():
     if len(args.integers)>0:
         indices = args.integers
     else:
-        indices = [4,5,6]
+        indices = [1,2,3]
 
     return [args.mshFileName,args.solFileName,indices]
 

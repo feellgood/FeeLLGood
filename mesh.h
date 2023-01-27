@@ -141,9 +141,7 @@ double updateNodes(std::vector<double> const& X,const double dt)
 
     /** read a solution from a file (tsv formated) and initialize fem struct to restart computation from that distribution, return time
     */
-    double readSol(bool VERBOSE/**< [in] */,
-             double scaling /**< [in] scaling factor for physical coordinates */,
-             const std::string fileName /**< [in] */ );
+    double readSol(bool VERBOSE/**< [in] */, const std::string fileName /**< [in] input .sol text file */ );
 
     /** computes an analytical initial magnetization distribution as a starting point for the simulation */
     inline void init_distrib(Settings const& mySets /**< [in] */)
@@ -175,7 +173,7 @@ double updateNodes(std::vector<double> const& X,const double dt)
 
     /** text file (tsv) writing function for a solution */
     void savesol(const int precision /**< [in] numeric precision in .sol output text file */,
-    const std::string fileName /**< [in] */,std::string const& metadata /**< [in] */,const double s /**< [in] */) const;
+    const std::string fileName /**< [in] */,std::string const& metadata /**< [in] */) const;
 
     /** text file (tsv) writing function for a solution of a side problem, used by electrostatSolver */
     bool savesol(const int precision /**< [in] */, const std::string fileName /**< [in] */,
