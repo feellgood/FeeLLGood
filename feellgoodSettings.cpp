@@ -110,7 +110,6 @@ void Settings::infos()
     for (auto it = evol_columns.begin(); it != evol_columns.end(); ++it) {
         std::cout << "    - " << *it << "\n";
     }
-    std::cout << "  evol_header: " << str(evol_header) << "\n";
     std::cout << "  take_photo: " << save_period << "\n";
     std::cout << "  vtk_file: " << str(withVtk) << "\n";
     std::cout << "mesh:\n";
@@ -163,11 +162,11 @@ void Settings::infos()
         }
         std::cout << "  threshold: " << threshold << "\n";
     }
-    std::cout << "Bext: [\""
-        << sBx << "\", \"" << sBy << "\", \"" << sBz << "\"]\n";
+    std::cout << "Bext: [\"" << sBx << "\", \"" << sBy << "\", \"" << sBz << "\"]\n";
     std::cout << "spin_transfer_torque:\n";
     std::cout << "  enable: " << str(stt_flag) << "\n";
-    if (stt_flag) {
+    if (stt_flag)
+        {
         std::cout << "  sigma: " << p_stt.sigma << "\n";
         std::cout << "  dens_state: " << p_stt.N0 << "\n";
         std::cout << "  beta: " << p_stt.beta << "\n";
@@ -175,16 +174,15 @@ void Settings::infos()
         std::cout << "  l_sf: " << p_stt.lsf << "\n";
         std::cout << "  V_file: " << str(p_stt.V_file) << "\n";
         std::cout << "  boundary_conditions:";
-        if (p_stt.boundaryCond.size() == 0) {
-            std::cout << " {}\n";  // empty map
-        } else {
+        if (p_stt.boundaryCond.size() == 0)
+            { std::cout << " {}\n";  /* empty map*/ }
+        else
+            {
             std::cout << "\n";
-            for (unsigned int i = 0; i < p_stt.boundaryCond.size(); i++) {
-                std::cout << "    \"" << p_stt.boundaryCond[i].first
-                    << "\": " << p_stt.boundaryCond[i].second << "\n";
+            for (unsigned int i = 0; i < p_stt.boundaryCond.size(); i++)
+                { std::cout << "    \"" << p_stt.boundaryCond[i].first << "\": " << p_stt.boundaryCond[i].second << "\n"; }
             }
         }
-    }
     
     std::cout << "finite_element_solver:\n";
     std::cout << "  nb_threads: " << solverNbTh << "\n";
@@ -204,7 +202,7 @@ std::string Settings::buildMetadata(double t,std::string columnsTitle) const
 	ss << "##feeLLGood version: " << feellgood_version << std::endl;
 	ss << "##settings file: " << getFileDisplayName() << std::endl;
 	ss << "##mesh file: " << getPbName() << std::endl;
-	ss << "##time: "<<std::scientific << t << std::endl;
+	ss << "##time: " << std::scientific << t << std::endl;
     ss << "##columns: " << columnsTitle << std::endl;
     return ss.str();
 	}
@@ -244,7 +242,6 @@ void Settings::read(YAML::Node yaml)
             for (auto it = columns.begin(); it != columns.end(); ++it)
                 evol_columns.push_back(it->as<std::string>());
         }
-        assign(evol_header, outputs["evol_header"]);
     }  // outputs
 
     YAML::Node mesh = yaml["mesh"];
@@ -307,21 +304,22 @@ void Settings::read(YAML::Node yaml)
     }  // mesh
 
     YAML::Node magnetization = yaml["initial_magnetization"];
-    if (magnetization) {
-        if (magnetization.IsScalar()) {
-            restoreFileName = magnetization.as<std::string>();
-        } else if (magnetization.IsSequence()) {
+    if (magnetization)
+        {
+        if (magnetization.IsScalar())
+            { restoreFileName = magnetization.as<std::string>(); }
+        else if (magnetization.IsSequence()) 
+            {
             if (magnetization.size() != 3)
                 error("initial_magnetization should have three components.");
             sMx = magnetization[0].as<std::string>();
             sMy = magnetization[1].as<std::string>();
             sMz = magnetization[2].as<std::string>();
             doCompile3Dprm();
-        } else {
-            error("initial_magnetization should be either a file name "
-                  "or a vector of expressions.");
-        }
-    }  // initial_magnetization
+            }
+        else
+            { error("initial_magnetization should be a file name or a vector of expressions."); }
+        }  // initial_magnetization
 
     YAML::Node recentering = yaml["recentering"];
     if (recentering) {
@@ -350,7 +348,8 @@ void Settings::read(YAML::Node yaml)
     }  // Bext
 
     YAML::Node stt = yaml["spin_transfer_torque"];
-    if (stt) {
+    if (stt)
+        {
         assign(stt_flag, stt["enable"]);
         assign(p_stt.sigma, stt["sigma"]);
         assign(p_stt.N0, stt["dens_state"]);
@@ -368,17 +367,15 @@ void Settings::read(YAML::Node yaml)
         		{
         		for (auto it = bound_cond.begin(); it != bound_cond.end(); ++it)
         			{
-                		std::string name = it->first.as<std::string>();
-                		double V = it->second.as<double>();
-        			p_stt.boundaryCond.push_back(std::make_pair(name,V)); 
-        			//std::cout<< "surf name : " << name << "\tV = " << V <<std::endl;
+                    std::string name = it->first.as<std::string>();
+                    double V = it->second.as<double>();
+                    p_stt.boundaryCond.push_back(std::make_pair(name,V));
         			}
         		}
         	}
-    }  // spin_transfer_torque
+        }  // spin_transfer_torque
 
-    // The number of available processors (actually, hardware threads)
-    // is the default for the number of threads to spin.
+    // The number of available processors (actually, hardware threads) is the default for the number of threads to spin.
     int available_cpu_count = sysconf(_SC_NPROCESSORS_ONLN);
 
     YAML::Node solver = yaml["finite_element_solver"];

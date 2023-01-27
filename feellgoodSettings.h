@@ -96,7 +96,7 @@ class Settings{
     std::string restoreFileName;/**< input file name for continuing a calculation (sol.in) */
 
 /** maximum value for du step */
-    double DUMAX; // 0.1 en stat; 0.02 en dynamique
+    double DUMAX; // 0.1 for magnetostatic simulations; 0.02 for the dynamics
     
     int MAXITER;/**< maximum number of iteration for biconjugate gradient algorithm */
     
@@ -108,7 +108,8 @@ class Settings{
 	/** \return index of the region in volume region container  */
 	inline int findTetraRegionIdx(const std::string name /**< [in] */) const
 	{
-	std::vector<Tetra::prm>::const_iterator result = std::find_if(paramTetra.begin(),paramTetra.end(),[name](Tetra::prm const& p){return(p.regName == name); }  ); 
+	std::vector<Tetra::prm>::const_iterator result = std::find_if(paramTetra.begin(),paramTetra.end(),
+	                                         [name](Tetra::prm const& p){return(p.regName == name); }  ); 
 	
 	int idx(-2);
 	if (result == paramTetra.end()) 
@@ -127,18 +128,20 @@ class Settings{
     /** contain the value names of the columns the user want in .evol file */
     std::vector<std::string> evol_columns;
     
-    /**  if true the first line of .evol file is the title of each column tsv format, starting with \# */
-    bool evol_header;
+    /** final integration time */
+    double tf;
 
-    /* timing parameters */
-    double tf;      /**< final integration time */
-    double dt_min;  /**< minimal time step */
-    double dt_max;  /**< maximal time step */
+    /** minimal time step */
+    double dt_min;
     
+    /** maximal time step */
+    double dt_max;
+
 	/** \return index of the region in surface region container  */
 	inline int findFacetteRegionIdx(const std::string name /**< [in] */) const
 	{ 
-	std::vector<Facette::prm>::const_iterator result = std::find_if(paramFacette.begin(),paramFacette.end(),[name](Facette::prm const& p){return(p.regName == name); }  ); 
+	std::vector<Facette::prm>::const_iterator result = std::find_if(paramFacette.begin(),paramFacette.end(),
+	                                            [name](Facette::prm const& p){return(p.regName == name); }  ); 
 	int idx(-2);
 	
 	if (result == paramFacette.end())

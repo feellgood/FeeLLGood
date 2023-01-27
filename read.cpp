@@ -187,12 +187,13 @@ on_fail_msg_error(fin, "cannot open file: " + fileName );
 std::string str;
 getline(fin, str);
 
-unsigned long idx = str.find(":");
+unsigned long idx = str.find("##time:");
 idx +=2;
 
 double t = stod(str.substr(idx));
 
-if(VERBOSE) { std::cout << ".sol file: " << str << " @ time t = " << t << std::endl; }
+if(VERBOSE)
+    { std::cout << ".sol file: " << str << " @ time t = " << t << std::endl; }
 
 for (unsigned int i=0; i<node.size(); i++)
     {
@@ -203,7 +204,8 @@ for (unsigned int i=0; i<node.size(); i++)
 
     if (i!=i_)
         {
-        if(VERBOSE) { std::cerr << ".sol file mismatch with mesh nodes"<< std::endl; }
+        if(VERBOSE)
+            { std::cerr << ".sol file mismatch with mesh nodes"<< std::endl; }
         fin.close();
         SYSTEM_ERROR;
         }

@@ -127,114 +127,115 @@ inline void compute_all(Fem &fem,Settings &settings,scal_fmm::fmm &myFMM,double 
     }
 
 int time_integration(Fem &fem,Settings &settings /**< [in] */,LinAlgebra &linAlg /**< [in] */,scal_fmm::fmm &myFMM  /**< [in] */,timing &t_prm)
-{
-fem.DW_z  = 0.0;
-
-compute_all(fem,settings,myFMM,t_prm.get_t());
-
-std::string baseName = settings.r_path_output_dir + '/' + settings.getSimName();
-std::string str = baseName + ".evol";
-
-std::ofstream fout(str);
-
-if (fout.fail())
-    { std::cout << "cannot open file "<< str << std::endl; SYSTEM_ERROR; }
-
-if(settings.evol_header)
     {
-    fout << "# ";
-    for(unsigned int i=0; i < (settings.evol_columns.size()-1);i++) {fout << settings.evol_columns[i] << "\t";}
+    fem.DW_z  = 0.0;
+
+    compute_all(fem,settings,myFMM,t_prm.get_t());
+
+    std::string baseName = settings.r_path_output_dir + '/' + settings.getSimName();
+    std::string str = baseName + ".evol";
+
+    std::ofstream fout(str);
+
+    if (fout.fail())
+        { std::cout << "cannot open file "<< str << std::endl; SYSTEM_ERROR; }
+
+    fout << "##";
+    for(unsigned int i=0; i < (settings.evol_columns.size()-1);i++)
+        {fout << settings.evol_columns[i] << "\t";}
+    
     fout << settings.evol_columns[settings.evol_columns.size()-1] << "\n" << std::flush;
-    }
 
-int flag  = 0;
-int nt_output = 0;  // visible iteration count
-int nt = 0;         // total iteration count
-double t_step = settings.time_step;
-TimeStepper stepper(t_prm.get_dt(), t_prm.DTMIN, t_prm.DTMAX);
-Stats stats;
+    int flag(0);
+    int nt_output(0);  // visible iteration count
+    int nt(0);         // total iteration count
+    double t_step = settings.time_step;
+    TimeStepper stepper(t_prm.get_dt(), t_prm.DTMIN, t_prm.DTMAX);
+    Stats stats;
 
-// Loop over the visible time steps,
-// i.e. those that will appear on the output file.
-for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target += t_step)
-    {
-    // Loop over the integration time steps within a visible step.
-    while (t_prm.get_t() < t_target)
+// Loop over the visible time steps, i.e. those that will appear on the output file.
+    for (double t_target = t_prm.get_t(); t_target <  t_prm.tf+t_step/2; t_target += t_step)
         {
-        exit_if_signal_received(fem, settings, t_prm, stats);
-
-        t_prm.set_dt( stepper(t_target - t_prm.get_t()) );
-        bool last_step = (t_prm.get_dt() == t_target - t_prm.get_t());
-
-        if(settings.verbose)
+        // Loop over the integration time steps within a visible step.
+        while (t_prm.get_t() < t_target)
             {
-            std::cout << std::string(64, '-') << '\n';  // separator
-            if (flag)
-                std::cout << "  TRYING AGAIN with a smaller time step: "
-                          << "retry " << flag << '\n';
-            std::cout << "evol step = " << nt_output
-                      << ", step = " << nt
-                      << ", t = " << t_prm.get_t()
-                      << ", dt = " << t_prm.get_dt() << '\n';
-            }
+            exit_if_signal_received(fem, settings, t_prm, stats);
 
-        if (t_prm.is_dt_TooSmall())
-            {
-            std::cout << "\n**ABORTED**: dt < DTMIN\n";
-            goto bailout;
-            }
+            t_prm.set_dt( stepper(t_target - t_prm.get_t()) );
+            bool last_step = (t_prm.get_dt() == t_target - t_prm.get_t());
 
-        /* changement de referentiel */
-        if(settings.recenter)
-        	{
-        	fem.DW_vz += fem.DW_dir*fem.msh.avg(Nodes::get_v0_comp,settings.recentering_direction)*Pt::pScal( Pt::pt3D(settings.recentering_direction), fem.msh.l)/2.;
-        	//fem.DW_vz += fem.DW_dir*fem.msh.avg(Nodes::get_v0_comp,Pt::IDX_Z)*fem.msh.l.z()/2.;
-        	linAlg.set_DW_vz(fem.DW_vz);
-        	}
-        
-        Pt::pt3D Hext = settings.getValue(t_prm.get_t());
-        
-        linAlg.prepareElements(Hext,t_prm);
-        int err = linAlg.solver(t_prm,nt);  
-        fem.vmax = linAlg.get_v_max();
-        
-        if (err)
-            {
-            flag++;
-            stepper.set_soft_limit(t_prm.get_dt() / 2);
-            stats.bad_dt.add(t_prm.get_dt());
-            continue;
-            }
+            if(settings.verbose)
+                {
+                std::cout << std::string(64, '-') << '\n';  // separator
+                if (flag)
+                    std::cout << "  TRYING AGAIN with a smaller time step: "
+                              << "retry " << flag << '\n';
+                std::cout << "evol step = " << nt_output
+                          << ", step = " << nt
+                          << ", t = " << t_prm.get_t()
+                          << ", dt = " << t_prm.get_dt() << '\n';
+                }
 
-        double dumax = t_prm.get_dt()*fem.vmax;
-        stats.good_dt.add(t_prm.get_dt());
-        stats.good_dumax.add(dumax);
-        if(settings.verbose) { std::cout << "  -> dumax = " << dumax << ",  vmax = "<< fem.vmax << std::endl; }
+            if (t_prm.is_dt_TooSmall())
+                {
+                std::cout << "\n**ABORTED**: dt < DTMIN\n";
+                goto bailout;
+                }
+
+        /* frame change */
+            if(settings.recenter)
+        	    {
+        	    fem.DW_vz += fem.DW_dir*fem.msh.avg(Nodes::get_v0_comp,settings.recentering_direction)*Pt::pScal( Pt::pt3D(settings.recentering_direction), fem.msh.l)/2.;
+        	    linAlg.set_DW_vz(fem.DW_vz);
+        	    }
+        
+            Pt::pt3D Hext = settings.getValue(t_prm.get_t());
+
+            linAlg.prepareElements(Hext,t_prm);
+            int err = linAlg.solver(t_prm,nt);  
+            fem.vmax = linAlg.get_v_max();
+        
+            if (err)
+                {
+                flag++;
+                stepper.set_soft_limit(t_prm.get_dt() / 2);
+                stats.bad_dt.add(t_prm.get_dt());
+                continue;
+                }
+
+            double dumax = t_prm.get_dt()*fem.vmax;
+            stats.good_dt.add(t_prm.get_dt());
+            stats.good_dumax.add(dumax);
+            if(settings.verbose)
+                { std::cout << "  -> dumax = " << dumax << ",  vmax = "<< fem.vmax << std::endl; }
                 
-        stepper.set_soft_limit(settings.DUMAX / fem.vmax / 2);
-        if (dumax > settings.DUMAX)
-            { flag++; continue;}
+            stepper.set_soft_limit(settings.DUMAX / fem.vmax / 2);
+            if (dumax > settings.DUMAX)
+                { flag++; continue;}
 
-        compute_all(fem,settings,myFMM,t_prm.get_t());
-        
-        nt++; flag=0;
+            compute_all(fem,settings,myFMM,t_prm.get_t());
+            nt++;
+            flag=0;
 
-        // Prevent rounding errors from making us miss the target.
-        if (last_step)
-            t_prm.set_t(t_target);
-        else
-            t_prm.inc_t();
+            // Prevent rounding errors from making us miss the target.
+            if (last_step)
+                t_prm.set_t(t_target);
+            else
+                t_prm.inc_t();
 
-        fem.DW_z  += fem.DW_vz*t_prm.get_dt();
-        if(settings.recenter) fem.recenter(settings.threshold,settings.recentering_direction);
-        if (!settings.verbose) show_progress(t_prm.get_t()/t_prm.tf);
-        }//endwhile
-    fem.saver(settings,t_prm,fout,nt_output++);
-    }// end for
-    if (!settings.verbose) show_progress(1.0);  // show we are done
+            fem.DW_z  += fem.DW_vz*t_prm.get_dt();
+            if(settings.recenter)
+                fem.recenter(settings.threshold,settings.recentering_direction);
+            if (!settings.verbose)
+                show_progress(t_prm.get_t()/t_prm.tf);
+            }//endwhile
+        fem.saver(settings,t_prm,fout,nt_output++);
+        }// end for
+        if (!settings.verbose)
+            show_progress(1.0);  // show we are done
 
-bailout:
-fout.close();
-print_stats(stats);
-return nt;
-}
+        bailout:
+        fout.close();
+        print_stats(stats);
+        return nt;
+    }
