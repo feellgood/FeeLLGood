@@ -75,8 +75,10 @@ public:
                              STT const& _p_stt /**< all spin transfer torque parameters */,
                              const double _tol /**< [in] tolerance for solvers */,
                              const bool v /**< [in] verbose bool */,
-                             const int max_iter /**< [in] maximum number of iteration */ ):
-                             msh(_msh), p_stt(_p_stt), verbose(v), MAXITER(max_iter), precision(PRECISION_STT)
+                             const int max_iter /**< [in] maximum number of iteration */,
+                             const std::string _fileName /**<  [in] output .sol file name for electrostatic potential */ ):
+                             msh(_msh), p_stt(_p_stt), verbose(v), MAXITER(max_iter), precision(PRECISION_STT),
+                             fileName(_fileName)
                              {
                              ksi = Pt::sq(p_stt.lJ/p_stt.lsf);
                              D0 = 2.0*p_stt.sigma/(Pt::sq(CHARGE_ELECTRON)*p_stt.N0);
@@ -89,7 +91,6 @@ public:
                              	{	
                              	if (p_stt.V_file) 
                              		{
-                             		std::string fileName = "V.sol";
                              		if(verbose)
                                         { std::cout << "writing electrostatic potential solutions to file " << fileName << std::endl; }
                                     bool iznogood = msh.savesol(precision,fileName,"##columns: index\tV\n",V);
@@ -188,6 +189,9 @@ private:
 
     /** number of digits in the optional output file */
     const int precision;
+
+    /** output .sol file name for electrostatic problem */
+    const std::string fileName;
 
     /** electrostatic potential values for boundary conditions, V.size() is the size of the vector of nodes */ 
     std::vector<double> V;
