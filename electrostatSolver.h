@@ -107,7 +107,7 @@ public:
 									calc_Hm(tet,_gradV,_Hm);
                              		Hm.push_back(_Hm);
                              		} );
-                             	
+                                prepareExtras();
                              	}
                              else
                                 { std::cerr << "Solver (STT) has not converged" << std::endl; exit(1); }
@@ -140,32 +140,29 @@ for (int npi=0; npi<Tetra::NPI; npi++)
 	{ _Hm[npi] = -p_stt.sigma*_gradV[npi]*p_g[npi]; }
 }
 
-/** affect extraField function and extraCoeffs_BE function for all the tetrahedrons */
-void prepareExtras(void)
-	{
-	std::for_each(msh.tet.begin(),msh.tet.end(), [this]( Tetra::Tet & tet )
-		{
-		tet.extraField = [this,&tet]( int npi, Pt::pt3D & _H ) { _H += this->Hm[tet.idx][npi]; } ;
+private:
+    /** affect extraField function and extraCoeffs_BE function for all the tetrahedrons */
+    void prepareExtras(void)
+	    {
+	    std::for_each(msh.tet.begin(),msh.tet.end(), [this]( Tetra::Tet & tet )
+	        {
+		    tet.extraField = [this,&tet]( int npi, Pt::pt3D & _H ) { _H += this->Hm[tet.idx][npi]; } ;
 
-		tet.extraCoeffs_BE = [this,&tet](int npi,double Js,Pt::pt3D &U,Pt::pt3D &dUdx,Pt::pt3D &dUdy,Pt::pt3D &dUdz, Pt::pt3D (&BE)[Tetra::N] )
-			{
-			const double prefactor = D0/Pt::sq(p_stt.lJ)/(gamma0*nu0*Js);
-
-	        Pt::pt3D const& _gV = gradV[tet.idx][npi];
-
-            Pt::pt3D j_grad_u = -p_stt.sigma*Pt::pt3D(Pt::pScal(_gV,Pt::pt3D(dUdx(Pt::IDX_X),dUdy(Pt::IDX_X),dUdz(Pt::IDX_X)) ),
+		    tet.extraCoeffs_BE = [this,&tet](int npi,double Js,Pt::pt3D &U,Pt::pt3D &dUdx,Pt::pt3D &dUdy,Pt::pt3D &dUdz, Pt::pt3D (&BE)[Tetra::N] )
+			    {
+			    const double prefactor = D0/Pt::sq(p_stt.lJ)/(gamma0*nu0*Js);
+                Pt::pt3D const& _gV = gradV[tet.idx][npi];
+                Pt::pt3D j_grad_u = -p_stt.sigma*Pt::pt3D(Pt::pScal(_gV,Pt::pt3D(dUdx(Pt::IDX_X),dUdy(Pt::IDX_X),dUdz(Pt::IDX_X)) ),
                                  Pt::pScal(_gV,Pt::pt3D(dUdx(Pt::IDX_Y),dUdy(Pt::IDX_Y),dUdz(Pt::IDX_Y)) ),
                                  Pt::pScal(_gV,Pt::pt3D(dUdx(Pt::IDX_Z),dUdy(Pt::IDX_Z),dUdz(Pt::IDX_Z)) ));
 
-            Pt::pt3D m = pf*(ksi*j_grad_u+U*j_grad_u);
+                Pt::pt3D m = pf*(ksi*j_grad_u+U*j_grad_u);
+                for (int i=0; i<Tetra::N; i++)
+                    { BE[i] += tet.weight[npi]*Tetra::a[i][npi]*(Hm[tet.idx][npi] + prefactor*m); }
+			    };
+		    });
+	    }
 
-            for (int i=0; i<Tetra::N; i++)
-                { BE[i] += tet.weight[npi]*Tetra::a[i][npi]*(Hm[tet.idx][npi] + prefactor*m); }
-			};
-		});
-	}
-
-private:
     /** ksi is in Thiaville notations beta_DW */
     double ksi;
 
