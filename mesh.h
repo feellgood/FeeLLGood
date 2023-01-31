@@ -179,9 +179,6 @@ double updateNodes(std::vector<double> const& X,const double dt)
     bool savesol(const int precision /**< [in] */, const std::string fileName /**< [in] */,
      std::string const& metadata /**< [in] */, std::vector<double> const& val /**< [in] */) const;
 
-    /** save the demagnetizing field values, including idx and npi indices, for debug use */
-    void saveH(const std::string fileName /**< [in] */,const double t/**< [in] */,const double scale /**< [in] */) const;
-    
     /** computes all charges for the demag field to feed a tree in the fast multipole algo (scalfmm) */
     void calc_charges(std::function<const Pt::pt3D (Nodes::Node)> getter,std::vector<double> & srcDen,std::vector<double> & corr,Settings const& settings)
     {

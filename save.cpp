@@ -59,7 +59,6 @@ if (save_period && (nt%save_period)==0)
     msh.savesol(settings.getPrecision(),str,metadata);
     if(settings.verbose)
         { cout << "all nodes written." << endl; }
-    //saveH(str,t_prm.get_t(),settings.getScale());
     }
 }
 
@@ -150,32 +149,3 @@ bool Mesh::mesh::savesol(const int precision, const std::string fileName, std::s
     return !(fout.good());
     }
 
-void Mesh::mesh::saveH(const string fileName,const double t,const double scale) const
-    {
-    ofstream fout(fileName, ios::out);
-    if (fout.fail())
-        {
-        std::cout << "cannot open file " << fileName << std::endl;
-        SYSTEM_ERROR;
-        }
-    fout << "##time: "<< t << endl;
-
-    int idx_tet=0;
-    std::for_each(tet.begin(),tet.end(),[&idx_tet,&fout,scale](Tetra::Tet const &te)
-        {
-        Pt::pt3D gauss[Tetra::NPI];
-        double Hdx[Tetra::NPI], Hdy[Tetra::NPI], Hdz[Tetra::NPI];
-
-        te.interpolation(Nodes::get_p,gauss);
-        te.interpolation(Nodes::get_phi,Hdx,Hdy,Hdz);
-
-        for (int npi=0; npi<Tetra::NPI; npi++)
-            {
-            Pt::pt3D p = gauss[npi]/scale;
-            fout << idx_tet << " " << npi << " " << p << " "<< Hdx[npi] << " " << Hdy[npi] << " " << Hdz[npi] << endl;
-            }
-        idx_tet++;
-        });//end for_each
-
-    fout.close();
-    }
