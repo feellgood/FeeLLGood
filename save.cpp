@@ -44,12 +44,6 @@ string baseName = settings.r_path_output_dir + '/' + settings.getSimName();
     
 if (save_period && (nt%save_period)==0)
     {
-    if (settings.withVtk)
-        {
-        string str = baseName + "_iter" + to_string(nt) + ".vtk";
-        msh.savecfg_vtk(t_prm,str);
-        }
-    
     string str = baseName + "_iter" + to_string(nt) + ".sol";
  
     if(settings.verbose)
@@ -60,53 +54,6 @@ if (save_period && (nt%save_period)==0)
     if(settings.verbose)
         { cout << "all nodes written." << endl; }
     }
-}
-
-void Mesh::mesh::savecfg_vtk(timing const& t_prm,const string fileName) const
-{
-    const int TET = tet.size();
-    const int NOD = node.size();
-
-ofstream fout(fileName, ios::out);
-if (fout.fail())
-    {
-    std::cout << "cannot open file : " << fileName << std::endl;
-    SYSTEM_ERROR;
-    }
-
-fout << "# vtk DataFile Version 2.0" << endl;
-fout << "time : " << t_prm.get_t() << endl; // boost::format(" time : %+20.10e") % fem.t;
-fout << "ASCII" << endl;
-fout << "DATASET UNSTRUCTURED_GRID" << endl;
-fout << "POINTS "<< NOD << " float" << endl;
-
-for(int i=0;i<NOD;i++)
-    {fout << node[i].p << endl;}
-
-fout << "CELLS " << setw(8) << TET << "\t" << setw(8) << (5*TET) << endl;
-
-std::for_each(tet.begin(),tet.end(),[&fout](Tetra::Tet const &te)
-    {
-    fout << setw(8) << Tetra::N;    
-    for (int i=0; i<Tetra::N; i++) 
-        { fout << setw(8) << te.ind[i]; }
-    fout << endl;    
-    });
-
-fout << "CELL_TYPES " << setw(8) << TET << endl;
-for (int t=0; t<TET; t++)
-    { fout << setw(8) << 10 << endl; }
-
-fout <<"POINT_DATA " << setw(8) << NOD << endl;
-fout <<"SCALARS phi float 1" << endl;
-fout << "LOOKUP_TABLE my_table" << endl;
-
-for(int i=0;i<NOD;i++)
-    {fout << node[i].phi << endl;}
-
-fout << "VECTORS u float" << endl;
-for(int i=0;i<NOD;i++)
-    {fout << node[i].u << endl;}
 }
 
 void Mesh::mesh::savesol(const int precision, const std::string fileName, std::string const& metadata) const

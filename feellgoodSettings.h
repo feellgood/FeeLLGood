@@ -66,9 +66,9 @@ class Settings{
     /** refresh diagonal pre-conditionner every REFRESH_PRC for bicgstab */
     inline void set_REFRESH_PRC(int i) {REFRESH_PRC = i;}
 	
-	bool withTsv;/**< boolean flag to mention if you want output in txt tsv file format  */
-	bool withVtk;/**< boolean flag to mention if you want output in txt vtk file format (readable by paraview) */
-	
+    /** boolean flag to mention if you want output in txt tsv file format */
+    bool withTsv;
+
 	bool verbose;/**< if true the user gets many printing feedback in terminal */
 	
 	double time_step;/**< energy saved every time_step */

@@ -168,9 +168,6 @@ double updateNodes(std::vector<double> const& X,const double dt)
     return sum/vol;
     }
 
-    /** text file (vtk) writing function for a solution, using text VTK format (unstructured grid version 2.0) : deprecated, it is recommanded to use convert2vtk python script instead */
-    void savecfg_vtk(timing const& t_prm /**< [in] */,const std::string fileName /**< [in] */) const;
-
     /** text file (tsv) writing function for a solution */
     void savesol(const int precision /**< [in] numeric precision in .sol output text file */,
     const std::string fileName /**< [in] */,std::string const& metadata /**< [in] */) const;

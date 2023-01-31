@@ -111,7 +111,6 @@ void Settings::infos()
         std::cout << "    - " << *it << "\n";
     }
     std::cout << "  take_photo: " << save_period << "\n";
-    std::cout << "  vtk_file: " << str(withVtk) << "\n";
     std::cout << "mesh:\n";
     std::cout << "  filename: " << pbName << "\n";
     std::cout << "  scaling_factor: " << _scale << "\n";
@@ -222,7 +221,6 @@ void Settings::read(YAML::Node yaml)
                 { r_path_output_dir.pop_back(); }
         }
         assign(simName, outputs["file_basename"]);
-        assign(withVtk, outputs["vtk_file"]);
         assign(time_step, outputs["evol_time_step"]);
         assign(tf, outputs["final_time"]);
         YAML::Node take_photo = outputs["take_photo"];
