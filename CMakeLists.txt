@@ -1,5 +1,5 @@
 if(POLICY CMP0048)
-  cmake_policy(SET CMP0048 NEW) # CMake 3.0.0
+    cmake_policy(SET CMP0048 NEW) # CMake 3.0.0
 endif()
 
 PROJECT (FEELLGOOD)
@@ -8,6 +8,13 @@ cmake_minimum_required(VERSION 3.0)
 ENABLE_LANGUAGE(CXX)
 
 MESSAGE(STATUS "CXX ${CMAKE_CXX_COMPILER_ID}")
+
+find_package(TBB REQUIRED)
+if(TBB_FOUND)
+    message(STATUS "TBB Found")
+else()
+    message(FATAL_ERROR "TBB NOT FOUND")
+endif()
 
 #===========================================================================
 # these parameters are used to build a config.h file 
@@ -60,7 +67,7 @@ add_custom_command(
 
 ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES} default-settings.o)
 
-TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm ANN tbb)
+TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm ANN TBB::tbb)
 
 if(DEFINED withSharedLib)
     MESSAGE( "Shared lib generation " ${withSharedLib} )
