@@ -1,0 +1,128 @@
+#!/usr/bin/env python3
+
+import h5py
+import numpy as np
+import sys
+import glob,os
+import re
+
+def getInputEvolFile():
+    os.chdir("./")
+    inputFile = ''
+    inputFiles = []
+    for file in glob.glob("*.evol"):
+        inputFiles.append(file)
+    if (len(inputFiles)>1):
+        print("Warning: more than one .evol file ", inputFiles[0] , " will be used")
+        inputFile = inputFiles[0]
+    elif (len(inputFiles)==1):
+        inputFile = inputFiles[0]
+    return inputFile
+
+def readMetadataSolFile(solFileName):
+    metadata = {}
+    metadata['comments'] = ""
+    metadata['feeLLGood version'] = ""
+    metadata['settings file'] = ""
+    metadata['mesh file'] = ""
+    metadata['time'] = 0
+    metadata['columns'] = ""
+    with open(solFileName, 'r', encoding='utf-8') as solFile:
+        lines = solFile.readlines()
+        for l in lines:
+            if (l.startswith('##feeLLGood version:')):
+                metadata['feeLLGood version'] += l[2+l.find(':'):-1]
+            elif (l.startswith('##settings file:')):
+                metadata['settings file'] += l[2+l.find(':'):-1]
+            elif (l.startswith('##mesh file:')):
+                metadata['mesh file'] += l[2+l.find(':'):-1]
+            elif (l.startswith('##time:')):
+                metadata['time'] = float(l[2+l.find(':'):-1])
+            elif (l.startswith('##columns:')):
+                metadata['columns'] += l[2+l.find(':'):-1]
+            elif (l.startswith('#')):
+                metadata['comments'] += l
+        solFile.close()
+    return metadata
+
+def getInputSolFiles():
+    os.chdir("./")
+    inputFiles = []
+    for file in glob.glob("*.sol"):
+        inputFiles.append(file)
+    return inputFiles
+
+def get_params():
+    import argparse
+    description = 'convert .sol to hdf5 using h5py and .sol file(s)'
+    epilogue = '''
+ build a hdf5 file from feellgood output .sol files and script file, if a .sol file name or several file names are not
+  provided then all .sol files in the directory are considered  
+   '''
+    parser = argparse.ArgumentParser(description=description, epilog=epilogue,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('outputFileName',help='an output file name (without extension)')
+    parser.add_argument('scriptFileName', help='a script file')
+    parser.add_argument('solFileNames',metavar='fileName',type=str, nargs='*', help='.sol feellgood files')
+    
+    parser.add_argument('--version',action='version',version= __version__,help='show the version number')
+    
+    args = parser.parse_args()
+    
+    return [args.outputFileName, args.scriptFileName, args.solFileNames]
+    
+def main():
+    [outputFileName, scriptFileName, solFileNames] = get_params()
+    
+    nbFiles = len(solFileNames)
+    if nbFiles == 0:
+        solFileNames = getInputSolFiles()
+    
+    fullOutputFileName = outputFileName + '.h5'
+    f = h5py.File(fullOutputFileName, 'w')
+    g = f.create_group("results")
+    
+    for sol_f in solFileNames:
+        nb_iter_begin = sol_f.find("_")
+        nb_iter_end = sol_f.find(".sol")
+        sub_s = sol_f[nb_iter_begin:nb_iter_end]
+        metadata = readMetadataSolFile(sol_f)
+        
+        with open(sol_f,'r') as f:
+            my_data = np.genfromtxt(f,delimiter='\t',comments='#',dtype=np.float64, usecols=(1,2,3,4))
+            dset = g.create_dataset("solFile"+sub_s, data = my_data)
+
+        for k in metadata.items():
+            dset.attrs[k[0]] = k[1]
+    
+    evolFileName = getInputEvolFile()
+    evolMetadata =''
+    with open(evolFileName, 'r', encoding='utf-8') as evolFile:
+        lines = evolFile.readlines()
+        for l in lines:
+            if l.startswith('#'):
+                evolMetadata += l
+        evolFile.close()
+    
+    with open(evolFileName,'r') as f:
+        my_evol_data = np.genfromtxt(f,delimiter='\t',comments='#',dtype=np.float64) 
+    
+    evol_dset = g.create_dataset("evolFile",data = my_evol_data)
+    evol_dset.attrs['metadata'] = evolMetadata
+    
+    with open(scriptFileName, 'r', encoding='utf-8') as scriptFile:
+        lines = scriptFile.readlines()
+        g.attrs['script'] = ''
+        for l in lines:
+            g.attrs['script'] += l 
+        scriptFile.close()
+    
+__version__ = '0.0.0'
+if __name__ == "__main__":
+    main()
+    
+#    with h5py.File("willy.h5",'r') as f:
+#        truc = f.get("results/solFiles")
+#        print(truc)
+#        print( (f.get("results")).attrs.get('script'))
+#        print("time =", truc.attrs.get('time'))
