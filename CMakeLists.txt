@@ -80,6 +80,7 @@ endif(DEFINED withSharedLib)
 
 install(TARGETS feellgood RUNTIME DESTINATION bin)
 install(PROGRAMS ./tools/convert2vtk DESTINATION bin)
+install(PROGRAMS ./tools/convert2hdf5 DESTINATION bin)
 
 #===========================================================================
 # unit tests, by default it is not built.
