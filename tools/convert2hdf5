@@ -61,27 +61,38 @@ def get_params():
    '''
     parser = argparse.ArgumentParser(description=description, epilog=epilogue,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('outputFileName',help='an output file name (without extension)')
+    parser.add_argument('-a','--append',metavar='groupName',type=str,nargs='?', help='append to an existing hdf5 file a group',default='emptyGroupName')
+    parser.add_argument('outputFileName',help='an output file name with h5 extension')
     parser.add_argument('scriptFileName', help='a script file')
     parser.add_argument('solFileNames',metavar='fileName',type=str, nargs='*', help='.sol feellgood files')
     
     parser.add_argument('--version',action='version',version= __version__,help='show the version number')
     
     args = parser.parse_args()
-    
-    return [args.outputFileName, args.scriptFileName, args.solFileNames]
+    return [args.append, args.outputFileName, args.scriptFileName, args.solFileNames]
     
 def main():
-    [outputFileName, scriptFileName, solFileNames] = get_params()
+    [appendGroupName, outputFileName, scriptFileName, solFileNames] = get_params()
     
     nbFiles = len(solFileNames)
     if nbFiles == 0:
         solFileNames = getInputSolFiles()
     
-    fullOutputFileName = outputFileName + '.h5'
-    f = h5py.File(fullOutputFileName, 'w')
-    g = f.create_group("results")
-    
+    if appendGroupName != 'emptyGroupName':
+        if not(os.path.exists(outputFileName)):
+            print("New file ", outputFileName," created, append to group ", appendGroupName)
+        f = h5py.File(outputFileName, 'a')
+        if appendGroupName in f:
+            print("Error : group name", appendGroupName, "already exists." )
+            exit(1)
+
+        g = f.create_group(appendGroupName)
+    else:
+        if os.path.exists(outputFileName):
+            print("Warning : ", outputFileName," already exists, overwritting.")
+        f = h5py.File(outputFileName, 'w')
+        g = f.create_group("results")
+
     for sol_f in solFileNames:
         nb_iter_begin = sol_f.find("_")
         nb_iter_end = sol_f.find(".sol")
@@ -117,12 +128,7 @@ def main():
             g.attrs['script'] += l 
         scriptFile.close()
     
-__version__ = '0.0.0'
+__version__ = '1.0.1'
 if __name__ == "__main__":
     main()
-    
-#    with h5py.File("willy.h5",'r') as f:
-#        truc = f.get("results/solFiles")
-#        print(truc)
-#        print( (f.get("results")).attrs.get('script'))
-#        print("time =", truc.attrs.get('time'))
+
