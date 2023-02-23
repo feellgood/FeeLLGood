@@ -52,6 +52,20 @@ def getInputSolFiles():
         inputFiles.append(file)
     return inputFiles
 
+def getMeshFileNameFromScript(scriptFileName):
+    import yaml
+    meshFileName = ''
+    with open(scriptFileName, 'r', encoding='utf-8') as scriptFile:
+        script_loaded = yaml.safe_load(scriptFile)
+        meshFileName = script_loaded['mesh']['filename']
+        scriptFile.close()
+    idx = meshFileName.rfind('/')
+    if idx == -1:
+        return meshFileName
+    else:
+        idx += 1
+        return meshFileName[idx:]
+
 def get_params():
     import argparse
     description = 'convert .sol to hdf5 using h5py and .sol file(s)'
@@ -74,6 +88,9 @@ def get_params():
 def main():
     [appendGroupName, outputFileName, scriptFileName, solFileNames] = get_params()
     
+    meshFileName = getMeshFileNameFromScript(scriptFileName)
+    #print('mesh file :', meshFileName)
+
     nbFiles = len(solFileNames)
     if nbFiles == 0:
         solFileNames = getInputSolFiles()
@@ -122,10 +139,7 @@ def main():
     evol_dset.attrs['metadata'] = evolMetadata
     
     with open(scriptFileName, 'r', encoding='utf-8') as scriptFile:
-        lines = scriptFile.readlines()
-        g.attrs['script'] = ''
-        for l in lines:
-            g.attrs['script'] += l 
+        g.attrs['script'] = scriptFile.read()
         scriptFile.close()
     
 __version__ = '1.0.1'
