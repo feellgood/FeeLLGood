@@ -142,7 +142,12 @@ def main():
         g.attrs['script'] = scriptFile.read()
         scriptFile.close()
     
-__version__ = '1.0.1'
+    # mesh is copied as a text blob, stored in 'mesh' attribute
+    with open(meshFileName,'r',encoding='utf-8') as meshFile:
+        g.attrs['mesh'] = meshFile.read()
+        meshFile.close()
+
+__version__ = '1.0.2'
 if __name__ == "__main__":
     main()
 
