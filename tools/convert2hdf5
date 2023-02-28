@@ -46,19 +46,18 @@ def readMetadataSolFile(solFileName):
     return metadata
 
 def getInputSolFiles():
-    os.chdir("./")
     inputFiles = []
     for file in glob.glob("*.sol"):
         inputFiles.append(file)
     return inputFiles
 
-def getMeshFileNameFromScript(scriptFileName):
+def getMeshFileNameFromSettings(settingsFileName):
     import yaml
     meshFileName = ''
-    with open(scriptFileName, 'r', encoding='utf-8') as scriptFile:
-        script_loaded = yaml.safe_load(scriptFile)
-        meshFileName = script_loaded['mesh']['filename']
-        scriptFile.close()
+    with open(settingsFileName, 'r', encoding='utf-8') as settingsFile:
+        settings_loaded = yaml.safe_load(settingsFile)
+        meshFileName = settings_loaded['mesh']['filename']
+        settingsFile.close()
     idx = meshFileName.rfind('/')
     if idx == -1:
         return meshFileName
@@ -70,27 +69,24 @@ def get_params():
     import argparse
     description = 'convert .sol to hdf5 using h5py and .sol file(s)'
     epilogue = '''
- build a hdf5 file from feellgood output .sol files and script file, if a .sol file name or several file names are not
+ build a hdf5 file from feellgood output .sol files and settings file, if a .sol file name or several file names are not
   provided then all .sol files in the directory are considered  
    '''
     parser = argparse.ArgumentParser(description=description, epilog=epilogue,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-a','--append',metavar='groupName',type=str,nargs='?', help='append to an existing hdf5 file a group',default='emptyGroupName')
     parser.add_argument('outputFileName',help='an output file name with h5 extension')
-    parser.add_argument('scriptFileName', help='a script file')
+    parser.add_argument('settingsFileName', help='a settings file')
     parser.add_argument('solFileNames',metavar='fileName',type=str, nargs='*', help='.sol feellgood files')
     
     parser.add_argument('--version',action='version',version= __version__,help='show the version number')
     
     args = parser.parse_args()
-    return [args.append, args.outputFileName, args.scriptFileName, args.solFileNames]
+    return [args.append, args.outputFileName, args.settingsFileName, args.solFileNames]
     
 def main():
-    [appendGroupName, outputFileName, scriptFileName, solFileNames] = get_params()
-    
-    meshFileName = getMeshFileNameFromScript(scriptFileName)
-    #print('mesh file :', meshFileName)
-
+    [appendGroupName, outputFileName, settingsFileName, solFileNames] = get_params()
+    meshFileName = getMeshFileNameFromSettings(settingsFileName)
     nbFiles = len(solFileNames)
     if nbFiles == 0:
         solFileNames = getInputSolFiles()
@@ -138,16 +134,16 @@ def main():
     evol_dset = g.create_dataset("evolFile",data = my_evol_data)
     evol_dset.attrs['metadata'] = evolMetadata
     
-    with open(scriptFileName, 'r', encoding='utf-8') as scriptFile:
-        g.attrs['script'] = scriptFile.read()
-        scriptFile.close()
+    with open(settingsFileName, 'r', encoding='utf-8') as settingsFile:
+        g.attrs['settings'] = settingsFile.read()
+        settingsFile.close()
     
     # mesh is copied as a text blob, stored in 'mesh' attribute
     with open(meshFileName,'r',encoding='utf-8') as meshFile:
         g.attrs['mesh'] = meshFile.read()
         meshFile.close()
 
-__version__ = '1.0.2'
+__version__ = '1.1.0'
 if __name__ == "__main__":
     main()
 
