@@ -199,8 +199,7 @@ std::string Settings::buildMetadata(double t,std::string columnsTitle) const
 	{
 	std::ostringstream ss;
 	ss << "##feeLLGood version: " << feellgood_version << std::endl;
-	ss << "##settings file: " << getFileDisplayName() << std::endl;
-	ss << "##mesh file: " << getPbName() << std::endl;
+	ss << "##settings file name: " << getFileDisplayName() << std::endl;
 	ss << "##time: " << std::scientific << t << std::endl;
     ss << "##columns: " << columnsTitle << std::endl;
     return ss.str();
