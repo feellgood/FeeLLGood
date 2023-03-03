@@ -6,7 +6,11 @@ import sys
 import os
 
 def buildSolMetadata(solDataset):
-    s=''
+    s = solDataset.attrs['comments']
+    s += "##feeLLGood version: " + solDataset.attrs['feeLLGood version'] + '\n'
+    s += "##settings file: " + solDataset.attrs['settings file name'] + '\n'
+    s += "##time: " + str(solDataset.attrs['time']) + '\n'
+    s += "##" + solDataset.attrs['columns'] + '\n'
     return s
 
 def writeFile(fileName,whatToWrite,metadata):
@@ -35,17 +39,18 @@ def get_params():
     import argparse
     description = 'extract from hdf5 mesh, feellgood settings(yaml), .evol or .sol file(s)'
     epilogue = '''
- rebuild file(s) from feellgood input hdf5 file 
+ extracts data from hdf5 file and writes file(s) from hdf5 feellgood input file
    '''
     parser = argparse.ArgumentParser(description=description, epilog=epilogue,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('-w','--what',metavar='what',type=str, help='what to extract')
-    
     parser.add_argument('h5FileName',help='an input hdf5 file name')
     parser.add_argument('groupName',help='group name where to extract')
     parser.add_argument('-b','--basename', help='a base name for output file(s)')
     parser.add_argument('--view',action='store_true',help='view in standard output the group content')
     parser.add_argument('--version',action='version',version= __version__,help='show the version number')
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('-w','--what',metavar='what',type=str, help='what to extract')
+    group.add_argument('-a','--all',action='store_true',help='extract all')
     
     args = parser.parse_args()
     return vars(args)
