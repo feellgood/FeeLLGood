@@ -1,0 +1,70 @@
+#!/usr/bin/env python3
+
+import h5py
+import numpy as np
+import sys
+import os
+
+def buildSolMetadata(solDataset):
+    s=''
+    return s
+
+def writeFile(fileName,whatToWrite,metadata):
+    if type(whatToWrite)==str:
+        with open(fileName,'w') as f:
+            f.write(metadata)
+            f.write(whatToWrite)
+            f.close()
+    else:
+        np.savetxt(fileName,whatToWrite,delimiter='\t',newline='\n',header=metadata,comments='')
+
+def view(h5file,groupName):
+    if groupName in h5file:
+        print(groupName)
+        for a in h5file[groupName].attrs:
+            print("  a:",a)
+        for dataset in h5file[groupName]:
+            print("  d:",dataset)
+            for a in h5file[groupName][dataset].attrs:
+                print("    a:",a,':',h5file[groupName][dataset].attrs[a])
+    else:
+        print(groupName, "not found")
+        exit(1)
+
+def get_params():
+    import argparse
+    description = 'extract from hdf5 mesh, feellgood settings(yaml), .evol or .sol file(s)'
+    epilogue = '''
+ rebuild file(s) from feellgood input hdf5 file 
+   '''
+    parser = argparse.ArgumentParser(description=description, epilog=epilogue,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('-w','--what',metavar='what',type=str, help='what to extract')
+    
+    parser.add_argument('h5FileName',help='an input hdf5 file name')
+    parser.add_argument('groupName',help='group name where to extract')
+    parser.add_argument('-b','--basename', help='a base name for output file(s)')
+    parser.add_argument('--view',action='store_true',help='view in standard output the group content')
+    parser.add_argument('--version',action='version',version= __version__,help='show the version number')
+    
+    args = parser.parse_args()
+    return vars(args)
+    
+def main():
+    inputs = get_params()
+    print("whatToDo =", inputs)
+    if not(os.path.exists(inputs['h5FileName'])):
+        print("error: file "+ inputs['h5FileName'] + " not found" )
+        exit(1)
+    else:
+        if inputs['view'] == True:
+            fileName = inputs['h5FileName'] 
+            f = h5py.File(fileName,'r')
+            view(f,inputs['groupName'])
+            f.close()
+        
+    
+__version__ = '0.0.0'
+if __name__ == "__main__":
+    main()
+
