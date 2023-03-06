@@ -22,6 +22,9 @@ def writeFile(fileName,whatToWrite,metadata):
     else:
         np.savetxt(fileName,whatToWrite,delimiter='\t',newline='\n',header=metadata,comments='')
 
+def writeSolFile(fileName,dataSolFile):
+    writeFile( fileName, dataSolFile, buildSolMetadata(dataSolFile))
+
 def view(h5file,groupName):
     if groupName in h5file:
         print(groupName)
@@ -35,6 +38,18 @@ def view(h5file,groupName):
         print(groupName, "not found")
         exit(1)
 
+def extractAll(h5file,groupName,baseName):
+    dataEvolFile = h5file[groupName].get('evolFile')
+    writeFile( baseName +".evol", dataEvolFile, dataEvolFile.attrs['metadata'])
+    writeFile( baseName +".msh", h5file[groupName].attrs['mesh'], "")
+    writeFile( baseName +".yml", h5file[groupName].attrs['settings'], "")
+    list_dset = []
+    for dset in h5file[groupName]:
+        if dset != 'evolFile':
+            list_dset.append(dset)
+    for d in list_dset:
+        writeSolFile(baseName + d + ".sol", h5file[groupName].get(d))
+
 def get_params():
     import argparse
     description = 'extract from hdf5 mesh, feellgood settings(yaml), .evol or .sol file(s)'
@@ -45,12 +60,11 @@ def get_params():
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('h5FileName',help='an input hdf5 file name')
     parser.add_argument('groupName',help='group name where to extract')
-    parser.add_argument('-b','--basename', help='a base name for output file(s)')
+    parser.add_argument('-b','--basename', help='a base name for output file(s)',default='emptyBaseName')
     parser.add_argument('--view',action='store_true',help='view in standard output the group content')
     parser.add_argument('--version',action='version',version= __version__,help='show the version number')
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('-w','--what',metavar='what',type=str, help='what to extract')
-    group.add_argument('-a','--all',action='store_true',help='extract all')
+    group.add_argument('-w','--what',metavar='what',type=str, help='what to extract',default='undefined')
     
     args = parser.parse_args()
     return vars(args)
@@ -62,14 +76,33 @@ def main():
         print("error: file "+ inputs['h5FileName'] + " not found" )
         exit(1)
     else:
+        fileName = inputs['h5FileName']
+        f = h5py.File(fileName,'r')
+
         if inputs['view'] == True:
-            fileName = inputs['h5FileName'] 
-            f = h5py.File(fileName,'r')
             view(f,inputs['groupName'])
-            f.close()
-        
-    
-__version__ = '0.0.0'
+        elif inputs['what'] == 'evol':
+            dataEvolFile = f[ inputs['groupName']].get('evolFile')
+            writeFile( inputs['basename']+".evol", dataEvolFile, dataEvolFile.attrs['metadata'])
+        elif inputs['what'] == 'mesh':
+            writeFile( inputs['basename']+".msh", f[ inputs['groupName']].attrs['mesh'], "")
+        elif inputs['what'] == 'settings':
+            writeFile( inputs['basename']+".yml", f[ inputs['groupName']].attrs['settings'], "")
+        elif inputs['what'] == 'datasets':
+            list_dset = []
+            for dset in f[ inputs['groupName']]:
+                if dset != 'evolFile':
+                    list_dset.append(dset)
+            for d in list_dset:
+                writeSolFile( inputs['basename']+d+".sol", f[ inputs['groupName']].get(d))
+        elif inputs['what'] in f[ inputs['groupName']]:
+            writeSolFile( inputs['basename']+inputs['what']+".sol", f[ inputs['groupName']].get(inputs['what']) )
+        else:# extract all
+            extractAll(f,inputs['groupName'],inputs['basename'])
+
+        f.close()
+
+__version__ = '1.0.0'
 if __name__ == "__main__":
     main()
 
