@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <sys/stat.h>
+#include <ctime>
 
 #include "fem.h"
 #include "mesh.h"
@@ -65,7 +67,15 @@ void Mesh::mesh::savesol(const int precision, const std::string fileName, std::s
         SYSTEM_ERROR;
         }
 
-    fout << metadata << std::scientific << std::setprecision(precision);
+    struct stat fileStats;
+    std::stringstream modificationTime;
+    if (stat(fileName.c_str(),&fileStats)==0)
+        {
+        std::time_t _t = std::mktime( gmtime(&(fileStats.st_mtime)) );
+        modificationTime << std::put_time(std::localtime(& _t),"%F-%H:%M:%S %Z");
+        }
+    
+    fout <<"##modification time: " << modificationTime.str() << '\n' << metadata << std::scientific << std::setprecision(precision);
 
     for(unsigned int i=0;i<node.size();i++)
         { fout << i << "\t" << node[i].u << "\t" << node[i].phi << endl; }
@@ -82,7 +92,15 @@ bool Mesh::mesh::savesol(const int precision, const std::string fileName, std::s
         SYSTEM_ERROR;
         }
 
-    fout << metadata << std::scientific << std::setprecision(precision);
+    struct stat fileStats;
+    std::stringstream modificationTime;
+    if (stat(fileName.c_str(),&fileStats)==0)
+        {
+        std::time_t _t = std::mktime( gmtime(&(fileStats.st_mtime)) );
+        modificationTime << std::put_time(std::localtime(& _t),"%F-%H:%M:%S %Z");
+        }
+
+    fout <<"##modification time: " << modificationTime.str() << '\n' << metadata << std::scientific << std::setprecision(precision);
 
     if (node.size() == val.size())
         {
@@ -92,7 +110,6 @@ bool Mesh::mesh::savesol(const int precision, const std::string fileName, std::s
     else
         { std::cout << "error: size mismatch while saving " << fileName << std::endl; exit(1); }
     fout.close();
-    
     return !(fout.good());
     }
 
