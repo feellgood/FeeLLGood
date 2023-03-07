@@ -49,7 +49,7 @@ if (save_period && (nt%save_period)==0)
     if(settings.verbose)
         { cout << " " << str << endl; }
 
-    string metadata = settings.buildMetadata(t_prm.get_t(),"idx\tmx\tmy\tmz\tphi");
+    string metadata = settings.solMetadata(t_prm.get_t(),"idx\tmx\tmy\tmz\tphi");
     msh.savesol(settings.getPrecision(),str,metadata);
     if(settings.verbose)
         { cout << "all nodes written." << endl; }

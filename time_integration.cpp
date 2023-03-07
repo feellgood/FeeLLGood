@@ -106,7 +106,7 @@ if(settings.save_period > 0)
 	{
 	std::cout << ": saving the magnetization configuration...\n";
 	std::string fileName = settings.r_path_output_dir + '/' + settings.getSimName() + "_at_exit.sol";
-	std::string metadata = settings.buildMetadata(t_prm.get_t(),"idx\tmx\tmy\tmz\tphi");
+	std::string metadata = settings.solMetadata(t_prm.get_t(),"idx\tmx\tmy\tmz\tphi");
 	fem.msh.savesol(settings.getPrecision(), fileName, metadata);
 	std::cout << "Magnetization configuration saved to " << fileName << "\n";
 	}
@@ -140,12 +140,8 @@ int time_integration(Fem &fem,Settings &settings /**< [in] */,LinAlgebra &linAlg
     if (fout.fail())
         { std::cout << "cannot open file "<< str << std::endl; SYSTEM_ERROR; }
 
-    fout << "##";
-    for(unsigned int i=0; i < (settings.evol_columns.size()-1);i++)
-        {fout << settings.evol_columns[i] << "\t";}
+    fout << settings.evolMetadata();
     
-    fout << settings.evol_columns[settings.evol_columns.size()-1] << "\n" << std::flush;
-
     int flag(0);
     int nt_output(0);  // visible iteration count
     int nt(0);         // total iteration count

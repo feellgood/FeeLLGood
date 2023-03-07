@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include <unistd.h>  // for sysconf()
+#include <unistd.h>  // for sysconf(), gethostname()
 
 #include "feellgoodSettings.h"
 
@@ -195,11 +195,24 @@ void Settings::infos()
     std::cout << "  max(dt): " << dt_max << "\n";
 }
 
-std::string Settings::buildMetadata(double t,std::string columnsTitle) const
-	{
+std::string Settings::evolMetadata() const
+    {
 	std::ostringstream ss;
 	ss << "##feeLLGood version: " << feellgood_version << std::endl;
+	char name[HOST_NAME_MAX];
+	if (gethostname(name,HOST_NAME_MAX) != ENAMETOOLONG)
+	    { ss << "##hostname: " << name << std::endl; }
 	ss << "##settings file name: " << getFileDisplayName() << std::endl;
+	ss << "##";
+    for(unsigned int i=0; i < (evol_columns.size()-1);i++)
+        { ss << evol_columns[i] << "\t"; }
+    ss << evol_columns[evol_columns.size()-1] << std::endl;
+    return ss.str();
+	}
+
+std::string Settings::solMetadata(double t,std::string columnsTitle) const
+	{
+	std::ostringstream ss;
 	ss << "##time: " << std::scientific << t << std::endl;
     ss << "##columns: " << columnsTitle << std::endl;
     return ss.str();

@@ -33,8 +33,11 @@ class Settings{
     /** some prints sent to terminal */	
     void infos(void);
 
-	/** build a metadata string for .sol text files */
-	std::string buildMetadata(double t,std::string columnsTitle) const;
+    /** build a metadata string for .evol file */
+    std::string evolMetadata() const;
+
+    /** build a metadata string for .sol text files */
+    std::string solMetadata(double t,std::string columnsTitle) const;
 
     /** read settings from a parsed YAML document */
 	void read(YAML::Node);
