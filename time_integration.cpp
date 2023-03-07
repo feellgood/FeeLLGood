@@ -1,5 +1,8 @@
 #include <cfloat>
 #include <signal.h>
+#include <sys/stat.h>
+#include <ctime>
+
 #include "fem.h"
 #include "time_integration.h"
 
@@ -140,7 +143,15 @@ int time_integration(Fem &fem,Settings &settings /**< [in] */,LinAlgebra &linAlg
     if (fout.fail())
         { std::cout << "cannot open file "<< str << std::endl; SYSTEM_ERROR; }
 
-    fout << settings.evolMetadata();
+    struct stat fileStats;
+    std::stringstream creationTime;
+    if (stat(str.c_str(),&fileStats)==0)
+        {
+        std::time_t _t = std::mktime( gmtime(&(fileStats.st_ctime)) );
+        creationTime << std::put_time(std::localtime(& _t),"%F-%H:%M:%S %Z");
+        }
+
+    fout << settings.evolMetadata(creationTime.str());
     
     int flag(0);
     int nt_output(0);  // visible iteration count

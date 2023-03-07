@@ -34,7 +34,7 @@ class Settings{
     void infos(void);
 
     /** build a metadata string for .evol file */
-    std::string evolMetadata() const;
+    std::string evolMetadata(std::string creationTime) const;
 
     /** build a metadata string for .sol text files */
     std::string solMetadata(double t,std::string columnsTitle) const;
