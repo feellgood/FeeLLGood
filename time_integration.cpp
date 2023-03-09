@@ -148,7 +148,7 @@ int time_integration(Fem &fem,Settings &settings /**< [in] */,LinAlgebra &linAlg
     if (stat(str.c_str(),&fileStats)==0)
         {
         std::time_t _t = std::mktime( gmtime(&(fileStats.st_ctime)) );
-        creationTime << std::put_time(std::localtime(& _t),"%F-%H:%M:%S %Z");
+        creationTime << std::put_time(std::localtime(& _t),"%FT%H:%M:%S%z");
         }
 
     fout << settings.evolMetadata(creationTime.str());

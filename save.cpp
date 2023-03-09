@@ -72,7 +72,7 @@ void Mesh::mesh::savesol(const int precision, const std::string fileName, std::s
     if (stat(fileName.c_str(),&fileStats)==0)
         {
         std::time_t _t = std::mktime( gmtime(&(fileStats.st_mtime)) );
-        modificationTime << std::put_time(std::localtime(& _t),"%F-%H:%M:%S %Z");
+        modificationTime << std::put_time(std::localtime(& _t),"%FT%H:%M:%S%z");
         }
     
     fout <<"##modification time: " << modificationTime.str() << '\n' << metadata << std::scientific << std::setprecision(precision);
@@ -97,7 +97,7 @@ bool Mesh::mesh::savesol(const int precision, const std::string fileName, std::s
     if (stat(fileName.c_str(),&fileStats)==0)
         {
         std::time_t _t = std::mktime( gmtime(&(fileStats.st_mtime)) );
-        modificationTime << std::put_time(std::localtime(& _t),"%F-%H:%M:%S %Z");
+        modificationTime << std::put_time(std::localtime(& _t),"%FT%H:%M:%S%z");
         }
 
     fout <<"##modification time: " << modificationTime.str() << '\n' << metadata << std::scientific << std::setprecision(precision);
