@@ -195,14 +195,14 @@ void Settings::infos()
     std::cout << "  max(dt): " << dt_max << "\n";
 }
 
-std::string Settings::evolMetadata(std::string creationTime) const
+std::string Settings::evolMetadata(std::string realWorldTime) const
     {
     std::ostringstream ss;
 	ss << "##feeLLGood version: " << feellgood_version << std::endl;
 	char name[HOST_NAME_MAX];
 	if (gethostname(name,HOST_NAME_MAX) != ENAMETOOLONG)
 	    { ss << "##hostname: " << name << std::endl; }
-	ss << "##creation time: " << creationTime << std::endl;
+	ss << "##real-world time: " << realWorldTime << std::endl;
 	ss << "##settings file name: " << getFileDisplayName() << std::endl;
 	ss << "##";
     for(unsigned int i=0; i < (evol_columns.size()-1);i++)

@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <sys/stat.h>
 #include <ctime>
 
 #include "fem.h"
@@ -67,15 +66,11 @@ void Mesh::mesh::savesol(const int precision, const std::string fileName, std::s
         SYSTEM_ERROR;
         }
 
-    struct stat fileStats;
-    std::stringstream modificationTime;
-    if (stat(fileName.c_str(),&fileStats)==0)
-        {
-        std::time_t _t = std::mktime( gmtime(&(fileStats.st_mtime)) );
-        modificationTime << std::put_time(std::localtime(& _t),"%FT%H:%M:%S%z");
-        }
+    std::stringstream realWorldTime;
+    std::time_t _t = std::time(nullptr);
+    realWorldTime << std::put_time(std::localtime(& _t),"%FT%H:%M:%S%z");
     
-    fout <<"##modification time: " << modificationTime.str() << '\n' << metadata << std::scientific << std::setprecision(precision);
+    fout <<"##real-world time: " << realWorldTime.str() << '\n' << metadata << std::scientific << std::setprecision(precision);
 
     for(unsigned int i=0;i<node.size();i++)
         { fout << i << "\t" << node[i].u << "\t" << node[i].phi << endl; }
@@ -92,15 +87,11 @@ bool Mesh::mesh::savesol(const int precision, const std::string fileName, std::s
         SYSTEM_ERROR;
         }
 
-    struct stat fileStats;
-    std::stringstream modificationTime;
-    if (stat(fileName.c_str(),&fileStats)==0)
-        {
-        std::time_t _t = std::mktime( gmtime(&(fileStats.st_mtime)) );
-        modificationTime << std::put_time(std::localtime(& _t),"%FT%H:%M:%S%z");
-        }
+    std::stringstream realWorldTime;
+    std::time_t _t = std::time(nullptr);
+    realWorldTime << std::put_time(std::localtime(& _t),"%FT%H:%M:%S%z");
 
-    fout <<"##modification time: " << modificationTime.str() << '\n' << metadata << std::scientific << std::setprecision(precision);
+    fout <<"##real-world time: " << realWorldTime.str() << '\n' << metadata << std::scientific << std::setprecision(precision);
 
     if (node.size() == val.size())
         {
