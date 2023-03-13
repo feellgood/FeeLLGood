@@ -25,18 +25,22 @@ def writeFile(fileName,whatToWrite,metadata):
 def writeSolFile(fileName,dataSolFile):
     writeFile( fileName, dataSolFile, buildSolMetadata(dataSolFile))
 
+def viewGroup(h5file,groupName):
+    print(groupName)
+    for a in h5file[groupName].attrs:
+        print("  a:",a)
+    for dataset in h5file[groupName]:
+        print("  d:",dataset)
+        for a in h5file[groupName][dataset].attrs:
+            print("    a:",a,':',h5file[groupName][dataset].attrs[a])
+
 def view(h5file,groupName):
-    if groupName in h5file:
-        print(groupName)
-        for a in h5file[groupName].attrs:
-            print("  a:",a)
-        for dataset in h5file[groupName]:
-            print("  d:",dataset)
-            for a in h5file[groupName][dataset].attrs:
-                print("    a:",a,':',h5file[groupName][dataset].attrs[a])
+    if (groupName != 'emptyGroupName') and (groupName in h5file):
+        viewGroup(h5file,groupName)
     else:
-        print(groupName, "not found")
-        exit(1)
+        for g in h5file.keys():
+            viewGroup(h5file,g)
+    exit(1)
 
 def extractAll(h5file,groupName,baseName):
     dataEvolFile = h5file[groupName].get('evolFile')
@@ -59,7 +63,7 @@ def get_params():
     parser = argparse.ArgumentParser(description=description, epilog=epilogue,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('h5FileName',help='an input hdf5 file name')
-    parser.add_argument('groupName',help='group name where to extract')
+    parser.add_argument('-g','--groupname',help='group name where to extract',default='emptyGroupName')
     parser.add_argument('-b','--basename', help='a base name for output file(s)',default='emptyBaseName')
     parser.add_argument('--view',action='store_true',help='view in standard output the group content')
     parser.add_argument('--version',action='version',version= __version__,help='show the version number')
@@ -71,7 +75,6 @@ def get_params():
     
 def main():
     inputs = get_params()
-    print("whatToDo =", inputs)
     if not(os.path.exists(inputs['h5FileName'])):
         print("error: file "+ inputs['h5FileName'] + " not found" )
         exit(1)
@@ -79,26 +82,30 @@ def main():
         fileName = inputs['h5FileName']
         f = h5py.File(fileName,'r')
 
-        if inputs['view'] == True:
-            view(f,inputs['groupName'])
-        elif inputs['what'] == 'evol':
-            dataEvolFile = f[ inputs['groupName']].get('evolFile')
+        if ((inputs['groupname'] == 'emptyGroupName')or(inputs['groupname'] in f.keys())) and inputs['view']:
+            view(f,inputs['groupname'])
+        elif not(inputs['groupname'] in f.keys()):
+            print("error: group " + inputs['groupname'] + " does not exist in file " + inputs['h5FileName'] )
+            exit(1)
+
+        if inputs['what'] == 'evol':
+            dataEvolFile = f[ inputs['groupname']].get('evolFile')
             writeFile( inputs['basename']+".evol", dataEvolFile, dataEvolFile.attrs['metadata'])
         elif inputs['what'] == 'mesh':
-            writeFile( inputs['basename']+".msh", f[ inputs['groupName']].attrs['mesh'], "")
+            writeFile( inputs['basename']+".msh", f[ inputs['groupname']].attrs['mesh'], "")
         elif inputs['what'] == 'settings':
-            writeFile( inputs['basename']+".yml", f[ inputs['groupName']].attrs['settings'], "")
+            writeFile( inputs['basename']+".yml", f[ inputs['groupname']].attrs['settings'], "")
         elif inputs['what'] == 'datasets':
             list_dset = []
-            for dset in f[ inputs['groupName']]:
+            for dset in f[ inputs['groupname']]:
                 if dset != 'evolFile':
                     list_dset.append(dset)
             for d in list_dset:
-                writeSolFile( inputs['basename']+d+".sol", f[ inputs['groupName']].get(d))
-        elif inputs['what'] in f[ inputs['groupName']]:
-            writeSolFile( inputs['basename']+inputs['what']+".sol", f[ inputs['groupName']].get(inputs['what']) )
+                writeSolFile( inputs['basename']+d+".sol", f[ inputs['groupname']].get(d))
+        elif inputs['what'] in f[ inputs['groupname']]:
+            writeSolFile( inputs['basename']+inputs['what']+".sol", f[ inputs['groupname']].get(inputs['what']) )
         else:# extract all
-            extractAll(f,inputs['groupName'],inputs['basename'])
+            extractAll(f,inputs['groupname'],inputs['basename'])
 
         f.close()
 
