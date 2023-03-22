@@ -6,8 +6,8 @@
 #define mag_parser_h
 
 #include "pt3D.h"
-#include <string>
 #include <memory>
+#include <string>
 
 /**
  * \brief Parse and evaluate the expressions that give the components of
@@ -20,7 +20,8 @@
  *
  * This class **cannot be copied**, as it holds a `unique_ptr`.
  */
-class MagnetizationParser {
+class MagnetizationParser
+    {
 public:
     MagnetizationParser();
     ~MagnetizationParser();
@@ -28,10 +29,7 @@ public:
     /**
      * Compile the expressions for the magnetization components.
      */
-    void set_expressions(
-            const std::string &Mx,
-            const std::string &My,
-            const std::string &Mz);
+    void set_expressions(const std::string &Mx, const std::string &My, const std::string &Mz);
 
     /**
      * Evaluate the magnetization at point `p`. Returns the _normalized_
@@ -43,7 +41,7 @@ public:
 private:
     class Impl3Dprm;
     std::unique_ptr<Impl3Dprm> pimpl3Dprm; /**< Pointer to the internal implementation. */
-};
+    };
 
 /**
  * \brief Parse and evaluate the expressions that give the components of
@@ -52,22 +50,21 @@ private:
  * This class **cannot be copied**, as it holds a `unique_ptr`.
  */
 
-class TimeDepFieldParser {
+class TimeDepFieldParser
+    {
 public:
     TimeDepFieldParser();
     ~TimeDepFieldParser();
 
     /** setter for the expressions of applied field B */
-    void set_expressions(
-            const std::string &Bx,
-            const std::string &By,
-            const std::string &Bz);
+    void set_expressions(const std::string &Bx, const std::string &By, const std::string &Bz);
 
     /** getter for time dependant field value */
     Pt::pt3D get_timeDepField(const double t_val) const;
+
 private:
     class Impl1Dprm;
-    std::unique_ptr<Impl1Dprm> pimpl1Dprm;/**< internal implementation pointer */ 
-};
+    std::unique_ptr<Impl1Dprm> pimpl1Dprm; /**< internal implementation pointer */
+    };
 
 #endif /* mag_parser_h */

@@ -9,24 +9,25 @@
  * For the sake of numerical stability, this class uses [Welford's
  * online algorithm][1].
  *
- * [1]: https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford%27s_online_algorithm
+ * [1]:
+ * https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford%27s_online_algorithm
  */
 
 #include <cmath>
 
 class LogStats
-{
+    {
 public:
     /** Add a sample to the statistics. */
     void add(double x)
-    {
+        {
         x = std::log(x);
         n += 1;
         double delta1 = x - m;
         m += delta1 / n;
         double delta2 = x - m;
         s += delta1 * delta2;
-    }
+        }
 
     /** Return the count of samples added so far. */
     long count() const { return n; }
@@ -54,7 +55,7 @@ public:
     double stddev() const { return std::sqrt(s / n); }
 
 private:
-    long n = 0;  /**< sample count */
-    double m = 0;  /**< sample mean */
-    double s = 0;  /**< sum of squares of deviations */
-};
+    long n = 0;   /**< sample count */
+    double m = 0; /**< sample mean */
+    double s = 0; /**< sum of squares of deviations */
+    };
