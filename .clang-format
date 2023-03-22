@@ -1,0 +1,36 @@
+# FeeLLGood code formatting conventions.
+#
+# Keep this file compatible with clang-format version 10.0 and above.
+#
+# Usage:
+#   clang-format -i *.h* *.cpp unit-tests/*.cpp tools/rev_CMK/rev_CMK.*
+
+# Parse the code as C++17.
+Standard: c++17
+
+# Whitesmiths style, 4-space indent.
+BreakBeforeBraces: Whitesmiths
+IndentWidth: 4
+UseTab: Never
+
+# Enforce a maximum line length.
+ColumnLimit: 100
+
+# Adjust indent of specific constructs.
+ContinuationIndentWidth: 8
+AccessModifierOffset: -4
+IndentCaseLabels: true
+
+# Some short statements can fit in a single line.
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: WithoutElse
+
+# Miscellaneous settings.
+AlignEscapedNewlines: Left
+AlwaysBreakTemplateDeclarations: Yes
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeTernaryOperators: true
+IndentPPDirectives: AfterHash
+SpaceAfterCStyleCast: true
+SpaceAfterTemplateKeyword: false
+SpacesBeforeTrailingComments: 2
