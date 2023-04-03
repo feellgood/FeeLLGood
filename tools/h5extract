@@ -10,7 +10,7 @@ def buildSolMetadata(solDataset):
     s += "##feeLLGood version: " + solDataset.attrs['feeLLGood version'] + '\n'
     s += "##settings file: " + solDataset.attrs['settings file name'] + '\n'
     s += "##time: " + str(solDataset.attrs['time']) + '\n'
-    s += "##" + solDataset.attrs['columns'] + '\n'
+    s += "##columns: " + solDataset.attrs['columns'] + '\n'
     return s
 
 def writeFile(fileName,whatToWrite,metadata):
