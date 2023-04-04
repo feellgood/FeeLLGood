@@ -6,7 +6,7 @@ void on_fail_msg_error(std::ifstream &f_in, const std::string strWhat)
     {
     if (f_in.fail())
         {
-        std::cerr << strWhat << std::endl;
+        std::cerr << strWhat << ": " << strerror(errno) << std::endl;
         SYSTEM_ERROR;
         }
     }
@@ -36,7 +36,7 @@ void mesh::readMesh(Settings const &mySets)
     std::string symb;
     std::ifstream msh(mySets.getPbName());
 
-    on_fail_msg_error(msh, "cannot open file");
+    on_fail_msg_error(msh, "cannot open file " + mySets.getPbName() );
 
     msh >> symb;
     if (symb == "$MeshFormat")
