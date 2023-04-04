@@ -197,7 +197,7 @@ std::string Settings::evolMetadata(std::string realWorldTime) const
         ss << "##hostname: " << name << std::endl;
         }
     ss << "##real-world time: " << realWorldTime << std::endl;
-    ss << "##settings file name: " << getFileDisplayName() << std::endl;
+    ss << "##settings file: " << getFileDisplayName() << std::endl;
     ss << "##columns: ";
     for (unsigned int i = 0; i < (evol_columns.size() - 1); i++)
         {

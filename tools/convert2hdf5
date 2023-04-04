@@ -23,7 +23,7 @@ def readMetadataSolFile(solFileName):
     metadata = {}
     metadata['comments'] = ""
     metadata['feeLLGood version'] = ""
-    metadata['settings file name'] = ""
+    metadata['settings file'] = ""
     metadata['time'] = 0
     metadata['columns'] = ""
     with open(solFileName, 'r', encoding='utf-8') as solFile:
@@ -32,7 +32,7 @@ def readMetadataSolFile(solFileName):
             if (l.startswith('##feeLLGood version:')):
                 metadata['feeLLGood version'] += l[2+l.find(':'):-1]
             elif (l.startswith('##settings file:')):
-                metadata['settings file name'] += l[2+l.find(':'):-1]
+                metadata['settings file'] += l[2+l.find(':'):-1]
             elif (l.startswith('##time:')):
                 metadata['time'] = float(l[2+l.find(':'):-1])
             elif (l.startswith('##columns:')):
