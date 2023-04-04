@@ -117,7 +117,7 @@ public:
                     std::cout << "writing electrostatic potential solutions to file " << fileName
                               << std::endl;
                     }
-                bool iznogood = msh.savesol(precision, fileName, "##columns: index\tV\n", V);
+                bool iznogood = msh.savesol(precision, fileName, "## columns: index\tV\n", V);
                 if (verbose && iznogood)
                     {
                     std::cout << "file " << fileName << " status : " << iznogood << std::endl;

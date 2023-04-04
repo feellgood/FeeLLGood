@@ -241,20 +241,20 @@ double mesh::readSol(bool VERBOSE, const std::string fileName)
     bool flag_t = false;
     while ((fin.peek() != EOF) && (str[0] == '#' && str[1] == '#'))
         {
-        idx = str.find("##time:");
+        idx = str.find("## time:");
         if (std::string::npos != idx)
-            {  // found beacon "##time:"
+            {  // found beacon "## time:"
             t = stod(str.substr(idx + 7));
             flag_t = true;
             break;
             }
         getline(fin, str);
         }
-    getline(fin, str);  // to skip ##columns line
+    getline(fin, str);  // to skip "## columns:" line
 
     if (!flag_t)
         {
-        std::cerr << "error: no ##time: beacon in input .sol file " << fileName << std::endl;
+        std::cerr << "error: no ## time: beacon in input .sol file " << fileName << std::endl;
         SYSTEM_ERROR;
         }
 
