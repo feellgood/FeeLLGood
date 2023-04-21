@@ -5,14 +5,12 @@
 #include <sys/types.h>  // for mkdir(), stat()
 #include <unistd.h>     // for getpid(), stat()
 
-#include "Utils/FTic.hpp"  //for counter from scalfmm
-
+#include "chronometer.h"
 #include "fem.h"
 #include "fmm_demag.h"
 #include "linear_algebra.h"
 #include "mesh.h"
 #include "time_integration.h"
-
 #include "electrostatSolver.h"
 
 // Catch some deadly signals in order to save the state before quitting.
@@ -181,7 +179,7 @@ std::string parseOptions(Settings &settings, int argc, char *argv[], unsigned in
 int main(int argc, char *argv[])
     {
     Settings mySettings;
-    FTic counter;
+    chronometer counter;
 
     unsigned int random_seed;
     std::string filename = parseOptions(mySettings, argc, argv, random_seed);
@@ -213,7 +211,7 @@ int main(int argc, char *argv[])
         fem.msh.infos();
         }
 
-    counter.tic();
+    counter.reset();
     LinAlgebra linAlg(mySettings, fem.msh);
 
     if (mySettings.stt_flag)
@@ -244,15 +242,9 @@ int main(int argc, char *argv[])
 
     int nt = time_integration(fem, mySettings, linAlg, myFMM, t_prm);
 
-    counter.tac();
-    double total_time = counter.elapsed();
+    double total_time = counter.fp_elapsed();
     std::cout << "\nComputing time:\n\n";
-    std::cout << "    total: " << total_time << " s";
-    if (total_time >= 3600)
-        std::cout << " (" << total_time / 3600 << " h)";
-    else if (total_time >= 60)
-        std::cout << " (" << total_time / 60 << " min)";
-    std::cout << '\n';
+    std::cout << "    total: " << counter.convertSeconds(total_time);
     std::cout << "    per time step: " << total_time / nt << " s\n";
     return 0;
     }
