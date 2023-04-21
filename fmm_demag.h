@@ -9,7 +9,6 @@ the fast multipole algorithm, and to compute the demag field.
 // scalFMM includes
 
 #include "Utils/FParameters.hpp"
-#include "Utils/FTic.hpp"
 
 #include "Components/FParticleType.hpp"
 #include "Components/FTypedLeaf.hpp"
@@ -23,6 +22,7 @@ the fast multipole algorithm, and to compute the demag field.
 #include "Kernels/Rotation/FRotationCell.hpp"
 #include "Kernels/Rotation/FRotationKernel.hpp"
 
+#include "chronometer.h"
 #include "mesh.h"
 
 /**
@@ -79,8 +79,7 @@ public:
         omp_set_num_threads(ScalfmmNbThreads);
         norm = 1. / (2. * msh.diam);
 
-        FTic counter;
-        counter.tic();
+        chronometer counter(2);
 
         FSize idxPart = 0;
         for (idxPart = 0; idxPart < NOD; ++idxPart)
@@ -95,11 +94,10 @@ public:
         insertCharges<Tetra::Tet, Tetra::NPI>(msh.tet, idxPart, msh.c);
         insertCharges<Facette::Fac, Facette::NPI>(msh.fac, idxPart, msh.c);
 
-        counter.tac();
         if (VERBOSE)
             {
             std::cout << "Magnetostatics: particles inserted, using " << ScalfmmNbThreads
-                      << " threads, in " << counter.elapsed() << " s.\n";
+                      << " threads, in " << counter.millis() << std::endl;
             }
         }
 
@@ -108,16 +106,14 @@ public:
     */
     void calc_demag(Mesh::mesh &msh, Settings &mySettings)
         {
-        FTic counter;
-        counter.tic();
+        chronometer counter(2);
 
         demag(Nodes::get_u, Nodes::set_phi, msh, mySettings);
         demag(Nodes::get_v, Nodes::set_phiv, msh, mySettings);
 
-        counter.tac();
         if (mySettings.verbose)
             {
-            std::cout << "magnetostatics done in " << counter.elapsed() << " s.\n";
+            std::cout << "magnetostatics done in " << counter.millis() << std::endl;
             }
         }
 

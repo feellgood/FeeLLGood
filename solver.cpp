@@ -1,11 +1,9 @@
-#include "Utils/FTic.hpp"
+#include "chronometer.h"
 #include "linear_algebra.h"
 
 int LinAlgebra::solver(timing const &t_prm, long nt)
     {
-    FTic counter;
-
-    counter.tic();
+    chronometer counter(2);
 
     write_matrix K_TH(2 * NOD, 2 * NOD);
     std::vector<double> L_TH(2 * NOD, 0);
@@ -13,11 +11,9 @@ int LinAlgebra::solver(timing const &t_prm, long nt)
     insertCoeff<Tetra::Tet>(refMsh->tet, K_TH, L_TH);
     insertCoeff<Facette::Fac>(refMsh->fac, K_TH, L_TH);
 
-    counter.tac();
-
     if (settings.verbose)
         {
-        std::cout << "matrix assembly done in " << counter.elapsed() << " s.\n";
+        std::cout << "matrix assembly done in " << counter.millis() << std::endl;
         }
 
     read_matrix Kr(2 * NOD, 2 * NOD);
@@ -42,53 +38,49 @@ int LinAlgebra::solver(timing const &t_prm, long nt)
         prc_time_step = nt;
         }
 
-    counter.tic();
+    counter.reset();
     // gmm::clear(X); // no need to clear X,it is zero initialized
     gmm::bicgstab(Kr, X, L_TH, *prc, bicg_iter);
 
     if (!(bicg_iter.converged()))
         {
-        counter.tac();
         if (settings.verbose)
             {
             std::cout << "solver: bicg (prc " << (nt % (settings.REFRESH_PRC)) << ") FAILED after "
-                      << bicg_iter.get_iteration() << " iterations, in " << counter.elapsed()
-                      << " s.\n";
+                      << bicg_iter.get_iteration() << " iterations, in " << counter.millis()
+                      << std::endl;
             }
         gmm::diagonal_precond<read_matrix> gmr_prc(Kr);
-        counter.tic();
+        counter.reset();
 
         gmm::clear(X);  // X is cleared for safety, it should be useless
         gmm::gmres(Kr, X, L_TH, gmr_prc, 50, gmr_iter);
 
         if (!(gmr_iter.converged()))
             {
-            counter.tac();
             if (settings.verbose)
                 {
                 std::cout << "solver: gmres FAILED after " << gmr_iter.get_iteration()
-                          << " iterations, in " << counter.elapsed() << " s.\n";
+                          << " iterations, in " << counter.millis() << std::endl;
                 }
             return 1;
             }
         else
             {
-            counter.tac();
             if (settings.verbose)
                 {
                 std::cout << "solver: gmres converged in " << gmr_iter.get_iteration()
-                          << " iterations, " << counter.elapsed() << " s.\n";
+                          << " iterations, " << counter.millis() << std::endl;
                 }
             }
         }
     else
         {
-        counter.tac();
         if (settings.verbose)
             {
             std::cout << "solver: bicg (prc " << (nt % (settings.REFRESH_PRC)) << ") converged in "
-                      << bicg_iter.get_iteration() << " iterations, " << counter.elapsed()
-                      << " s.\n";
+                      << bicg_iter.get_iteration() << " iterations, " << counter.millis()
+                      << std::endl;
             }
         }
 
