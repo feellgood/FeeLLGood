@@ -15,7 +15,7 @@ The code is being modified without any warranty it works. A dedicated website ca
 * [ScalFMM][] revision [22b9e4f6cf][ScalFMM-rev] (it should also work with V1.5.1)
 * [GMM][] 5.4 (it should also work with 4.x)
 
-[here]: http://feellgood.neel.cnrs.fr/
+[here]: https://feellgood.neel.cnrs.fr/
 [TBB]: https://www.threadingbuildingblocks.org/
 [yaml-cpp]: https://github.com/jbeder/yaml-cpp
 [ANN]: https://www.cs.umd.edu/~mount/ANN/

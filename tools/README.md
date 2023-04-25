@@ -10,4 +10,4 @@ working with feeLLGood:
 These tools are documented in the [tools section][] of the feeLLGood Web
 site.
 
-[tools section]: http://feellgood.neel.cnrs.fr/tools.html
+[tools section]: https://feellgood.neel.cnrs.fr/tools.html

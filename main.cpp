@@ -80,11 +80,11 @@ static std::string pad(const std::string &s, int length)
 
 void prompt(void)
     {
-    std::cout << "\t┌───────────────────────────────┐\n";
-    std::cout << "\t│           feeLLGood           │\n";
-    std::cout << "\t│      CNRS Grenoble – INP      │\n";
-    std::cout << "\t│ http://feellgood.neel.cnrs.fr │\n";
-    std::cout << "\t└───────────────────────────────┘\n";
+    std::cout << "\t┌────────────────────────────────┐\n";
+    std::cout << "\t│           feeLLGood            │\n";
+    std::cout << "\t│      CNRS Grenoble – INP       │\n";
+    std::cout << "\t│ https://feellgood.neel.cnrs.fr │\n";
+    std::cout << "\t└────────────────────────────────┘\n";
     }
 
 std::string parseOptions(Settings &settings, int argc, char *argv[], unsigned int &random_seed)

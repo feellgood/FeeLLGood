@@ -22,7 +22,7 @@ Summary of tested items:
 | the documentation builds |     ✘     |   ✔    |
 
 [GitHub Actions]: https://docs.github.com/en/actions
-[installation procedure]: http://feellgood.neel.cnrs.fr/install.html
+[installation procedure]: https://feellgood.neel.cnrs.fr/install.html
 
 ## Files
 
