@@ -38,12 +38,12 @@ void mesh::readMesh(Settings const &mySets)
 
                     switch (stoi(symb))
                         {
-                        case 2:
+                        case beacons::msh::DIM_OBJ_2D:
                             {
                             surfRegNames[tags] = name.substr(1, name.length() - 2);
                             break;
                             }
-                        case 3:
+                        case beacons::msh::DIM_OBJ_3D:
                             {
                             volRegNames[tags] = name.substr(1, name.length() - 2);
                             break;
@@ -112,7 +112,7 @@ void mesh::readMesh(Settings const &mySets)
                         msh >> symb;
                     switch (TYP)
                         {
-                        case 2:
+                        case beacons::msh::TYP_ELEM_TRIANGLE:
                             {
                             int i0, i1, i2;
                             msh >> i0 >> i1 >> i2;
@@ -142,7 +142,7 @@ void mesh::readMesh(Settings const &mySets)
 
                             break;
                             }
-                        case 4:
+                        case beacons::msh::TYP_ELEM_TETRAEDRON:
                             {
                             int i0, i1, i2, i3;
                             msh >> i0 >> i1 >> i2 >> i3;

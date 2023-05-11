@@ -26,6 +26,12 @@ namespace beacons
         const std::string begin_nodes = "$Nodes";
         const std::string begin_elements = "$Elements";
         const std::string end_elements = "$EndElements";
+
+        const int DIM_OBJ_2D = 2;
+        const int DIM_OBJ_3D = 3;
+        
+        const int TYP_ELEM_TRIANGLE = 2;
+        const int TYP_ELEM_TETRAEDRON = 4;
         }
 
     bool lookFor(const bool _b, std::ifstream &f_in, const std::string strWhat)
