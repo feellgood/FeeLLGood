@@ -17,7 +17,7 @@ settings = {
         "file_basename": "full_test",
         "evol_time_step": 1e-12,
         "final_time": 2e-11,
-        "take_photo": False
+        "take_photo": 5 #False
     },
     "mesh": {
         "filename": "../examples/ellipsoid.msh",

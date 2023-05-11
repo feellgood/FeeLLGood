@@ -1,6 +1,9 @@
 #ifndef tags_h
 #define tags_h
 
+/**
+error handler for input files
+*/
 void on_fail_msg_error(std::ifstream &f_in, const std::string strWhat);
 
 namespace tags
@@ -38,6 +41,9 @@ namespace tags
         const int TYP_ELEM_TETRAEDRON = 4;
         }
 
+    /**
+    convenient function to look for a tag in a text file, returns true if it was found
+    */
     bool lookFor(const bool _b, std::ifstream &f_in, const std::string strWhat);
 
     } // end namespace tags

@@ -13,6 +13,7 @@ void on_fail_msg_error(std::ifstream &f_in, const std::string strWhat)
         }
     }
 
+// carefull ! if strWhat tag contains a space it does not work ...
 bool tags::lookFor(const bool _b, std::ifstream &f_in, const std::string strWhat)
     {
     std::string symb = "";

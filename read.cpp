@@ -197,25 +197,32 @@ double mesh::readSol(bool VERBOSE, const std::string fileName)
 
     std::string str;
     getline(fin, str);
-    while ((fin.peek() != EOF) && (str[0] == '#' && str[1] != '#'))
-        {
-        getline(fin, str);
-        }  // to skip comments (if any)
-
-    unsigned long idx;
     bool flag_t = false;
+    unsigned long idx;
+
     while ((fin.peek() != EOF) && (str[0] == '#' && str[1] == '#'))
         {
+        getline(fin, str);
         idx = str.find(tags::sol::time);
         if (std::string::npos != idx)
-            {  // found beacon "## time:"
-            t = stod(str.substr(idx + 7));
+            {  // found tag "## time:"
+            t = stod(str.substr(idx + tags::sol::time.length() ));
             flag_t = true;
             break;
             }
+        }
+
+    // to skip "## columns:" line and optional comments starting with ##
+    while ((fin.peek() != EOF) && (str[0] == '#' && str[1] == '#'))
+        {
+        idx = str.find(tags::sol::columns);
+        if (std::string::npos != idx)
+            {  // found tag "## columns:"
+            break;
+            }
+
         getline(fin, str);
         }
-    getline(fin, str);  // to skip "## columns:" line
 
     if (!flag_t)
         {
