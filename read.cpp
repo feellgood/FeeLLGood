@@ -41,26 +41,22 @@ void mesh::readMesh(Settings const &mySets)
     on_fail_msg_error(msh, "cannot open file " + mySets.getPbName() );
 
     msh >> symb;
-    if (symb == "$MeshFormat")
+    if (symb == beacons::msh::format)
         {
         std::string mshFormat = "";
         msh >> mshFormat;
-        if (mshFormat == "2.2")
+        if (mshFormat == beacons::msh::version)
             {
-            if (mySets.verbose)
-                {
-                std::cout << "  file format: 2.2\n";
-                }
             int tags, reg, TYP;
 
-            bool beaconFound = lookFor(false, msh, "$PhysicalNames");
+            bool beaconFound = lookFor(false, msh, beacons::msh::begin_physical_names);
 
             int nbRegNames;
             if (beaconFound)
                 {
                 msh >> nbRegNames;
 
-                while ((msh >> symb) && (symb != "$EndPhysicalNames") && (!msh.fail()))
+                while ((msh >> symb) && (symb != beacons::msh::end_physical_names) && (!msh.fail()))
                     {
                     std::string name;
                     msh >> tags >> name;
@@ -78,7 +74,7 @@ void mesh::readMesh(Settings const &mySets)
                             break;
                             }
                         default:
-                            std::cerr << "unknown type in mesh $PhysicalNames" << std::endl;
+                            std::cerr << "unknown type in mesh " << beacons::msh::begin_physical_names << std::endl;
                             break;
                         }
                     }
@@ -98,16 +94,12 @@ void mesh::readMesh(Settings const &mySets)
                 }
             else
                 {
-                if (mySets.verbose)
-                    {
-                    std::cout << "No $PhysicalNames defined.\n";
-                    }
-
+                std::cerr << beacons::msh::begin_physical_names <<" undefined." << std::endl;
                 msh.clear();
                 msh.seekg(std::ios::beg);
                 }
 
-            beaconFound = lookFor(true, msh, "$Nodes");
+            beaconFound = lookFor(true, msh, beacons::msh::begin_nodes);
 
             double scale = mySets.getScale();
             int nbNod;
@@ -131,7 +123,7 @@ void mesh::readMesh(Settings const &mySets)
                 s.push_back(Mesh::Surf(node, it->second));
                 }
 
-            beaconFound = lookFor(true, msh, "$Elements");
+            beaconFound = lookFor(true, msh, beacons::msh::begin_elements);
 
             int nbElem;
 
@@ -142,7 +134,7 @@ void mesh::readMesh(Settings const &mySets)
                     {
                     std::cout << "  element count: " << nbElem << '\n';
                     }
-                while ((msh >> symb) && (symb != "$EndElements") && (!msh.fail()))
+                while ((msh >> symb) && (symb != beacons::msh::end_elements) && (!msh.fail()))
                     {
                     msh >> TYP >> tags >> reg;
                     for (int i = 1; i < tags; i++)
@@ -195,7 +187,7 @@ void mesh::readMesh(Settings const &mySets)
                                 }
                             break;
                             }
-                        default: std::cerr << "unknown type in mesh $Elements" << std::endl; break;
+                        default: std::cerr << "unknown object type in mesh\n"; break;
                         }
                     }
                 }
