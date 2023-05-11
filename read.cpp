@@ -2,6 +2,8 @@
 #include "mesh.h"
 #include "pt3D.h"
 
+#include "beacons.h"
+
 void on_fail_msg_error(std::ifstream &f_in, const std::string strWhat)
     {
     if (f_in.fail())
@@ -241,7 +243,7 @@ double mesh::readSol(bool VERBOSE, const std::string fileName)
     bool flag_t = false;
     while ((fin.peek() != EOF) && (str[0] == '#' && str[1] == '#'))
         {
-        idx = str.find("## time:");
+        idx = str.find(beacons::sol::time);
         if (std::string::npos != idx)
             {  // found beacon "## time:"
             t = stod(str.substr(idx + 7));
