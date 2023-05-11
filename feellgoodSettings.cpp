@@ -191,18 +191,18 @@ void Settings::infos()
 std::string Settings::evolMetadata(std::string realWorldTime) const
     {
     std::ostringstream ss;
-    ss << "## feeLLGood version: " << feellgood_version << std::endl;
+    ss << tags::evol::version << ' ' << feellgood_version << std::endl;
     char name[HOST_NAME_MAX];
     if (gethostname(name, HOST_NAME_MAX) != ENAMETOOLONG)
         {
-        ss << "## hostname: " << name << std::endl;
+        ss << tags::evol::hostname << ' ' << name << std::endl;
         }
-    ss << "## real-world time: " << realWorldTime << std::endl;
-    ss << "## settings file: " << getFileDisplayName() << std::endl;
-    ss << "## columns: ";
+    ss << tags::evol::rw_time << ' ' << realWorldTime << std::endl;
+    ss << tags::evol::settings_file << ' ' << getFileDisplayName() << std::endl;
+    ss << tags::evol::columns << ' ';
     for (unsigned int i = 0; i < (evol_columns.size() - 1); i++)
         {
-        ss << evol_columns[i] << "\t";
+        ss << evol_columns[i] << '\t';
         }
     ss << evol_columns[evol_columns.size() - 1] << std::endl;
     return ss.str();

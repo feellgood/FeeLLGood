@@ -12,6 +12,15 @@ namespace tags
         const std::string columns = "## columns:";
         }
     
+    namespace evol
+        {
+        const std::string version = "## feeLLGood version:";
+        const std::string hostname = "## hostname:";
+        const std::string rw_time = "## real-world time:";
+        const std::string settings_file = "## settings file:";
+        const std::string columns = "## columns:";
+        }
+
     namespace msh
         {
         const std::string format = "$MeshFormat";
