@@ -1,5 +1,5 @@
-#ifndef beacons_h
-#define beacons_h
+#ifndef tags_h
+#define tags_h
 
 void on_fail_msg_error(std::ifstream &f_in, const std::string strWhat)
     {
@@ -10,7 +10,7 @@ void on_fail_msg_error(std::ifstream &f_in, const std::string strWhat)
         }
     }
 
-namespace beacons
+namespace tags
     {
     namespace sol
         {
@@ -42,11 +42,11 @@ namespace beacons
         f_in >> symb;
         }
 
-    if (_b) on_fail_msg_error(f_in, "could not find beacon " + strWhat);
+    if (_b) on_fail_msg_error(f_in, "could not find tag " + strWhat);
 
     return !(f_in.fail());
     }
 
-    } // end namespace beacons
+    } // end namespace tags
     
 #endif

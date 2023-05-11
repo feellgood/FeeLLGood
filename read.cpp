@@ -2,7 +2,7 @@
 #include "mesh.h"
 #include "pt3D.h"
 
-#include "beacons.h"
+#include "tags.h"
 
 namespace Mesh
     {
@@ -19,37 +19,37 @@ void mesh::readMesh(Settings const &mySets)
     on_fail_msg_error(msh, "cannot open file " + mySets.getPbName() );
 
     msh >> symb;
-    if (symb == beacons::msh::format)
+    if (symb == tags::msh::format)
         {
         std::string mshFormat = "";
         msh >> mshFormat;
-        if (mshFormat == beacons::msh::version)
+        if (mshFormat == tags::msh::version)
             {
-            int tags, reg, TYP,nbRegNames;
+            int _tags, reg, TYP,nbRegNames;
 
-            if (beacons::lookFor(false, msh, beacons::msh::begin_physical_names))
+            if (tags::lookFor(false, msh, tags::msh::begin_physical_names))
                 {
                 msh >> nbRegNames;
 
-                while ((msh >> symb) && (symb != beacons::msh::end_physical_names) && (!msh.fail()))
+                while ((msh >> symb) && (symb != tags::msh::end_physical_names) && (!msh.fail()))
                     {
                     std::string name;
-                    msh >> tags >> name;
+                    msh >> _tags >> name;
 
                     switch (stoi(symb))
                         {
-                        case beacons::msh::DIM_OBJ_2D:
+                        case tags::msh::DIM_OBJ_2D:
                             {
-                            surfRegNames[tags] = name.substr(1, name.length() - 2);
+                            surfRegNames[_tags] = name.substr(1, name.length() - 2);
                             break;
                             }
-                        case beacons::msh::DIM_OBJ_3D:
+                        case tags::msh::DIM_OBJ_3D:
                             {
-                            volRegNames[tags] = name.substr(1, name.length() - 2);
+                            volRegNames[_tags] = name.substr(1, name.length() - 2);
                             break;
                             }
                         default:
-                            std::cerr << "unknown type in mesh " << beacons::msh::begin_physical_names << std::endl;
+                            std::cerr << "unknown type in mesh " << tags::msh::begin_physical_names << std::endl;
                             break;
                         }
                     }
@@ -69,7 +69,7 @@ void mesh::readMesh(Settings const &mySets)
                 }
             else
                 {
-                std::cerr << beacons::msh::begin_physical_names <<" undefined." << std::endl;
+                std::cerr << tags::msh::begin_physical_names <<" undefined." << std::endl;
                 msh.clear();
                 msh.seekg(std::ios::beg);
                 }
@@ -77,7 +77,7 @@ void mesh::readMesh(Settings const &mySets)
             double scale = mySets.getScale();
             int nbNod;
 
-            if (beacons::lookFor(true, msh, beacons::msh::begin_nodes))
+            if (tags::lookFor(true, msh, tags::msh::begin_nodes))
                 {
                 msh >> nbNod;
                 init_node(nbNod);
@@ -98,21 +98,21 @@ void mesh::readMesh(Settings const &mySets)
 
             int nbElem;
 
-            if (beacons::lookFor(true, msh, beacons::msh::begin_elements))
+            if (tags::lookFor(true, msh, tags::msh::begin_elements))
                 {
                 msh >> nbElem;
                 if (mySets.verbose)
                     {
                     std::cout << "  element count: " << nbElem << '\n';
                     }
-                while ((msh >> symb) && (symb != beacons::msh::end_elements) && (!msh.fail()))
+                while ((msh >> symb) && (symb != tags::msh::end_elements) && (!msh.fail()))
                     {
-                    msh >> TYP >> tags >> reg;
-                    for (int i = 1; i < tags; i++)
+                    msh >> TYP >> _tags >> reg;
+                    for (int i = 1; i < _tags; i++)
                         msh >> symb;
                     switch (TYP)
                         {
-                        case beacons::msh::TYP_ELEM_TRIANGLE:
+                        case tags::msh::TYP_ELEM_TRIANGLE:
                             {
                             int i0, i1, i2;
                             msh >> i0 >> i1 >> i2;
@@ -142,7 +142,7 @@ void mesh::readMesh(Settings const &mySets)
 
                             break;
                             }
-                        case beacons::msh::TYP_ELEM_TETRAEDRON:
+                        case tags::msh::TYP_ELEM_TETRAEDRON:
                             {
                             int i0, i1, i2, i3;
                             msh >> i0 >> i1 >> i2 >> i3;
@@ -193,7 +193,7 @@ double mesh::readSol(bool VERBOSE, const std::string fileName)
     double t(0);
     std::ifstream fin(fileName, std::ifstream::in);
 
-    on_fail_msg_error(fin, "cannot open file: " + fileName);
+    on_fail_msg_error(fin, "cannot open file " + fileName);
 
     std::string str;
     getline(fin, str);
@@ -206,7 +206,7 @@ double mesh::readSol(bool VERBOSE, const std::string fileName)
     bool flag_t = false;
     while ((fin.peek() != EOF) && (str[0] == '#' && str[1] == '#'))
         {
-        idx = str.find(beacons::sol::time);
+        idx = str.find(tags::sol::time);
         if (std::string::npos != idx)
             {  // found beacon "## time:"
             t = stod(str.substr(idx + 7));
@@ -219,7 +219,7 @@ double mesh::readSol(bool VERBOSE, const std::string fileName)
 
     if (!flag_t)
         {
-        std::cerr << "error: no ## time: beacon in input .sol file " << fileName << std::endl;
+        std::cerr << "error: no ## time: tag in input .sol file " << fileName << std::endl;
         SYSTEM_ERROR;
         }
 
