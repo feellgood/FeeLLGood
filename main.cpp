@@ -212,6 +212,7 @@ int main(int argc, char *argv[])
         }
 
     counter.reset();
+    std::cout << "starting on:       " << date() << std::endl;
     LinAlgebra linAlg(mySettings, fem.msh);
 
     if (mySettings.stt_flag)
