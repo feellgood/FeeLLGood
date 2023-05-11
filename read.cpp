@@ -4,28 +4,6 @@
 
 #include "beacons.h"
 
-void on_fail_msg_error(std::ifstream &f_in, const std::string strWhat)
-    {
-    if (f_in.fail())
-        {
-        std::cerr << strWhat << ": " << strerror(errno) << std::endl;
-        SYSTEM_ERROR;
-        }
-    }
-
-bool lookFor(const bool _b, std::ifstream &f_in, const std::string strWhat)
-    {
-    std::string symb = "";
-    while ((f_in.peek() != EOF) && (symb != strWhat))
-        {
-        f_in >> symb;
-        }
-
-    if (_b) on_fail_msg_error(f_in, "could not find beacon " + strWhat);
-
-    return !(f_in.fail());
-    }
-
 namespace Mesh
     {
 
@@ -47,12 +25,9 @@ void mesh::readMesh(Settings const &mySets)
         msh >> mshFormat;
         if (mshFormat == beacons::msh::version)
             {
-            int tags, reg, TYP;
+            int tags, reg, TYP,nbRegNames;
 
-            bool beaconFound = lookFor(false, msh, beacons::msh::begin_physical_names);
-
-            int nbRegNames;
-            if (beaconFound)
+            if (beacons::lookFor(false, msh, beacons::msh::begin_physical_names))
                 {
                 msh >> nbRegNames;
 
@@ -99,12 +74,10 @@ void mesh::readMesh(Settings const &mySets)
                 msh.seekg(std::ios::beg);
                 }
 
-            beaconFound = lookFor(true, msh, beacons::msh::begin_nodes);
-
             double scale = mySets.getScale();
             int nbNod;
 
-            if (beaconFound)
+            if (beacons::lookFor(true, msh, beacons::msh::begin_nodes))
                 {
                 msh >> nbNod;
                 init_node(nbNod);
@@ -123,11 +96,9 @@ void mesh::readMesh(Settings const &mySets)
                 s.push_back(Mesh::Surf(node, it->second));
                 }
 
-            beaconFound = lookFor(true, msh, beacons::msh::begin_elements);
-
             int nbElem;
 
-            if (beaconFound)
+            if (beacons::lookFor(true, msh, beacons::msh::begin_elements))
                 {
                 msh >> nbElem;
                 if (mySets.verbose)
