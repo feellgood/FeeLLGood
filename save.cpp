@@ -7,17 +7,9 @@
 #include "time_integration.h"
 
 #include "tags.h"
+#include "chronometer.h"
 
 using namespace std;
-
-std::string date(void)
-    {
-    std::stringstream realWorldTime;
-    std::time_t _t = std::time(nullptr);
-    realWorldTime << std::put_time(std::localtime(&_t), "%FT%H:%M:%S%z");
-
-    return realWorldTime.str();
-    }
 
 void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const int nt) const
     {

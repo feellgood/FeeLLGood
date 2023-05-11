@@ -6,6 +6,8 @@
 #include <iomanip>
 #include <sstream>
 
+std::string date(void);
+
 /** \class chronometer
 convenient class to measure durations in ms or µs. Constructor is initialized with a starting value.
 Then each successive calls to millis() or micros() are measuring the elapsed time since last call.

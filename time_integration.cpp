@@ -4,7 +4,7 @@
 
 #include "fem.h"
 #include "time_integration.h"
-
+#include "chronometer.h"
 #include "fmm_demag.h"
 #include "linear_algebra.h"
 #include "log-stats.h"
@@ -152,11 +152,7 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
         SYSTEM_ERROR;
         }
 
-    std::stringstream realWorldTime;
-    std::time_t _t = std::time(nullptr);
-    realWorldTime << std::put_time(std::localtime(&_t), "%FT%H:%M:%S%z");
-
-    fout << settings.evolMetadata(realWorldTime.str());
+    fout << settings.evolMetadata(date());
 
     int flag(0);
     int nt_output(0);  // visible iteration count
