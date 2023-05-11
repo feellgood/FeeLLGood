@@ -9,6 +9,7 @@ namespace tags
         {
         const std::string time = "## time:";
         const std::string rw_time = "## real-world time:";
+        const std::string columns = "## columns:";
         }
     
     namespace msh

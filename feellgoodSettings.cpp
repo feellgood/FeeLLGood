@@ -2,6 +2,7 @@
 #include <string>
 #include <unistd.h>  // for sysconf(), gethostname()
 
+#include "tags.h"
 #include "feellgoodSettings.h"
 
 /***********************************************************************
@@ -210,8 +211,8 @@ std::string Settings::evolMetadata(std::string realWorldTime) const
 std::string Settings::solMetadata(double t, std::string columnsTitle) const
     {
     std::ostringstream ss;
-    ss << "## time: " << std::scientific << t << std::endl;
-    ss << "## columns: " << columnsTitle << std::endl;
+    ss << tags::sol::time << ' ' << std::scientific << t << std::endl;
+    ss << tags::sol::columns << ' ' << columnsTitle << std::endl;
     return ss.str();
     }
 
