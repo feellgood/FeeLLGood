@@ -10,6 +10,15 @@
 
 using namespace std;
 
+std::string date(void)
+    {
+    std::stringstream realWorldTime;
+    std::time_t _t = std::time(nullptr);
+    realWorldTime << std::put_time(std::localtime(&_t), "%FT%H:%M:%S%z");
+
+    return realWorldTime.str();
+    }
+
 void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const int nt) const
     {
     int save_period = settings.save_period;
@@ -140,16 +149,12 @@ void Mesh::mesh::savesol(const int precision, const std::string fileName,
         SYSTEM_ERROR;
         }
 
-    std::stringstream realWorldTime;
-    std::time_t _t = std::time(nullptr);
-    realWorldTime << std::put_time(std::localtime(&_t), "%FT%H:%M:%S%z");
-
-    fout << tags::sol::rw_time << ' ' << realWorldTime.str() << '\n'
-         << metadata << std::scientific << std::setprecision(precision);
+    fout << tags::sol::rw_time << ' ' <<  date() << '\n' << metadata << std::scientific
+         << std::setprecision(precision);
 
     for (unsigned int i = 0; i < node.size(); i++)
         {
-        fout << i << "\t" << node[i].u << "\t" << node[i].phi << endl;
+        fout << i << '\t' << node[i].u << '\t' << node[i].phi << endl;
         }
 
     fout.close();
@@ -165,12 +170,8 @@ bool Mesh::mesh::savesol(const int precision, const std::string fileName,
         SYSTEM_ERROR;
         }
 
-    std::stringstream realWorldTime;
-    std::time_t _t = std::time(nullptr);
-    realWorldTime << std::put_time(std::localtime(&_t), "%FT%H:%M:%S%z");
-
-    fout << tags::sol::rw_time << ' ' << realWorldTime.str() << '\n'
-         << metadata << std::scientific << std::setprecision(precision);
+    fout << tags::sol::rw_time << ' ' << date() << '\n' << metadata << std::scientific 
+         << std::setprecision(precision);
 
     if (node.size() == val.size())
         {
