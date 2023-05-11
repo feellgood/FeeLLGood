@@ -6,6 +6,8 @@
 #include "mesh.h"
 #include "time_integration.h"
 
+#include "tags.h"
+
 using namespace std;
 
 void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const int nt) const
@@ -142,7 +144,7 @@ void Mesh::mesh::savesol(const int precision, const std::string fileName,
     std::time_t _t = std::time(nullptr);
     realWorldTime << std::put_time(std::localtime(&_t), "%FT%H:%M:%S%z");
 
-    fout << "## real-world time: " << realWorldTime.str() << '\n'
+    fout << tags::sol::rw_time << ' ' << realWorldTime.str() << '\n'
          << metadata << std::scientific << std::setprecision(precision);
 
     for (unsigned int i = 0; i < node.size(); i++)
@@ -167,7 +169,7 @@ bool Mesh::mesh::savesol(const int precision, const std::string fileName,
     std::time_t _t = std::time(nullptr);
     realWorldTime << std::put_time(std::localtime(&_t), "%FT%H:%M:%S%z");
 
-    fout << "## real-world time: " << realWorldTime.str() << '\n'
+    fout << tags::sol::rw_time << ' ' << realWorldTime.str() << '\n'
          << metadata << std::scientific << std::setprecision(precision);
 
     if (node.size() == val.size())
