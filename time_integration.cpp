@@ -137,8 +137,6 @@ inline void compute_all(Fem &fem, Settings &settings, scal_fmm::fmm &myFMM, doub
 int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linAlg /**< [in] */,
                      scal_fmm::fmm &myFMM /**< [in] */, timing &t_prm)
     {
-    fem.DW_z = 0.0;
-
     compute_all(fem, settings, myFMM, t_prm.get_t());
 
     std::string baseName = settings.r_path_output_dir + '/' + settings.getSimName();
@@ -188,15 +186,6 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
                 goto bailout;
                 }
 
-            /* frame change */
-            if (settings.recenter)
-                {
-                fem.DW_vz += fem.DW_dir
-                             * fem.msh.avg(Nodes::get_v0_comp, settings.recentering_direction)
-                             * Pt::pScal(Pt::pt3D(settings.recentering_direction), fem.msh.l) / 2.;
-                linAlg.set_DW_vz(fem.DW_vz);
-                }
-
             Pt::pt3D Hext = settings.getValue(t_prm.get_t());
 
             linAlg.prepareElements(Hext, t_prm);
@@ -236,7 +225,6 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
             else
                 t_prm.inc_t();
 
-            fem.DW_z += fem.DW_vz * t_prm.get_dt();
             if (settings.recenter) fem.recenter(settings.threshold, settings.recentering_direction);
             if (!settings.verbose) show_progress(t_prm.get_t() / t_prm.tf);
             }  // endwhile
