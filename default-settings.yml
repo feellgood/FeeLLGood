@@ -56,7 +56,6 @@ outputs:
   # - <dMz/dt>: average change rate of Mz
   # - E_aniso: anisotropy energy
   # - DW_z: domain wall position along z
-  # - DW_dz: domain wall displacement
   evol_columns:
     - t         # time
     - <Mx>      # Average value of Mx
