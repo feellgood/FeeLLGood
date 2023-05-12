@@ -196,32 +196,18 @@ double mesh::readSol(bool VERBOSE, const std::string fileName)
     on_fail_msg_error(fin, "cannot open file " + fileName);
 
     std::string str;
-    getline(fin, str);
     bool flag_t = false;
     unsigned long idx;
 
-    while ((fin.peek() != EOF) && (str[0] == '#' && str[1] == '#'))
+    while (fin.peek() == '#' || fin.peek() == '\n')
         {
         getline(fin, str);
         idx = str.find(tags::sol::time);
-        if (std::string::npos != idx)
+        if (idx != std::string::npos)
             {  // found tag "## time:"
             t = stod(str.substr(idx + tags::sol::time.length() ));
             flag_t = true;
-            break;
             }
-        }
-
-    // to skip "## columns:" line and optional comments starting with ##
-    while ((fin.peek() != EOF) && (str[0] == '#' && str[1] == '#'))
-        {
-        idx = str.find(tags::sol::columns);
-        if (std::string::npos != idx)
-            {  // found tag "## columns:"
-            break;
-            }
-
-        getline(fin, str);
         }
 
     if (!flag_t)
