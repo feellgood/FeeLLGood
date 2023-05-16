@@ -46,7 +46,10 @@ if(${ENABLE_LTO})
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
-set( CMAKE_CXX_FLAGS "-DNDEBUG -Wall -Wextra -std=c++17 -fopenmp -O3 -march=native" CACHE STRING "C++ compiler flags used during builds." FORCE )
+set(CMAKE_CXX_FLAGS
+    "-DNDEBUG -DTBB_SUPPRESS_DEPRECATED_MESSAGES \
+    -Wall -Wextra -std=c++17 -fopenmp -O3 -march=native"
+    CACHE STRING "C++ compiler flags used during builds." FORCE)
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
 
