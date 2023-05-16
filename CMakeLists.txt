@@ -1,9 +1,5 @@
-if(POLICY CMP0048)
-    cmake_policy(SET CMP0048 NEW) # CMake 3.0.0
-endif()
-
-PROJECT (FEELLGOOD)
 cmake_minimum_required(VERSION 3.0)
+PROJECT(FEELLGOOD)
 
 ENABLE_LANGUAGE(CXX)
 
