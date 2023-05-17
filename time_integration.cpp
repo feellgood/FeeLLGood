@@ -135,7 +135,7 @@ inline void compute_all(Fem &fem, Settings &settings, scal_fmm::fmm &myFMM, doub
     }
 
 int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linAlg /**< [in] */,
-                     scal_fmm::fmm &myFMM /**< [in] */, timing &t_prm)
+                     scal_fmm::fmm &myFMM /**< [in] */, timing &t_prm, int &nt)
     {
     compute_all(fem, settings, myFMM, t_prm.get_t());
 
@@ -154,12 +154,13 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
 
     int flag(0);
     int nt_output(0);  // visible iteration count
-    int nt(0);         // total iteration count
+    int status(0);     // exit status
     double t_step = settings.time_step;
     TimeStepper stepper(t_prm.get_dt(), t_prm.DTMIN, t_prm.DTMAX);
     Stats stats;
 
     // Loop over the visible time steps, i.e. those that will appear on the output file.
+    nt = 0;
     for (double t_target = t_prm.get_t(); t_target < t_prm.tf + t_step / 2; t_target += t_step)
         {
         // Loop over the integration time steps within a visible step.
@@ -183,6 +184,7 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
             if (t_prm.is_dt_TooSmall())
                 {
                 std::cout << "\n**ABORTED**: dt < DTMIN\n";
+                status = 1;
                 goto bailout;
                 }
 
@@ -235,5 +237,5 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
 bailout:
     fout.close();
     print_stats(stats);
-    return nt;
+    return status;
     }
