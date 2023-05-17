@@ -25,8 +25,10 @@ int LinAlgebra::solver(timing const &t_prm, long nt)
     gmm::iteration gmr_iter(1e-6);
     bicg_iter.set_maxiter(settings.MAXITER);
     gmr_iter.set_maxiter(settings.MAXITER);
-    bicg_iter.set_noisy(settings.verbose);
-    gmr_iter.set_noisy(settings.verbose);
+
+    // Let GMM be noisy only at verbosity levels higher than one.
+    bicg_iter.set_noisy(settings.verbose > 1);
+    gmr_iter.set_noisy(settings.verbose > 1);
 
     if (!prc || (nt - prc_time_step >= settings.REFRESH_PRC))
         {

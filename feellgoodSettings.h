@@ -88,7 +88,7 @@ public:
     /** boolean flag to mention if you want output in txt tsv file format */
     bool withTsv;
 
-    bool verbose; /**< if true the user gets many printing feedback in terminal */
+    int verbose; /**< verbosity level, defaults to zero */
 
     double time_step; /**< energy saved every time_step */
     int save_period;  /**< magnetic configuration saved every save_period time steps */

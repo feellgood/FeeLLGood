@@ -89,16 +89,16 @@ void prompt(void)
 
 std::string parseOptions(Settings &settings, int argc, char *argv[], unsigned int &random_seed)
     {
-    bool print_help = false;
-    bool print_version = false;
-    bool print_defaults = false;
-    bool verify = false;
-    bool use_fixed_seed = false;
+    int print_help = false;
+    int print_version = false;
+    int print_defaults = false;
+    int verify = false;
+    int use_fixed_seed = false;
     struct Option
         {
         std::string short_opt, long_opt;
         const char *help;
-        bool *setting;
+        int *setting;
         };
     struct Option options[] = {
             {"-h", "--help", "display short help and exit", &print_help},
@@ -119,7 +119,7 @@ std::string parseOptions(Settings &settings, int argc, char *argv[], unsigned in
             {
             if (opt == o->short_opt || opt == o->long_opt)
                 {
-                *o->setting = true;
+                (*o->setting)++;
                 if (o->long_opt == "--seed" && optind < argc - 1)
                     {
                     random_seed = atol(argv[++optind]);
