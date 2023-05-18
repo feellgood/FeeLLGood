@@ -23,25 +23,25 @@
  */
 namespace Tetra
     {
-const int N = 4;   /**< number of sommits */
-const int NPI = 5; /**< number of weights  */
+constexpr int N = 4;   /**< number of sommits */
+constexpr int NPI = 5; /**< number of weights  */
 
-const double epsilon =
+constexpr double epsilon =
         EPSILON; /**< this constant is defined from a macro in config.h.in, it is used to check the
                     validity of the tetrahedreon, a degeneracy test */
 
-const double A = 1. / 4.;                /**< constant to build hat functions */
-const double B = 1. / 6.;                /**< constant to build hat functions */
-const double C = 1. / 2.;                /**< constant to build hat functions */
-const double D = -2. / 15.;              /**< constant to build hat functions */
-const double E = 3. / 40.;               /**< constant to build hat functions */
-const double u[NPI] = {A, B, B, B, C};   /**< some constants to build hat functions */
-const double v[NPI] = {A, B, B, C, B};   /**< some constants to build hat functions */
-const double w[NPI] = {A, B, C, B, B};   /**< some constants to build hat functions */
-const double pds[NPI] = {D, E, E, E, E}; /**< some constant weights to build hat functions */
+constexpr double A = 1. / 4.;                /**< constant to build hat functions */
+constexpr double B = 1. / 6.;                /**< constant to build hat functions */
+constexpr double C = 1. / 2.;                /**< constant to build hat functions */
+constexpr double D = -2. / 15.;              /**< constant to build hat functions */
+constexpr double E = 3. / 40.;               /**< constant to build hat functions */
+constexpr double u[NPI] = {A, B, B, B, C};   /**< some constants to build hat functions */
+constexpr double v[NPI] = {A, B, B, C, B};   /**< some constants to build hat functions */
+constexpr double w[NPI] = {A, B, C, B, B};   /**< some constants to build hat functions */
+constexpr double pds[NPI] = {D, E, E, E, E}; /**< some constant weights to build hat functions */
 
 /** constant matrix */
-const double dadu[N][Pt::DIM] = {{-1., -1., -1.}, {1., 0., 0.}, {0., 1., 0.}, {0., 0., 1.}};
+constexpr double dadu[N][Pt::DIM] = {{-1., -1., -1.}, {1., 0., 0.}, {0., 1., 0.}, {0., 0., 1.}};
 
 /** constant matrix \f$ j:0..4 \f$
 a[0][j]   = 1.-u[j]-v[j]-w[j];

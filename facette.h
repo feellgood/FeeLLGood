@@ -20,12 +20,12 @@ namespace Facette
 const int N = 3;   /**< number of sommits */
 const int NPI = 4; /**< number of weights  */
 
-const double u[NPI] = {1 / 3., 1 / 5., 3 / 5.,
-                       1 / 5.}; /**< some constants to build hat functions */
-const double v[NPI] = {1 / 3., 1 / 5., 1 / 5.,
-                       3 / 5.}; /**< some constants  to build hat functions */
-const double pds[NPI] = {-27 / 96., 25 / 96., 25 / 96.,
-                         25 / 96.}; /**< some constant weights  to build hat functions */
+constexpr double u[NPI] = {1 / 3., 1 / 5., 3 / 5.,
+                           1 / 5.}; /**< some constants to build hat functions */
+constexpr double v[NPI] = {1 / 3., 1 / 5., 1 / 5.,
+                           3 / 5.}; /**< some constants  to build hat functions */
+constexpr double pds[NPI] = {-27 / 96., 25 / 96., 25 / 96.,
+                             25 / 96.}; /**< some constant weights  to build hat functions */
 
 /** hat function constants */
 constexpr double a[N][NPI] = {
