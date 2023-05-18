@@ -78,7 +78,7 @@ if [ ! -f "ann_1.1.2.tar.gz" ]; then
 fi
 tar xzf ann_1.1.2.tar.gz
 cd ann_1.1.2/
-sed -i 's/CFLAGS =.* -O3/& -std=c++98/' Make-config
+sed -i.bak 's/CFLAGS =.* -O3/& -std=c++98/' Make-config
 make -C src -j $job_count linux-g++
 sudo cp lib/libANN.a /usr/local/lib/
 sudo cp include/ANN/ANN.h /usr/local/include/
@@ -105,8 +105,8 @@ if [ ! -f "ScalFMM-$scalfmm_sha1.tar.gz" ]; then
 fi
 tar xzf ScalFMM-$scalfmm_sha1.tar.gz
 cd ScalFMM-$scalfmm_sha1/
-sed -i 's/memcpy/if (nbParticles != 0) memcpy/' Src/Components/FBasicParticleContainer.hpp
-sed -i 's/OPENMP_CXX_FOUND/OPENMP_FOUND OR OPENMP_CXX_FOUND/' CMakeLists.txt
+sed -i.bak 's/memcpy/if (nbParticles != 0) memcpy/' Src/Components/FBasicParticleContainer.hpp
+sed -i.bak 's/OPENMP_CXX_FOUND/OPENMP_FOUND OR OPENMP_CXX_FOUND/' CMakeLists.txt
 cd Build
 cmake .. -DSCALFMM_BUILD_EXAMPLES=OFF
 make -j $job_count
