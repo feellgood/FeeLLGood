@@ -79,7 +79,7 @@ fi
 tar xzf ann_1.1.2.tar.gz
 cd ann_1.1.2/
 sed -i 's/CFLAGS =.* -O3/& -std=c++98/' Make-config
-make -j $job_count linux-g++
+make -C src -j $job_count linux-g++
 sudo cp lib/libANN.a /usr/local/lib/
 sudo cp include/ANN/ANN.h /usr/local/include/
 cd ..
