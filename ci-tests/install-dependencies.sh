@@ -120,6 +120,6 @@ if [ ! -f "gmm-5.4.tar.gz" ]; then
 fi
 tar xzf gmm-5.4.tar.gz
 cd gmm-5.4/
-./configure
+CXX=g++ ./configure
 make -j $job_count
 sudo make install
