@@ -108,7 +108,7 @@ cd ScalFMM-$scalfmm_sha1/
 sed -i 's/memcpy/if (nbParticles != 0) memcpy/' Src/Components/FBasicParticleContainer.hpp
 sed -i 's/OPENMP_CXX_FOUND/OPENMP_FOUND OR OPENMP_CXX_FOUND/' CMakeLists.txt
 cd Build
-cmake ..
+cmake .. -DSCALFMM_BUILD_EXAMPLES=OFF
 make -j $job_count
 sudo make install
 cd ../..
