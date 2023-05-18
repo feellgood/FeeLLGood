@@ -11,6 +11,11 @@
 #include "chronometer.h"
 #include "settings.h"
 
+// macOS does not define HOST_NAME_MAX.
+#ifndef HOST_NAME_MAX
+#    define HOST_NAME_MAX 256
+#endif
+
 using namespace Nodes;
 
 /***********************************************************************
