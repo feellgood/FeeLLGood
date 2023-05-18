@@ -25,7 +25,12 @@ while getopts "ud" OPT; do
 done
 
 # Identify the OS.
-eval $(grep -E '^(ID|PRETTY_NAME)=' /etc/os-release)
+if [[ $OSTYPE == darwin* ]]; then
+    ID="darwin"
+    PRETTY_NAME="Darwin"
+else
+    eval $(grep -E '^(ID|PRETTY_NAME)=' /etc/os-release)
+fi
 echo -e "\n*** Building on $PRETTY_NAME"
 
 # Set shell options:
