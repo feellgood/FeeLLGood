@@ -5,6 +5,11 @@
 #include "tags.h"
 #include "feellgoodSettings.h"
 
+// macOS does not define HOST_NAME_MAX.
+#ifndef HOST_NAME_MAX
+#    define HOST_NAME_MAX 256
+#endif
+
 /***********************************************************************
  * Access to the default configuration embedded from the file
  * default-settings.yml.
