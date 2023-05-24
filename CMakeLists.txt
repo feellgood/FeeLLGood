@@ -42,6 +42,8 @@ if(${ENABLE_LTO})
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
+include_directories(SYSTEM /usr/local/include)
+
 set(CMAKE_CXX_FLAGS
     "-DNDEBUG -DTBB_SUPPRESS_DEPRECATED_MESSAGES \
     -Wall -Wextra -std=c++17 -fopenmp -O3 -march=native"
@@ -65,6 +67,9 @@ add_custom_command(
     DEPENDS default-settings.yml)
 
 ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES} default-settings.o)
+
+# This should be conditioned on being on a Mac with Apple Silicon.
+link_directories(/opt/homebrew/lib)
 
 TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm ANN TBB::tbb)
 
