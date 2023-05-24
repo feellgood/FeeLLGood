@@ -23,12 +23,16 @@ add_custom_command(
 # -fsanitize=address leak null undefined # both compiler and linker
 #===========================================================================
 
+include_directories(SYSTEM /usr/local/include)
 include_directories (${CMAKE_SOURCE_DIR} ${GMSH_INC})
 
 ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES} default-settings.o)
 target_compile_options( feellgood PUBLIC -Wall -Wextra -O3 -march=native ${MKL_CFLAGS} )
 target_compile_definitions(feellgood PUBLIC
         -DNDEBUG -DTBB_SUPPRESS_DEPRECATED_MESSAGES ${EIGEN_MKL_CFLAGS} )
+
+# This should be conditioned on being on a Mac with Apple Silicon.
+target_link_directories(feellgood PUBLIC /opt/homebrew/lib)
 
 if (MKL_FOUND)
     #option --no-as-needed for mkl, see
