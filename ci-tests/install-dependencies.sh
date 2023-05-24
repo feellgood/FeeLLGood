@@ -48,7 +48,9 @@ job_count=$(getconf _NPROCESSORS_ONLN)
 
 # Install required packages.
 packages="unzip make cmake git"
-if [ "$ID" = "rocky" ]; then
+if [ "$ID" = "darwin" ]; then
+    brew install gcc cmake wget tbb yaml-cpp doxygen libomp
+elif [ "$ID" = "rocky" ]; then
     packages="$packages tar wget gcc-c++ eigen3-devel tbb-devel yaml-cpp-devel duktape-devel"
     sudo dnf check-update -q || true
     sudo dnf install -y 'dnf-command(config-manager)'
