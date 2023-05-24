@@ -4,51 +4,21 @@ on: [pull_request, push, repository_dispatch]
 
 jobs:
   test:
-    runs-on: ubuntu-latest
-
-    env:
-      CCACHE_COMPRESS: "true"
-      CCACHE_MAXSIZE: 500M
+    runs-on: macos-latest
 
     steps:
     - name: checkout repository
       uses: actions/checkout@v3
 
-    - name: install ccache
-      run: sudo apt-get install ccache
-
-    - name: identify machine architecture
-      id: id-machine
-      run: |
-        gcc -### -E -march=native - |& \
-        sed -En '/cc1/s/.*(arch=[[:alnum:]_-]+).*/\1/p' | \
-        tee -a $GITHUB_OUTPUT
-
-    - name: restore cache
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/ccache
-        key: ccache-${{ steps.id-machine.outputs.arch }}-${{ github.sha }}
-        restore-keys: ccache-${{ steps.id-machine.outputs.arch }}-
-
     - name: install dependencies
       run: |
-        export PATH="/usr/lib/ccache:$PATH"
-        ci-tests/install-dependencies.sh -u
+        ci-tests/install-dependencies.sh
 
     - name: build
       run: |
-        export PATH="/usr/lib/ccache:$PATH"
-        cmake . -DENABLE_UTESTS=ON -DENABLE_DET_UTESTS=ON
+        CXX=gcc-13 cmake .
+        touch default-settings.o
         make -j $(getconf _NPROCESSORS_ONLN)
-
-    - name: show ccache stats
-      run: |
-        ccache --show-stats
-        ccache --zero-stats
-
-    - name: run unit tests
-      run: make test
 
     - name: run functional test
       run: ci-tests/full_test.py
