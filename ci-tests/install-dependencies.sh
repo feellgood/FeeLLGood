@@ -82,7 +82,7 @@ cd ~/src
 
 # On Rocky Linux, download and install ANN and GMSH.
 # On Debian and Ubuntu, they have already been installed with apt.
-if [ "$ID" = "rocky" ]; then
+if [ "$ID" = "rocky" -o "$ID" = "darwin" ]; then
 
     # Download and install ANN.
     rm -rf ann_1.1.2/
@@ -92,7 +92,12 @@ if [ "$ID" = "rocky" ]; then
     tar xzf ann_1.1.2.tar.gz
     cd ann_1.1.2/
     sed -i.bak 's/CFLAGS =.* -O3/& -std=c++98/' Make-config
-    make -C src -j $job_count linux-g++
+    if [ "$ID" = "darwin" ]; then
+        target="macosx-g++"
+    else
+        target="linux-g++"
+    fi
+    make -C src -j $job_count $target
     sudo cp lib/libANN.a /usr/local/lib/libann.a
     sudo cp --parents include/ANN/ANN.h /usr/local/
     cd ..
