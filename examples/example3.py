@@ -2,7 +2,7 @@ import sys
 import numpy as np
 
 sys.path.insert(0,'../tools')
-from icoMaker import Ico
+from meshMaker import Ico
 from settingsMaker import Settings
 
 meshFileName = 'icosahedron.msh'

@@ -4,7 +4,7 @@ import json
 import numpy as np
 
 sys.path.insert(0,'../tools')
-from cylinderMaker import Cylinder
+from meshMaker import Cylinder
 from settingsMaker import Settings
 
 
