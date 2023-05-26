@@ -77,6 +77,42 @@ if(DEFINED withSharedLib)
     endif(withSharedLib)
 endif(DEFINED withSharedLib)
 
+#===========================================================================
+# Find where to install the Python modules.
+#===========================================================================
+
+# Find the version of the Python interpreter.
+# Keep only the major and minor version numbers, e.g. "3.10".
+execute_process(COMMAND python3 --version OUTPUT_VARIABLE PYTHON_VERSION)
+string(
+    REGEX REPLACE "Python ([0-9]+\\.[0-9]+)\\..*" "\\1"
+    PYTHON_VERSION "${PYTHON_VERSION}"
+)
+
+# Possible install locations. The fisrt one (dist-packages) is used by the
+# system Python on Debian and Debian-like systems. This is our preferred
+# install location, and it will be used if it exists. The second one should
+# work with any non-Debianized Python interpreter.
+set(PY_DIST_DIR "/usr/local/lib/python${PYTHON_VERSION}/dist-packages")
+set(PY_SITE_DIR "/usr/local/lib/python${PYTHON_VERSION}/site-packages")
+
+# Select the best available installation directory.
+if(EXISTS ${PY_DIST_DIR})
+    set(PY_MODULES_DIR "${PY_DIST_DIR}/feellgood")
+elseif(PYTHON_VERSION)
+    set(PY_MODULES_DIR "${PY_SITE_DIR}/feellgood")
+endif()
+
+# Install the python modules if we found a suitable location.
+if(DEFINED PY_MODULES_DIR)
+    install(DIRECTORY python-modules/ DESTINATION ${PY_MODULES_DIR})
+    message(STATUS "Python modules will be installed in ${PY_MODULES_DIR}")
+else()
+    message(WARNING "Python modules will not be installed.")
+endif()
+
+#===========================================================================
+
 install(TARGETS feellgood RUNTIME DESTINATION bin)
 install(PROGRAMS ./tools/convert2vtk DESTINATION bin)
 install(PROGRAMS ./tools/convert2hdf5 DESTINATION bin)
