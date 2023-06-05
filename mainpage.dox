@@ -16,18 +16,20 @@ See online documentation for more details about all parameters required for a co
 
 ## Installation & configuration
 
-Installation of feellgood recquires the library ANN, the scalfmm, and GMM++.
+Installation of feellgood requires the library ANN, the scalfmm, and GMM++.
 To compile and link feellgood, a CMakeLists.txt is provided.
 
-### how to compile
-C++ 11 for feellgood source
-C++ 14 for scalfmm
-C++ 11 for GMM++
-C++ 98 for ANN
+### what C++ version is needed
+C++ 17 | feellgood source, with TBB library to handle parallel execution policies
+
+C++ 14 | scalfmm
+
+C++ 11 | GMM++
+
+C++ 98 | ANN
 
 ### about the mesh
-The mesh must be tetrahedrons in .msh format, the software gmsh can build such a mesh file.
-At the end of the .msh file, a section is to be added to describe your material in adequation with the numbering system region of gmsh. \f$ M_s \f$, \f$ \alpha \f$, and other parameters such as anisotropy constants are provided here.
+The mesh must be tetrahedrons in .msh format 2.2, the software gmsh can build such a mesh file.
 
 ### output files
 The outputs are text files, tab separated value. See online documentation for more informations.
