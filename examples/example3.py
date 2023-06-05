@@ -6,12 +6,10 @@ from meshMaker import Ico
 from settingsMaker import Settings
 
 meshFileName = 'icosahedron.msh'
-#carefull here, volume and region names must be stringified integers
 vol_region_name = "whole_volume"
 surf_region_name = "whole_surface"
 my_ico = Ico()
 my_ico.make(meshFileName,vol_region_name,surf_region_name)
-# my_ico.show()
 
 mySettings = Settings(meshFileName)
 
