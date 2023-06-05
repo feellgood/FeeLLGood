@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 
+__version__ = '0.0.0'
+
 import numpy as np
 import gmsh
-
-def coucou():
-    print("coucou toi!")
 
 class mesh(object):
     def __init__ (self,fileName):
