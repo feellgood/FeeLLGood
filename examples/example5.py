@@ -3,8 +3,7 @@ import subprocess
 import json
 import numpy as np
 
-sys.path.insert(0,'../tools')
-from meshMaker import Cylinder
+from feellgood.meshMaker import Cylinder
 
 
 mesh_size = 0.5

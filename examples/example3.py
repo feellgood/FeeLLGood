@@ -1,9 +1,8 @@
 import sys
 import numpy as np
 
-sys.path.insert(0,'../tools')
-from meshMaker import Ico
-from settingsMaker import Settings
+from feellgood.meshMaker import Ico
+from feellgood.settingsMaker import Settings
 
 meshFileName = 'icosahedron.msh'
 vol_region_name = "whole_volume"

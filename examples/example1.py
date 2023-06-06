@@ -1,8 +1,7 @@
 import os
 import sys
 
-sys.path.insert(0,'../tools')
-from settingsMaker import Settings
+from feellgood.settingsMaker import Settings
 
 mySettings = Settings("ellipsoid.msh")
 mySettings.createVolRegion( "ellipsoid_volume" )

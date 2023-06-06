@@ -1,9 +1,8 @@
 import sys
 import numpy as np
 
-sys.path.insert(0,'../tools')
-from meshMaker import Cuboid
-from settingsMaker import Settings
+from feellgood.meshMaker import Cuboid
+from feellgood.settingsMaker import Settings
 
 rectangle = Cuboid([-256,-256,-2],[256,256,2],128,128,1)
 meshFileName = 'rectangle.msh'
