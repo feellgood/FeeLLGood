@@ -5,7 +5,6 @@ import numpy as np
 
 sys.path.insert(0,'../tools')
 from meshMaker import Cylinder
-from settingsMaker import Settings
 
 
 mesh_size = 0.5
