@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
-__version__ = '0.0.0'
+# see https://gmsh.info/doc/texinfo/gmsh.html#x1 for more on parsing mesh with python
+
+__version__ = '0.0.1'
 
 import numpy as np
 import gmsh
