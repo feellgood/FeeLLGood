@@ -5,46 +5,53 @@ FeeLLGood is a micromagnetic solver using finite element method (FEM) to solve L
 
 \f$ \frac{\partial \mathbf{m}}{\partial t} = - |\gamma_0| \mathbf{m} \times \mathbf{H}_{eff} + \alpha \mathbf{m} \times \frac{\partial \mathbf{m}}{\partial t}   \f$ <br>
 With \f$ \gamma_0 \f$ the electron gyromagnetic ratio and \f$ \alpha \f$ the Gilbert phenomenological damping parameter.
-This non-linear partial derivative equation is solved using finite element method, using a weak formulation. The effective field \f$ \mathbf{H}_{eff} \f$ is : <br>
+This non-linear partial derivative equation is solved using finite element method, using a weak formulation. The effective field \f$ \mathbf{H}_{eff} \f$ is: <br>
 
 \f$ \mathbf{H}_{eff} = \frac{2 A}{\mu_0 M_s} \nabla^2 \mathbf{m} - \frac{1}{\mu_0 M_s} \frac{\partial E_{an}}{\partial \mathbf{m} } + \mathbf{H}_a + \mathbf{H}_d  \f$
 
-\f$ A \f$ is the exchange energy constant, \f$ M_s \f$ is the magnetization at saturation of the considered material. \f$ E_{an} \f$ is the anisotropy energy contribution. \f$ \mathbf{H}_a \f$
-is the external applied field.
+\f$ A \f$ is the exchange energy constant, \f$ M_s \f$ is the magnetization at saturation of the considered material. \f$ E_{an} \f$ is the anisotropy energy contribution. \f$ \mathbf{H}_a \f$ is the external applied field.
 The demagnetizing field \f$ \mathbf{H}_d = -\frac{1}{4 \pi} \int_V \nabla \cdot \mathbf{m} \frac{\mathbf{r}}{r^3} dV \f$ is computed using fast multipole algorithm, implemented in the external library scalfmm.
 See online documentation for more details about all parameters required for a complete simulation.
 
-## Installation & configuration
+## FeeLLGood synopsis
 
-Installation of feellgood requires the library ANN, the scalfmm, and GMM++.
-To compile and link feellgood, a CMakeLists.txt is provided.
+FeeLLGood solves a micromagnetic problem the following way:
 
-### what C++ version is needed
-C++ 17 | feellgood source, with TBB library to handle parallel execution policies
+\dot
+digraph "FeeLLGood inner workflow"
+    {
+    "settings" -> "magnetization field" [label="at t=0"];
+    "settings" -> "applied field"
+    "magnetization field"   -> "demag field"
+    "magnetization field"   -> "exchange field"
+    "magnetization field"   -> "anisotropy field"
+    "demag field"           -> "element matrices"
+    "exchange field"        -> "element matrices"
+    "anisotropy field"      -> "element matrices"
+    "applied field"         -> "element matrices"
+    "element matrices"      -> "sparse system"   [label="assembly"];
+    "sparse system"   -> solve
+    solve                   -> "magnetization field" [label="update on success"];
+    solve                   -> "adapt dt" [label="on failure"];
+    "adapt dt"              -> solve
+    "adapt dt"              -> "abort" [label=" (dt<dt_min) or exceed max_iter"];
+    "magnetization field", "element matrices" [style=filled, fillcolor=lightgrey];
+    }
+\enddot
 
-C++ 14 | scalfmm
+Within the settings, a mesh and all the micromagnetic parameters are provided. The mesh must be a tetraedron first order mesh, it is read once to prepare `element matrices`, related to each element objects, namely triangular facettes and the tetraedrons. FeeLLGood does not handle any other kind of mesh. At time t=0, the initial magnetization field values are set, either from .sol file or using a math expression. The external applied field \f$ \mathbf{H}_a \f$ might be time dependant. All material parameters defining exchange and anisotropy are used as inputs for the computation of the corresponding fields (arrow dismissed here for readability). The small dense element matrices are used to build a 2N×2N sparse set of equations. It is solved using a stabilized bi-conjugate gradient algorithm.
 
-C++ 11 | GMM++
-
-C++ 98 | ANN
-
-### about the mesh
+## Input and output files
+Input settings should be written in a json or yaml text file, following the online documentation. They feed the class Settings.
 The mesh must be tetrahedrons in .msh format 2.2, the software gmsh can build such a mesh file.
+An optional initial magnetization configuration might be provided, it must be a .sol file.
 
 ### output files
-The outputs are text files, tab separated value. See online documentation for more informations.
-It is also possible to have some outputs formatted in vtk file format, usefull to visualize datas in paraview.
+The output .evol file is a convenient way to monitor a simulation, it is a tab separated value file with variable columns defined in the settings.
+The output .sol files are text files, tab separated value. Each column is a magnetization component, each line is refering to a node of the mesh.
+It is also possible to convert outputs text files in vtk file format, usefull to visualize datas in paraview, with some external scripts provided in `feellgood/tools` sub directory.
 
-### scalfmm settings for feellgood
-feellgood uses double precision to compute demagnetizing field through scalfmm. It is directly set through a template parameter for most scalfmm calls.
-
-By default, scalfmm is set to use Advance Vector Extensions (AVX) assembler instruction sets to fasten some computations. It should be set off in /usr/local/include/Utils/ScalFmmConfig.h to use the SSE 4.2 assembler instruction sets, and AVX set to off.
-You should have that line in ScalFmmConfig.h for SCALFMM_USE_SSE in the SSE section: <br>
-
-\#define SCALFMM_USE_SSE <br>
-
-And everything commented in the AVX section.
-
-
+### Dependances, installation & configuration
+see online documentation for the installation procedures, and all the prerequisites.
 
 */

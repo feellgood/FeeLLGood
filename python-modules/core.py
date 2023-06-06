@@ -4,6 +4,7 @@
 
 __version__ = '0.0.1'
 
+import sys
 import numpy as np
 import gmsh
 
@@ -16,17 +17,17 @@ class mesh(object):
         gmsh.initialize()
         gmsh.option.setNumber("General.Terminal",False) # to silent gmsh
         gmsh.open(fileName)
+        if gmsh.model.getDimension() != 3:
+            print('Error : feellgood.core does not support Model ' + gmsh.model.getCurrent() + ' : it is not 3D')
+            sys.exit(1)
         
         self.readNodes()
         self.readTetra()
-        
+        #self.readTriangles()
         gmsh.clear()
         gmsh.finalize()
         
     def readNodes(self):
-        if gmsh.model.getDimension() != 3:
-            print('Error : convert2vtk does not support Model ' + gmsh.model.getCurrent() + ' : it is not 3D')
-        
         # Get all the mesh nodes:
         nodeTags, nodeCoords, nodeParams = gmsh.model.mesh.getNodes()
         self.Nodes = np.empty([len(nodeTags),3],dtype=float)
@@ -42,14 +43,14 @@ class mesh(object):
         for e in entities_3D:
             dim = 3
             tag = e[1]
-            
+
             # Get the mesh elements for the entity (dim, tag):
             elemTypes, elemTags, elemNodeTags = gmsh.model.mesh.getElements(dim, tag)
             
             if len(elemTypes) != 1:
-                print("Error : convert2vtk only handles mesh with first order tetrahedron elements")
-                exit(1)
-    
+                print("Error : feellgood.core only handles mesh with first order tetrahedron elements")
+                sys.exit(1)
+
             for n in range(0,len(elemTags[0])):
                 idx = int(elemTags[0][n])-1 
                 i0 = int(elemNodeTags[0][4*n])
@@ -63,6 +64,18 @@ class mesh(object):
                 s = ''
                 for p in physicalTags:
                     self.Names.append( gmsh.model.getPhysicalName(dim, p))
+
+    def readTriangles(self):
+        objDim = 2
+        entities_2D = gmsh.model.getEntities(dim = objDim)
+        for e in entities_2D:
+            tag = e[1]
+
+            # Get the mesh elements for the entity (dim, tag):
+            elemTypes, elemTags, elemNodeTags = gmsh.model.mesh.getElements(objDim, tag)
+            print("elemTypes:",elemTypes)
+            print("elemTags:",elemTags)
+            print("elemNodeTags:",elemNodeTags)
 
     def infos(self):
         print("nb Nodes: ",len(self.Nodes),"\tnb Tetrahedrons: ",len(self.Tet), "\tphysical names: ", self.Names)
