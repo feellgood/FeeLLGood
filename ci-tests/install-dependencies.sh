@@ -9,7 +9,7 @@
 #
 # Options:
 #   -u  install the libraries required for unit tests
-#   -d  install doxygen
+#   -d  install doxygen and graphviz
 
 ########################################################################
 # The following few commands are not part of the documented installation
@@ -62,7 +62,7 @@ else  # Debian-like OS
         packages="$packages libboost-system-dev libboost-filesystem-dev libboost-test-dev"
     fi
     if [ "$doxygen" = "true" ]; then
-        packages="$packages doxygen"
+        packages="$packages doxygen graphviz"
     fi
     sudo apt-get install -y $packages
 fi
