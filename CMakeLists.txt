@@ -68,15 +68,6 @@ ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES} default-settings.o)
 
 TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm ANN TBB::tbb)
 
-if(DEFINED withSharedLib)
-    MESSAGE( "Shared lib generation " ${withSharedLib} )
-    if (withSharedLib)
-        ADD_LIBRARY( _feellgood SHARED ${HEADERS} ${SOURCES} )
-        install(FILES feellgood_core.h DESTINATION include)
-        install(TARGETS _feellgood DESTINATION lib)
-    endif(withSharedLib)
-endif(DEFINED withSharedLib)
-
 #===========================================================================
 # Find where to install the Python modules.
 #===========================================================================
