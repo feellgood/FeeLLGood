@@ -88,10 +88,6 @@ void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const i
             {
             fout << Etot << sep;
             }
-        if (keyVal == "DW_z")
-            {
-            fout << DW_z << sep;
-            }
         if (keyVal == "Hx")
             {
             fout << settings.getValue(t_prm.get_t()).x() << sep;
