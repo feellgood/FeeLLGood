@@ -224,7 +224,13 @@ int main(int argc, char *argv[])
                                                          mySettings.verbose, 5000, fileName);
         }
 
-    scal_fmm::fmm myFMM(fem.msh, mySettings.verbose, mySettings.scalfmmNbTh);
+    chronometer fmm_counter(2);
+    scal_fmm::fmm myFMM(fem.msh, mySettings.scalfmmNbTh);
+    if (mySettings.verbose)
+            {
+            std::cout << "Magnetostatics: particles inserted, using " << mySettings.scalfmmNbTh
+                      << " threads, in " << fmm_counter.millis() << std::endl;
+            }
 
     // Catch SIGINT and SIGTERM.
     struct sigaction action;

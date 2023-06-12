@@ -67,15 +67,13 @@ class fmm
 public:
     /** constructor, initialize memory for tree, kernel, sources corrections, initialize all sources
      */
-    inline fmm(Mesh::mesh &msh, bool VERBOSE, const int ScalfmmNbThreads)
+    inline fmm(Mesh::mesh &msh, const int ScalfmmNbThreads)
         : NOD(msh.getNbNodes()), FAC(msh.getNbFacs()), TET(msh.getNbTets()),
           SRC(FAC * Facette::NPI + TET * Tetra::NPI),
           tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels(NbLevels, boxWidth, boxCenter)
         {
         omp_set_num_threads(ScalfmmNbThreads);
         norm = 1. / (2. * msh.diam);
-
-        chronometer counter(2);
 
         FSize idxPart = 0;
         for (idxPart = 0; idxPart < NOD; ++idxPart)
@@ -87,12 +85,6 @@ public:
 
         insertCharges<Tetra::Tet, Tetra::NPI>(msh.tet, idxPart, msh.c);
         insertCharges<Facette::Fac, Facette::NPI>(msh.fac, idxPart, msh.c);
-
-        if (VERBOSE)
-            {
-            std::cout << "Magnetostatics: particles inserted, using " << ScalfmmNbThreads
-                      << " threads, in " << counter.millis() << std::endl;
-            }
         }
 
     /**
