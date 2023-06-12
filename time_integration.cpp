@@ -127,9 +127,14 @@ static void exit_if_signal_received(const Fem &fem, const Settings &settings, co
     }
 
 /** compute all quantitites at time t */
-inline void compute_all(Fem &fem, Settings &settings, scal_fmm::fmm &myFMM, double t)
+inline void compute_all(Fem &fem, Settings &settings, scal_fmm::fmm &myFMM, const double t)
     {
+    chronometer fmm_counter(2);
     myFMM.calc_demag(fem.msh, settings);
+    if (settings.verbose)
+            {
+            std::cout << "magnetostatics done in " << fmm_counter.millis() << std::endl;
+            }
     fem.energy(t, settings);
     fem.evolution();
     }

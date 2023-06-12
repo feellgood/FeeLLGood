@@ -20,7 +20,6 @@ the fast multipole algorithm, and to compute the demag field.
 #include "Kernels/Rotation/FRotationCell.hpp"
 #include "Kernels/Rotation/FRotationKernel.hpp"
 
-#include "chronometer.h"
 #include "mesh.h"
 
 /** \namespace scal_fmm
@@ -92,15 +91,8 @@ public:
     */
     void calc_demag(Mesh::mesh &msh /**< [in] */, Settings &mySettings /**< [in] */)
         {
-        chronometer counter(2);
-
         demag(Nodes::get_u, Nodes::set_phi, msh, mySettings);
         demag(Nodes::get_v, Nodes::set_phiv, msh, mySettings);
-
-        if (mySettings.verbose)
-            {
-            std::cout << "magnetostatics done in " << counter.millis() << std::endl;
-            }
         }
 
 private:
