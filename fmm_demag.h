@@ -2,11 +2,9 @@
 #define FMM_DEMAG_H
 
 /** \file fmm_demag.h
-this header is the interface to scalfmm. Its purpose is to prepare an octree for the application of
+\brief this header is the interface to scalfmm. Its purpose is to prepare an octree for the application of
 the fast multipole algorithm, and to compute the demag field.
 */
-
-// scalFMM includes
 
 #include "Utils/FParameters.hpp"
 
@@ -25,9 +23,8 @@ the fast multipole algorithm, and to compute the demag field.
 #include "chronometer.h"
 #include "mesh.h"
 
-/**
-\namespace scal_fmm to grab altogether the templates and functions using scalfmm for the computation
-of the demag field
+/** \namespace scal_fmm
+to grab altogether the templates and functions using scalfmm for the computation of the demag field
 */
 
 namespace scal_fmm
@@ -35,7 +32,7 @@ namespace scal_fmm
 
 const int P = 9; /**< constant parameter for some scalfmm templates */
 
-typedef double FReal; /**< parameter of scalfmm templates */
+typedef double FReal; /**< parameter of scalfmm templates, all computations are made in double precision */
 
 typedef FTypedRotationCell<FReal, P>
         CellClass; /**< convenient typedef for the definition of cell type in scalfmm  */
@@ -61,8 +58,7 @@ const int SizeSubLevels = 6;               /**< size of the sub levels  */
 const double boxWidth = 2.01;              /**< bounding box max dimension */
 const FPoint<FReal> boxCenter(0., 0., 0.); /**< center of the bounding box */
 
-/**
-\class fmm
+/** \class fmm
 to initialize a tree and a kernel for the computation of the demagnetizing field, and launch the
 computation easily with calc_demag public member
 */
@@ -86,9 +82,7 @@ public:
             {
             Pt::pt3D pTarget = norm * (msh.getNode(idxPart).p - msh.c);
             tree.insert(FPoint<FReal>(pTarget.x(), pTarget.y(), pTarget.z()),
-                        FParticleType::FParticleTypeTarget, idxPart);  //, 0.0);
-            // tree.insert( FPoint<FReal>(pTarget.x(), pTarget.y(), pTarget.z()) ,
-            // FParticleType::target, idxPart);
+                        FParticleType::FParticleTypeTarget, idxPart);
             }
 
         insertCharges<Tetra::Tet, Tetra::NPI>(msh.tet, idxPart, msh.c);
@@ -149,8 +143,6 @@ private:
                               Pt::pt3D pSource = norm * (gauss[j] - c);
                               tree.insert(FPoint<FReal>(pSource.x(), pSource.y(), pSource.z()),
                                           FParticleType::FParticleTypeSource, idx, 0.0);
-                              // tree.insert( FPoint<FReal>(pSource.x(), pSource.y(), pSource.z()) ,
-                              // FParticleType::source, idx, 0.0);
                               }
                       });  // end for_each
         }
@@ -200,12 +192,8 @@ private:
                     for (int idxPart = 0; idxPart < nbParticlesInLeaf; ++idxPart)
                         {
                         const int indexPartOrig = indexes[idxPart];
-                        // setter(msh.setNode(indexPartOrig), (potentials[idxPart]*norm +
-                        // corr[indexPartOrig])/(4*M_PI));
                         msh.set(indexPartOrig, setter,
                                 (potentials[idxPart] * norm + corr[indexPartOrig]) / (4 * M_PI));
-                        // setter(msh.node[indexPartOrig], (potentials[idxPart]*norm +
-                        // corr[indexPartOrig])/(4*M_PI));
                         }
                 });
         }
