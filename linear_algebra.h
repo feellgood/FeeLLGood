@@ -6,13 +6,8 @@
 <br> It encapsulates the calls to GMM, the assemblage and projection of the matrix for all elements
 <br> projection and matrix assembly is multithreaded for tetrahedron, monothread for facette
 */
-#include <deque>
-#include <queue>
 #include <random>
-#include <thread>
-
 #include <execution>
-#include <mutex>
 
 #include "gmm/gmm_iter.h"
 #include "gmm/gmm_precond_diagonal.h"
