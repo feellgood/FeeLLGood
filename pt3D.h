@@ -232,9 +232,9 @@ public:
     /**
      * printing function, called by operator<<
      */
-    inline void affiche(std::ostream &flux) const
+    inline void print(std::ostream &flux) const
         {
-        flux << _x[IDX_X] << "\t" << _x[IDX_Y] << "\t" << _x[IDX_Z];
+        flux << _x[IDX_X] << '\t' << _x[IDX_Y] << '\t' << _x[IDX_Z];
         }
 
     /**
@@ -265,7 +265,7 @@ private:
 /** operator<< for pt3D, coordinates are tab separated */
 inline std::ostream &operator<<(std::ostream &flux, pt3D const &p)
     {
-    p.affiche(flux);
+    p.print(flux);
     return flux;
     }
 
@@ -421,11 +421,6 @@ inline void inverse(double M[DIM][DIM], double detM)
     M[2][1] = (m01 * m20 - m00 * m21) / detM;
     M[2][2] = (m00 * m11 - m01 * m10) / detM;
     }
-
-/**
- geometry : returns iso-barycenter
-*/
-//inline pt3D barycentre(pt3D const a, pt3D const b, pt3D const c) { return ((a + b + c) / 3.0); }
 
 /**
  frobenius norm of a table of pt3D
