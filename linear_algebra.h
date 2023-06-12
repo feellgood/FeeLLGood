@@ -86,6 +86,26 @@ private:
      */
     void base_projection();
 
+    /** template to assemble the big sparse matrix K with T tetra or facette */
+    template<class T>
+    void assemblage_mat(T &elem, write_matrix &K)
+        {
+        const int N = elem.getN();
+        for (int i = 0; i < N; i++)
+            {
+            int i_ = elem.ind[i];
+
+            for (int j = 0; j < N; j++)
+                {
+                int j_ = elem.ind[j];
+                K(NOD + i_, j_) += elem.Kp[i][j];
+                K(NOD + i_, NOD + j_) += elem.Kp[i][N + j];
+                K(i_, j_) += elem.Kp[N + i][j];
+                K(i_, NOD + j_) += elem.Kp[N + i][N + j];
+                }
+            }
+        }
+
     /** template to insert coeff in sparse matrix K_TH and vector L_TH, T is Tetra or Facette */
     template<class T>
     void insertCoeff(std::vector<T> &container, write_matrix &K_TH, std::vector<double> &L_TH)
@@ -93,7 +113,8 @@ private:
         std::for_each(container.begin(), container.end(),
                       [this, &K_TH, &L_TH](T &my_elem)
                       {
-                          my_elem.assemblage_mat(K_TH, NOD);
+                          assemblage_mat(my_elem,K_TH);
+                          //my_elem.assemblage_mat(K_TH, NOD);
                           my_elem.assemblage_vect(L_TH, NOD);
                       });
         }

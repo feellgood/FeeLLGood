@@ -405,9 +405,6 @@ public:
         Nodes::projection_vect<Tetra::Tet, N>(*this, L);
         }
 
-    /** matrix assembly using inner matrix in tetra */
-    void assemblage_mat(write_matrix &K, const int offset) const;
-
     /** vector assembly using inner vector in tetra */
     inline void assemblage_vect(std::vector<double> &L, const int offset) const
         {

@@ -230,23 +230,6 @@ double Tet::zeemanEnergy(Tetra::prm const &param, double uz_drift, Pt::pt3D cons
     return (-param.J * weightedScalarProd(dens));
     }
 
-void Tet::assemblage_mat(write_matrix &K, const int offset) const
-    {
-    for (int i = 0; i < N; i++)
-        {
-        int i_ = ind[i];
-
-        for (int j = 0; j < N; j++)
-            {
-            int j_ = ind[j];
-            K(offset + i_, j_) += Kp[i][j];
-            K(offset + i_, offset + j_) += Kp[i][N + j];
-            K(i_, j_) += Kp[N + i][j];
-            K(i_, offset + j_) += Kp[N + i][N + j];
-            }
-        }
-    }
-
 double Tet::Jacobian(double (&J)[DIM][DIM])
     {
     Pt::pt3D const &p0 = refNode[ind[0]].p;

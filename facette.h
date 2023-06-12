@@ -190,9 +190,6 @@ public:
         Nodes::projection_vect<Facette::Fac, N>(*this, L);
         }
 
-    /** assemblage of the matrix elements from inner matrix in facette object */
-    void assemblage_mat(write_matrix &K, const int offset) const;
-
     /** assemblage of the vector elements from inner matrix in facette object */
     inline void assemblage_vect(std::vector<double> &L, const int offset) const
         //{ for (int i=0; i < N; i++) { L[NOD+ind[i]] += Lp[i]; L[ind[i]] += Lp[N+i]; } }

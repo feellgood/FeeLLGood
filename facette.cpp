@@ -66,23 +66,6 @@ double Fac::demagEnergy(const Pt::pt3D (&u)[NPI], const double (&phi)[NPI]) cons
     return weightedScalarProd(dens);
     }
 
-void Fac::assemblage_mat(write_matrix &K, const int offset) const
-    {
-    for (int i = 0; i < N; i++)
-        {
-        int i_ = ind[i];
-
-        for (int j = 0; j < N; j++)
-            {
-            int j_ = ind[j];
-            K(offset + i_, j_) += Kp[i][j];
-            K(offset + i_, offset + j_) += Kp[i][N + j];
-            K(i_, j_) += Kp[N + i][j];
-            K(i_, offset + j_) += Kp[N + i][N + j];
-            }
-        }
-    }
-
 double Fac::potential(std::function<Pt::pt3D(Nodes::Node)> getter, int i) const
     {
     int ii = (i + 1) % 3;
