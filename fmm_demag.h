@@ -67,7 +67,7 @@ class fmm
 public:
     /** constructor, initialize memory for tree, kernel, sources corrections, initialize all sources
      */
-    inline fmm(Mesh::mesh &msh, const int ScalfmmNbThreads)
+    inline fmm(Mesh::mesh &msh /**< [in] */, const int ScalfmmNbThreads /**< [in] */)
         : NOD(msh.getNbNodes()), FAC(msh.getNbFacs()), TET(msh.getNbTets()),
           SRC(FAC * Facette::NPI + TET * Tetra::NPI),
           tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels(NbLevels, boxWidth, boxCenter)
@@ -90,7 +90,7 @@ public:
     /**
     launch the calculation of the demag field with second order corrections
     */
-    void calc_demag(Mesh::mesh &msh, Settings &mySettings)
+    void calc_demag(Mesh::mesh &msh /**< [in] */, Settings &mySettings /**< [in] */)
         {
         chronometer counter(2);
 
