@@ -15,9 +15,8 @@
 #include <math.h>
 #include <vector>
 
-/**
- \namespace Pt
- to grab altogether some dedicated functions and some enum for class pt2D and pt3D
+/** \namespace Pt
+ * to grab altogether some dedicated functions and some enum for class pt2D and pt3D
  */
 namespace Pt
     {
@@ -426,7 +425,7 @@ inline void inverse(double M[DIM][DIM], double detM)
 /**
  geometry : returns iso-barycenter
 */
-inline pt3D barycentre(pt3D const a, pt3D const b, pt3D const c) { return ((a + b + c) / 3.0); }
+//inline pt3D barycentre(pt3D const a, pt3D const b, pt3D const c) { return ((a + b + c) / 3.0); }
 
 /**
  frobenius norm of a table of pt3D
@@ -441,21 +440,6 @@ double sq_frobenius_norm(const pt3D X[nbVect])
         val += norme2(X[i]);
         }
     return val;
-    }
-
-/**
- * function template to write into a file the vector<typename>, as a column of text : use overloaded
- * operator<<
- */
-template<class T>
-int writeToFile(std::string fileName, std::vector<T> v)
-    {
-    using namespace Pt;  // pour le bon operator<<
-    std::ofstream f_out(fileName, std::ios::out);
-
-    std::for_each(v.begin(), v.end(), [&f_out](T &p) { f_out << p << std::endl; });
-    f_out.close();
-    return 0;
     }
 
     }  // end namespace Pt
