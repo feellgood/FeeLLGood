@@ -5,14 +5,10 @@
   \brief namespace Tetra
   header containing Tet class, some constants, and integrales
  */
-#include <functional>
+
 #include <set>
 
-#include "gmm/gmm_kernel.h"
-
 #include "spinTransferTorque.h"
-
-#include "config.h"
 #include "facette.h"
 #include "node.h"
 #include "time_integration.h"

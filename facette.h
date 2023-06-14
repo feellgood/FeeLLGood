@@ -7,9 +7,6 @@
   triangular faces
  */
 
-#include <functional>
-
-#include "config.h"
 #include "node.h"
 
 /** \namespace Facette
