@@ -133,6 +133,7 @@ public:
         set_ind(1,i1);
         set_ind(2,i2);
         set_ind(3,i3);
+        zeroBasing();
 
         if (refNode.size() > 0)
             {

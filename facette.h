@@ -7,7 +7,7 @@
   triangular faces
  */
 
-#include "node.h"
+#include "element.h"
 
 /** \namespace Facette
  to grab altogether some constants and calculation functions for class Fac
@@ -59,14 +59,14 @@ struct prm
 Face is a class containing the index references to nodes, it has a triangular shape and should not
 be degenerated
 */
-class Fac
+class Fac : public element<N,NPI>
     {
 public:
     /** constructor for some unit tests */
     inline Fac(const std::vector<Nodes::Node> &_p_node /**< [in] vector of nodes */)
-        : refNode(_p_node)
+        : element<N,NPI>(_p_node), idxPrm(0)
         {
-        idxPrm = ind[0] = ind[1] = ind[2] = 0;
+        indicesToZero();
         }
 
     /** constructor used by readMesh */
@@ -75,14 +75,15 @@ public:
                const int _idx /**< [in] region index in region vector */,
                const int i0 /**< [in] node index */, const int i1 /**< [in] node index */,
                const int i2 /**< [in] node index */)
-        : idxPrm(_idx), refNode(_p_node)
+        : element<N,NPI>(_p_node), idxPrm(_idx)
         {
-        ind[0] = i0;
-        ind[1] = i1;
-        ind[2] = i2;
+        set_ind(0,i0);
+        set_ind(1,i1);
+        set_ind(2,i2);
 
         if (_NOD > 0)
             {  // to force index to start from 0 (C++) instead of Matlab/msh convention
+            /*
             if ((i0 > 0) && (i0 <= _NOD))
                 {
                 ind[0]--;
@@ -101,6 +102,8 @@ public:
                 }
             else
                 std::cout << "warning index i2 out of bounds in fac constructor" << std::endl;
+            */
+            zeroBasing();
             surf = calc_surf();
             }
         else
@@ -114,7 +117,6 @@ public:
 
     double surf; /**< surface of the element */
     double Ms;   /**< magnetization at saturation of the face */
-    int ind[N];  /**< indices table of the nodes */
 
     /** weighted scalar product : factorized formulation: weight(1)=weight(2)=weight(3) */
     inline double weightedScalarProd(const double (&X)[NPI] /**< [in] */) const
@@ -157,11 +159,10 @@ public:
         }
 
     /** basic infos */
-    inline void infos() const  //{std::cout<< "reg="<< reg << ":" << idxPrm << "ind:"<< ind[0]<<
-                               //"\t"<< ind[1]<< "\t"<< ind[2] <<std::endl;};
+    inline void infos() const
         {
-        std::cout << "idxPrm:" << idxPrm << "ind:" << ind[0] << "\t" << ind[1] << "\t" << ind[2]
-                  << std::endl;
+        std::cout << "idxPrm:" << idxPrm << "ind: ";
+        print_indices();
         };
 
     /** computes the integral contribution of the triangular face */
@@ -187,15 +188,6 @@ public:
         Nodes::projection_vect<Facette::Fac, N>(*this, L);
         }
 
-    /** getter for N */
-    inline int getN(void) const { return N; }
-
-    /** getter for NPI */
-    inline int getNPI(void) const { return NPI; }
-
-    /** getter for node */
-    inline const Nodes::Node &getNode(const int i) { return refNode[ind[i]]; }
-
     /** computes weight coefficients */
     inline double weight(const int i) const { return 2.0 * surf * Facette::pds[i]; }
 
@@ -215,12 +207,6 @@ public:
                        || ((this->ind[1] == f.ind[1]) && (this->ind[2] < f.ind[2]))));
         }
 
-    /** small matrix for integrales */
-    double Kp[2 * N][2 * N];
-
-    /** small vector for integrales */
-    double Lp[2 * N];
-
     /** computes the norm to the face, returns a unit vector */
     inline Pt::pt3D calc_norm(void) const
         {
@@ -233,9 +219,6 @@ public:
     inline double calc_surf(void) const { return 0.5 * normal_vect().norm(); }
 
 private:
-    /** direct access to the Nodes */
-    const std::vector<Nodes::Node> &refNode;
-
     /** return normal to the triangular face, not normalized */
     inline Pt::pt3D normal_vect() const
         {
@@ -245,7 +228,6 @@ private:
 
         return ((p1 - p0) * (p2 - p0));
         }
-
     };  // end class Fac
 
     }  // namespace Facette

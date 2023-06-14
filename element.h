@@ -27,8 +27,15 @@ class element
     
     /** index setter */
     inline void set_ind(const int i, const int idx)
-        { ind[i] = idx-1; } // index convention Matlab/msh (one based) -> C++ (zero based)
+        { ind[i] = idx; }
     
+    /** zeroBasing : index convention Matlab/msh (one based) -> C++ (zero based) */
+    inline void zeroBasing(void)
+        {
+        for(unsigned int i = 0; i < N; i++)
+            ind[i]--;
+        }
+
     /** getter for N */
     inline constexpr int getN(void) const { return N; }
 
@@ -39,11 +46,15 @@ class element
     inline const Nodes::Node &getNode(const int i)
         { return refNode[ind[i]]; }
     
+    /** set all indices to zero */
+    inline void indicesToZero(void)
+        { std::fill(ind.begin(),ind.end(),0); }
+
     /** print the node indices of the element */
     void print_indices(void) const
         {
         std::cout << '(';
-        for(unsigned int i = 0; i < ind.size()-1; i++)
+        for(unsigned int i = 0; i < N-1; i++)
             { std::cout << ind[i] << ", "; }
         std::cout << ind[N-1] << ")\n";
         }
