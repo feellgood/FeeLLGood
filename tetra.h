@@ -405,21 +405,10 @@ public:
         Nodes::projection_vect<Tetra::Tet, N>(*this, L);
         }
 
-    /** vector assembly using inner vector in tetra */
-    inline void assemblage_vect(std::vector<double> &L, const int offset) const
-        {
-        for (int i = 0; i < N; i++)
-            {
-            L[offset + ind[i]] += Lp[i];
-            L[ind[i]] += Lp[N + i];
-            }
-        }
-    //{ for (int i=0; i < N; i++) { L[NOD+ind[i]] += Lp[i]; L[ind[i]] += Lp[N+i]; } }
-
-    /** getter for N ; unit tests : Tet_constructor */
+    /** getter for N; unit tests : Tet_constructor */
     inline int getN(void) const { return N; }
 
-    /** getter for NPI ; unit tests : Tet_constructor */
+    /** getter for NPI; unit tests : Tet_constructor */
     inline int getNPI(void) const { return NPI; }
 
     /** getter for node */
@@ -446,7 +435,7 @@ public:
     /** for extra contribution to the effective field, such as spin transfert torque Hm */
     std::function<void(int npi, Pt::pt3D &Hm)> extraField;
 
-    /** for extra contribution to the matrix BE, such as spin transfert torque contribs */
+    /** for extra contribution to the matrix BE, such as spin transfer torque contribs */
     std::function<void(int npi, double Js, Pt::pt3D &U, Pt::pt3D &dUdx, Pt::pt3D &dUdy,
                        Pt::pt3D &dUdz, Pt::pt3D (&BE)[N])>
             extraCoeffs_BE;
@@ -455,8 +444,7 @@ private:
     /** vector of nodes */
     const std::vector<Nodes::Node> &refNode;
 
-    /** template getter to access and copy some parts of the node vector of type T = double or
-     * Pt::pt3D  */
+    /** template getter to access and copy parts of the node vector of type T= double | Pt::pt3D */
     template<class T>
     void getDataFromNode(std::function<T(Nodes::Node)> getter, T (&X_data)[N]) const
         {
