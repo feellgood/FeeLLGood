@@ -56,7 +56,7 @@ if [ "$ID" = "rocky" ]; then
     fi
     sudo dnf install -y $packages
 else  # Debian-like OS
-    packages="$packages g++ libtbb-dev libyaml-cpp-dev"
+    packages="$packages g++ libtbb-dev libyaml-cpp-dev duktape-dev"
     sudo apt-get update -q
     if [ "$unit_tests" = "true" ]; then
         packages="$packages libboost-system-dev libboost-filesystem-dev libboost-test-dev"
@@ -84,17 +84,20 @@ sudo cp lib/libANN.a /usr/local/lib/
 sudo cp include/ANN/ANN.h /usr/local/include/
 cd ..
 
-# Download and install exprtk.
-# Use the version provided by Microsoft's vcpkg dependency manager:
-# https://github.com/microsoft/vcpkg/blob/master/ports/exprtk/portfile.cmake
-exprtk_sha1=806c519c91fd08ba4fa19380dbf3f6e42de9e2d1
-rm -rf exprtk-$exprtk_sha1/
-if [ ! -f "exprtk-$exprtk_sha1.zip" ]; then
-    wget -nv https://github.com/ArashPartow/exprtk/archive/$exprtk_sha1.zip
-    mv $exprtk_sha1.zip exprtk-$exprtk_sha1.zip
+# On Rocky Linux, download and install Duktape.
+# On Debian and Ubuntu, it has already been installed with apt.
+if [ "$ID" = "rocky" ]; then
+    if [ ! -f "duktape-2.7.0.tar.xz" ]; then
+        wget -nv https://duktape.org/duktape-2.7.0.tar.xz
+    fi
+    tar -xJf duktape-2.7.0.tar.xz
+    cd duktape-2.7.0/src
+    gcc -O2 -c duktape.c
+    ar rcs libduktape.a duktape.o
+    sudo cp libduktape.a /usr/local/lib/
+    sudo cp duktape.h duk_config.h /usr/local/include/
+    cd ../..
 fi
-unzip -q exprtk-$exprtk_sha1.zip
-sudo cp exprtk-$exprtk_sha1/exprtk.hpp /usr/local/include/
 
 # Download, patch and install ScalFMM.
 # Use the tip of the branch maintenance/scalfmm-1.5 as of 2021-09-20.

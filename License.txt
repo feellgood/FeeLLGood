@@ -20,8 +20,8 @@ FeeLLGood uses ANN (https://www.cs.umd.edu/~mount/ANN/),
 Copyright (c) 1997-2010 University of Maryland and Sunil Arya and David Mount,
 licensed under the terms and conditions of the GNU Lesser General Public Library. (http://www.gnu.org/copyleft/lesser.html)
 
-FeeLLGood uses exprtk (http://partow.net/programming/exprtk/index.html)
-Copyright (c) Arash Partow, 
+FeeLLGood uses Duktape (https://duktape.org/)
+Copyright (c) Duktape authors
 licensed under the guidelines and in accordance with the most current version of the MIT License. (http://www.opensource.org/licenses/MIT)  
 
 FeeLLGood uses GMM (http://getfem.org/gmm/index.html)

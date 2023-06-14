@@ -66,7 +66,7 @@ add_custom_command(
 
 ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES} default-settings.o)
 
-TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm ANN TBB::tbb)
+TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm duktape ANN TBB::tbb)
 
 #===========================================================================
 # Find where to install the Python modules.

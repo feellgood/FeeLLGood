@@ -1,68 +1,153 @@
 /*
- * Implementation of MagnetizationParser.
+ * Implementation of MagnetizationParser and TimeDepFieldParser.
  */
 
 #include "mag_parser.h"
-#include <exprtk.hpp>
+#include <duktape.h>
 #include <iostream>
 
-/**
- * \brief Internal implementation of MagnetizationParser.
- *
- * This implementation is based on the
- * [exprtk](http://www.partow.net/programming/exprtk/index.html)
- * expression parser. That parser is implemented as a single huge,
- * template-rich header file, that takes very long to compile. For this
- * reason, we hide this implementation from the MagnetizationParser
- * interface using the pimpl (Pointer to IMPLementation) idiom.
+/***********************************************************************
+ * Code shared between both parsers.
  */
-struct MagnetizationParser::Impl3Dprm
+
+/* Copy all the contents of the Math object (sqrt, sin, log, PI...) to the global object. */
+static const char js_library[] = "Object.getOwnPropertyNames(Math).forEach("
+                                 "    function(name) { globalThis[name] = Math[name]; }"
+                                 ");";
+
+/**
+ * Generic parser and evaluator, parametrized by the type of the parameter:
+ *  - T = double for the field, which is a function of time
+ *  - T = Pt::pt3D for the initial magnetization, which is a function of position.
+ */
+template<typename T>
+struct VectorParser
     {
-    Impl3Dprm()
+    VectorParser()
         {
-        s_table.add_variable("x", x);
-        s_table.add_variable("y", y);
-        s_table.add_variable("z", z);
-        s_table.add_constants();
-        Mx.register_symbol_table(s_table);
-        My.register_symbol_table(s_table);
-        Mz.register_symbol_table(s_table);
+        ctx = duk_create_heap_default();
+        duk_int_t err = duk_peval_string(ctx, js_library);
+        die_if_error(err);
+        duk_pop(ctx);  // drop the result of the evaluation
         }
 
     /**
-     * Internal implementation of
-     * MagnetizationParser::set_expressions().
+     * Abort with an suitable error message if `err` is an actual error,
+     * in which case the top of the stack is assumed to hold the corresponding Error object.
      */
-    void set_expressions(const std::string &str_Mx, const std::string &str_My,
-                         const std::string &str_Mz)
+    void die_if_error(duk_int_t err)
         {
-        exprtk::parser<double> parser;
-        parser.compile(str_Mx, Mx);
-        parser.compile(str_My, My);
-        parser.compile(str_Mz, Mz);
+        if (err == DUK_ERR_NONE) return;
+        std::cerr << "Script " << duk_safe_to_string(ctx, -1) << '\n';
+        exit(EXIT_FAILURE);
         }
 
     /**
-     * Internal implementation of
-     * MagnetizationParser::get_magnetization().
+     * Build a function that takes the given parameters and evaluates the given expression.
+     * Push it to the stack.
      */
-    Pt::pt3D get_magnetization(const Pt::pt3D &p)
+    void push_function(std::string expression)
         {
-        x = p.x();
-        y = p.y();
-        z = p.z();
-        Pt::pt3D mag = Pt::pt3D(Mx.value(), My.value(), Mz.value());
-        mag.normalize();
-        return mag;
+        std::string js_function = "function(" + js_params + ") { return (" + expression + "); }";
+        int stack_size_before = duk_get_top(ctx);
+        duk_int_t err = duk_pcompile_string(ctx, DUK_COMPILE_FUNCTION, js_function.c_str());
+        die_if_error(err);
+        int stack_size_after = duk_get_top(ctx);
+        if (stack_size_after != stack_size_before + 1)
+            {
+            std::cerr << "Compilation of " << expression << " damaged the stack.\n";
+            exit(EXIT_FAILURE);
+            }
         }
 
-    double x;                             /**< working variable x for the exprtk parser */
-    double y;                             /**< working variable y for the exprtk parser */
-    double z;                             /**< working variable z for the exprtk parser */
-    exprtk::symbol_table<double> s_table; /**< symbol table for the exprtk parser  */
-    exprtk::expression<double> Mx;        /**< Mx expression */
-    exprtk::expression<double> My;        /**< My expression */
-    exprtk::expression<double> Mz;        /**< Mz expression */
+    /**
+     * Compile the expressions into JavaScript functions.
+     * Leave them on the stack at positions (0, 1, 2).
+     */
+    void set_expressions(const std::string &expr_x, const std::string &expr_y,
+                         const std::string &expr_z)
+        {
+        duk_set_top(ctx, 0);  // clear the stack
+        push_function(expr_x);
+        push_function(expr_y);
+        push_function(expr_z);
+        }
+
+    /**
+     * Dummy method to push the parameter to the stack, will be specialized later.
+     */
+    void push(const T &value) {}
+
+    /**
+     * Get a single vector component. `component_index` is either 0, 1, or 2.
+     */
+    double get_vector_component(const T &param, int component_index)
+        {
+        duk_dup(ctx, component_index);  // copy the function to the top of the stack
+        push(param);
+        duk_int_t err = duk_pcall(ctx, dim);
+        die_if_error(err);
+        double val = duk_get_number(ctx, -1);
+        duk_pop(ctx);
+        return val;
+        }
+
+    /**
+     * Get the vector corresponding to the provided parameter.
+     */
+    Pt::pt3D get_vector(const T &param)
+        {
+        double x = get_vector_component(param, 0);
+        double y = get_vector_component(param, 1);
+        double z = get_vector_component(param, 2);
+        return Pt::pt3D(x, y, z);
+        }
+
+    duk_context *ctx;             /**< Ducktape context holding the functions */
+    static const int dim;         /**< dimension of the parameter (1 or 3) */
+    static std::string js_params; /**< JavaScript parameter list: either "t" or "x,y,z" */
+    };
+
+/*
+ * VectorParser template specializations for `double` and `Pt::pt3D`.
+ * Hide them from Doxygen, as it does not seem to understand them:
+ * it says "warning: no matching class member found for [...]"
+ */
+//! @cond Doxygen_Suppress
+
+template<>
+const int VectorParser<double>::dim = 1;
+
+template<>
+std::string VectorParser<double>::js_params = "t";
+
+template<>
+void VectorParser<double>::push(const double &value)
+    {
+    duk_push_number(ctx, value);
+    }
+
+template<>
+const int VectorParser<Pt::pt3D>::dim = 3;
+
+template<>
+std::string VectorParser<Pt::pt3D>::js_params = "x,y,z";
+
+template<>
+void VectorParser<Pt::pt3D>::push(const Pt::pt3D &value)
+    {
+    duk_push_number(ctx, value.x());
+    duk_push_number(ctx, value.y());
+    duk_push_number(ctx, value.z());
+    }
+
+//! @endcond
+
+/** ********************************************************************
+ * \brief Internal implementation of MagnetizationParser.
+ */
+struct MagnetizationParser::Impl3Dprm : VectorParser<Pt::pt3D>
+    {
     };
 
 /*
@@ -81,51 +166,16 @@ void MagnetizationParser::set_expressions(const std::string &Mx, const std::stri
 
 Pt::pt3D MagnetizationParser::get_magnetization(const Pt::pt3D &p) const
     {
-    return pimpl3Dprm->get_magnetization(p);
+    Pt::pt3D M = pimpl3Dprm->get_vector(p);
+    M.normalize();
+    return M;
     }
 
-/**
+/** ********************************************************************
  * \brief Internal implementation of TimeDepFieldParser.
  */
-struct TimeDepFieldParser::Impl1Dprm
+struct TimeDepFieldParser::Impl1Dprm : VectorParser<double>
     {
-    Impl1Dprm()
-        {
-        s_table.add_variable("t", t);
-        s_table.add_constants();
-        Bx.register_symbol_table(s_table);
-        By.register_symbol_table(s_table);
-        Bz.register_symbol_table(s_table);
-        }
-
-    /**
-     * Internal implementation of
-     * TimeDepFieldParser::set_expressions().
-     */
-    void set_expressions(const std::string &str_Bx, const std::string &str_By,
-                         const std::string &str_Bz)
-        {
-        exprtk::parser<double> parser;
-        parser.compile(str_Bx, Bx);
-        parser.compile(str_By, By);
-        parser.compile(str_Bz, Bz);
-        }
-
-    /**
-     * Internal implementation of
-     * TimeDepFieldParser::get_TimeDepField().
-     */
-    Pt::pt3D get_timeDepField(const double t_val)
-        {
-        t = t_val;
-        return Pt::pt3D(Bx.value(), By.value(), Bz.value());
-        }
-
-    double t;                             /**< working variable t for the exprtk parser */
-    exprtk::symbol_table<double> s_table; /**< symbol table for the exprtk parser  */
-    exprtk::expression<double> Bx;        /**< Bx expression */
-    exprtk::expression<double> By;        /**< By expression */
-    exprtk::expression<double> Bz;        /**< Bz expression */
     };
 
 /*
@@ -144,5 +194,5 @@ void TimeDepFieldParser::set_expressions(const std::string &Bx, const std::strin
 
 Pt::pt3D TimeDepFieldParser::get_timeDepField(const double t_val) const
     {
-    return pimpl1Dprm->get_timeDepField(t_val);
+    return pimpl1Dprm->get_vector(t_val);
     }
