@@ -14,6 +14,8 @@
 #include "time_integration.h"
 #include "tiny.h"
 
+#include "element.h"
+
 /** \namespace Tetra
  to grab altogether some constants for struct Tet
  */
@@ -115,7 +117,7 @@ indices convention is<br>
                         ` w
 ```
 */
-class Tet
+class Tet : public element<N,NPI>
     {
 public:
     /** constructor for readMesh. It initializes weight hat function and dad(x|y|z) if \f$ | detJ |
@@ -125,15 +127,21 @@ public:
                const int _idx /**< [in] region index in region vector */,
                const int i0 /**< [in] node index */, const int i1 /**< [in] node index */,
                const int i2 /**< [in] node index */, const int i3 /**< [in] node index */)
-        : idxPrm(_idx), refNode(_p_node)
+        : element<N,NPI>(_p_node), idxPrm(_idx) //, refNode(_p_node)
         {
+        // index convention Matlab/msh (one based) -> C++ (zero based)
+        set_ind(0,i0);
+        set_ind(1,i1);
+        set_ind(2,i2);
+        set_ind(3,i3);
+        /*
         ind[0] = i0;
         ind[1] = i1;
         ind[2] = i2;
         ind[3] = i3;
         for (int i = 0; i < N; i++)
-            ind[i]--;  // convention Matlab/msh -> C++
-
+            ind[i]--;  
+*/
         if (refNode.size() > 0)
             {
             if (calc_vol() < 0.0)
@@ -174,7 +182,7 @@ public:
         }
 
     int idxPrm;         /**< index of the material parameters of the tetrahedron */
-    int ind[N];         /**< indices to the nodes */
+    //int ind[N];         /**< indices to the nodes */
     double weight[NPI]; /**< weights \f$ w_i = |J| p_i  \f$ with  \f$ p_i = pds[i] = (D,E,E,E,E) \f$
                          */
     double dadx[N][NPI]; /**< variations of hat function along x directions */
@@ -402,22 +410,22 @@ public:
         }
 
     /** getter for N; unit tests : Tet_constructor */
-    inline int getN(void) const { return N; }
+//    inline int getN(void) const { return N; }
 
     /** getter for NPI; unit tests : Tet_constructor */
-    inline int getNPI(void) const { return NPI; }
+//    inline int getNPI(void) const { return NPI; }
 
     /** getter for node */
-    inline const Nodes::Node &getNode(const int i) { return refNode[ind[i]]; }
+//    inline const Nodes::Node &getNode(const int i) { return refNode[ind[i]]; }
 
     /** \return \f$ |J| \f$ build Jacobian \f$ J \f$ */
     double Jacobian(double (&J)[Pt::DIM][Pt::DIM]);
 
     /** small matrix for integrales */
-    double Kp[2 * N][2 * N];
+    //double Kp[2 * N][2 * N];
 
     /** small vector for integrales */
-    double Lp[2 * N];
+    //double Lp[2 * N];
 
     /** computes volume of the tetrahedron ; unit test Tet_calc_vol */
     double calc_vol(void) const;
@@ -438,7 +446,7 @@ public:
 
 private:
     /** vector of nodes */
-    const std::vector<Nodes::Node> &refNode;
+    //const std::vector<Nodes::Node> &refNode;
 
     /** template getter to access and copy parts of the node vector of type T= double | Pt::pt3D */
     template<class T>

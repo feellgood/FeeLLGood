@@ -24,9 +24,11 @@ BOOST_AUTO_TEST_CASE(Stupid)
 /*-----------------------------------------------------*/
 BOOST_AUTO_TEST_CASE(Tet_constructor)
     {
+    std::cout << "constructor test with empty node vector\n";
     std::vector<Nodes::Node> node(0);
 
     Tetra::Tet tet(node, 0, 0, 0, 0, 0);
+    tet.infos();
 
     BOOST_CHECK((tet.getN() == Tetra::N) && (tet.getNPI() == Tetra::NPI));
     }
@@ -42,7 +44,8 @@ BOOST_AUTO_TEST_CASE(Tet_inner_tables, *boost::unit_test::tolerance(UT_TOL))
     {
     // this test is dedicated to  check dadx,dady,dadz and weight tables, those values are
     // initilized once by Tet constructor
-    int nbNod = 4;
+    std::cout << "constructor test with 4 nodes in node vector\n";
+    const int nbNod = 4;
     // std::shared_ptr<Nodes::Node[]> node(new Nodes::Node[nbNod]);
     std::vector<Nodes::Node> node(nbNod);
 
@@ -73,6 +76,7 @@ BOOST_AUTO_TEST_CASE(Tet_inner_tables, *boost::unit_test::tolerance(UT_TOL))
         }
 
     Tetra::Tet t(node, 0, 1, 2, 3, 4);  // carefull with indices (starting from 1)
+    t.infos();
 
     // ref code (with minimal adaptations of dad(x|y|z) in file Mesh_hat.cc of
     // src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
