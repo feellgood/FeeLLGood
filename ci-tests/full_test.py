@@ -36,7 +36,7 @@ settings = {
     }
 }
 
-val = subprocess.run(["../feellgood", "--seed", "1", "-"], input=json.dumps(settings), text=True)
+val = subprocess.run(["../feellgood", "--seed", "2", "-"], input=json.dumps(settings), text=True)
 
 if(val.returncode==0):
     with open("full_test.evol","r") as f:
