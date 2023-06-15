@@ -82,8 +82,8 @@ BOOST_AUTO_TEST_CASE(anisotropy_uniax, *boost::unit_test::tolerance(10.0 * UT_TO
         node[i].u0 = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
         node[i].v0 = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
         }
-
-    Tetra::Tet t(node, 0, 1, 2, 3, 4);  // carefull with indices (starting from 1)
+    // carefull with indices (starting from 1)
+    Tetra::Tet t(node, 0, {1, 2, 3, 4});
 
     double dt = distrib(gen);
 
@@ -229,8 +229,8 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TO
         node[i].u0 = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
         node[i].v0 = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
         }
-
-    Tetra::Tet t(node, 0, 1, 2, 3, 4);  // carefull with indices (starting from 1)
+    // carefull with indices (starting from 1)
+    Tetra::Tet t(node, 0, {1, 2, 3, 4});
 
     double dt = distrib(gen);
 

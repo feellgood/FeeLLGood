@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(Tet_constructor)
     std::cout << "constructor test with empty node vector\n";
     std::vector<Nodes::Node> node(0);
 
-    Tetra::Tet tet(node, 0, 0, 0, 0, 0);
+    Tetra::Tet tet(node, 0, {0, 0, 0, 0});
     tet.infos();
 
     BOOST_CHECK((tet.getN() == Tetra::N) && (tet.getNPI() == Tetra::NPI));
@@ -75,7 +75,8 @@ BOOST_AUTO_TEST_CASE(Tet_inner_tables, *boost::unit_test::tolerance(UT_TOL))
         node[i].u0 = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
         }
 
-    Tetra::Tet t(node, 0, 1, 2, 3, 4);  // carefull with indices (starting from 1)
+    // carefull with indices (starting from 1)
+    Tetra::Tet t(node, 0, {1, 2, 3, 4});
     t.infos();
 
     // ref code (with minimal adaptations of dad(x|y|z) in file Mesh_hat.cc of
@@ -162,7 +163,8 @@ BOOST_AUTO_TEST_CASE(Tet_calc_vol, *boost::unit_test::tolerance(UT_TOL))
     node[2] = n2;
     node[3] = n3;
 
-    Tetra::Tet t(node, 0, 1, 2, 3, 4);  // carefull with indices (starting from 1)
+    // carefull with indices (starting from 1)
+    Tetra::Tet t(node, 0, {1, 2, 3, 4});
 
     double result = 1 / 6.0;
     double vol = t.calc_vol();
@@ -231,7 +233,8 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation, *boost::unit_test::tolerance(UT_TOL)
         node[i].v0 = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
         }
 
-    Tetra::Tet t(node, 0, 1, 2, 3, 4);  // carefull with indices (starting from 1)
+    // carefull with indices (starting from 1)
+    Tetra::Tet t(node, 0, {1, 2, 3, 4});
 
     // ref code (with minimal adaptations of integrales method in file MuMag_integrales.cc of
     // src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
@@ -383,7 +386,8 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation2, *boost::unit_test::tolerance(UT_TOL
         node[i].phiv0 = distrib(gen);
         }
 
-    Tetra::Tet t(node, 0, 1, 2, 3, 4);  // carefull with indices (starting from 1)
+    // carefull with indices (starting from 1)
+    Tetra::Tet t(node, 0, {1, 2, 3, 4});
 
     // ref code (with minimal adaptations of integrales method in file MuMag_integrales.cc of
     // src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
@@ -485,8 +489,9 @@ BOOST_AUTO_TEST_CASE(Tet_lumping, *boost::unit_test::tolerance(UT_TOL))
         node[i].u0 = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
         }
 
-    Tetra::Tet t(node, 0, 1, 2, 3, 4);  // carefull with indices (starting from 1)
-
+    // carefull with indices (starting from 1)
+    Tetra::Tet t(node, 0, {1, 2, 3, 4});
+    
     double a = distrib(gen);
     double b = distrib(gen);
 
@@ -599,8 +604,8 @@ BOOST_AUTO_TEST_CASE(Tet_Pcoeff)
         node[i].setBasis(2 * M_PI * distrib(gen));
         }
 
-    // Tetra::Tet t(node,nbNod,0,0,1,2,3,4);//carefull with indices (starting from 1)
-    Tetra::Tet t(node, 0, 1, 2, 3, 4);  // carefull with indices (starting from 1)
+    // carefull with indices (starting from 1)
+    Tetra::Tet t(node, 0, {1, 2, 3, 4});
 
     double P[2 * N][3 * N] = {{0}};
     for (int i = 0; i < 2 * N; i++)

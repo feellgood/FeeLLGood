@@ -125,14 +125,10 @@ public:
 */
     inline Tet(const std::vector<Nodes::Node> &_p_node /**< vector of nodes */,
                const int _idx /**< [in] region index in region vector */,
-               const int i0 /**< [in] node index */, const int i1 /**< [in] node index */,
-               const int i2 /**< [in] node index */, const int i3 /**< [in] node index */)
-        : element<N,NPI>(_p_node), idxPrm(_idx)
+               std::initializer_list<int> _i /**< [in] node index */)
+        : element<N,NPI>(_p_node), idxPrm(_idx), idx(0)
         {
-        set_ind(0,i0);
-        set_ind(1,i1);
-        set_ind(2,i2);
-        set_ind(3,i3);
+        set_ind(_i);
         zeroBasing();
 
         if (refNode.size() > 0)
@@ -167,7 +163,6 @@ public:
                 weight[j] = detJ * Tetra::pds[j];
                 }
             }
-        idx = 0;
         // do nothing lambda's (usefull for spin transfer torque)
         extraField = [](int, Pt::pt3D &) {};
         extraCoeffs_BE = [](int, double, Pt::pt3D &, Pt::pt3D &, Pt::pt3D &, Pt::pt3D &,

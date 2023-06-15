@@ -24,10 +24,12 @@ class element
 
     /** vector for integrales */
     double Lp[2*N];
-    
+
     /** index setter */
-    inline void set_ind(const int i, const int idx)
-        { ind[i] = idx; }
+    inline void set_ind(std::initializer_list<int> & _i)
+        {
+        ind.assign(_i.begin(),_i.end());
+        }
     
     /** zeroBasing : index convention Matlab/msh (one based) -> C++ (zero based) */
     inline void zeroBasing(void)

@@ -28,8 +28,8 @@ BOOST_AUTO_TEST_CASE(Stupid)
 BOOST_AUTO_TEST_CASE(Fac_full_constructor)
     {
     std::vector<Nodes::Node> node;
-    std::cout << "6 param constructor" << std::endl;
-    Facette::Fac f(node, 0, 0, 0, 0, 0);
+    std::cout << "4 param constructor" << std::endl;
+    Facette::Fac f(node, 0, 0, {0, 0, 0});
 
     std::cout << "indices:" << f.ind[0] << ";" << f.ind[1] << ";" << f.ind[2] << std::endl;
     BOOST_CHECK((f.getN() == Facette::N) && (f.getNPI() == Facette::NPI));
@@ -51,11 +51,19 @@ BOOST_AUTO_TEST_CASE(Fac_operator_infto)
     std::vector<Nodes::Node> node;
     Facette::Fac f(node);
     bool test_result = !(f < f);  // whatever is f, f<f must return false
+    std::cout<<" should be true: " << test_result << std::endl; 
 
     for (int i = 0; i < 100; i++)
         {
-        Facette::Fac f1(node, 0, 0, distrib(gen), distrib(gen), distrib(gen));
-        Facette::Fac f2(node, 0, 0, distrib(gen), distrib(gen), distrib(gen));
+        int a = distrib(gen);
+        int b = distrib(gen);
+        int c = distrib(gen);
+        int d = distrib(gen);
+        int e = distrib(gen);
+        int f = distrib(gen);
+        
+        Facette::Fac f1(node, 0, 0, {a,b,c} );
+        Facette::Fac f2(node, 0, 0, {d,e,f} );
 
         /* ref code */
         bool val_ref = false;
@@ -100,7 +108,7 @@ BOOST_AUTO_TEST_CASE(Fac_calc_surf, *boost::unit_test::tolerance(UT_TOL))
     node[1] = n2;
     node[2] = n3;
 
-    Facette::Fac f(node, nbNod, 0, 1, 2, 3);  // carefull with the index shift
+    Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
 
     std::cout << "indices:" << f.ind[0] << ";" << f.ind[1] << ";" << f.ind[2] << std::endl;
 
@@ -138,7 +146,7 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_pt3D, *boost::unit_test::tolerance(UT_TOL
     node[1].u0 = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
     node[2].u0 = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
 
-    Facette::Fac f(node, nbNod, 0, 1, 2, 3);  // carefull with the index shift
+    Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
 
     Pt::pt3D _u[Facette::NPI];
     f.interpolation<Pt::pt3D>(Nodes::get_u0, _u);
@@ -192,7 +200,7 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_double, *boost::unit_test::tolerance(UT_T
     node[1].phi0 = distrib(gen);
     node[2].phi0 = distrib(gen);
 
-    Facette::Fac f(node, nbNod, 0, 1, 2, 3);  // carefull with the index shift
+    Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
 
     double _p[Facette::NPI];
     f.interpolation<double>(Nodes::get_phi0, _p);
@@ -251,7 +259,7 @@ BOOST_AUTO_TEST_CASE(Fac_potential_u, *boost::unit_test::tolerance(UT_TOL))
     node[1] = n2;
     node[2] = n3;
 
-    Facette::Fac f(node, nbNod, 0, 1, 2, 3);  // carefull with the index shift
+    Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
     f.Ms = distrib(gen);
 
     int i = 0;
@@ -380,7 +388,7 @@ BOOST_AUTO_TEST_CASE(Fac_potential_v, *boost::unit_test::tolerance(UT_TOL))
     node[1] = n2;
     node[2] = n3;
 
-    Facette::Fac f(node, nbNod, 0, 1, 2, 3);  // carefull with the index shift
+    Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
     f.Ms = distrib(gen);
 
     int i = 0;
@@ -501,7 +509,7 @@ BOOST_AUTO_TEST_CASE(Fac_Pcoeff)
         node[i].setBasis(2 * M_PI * distrib(gen));
         }
 
-    Facette::Fac f(node, nbNod, 0, 1, 2, 3);  // carefull with the index shift
+    Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
 
     double P[2 * N][3 * N] = {{0}};
     for (int i = 0; i < 2 * N; i++)

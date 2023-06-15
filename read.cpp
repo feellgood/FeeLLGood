@@ -129,8 +129,8 @@ void mesh::readMesh(Settings const &mySets)
                                 int idx = mySets.findFacetteRegionIdx(search->second);
                                 if (idx > -1)
                                     fac.push_back(
-                                            Facette::Fac(node, nbNod, idx, i0, i1,
-                                                         i2));  // we only want to store in fac
+                                            Facette::Fac(node, nbNod, idx, {i0, i1,
+                                                         i2}));  // we only want to store in fac
                                                                 // vector the facettes for micromag
                                                                 // problem, nothing for bc for stt
                                 }
@@ -144,12 +144,12 @@ void mesh::readMesh(Settings const &mySets)
                             }
                         case tags::msh::TYP_ELEM_TETRAEDRON:
                             {
-                            int i0, i1, i2, i3;
+                            int i0,i1,i2,i3;
                             msh >> i0 >> i1 >> i2 >> i3;
                             if (auto search = volRegNames.find(reg); search != volRegNames.end())
                                 {  // found named volume
                                 int idx = mySets.findTetraRegionIdx(search->second);
-                                if (idx > -1) tet.push_back(Tetra::Tet(node, idx, i0, i1, i2, i3));
+                                if (idx > -1) tet.push_back(Tetra::Tet(node, idx, {i0,i1,i2,i3}));
                                 }
                             else
                                 {

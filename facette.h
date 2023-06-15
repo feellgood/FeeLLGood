@@ -73,36 +73,13 @@ public:
     inline Fac(const std::vector<Nodes::Node> &_p_node /**< [in] vector of nodes */,
                const int _NOD /**< [in] nb nodes */,
                const int _idx /**< [in] region index in region vector */,
-               const int i0 /**< [in] node index */, const int i1 /**< [in] node index */,
-               const int i2 /**< [in] node index */)
+               std::initializer_list<int> _i /**< [in] node index */)
         : element<N,NPI>(_p_node), idxPrm(_idx)
         {
-        set_ind(0,i0);
-        set_ind(1,i1);
-        set_ind(2,i2);
+        set_ind(_i);
 
         if (_NOD > 0)
-            {  // to force index to start from 0 (C++) instead of Matlab/msh convention
-            /*
-            if ((i0 > 0) && (i0 <= _NOD))
-                {
-                ind[0]--;
-                }
-            else
-                std::cout << "warning index i0 out of bounds in fac constructor" << std::endl;
-            if ((i1 > 0) && (i1 <= _NOD))
-                {
-                ind[1]--;
-                }
-            else
-                std::cout << "warning index i1 out of bounds in fac constructor" << std::endl;
-            if ((i2 > 0) && (i2 <= _NOD))
-                {
-                ind[2]--;
-                }
-            else
-                std::cout << "warning index i2 out of bounds in fac constructor" << std::endl;
-            */
+            {
             zeroBasing();
             surf = calc_surf();
             }

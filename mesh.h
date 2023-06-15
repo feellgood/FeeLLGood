@@ -307,7 +307,7 @@ private:
                             {
                             for (int nrot = 0; nrot < 3; nrot++)
                                 {
-                                Facette::Fac fc(node, 0, 0, 0, 0, 0);
+                                Facette::Fac fc(node, 0, 0, {0, 0, 0} );
                                 fc.ind[(0 + nrot) % 3] = i0;
                                 fc.ind[(1 + nrot) % 3] = i1;
                                 fc.ind[(2 + nrot) % 3] = i2;

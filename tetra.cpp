@@ -268,10 +268,10 @@ std::set<Facette::Fac> Tet::ownedFac() const
     const int ic = ind[2];
     const int id = ind[3];
 
-    s.insert(Facette::Fac(refNode, 0, idxPrm, ia, ic, ib));
-    s.insert(Facette::Fac(refNode, 0, idxPrm, ib, ic, id));
-    s.insert(Facette::Fac(refNode, 0, idxPrm, ia, id, ic));
-    s.insert(Facette::Fac(refNode, 0, idxPrm, ia, ib, id));
+    s.insert(Facette::Fac(refNode, 0, idxPrm, {ia, ic, ib} ));
+    s.insert(Facette::Fac(refNode, 0, idxPrm, {ib, ic, id} ));
+    s.insert(Facette::Fac(refNode, 0, idxPrm, {ia, id, ic} ));
+    s.insert(Facette::Fac(refNode, 0, idxPrm, {ia, ib, id} ));
 
     return s;
     }
