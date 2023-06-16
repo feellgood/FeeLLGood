@@ -4,10 +4,10 @@ from math import sqrt
 import numpy as np
 
 def infos(g_opt):
-    nbNodes = g_opt.get_number("Mesh.NbNodes")
-    nbTriangles = g_opt.get_number("Mesh.NbTriangles")
-    nbTetra = g_opt.get_number("Mesh.NbTetrahedra")
-    print("nb nodes =" + str(nbNodes) + " , nb tetra =" +str(nbTetra) + " , nb triangles =" + str(nbTriangles) )
+    nbNodes = int(g_opt.get_number("Mesh.NbNodes"))
+    nbTriangles = int(g_opt.get_number("Mesh.NbTriangles"))
+    nbTetra = int(g_opt.get_number("Mesh.NbTetrahedra"))
+    return f"{nbNodes} nodes, {nbTetra} tetrahedra, {nbTriangles} triangles"
 
 class Cylinder(object):
     def __init__ (self,radius,thickness,mesh_size,surfName,volName):
@@ -84,8 +84,7 @@ class Cylinder(object):
 
         # uncomment next line to see a graphic rendering of the mesh
         #gmsh.fltk.run()
-        print("mesh file " + meshFileName + " generated")
-        infos(gmsh.option)
+        print(f"Generated {meshFileName}: {infos(gmsh.option)}")
         gmsh.finalize()
 
 class Ellipsoid(object):
@@ -141,8 +140,7 @@ class Ellipsoid(object):
 
         # uncomment next line to see a graphic rendering of the mesh
         #gmsh.fltk.run()
-        print("mesh file " + meshFileName + " generated")
-        infos(gmsh.option)
+        print(f"Generated {meshFileName}: {infos(gmsh.option)}")
         gmsh.finalize()
 
 # Cuboid class
@@ -313,7 +311,7 @@ class Cuboid(object):
                 idx += 1
         meshFile.write("$EndElements\n")
         meshFile.close()
-        print("mesh file " + meshFileName + " generated, nb nodes =" + str(len(self.pts)) + " , nb tetra =" +str(len(self.Tet)) )
+        print(f"Generated {meshFileName}: {len(self.pts)} nodes, {len(self.Tet)} tetrahedra")
 
 # Ico class
 # make builds a mesh of an icosahedron format 2.2, each tetrahedron is built with a outer face of the icosahedron linked to the barycenter of the icosahedron (zero). The mesh file is directly written in the output textfile, without calling gmsh module.
@@ -347,5 +345,5 @@ class Ico(object):
 
         meshFile.write("$EndElements\n")
         meshFile.close()
-        print("mesh file " + meshFileName + " generated")
+        print(f"Generated {meshFileName}: 13 nodes, 20 tetrahedra, 20 triangles")
 
