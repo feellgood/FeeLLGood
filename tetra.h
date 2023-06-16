@@ -133,10 +133,7 @@ public:
 
         if (refNode.size() > 0)
             {
-            if (calc_vol() < 0.0)
-                {
-                std::swap(ind[2], ind[3]);
-                }
+            orientate();
 
             double J[Pt::DIM][Pt::DIM];  // we have to rebuild the jacobian in case of ill oriented
                                          // tetrahedron
@@ -418,6 +415,12 @@ public:
             extraCoeffs_BE;
 
 private:
+
+    void orientate(void)
+        {
+        if (calc_vol() < 0.0)
+                std::swap(ind[2], ind[3]);
+        }
 
     /** template getter to access and copy parts of the node vector of type T= double | Pt::pt3D */
     template<class T>

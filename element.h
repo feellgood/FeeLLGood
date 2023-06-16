@@ -1,6 +1,7 @@
 #ifndef element_h
 #define element_h
 
+#include <execution>
 #include "node.h"
 
 /** \class element
@@ -11,11 +12,12 @@ template <int N,int NPI>
 class element
     {
     /** constructor */
-    public: element(const std::vector<Nodes::Node> &_p_node /**< vector of nodes */) : refNode(_p_node)
+    public:
+    element(const std::vector<Nodes::Node> &_p_node /**< vector of nodes */) : refNode(_p_node)
         {
         ind.resize(N);
         }
-    
+
     /** indices to the nodes */
     std::vector<int> ind;
     
@@ -34,8 +36,11 @@ class element
     /** zeroBasing : index convention Matlab/msh (one based) -> C++ (zero based) */
     inline void zeroBasing(void)
         {
-        for(unsigned int i = 0; i < N; i++)
-            ind[i]--;
+        std::for_each(ind.begin(), ind.end(), [] (int & idx) {idx--;});
+        /* does not link for some obscure tbb reason ??
+        std::transform(std::execution::par, ind.begin(), ind.end(), ind.begin(),
+                         [](int idx) -> int {return idx-1;} );
+        */
         }
 
     /** getter for N */
@@ -64,6 +69,10 @@ class element
     protected:
         /** vector of nodes */
         const std::vector<Nodes::Node> &refNode;
+    
+    private:
+        /** a method to orientate the element must be provided in derived class */
+        virtual void orientate() = 0;
     };
     
 #endif

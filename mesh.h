@@ -51,7 +51,7 @@ public:
                                     [](Tetra::Tet const &te) { return te.calc_vol(); });
 
         surf = std::transform_reduce(std::execution::par, fac.begin(), fac.end(), 0.0, std::plus{},
-                                     [](Facette::Fac const &fa) { return fa.calc_surf(); });
+                                     [](Facette::Fac const &fa) { return fa.surf; /*calc_surf();*/ });
         }
 
     /** return number of nodes  */

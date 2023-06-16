@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(Fac_calc_surf, *boost::unit_test::tolerance(UT_TOL))
     std::cout << "indices:" << f.ind[0] << ";" << f.ind[1] << ";" << f.ind[2] << std::endl;
 
     double s = 0.5;
-    BOOST_TEST(f.calc_surf() == s);
+    BOOST_TEST(f.surf == s);
     }
 
 BOOST_AUTO_TEST_CASE(Fac_interpolation_pt3D, *boost::unit_test::tolerance(UT_TOL))
