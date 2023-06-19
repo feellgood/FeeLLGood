@@ -22,16 +22,8 @@ BOOST_AUTO_TEST_CASE(Stupid)
 /*-----------------------------------------------------*/
 /* zero lvl tests : direct elementary member functions */
 /*-----------------------------------------------------*/
-BOOST_AUTO_TEST_CASE(Tet_constructor)
-    {
-    std::cout << "constructor test with empty node vector\n";
-    std::vector<Nodes::Node> node(0);
 
-    Tetra::Tet tet(node, 0, {0, 0, 0, 0});
-    tet.infos();
-
-    BOOST_CHECK((tet.getN() == Tetra::N) && (tet.getNPI() == Tetra::NPI));
-    }
+// Tetra::Tet constructor is tested in ut_element.cpp
 
 /*---------------------------------------*/
 /* first lvl tests : nested calculus,... */

@@ -25,15 +25,7 @@ BOOST_AUTO_TEST_CASE(Stupid)
 /* zero lvl tests : direct elementary member functions */
 /*-----------------------------------------------------*/
 
-BOOST_AUTO_TEST_CASE(Fac_full_constructor)
-    {
-    std::vector<Nodes::Node> node;
-    std::cout << "4 param constructor" << std::endl;
-    Facette::Fac f(node, 0, 0, {0, 0, 0});
-
-    std::cout << "indices:" << f.ind[0] << ";" << f.ind[1] << ";" << f.ind[2] << std::endl;
-    BOOST_CHECK((f.getN() == Facette::N) && (f.getNPI() == Facette::NPI));
-    }
+// Facette::Fac constructor is tested in ut_element.cpp
 
 /*---------------------------------------*/
 /* first lvl tests : nested calculus,... */

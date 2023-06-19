@@ -20,6 +20,9 @@ add_definitions (-DBOOST_TEST_DYN_LINK)
 add_executable (test_ut_pt3D ut_pt3D.cpp)
 add_executable (test_ut_node ut_node.cpp)
 
+SET(SOURCES ../facette.cpp ../tetra.cpp ut_element.cpp)
+add_executable (test_ut_element ${SOURCES})
+
 SET(SOURCES ../facette.cpp ut_facette.cpp)
 add_executable (test_ut_facette ${SOURCES})
 
@@ -45,6 +48,13 @@ target_link_libraries(test_ut_node
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  )
+
+target_link_libraries(test_ut_element
+  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY}
+  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  TBB::tbb
   )
 
 target_link_libraries(test_ut_facette
@@ -87,6 +97,7 @@ target_link_libraries(test_ut_log-stats
 
 add_test (NAME ut_pt3D_arithmetic COMMAND test_ut_pt3D)
 add_test (NAME ut_node COMMAND test_ut_node)
+add_test (NAME ut_element COMMAND test_ut_element)
 add_test (NAME ut_facette COMMAND test_ut_facette)
 add_test (NAME ut_tetra COMMAND test_ut_tetra)
 add_test (NAME ut_anisotropy COMMAND test_ut_anisotropy)
