@@ -2,6 +2,13 @@ PROJECT (FEELLGOOD)
 
 find_package (Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
 
+find_package(TBB REQUIRED)
+if(TBB_FOUND)
+    message(STATUS "TBB Found")
+else()
+    message(FATAL_ERROR "TBB NOT FOUND")
+endif()
+
 include_directories (${CMAKE_SOURCE_DIR}
   ${Boost_INCLUDE_DIRS}
   )
@@ -44,18 +51,21 @@ target_link_libraries(test_ut_facette
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  TBB::tbb
   )
 
 target_link_libraries(test_ut_tetra
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  TBB::tbb
   )
 
 target_link_libraries(test_ut_anisotropy
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  TBB::tbb
   )
   
 target_link_libraries(test_ut_tiny

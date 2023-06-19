@@ -36,11 +36,8 @@ class element
     /** zeroBasing : index convention Matlab/msh (one based) -> C++ (zero based) */
     inline void zeroBasing(void)
         {
-        std::for_each(ind.begin(), ind.end(), [] (int & idx) {idx--;});
-        /* does not link for some obscure tbb reason ??
-        std::transform(std::execution::par, ind.begin(), ind.end(), ind.begin(),
+        std::transform(std::execution::par, ind.cbegin(), ind.cend(), ind.begin(),
                          [](int idx) -> int {return idx-1;} );
-        */
         }
 
     /** getter for N */
