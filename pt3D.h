@@ -7,14 +7,13 @@
  * a template to write text files from std::vector<>
  */
 
-#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <iostream>
 #include <math.h>
-#include <vector>
 
+#include "vecND.h"
 /** \namespace Pt
  * to grab altogether some dedicated functions and some enum for class pt2D and pt3D
  */
@@ -54,30 +53,24 @@ inline double sq(const double x) { return x * x; }
  all usefull operators are defined : += ; -= ; + - * <br>
  \f$ \mathbb{R}^3 \f$ scalar product and norm are defined, return double
  */
-class pt3D
+class pt3D : public vecND<DIM>
     {
 public:
     /**
      * default constructor : initialization by zero values
      */
-    inline pt3D() { std::fill_n(_x, DIM, 0); }
+    pt3D(): vecND<DIM>() {}
 
     /** constructor by values, cartesian coordinates */
-    inline pt3D(const double a, const double b, const double c)
-        {
-        _x[IDX_X] = a;
-        _x[IDX_Y] = b;
-        _x[IDX_Z] = c;
-        }
+    inline pt3D(const double a, const double b, const double c): vecND<DIM>()
+        { set({a,b,c}); }
 
     /** unit vector constructor by values, spherical coordinates \f$ (r=1,\theta \in [0,\pi],\phi
      * \in [0,2 \pi]) \f$ */
-    inline pt3D(const double theta, const double phi)
+    inline pt3D(const double theta, const double phi): vecND<DIM>()
         {
-        double si_t = sin(theta);
-        _x[IDX_X] = si_t * cos(phi);
-        _x[IDX_Y] = si_t * sin(phi);
-        _x[IDX_Z] = cos(theta);
+        const double si_t = sin(theta);
+        set({si_t*cos(phi), si_t*sin(phi), cos(theta)});
         }
 
     /**
@@ -85,16 +78,10 @@ public:
      * example : pt3D p = pt3D(IDX_Y); <br>
      p will contain \f$ (x,y,z) = (0.0,1.0,0.0) \f$
      */
-    inline pt3D(const enum index idx)
+    inline pt3D(const enum index idx): vecND<DIM>()
         {
-        _x[IDX_X] = 0;
-        _x[IDX_Y] = 0;
-        _x[IDX_Z] = 0;
         if (idx != IDX_UNDEF) _x[idx] = 1.0;
         }
-
-    inline pt3D(const pt3D &p) { memcpy(_x, p._x, sizeof _x); }
-    /**< constructor copy */
 
     /**
      * getter for x coordinate : example : double x0 = pt.x();
@@ -135,31 +122,6 @@ public:
      * setter for z coordinate : example : pt.z(0.707);
      */
     inline void z(double c) { _x[IDX_Z] = c; }
-
-    /**
-     * getter/setter by index
-     @param i is an enum IDX_X IDX_Y IDX_Z
-     */
-    inline double &operator()(const index i) { return _x[i]; }
-
-    /**
-    getter by index
-    */
-    inline double operator()(const index i) const { return _x[i]; }
-
-    /** getter by int : carefull, no test on i ! */
-    inline double operator()(const int i) const { return _x[i]; }
-
-    /** setter by int : carefull, no test on i ! */
-    inline void operator()(const int i, const double val) { _x[i] = val; }
-
-    inline pt3D &operator=(pt3D const &p)
-        {
-        _x[IDX_X] = p.x();
-        _x[IDX_Y] = p.y();
-        _x[IDX_Z] = p.z();
-        return *this;
-        } /**< operator= */
 
     /**
      * algebric += components by components
@@ -257,9 +219,6 @@ public:
         std::swap(_x[1], a._x[1]);
         std::swap(_x[2], a._x[2]);
         }
-
-private:
-    double _x[DIM]; /**< rectangular coordinates */
     };
 
 /** operator<< for pt3D, coordinates are tab separated */

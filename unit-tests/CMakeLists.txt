@@ -42,12 +42,14 @@ target_link_libraries(test_ut_pt3D
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  TBB::tbb
   )
 
 target_link_libraries(test_ut_node
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  TBB::tbb
   )
 
 target_link_libraries(test_ut_element
