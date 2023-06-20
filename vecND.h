@@ -12,6 +12,9 @@ template class for double precision vectors of dimension _DIM: template paramete
 
 
 //operators are twice slower with par_unseq than unseq 
+/**
+execution policy for various operators
+*/
 #define strategy std::execution::unseq
 
 /** \class vecND
