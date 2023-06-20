@@ -29,7 +29,16 @@ BOOST_AUTO_TEST_CASE(Fac_full_constructor)
     std::cout << "4 param constructor" << std::endl;
     Facette::Fac f(node, 0, 0, {0, 0, 0});
 
-    std::cout << "indices:" << f.ind[0] << ";" << f.ind[1] << ";" << f.ind[2] << std::endl;
+    std::cout << "indices:\t";
+    f.print_indices();
+    /*
+    The constructor facette does not modify all indices to fit to zero based index convention
+    it's done later
+    */
+    const int idx = 0;
+    BOOST_CHECK(f.ind[0] == idx);
+    BOOST_CHECK(f.ind[1] == idx);
+    BOOST_CHECK(f.ind[2] == idx);
     BOOST_CHECK((f.getN() == Facette::N) && (f.getNPI() == Facette::NPI));
     }
 
@@ -39,8 +48,16 @@ BOOST_AUTO_TEST_CASE(Tet_constructor)
     std::vector<Nodes::Node> node(0);
 
     Tetra::Tet tet(node, 0, {0, 0, 0, 0});
-    tet.infos();
-
+    std::cout << "indices:\t";
+    tet.print_indices();
+    /*
+    The constructor tetra do modify all indices to fit to zero based index convention
+    */
+    const int idx = -1;
+    BOOST_CHECK(tet.ind[0] == idx);
+    BOOST_CHECK(tet.ind[1] == idx);
+    BOOST_CHECK(tet.ind[2] == idx);
+    BOOST_CHECK(tet.ind[3] == idx);
     BOOST_CHECK((tet.getN() == Tetra::N) && (tet.getNPI() == Tetra::NPI));
     }
 

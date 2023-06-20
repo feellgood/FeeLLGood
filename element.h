@@ -32,13 +32,6 @@ class element
         {
         ind.assign(_i.begin(),_i.end());
         }
-    
-    /** zeroBasing : index convention Matlab/msh (one based) -> C++ (zero based) */
-    inline void zeroBasing(void)
-        {
-        std::transform(std::execution::par, ind.cbegin(), ind.cend(), ind.begin(),
-                         [](int idx) -> int {return idx-1;} );
-        }
 
     /** getter for N */
     inline constexpr int getN(void) const { return N; }
@@ -66,6 +59,14 @@ class element
     protected:
         /** vector of nodes */
         const std::vector<Nodes::Node> &refNode;
+
+    /** zeroBasing : index convention Matlab/msh (one based) -> C++ (zero based) */
+        inline void zeroBasing(void)
+            {// par_unseq to benefit of parallelization and vectorization (SSE|AVX)
+            std::transform(std::execution::par_unseq, ind.cbegin(), ind.cend(), ind.begin(),
+                         [](int idx) -> int {return idx-1;} );
+            }
+
     
     private:
         /** a method to orientate the element must be provided in derived class */
