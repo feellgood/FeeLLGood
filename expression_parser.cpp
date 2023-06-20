@@ -2,7 +2,7 @@
  * Implementation of MagnetizationParser and TimeDepFieldParser.
  */
 
-#include "mag_parser.h"
+#include "expression_parser.h"
 #include <iostream>
 
 /* Copy all the contents of the Math object (sqrt, sin, log, PI...) to the global object. */

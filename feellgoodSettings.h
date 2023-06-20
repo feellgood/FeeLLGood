@@ -14,8 +14,8 @@ output file format wanted by the user. This is done mainly with the class Settin
 
 #include <yaml-cpp/yaml.h>
 
+#include "expression_parser.h"
 #include "facette.h"
-#include "mag_parser.h"
 #include "spinTransferTorque.h"
 #include "tetra.h"
 #include "time_integration.h"

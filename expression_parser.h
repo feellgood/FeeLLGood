@@ -4,8 +4,8 @@
  *  - TimeDepFieldParser: parser for the applied field B(t)
  */
 
-#ifndef mag_parser_h
-#define mag_parser_h
+#ifndef expression_parser_h
+#define expression_parser_h
 
 #include "pt3D.h"
 #include <duktape.h>
@@ -121,4 +121,4 @@ private:
     double get_vector_component(double t, int component_index) const;
     };
 
-#endif /* mag_parser_h */
+#endif /* expression_parser_h */
