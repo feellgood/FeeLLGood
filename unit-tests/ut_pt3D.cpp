@@ -60,26 +60,6 @@ BOOST_AUTO_TEST_CASE(pt3D_getter)
     BOOST_CHECK(x == result);
     }
 
-BOOST_AUTO_TEST_CASE(pt3D_swap)
-    {
-    Pt::pt3D X(1, 2, 3);
-    Pt::pt3D Y(5, 6, 7);
-    std::cout << "X;Y = " << X << " ; " << Y << std::endl;
-    Pt::swap(X, Y);
-    std::cout << "X;Y = " << X << " ; " << Y << std::endl;
-
-    double x(1.0), y(2.0), z(3.0);
-    BOOST_CHECK(Y.x() == x);
-    BOOST_CHECK(Y.y() == y);
-    BOOST_CHECK(Y.z() == z);
-    x = 5;
-    y = 6;
-    z = 7;
-    BOOST_CHECK(X.x() == x);
-    BOOST_CHECK(X.y() == y);
-    BOOST_CHECK(X.z() == z);
-    }
-
 BOOST_AUTO_TEST_CASE(pt3D_op_add)
     {
     Pt::pt3D X(1, 2, 3);

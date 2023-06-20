@@ -165,13 +165,6 @@ public:
     /** \return max length coordinate */
     inline double maxLength(void) { return std::max(_x[IDX_X], std::max(_x[IDX_Y], _x[IDX_Z])); }
 
-    /** swap */
-    inline void swap(Pt::pt3D &a)
-        {
-        std::swap(_x[0], a._x[0]);
-        std::swap(_x[1], a._x[1]);
-        std::swap(_x[2], a._x[2]);
-        }
     }; // end class pt3D
 
 /** operator<< for pt3D, coordinates are tab separated */
@@ -240,9 +233,6 @@ inline pt3D operator/(pt3D const &a, double const &b)
     {
     return pt3D(a.x() / b, a.y() / b, a.z() / b);
     }
-
-/** swap  */
-inline void swap(pt3D &a, pt3D &b) { a.swap(b); }
 
 /**
 algebra : R^3 scalar product
