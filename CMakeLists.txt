@@ -54,9 +54,10 @@ SET(HEADERS config.h pt3D.h node.h expression_parser.h mesh.h electrostatSolver.
     facette.h triangle.h surface.h linear_algebra.h log-stats.h tags.h
     chronometer.h element.h tiny.h)
 
-SET(SOURCES expression_parser.cpp time_integration.cpp feellgoodSettings.cpp
-    solver.cpp tetra.cpp facette.cpp read.cpp save.cpp tags.cpp
-    linear_algebra.cpp energy.cpp recentering.cpp chronometer.cpp)
+SET(SOURCES feellgoodSettings.cpp time_integration.cpp solver.cpp
+    read.cpp save.cpp linear_algebra.cpp recentering.cpp tetra.cpp
+    energy.cpp facette.cpp expression_parser.cpp chronometer.cpp
+    tags.cpp)
 
 configure_file(config.h.in ./config.h)
 
