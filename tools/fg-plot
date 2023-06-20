@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+
+import numpy as np
+import sys
+import os
+
+import matplotlib.pyplot as plt
+# python3 -m pip install -U matplotlib
+import matplotlib.colors
+
+from feellgood.core import mesh
+
+def get_params():
+    import argparse
+    description = 'make a basic quiver rendering of a .sol file'
+    epilogue = '''
+ render a .sol file wit a .msh and a coerresponding .sol file
+   '''
+    parser = argparse.ArgumentParser(description=description, epilog=epilogue,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('meshFileName', help='.msh file name')
+    parser.add_argument('solFileName', help='.sol file name to render')
+    parser.add_argument('-P', '--percent',
+    default=100,
+    help='Percentage of the field vectors rendered'
+    )
+    args = parser.parse_args()
+    
+    return args
+
+def main():
+    my_args = get_params()
+    meshFileName = my_args.meshFileName
+    solFileName = my_args.solFileName
+    perc = float(my_args.percent)
+
+    path, ext = os.path.splitext(meshFileName)
+    ext = ext.lower()
+    if ext != '.msh':
+        print(ext, " unsupported.")
+        sys.exit(1)
+
+    with open(solFileName,'r') as f:
+        my_data = np.genfromtxt(f,delimiter='\t',comments='#',dtype=np.float64, usecols=(1,2,3))
+
+    msh = mesh(meshFileName)
+#slice : every s_val points to be viewed
+    s_val = int(100.0/perc)
+    pos = msh.Nodes[::s_val] 
+    vec = my_data[::s_val]
+
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+    
+    graph = ax.quiver(pos[:,0], pos[:,1], pos[:,2], vec[:,0], vec[:,1], vec[:,2], length=0.03, cmap='rainbow', pivot='middle', normalize=True)
+    #ax.scatter(pos[:,0], pos[:,1], pos[:,2],color='b',s=5)
+    ax.axis('equal')
+    ax.set_title("Magnetization")
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_zlabel("z")
+    graph.set_array(vec[:,2])
+    cbar = fig.colorbar(graph,orientation='vertical')#'horizontal')
+    cbar.set_label("Mz")
+    plt.show()
+
+if __name__ == "__main__":
+    main()
