@@ -14,16 +14,14 @@ def get_params():
     import argparse
     description = 'make a basic quiver rendering of a .sol file'
     epilogue = '''
- render a .sol file wit a .msh and a coerresponding .sol file
+ render a .sol file with a .msh and a corresponding .sol file
    '''
     parser = argparse.ArgumentParser(description=description, epilog=epilogue,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('meshFileName', help='.msh file name')
     parser.add_argument('solFileName', help='.sol file name to render')
-    parser.add_argument('-P', '--percent',
-    default=100,
-    help='Percentage of the field vectors rendered'
-    )
+    parser.add_argument('-P', '--percent', default=100, help='Percentage of the field vectors rendered')
+    parser.add_argument('-q', '--qlength', default=1.0, help='quiver length')
     args = parser.parse_args()
     
     return args
@@ -33,6 +31,7 @@ def main():
     meshFileName = my_args.meshFileName
     solFileName = my_args.solFileName
     perc = float(my_args.percent)
+    q_l = float(my_args.qlength)
 
     path, ext = os.path.splitext(meshFileName)
     ext = ext.lower()
@@ -52,7 +51,7 @@ def main():
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
     
-    graph = ax.quiver(pos[:,0], pos[:,1], pos[:,2], vec[:,0], vec[:,1], vec[:,2], length=0.03, cmap='rainbow', pivot='middle', normalize=True)
+    graph = ax.quiver(pos[:,0], pos[:,1], pos[:,2], vec[:,0], vec[:,1], vec[:,2], length=q_l, cmap='rainbow', pivot='middle', normalize=True)
     #ax.scatter(pos[:,0], pos[:,1], pos[:,2],color='b',s=5)
     ax.axis('equal')
     ax.set_title("Magnetization")
