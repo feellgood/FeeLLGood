@@ -124,22 +124,6 @@ public:
     inline void z(double c) { _x[IDX_Z] = c; }
 
     /**
-     * algebric /= , if a is zero do nothing and send a message on cerr
-     */
-    inline pt3D &operator/=(const double &a)
-        {
-        if (a != 0)
-            {
-            _x[IDX_X] /= a;
-            _x[IDX_Y] /= a;
-            _x[IDX_Z] /= a;
-            }
-        else
-            std::cerr << "division by zero in pt3D::operator/=" << std::endl;
-        return *this;
-        }
-
-    /**
      * return algebric norm \f$ \mathcal{R}^3 \f$
      */
     inline double norm(void) const
@@ -171,12 +155,12 @@ public:
     /**
      scaling factor mainly for writing files in user units
      */
-    inline void rescale(double scaling)
+
+    inline void rescale(const double scaling)
         {
-        _x[IDX_X] *= scaling;
-        _x[IDX_Y] *= scaling;
-        _x[IDX_Z] *= scaling;
+        *this *= scaling;
         }
+
 
     /** \return max length coordinate */
     inline double maxLength(void) { return std::max(_x[IDX_X], std::max(_x[IDX_Y], _x[IDX_Z])); }
@@ -188,7 +172,7 @@ public:
         std::swap(_x[1], a._x[1]);
         std::swap(_x[2], a._x[2]);
         }
-    };
+    }; // end class pt3D
 
 /** operator<< for pt3D, coordinates are tab separated */
 inline std::ostream &operator<<(std::ostream &flux, pt3D const &p)
@@ -205,8 +189,8 @@ inline std::istream &operator>>(std::istream &flux, pt3D &p)
     }
 
 /**
- * algebra : +
- */
+* algebra : +
+*/
 inline pt3D operator+(pt3D const &a, pt3D const &b)
     {
     pt3D r = pt3D(a);
@@ -215,8 +199,8 @@ inline pt3D operator+(pt3D const &a, pt3D const &b)
     }
 
 /**
- * algebra : -
- */
+* algebra : -
+*/
 inline pt3D operator-(pt3D const &a, pt3D const &b)
     {
     pt3D r = pt3D(a);

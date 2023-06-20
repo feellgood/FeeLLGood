@@ -5,8 +5,8 @@
 #include <algorithm>
 #include <execution>
 
-/**
-* \brief class vecND for small dense vectors, using parallelization and vectorization for operators
+/** \file vecND.h
+* \brief template class vecND for small dense vectors, using parallelization and vectorization for operators
 template class for double precision vectors of dimension _DIM: template parameter
 */
 
@@ -14,6 +14,10 @@ template class for double precision vectors of dimension _DIM: template paramete
 //operators are twice slower with par_unseq than unseq 
 #define strategy std::execution::unseq
 
+/** \class vecND
+\brief vector of dimension _DIM
+template class for a vector of dimension _DIM with basic operators implemented using transform algorithm 
+*/
 template <int _DIM>
 class vecND
     {
@@ -72,6 +76,20 @@ class vecND
         {
         std::transform(strategy, std::begin(_x), std::end(_x), std::begin(_x),
                         [a](double &v_loc) -> double { return v_loc*=a; } );
+        return *this;
+        }
+
+    /**
+     * algebric /= , if a is zero do nothing and send a message on cerr
+     */
+    inline vecND &operator/=(const double &a)
+        {
+        if (a != 0)
+            {
+            *this *= 1.0/a;
+            }
+        else
+            std::cerr << "division by zero in vecND::operator/=" << std::endl;
         return *this;
         }
     
