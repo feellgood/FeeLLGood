@@ -124,37 +124,6 @@ public:
     inline void z(double c) { _x[IDX_Z] = c; }
 
     /**
-     * algebric += components by components
-     */
-    inline pt3D &operator+=(const pt3D &a)
-        {
-        _x[IDX_X] += a.x();
-        _x[IDX_Y] += a.y();
-        _x[IDX_Z] += a.z();
-        return *this;
-        }
-
-    /**
-     * algebric -= components by components
-     */
-    inline pt3D &operator-=(const pt3D &a)
-        {
-        _x[IDX_X] -= a.x();
-        _x[IDX_Y] -= a.y();
-        _x[IDX_Z] -= a.z();
-        return *this;
-        }
-
-    /** algebric *= with a double */
-    inline pt3D &operator*=(const double &a)
-        {
-        _x[IDX_X] *= a;
-        _x[IDX_Y] *= a;
-        _x[IDX_Z] *= a;
-        return *this;
-        }
-
-    /**
      * algebric /= , if a is zero do nothing and send a message on cerr
      */
     inline pt3D &operator/=(const double &a)
