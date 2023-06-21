@@ -124,24 +124,13 @@ public:
     inline void z(double c) { _x[IDX_Z] = c; }
 
     /**
-     * return algebric norm \f$ \mathcal{R}^3 \f$
-     */
-    inline double norm(void) const
-        {
-        return sqrt(_x[IDX_X] * _x[IDX_X] + _x[IDX_Y] * _x[IDX_Y] + _x[IDX_Z] * _x[IDX_Z]);
-        }
-
-    /**
      * normalization : divide each components x,y and z by the norm \f$ \mathcal{R}^3 \f$ in place
      * without safety
      */
     inline void normalize(void)
         {
         double inv_r = 1.0 / norm();
-        _x[IDX_X] *= inv_r;
-        _x[IDX_Y] *= inv_r;
-        _x[IDX_Z] *= inv_r;
-        return;
+        *this *= inv_r;
         }
 
     /**
@@ -160,7 +149,6 @@ public:
         {
         *this *= scaling;
         }
-
 
     /** \return max length coordinate */
     inline double maxLength(void) { return std::max(_x[IDX_X], std::max(_x[IDX_Y], _x[IDX_Z])); }
@@ -274,12 +262,12 @@ inline double dist(pt3D const &a, pt3D const &b)
 /**
 algebra : returns square of the R^3 norm
  */
-inline double norme2(pt3D const &p) { return (p.x() * p.x() + p.y() * p.y() + p.z() * p.z()); }
+inline double norme2(pt3D const &p) { return p.norm2(); }
 
 /**
  * algebra : returns R^3 norm
  */
-inline double norme(pt3D const &p) { return sqrt(norme2(p)); }
+inline double norme(pt3D const &p) { return p.norm(); }
 
 /** check orthogonality of three vectors */
 inline bool isOrthogonal(pt3D const &a, pt3D const &b, pt3D const &c, const double precision)

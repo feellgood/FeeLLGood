@@ -53,7 +53,7 @@ class vecND
         void operator()(const int i, const double val) { _x[i] = val; }
 
     /**
-     * algebric += components by components
+     * algebra += components by components
      */
     inline vecND &operator+=(const vecND &a)
         {
@@ -64,7 +64,7 @@ class vecND
         }
 
     /**
-     * algebric -= components by components
+     * algebra -= components by components
      */
     inline vecND &operator-=(const vecND &a)
         {
@@ -74,7 +74,7 @@ class vecND
         return *this;
         }
 
-    /** algebric *= with a double */
+    /** algebra *= with a double */
     inline vecND &operator*=(const double &a)
         {
         std::transform(strategy, std::begin(_x), std::end(_x), std::begin(_x),
@@ -83,7 +83,7 @@ class vecND
         }
 
     /**
-     * algebric /= , if a is zero do nothing and send a message on cerr
+     * algebra /= , if a is zero do nothing and send a message on cerr
      */
     inline vecND &operator/=(const double &a)
         {
@@ -96,6 +96,23 @@ class vecND
         return *this;
         }
     
+    /**
+    * algebra : returns square of the norm \f$ \mathcal{R}^n \f$
+    */
+    inline double norm2(void) const
+        {
+        return std::transform_reduce(strategy, std::begin(_x), std::end(_x), 0.0, std::plus{},
+                                     [](double val){return val*val;} );
+        }
+
+    /**
+     * returns norm \f$ \mathcal{R}^n \f$
+     */
+    inline double norm(void) const
+        {
+        return sqrt(norm2());
+        }
+
     protected:
         //a std_vector<double> is slower : depending on policy from 25% to 100% of added time on full_test.py
         
