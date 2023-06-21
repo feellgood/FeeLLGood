@@ -148,7 +148,7 @@ void Tet::integrales(std::vector<Tetra::prm> const &params, timing const &prm_t,
         H = Hext + Hd[npi];
         extraField(npi, H);  // add STT contribution to the effective field H
         double uHeff =
-                contrib_aniso - Abis * (norme2(dUdx[npi]) + norme2(dUdy[npi]) + norme2(dUdz[npi]));
+                contrib_aniso - Abis *( dUdx[npi].norm2() + dUdy[npi].norm2() + dUdz[npi].norm2());
         uHeff += pScal(U[npi], H);
 
         lumping(npi, prm_t.calc_alpha_eff(alpha, uHeff), prm_t.prefactor * s_dt * Abis, AE);

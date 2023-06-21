@@ -242,7 +242,7 @@ BOOST_AUTO_TEST_CASE(pt3D_det, *boost::unit_test::tolerance(10.0 * UT_TOL))
               << std::endl;
     std::cout << "X= " << X << std::endl;
 
-    while (Pt::norme2(X) > 1.0)
+    while (X.norm2() > 1.0)
         {
         X.x(distrib(gen));
         X.y(distrib(gen));
@@ -252,7 +252,7 @@ BOOST_AUTO_TEST_CASE(pt3D_det, *boost::unit_test::tolerance(10.0 * UT_TOL))
     double x = X.x();
     double y = X.y();
     double z = X.z();
-    double w = sqrt(1.0 - Pt::norme2(X));  // w could be negative too
+    double w = sqrt(1.0 - X.norm2());  // w could be negative too
 
     M[0][0] = 2.0 * (x * x + w * w) - 1.0;
     M[0][1] = 2.0 * (x * y - z * w);
@@ -291,7 +291,7 @@ BOOST_AUTO_TEST_CASE(pt3D_inverse, *boost::unit_test::tolerance(UT_TOL))
               << std::endl;
     std::cout << "X= " << X << std::endl;
 
-    while (Pt::norme2(X) > 1.0)
+    while (X.norm2() > 1.0)
         {
         X.x(distrib(gen));
         X.y(distrib(gen));
@@ -301,7 +301,7 @@ BOOST_AUTO_TEST_CASE(pt3D_inverse, *boost::unit_test::tolerance(UT_TOL))
     double x = X.x();
     double y = X.y();
     double z = X.z();
-    double w = sqrt(1.0 - Pt::norme2(X));  // w could be negative too
+    double w = sqrt(1.0 - X.norm2());  // w could be negative too
 
     inv_M[0][0] = M[0][0] = 2.0 * (x * x + w * w) - 1.0;
     inv_M[0][1] = M[0][1] = 2.0 * (x * y - z * w);

@@ -231,7 +231,6 @@ inline double pScal(pt3D const &a, pt3D const &b)
     return a.pScal(b);
     }
 
-
 /**
 algebra : R^3 direct (component to component) product
  */
@@ -258,18 +257,8 @@ algebra : R^3 euclidian distance
  */
 inline double dist(pt3D const &a, pt3D const &b)
     {
-    return sqrt(sq(a.x() - b.x()) + sq(a.y() - b.y()) + sq(a.z() - b.z()));
+    return sqrt((a-b).norm2());
     }
-
-/**
-algebra : returns square of the R^3 norm
- */
-inline double norme2(pt3D const &p) { return p.norm2(); }
-
-/**
- * algebra : returns R^3 norm
- */
-inline double norme(pt3D const &p) { return p.norm(); }
 
 /** check orthogonality of three vectors */
 inline bool isOrthogonal(pt3D const &a, pt3D const &b, pt3D const &c, const double precision)
@@ -324,7 +313,7 @@ double sq_frobenius_norm(const pt3D X[nbVect])
     double val(0.0);
     for (int i = 0; i < nbVect; i++)
         {
-        val += norme2(X[i]);
+        val += X[i].norm2();
         }
     return val;
     }
