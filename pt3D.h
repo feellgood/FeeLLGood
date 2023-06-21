@@ -225,10 +225,12 @@ inline pt3D operator/(pt3D const &a, double const &b)
 /**
 algebra : R^3 scalar product
  */
+
 inline double pScal(pt3D const &a, pt3D const &b)
     {
-    return (a.x() * b.x() + a.y() * b.y() + a.z() * b.z());
+    return a.pScal(b);
     }
+
 
 /**
 algebra : R^3 direct (component to component) product

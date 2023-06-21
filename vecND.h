@@ -113,6 +113,15 @@ class vecND
         return sqrt(norm2());
         }
 
+/**
+algebra : euclidian \f$ \mathcal{R}^n \f$ scalar product with vector a
+ */
+    inline double pScal(const vecND &a) const
+        {
+        return std::transform_reduce(strategy, std::begin(_x), std::end(_x), std::begin(a._x), 0.0, std::plus{},
+                                     [](const double v1,const double v2){return v1*v2;} );
+        }
+
     protected:
         //a std_vector<double> is slower : depending on policy from 25% to 100% of added time on full_test.py
         
@@ -121,5 +130,7 @@ class vecND
         */
         double _x[_DIM];
     };
+
+
 
 #endif
