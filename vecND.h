@@ -57,9 +57,8 @@ class vecND
      */
     inline vecND &operator+=(const vecND &a)
         {
-        std::transform(strategy, std::begin(_x), std::end(_x),
-                        std::begin(a._x), std::begin(_x),
-                        [](double &v_loc, const double &val) -> double { return v_loc + val; } );
+        std::for_each(strategy, std::begin(_x), std::end(_x),
+                      [this, &a](double &value) { value += a._x[std::distance(_x, &value)]; });
         return *this;
         }
 
@@ -68,17 +67,15 @@ class vecND
      */
     inline vecND &operator-=(const vecND &a)
         {
-        std::transform(strategy, std::begin(_x), std::end(_x),
-                        std::begin(a._x), std::begin(_x),
-                        [](double &v_loc, const double &val) -> double { return v_loc - val; } );
+        std::for_each(strategy, std::begin(_x), std::end(_x),
+                      [this, &a](double &value) { value -= a._x[std::distance(_x, &value)]; });
         return *this;
         }
 
     /** algebra *= with a double */
     inline vecND &operator*=(const double &a)
         {
-        std::transform(strategy, std::begin(_x), std::end(_x), std::begin(_x),
-                        [a](double &v_loc) -> double { return v_loc*=a; } );
+        std::for_each(strategy, std::begin(_x), std::end(_x), [a](double &value) { value *= a; });
         return *this;
         }
 
