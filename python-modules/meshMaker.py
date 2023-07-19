@@ -3,18 +3,89 @@
 from math import sqrt
 import numpy as np
 
-def infos(g_opt):
-    nbNodes = int(g_opt.get_number("Mesh.NbNodes"))
+def my_gmsh_init(objName):
+    """
+    initializations of gmsh used by some classes below.
+    """
+    import gmsh
+    global gmsh
+    gmsh.initialize()
+    gmsh.option.setNumber("General.Terminal",False) # to silent gmsh
+    gmsh.option.set_number("Mesh.MshFileVersion", 2.2) # to force mesh file format to 2.2
+    gmsh.model.add(objName)
+
+def infos(g_opt,name):
+    """
+    returns a string with total number of nodes of 3D physical entities, number of tetraedrons, and number of triangles corresponding  to written mesh file of model 'name'
+    """
+    gmsh.model.setCurrent(name)
+    e_3D = gmsh.model.getEntities(dim = 3)
+    nbNodes = 0
+    for o3D in e_3D:
+        physicalTags = gmsh.model.getPhysicalGroupsForEntity( 3, o3D[1] )
+        for p in physicalTags:
+            nodeTags = gmsh.model.mesh.getNodesForPhysicalGroup(3,p)
+            nbNodes += int(len(nodeTags[1])/3)
+    
     nbTriangles = int(g_opt.get_number("Mesh.NbTriangles"))
     nbTetra = int(g_opt.get_number("Mesh.NbTetrahedra"))
     return f"{nbNodes} nodes, {nbTetra} tetrahedra, {nbTriangles} triangles"
 
+class Hexahedron(object):
+    def __init__ (self,pt_min,pt_max,mesh_size,surfName,volName):
+        """
+        hexahedron defined by pt_min and pt_max, mesh_size average tetrahedron size
+        gmsh file format 2.2 is used to write the mesh text file
+        """
+        self.msh_s = mesh_size
+        self.surfName = surfName
+        self.volName = volName
+        self.p_min = pt_min
+        self.p_max = pt_max
+        my_gmsh_init("hex")
+        
+    def make(self,meshFileName):
+        """ write hexahedron mesh file in gmsh 2.2 text format """
+        
+        p = np.empty(4, dtype=object)
+        p[0] = gmsh.model.geo.addPoint(self.p_min[0],self.p_min[1],self.p_min[2],self.msh_s)
+        p[1] = gmsh.model.geo.addPoint(self.p_max[0],self.p_min[1],self.p_min[2],self.msh_s)
+        p[2] = gmsh.model.geo.addPoint(self.p_max[0],self.p_max[1],self.p_min[2],self.msh_s)
+        p[3] = gmsh.model.geo.addPoint(self.p_min[0],self.p_max[1],self.p_min[2],self.msh_s)
+        
+        l = np.empty(4,dtype=object)
+        l[0] = gmsh.model.geo.addLine(p[0],p[1])
+        l[1] = gmsh.model.geo.addLine(p[1],p[2])
+        l[2] = gmsh.model.geo.addLine(p[2],p[3])
+        l[3] = gmsh.model.geo.addLine(p[3],p[0])
+        
+        closedLoop = gmsh.model.geo.addCurveLoop([l[0],l[1],l[2],l[3]])
+        surf = gmsh.model.geo.addPlaneSurface([closedLoop]) # surf is an index (integer)
+        t = self.p_max[2] - self.p_min[2] 
+        out = gmsh.model.geo.extrude([(2,surf)],0,0,t) # 2 is the dimension of the object refered by index surf
+        gmsh.model.geo.synchronize() # we have to sync before calling addPhysicalGroup
+        
+        surface_tag = 200
+        gmsh.model.addPhysicalGroup(2,[surf, out[0][1], out[2][1], out[3][1], out[4][1], out[5][1]],surface_tag)
+        gmsh.model.setPhysicalName(2,surface_tag,self.surfName)
+        
+        volume_tag = 300
+        gmsh.model.addPhysicalGroup(3,[out[1][1]],volume_tag)
+        gmsh.model.setPhysicalName(3,volume_tag,self.volName)
+        
+        gmsh.model.geo.synchronize() # we have to synchronize before the call to 'generate' to build the mesh
+        gmsh.model.mesh.generate(3) # 3 is the dimension of the mesh
+        
+        gmsh.write(meshFileName)
+        print(f"Generated {meshFileName}: {infos(gmsh.option,'hex')}")
+        gmsh.finalize()
+        
 class Cylinder(object):
     def __init__ (self,radius,thickness,mesh_size,surfName,volName):
         """ 
             geometrical cylinder is zero centered, with radius r and length t along (Oz), build by extrusion
             this cylinder mesh is generated with geo
-            gmsh file format 2.2 is used to write the mesh text file  
+            gmsh file format 2.2 is used to write the mesh text file
         """
         
         self.r = radius
@@ -23,6 +94,7 @@ class Cylinder(object):
         self.surfName = surfName
         self.volName = volName
         self.withExtraSurf = False
+        my_gmsh_init("cyl")
 
     def addEdgeSurf(self,name1,name2):
         """ optional surfaces : name1 will refer to the base surface, name2 will refer to the translated name1 surface from extrusion """
@@ -33,23 +105,19 @@ class Cylinder(object):
     def make(self,meshFileName):
         """ write cylinder mesh file in gmsh 2.2 text format """
         
-        import gmsh
-        gmsh.initialize()
-        gmsh.option.setNumber("General.Terminal",False) # to silent gmsh
-        gmsh.model.add("cyl")
-        
         p_origin = gmsh.model.geo.addPoint(0,0,-0.5*self.t,self.msh_s)
 
         start_pt = gmsh.model.geo.addPoint(self.r,0,-0.5*self.t,self.msh_s)
         interim_pt = gmsh.model.geo.addPoint(0,self.r,-0.5*self.t,self.msh_s)
         interim1_pt = gmsh.model.geo.addPoint(-self.r,0,-0.5*self.t,self.msh_s)
         interim2_pt = gmsh.model.geo.addPoint(0,-self.r,-0.5*self.t,self.msh_s)
-        end_pt = gmsh.model.geo.addPoint(self.r,0,-0.5*self.t,self.msh_s)
-
+        
         big_circle = gmsh.model.geo.addCircleArc(start_pt,p_origin,interim_pt)
         big_circle1 = gmsh.model.geo.addCircleArc(interim_pt,p_origin,interim1_pt)
         big_circle2 = gmsh.model.geo.addCircleArc(interim1_pt,p_origin,interim2_pt)
-        big_circle3 = gmsh.model.geo.addCircleArc(interim2_pt,p_origin,end_pt)
+        big_circle3 = gmsh.model.geo.addCircleArc(interim2_pt,p_origin,start_pt)
+
+        gmsh.model.geo.remove([(p_origin,0)])
 
         curvedLoop = gmsh.model.geo.addCurveLoop([big_circle,big_circle1,big_circle2,big_circle3]) # curvedLoop is an index (integer)
         surf = gmsh.model.geo.addPlaneSurface([curvedLoop]) # surf is an index (integer)
@@ -75,16 +143,13 @@ class Cylinder(object):
 
         gmsh.model.geo.synchronize() # we have to synchronize before the call to 'generate' to build the mesh
         gmsh.model.mesh.generate(3) # 3 is the dimension of the mesh
-        gmsh.option.set_number("Mesh.MshFileVersion", 2.2) # to force mesh file format to 2.2
+        
         gmsh.write(meshFileName)
-
-        nbNodes = gmsh.option.get_number("Mesh.NbNodes")
-        nbTriangles = gmsh.option.get_number("Mesh.NbTriangles")
-        nbTetra = gmsh.option.get_number("Mesh.NbTetrahedra")
 
         # uncomment next line to see a graphic rendering of the mesh
         #gmsh.fltk.run()
-        print(f"Generated {meshFileName}: {infos(gmsh.option)}")
+        
+        print(f"Generated {meshFileName}: {infos(gmsh.option,'cyl')}")
         gmsh.finalize()
 
 class Ellipsoid(object):
@@ -100,14 +165,11 @@ class Ellipsoid(object):
         self.msh_s = mesh_size
         self.surfName = surfName
         self.volName = volName
+        my_gmsh_init("ellipsoid")
     
     def make(self,meshFileName):
         """ write ellipsoid mesh file in gmsh 2.2 text format """
         
-        import gmsh
-        gmsh.initialize()
-        gmsh.option.setNumber("General.Terminal",False) # to silent gmsh
-        gmsh.model.add("ellipsoid")
         sph = gmsh.model.occ.addSphere(0,0,0,self.r1)
         gmsh.model.occ.dilate([(3,sph)],0,0,0,1,1,self.r2)
         gmsh.model.occ.synchronize() # we have to sync before calling addPhysicalGroup
@@ -135,12 +197,11 @@ class Ellipsoid(object):
         objects = gmsh.model.getEntitiesInBoundingBox(xmin,ymin,zmin,xmax,ymax,zmax, dim = 0)
         gmsh.model.mesh.setSize(objects,self.msh_s)
         gmsh.model.mesh.generate(dim = 3)
-        gmsh.option.set_number("Mesh.MshFileVersion", 2.2) # to force mesh file format to 2.2
         gmsh.write(meshFileName)
 
         # uncomment next line to see a graphic rendering of the mesh
         #gmsh.fltk.run()
-        print(f"Generated {meshFileName}: {infos(gmsh.option)}")
+        print(f"Generated {meshFileName}: {infos(gmsh.option,'ellipsoid')}")
         gmsh.finalize()
 
 # Cuboid class
