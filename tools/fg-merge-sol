@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+
+description = '''
+Combine a mesh file (which has the node coordinates) with a
+magnetization configuration in feeLLGood’s ‘.sol’ format (which has the
+node reduced magnetizations). Output the reduced magnetization as a
+function of position, in a tab-separated-values file with six columns:
+(x, y, z, m_x, m_y, m_z).
+'''
+
+import sys
+import argparse
+from feellgood.core import mesh
+
+# Parse the command line.
+parser = argparse.ArgumentParser(description=description)
+parser.add_argument('-o', '--output',
+    help='name of the output file, defaults to stdout')
+parser.add_argument('mesh_file',
+    help='name of the mesh file, in GMSH ‘MSH 2’ format')
+parser.add_argument('sol_file',
+    help='name of a matching feeLLGood ‘.sol’ file')
+args = parser.parse_args()
+
+# Get the node positions from the mesh file.
+nodes = mesh(args.mesh_file).Nodes
+
+# Get the magnetizations from the sol file.
+sol = open(args.sol_file, 'r')
+mags = []  # magnetizations on the nodes
+for line in sol:
+    if not line.startswith('#'):  # skip comments and metadata
+        mags.append(list(map(float, line.split())))
+
+# Open the output file.
+if args.output:
+    output = open(args.output, 'w')
+else:
+    output = sys.stdout
+
+# Output the magnetization as a function of position.
+print('# x\ty\tz\tm_x\tm_y\tm_z', file=output)
+for i in range(0, len(nodes)):
+    node = nodes[i]
+    mag = mags[i]
+    fields = [node[0], node[1], node[2], mag[1], mag[2], mag[3]]
+    print('\t'.join(map(str, fields)), file=output)
+
+# Make sure the output file is flushed to disk.
+output.close()
