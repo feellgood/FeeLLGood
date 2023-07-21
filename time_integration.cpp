@@ -156,6 +156,7 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
         }
 
     fout << settings.evolMetadata(date());
+    fout.precision(16);  // extra precision needed to monitor relaxation towards equilibrium
 
     int flag(0);
     int nt_output(0);  // visible iteration count
