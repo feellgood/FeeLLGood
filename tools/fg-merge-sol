@@ -27,9 +27,14 @@ nodes = mesh(args.mesh_file).Nodes
 
 # Get the magnetizations from the sol file.
 sol = open(args.sol_file, 'r')
+comments = []  # comments and metadata
 mags = []  # magnetizations on the nodes
 for line in sol:
-    if not line.startswith('#'):  # skip comments and metadata
+    if line.startswith("## columns:"):  # column labels
+        comments.append("## columns: x\ty\tz\tmx\tmy\tmz\n")
+    elif line.startswith('#'):  # other comments and metadata
+            comments.append(line)
+    else:  # magnetization data
         mags.append(list(map(float, line.split())))
 
 # Open the output file.
@@ -39,7 +44,8 @@ else:
     output = sys.stdout
 
 # Output the magnetization as a function of position.
-print('# x\ty\tz\tm_x\tm_y\tm_z', file=output)
+for line in comments:
+    output.write(line)
 for i in range(0, len(nodes)):
     node = nodes[i]
     mag = mags[i]
