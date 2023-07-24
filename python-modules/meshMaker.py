@@ -14,6 +14,18 @@ def my_gmsh_init(objName):
     gmsh.option.set_number("Mesh.MshFileVersion", 2.2) # to force mesh file format to 2.2
     gmsh.model.add(objName)
 
+def gmsh_mesh_build(name,_optimize):
+    """
+    optional refinement of the mesh
+    """
+    gmsh.model.setCurrent(name)
+    gmsh.model.mesh.removeDuplicateNodes()
+    gmsh.model.geo.synchronize() # we have to synchronize before the call to 'generate' to build the mesh
+    gmsh.model.mesh.generate(3) # 3 is the dimension of the mesh
+    if _optimize:
+        #gmsh.model.mesh.refine()  # add a lot of nodes
+        gmsh.model.mesh.optimize(method = "Relocate3D", force = True)
+
 def infos(g_opt,name):
     """
     returns a string with total number of nodes of 3D physical entities, number of tetraedrons, and number of triangles corresponding  to written mesh file of model 'name'
@@ -32,14 +44,16 @@ def infos(g_opt,name):
     return f"{nbNodes} nodes, {nbTetra} tetrahedra, {nbTriangles} triangles"
 
 class Hexahedron(object):
-    def __init__ (self,pt_min,pt_max,mesh_size,surfName,volName):
+    def __init__ (self,pt_min,pt_max,mesh_size,surfName,volName,optimize):
         """
         hexahedron defined by pt_min and pt_max, mesh_size average tetrahedron size
+        bool optimize is optional optimization of the mesh by relocating of the nodes
         gmsh file format 2.2 is used to write the mesh text file
         """
         self.msh_s = mesh_size
         self.surfName = surfName
         self.volName = volName
+        self.optimize = optimize
         self.p_min = pt_min
         self.p_max = pt_max
         my_gmsh_init("hex")
@@ -73,8 +87,7 @@ class Hexahedron(object):
         gmsh.model.addPhysicalGroup(3,[out[1][1]],volume_tag)
         gmsh.model.setPhysicalName(3,volume_tag,self.volName)
         
-        gmsh.model.geo.synchronize() # we have to synchronize before the call to 'generate' to build the mesh
-        gmsh.model.mesh.generate(3) # 3 is the dimension of the mesh
+        gmsh_mesh_build("hex",self.optimize)
         
         gmsh.write(meshFileName)
         print(f"Generated {meshFileName}: {infos(gmsh.option,'hex')}")
