@@ -5,8 +5,10 @@
 \brief class mesh, readMesh is expecting a mesh file in gmsh text format 2.2, with first order tetraedrons and triangular facettes.
 */
 
+#include <algorithm>
 #include <execution>
 #include <map>
+#include <numeric>
 #include <set>
 
 #include "facette.h"
@@ -46,6 +48,8 @@ public:
         l = Pt::pt3D(xmax - xmin, ymax - ymin, zmax - zmin);
         diam = l.maxLength();
         c = Pt::pt3D(0.5 * (xmax + xmin), 0.5 * (ymax + ymin), 0.5 * (zmax + zmin));
+
+        sortNodes();
 
         vol = std::transform_reduce(std::execution::par, tet.begin(), tet.end(), 0.0, std::plus{},
                                     [](Tetra::Tet const &te) { return te.calc_vol(); });
@@ -340,6 +344,72 @@ private:
             {
             std::cout << "  reindexed\n";
             }
+        }
+
+    /** Sort the nodes along the longest axis of the sample. This should reduce the bandwidth of
+     * the matrix we will have to solve for. */
+    void sortNodes()
+        {
+        // Find the longest axis of the sample.
+        Pt::index long_axis;
+        if (l.x() > l.y())
+            {
+            if (l.x() > l.z())
+                long_axis = Pt::IDX_X;
+            else
+                long_axis = Pt::IDX_Z;
+            }
+        else
+            {
+            if (l.y() > l.z())
+                long_axis = Pt::IDX_Y;
+            else
+                long_axis = Pt::IDX_Z;
+            }
+
+        // Sort the nodes along this axis, indirectly through an array of indices.
+        std::vector<int> permutation(node.size());
+        std::iota(permutation.begin(), permutation.end(), 0);
+        std::sort(permutation.begin(), permutation.end(),
+                  [this, long_axis](int a, int b)
+                  { return node[a].p(long_axis) < node[b].p(long_axis); });
+        std::vector<int> inverse_perm(node.size());  // inverse permutation
+        for (size_t i = 0; i < node.size(); i++)
+            inverse_perm[permutation[i]] = i;
+
+        // Actually sort the array of nodes.
+        std::vector<Nodes::Node> node_copy(node);
+        for (size_t i = 0; i < node.size(); i++)
+            node[i] = node_copy[permutation[i]];
+
+        // Update the indices stored in the elements.
+        std::for_each(tet.begin(), tet.end(),
+                      [&inverse_perm](Tetra::Tet &tetrahedron)
+                      {
+                          tetrahedron.ind[0] = inverse_perm[tetrahedron.ind[0]];
+                          tetrahedron.ind[1] = inverse_perm[tetrahedron.ind[1]];
+                          tetrahedron.ind[2] = inverse_perm[tetrahedron.ind[2]];
+                          tetrahedron.ind[3] = inverse_perm[tetrahedron.ind[3]];
+                      });
+        std::for_each(fac.begin(), fac.end(),
+                      [&inverse_perm](Facette::Fac &facette)
+                      {
+                          facette.ind[0] = inverse_perm[facette.ind[0]];
+                          facette.ind[1] = inverse_perm[facette.ind[1]];
+                          facette.ind[2] = inverse_perm[facette.ind[2]];
+                      });
+        std::for_each(s.begin(), s.end(),
+                      [&inverse_perm](Mesh::Surf &surface)
+                      {
+                          std::vector<Mesh::Triangle> &elements = surface.elem;
+                          std::for_each(elements.begin(), elements.end(),
+                                        [&inverse_perm](Mesh::Triangle &tri)
+                                        {
+                                            tri.ind[0] = inverse_perm[tri.ind[0]];
+                                            tri.ind[1] = inverse_perm[tri.ind[1]];
+                                            tri.ind[2] = inverse_perm[tri.ind[2]];
+                                        });
+                      });
         }
     };
 
