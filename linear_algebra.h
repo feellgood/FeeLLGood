@@ -12,7 +12,7 @@
 #include "gmm/gmm_iter.h"
 #include "gmm/gmm_precond_diagonal.h"
 #include "gmm/gmm_solver_bicgstab.h"
-#include "gmm/gmm_solver_gmres.h"
+//#include "gmm/gmm_solver_gmres.h"
 
 #include "config.h"
 
@@ -73,9 +73,6 @@ private:
     double v_max;             /**< maximum speed */
 
     long prc_time_step = -1; /**< time step when prc was built */
-
-    /** update nodes.u and v values and find the maximum speed value  */
-    void updateNodes(std::vector<double> const &X, const double dt);
 
     /** computes the local vector basis {ep,eq} in the tangeant plane for projection on the elements
      */

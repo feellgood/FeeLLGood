@@ -1,10 +1,5 @@
 #include "linear_algebra.h"
 
-void LinAlgebra::updateNodes(std::vector<double> const &X, const double dt)
-    {
-    v_max = refMsh->updateNodes(X, dt);
-    }
-
 void LinAlgebra::base_projection()
     {
     std::mt19937 gen(rand());  // random number generator: standard Mersenne twister initialized

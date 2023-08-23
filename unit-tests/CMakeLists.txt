@@ -9,6 +9,8 @@ else()
     message(FATAL_ERROR "TBB NOT FOUND")
 endif()
 
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+
 include_directories (${CMAKE_SOURCE_DIR}
   ${Boost_INCLUDE_DIRS}
   )
@@ -18,6 +20,9 @@ set( BOOST_TEST_LOG_LEVEL "all" )
 add_definitions (-DBOOST_TEST_DYN_LINK)
 
 add_executable (test_ut_pt3D ut_pt3D.cpp)
+
+add_executable (test_ut_solver ut_solver.cpp)
+
 add_executable (test_ut_node ut_node.cpp)
 
 SET(SOURCES ../facette.cpp ../tetra.cpp ut_element.cpp)
@@ -43,6 +48,14 @@ target_link_libraries(test_ut_pt3D
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
   TBB::tbb
+  )
+
+target_link_libraries(test_ut_solver
+  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY}
+  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  TBB::tbb
+  Eigen3::Eigen
   )
 
 target_link_libraries(test_ut_node
@@ -98,6 +111,7 @@ target_link_libraries(test_ut_log-stats
 #enable_testing()
 
 add_test (NAME ut_pt3D_arithmetic COMMAND test_ut_pt3D)
+add_test (NAME ut_solver COMMAND test_ut_solver)
 add_test (NAME ut_node COMMAND test_ut_node)
 add_test (NAME ut_element COMMAND test_ut_element)
 add_test (NAME ut_facette COMMAND test_ut_facette)

@@ -23,13 +23,10 @@ int LinAlgebra::solver(timing const &t_prm, long nt)
     refMsh->buildInitGuess(X); // gamma0 division handled within function buildInitGuess
 
     gmm::iteration bicg_iter(1e-6);
-    gmm::iteration gmr_iter(1e-6);
     bicg_iter.set_maxiter(settings.MAXITER);
-    gmr_iter.set_maxiter(settings.MAXITER);
 
     // Let GMM be noisy only at verbosity levels higher than one.
     bicg_iter.set_noisy(settings.verbose > 1);
-    gmr_iter.set_noisy(settings.verbose > 1);
 
     if (!prc || (nt - prc_time_step >= settings.REFRESH_PRC))
         {
@@ -42,7 +39,6 @@ int LinAlgebra::solver(timing const &t_prm, long nt)
         }
 
     counter.reset();
-    // gmm::clear(X); // no need to clear X,it is zero initialized
     gmm::bicgstab(Kr, X, L_TH, *prc, bicg_iter);
 
     if (!(bicg_iter.converged()))
@@ -53,29 +49,7 @@ int LinAlgebra::solver(timing const &t_prm, long nt)
                       << bicg_iter.get_iteration() << " iterations, in " << counter.millis()
                       << std::endl;
             }
-        gmm::diagonal_precond<read_matrix> gmr_prc(Kr);
-        counter.reset();
-
-        gmm::clear(X);  // X is cleared for safety, it should be useless
-        gmm::gmres(Kr, X, L_TH, gmr_prc, 50, gmr_iter);
-
-        if (!(gmr_iter.converged()))
-            {
-            if (settings.verbose)
-                {
-                std::cout << "solver: gmres FAILED after " << gmr_iter.get_iteration()
-                          << " iterations, in " << counter.millis() << std::endl;
-                }
-            return 1;
-            }
-        else
-            {
-            if (settings.verbose)
-                {
-                std::cout << "solver: gmres converged in " << gmr_iter.get_iteration()
-                          << " iterations, " << counter.millis() << std::endl;
-                }
-            }
+        return 1;
         }
     else
         {
@@ -87,6 +61,7 @@ int LinAlgebra::solver(timing const &t_prm, long nt)
             }
         }
 
-    updateNodes(X, t_prm.get_dt());// gamma0 multiplication handled within function updateNodes
+    // gamma0 multiplication handled within function updateNodes
+    v_max = refMsh->updateNodes(X, t_prm.get_dt());
     return 0;
     }
