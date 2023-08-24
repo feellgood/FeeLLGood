@@ -44,7 +44,7 @@ job_count=$(getconf _NPROCESSORS_ONLN)
 # Install required packages.
 packages="unzip make cmake git"
 if [ "$ID" = "rocky" ]; then
-    packages="$packages wget gcc-c++ tbb-devel yaml-cpp-devel"
+    packages="$packages wget gcc-c++ eigen3-devel tbb-devel yaml-cpp-devel"
     sudo dnf check-update -q || true
     sudo dnf config-manager --set-enabled devel crb
     sudo dnf install -y epel-release
@@ -56,7 +56,7 @@ if [ "$ID" = "rocky" ]; then
     fi
     sudo dnf install -y $packages
 else  # Debian-like OS
-    packages="$packages g++ libtbb-dev libyaml-cpp-dev duktape-dev"
+    packages="$packages g++ libeigen3-dev libtbb-dev libyaml-cpp-dev duktape-dev"
     sudo apt-get update -q
     if [ "$unit_tests" = "true" ]; then
         packages="$packages libboost-system-dev libboost-filesystem-dev libboost-test-dev"

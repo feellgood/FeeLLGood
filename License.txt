@@ -29,3 +29,5 @@ Copyright (c) Yves Renard and Julien Pommier,
 licensed under under  the  terms  of the  GNU Lesser General Public License as published
  by  the  Free Software Foundation;  either version 3 of the License,  or (at your option) any later version along with the GCC Runtime Library Exception either version 3.1 or (at your option) any later version.
 
+FeeLLGood uses Eigen (http://eigen.tuxfamily.org)
+Eigen is primarily MPL2 licensed. Some files contain third-party code under BSD or other MPL2-compatible licenses.
