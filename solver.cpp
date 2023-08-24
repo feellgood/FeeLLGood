@@ -6,11 +6,18 @@ int LinAlgebra::solver(timing const &t_prm, long nt)
     chronometer counter(2);
 
     write_matrix K_TH(2 * NOD, 2 * NOD);
+    std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
+                      [this,&K_TH](Tetra::Tet &my_elem) { my_elem.assemblage_mat(NOD,K_TH); } );
+    std::for_each(refMsh->fac.begin(), refMsh->fac.end(),
+                      [this,&K_TH](Facette::Fac &my_elem) { my_elem.assemblage_mat(NOD,K_TH); } );
+    
     std::vector<double> L_TH(2 * NOD, 0);
-
-    insertCoeff<Tetra::Tet>(refMsh->tet, K_TH, L_TH);
-    insertCoeff<Facette::Fac>(refMsh->fac, K_TH, L_TH);
-
+    
+    std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
+                      [this,&L_TH](Tetra::Tet &my_elem) { my_elem.assemblage_vect(NOD,L_TH); } );
+    std::for_each(refMsh->fac.begin(), refMsh->fac.end(),
+                      [this,&L_TH](Facette::Fac &my_elem) { my_elem.assemblage_vect(NOD,L_TH); } );
+    
     if (settings.verbose)
         {
         std::cout << "matrix assembly done in " << counter.millis() << std::endl;

@@ -12,7 +12,6 @@
 #include "gmm/gmm_iter.h"
 #include "gmm/gmm_precond_diagonal.h"
 #include "gmm/gmm_solver_bicgstab.h"
-//#include "gmm/gmm_solver_gmres.h"
 
 #include "config.h"
 
@@ -76,18 +75,6 @@ private:
 
     /** computes local vector basis {ep,eq} in the tangeant plane for projection on the elements */
     void base_projection();
-
-    /** template to insert coeff in sparse matrix K_TH and vector L_TH, T is Tetra or Facette */
-    template<class T>
-    void insertCoeff(std::vector<T> &container, write_matrix &K_TH, std::vector<double> &L_TH)
-        {
-        std::for_each(container.begin(), container.end(),
-                      [this,&K_TH, &L_TH](T &my_elem)
-                      {
-                          my_elem.assemblage_mat(NOD,K_TH);
-                          my_elem.assemblage_vect(NOD,L_TH);
-                      });
-        }
 
     };  // fin class linAlgebra
 
