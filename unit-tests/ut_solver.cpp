@@ -80,5 +80,49 @@ BOOST_AUTO_TEST_CASE(rand_sp_mat_problem_solver, *boost::unit_test::tolerance(UT
     BOOST_CHECK( ((A*x)-b).norm() <= _TOL );
     }
 
+template<int DIM,int NbRand>
+void build_coeffs( std::vector<Eigen::Triplet<double>> &coeffs ,Eigen::Ref<Eigen::VectorXd> v)
+    {
+    for(int i=0;i<DIM;i++)
+        {
+        coeffs.push_back(Eigen::Triplet<double>(i,i,1.0) );
+        v(i) = 1.0;
+        }
+
+    std::mt19937 gen(my_seed());
+    std::uniform_int_distribution<> distrib(0, DIM);
+
+    for (int nb=0; nb<NbRand; nb++)
+        {
+        int i = distrib(gen);
+        int j = distrib(gen);
+        coeffs.push_back(Eigen::Triplet<double>(i,j,1.0) );
+        }
+    }
+
+BOOST_AUTO_TEST_CASE(rand_asym_sp_mat_problem_solver, *boost::unit_test::tolerance(UT_TOL))
+    {
+    const int MAX_ITER = 2000;
+    const double _TOL = 1e-8;
+    const int N = 10000;
+
+    Eigen::VectorXd x(N), b(N);
+    Eigen::SparseMatrix<double,Eigen::RowMajor> A(N,N);
+    std::vector<Eigen::Triplet<double>> coeffs;
+
+    build_coeffs<N,800>(coeffs,b);
+    A.setFromTriplets(coeffs.begin(),coeffs.end());
+    Eigen::BiCGSTAB<Eigen::SparseMatrix<double> > solver;
+    solver.setMaxIterations(MAX_ITER);
+    solver.setTolerance(_TOL);
+    solver.compute(A);
+    x = solver.solveWithGuess(b, Eigen::VectorXd::Constant(N,2.0));
+    std::cout << "#iterations:     " << solver.iterations() << std::endl;
+    std::cout << "estimated error: " << solver.error()      << std::endl;
+    BOOST_CHECK( solver.iterations() > 1);
+    BOOST_CHECK( (x-b).norm() != 0.0 );
+    BOOST_CHECK( ((A*x)-b).norm() <= _TOL );
+    }
+
 BOOST_AUTO_TEST_SUITE_END()
 
