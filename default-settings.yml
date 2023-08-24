@@ -66,17 +66,9 @@ outputs:
     - E_zeeman  # Zeeman energy
     - E_tot     # Total energy
 
-  # Whether to start the evolution file with a one-line header listing
-  # the names of the columns.
-  evol_header: false
-
   # How often to save the magnetization configuration. This should be an
   # integer that is interpreted in units of ‘evol_time_step’.
   take_photo: 100
-
-  # Should feeLLGood save the magnetization configuration in the VTK
-  # file format in addition to its own ‘.sol’ format?
-  vtk_file: false
 
 # Description of the meshed object.
 mesh:

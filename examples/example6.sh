@@ -35,7 +35,6 @@ outputs:
   evol_time_step: 5e-12
   final_time: $duration
   evol_columns: [t, <Mx>, <My>, <Mz>]
-  evol_header: true
   take_photo: false
 mesh:
   filename: ../ellipsoid.msh
