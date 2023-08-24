@@ -10,6 +10,7 @@
 #include <eigen3/Eigen/Dense>
 
 #include "ut_config.h"  // for tolerance UT_TOL macro
+#include "ut_solver.h"
 
 BOOST_AUTO_TEST_SUITE(ut_solver)
 
@@ -80,26 +81,6 @@ BOOST_AUTO_TEST_CASE(rand_sp_mat_problem_solver, *boost::unit_test::tolerance(UT
     BOOST_CHECK( ((A*x)-b).norm() <= _TOL );
     }
 
-template<int DIM,int NbRand>
-void build_coeffs( std::vector<Eigen::Triplet<double>> &coeffs ,Eigen::Ref<Eigen::VectorXd> v)
-    {
-    for(int i=0;i<DIM;i++)
-        {
-        coeffs.push_back(Eigen::Triplet<double>(i,i,1.0) );
-        v(i) = 1.0;
-        }
-
-    std::mt19937 gen(my_seed());
-    std::uniform_int_distribution<> distrib(0, DIM);
-
-    for (int nb=0; nb<NbRand; nb++)
-        {
-        int i = distrib(gen);
-        int j = distrib(gen);
-        coeffs.push_back(Eigen::Triplet<double>(i,j,1.0) );
-        }
-    }
-
 BOOST_AUTO_TEST_CASE(rand_asym_sp_mat_problem_solver, *boost::unit_test::tolerance(UT_TOL))
     {
     const int MAX_ITER = 2000;
@@ -122,6 +103,27 @@ BOOST_AUTO_TEST_CASE(rand_asym_sp_mat_problem_solver, *boost::unit_test::toleran
     BOOST_CHECK( solver.iterations() > 1);
     BOOST_CHECK( (x-b).norm() != 0.0 );
     BOOST_CHECK( ((A*x)-b).norm() <= _TOL );
+    }
+
+BOOST_AUTO_TEST_CASE(class_embedded_solver, *boost::unit_test::tolerance(UT_TOL))
+    {
+    const int MAX_ITER = 2000;
+    const double _TOL = 1e-8;
+    const int N = 10000;
+
+    Eigen::VectorXd x(N), b(N);
+    Eigen::SparseMatrix<double,Eigen::RowMajor> A(N,N);
+    std::vector<Eigen::Triplet<double>> coeffs;
+
+    DummyLinAlgebra bob(N,MAX_ITER,_TOL);
+    
+    double t(0);
+    
+    bob.solve(t);
+    double t_end(0.01);
+    BOOST_CHECK( t == t_end);
+    bob.solve(t);
+    BOOST_CHECK( t == 2.0*t_end);
     }
 
 BOOST_AUTO_TEST_SUITE_END()
