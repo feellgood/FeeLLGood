@@ -56,6 +56,35 @@ class element
         std::cout << ind[N-1] << ")\n";
         }
 
+    /** assemble the big sparse matrix K from tetra or facette inner matrix Kp */
+    void assemblage_mat(const int NOD, write_matrix &K) const
+        {
+        for (int i = 0; i < N; i++)
+            {
+            int i_ = ind[i];
+
+            for (int j = 0; j < N; j++)
+                {
+                int j_ = ind[j];
+                K(NOD + i_, j_) += Kp[i][j];
+                K(NOD + i_, NOD + j_) += Kp[i][N + j];
+                K(i_, j_) += Kp[N + i][j];
+                K(i_, NOD + j_) += Kp[N + i][N + j];
+                }
+            }
+        }
+
+    /** assemble the big vector L from tetra or facette inner vector Lp */
+    void assemblage_vect(const int NOD, std::vector<double> &L) const
+        {
+        for (int i = 0; i < N; i++)
+            {
+            const int i_ = ind[i];
+            L[NOD + i_] += Lp[i];
+            L[i_] += Lp[N + i];
+            }
+        }
+
     protected:
         /** vector of nodes */
         const std::vector<Nodes::Node> &refNode;

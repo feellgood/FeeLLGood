@@ -74,42 +74,8 @@ private:
 
     long prc_time_step = -1; /**< time step when prc was built */
 
-    /** computes the local vector basis {ep,eq} in the tangeant plane for projection on the elements
-     */
+    /** computes local vector basis {ep,eq} in the tangeant plane for projection on the elements */
     void base_projection();
-
-    /** template to assemble the big sparse matrix K with T tetra or facette */
-    template<class T>
-    void assemblage_mat(T &elem, write_matrix &K) const
-        {
-        const int N = elem.getN();
-        for (int i = 0; i < N; i++)
-            {
-            int i_ = elem.ind[i];
-
-            for (int j = 0; j < N; j++)
-                {
-                int j_ = elem.ind[j];
-                K(NOD + i_, j_) += elem.Kp[i][j];
-                K(NOD + i_, NOD + j_) += elem.Kp[i][N + j];
-                K(i_, j_) += elem.Kp[N + i][j];
-                K(i_, NOD + j_) += elem.Kp[N + i][N + j];
-                }
-            }
-        }
-
-    /** template to assemble the big vector L with T tetra or facette */
-    template<class T>
-    void assemblage_vect(T &elem, std::vector<double> &L) const
-        {
-        const int N = elem.getN();
-        for (int i = 0; i < N; i++)
-            {
-            const int i_ = elem.ind[i];
-            L[NOD + i_] += elem.Lp[i];
-            L[i_] += elem.Lp[N + i];
-            }
-        }
 
     /** template to insert coeff in sparse matrix K_TH and vector L_TH, T is Tetra or Facette */
     template<class T>
@@ -118,8 +84,8 @@ private:
         std::for_each(container.begin(), container.end(),
                       [this,&K_TH, &L_TH](T &my_elem)
                       {
-                          assemblage_mat<T>(my_elem,K_TH);
-                          assemblage_vect<T>(my_elem,L_TH);
+                          my_elem.assemblage_mat(NOD,K_TH);
+                          my_elem.assemblage_vect(NOD,L_TH);
                       });
         }
 
