@@ -176,12 +176,19 @@ spin_transfer_torque:
   l_sf: 1.0
   V_file: false
 
-# Parameters of the solver.
-finite_element_solver:
+# Parameters for the computation of the demagnetizing field.
+demagnetizing_field_solver:
 
   # Number of threads to use. The value 0 means to match the number of
   # available processors (actually, hardware threads), as reported by
   # sysconf(_SC_NPROCESSORS_ONLN).
+  nb_threads: 0
+
+# Parameters of the solver.
+finite_element_solver:
+
+  # Number of threads to use. The value 0 means to match the number of
+  # available processors.
   nb_threads: 0
 
   # Maximum number of iteration for the biconjugate gradient algorithm.
@@ -189,13 +196,6 @@ finite_element_solver:
 
   # Number of iterations before the preconditioner is recomputed.
   refresh_preconditioner_every: 20
-
-# Parameters for the computation of the demagnetizing field.
-demagnetizing_field_solver:
-
-  # Number of threads to use. The value 0 means to match the number of
-  # available processors.
-  nb_threads: 0
 
 # Parameters for the integration of the dynamic equation.
 time_integration:

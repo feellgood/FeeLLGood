@@ -176,12 +176,12 @@ void Settings::infos()
             }
         }
 
+    std::cout << "demagnetizing_field_solver:\n";
+    std::cout << "  nb_threads: " << scalfmmNbTh << "\n";
     std::cout << "finite_element_solver:\n";
     std::cout << "  nb_threads: " << solverNbTh << "\n";
     std::cout << "  max(iter): " << MAXITER << "\n";
     std::cout << "  refresh_preconditioner_every: " << REFRESH_PRC << "\n";
-    std::cout << "demagnetizing_field_solver:\n";
-    std::cout << "  nb_threads: " << scalfmmNbTh << "\n";
     std::cout << "time_integration:\n";
     std::cout << "  max(du): " << DUMAX << "\n";
     std::cout << "  min(dt): " << dt_min << "\n";
@@ -405,7 +405,14 @@ void Settings::read(YAML::Node yaml)
     // of threads to spin.
     int available_cpu_count = sysconf(_SC_NPROCESSORS_ONLN);
 
-    YAML::Node solver = yaml["finite_element_solver"];
+    YAML::Node solver = yaml["demagnetizing_field_solver"];
+    if (solver)
+        {
+        assign(scalfmmNbTh, solver["nb_threads"]);
+        if (scalfmmNbTh <= 0) scalfmmNbTh = available_cpu_count;
+        }  // demagnetizing_field_solver
+
+    solver = yaml["finite_element_solver"];
     if (solver)
         {
         assign(solverNbTh, solver["nb_threads"]);
@@ -413,13 +420,6 @@ void Settings::read(YAML::Node yaml)
         assign(MAXITER, solver["max(iter)"]);
         assign(REFRESH_PRC, solver["refresh_preconditioner_every"]);
         }  // finite_element_solver
-
-    solver = yaml["demagnetizing_field_solver"];
-    if (solver)
-        {
-        assign(scalfmmNbTh, solver["nb_threads"]);
-        if (scalfmmNbTh <= 0) scalfmmNbTh = available_cpu_count;
-        }  // demagnetizing_field_solver
 
     YAML::Node time_integration = yaml["time_integration"];
     if (time_integration)
