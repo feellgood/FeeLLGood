@@ -167,52 +167,6 @@ inline void set_phi(Node &n, double val) { n.phi = val; }
 /** setter for phi_v */
 inline void set_phiv(Node &n, double val) { n.phiv = val; }
 
-/** template to make projection for T, tetra or facette. It computes Bp = P*B and stores result in
- * inner vector Lp of class T */
-template<class T, int N>
-void projection_vect(T &x, Pt::pt3D *B)
-    {
-    for (int i = 0; i < (2 * N); i++)
-        {
-        x.Lp[i] = 0;
-        for (int k = 0; k < N; k++)
-            {
-            x.Lp[i] += x.Pcoeff(i,k) * B[k].x()
-                       + x.Pcoeff(i,N + k) * B[k].y()
-                       + x.Pcoeff(i,2*N + k) * B[k].z();
-            }
-        }
-    }
-
-/** template to make projection for T, tetra or facette. It computes Ap = (P*A)*trans(P) and stores
- * result in inner matrix Kp of class T */
-template<class T, int N>
-void projection_mat(T &x, double (&A)[3 * N][3 * N])
-    {
-    double PA[2 * N][3 * N];  // no need to initialize with zeros
-    for (int i = 0; i < (2 * N); i++)
-        {
-        for (int k = 0; k < (3 * N); k++)
-            {
-            PA[i][k] = 0;
-            for (int j = 0; j < (3 * N); j++)
-                {
-                PA[i][k] += x.Pcoeff(i, j) * A[j][k];
-                }
-            }
-        }
-
-    for (int i = 0; i < (2 * N); i++)
-        for (int k = 0; k < (2 * N); k++)
-            {
-            x.Kp[i][k] = 0;
-            for (int j = 0; j < (3 * N); j++)
-                {
-                x.Kp[i][k] += PA[i][j] * x.Pcoeff(k, j);
-                }
-            }
-    }
-
     }  // end namespace Nodes
 
 #endif /* node_h */

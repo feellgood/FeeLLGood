@@ -32,7 +32,8 @@ void LinAlgebra::prepareElements(Pt::pt3D const &Hext /**< [in] applied field */
                       Pt::pt3D L[Tetra::N];
 
                       tet.integrales(settings.paramTetra, t_prm, Hext, idx_dir, DW_vz, K, L);
-                      tet.projection(K, L);
+                      tet.projection_mat(K);
+                      tet.projection_vect(L);
                   });
 
     std::for_each(std::execution::par, refMsh->fac.begin(), refMsh->fac.end(),
@@ -42,6 +43,7 @@ void LinAlgebra::prepareElements(Pt::pt3D const &Hext /**< [in] applied field */
                       Pt::pt3D Ls[Facette::N];
 
                       fac.integrales(settings.paramFacette, Ls);
-                      fac.projection(Ks, Ls);
+                      fac.projection_mat(Ks);
+                      fac.projection_vect(Ls);
                   });
     }

@@ -158,13 +158,6 @@ public:
     double demagEnergy(const Pt::pt3D (&u)[NPI] /**< [in] */,
                        const double (&phi)[NPI] /**< [in] */) const;
 
-    /** projections using Nodes::projection templates */
-    inline void projection(double (&K)[3 * N][3 * N], Pt::pt3D L[N])
-        {
-        Nodes::projection_mat<Facette::Fac, N>(*this, K);
-        Nodes::projection_vect<Facette::Fac, N>(*this, L);
-        }
-
     /** computes weight coefficients */
     inline double weight(const int i) const { return 2.0 * surf * Facette::pds[i]; }
 

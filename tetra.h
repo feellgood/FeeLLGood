@@ -387,13 +387,6 @@ public:
     double zeemanEnergy(Tetra::prm const &param, double uz_drift, Pt::pt3D const &Hext,
                         const double (&u)[Pt::DIM][NPI]) const;
 
-    /** projections using Nodes::projection templates */
-    inline void projection(double (&K)[3 * N][3 * N], Pt::pt3D L[N])
-        {
-        Nodes::projection_mat<Tetra::Tet, N>(*this, K);
-        Nodes::projection_vect<Tetra::Tet, N>(*this, L);
-        }
-
     /** \return \f$ |J| \f$ build Jacobian \f$ J \f$ */
     double Jacobian(double (&J)[Pt::DIM][Pt::DIM]);
 

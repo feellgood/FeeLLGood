@@ -77,6 +77,48 @@ class element
         return val;
         }
 
+/** make projection for tetra or facette. It computes Bp = P*B and stores result in inner vector Lp */
+    void projection_vect(Pt::pt3D *B)
+        {
+        for (int i = 0; i < (2 * N); i++)
+            {
+            Lp[i] = 0;
+            for (int k = 0; k < N; k++)
+                {
+                Lp[i] += Pcoeff(i,k) * B[k].x()
+                       + Pcoeff(i,N + k) * B[k].y()
+                       + Pcoeff(i,2*N + k) * B[k].z();
+                }
+            }
+        }
+
+/** make projection for tetra or facette. It computes Ap = (P*A)*trans(P) and stores result in inner matrix Kp */
+    void projection_mat(double (&A)[3 * N][3 * N])
+        {
+        double PA[2 * N][3 * N];  // no need to initialize with zeros
+        for (int i = 0; i < (2 * N); i++)
+            {
+            for (int k = 0; k < (3 * N); k++)
+                {
+                PA[i][k] = 0;
+                for (int j = 0; j < (3 * N); j++)
+                    {
+                    PA[i][k] += Pcoeff(i, j) * A[j][k];
+                    }
+                }
+            }
+
+        for (int i = 0; i < (2 * N); i++)
+            for (int k = 0; k < (2 * N); k++)
+                {
+                Kp[i][k] = 0;
+                for (int j = 0; j < (3 * N); j++)
+                    {
+                    Kp[i][k] += PA[i][j] * Pcoeff(k, j);
+                    }
+                }
+        }
+
     /** assemble the big sparse matrix K from tetra or facette inner matrix Kp */
     void assemblage_mat(const int NOD, write_matrix &K) const
         {
