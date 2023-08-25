@@ -39,7 +39,7 @@ class element
     /** getter for NPI */
     inline constexpr int getNPI(void) const { return NPI; }
 
-    /** getter for node */
+    /** getter for node (only used by unit-tests ; not recommended) */
     inline const Nodes::Node &getNode(const int i) { return refNode[ind[i]]; }
     
     /** set all indices to zero */
@@ -63,7 +63,7 @@ class element
 
         if (node_i == (j % N))
             {
-            const Nodes::Node &n = getNode(node_i);
+            const Nodes::Node &n = refNode[ind[node_i]];
 
             if (i < N)
                 {
