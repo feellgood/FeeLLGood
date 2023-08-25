@@ -66,9 +66,10 @@ outputs:
     - E_zeeman  # Zeeman energy
     - E_tot     # Total energy
 
-  # How often to save the magnetization configuration. This should be an
-  # integer that is interpreted in units of ‘evol_time_step’.
-  take_photo: 100
+  # How often to save the magnetization configuration. This should be
+  # either an integer that is interpreted in units of ‘evol_time_step’,
+  # or the keyword ‘false’ which disables the feature.
+  mag_config_every: 100
 
 # Description of the meshed object.
 mesh:
@@ -78,7 +79,7 @@ mesh:
   filename:
 
   # Unit of length used in the mesh file, in meters.
-  scaling_factor: 1e-9
+  length_unit: 1e-9
 
   # Material parameters of the volume regions defined by the mesh. Each
   # region is defined as a subsection of ‘volume_regions’.

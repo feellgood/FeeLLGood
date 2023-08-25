@@ -17,11 +17,11 @@ settings = {
         "file_basename": "full_test",
         "evol_time_step": 1e-12,
         "final_time": 2e-11,
-        "take_photo": False
+        "mag_config_every": False
     },
     "mesh": {
         "filename": "../examples/ellipsoid.msh",
-        "scaling_factor": 1e-10,
+        "length_unit": 1e-10,
         "volume_regions": { "ellipsoid_volume": {} },
         "surface_regions": { "ellipsoid_surface": {} }
     },

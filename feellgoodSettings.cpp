@@ -97,10 +97,10 @@ void Settings::infos()
         {
         std::cout << "    - " << *it << "\n";
         }
-    std::cout << "  take_photo: " << save_period << "\n";
+    std::cout << "  mag_config_every: " << save_period << "\n";
     std::cout << "mesh:\n";
     std::cout << "  filename: " << pbName << "\n";
-    std::cout << "  scaling_factor: " << _scale << "\n";
+    std::cout << "  length_unit: " << _scale << "\n";
     std::cout << "  volume_regions:\n";
     for (auto it = paramTetra.begin(); it != paramTetra.end(); ++it)
         {
@@ -237,18 +237,18 @@ void Settings::read(YAML::Node yaml)
         assign(simName, outputs["file_basename"]);
         assign(time_step, outputs["evol_time_step"]);
         assign(tf, outputs["final_time"]);
-        YAML::Node take_photo = outputs["take_photo"];
-        if (take_photo.Scalar() == "true")
+        YAML::Node mag_config_every = outputs["mag_config_every"];
+        if (mag_config_every.Scalar() == "true")
             {  // catch an easy mistake
-            error("outputs.take_photo should be an integer or `false'.");
+            error("outputs.mag_config_every should be an integer or `false'.");
             }
-        else if (take_photo.Scalar() == "false")
+        else if (mag_config_every.Scalar() == "false")
             {
             save_period = 0;
             }
         else
             {
-            if (assign(save_period, take_photo) && save_period < 0)
+            if (assign(save_period, mag_config_every) && save_period < 0)
                 {
                 save_period = 0;
                 }
@@ -268,8 +268,8 @@ void Settings::read(YAML::Node yaml)
         {
         if (!mesh.IsMap()) error("mesh should be a map.");
         assign(pbName, mesh["filename"]);
-        if (assign(_scale, mesh["scaling_factor"]) && _scale <= 0)
-            error("mesh.scaling_factor should be positive.");
+        if (assign(_scale, mesh["length_unit"]) && _scale <= 0)
+            error("mesh.length_unit should be positive.");
         YAML::Node volumes = mesh["volume_regions"];
         if (volumes)
             {

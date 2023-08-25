@@ -17,14 +17,14 @@ mySettings["finite_element_solver"]["max(iter)"] = 700
 mySettings["demagnetizing_field_solver"]["nb_threads"] = 4 # MaxNbThreads
 
 mySettings["outputs"]["evol_columns"] = ["t","<Mx>","<My>","<Mz>","<dMx/dt>","<dMy/dt>","<dMz/dt>","Hx","Hy","Hz","E_ex","E_demag","E_zeeman","E_tot"]
-mySettings["outputs"]["take_photo"] = 500
+mySettings["outputs"]["mag_config_every"] = 500
 mySettings["outputs"]["directory"] = "test_data_out/"
 mySettings["outputs"]["file_basename"] = "ellipsoid"
 
 mySettings["outputs"]["evol_time_step"] = 5e-16
 mySettings["outputs"]["final_time"] = 1e-13
 
-mySettings["mesh"]["scaling_factor"] = 1e-10
+mySettings["mesh"]["length_unit"] = 1e-10
 
 mySettings["mesh"]["volume_regions"]["ellipsoid_volume"]["alpha_LLG"] = 0.05
 

@@ -18,7 +18,7 @@ mySettings["outputs"]["evol_time_step"] = 1e-17
 mySettings["outputs"]["final_time"] = 5e-14
 mySettings["outputs"]["evol_columns"] = [ "t", "<Mx>", "<My>", "<Mz>", "E_ex", "E_aniso", "E_demag","E_zeeman", "E_tot" ]
 
-mySettings["outputs"]["take_photo"] = 1000
+mySettings["outputs"]["mag_config_every"] = 1000
 
 mySettings.createVolRegion( vol_region_name )
 mySettings.createSurfRegion( surf_region_name )

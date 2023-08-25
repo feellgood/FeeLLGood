@@ -35,10 +35,10 @@ outputs:
   evol_time_step: 5e-12
   final_time: $duration
   evol_columns: [t, <Mx>, <My>, <Mz>]
-  take_photo: false
+  mag_config_every: false
 mesh:
   filename: ../ellipsoid.msh
-  scaling_factor: 1e-9
+  length_unit: 1e-9
   volume_regions:
     ellipsoid_volume:
       Ae: 1e-11

@@ -31,11 +31,11 @@ settings = {
         "evol_time_step": 1e-12,
         "final_time": 2e-11,
         "evol_columns": [ "t", "<Mx>", "<My>", "<Mz>", "E_tot" ],
-        "take_photo": False
+        "mag_config_every": False
     },
     "mesh": {
         "filename": meshFileName,
-        "scaling_factor": 1e-9,
+        "length_unit": 1e-9,
         "volume_regions": { vol_regName: { "alpha_LLG" : 0.02 } },
         "surface_regions": { surf_regName: {} }
     },
