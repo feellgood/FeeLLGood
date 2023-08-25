@@ -167,31 +167,6 @@ inline void set_phi(Node &n, double val) { n.phi = val; }
 /** setter for phi_v */
 inline void set_phiv(Node &n, double val) { n.phiv = val; }
 
-/** template function to provide P matrix coefficients for T= tetra or facette, with respect to its
- * block diagonal structure */
-template<class T>
-double Pcoeff(T &x, const int i, const int j)
-    {
-    const int N = x.getN();
-    double val(0);
-    int node_i = i % N;
-
-    if (node_i == (j % N))
-        {
-        const Nodes::Node &n = x.getNode(node_i);
-
-        if (i < N)
-            {
-            val = n.ep(j / N);
-            }
-        else
-            {
-            val = n.eq(j / N);
-            }
-        }
-    return val;
-    }
-
 /** template to make projection for T, tetra or facette. It computes Bp = P*B and stores result in
  * inner vector Lp of class T */
 template<class T, int N>
@@ -202,9 +177,9 @@ void projection_vect(T &x, Pt::pt3D *B)
         x.Lp[i] = 0;
         for (int k = 0; k < N; k++)
             {
-            x.Lp[i] += Pcoeff<T>(x,i,k) * B[k].x()
-                       + Pcoeff<T>(x,i,N + k) * B[k].y()
-                       + Pcoeff<T>(x,i,2*N + k) * B[k].z();
+            x.Lp[i] += x.Pcoeff(i,k) * B[k].x()
+                       + x.Pcoeff(i,N + k) * B[k].y()
+                       + x.Pcoeff(i,2*N + k) * B[k].z();
             }
         }
     }
@@ -222,7 +197,7 @@ void projection_mat(T &x, double (&A)[3 * N][3 * N])
             PA[i][k] = 0;
             for (int j = 0; j < (3 * N); j++)
                 {
-                PA[i][k] += Pcoeff<T>(x, i, j) * A[j][k];
+                PA[i][k] += x.Pcoeff(i, j) * A[j][k];
                 }
             }
         }
@@ -233,7 +208,7 @@ void projection_mat(T &x, double (&A)[3 * N][3 * N])
             x.Kp[i][k] = 0;
             for (int j = 0; j < (3 * N); j++)
                 {
-                x.Kp[i][k] += PA[i][j] * Pcoeff<T>(x, k, j);
+                x.Kp[i][k] += PA[i][j] * x.Pcoeff(k, j);
                 }
             }
     }

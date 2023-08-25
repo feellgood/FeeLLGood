@@ -603,7 +603,7 @@ BOOST_AUTO_TEST_CASE(Tet_Pcoeff)
     for (int i = 0; i < 2 * N; i++)
         for (int j = 0; j < 3 * N; j++)
             {
-            P[i][j] = Nodes::Pcoeff<Tetra::Tet>(t, i, j);
+            P[i][j] = t.Pcoeff(i, j);
             }
 
     /* ref code */

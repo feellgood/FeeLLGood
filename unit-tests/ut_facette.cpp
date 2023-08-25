@@ -507,7 +507,7 @@ BOOST_AUTO_TEST_CASE(Fac_Pcoeff)
     for (int i = 0; i < 2 * N; i++)
         for (int j = 0; j < 3 * N; j++)
             {
-            P[i][j] = Nodes::Pcoeff<Facette::Fac>(f, i, j);
+            P[i][j] = f.Pcoeff(i, j);
             }
 
     /* ref code */

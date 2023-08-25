@@ -40,8 +40,7 @@ class element
     inline constexpr int getNPI(void) const { return NPI; }
 
     /** getter for node */
-    inline const Nodes::Node &getNode(const int i)
-        { return refNode[ind[i]]; }
+    inline const Nodes::Node &getNode(const int i) { return refNode[ind[i]]; }
     
     /** set all indices to zero */
     inline void indicesToZero(void)
@@ -54,6 +53,28 @@ class element
         for(unsigned int i = 0; i < N-1; i++)
             { std::cout << ind[i] << ", "; }
         std::cout << ind[N-1] << ")\n";
+        }
+
+    /** function to provide P matrix coefficients for tetra or facette, with respect to its block diagonal structure */
+    double Pcoeff(const int i, const int j)
+        {
+        double val(0);
+        int node_i = i % N;
+
+        if (node_i == (j % N))
+            {
+            const Nodes::Node &n = getNode(node_i);
+
+            if (i < N)
+                {
+                val = n.ep(j / N);
+                }
+            else
+                {
+                val = n.eq(j / N);
+                }
+            }
+        return val;
         }
 
     /** assemble the big sparse matrix K from tetra or facette inner matrix Kp */
