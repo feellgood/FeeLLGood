@@ -67,9 +67,9 @@ public:
 
             for (int i = 0; i < msh.getNbNodes(); i++)
                 {
-                this->pts[i][0] = msh.getNode(i).p.x();
-                this->pts[i][1] = msh.getNode(i).p.y();
-                this->pts[i][2] = msh.getNode(i).p.z();
+                this->pts[i][0] = msh.getNode_p(i).x();
+                this->pts[i][1] = msh.getNode_p(i).y();
+                this->pts[i][2] = msh.getNode_p(i).z();
                 }
 
             if (mySets.verbose)

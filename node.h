@@ -16,9 +16,7 @@
  */
 namespace Nodes
     {
-/**
- *convenient enum mainly to access some data values in calculations, used by some templates
- */
+/** convenient enum mainly to access some data values in calculations, used by some templates */
 enum index
     {
     IDX_p = 0,

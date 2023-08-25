@@ -77,7 +77,7 @@ public:
         FSize idxPart = 0;
         for (idxPart = 0; idxPart < NOD; ++idxPart)
             {
-            Pt::pt3D pTarget = norm * (msh.getNode(idxPart).p - msh.c);
+            Pt::pt3D pTarget = norm * (msh.getNode_p(idxPart) - msh.c);
             tree.insert(FPoint<FReal>(pTarget.x(), pTarget.y(), pTarget.z()),
                         FParticleType::FParticleTypeTarget, idxPart);
             }

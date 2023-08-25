@@ -55,7 +55,7 @@ public:
                                     [](Tetra::Tet const &te) { return te.calc_vol(); });
 
         surf = std::transform_reduce(std::execution::par, fac.begin(), fac.end(), 0.0, std::plus{},
-                                     [](Facette::Fac const &fa) { return fa.surf; /*calc_surf();*/ });
+                                     [](Facette::Fac const &fa) { return fa.surf; });
         }
 
     /** return number of nodes  */
@@ -67,8 +67,11 @@ public:
     /** return number of tetrahedrons */
     inline int getNbTets(void) const { return tet.size(); }
 
+    /** getter : return node.p */
+    inline const Pt::pt3D getNode_p(const int i) const { return node[i].p; }
+    
     /** getter : return node */
-    inline const Nodes::Node getNode(const int i) const { return node[i]; }
+    inline const Pt::pt3D getNode_u(const int i) const { return node[i].u; }
 
     /** setter for u0 */
     inline void set_node_u0(const int i, Pt::pt3D const &val) { node[i].u0 = val; }

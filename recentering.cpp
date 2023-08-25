@@ -23,7 +23,7 @@ void Fem::direction(enum index idx_dir)
 
     kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
     int ns = nnIdx[0];
-    double u2L = msh.getNode(ns).u(idx_dir);
+    double u2L = msh.getNode_u(ns)(idx_dir);
 
     /* right */
     qPt = msh.c + 0.5 * pDirect(pt3D(idx_dir), msh.l);
@@ -33,12 +33,12 @@ void Fem::direction(enum index idx_dir)
 
     kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
     ns = nnIdx[0];
-    double u2R = msh.getNode(ns).u(idx_dir);
+    double u2R = msh.getNode_u(ns)(idx_dir);
 
     if (u2L * u2R > 0.)
         DW_dir = 0.0;
     else
-        DW_dir = (u2L > 0 ? 1. : -1.); /* sens de deplacement de la paroi +Oz ou -Oz */
+        DW_dir = (u2L > 0 ? 1. : -1.); /* direction of the DW propagation +Oz or -Oz */
     delete[] dists;
     delete[] nnIdx;
     annDeallocPt(queryPt);
@@ -72,16 +72,16 @@ bool Fem::recenter(double thres, char recentering_direction)
     pt3D p_dir = pt3D(idx_dir);  // unit vector
     pt3D qPt = msh.c - 0.5 * pDirect(p_dir, msh.l);
 
-    /* bord gauche */
+    /* left frontier */
     queryPt[0] = qPt.x();
     queryPt[1] = qPt.y();
     queryPt[2] = qPt.z();
 
     kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
     ns = nnIdx[0];
-    double u2L = msh.getNode(ns).u(idx_dir);
+    double u2L = msh.getNode_u(ns)(idx_dir);
 
-    // bord droit
+    // right frontier
     qPt = msh.c + 0.5 * pDirect(p_dir, msh.l);
     queryPt[0] = qPt.x();
     queryPt[1] = qPt.y();
@@ -89,7 +89,7 @@ bool Fem::recenter(double thres, char recentering_direction)
 
     kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
     ns = nnIdx[0];
-    double u2R = msh.getNode(ns).u(idx_dir);
+    double u2R = msh.getNode_u(ns)(idx_dir);
 
     if (u2L * u2R > 0)
         {
@@ -98,11 +98,11 @@ bool Fem::recenter(double thres, char recentering_direction)
         }
 
     assert(u2L * u2R < 0);
-    double D_i = m_i * 0.5 * msh.l(idx_dir) * u2L;  // decalage avec signe OK
+    double D_i = m_i * 0.5 * msh.l(idx_dir) * u2L;  // shift with correct sign
 
     for (int i = 0; i < msh.getNbNodes(); i++)
         {
-        pt3D p = msh.getNode(i).p + D_i * p_dir;
+        pt3D p = msh.getNode_p(i) + D_i * p_dir;
 
         if (p(idx_dir) - msh.c(idx_dir) > +0.5 * msh.l(idx_dir))
             {
@@ -119,9 +119,7 @@ bool Fem::recenter(double thres, char recentering_direction)
         kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
 
         int ns = nnIdx[0];
-        // msh.setNode(i).u0 = msh.getNode(ns).u;
-        msh.set_node_u0(i, msh.getNode(ns).u);
-        // msh.setNode(i).v  = Pt::pt3D(0.,0.,0.);
+        msh.set_node_u0(i, msh.getNode_u(ns));
         msh.set_node_zero_v(i);
         }
 
