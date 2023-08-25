@@ -106,9 +106,9 @@ public:
 
         for (unsigned int i = 0; i < NOD; i++)
             {
-            double vp = X[i] * gamma0;
-            double vq = X[NOD + i] * gamma0;
-            double v2 = vp * vp + vq * vq;
+            const double & vp = X[i];
+            const double & vq = X[NOD + i];
+            double v2 = vp*vp + vq*vq;
             if (v2 > v2max)
                 {
                 v2max = v2;

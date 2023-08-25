@@ -69,6 +69,8 @@ int LinAlgebra::solver(timing const &t_prm, long nt)
         }
 
     // gamma0 multiplication handled within function updateNodes
+    std::transform(std::execution::par_unseq, X.begin(), X.end(),X.begin(),
+            [](double val){ return val *gamma0;} );
     v_max = refMsh->updateNodes(X, t_prm.get_dt());
     return 0;
     }
