@@ -2,11 +2,21 @@
 #define element_h
 
 #include <execution>
+#include "gmm/gmm_kernel.h"
 #include "node.h"
 
 /** \class element
 template class, mother class for tetraedrons and facettes
 */
+
+/** gmm write vector build on std::map, log(n) for read and write access */
+typedef gmm::wsvector<double> write_vector;
+/** gmm read vector */
+typedef gmm::rsvector<double> read_vector;
+/** gmm write sparse matrix */
+typedef gmm::row_matrix<write_vector> write_matrix;
+/** gmm read sparse matrix */
+typedef gmm::row_matrix<read_vector> read_matrix;
 
 template <int N,int NPI>
 class element
