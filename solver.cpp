@@ -20,6 +20,7 @@ int LinAlgebra::solver(timing const &t_prm, long nt)
     gmm::copy(K_TH, Kr);
 
     std::vector<double> X(2 * NOD);  // filled with zero by default
+    refMsh->buildInitGuess(X); // gamma0 division handled within function buildInitGuess
 
     gmm::iteration bicg_iter(1e-6);
     gmm::iteration gmr_iter(1e-6);
@@ -86,6 +87,6 @@ int LinAlgebra::solver(timing const &t_prm, long nt)
             }
         }
 
-    updateNodes(X, t_prm.get_dt());
+    updateNodes(X, t_prm.get_dt());// gamma0 multiplication handled within function updateNodes
     return 0;
     }

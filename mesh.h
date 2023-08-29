@@ -116,6 +116,20 @@ public:
         return sqrt(v2max);
         }
 
+    /** build init guess for bicgstab */
+    void buildInitGuess(std::vector<double> &G) const
+        {
+        const unsigned NOD = node.size();
+        
+        for (unsigned int i=0; i<NOD; i++)
+            {
+            Pt::pt3D const& n_v = node[i].v;
+            
+            G[i] = n_v.pScal(node[i].ep) / gamma0;
+            G[NOD + i] = n_v.pScal(node[i].eq) / gamma0;
+            }
+        }
+
     /** call evolution for all the nodes */
     inline void evolution(void)
         {
