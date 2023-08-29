@@ -2,6 +2,10 @@
 #define element_h
 
 #include <execution>
+
+#include <eigen3/Eigen/Sparse>
+#include <eigen3/Eigen/Dense>
+
 #include "gmm/gmm_kernel.h"
 #include "node.h"
 
@@ -13,8 +17,10 @@ template class, mother class for tetraedrons and facettes
 typedef gmm::wsvector<double> write_vector;
 /** gmm read vector */
 typedef gmm::rsvector<double> read_vector;
-/** gmm write sparse matrix */
-typedef gmm::row_matrix<write_vector> write_matrix;
+
+/** gmm  write sparse matrix */
+typedef gmm::row_matrix<write_vector> write_matrix;//std::vector<Eigen::Triplet<double>> w_matrix;//eigen coordinate
+
 /** gmm read sparse matrix */
 typedef gmm::row_matrix<read_vector> read_matrix;
 
@@ -130,7 +136,7 @@ class element
         }
 
     /** assemble the big sparse matrix K from tetra or facette inner matrix Kp */
-    void assemblage_mat(const int NOD, write_matrix &K) const
+    void assemblage_mat(const int NOD, write_matrix &K)//std::vector<Eigen::Triplet<double>> &K) const //,Eigen::RowMajor
         {
         for (int i = 0; i < N; i++)
             {
@@ -139,9 +145,16 @@ class element
             for (int j = 0; j < N; j++)
                 {
                 int j_ = ind[j];
+                //K.push_back(Eigen::Triplet<double>(NOD + i_, j_, Kp[i][j]));
                 K(NOD + i_, j_) += Kp[i][j];
+                
+                //K.push_back(Eigen::Triplet<double>(NOD + i_, NOD + j_, Kp[i][N + j]));
                 K(NOD + i_, NOD + j_) += Kp[i][N + j];
+                
+                //K.push_back(Eigen::Triplet<double>(i_, j_, Kp[N + i][j]));
                 K(i_, j_) += Kp[N + i][j];
+                
+                //K.push_back(Eigen::Triplet<double>(i_, NOD + j_, Kp[N + i][N + j]));
                 K(i_, NOD + j_) += Kp[N + i][N + j];
                 }
             }

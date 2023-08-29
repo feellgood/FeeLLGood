@@ -12,6 +12,8 @@ else()
     message(FATAL_ERROR "TBB NOT FOUND")
 endif()
 
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+
 #===========================================================================
 # these parameters are used to build a config.h file 
 #===========================================================================
@@ -68,7 +70,7 @@ add_custom_command(
 
 ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES} default-settings.o)
 
-TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm duktape ANN TBB::tbb)
+TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm duktape ANN TBB::tbb Eigen3::Eigen)
 
 #===========================================================================
 # Find where to install the Python modules.

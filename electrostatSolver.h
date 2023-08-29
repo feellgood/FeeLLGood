@@ -9,6 +9,7 @@
 #include <map>
 
 #include "gmm/gmm_iter.h"
+#include "gmm/gmm_precond_diagonal.h"
 #include "gmm/gmm_solver_bicgstab.h"
 #include "gmm/gmm_solver_cg.h"
 
@@ -21,6 +22,16 @@
 #include "tiny.h"
 
 #include "spinTransferTorque.h"
+
+/** gmm write vector build on std::map, log(n) for read and write access */
+typedef gmm::wsvector<double> write_vector;
+/** gmm read vector */
+typedef gmm::rsvector<double> read_vector;
+/** gmm write sparse matrix */
+typedef gmm::row_matrix<write_vector> write_matrix;
+/** gmm read sparse matrix */
+typedef gmm::row_matrix<read_vector> read_matrix;
+
 
 /** assemble the matrix K from tet and Ke inputs */
 inline void assembling_mat(Tetra::Tet const &tet, gmm::dense_matrix<double> const &Ke,
@@ -39,9 +50,7 @@ inline void assembling_mat(Tetra::Tet const &tet, gmm::dense_matrix<double> cons
 inline void assembling_vect(Facette::Fac const &fac, std::vector<double> const &Le, write_vector &L)
     {
     for (int ie = 0; ie < Facette::N; ie++)
-        {
-        L[fac.ind[ie]] += Le[ie];
-        }
+        { L[fac.ind[ie]] += Le[ie]; }
     }
 
 /** compute side problem (electrostatic potential on the nodes) integrales for matrix

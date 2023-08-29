@@ -37,13 +37,7 @@ public:
         }
 
     /** destructor */
-    ~LinAlgebra()
-        {
-        if (prc != nullptr)
-            {
-            delete prc;
-            }
-        }
+    ~LinAlgebra() { if (prc != nullptr){ delete prc; } }
 
     /** pointer to diagonal preconditioner  */
     gmm::diagonal_precond<read_matrix> *prc = nullptr;
