@@ -197,7 +197,7 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
             Pt::pt3D Hext = settings.getValue(t_prm.get_t());
 
             linAlg.prepareElements(Hext, t_prm);
-            int err = linAlg.solver(t_prm, nt);
+            int err = linAlg.solver(t_prm);
             fem.vmax = linAlg.get_v_max();
 
             if (err)

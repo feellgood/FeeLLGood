@@ -99,15 +99,15 @@ public:
         }
 
     /** make_evol on all nodes, and returns v_max */
-    double updateNodes(std::vector<double> const &X, const double dt)//(const Eigen::Ref<Eigen::VectorXd> X, const double dt)
+    double updateNodes(Eigen::Ref<Eigen::VectorXd> X, const double dt)
         {
         double v2max = 0.0;
         const unsigned int NOD = node.size();
 
         for (unsigned int i = 0; i < NOD; i++)
             {
-            const double & vp = X[i] * gamma0;
-            const double & vq = X[NOD + i] * gamma0;
+            const double & vp = X(i) * gamma0;
+            const double & vq = X(NOD + i) * gamma0;
             double v2 = vp*vp + vq*vq;
             if (v2 > v2max)
                 {
@@ -120,7 +120,7 @@ public:
         }
 
     /** build init guess for bicgstab */
-    void buildInitGuess(std::vector<double> &G) const
+    void buildInitGuess(Eigen::Ref<Eigen::VectorXd> G) const
         {
         const unsigned int NOD = node.size();
 
@@ -128,8 +128,8 @@ public:
             {
             Pt::pt3D const& n_v = node[i].v;
             
-            G[i] = n_v.pScal(node[i].ep) / gamma0;
-            G[NOD + i] = n_v.pScal(node[i].eq) / gamma0;
+            G(i) = n_v.pScal(node[i].ep) / gamma0;
+            G(NOD + i) = n_v.pScal(node[i].eq) / gamma0;
             }
         }
 

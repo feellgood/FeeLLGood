@@ -9,10 +9,6 @@
 #include <random>
 #include <execution>
 
-#include "gmm/gmm_iter.h"
-#include "gmm/gmm_precond_diagonal.h"
-#include "gmm/gmm_solver_bicgstab.h"
-
 #include "config.h"
 
 #include "facette.h"
@@ -36,19 +32,12 @@ public:
         base_projection();
         }
 
-    /** destructor */
-    ~LinAlgebra() { if (prc != nullptr){ delete prc; } }
-
-    /** pointer to diagonal preconditioner  */
-    gmm::diagonal_precond<read_matrix> *prc = nullptr;
-
     /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L
      * vectors) */
-    void prepareElements(Pt::pt3D const &Hext /**< [in] applied field */,
-                         timing const &t_prm /**< [in] */);
+    void prepareElements(Pt::pt3D const &Hext /**< [in] applied field */, timing const &t_prm /**< [in] */);
 
     /**  solver, uses bicgstab and gmres, sparse matrix and vector are filled with multiThreading */
-    int solver(timing const &t_prm /**< [in] */, long nt /**< [in] */);
+    int solver(timing const &t_prm /**< [in] */);
 
     /** setter for DW_dz */
     inline void set_DW_vz(double vz /**< [in] */) { DW_vz = vz; }
@@ -64,8 +53,6 @@ private:
     double DW_vz;             /**< speed of the domain wall */
     const Settings &settings; /**< settings */
     double v_max;             /**< maximum speed */
-
-    long prc_time_step = -1; /**< time step when prc was built */
 
     /** computes local vector basis {ep,eq} in the tangeant plane for projection on the elements */
     void base_projection();
