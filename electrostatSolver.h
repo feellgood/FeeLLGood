@@ -8,54 +8,39 @@
 #include <iostream>
 #include <map>
 
-#include "gmm/gmm_iter.h"
-#include "gmm/gmm_precond_diagonal.h"
-#include "gmm/gmm_solver_bicgstab.h"
-#include "gmm/gmm_solver_cg.h"
-
 #include "config.h"
 #include "fem.h"
 #include "mesh.h"
 
 #include "facette.h"
 #include "tetra.h"
-#include "tiny.h"
 
 #include "spinTransferTorque.h"
 
-/** gmm write vector build on std::map, log(n) for read and write access */
-typedef gmm::wsvector<double> write_vector;
-/** gmm read vector */
-typedef gmm::rsvector<double> read_vector;
-/** gmm write sparse matrix */
-typedef gmm::row_matrix<write_vector> write_matrix;
-/** gmm read sparse matrix */
-typedef gmm::row_matrix<read_vector> read_matrix;
-
-
 /** assemble the matrix K from tet and Ke inputs */
-inline void assembling_mat(Tetra::Tet const &tet, gmm::dense_matrix<double> const &Ke,
-                           write_matrix &K)
+inline void assembling_mat(Tetra::Tet const &tet, double Ke[Tetra::N][Tetra::N], std::vector<Eigen::Triplet<double>> &K)
     {
     for (int ie = 0; ie < Tetra::N; ie++)
         {
         for (int je = 0; je < Tetra::N; je++)
             {
-            K(tet.ind[ie], tet.ind[je]) += Ke(ie, je);
+            double val = Ke[ie][je];
+            if (val != 0)
+                { K.push_back( Eigen::Triplet(tet.ind[ie], tet.ind[je], val) ); }
             }
         }
     }
 
 /** assemble the vector L from fac and Le inputs */
-inline void assembling_vect(Facette::Fac const &fac, std::vector<double> const &Le, write_vector &L)
+inline void assembling_vect(Facette::Fac const &fac, std::vector<double> const &Le, Eigen::Ref<Eigen::VectorXd> L)
     {
     for (int ie = 0; ie < Facette::N; ie++)
-        { L[fac.ind[ie]] += Le[ie]; }
+        { L(fac.ind[ie]) += Le[ie]; }
     }
 
 /** compute side problem (electrostatic potential on the nodes) integrales for matrix
  * coefficients,input from tet ; sigma is the region conductivity */
-void integrales(Tetra::Tet const &tet, double sigma, gmm::dense_matrix<double> &AE)
+void integrales(Tetra::Tet const &tet, double sigma, double AE[Tetra::N][Tetra::N])
     {
     for (int npi = 0; npi < Tetra::NPI; npi++)
         {
@@ -72,7 +57,7 @@ void integrales(Tetra::Tet const &tet, double sigma, gmm::dense_matrix<double> &
                 double daj_dx = tet.dadx[je][npi];
                 double daj_dy = tet.dady[je][npi];
                 double daj_dz = tet.dadz[je][npi];
-                AE(ie, je) += sigma * (dai_dx * daj_dx + dai_dy * daj_dy + dai_dz * daj_dz) * w;
+                AE[ie][je] += sigma * (dai_dx * daj_dx + dai_dy * daj_dy + dai_dz * daj_dz) * w;
                 }
             }
         }
@@ -268,14 +253,14 @@ private:
         }
 
     /** fill matrix and vector to solve potential values on each node */
-    void prepareData(write_matrix &Kw, write_vector &Lw)
+    void prepareData(std::vector<Eigen::Triplet<double>> &Kw, Eigen::Ref<Eigen::VectorXd> Lw)
         {
         const double sigma = p_stt.sigma;
 
         std::for_each(msh.tet.begin(), msh.tet.end(),
                       [this, sigma, &Kw](Tetra::Tet const &tet)
                       {
-                          gmm::dense_matrix<double> K(Tetra::N, Tetra::N);
+                          double K[Tetra::N][Tetra::N] = {{0}};
                           integrales(tet, sigma, K);
                           assembling_mat(tet, K, Kw);
                       });
@@ -298,18 +283,15 @@ private:
 
     /** solver, using biconjugate stabilized gradient, with diagonal preconditionner and Dirichlet
      * boundary conditions */
-    int solve(const double iter_tol)
+    int solve(const double _tol)
         {
         const int NOD = msh.getNbNodes();
 
-        write_matrix Kw(NOD, NOD);
-        write_vector Lw(NOD);
-        write_vector Xw(NOD);
-
+        std::vector<Eigen::Triplet<double>> Kw;
+        Eigen::VectorXd Lw = Eigen::VectorXd::Zero(NOD);
         prepareData(Kw, Lw);
 
-        read_matrix Kr(NOD, NOD);
-        gmm::copy(Kw, Kr);
+        Eigen::VectorXd Xw(NOD);
 
         std::for_each(
                 p_stt.boundaryCond.begin(), p_stt.boundaryCond.end(),
@@ -328,15 +310,20 @@ private:
                                 surf_it->elem.begin(), surf_it->elem.end(),
                                 [V, &Kw, &Lw, &Xw](Mesh::Triangle const &tri)
                                 {
-                                    for (int ie = 0; ie < Facette::N;
-                                         ie++)  // should be Triangle::N
+                                    for (int ie = 0; ie < Facette::N; ie++)  // should be Triangle::N
                                         {
                                         const int i = tri.ind[ie];
-                                        std::for_each(
-                                                mat_row(Kw, i).begin(), mat_row(Kw, i).end(),
-                                                [](std::pair<const long unsigned int, double> &_it)
-                                                { _it.second = 0.0; });
-                                        Kw(i, i) = 1e9;
+                                        
+                                        // first we suppress all diagonal elements
+                                        Kw.erase(std::remove_if(Kw.begin(),Kw.end(),[i]( Eigen::Triplet<double> &t)
+                                                { return (t.row() == t.col()); } ));
+                                        
+                                        //then remove all the element we want to be zero
+                                        Kw.erase(std::remove_if(Kw.begin(),Kw.end(),[i]( Eigen::Triplet<double> &t)
+                                                { return (t.row() == i); } ));
+                                        
+                                        // then reinsert diagonal with big value
+                                        Kw.push_back(Eigen::Triplet<double>(i, i, 1e9));
                                         Lw[i] = V * 1e9;
                                         Xw[i] = V;
                                         }
@@ -345,37 +332,43 @@ private:
                 });
 
         if (verbose)
+            { std::cout << "line weighting..." << std::endl; }
+
+        Eigen::SparseMatrix<double> Kr(NOD,NOD);
+        Kr.setFromTriplets(Kw.begin(),Kw.end());
+        std::vector<double> maxRow(NOD,0);
+
+        //here we fill the vector maxRow with infinity norm : maxRow[i] = max{|Kr.row(i)|}
+        for(int i=0;i<NOD;i++)
             {
-            std::cout << "line weighting..." << std::endl;
+            for(int k=0;k<Kr.outerSize();++k)
+                for(Eigen::SparseMatrix<double>::InnerIterator it(Kr,k); it; ++it)
+                    { if((it.row() == i)&&(fabs(it.value()) > maxRow[i])) { maxRow[i] = fabs(it.value()); } }
             }
 
         for (int i = 0; i < NOD; i++)
             {
-            double norme = gmm::vect_norminf(mat_row(Kw, i));
+            double norme = maxRow[i];
+            
             Lw[i] /= norme;
-            std::for_each(mat_row(Kw, i).begin(), mat_row(Kw, i).end(),
-                          [norme](std::pair<const long unsigned int, double> &it)
-                          { it.second /= norme; });
+            Kr.row(i) /= norme;
             }
-
-        gmm::copy(Kw, Kr);
-        read_vector Lr(NOD);
-        gmm::copy(Lw, Lr);
-
+        
         if (verbose)
-            {
-            std::cout << "solving ..." << std::endl;
-            }
+            { std::cout << "solving ..." << std::endl; }
 
-        gmm::iteration iter(iter_tol);
-        iter.set_maxiter(MAXITER);
-        iter.set_noisy(verbose);
+        Eigen::BiCGSTAB<Eigen::SparseMatrix<double>> _solver;
 
-        gmm::bicgstab(Kr, Xw, Lr, gmm::diagonal_precond<read_matrix>(Kr), iter);
+        _solver.setTolerance(_tol);
+        _solver.setMaxIterations(MAXITER);
+        _solver.compute(Kr);
+        
+        Eigen::VectorXd sol = _solver.solve(Lw); 
 
         V.resize(NOD);
-        gmm::copy(Xw, V);
-        return (iter.get_iteration() < MAXITER);
+        for (int i=0;i<NOD;i++)
+            { V[i]= sol(i); }
+        return (_solver.iterations() < MAXITER);
         }
 
     };  // end class electrostatSolver

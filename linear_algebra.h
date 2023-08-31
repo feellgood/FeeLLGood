@@ -3,7 +3,7 @@
 
 /** \file linear_algebra.h
 \brief secondary header, it grabs altogether the linear algebra by the solver to apply fem method
-<br> It encapsulates the calls to GMM, the assemblage and projection of the matrix for all elements
+<br> It encapsulates the calls to eigen BiCGSTAB solver, the assemblage and projection of the matrix for all elements
 <br> projection and matrix assembly is multithreaded for tetrahedron, monothread for facette
 */
 #include <random>
@@ -32,11 +32,10 @@ public:
         base_projection();
         }
 
-    /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L
-     * vectors) */
+    /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors) */
     void prepareElements(Pt::pt3D const &Hext /**< [in] applied field */, timing const &t_prm /**< [in] */);
 
-    /**  solver, uses bicgstab and gmres, sparse matrix and vector are filled with multiThreading */
+    /**  solver, uses bicgstab, sparse matrix and vector are filled with multiThreading */
     int solver(timing const &t_prm /**< [in] */);
 
     /** setter for DW_dz */

@@ -3,7 +3,7 @@
 
 /** \file tiny.h
 contains a namespace to perform simple printing and algebra simple operations on matrices and
-vectors. <br> \todo this namespace is redondant with gmm, could probably be replaced or improved
+vectors. <br> \todo this namespace is redondant with eigen, could probably be replaced or improved
 with overloaded operators and a matrix class, or valarrays
 
 addition, substraction, frobenius norms and dist implemented only for unit tests, not used in
