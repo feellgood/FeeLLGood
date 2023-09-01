@@ -13,7 +13,6 @@ The code is being modified without any warranty it works. A dedicated website ca
 * [ANN][] 1.1.2
 * [Duktape][] 2.7.0
 * [ScalFMM][] revision [22b9e4f6cf][ScalFMM-rev] (it should also work with V1.5.1)
-* [GMM][] 5.4 (it should also work with 4.x)
 * [Eigen][] ≥ 3.3
 
 [here]: https://feellgood.neel.cnrs.fr/
@@ -23,5 +22,4 @@ The code is being modified without any warranty it works. A dedicated website ca
 [Duktape]: https://duktape.org/
 [ScalFMM]: https://gitlab.inria.fr/solverstack/ScalFMM/
 [ScalFMM-rev]: https://gitlab.inria.fr/solverstack/ScalFMM/-/archive/22b9e4f6cf4ea721d71198a71e3f5d2c5ae5e7cc/ScalFMM-22b9e4f6cf4ea721d71198a71e3f5d2c5ae5e7cc.tar.gz
-[GMM]: http://www.getfem.org/gmm/
 [Eigen]: https://eigen.tuxfamily.org/

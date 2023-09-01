@@ -114,15 +114,3 @@ cd Build
 cmake ..
 make -j $job_count
 sudo make install
-cd ../..
-
-# Download and install GMM.
-rm -rf gmm-5.4/
-if [ ! -f "gmm-5.4.tar.gz" ]; then
-    wget -nv http://download-mirror.savannah.gnu.org/releases/getfem/stable/gmm-5.4.tar.gz
-fi
-tar xzf gmm-5.4.tar.gz
-cd gmm-5.4/
-./configure
-make -j $job_count
-sudo make install
