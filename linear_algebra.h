@@ -19,8 +19,9 @@
 #include "tetra.h"
 
 /** \class LinAlgebra
-convenient class to grab altogether some part of the calculations involved using gmm solver at each
-timestep
+convenient class to grab altogether some part of the calculations involved using eigen BiCGSTAB solver at each
+timestep. The solver is handled by solver method, and is using Eigen::SparseMatrix, Row major matrix. This matrix
+is prepared in 'batch mode', using a vector of triplets (also called COO write sparse matrix).
 */
 class LinAlgebra
     {
@@ -28,9 +29,7 @@ public:
     /** constructor */
     inline LinAlgebra(Settings &s /**< [in] */, Mesh::mesh &my_msh /**< [in] */)
         : NOD(my_msh.getNbNodes()), refMsh(&my_msh), settings(s)
-        {
-        base_projection();
-        }
+        { base_projection(); }
 
     /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors) */
     void prepareElements(Pt::pt3D const &Hext /**< [in] applied field */, timing const &t_prm /**< [in] */);
@@ -45,17 +44,22 @@ public:
     inline double get_v_max(void) { return v_max; }
 
 private:
-    const int NOD; /**< total number of nodes, also an offset for filling sparseMatrix, initialized
-                      by constructor */
-    Mesh::mesh *refMsh; /**< direct access to the mesh */
+    /** number of nodes, also an offset for filling sparseMatrix, initialized by constructor */
+    const int NOD;
 
-    double DW_vz;             /**< speed of the domain wall */
-    const Settings &settings; /**< settings */
-    double v_max;             /**< maximum speed */
+    /** direct access to the mesh */
+    Mesh::mesh *refMsh;
+
+    /** speed of the domain wall */
+    double DW_vz;
+
+    /** settings */
+    const Settings &settings;
+
+    /** maximum speed of the magnetization in the whole physical object */
+    double v_max;
 
     /** computes local vector basis {ep,eq} in the tangeant plane for projection on the elements */
     void base_projection();
-
-    };  // fin class linAlgebra
-
+    };// end class linAlgebra
 #endif

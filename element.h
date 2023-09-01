@@ -59,7 +59,7 @@ class element
         std::cout << ind[N-1] << ")\n";
         }
 
-    /** function to provide P matrix coefficients for tetra or facette, with respect to its block diagonal structure */
+    /** function to provide P matrix(2N,3N) coefficients, with respect to its block diagonal structure */
     double Pcoeff(const int i, const int j)
         {
         double val(0);
@@ -136,19 +136,15 @@ class element
                 
                 if(Kp[i][j] != 0)
                     { K.push_back(Eigen::Triplet<double>(NOD + i_, j_, Kp[i][j])); }
-                //K(NOD + i_, j_) += Kp[i][j];
                 
                 if (Kp[i][N + j] != 0)
                     { K.push_back(Eigen::Triplet<double>(NOD + i_, NOD + j_, Kp[i][N + j])); }
-                //K(NOD + i_, NOD + j_) += Kp[i][N + j];
                 
                 if (Kp[N + i][j] != 0)
                     { K.push_back(Eigen::Triplet<double>(i_, j_, Kp[N + i][j])); }
-                //K(i_, j_) += Kp[N + i][j];
                 
                 if (Kp[N + i][N + j] != 0)
                     { K.push_back(Eigen::Triplet<double>(i_, NOD + j_, Kp[N + i][N + j])); }
-                //K(i_, NOD + j_) += Kp[N + i][N + j];
                 }
             }
         }
