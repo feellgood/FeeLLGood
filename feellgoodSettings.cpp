@@ -181,7 +181,6 @@ void Settings::infos()
     std::cout << "finite_element_solver:\n";
     std::cout << "  nb_threads: " << solverNbTh << "\n";
     std::cout << "  max(iter): " << MAXITER << "\n";
-    std::cout << "  refresh_preconditioner_every: " << REFRESH_PRC << "\n";
     std::cout << "time_integration:\n";
     std::cout << "  max(du): " << DUMAX << "\n";
     std::cout << "  min(dt): " << dt_min << "\n";
@@ -418,7 +417,6 @@ void Settings::read(YAML::Node yaml)
         assign(solverNbTh, solver["nb_threads"]);
         if (solverNbTh <= 0) solverNbTh = available_cpu_count;
         assign(MAXITER, solver["max(iter)"]);
-        assign(REFRESH_PRC, solver["refresh_preconditioner_every"]);
         }  // finite_element_solver
 
     YAML::Node time_integration = yaml["time_integration"];

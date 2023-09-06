@@ -58,69 +58,86 @@ public:
     /** setter for fileDisplayName */
     inline void setFileDisplayName(std::string _s) { fileDisplayName = _s; }
 
-    inline void setPbName(std::string str) { pbName = str; }    /**< setter for .msh file name  */
-    inline std::string getPbName(void) const { return pbName; } /**< getter for problem file name */
+    /** setter for .msh file name */
+    inline void setPbName(std::string str) { pbName = str; }
 
-    inline void setSimName(std::string str)
-        {
-        simName = str;
-        } /**< setter for .sol output file name  */
-    inline std::string getSimName(void) const
-        {
-        return simName;
-        } /**< getter for output file name */
+    /** getter for problem file name */
+    inline std::string getPbName(void) const { return pbName; }
 
-    inline void setScale(const double s)
-        {
-        _scale = s;
-        } /**< setter for geometrical scaling factor for physical coordinates of the mesh  */
-    inline double getScale(void) const
-        {
-        return _scale;
-        } /**< getter for geometrical scaling factor for physical coordinates of the mesh */
+    /** setter for .sol output file name */
+    inline void setSimName(std::string str) { simName = str; }
+
+    /** getter for output file name */
+    inline std::string getSimName(void) const { return simName; }
+
+    /** setter for geometrical scaling factor for physical coordinates of the mesh */
+    inline void setScale(const double s) { _scale = s; }
+
+    /** getter for geometrical scaling factor for physical coordinates of the mesh */
+    inline double getScale(void) const { return _scale; }
 
     /** maximum number of iterations setter for bicgstab */
     inline void set_MAXITER(int i) { MAXITER = i; }
 
-    /** refresh diagonal pre-conditionner every REFRESH_PRC for bicgstab */
-    inline void set_REFRESH_PRC(int i) { REFRESH_PRC = i; }
-
     /** boolean flag to mention if you want output in txt tsv file format */
     bool withTsv;
 
-    int verbose; /**< verbosity level, defaults to zero */
+    /** verbosity level, defaults to zero */
+    int verbose;
 
-    double time_step; /**< energy saved every time_step */
-    int save_period;  /**< magnetic configuration saved every save_period time steps */
+    /** energy saved every time_step */
+    double time_step;
 
-    bool recenter;                   /**< to recenter magnetization distribution or not */
-    Pt::index recentering_direction; /**< recentering direction, should be IDX_X|IDX_Y|IDX_Z */
-    double threshold; /**< threshold value to recenter or not versus avg(M_recentering_direction) */
+    /** magnetic configuration saved every save_period time steps */
+    int save_period;
 
-    int solverNbTh;  /**< nb of threads for the finite element solver */
-    int scalfmmNbTh; /**< nb of threads for the computation of the demag field with scalfmm */
+    /** to recenter magnetization distribution or not */
+    bool recenter;
 
-    STT p_stt; /**< spin transfert torque parameters */
+    /** recentering direction, should be IDX_X|IDX_Y|IDX_Z */
+    Pt::index recentering_direction;
 
-    bool stt_flag; /**< if spin transfer torque p_stt is fully initialized and boundary conditions
-                      ok, stt_flag is set to true */
+    /** threshold value to recenter or not versus avg(M_recentering_direction) */
+    double threshold;
 
-    std::string sMx; /**< string for analytical definition of Mx */
-    std::string sMy; /**< string for analytical definition of My */
-    std::string sMz; /**< string for analytical definition of Mz */
+    /** nb of threads for the finite element solver */
+    int solverNbTh;
 
-    std::string sBx; /**< string for analytical definition of Bx */
-    std::string sBy; /**< string for analytical definition of By */
-    std::string sBz; /**< string for analytical definition of Bz */
+    /** nb of threads for the computation of the demag field with scalfmm */
+    int scalfmmNbTh;
 
-    std::string restoreFileName; /**< input file name for continuing a calculation (sol.in) */
+    /** spin transfert torque parameters */
+    STT p_stt;
+
+    /** if spin transfer torque p_stt is fully initialized and boundary conditions ok, stt_flag is set to true */
+    bool stt_flag;
+
+    /** string for analytical definition of Mx */
+    std::string sMx;
+
+    /** string for analytical definition of My */
+    std::string sMy;
+
+    /** string for analytical definition of Mz */
+    std::string sMz;
+
+    /** string for analytical definition of Bx */
+    std::string sBx;
+
+    /** string for analytical definition of By */
+    std::string sBy;
+
+    /** string for analytical definition of Bz */
+    std::string sBz;
+
+    /** input file name for continuing a calculation (sol.in) */
+    std::string restoreFileName;
 
     /** maximum value for du step */
     double DUMAX;  // 0.1 for magnetostatic simulations; 0.02 for the dynamics
 
-    int MAXITER; /**< maximum number of iteration for biconjugate gradient algorithm */
-
-    int REFRESH_PRC; /**< refresh every REFRESH_PRC the diagonal preconditioner */
+    /** maximum number of iteration for biconjugate gradient algorithm */
+    int MAXITER;
 
     /** this vector contains the material parameters for all regions for all the tetrahedrons */
     std::vector<Tetra::prm> paramTetra;

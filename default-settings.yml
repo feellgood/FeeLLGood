@@ -187,9 +187,6 @@ finite_element_solver:
   # Maximum number of iteration for the biconjugate gradient algorithm.
   max(iter): 500
 
-  # Number of iterations before the preconditioner is recomputed.
-  refresh_preconditioner_every: 20
-
 # Parameters for the integration of the dynamic equation.
 time_integration:
 
