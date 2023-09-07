@@ -29,7 +29,10 @@ public:
     /** constructor */
     inline LinAlgebra(Settings &s /**< [in] */, Mesh::mesh &my_msh /**< [in] */)
         : NOD(my_msh.getNbNodes()), refMsh(&my_msh), settings(s)
-        { base_projection(); }
+        {
+        Eigen::setNbThreads(s.solverNbTh);
+        base_projection();
+        }
 
     /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors) */
     void prepareElements(Pt::pt3D const &Hext /**< [in] applied field */, timing const &t_prm /**< [in] */);

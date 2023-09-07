@@ -2,6 +2,8 @@ PROJECT (FEELLGOOD)
 
 find_package (Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
 
+find_package(OpenMP REQUIRED)
+
 find_package(TBB REQUIRED)
 if(TBB_FOUND)
     message(STATUS "TBB Found")
@@ -56,6 +58,7 @@ target_link_libraries(test_ut_solver
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
   TBB::tbb
   Eigen3::Eigen
+  OpenMP::OpenMP_CXX
   )
 
 target_link_libraries(test_ut_node
@@ -108,7 +111,6 @@ target_link_libraries(test_ut_time_int
 target_link_libraries(test_ut_log-stats
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
   )
-#enable_testing()
 
 add_test (NAME ut_pt3D_arithmetic COMMAND test_ut_pt3D)
 add_test (NAME ut_solver COMMAND test_ut_solver)

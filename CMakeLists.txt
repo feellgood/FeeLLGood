@@ -1,9 +1,11 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.10)
 PROJECT(FEELLGOOD)
 
 ENABLE_LANGUAGE(CXX)
 
 MESSAGE(STATUS "CXX ${CMAKE_CXX_COMPILER_ID}")
+
+find_package(OpenMP REQUIRED)
 
 find_package(TBB REQUIRED)
 if(TBB_FOUND)
@@ -46,7 +48,7 @@ endif()
 
 set(CMAKE_CXX_FLAGS
     "-DNDEBUG -DTBB_SUPPRESS_DEPRECATED_MESSAGES \
-    -Wall -Wextra -std=c++17 -fopenmp -O3 -march=native"
+    -Wall -Wextra -std=c++17 -O3 -march=native"
     CACHE STRING "C++ compiler flags used during builds." FORCE)
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
@@ -70,7 +72,7 @@ add_custom_command(
 
 ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES} default-settings.o)
 
-TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm duktape ANN TBB::tbb Eigen3::Eigen)
+TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm duktape ANN OpenMP::OpenMP_CXX TBB::tbb Eigen3::Eigen)
 
 #===========================================================================
 # Find where to install the Python modules.
