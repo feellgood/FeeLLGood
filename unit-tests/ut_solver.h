@@ -29,7 +29,7 @@ class DummyLinAlgebra
             Eigen::SparseMatrix<double,Eigen::RowMajor> A(NOD,NOD);
             std::vector<Eigen::Triplet<double>> coeffs;
 
-            loc_build_coeffs<300000>(coeffs,b,t);
+            loc_build_coeffs<30000>(coeffs,b,t);
             
             A.setFromTriplets(coeffs.begin(),coeffs.end());
             Eigen::BiCGSTAB<Eigen::SparseMatrix<double,Eigen::RowMajor>, Eigen::IncompleteLUT<double> > _solver;

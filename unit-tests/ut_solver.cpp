@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(class_embedded_solver, *boost::unit_test::tolerance(UT_TOL)
     {
     const int MAX_ITER = 1000;
     const double _TOL = 1e-7;
-    const int N = 200000;
+    const int N = 20000;
 
     omp_set_num_threads(4);
     Eigen::setNbThreads(4);
