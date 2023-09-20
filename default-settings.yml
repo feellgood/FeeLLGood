@@ -187,6 +187,9 @@ finite_element_solver:
   # Maximum number of iteration for the biconjugate gradient algorithm.
   max(iter): 500
 
+  # solver tolerance.
+  tolerance: 1e-6
+
 # Parameters for the integration of the dynamic equation.
 time_integration:
 

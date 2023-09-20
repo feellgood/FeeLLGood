@@ -32,6 +32,12 @@ public:
         {
         Eigen::setNbThreads(s.solverNbTh);
         base_projection();
+        K.resize(2*NOD,2*NOD);
+        K.reserve(2*NOD); // initial mem alloc to the size of the diagonal
+        X_guess.resize(2*NOD);
+        L_TH.resize(2*NOD);
+        _solver.setTolerance(s.TOL);
+        _solver.setMaxIterations(s.MAXITER);
         }
 
     /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors) */
@@ -50,6 +56,9 @@ private:
     /** number of nodes, also an offset for filling sparseMatrix, initialized by constructor */
     const int NOD;
 
+    /** solver tolerance */
+    //const double _TOL;
+
     /** direct access to the mesh */
     Mesh::mesh *refMsh;
 
@@ -61,6 +70,18 @@ private:
 
     /** maximum speed of the magnetization in the whole physical object */
     double v_max;
+
+    /** row major sparse matrix of the system to solve */
+    Eigen::SparseMatrix<double,Eigen::RowMajor> K;
+
+    /** initial guess for the solver */
+    Eigen::VectorXd X_guess;
+
+    /** RHS vector of the system to solve */
+    Eigen::VectorXd L_TH;
+
+    /** eigen stabilized biconjugate gradient solver, for row major sparse matrix and ILU preconditionner. Row major sparse matrix allows some parallelism with openMP multithreading */
+    Eigen::BiCGSTAB<Eigen::SparseMatrix<double,Eigen::RowMajor>,Eigen::IncompleteLUT<double>> _solver;
 
     /** computes local vector basis {ep,eq} in the tangeant plane for projection on the elements */
     void base_projection();

@@ -136,6 +136,9 @@ public:
     /** maximum value for du step */
     double DUMAX;  // 0.1 for magnetostatic simulations; 0.02 for the dynamics
 
+    /** solver tolerance (eigen bicgstab) */
+    double TOL;
+
     /** maximum number of iteration for biconjugate gradient algorithm */
     int MAXITER;
 
