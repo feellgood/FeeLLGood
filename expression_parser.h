@@ -1,7 +1,6 @@
 /*
- * Parsers/evaluators for the analytic expressions given by the user:
- *  - MagnetizationParser: parser for the initial magnetization M(x, y, z)
- *  - TimeDepFieldParser: parser for the applied field B(t)
+ * Parser/evaluator for the analytic expressions given by the user:
+ * the initial magnetization M(x, y, z) and the applied field B(t).
  */
 
 #ifndef expression_parser_h
@@ -12,13 +11,12 @@
 #include <string>
 
 /**
- * Generic parser and evaluator. This is the parent class of the other two parsers, and holds the
- * code shared between them. It handles a JavaScript function that computes the three components of
- * a vector, which depends on either a single parameter t or on (x, y, z).
+ * This class handles a JavaScript function that computes the three components of a vector, which
+ * depends on either a single parameter t or on (x, y, z).
  */
 class VectorParser
     {
-protected:
+public:
     VectorParser();
 
     /**
@@ -66,50 +64,6 @@ private:
      * Ducktape context holding the internal state of the interpreter.
      */
     duk_context *ctx;
-    };
-
-/**
- * Parse and evaluate the expressions that give the components of the initial magnetization as a
- * function of the position coordinates (x, y, z).
- */
-class MagnetizationParser : VectorParser
-    {
-public:
-    /**
-     * Compile the expressions for the magnetization components.
-     */
-    void set_expressions(const std::string &Mx, const std::string &My, const std::string &Mz)
-        {
-        VectorParser::set_expressions("x,y,z", Mx, My, Mz);
-        }
-
-    /**
-     * Evaluate the magnetization at point `p`. Returns the _normalized_ magnetization. This should
-     * only be called _after_ defining the expressions with set_expressions().
-     */
-    Pt::pt3D get_magnetization(const Pt::pt3D &p) const { return get_vector(p).normalize(); }
-    };
-
-/**
- * Parse and evaluate the expressions that give the components of the time-dependent applied field
- * as a function of time t.
- */
-class TimeDepFieldParser : public VectorParser
-    {
-public:
-    /**
-     * Compile the expressions for the field components.
-     */
-    void set_expressions(const std::string &Bx, const std::string &By, const std::string &Bz)
-        {
-        VectorParser::set_expressions("t", Bx, By, Bz);
-        }
-
-    /**
-     * Evaluate the applied field at time `t`. This should only be called _after_ defining the
-     * expressions with set_expressions().
-     */
-    Pt::pt3D get_timeDepField(const double t) const { return get_vector(t); }
     };
 
 #endif /* expression_parser_h */

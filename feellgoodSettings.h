@@ -202,17 +202,17 @@ public:
         };
 
     /** parser magnetization compiler */
-    inline void doCompile3Dprm(void) { mag_parser.set_expressions(sMx, sMy, sMz); };
+    inline void doCompile3Dprm(void) { mag_parser.set_expressions("x,y,z", sMx, sMy, sMz); };
 
     /** parser time dependant field compiler */
-    inline void doCompile1Dprm(void) { field_parser.set_expressions(sBx, sBy, sBz); };
+    inline void doCompile1Dprm(void) { field_parser.set_expressions("t", sBx, sBy, sBz); };
 
     /** evaluation of the magnetization components through math expression, each component of the
      magnetization is a function of (x,y,z). \return unit vector
      */
     inline Pt::pt3D getMagnetization(const Pt::pt3D &p) const
         {
-        return mag_parser.get_magnetization(p);
+        return mag_parser.get_vector(p).normalize();
         }
 
     /** evaluation of the field components through math expression, each component of the field is a
@@ -220,7 +220,7 @@ public:
      */
     inline Pt::pt3D getField(const double t_val) const
         {
-        return nu0 * (field_parser.get_timeDepField(t_val));
+        return nu0 * (field_parser.get_vector(t_val));
         }
 
 private:
@@ -229,8 +229,8 @@ private:
     double _scale;               /**< scaling factor from gmsh files to feellgood */
     std::string simName;         /**< simulation name */
     std::string pbName;          /**< mesh file, gmsh file format */
-    MagnetizationParser mag_parser;  /**< parser for the magnetization expressions */
-    TimeDepFieldParser field_parser; /**< parser for the time dependant applied field expressions */
+    VectorParser mag_parser;     /**< parser for the magnetization expressions */
+    VectorParser field_parser;   /**< parser for the time dependant applied field expressions */
     };
 
 #endif /* feellgoodSettings_h */
