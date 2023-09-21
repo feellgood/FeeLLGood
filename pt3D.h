@@ -125,12 +125,13 @@ public:
 
     /**
      * normalization : divide each components x,y and z by the norm \f$ \mathcal{R}^3 \f$ in place
-     * without safety
+     * without safety. Return a reference to this pt3D.
      */
-    inline void normalize(void)
+    inline pt3D &normalize(void)
         {
         double inv_r = 1.0 / norm();
         *this *= inv_r;
+        return *this;
         }
 
     /**
