@@ -1,5 +1,5 @@
 /*
- * Implementation of MagnetizationParser and TimeDepFieldParser.
+ * Implementation of VectorParser.
  */
 
 #include "expression_parser.h"
@@ -9,10 +9,6 @@
 static const char js_library[] = "Object.getOwnPropertyNames(Math).forEach("
                                  "    function(name) { globalThis[name] = Math[name]; }"
                                  ");";
-
-/*******************************************************************************
- * VectorParser implementation.
- */
 
 VectorParser::VectorParser()
     {
@@ -29,16 +25,14 @@ void VectorParser::die_if_error(duk_int_t err) const
     exit(EXIT_FAILURE);
     }
 
-void VectorParser::push_function(const std::string &parameters, const std::string &expression)
+void VectorParser::push_function(const std::string &js_function) const
     {
-    std::string js_function = "function(" + parameters + ") { return (" + expression + "); }";
-    int stack_size_before = duk_get_top(ctx);
+    duk_set_top(ctx, 0);  // clear the stack
     duk_int_t err = duk_pcompile_string(ctx, DUK_COMPILE_FUNCTION, js_function.c_str());
     die_if_error(err);
-    int stack_size_after = duk_get_top(ctx);
-    if (stack_size_after != stack_size_before + 1)
+    if (duk_get_top(ctx) != 1)
         {
-        std::cerr << "Compilation of " << expression << " damaged the stack.\n";
+        std::cerr << "Compilation of JavaScript function damaged the stack.\n";
         exit(EXIT_FAILURE);
         }
     }
@@ -46,67 +40,47 @@ void VectorParser::push_function(const std::string &parameters, const std::strin
 void VectorParser::set_expressions(const std::string &parameters, const std::string &expr_x,
                                    const std::string &expr_y, const std::string &expr_z)
     {
-    duk_set_top(ctx, 0);  // clear the stack
-    push_function(parameters, expr_x);
-    push_function(parameters, expr_y);
-    push_function(parameters, expr_z);
+    push_function("function(" + parameters + ") { return [(" + expr_x + "), (" + expr_y + "), ("
+                  + expr_z + ")]; }");
     }
 
-void VectorParser::prepare_call(int position) const
+double VectorParser::get_vector_component(int idx) const
     {
-    duk_dup(ctx, position);  // copy the function to the top of the stack
-    }
-
-void VectorParser::push_argument(double value) const { duk_push_number(ctx, value); }
-
-double VectorParser::get_component(int argument_count) const
-    {
-    duk_int_t err = duk_pcall(ctx, argument_count);
-    die_if_error(err);
+    duk_push_int(ctx, idx);                      // [ ... v ] -> [ ... v idx ]
+    duk_bool_t success = duk_get_prop(ctx, -2);  //           -> [ ... v v[idx] ]
+    if (!success)
+        {
+        std::cerr << "JavaScript function did not return a 3-vector.\n";
+        exit(EXIT_FAILURE);
+        }
     double val = duk_get_number(ctx, -1);
-    duk_pop(ctx);
+    duk_pop(ctx);  // -> [ ... v ]
     return val;
     }
 
-/*******************************************************************************
- * MagnetizationParser implementation.
- */
-
-double MagnetizationParser::get_vector_component(const Pt::pt3D &p, int component_index) const
+Pt::pt3D VectorParser::compute_vector(int argument_count) const
     {
-    prepare_call(component_index);
-    push_argument(p.x());
-    push_argument(p.y());
-    push_argument(p.z());
-    return get_component(3);
+    duk_int_t err = duk_pcall(ctx, argument_count);  // [ f f args... ] -> [ f v ]
+    die_if_error(err);
+    double x = get_vector_component(0);
+    double y = get_vector_component(1);
+    double z = get_vector_component(2);
+    duk_pop(ctx);  // -> [ f ]
+    return Pt::pt3D(x, y, z);
     }
 
-Pt::pt3D MagnetizationParser::get_magnetization(const Pt::pt3D &p) const
+Pt::pt3D VectorParser::get_vector(double arg) const
     {
-    double Mx = get_vector_component(p, 0);
-    double My = get_vector_component(p, 1);
-    double Mz = get_vector_component(p, 2);
-    Pt::pt3D M(Mx, My, Mz);
-    M.normalize();
-    return M;
+    duk_dup(ctx, -1);           // -> [ f f ]
+    duk_push_number(ctx, arg);  // -> [ f f arg ]
+    return compute_vector(1);
     }
 
-/*******************************************************************************
- * TimeDepFieldParser implementation.
- */
-
-double TimeDepFieldParser::get_vector_component(double t, int component_index) const
+Pt::pt3D VectorParser::get_vector(const Pt::pt3D &arg) const
     {
-    prepare_call(component_index);
-    push_argument(t);
-    return get_component(1);
-    }
-
-Pt::pt3D TimeDepFieldParser::get_timeDepField(const double t) const
-    {
-    double Bx = get_vector_component(t, 0);
-    double By = get_vector_component(t, 1);
-    double Bz = get_vector_component(t, 2);
-    Pt::pt3D B(Bx, By, Bz);
-    return B;
+    duk_dup(ctx, -1);               // -> [ f f ]
+    duk_push_number(ctx, arg.x());  // -> [ f f arg.x ]
+    duk_push_number(ctx, arg.y());  // -> [ f f arg.x arg.y ]
+    duk_push_number(ctx, arg.z());  // -> [ f f arg.x arg.y arg.z ]
+    return compute_vector(3);
     }

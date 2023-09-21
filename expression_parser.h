@@ -13,8 +13,8 @@
 
 /**
  * Generic parser and evaluator. This is the parent class of the other two parsers, and holds the
- * code shared between them. It handles three expressions that compute the three components of a
- * vector, which depend on unspecified parameters.
+ * code shared between them. It handles a JavaScript function that computes the three components of
+ * a vector, which depends on either a single parameter t or on (x, y, z).
  */
 class VectorParser
     {
@@ -23,28 +23,21 @@ protected:
 
     /**
      * Compile the expressions of the x, y and z components, which depend on the specified
-     * parameters, into JavaScript functions. Leave the compiled functions on the Duktape stack at
-     * positions (0, 1, 2).
+     * parameters, into a JavaScript function returning a 3-element array. Leave the compiled
+     * function as the sole value on the Duktape stack.
      */
     void set_expressions(const std::string &parameters, const std::string &expr_x,
                          const std::string &expr_y, const std::string &expr_z);
 
     /**
-     * Prepare the Duktape interpreter to call the function at the given stack position.
-     * Positions (0, 1, 2) correspond to components (x, y, z) of the computed vector.
+     * Compute a vector from the given scalar argument.
      */
-    void prepare_call(int position) const;
+    Pt::pt3D get_vector(double arg) const;
 
     /**
-     * Push a function argument to the Duktape stack.
+     * Compute a vector from the given vector argument.
      */
-    void push_argument(double value) const;
-
-    /**
-     * Compute a component of the vector. This must be called after prepare_call() and one or more
-     * calls to push_argument(). `argument_count` should match the number of arguments pushed.
-     */
-    double get_component(int argument_count) const;
+    Pt::pt3D get_vector(const Pt::pt3D &arg) const;
 
 private:
     /**
@@ -54,10 +47,20 @@ private:
     void die_if_error(duk_int_t err) const;
 
     /**
-     * Build a function that takes the given parameters and evaluates the given expression.
-     * Push it to the stack.
+     * Push the provided function expression to the stack.
      */
-    void push_function(const std::string &parameters, const std::string &expression);
+    void push_function(const std::string &js_function) const;
+
+    /**
+     * Get the given component from the array at the top of the stack. Preserve the stack state.
+     */
+    double get_vector_component(int idx) const;
+
+    /**
+     * Compute a vector. This must be called after duk_dup(ctx, -1) and one or more calls to
+     * duk_push_number(). `argument_count` should match the number of arguments pushed.
+     */
+    Pt::pt3D compute_vector(int argument_count) const;
 
     /**
      * Ducktape context holding the internal state of the interpreter.
@@ -84,13 +87,7 @@ public:
      * Evaluate the magnetization at point `p`. Returns the _normalized_ magnetization. This should
      * only be called _after_ defining the expressions with set_expressions().
      */
-    Pt::pt3D get_magnetization(const Pt::pt3D &p) const;
-
-private:
-    /**
-     * Get a single vector component. `component_index` should be either 0, 1, or 2.
-     */
-    double get_vector_component(const Pt::pt3D &p, int component_index) const;
+    Pt::pt3D get_magnetization(const Pt::pt3D &p) const { return get_vector(p).normalize(); }
     };
 
 /**
@@ -112,13 +109,7 @@ public:
      * Evaluate the applied field at time `t`. This should only be called _after_ defining the
      * expressions with set_expressions().
      */
-    Pt::pt3D get_timeDepField(const double t) const;
-
-private:
-    /**
-     * Get a single vector component. `component_index` should be either 0, 1, or 2.
-     */
-    double get_vector_component(double t, int component_index) const;
+    Pt::pt3D get_timeDepField(const double t) const { return get_vector(t); }
     };
 
 #endif /* expression_parser_h */
