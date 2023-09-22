@@ -131,7 +131,9 @@ void Settings::infos()
         if (it->Ks != 0) std::cout << "      uk: " << str(it->uk) << "\n";
         }
     std::cout << "initial_magnetization: ";
-    if (restoreFileName.empty())
+    if (!sM.empty())
+        std::cout << sM << "\n";
+    else if (restoreFileName.empty())
         std::cout << "[\"" << sMx << "\", \"" << sMy << "\", \"" << sMz << "\"]\n";
     else
         std::cout << restoreFileName << "\n";
@@ -333,7 +335,16 @@ void Settings::read(YAML::Node yaml)
         {
         if (magnetization.IsScalar())
             {
-            restoreFileName = magnetization.as<std::string>();
+            std::string s_mag = magnetization.as<std::string>();
+            if (s_mag.find("function") == std::string::npos || s_mag.find('{') == std::string::npos)
+                {
+                restoreFileName = s_mag;
+                }
+            else
+                {
+                sM = s_mag;
+                mag_parser.set_function(sM);
+                }
             }
         else if (magnetization.IsSequence())
             {
