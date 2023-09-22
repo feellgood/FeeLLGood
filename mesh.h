@@ -242,6 +242,9 @@ private:
      * function init_node */
     std::vector<Nodes::Node> node;
 
+    /** Inverse of the permutation we applied when sorting the nodes. */
+    std::vector<int> inverse_perm;
+
     /** map of the surface region physical names from mesh file */
     std::map<int, std::string> surfRegNames;
 
@@ -390,7 +393,7 @@ private:
         std::sort(permutation.begin(), permutation.end(),
                   [this, long_axis](int a, int b)
                   { return node[a].p(long_axis) < node[b].p(long_axis); });
-        std::vector<int> inverse_perm(node.size());  // inverse permutation
+        inverse_perm.resize(node.size());
         for (size_t i = 0; i < node.size(); i++)
             inverse_perm[permutation[i]] = i;
 
@@ -401,7 +404,7 @@ private:
 
         // Update the indices stored in the elements.
         std::for_each(tet.begin(), tet.end(),
-                      [&inverse_perm](Tetra::Tet &tetrahedron)
+                      [this](Tetra::Tet &tetrahedron)
                       {
                           tetrahedron.ind[0] = inverse_perm[tetrahedron.ind[0]];
                           tetrahedron.ind[1] = inverse_perm[tetrahedron.ind[1]];
@@ -409,18 +412,18 @@ private:
                           tetrahedron.ind[3] = inverse_perm[tetrahedron.ind[3]];
                       });
         std::for_each(fac.begin(), fac.end(),
-                      [&inverse_perm](Facette::Fac &facette)
+                      [this](Facette::Fac &facette)
                       {
                           facette.ind[0] = inverse_perm[facette.ind[0]];
                           facette.ind[1] = inverse_perm[facette.ind[1]];
                           facette.ind[2] = inverse_perm[facette.ind[2]];
                       });
         std::for_each(s.begin(), s.end(),
-                      [&inverse_perm](Mesh::Surf &surface)
+                      [this](Mesh::Surf &surface)
                       {
                           std::vector<Mesh::Triangle> &elements = surface.elem;
                           std::for_each(elements.begin(), elements.end(),
-                                        [&inverse_perm](Mesh::Triangle &tri)
+                                        [this](Mesh::Triangle &tri)
                                         {
                                             tri.ind[0] = inverse_perm[tri.ind[0]];
                                             tri.ind[1] = inverse_perm[tri.ind[1]];

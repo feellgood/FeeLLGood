@@ -138,7 +138,7 @@ void Mesh::mesh::savesol(const int precision, const std::string fileName,
 
     for (unsigned int i = 0; i < node.size(); i++)
         {
-        fout << i << '\t' << node[i].u << '\t' << node[i].phi << endl;
+        fout << i << '\t' << node[inverse_perm[i]].u << '\t' << node[i].phi << endl;
         }
 
     fout.close();
