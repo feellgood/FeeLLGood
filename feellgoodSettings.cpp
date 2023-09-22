@@ -149,7 +149,11 @@ void Settings::infos()
             }
         std::cout << "  threshold: " << threshold << "\n";
         }
-    std::cout << "Bext: [\"" << sBx << "\", \"" << sBy << "\", \"" << sBz << "\"]\n";
+    std::cout << "Bext: ";
+    if (!sB.empty())
+        std::cout << sB << "\n";
+    else
+        std::cout << "[\"" << sBx << "\", \"" << sBy << "\", \"" << sBz << "\"]\n";
     std::cout << "spin_transfer_torque:\n";
     std::cout << "  enable: " << str(stt_flag) << "\n";
     if (stt_flag)
@@ -365,12 +369,23 @@ void Settings::read(YAML::Node yaml)
     YAML::Node field = yaml["Bext"];
     if (field)
         {
-        if (!field.IsSequence()) error("Bext should be a vector of expressions.");
-        if (field.size() != 3) error("Bext should have three components.");
-        sBx = field[0].as<std::string>();
-        sBy = field[1].as<std::string>();
-        sBz = field[2].as<std::string>();
-        field_parser.set_expressions("t", sBx, sBy, sBz);
+        if (field.IsScalar())
+            {
+            sB = field.as<std::string>();
+            field_parser.set_function(sB);
+            }
+        else if (field.IsSequence())
+            {
+            if (field.size() != 3) error("Bext should have three components.");
+            sBx = field[0].as<std::string>();
+            sBy = field[1].as<std::string>();
+            sBz = field[2].as<std::string>();
+            field_parser.set_expressions("t", sBx, sBy, sBz);
+            }
+        else
+            {
+            error("Bext should be a function or a vector of expressions.");
+            }
         }  // Bext
 
     YAML::Node stt = yaml["spin_transfer_torque"];

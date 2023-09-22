@@ -25,7 +25,8 @@ void VectorParser::die_if_error(duk_int_t err) const
     exit(EXIT_FAILURE);
     }
 
-void VectorParser::push_function(const std::string &js_function) const
+// Compile a function expression and leave it as the sole value on the Duktape stack.
+void VectorParser::set_function(const std::string &js_function) const
     {
     duk_set_top(ctx, 0);  // clear the stack
     duk_int_t err = duk_pcompile_string(ctx, DUK_COMPILE_FUNCTION, js_function.c_str());
@@ -40,8 +41,8 @@ void VectorParser::push_function(const std::string &js_function) const
 void VectorParser::set_expressions(const std::string &parameters, const std::string &expr_x,
                                    const std::string &expr_y, const std::string &expr_z)
     {
-    push_function("function(" + parameters + ") { return [(" + expr_x + "), (" + expr_y + "), ("
-                  + expr_z + ")]; }");
+    set_function("function(" + parameters + ") { return [(" + expr_x + "), (" + expr_y + "), ("
+                 + expr_z + ")]; }");
     }
 
 double VectorParser::get_vector_component(int idx) const

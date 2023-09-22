@@ -20,9 +20,16 @@ public:
     VectorParser();
 
     /**
-     * Compile the expressions of the x, y and z components, which depend on the specified
-     * parameters, into a JavaScript function returning a 3-element array. Leave the compiled
-     * function as the sole value on the Duktape stack.
+     * Use the provided JavaScript function expression for subsequent computations of vectors. The
+     * provided function should take either one or three numeric parameters, and return an array of
+     * three numbers.
+     */
+    void set_function(const std::string &js_function) const;
+
+    /**
+     * Use the provided expressions for the x, y and z components for subsequent computations of
+     * vectors. `parameters` should be a comma-separated list of parameter names, typically "t" or
+     * "x,y,z".
      */
     void set_expressions(const std::string &parameters, const std::string &expr_x,
                          const std::string &expr_y, const std::string &expr_z);
@@ -43,11 +50,6 @@ private:
      * the stack is assumed to hold the corresponding Error object.
      */
     void die_if_error(duk_int_t err) const;
-
-    /**
-     * Push the provided function expression to the stack.
-     */
-    void push_function(const std::string &js_function) const;
 
     /**
      * Get the given component from the array at the top of the stack. Preserve the stack state.

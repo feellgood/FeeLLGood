@@ -121,6 +121,9 @@ public:
     /** string for analytical definition of Mz */
     std::string sMz;
 
+    /** string for a JavaScript function defining M, alternative to (sMx, sMy, sMz) */
+    std::string sM;
+
     /** string for analytical definition of Bx */
     std::string sBx;
 
@@ -129,6 +132,9 @@ public:
 
     /** string for analytical definition of Bz */
     std::string sBz;
+
+    /** string for a JavaScript function defining B, alternative to (sBx, sBy, sBz) */
+    std::string sB;
 
     /** input file name for continuing a calculation (sol.in) */
     std::string restoreFileName;
