@@ -3,7 +3,7 @@
 void Fem::energy(double const t, Settings &settings)
     {
     zeroEnergy();
-    const Pt::pt3D Hext = settings.getValue(t);
+    const Pt::pt3D Hext = settings.getField(t);
 
     std::for_each(msh.tet.begin(), msh.tet.end(),
                   [this, &Hext, &settings](Tetra::Tet const &te)

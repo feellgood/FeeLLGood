@@ -176,7 +176,7 @@ public:
         {
         for (unsigned int i = 0; i < node.size(); i++)
             {
-            node[i].u0 = mySets.getValue(Nodes::get_p(node[i]));
+            node[i].u0 = mySets.getMagnetization(Nodes::get_p(node[i]));
             node[i].u = node[i].u0;
             node[i].phi = 0.;
             node[i].phiv = 0.;

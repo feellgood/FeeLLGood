@@ -90,15 +90,15 @@ void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const i
             }
         if (keyVal == "Hx")
             {
-            fout << settings.getValue(t_prm.get_t()).x() << sep;
+            fout << settings.getField(t_prm.get_t()).x() << sep;
             }
         if (keyVal == "Hy")
             {
-            fout << settings.getValue(t_prm.get_t()).y() << sep;
+            fout << settings.getField(t_prm.get_t()).y() << sep;
             }
         if (keyVal == "Hz")
             {
-            fout << settings.getValue(t_prm.get_t()).z() << sep;
+            fout << settings.getField(t_prm.get_t()).z() << sep;
             }
         }
     fout << std::flush;

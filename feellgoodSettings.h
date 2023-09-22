@@ -210,12 +210,15 @@ public:
     /** evaluation of the magnetization components through math expression, each component of the
      magnetization is a function of (x,y,z). \return unit vector
      */
-    inline Pt::pt3D getValue(const Pt::pt3D &p) const { return mag_parser.get_magnetization(p); }
+    inline Pt::pt3D getMagnetization(const Pt::pt3D &p) const
+        {
+        return mag_parser.get_magnetization(p);
+        }
 
     /** evaluation of the field components through math expression, each component of the field is a
      * function of (t).
      */
-    inline Pt::pt3D getValue(const double t_val) const
+    inline Pt::pt3D getField(const double t_val) const
         {
         return nu0 * (field_parser.get_timeDepField(t_val));
         }
