@@ -338,7 +338,7 @@ void Settings::read(YAML::Node yaml)
             sMx = magnetization[0].as<std::string>();
             sMy = magnetization[1].as<std::string>();
             sMz = magnetization[2].as<std::string>();
-            doCompile3Dprm();
+            mag_parser.set_expressions("x,y,z", sMx, sMy, sMz);
             }
         else
             {
@@ -370,7 +370,7 @@ void Settings::read(YAML::Node yaml)
         sBx = field[0].as<std::string>();
         sBy = field[1].as<std::string>();
         sBz = field[2].as<std::string>();
-        doCompile1Dprm();
+        field_parser.set_expressions("t", sBx, sBy, sBz);
         }  // Bext
 
     YAML::Node stt = yaml["spin_transfer_torque"];

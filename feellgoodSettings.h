@@ -201,12 +201,6 @@ public:
         return idx;
         };
 
-    /** parser magnetization compiler */
-    inline void doCompile3Dprm(void) { mag_parser.set_expressions("x,y,z", sMx, sMy, sMz); };
-
-    /** parser time dependant field compiler */
-    inline void doCompile1Dprm(void) { field_parser.set_expressions("t", sBx, sBy, sBz); };
-
     /** evaluation of the magnetization components through math expression, each component of the
      magnetization is a function of (x,y,z). \return unit vector
      */
