@@ -70,6 +70,31 @@ static const std::string str(Pt::pt3D v)
            + std::to_string(v.z()) + "]";
     }
 
+// Stringify a string: if it contains a newline, convert it to a multiline string in "literal style"
+// (introduced by '|'). Otherwise leave it alone.
+// Warning: this function assumes this is the value of a property at indentation level zero.
+static const std::string str(std::string s)
+    {
+    // If it doesn't ave an eol, leave it alone.
+    if (s.find('\n') == std::string::npos) return s;
+
+    // Prepend "|\n".
+    s.insert(0, "|\n");
+
+    // Remove trailing eol.
+    if (s.back() == '\n') s.resize(s.size() - 1);
+
+    // Add indentation: replace "\n" with "\n  ".
+    size_t pos = 0;
+    while ((pos = s.find('\n', pos)) != std::string::npos)
+        {
+        s.replace(pos + 1, 0, "  ");
+        pos += 3;
+        }
+
+    return s;
+    }
+
 /***********************************************************************
  * Public API.
  */
@@ -132,7 +157,7 @@ void Settings::infos()
         }
     std::cout << "initial_magnetization: ";
     if (!sM.empty())
-        std::cout << sM << "\n";
+        std::cout << str(sM) << "\n";
     else if (restoreFileName.empty())
         std::cout << "[\"" << sMx << "\", \"" << sMy << "\", \"" << sMz << "\"]\n";
     else
@@ -153,7 +178,7 @@ void Settings::infos()
         }
     std::cout << "Bext: ";
     if (!sB.empty())
-        std::cout << sB << "\n";
+        std::cout << str(sB) << "\n";
     else
         std::cout << "[\"" << sBx << "\", \"" << sBy << "\", \"" << sBz << "\"]\n";
     std::cout << "spin_transfer_torque:\n";
