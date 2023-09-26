@@ -18,6 +18,9 @@ class VectorParser
     {
 public:
     VectorParser();
+    VectorParser(const VectorParser &) = delete;
+    VectorParser &operator=(const VectorParser &) = delete;
+    ~VectorParser();
 
     /**
      * Use the provided JavaScript function expression for subsequent computations of vectors. The

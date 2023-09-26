@@ -18,6 +18,8 @@ VectorParser::VectorParser()
     duk_pop(ctx);  // drop the result of the evaluation
     }
 
+VectorParser::~VectorParser() { duk_destroy_heap(ctx); }
+
 void VectorParser::die_if_error(duk_int_t err) const
     {
     if (err == DUK_ERR_NONE) return;
