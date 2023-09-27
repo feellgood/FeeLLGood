@@ -166,13 +166,9 @@ class element
         /** vector of nodes */
         const std::vector<Nodes::Node> &refNode;
 
-    /** zeroBasing : index convention Matlab/msh (one based) -> C++ (zero based) */
+        /** zeroBasing: index convention Matlab/msh (one based) -> C++ (zero based) */
         inline void zeroBasing(void)
-            {// par_unseq to benefit of parallelization and vectorization (SSE|AVX)
-            std::for_each(std::execution::par_unseq, ind.begin(), ind.end(),
-                          [](int &idx) { --idx; });
-            }
-
+            { for(int i=0;i<N;i++) {ind[i]--;} }
     
     private:
         /** a method to orientate the element must be provided in derived class */
