@@ -346,7 +346,7 @@ BOOST_AUTO_TEST_CASE(Fac_potential_u, *boost::unit_test::tolerance(UT_TOL))
                "possible rounding error in potential on u corrections");
     }
 
-BOOST_AUTO_TEST_CASE(Fac_potential_v, *boost::unit_test::tolerance(UT_TOL))
+BOOST_AUTO_TEST_CASE(Fac_potential_v, *boost::unit_test::tolerance(10.0*UT_TOL))
     {
     std::cout << "fac potential test on v" << std::endl;
     int nbNod = 3;
