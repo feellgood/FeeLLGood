@@ -5,10 +5,27 @@
 #include "expression_parser.h"
 #include <iostream>
 
+/* Seed the JavaScript interpreter with some useful math functions. */
+static const char js_library[] = R"--(
 /* Copy all the contents of the Math object (sqrt, sin, log, PI...) to the global object. */
-static const char js_library[] = "Object.getOwnPropertyNames(Math).forEach("
-                                 "    function(name) { globalThis[name] = Math[name]; }"
-                                 ");";
+Object.getOwnPropertyNames(Math).forEach(
+    function(name) { globalThis[name] = Math[name]; }
+);
+
+/* Shifted exp() and log(). */
+function expm1(x) { return abs(x)<2e-8 ? x : exp(x) - 1; }
+function log1p(x) { return abs(x)<2e-8 ? x : log(1 + x); }
+
+/* Hyperbolic functions. */
+function cosh(x) { return exp(x - LN2) + exp(-x - LN2); }
+function sinh(x) { return abs(x)<1e-5 ? x : exp(x - LN2) - exp(-x - LN2); }
+function tanh(x) { return abs(x)>20 ? sign(x) : expm1(2*x)/(exp(2*x) + 1); }
+
+/* Inverse hyperbolic functions. */
+function acosh(x) { return x>1e8 ? log(x) + LN2 : log(x + sqrt(x*x - 1)); }
+function asinh(x) { return abs(x)<1e-5 ? x : sign(x) * (log(abs(x)/2 + hypot(1, x)/2) + LN2); }
+function atanh(x) { return abs(x)<1e-5 ? x : log((1 + x)/(1 - x)) / 2; }
+)--";
 
 VectorParser::VectorParser()
     {
