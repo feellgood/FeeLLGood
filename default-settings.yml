@@ -55,7 +55,9 @@ outputs:
   # - <dMy/dt>: average change rate of My
   # - <dMz/dt>: average change rate of Mz
   # - E_aniso: anisotropy energy
-  # - DW_z: domain wall position along z
+  # - Hx: applied field along x
+  # - Hy: applied field along y
+  # - Hz: applied field along z
   evol_columns:
     - t         # time
     - <Mx>      # Average value of Mx
