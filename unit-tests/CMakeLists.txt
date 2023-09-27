@@ -56,7 +56,6 @@ target_link_libraries(test_ut_solver
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-  TBB::tbb
   Eigen3::Eigen
   OpenMP::OpenMP_CXX
   )
