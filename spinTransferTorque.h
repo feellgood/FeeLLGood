@@ -11,13 +11,24 @@
 
 struct STT
     {
-    double beta;  /**< \f$ \beta \f$ is polarization rate of the current */
-    double N0;    /**< density of states at Fermi level, units : J^-1 nm^-3  */
-    double sigma; /**< Conductivity Ohm^-1 nm^-1 */
-    double lJ;    /**< length */
-    double lsf;   /**< spin flip length */
-    bool V_file;  /**< if true a text file V.sol is generated. It contains the solution of the
+    /** \f$ \beta \f$ is polarization rate of the current */
+    double beta;
+
+    /** density of states at Fermi level, units : J^-1 nm^-3  */
+    double N0;
+
+    /** Conductivity Ohm^-1 nm^-1 */
+    double sigma;
+
+    /** length */
+    double lJ;
+
+    /** spin flip length */
+    double lsf;
+
+    /** if true a text file V.sol is generated. It contains the solution of the
                      electrostatic problem on the nodes of the mesh */
+    bool V_file;
 
     /** boundary conditions, stored as a vector of pairs.
     First element of the pair is the surface region name given in the mesh by its physical name;

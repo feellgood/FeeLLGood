@@ -331,6 +331,7 @@ void Settings::read(YAML::Node yaml)
                 p.p_STT.sigma = 1.0;
                 p.p_STT.lJ = 1.0;
                 p.p_STT.lsf = 1.0;
+                p.p_STT.V_file = false;
 
                 paramTetra.push_back(p);
                 }
