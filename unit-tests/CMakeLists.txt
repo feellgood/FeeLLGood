@@ -25,6 +25,8 @@ add_executable (test_ut_pt3D ut_pt3D.cpp)
 
 add_executable (test_ut_solver ut_solver.cpp)
 
+add_executable (test_ut_OMP_solver ut_OMP_solver.cpp)
+
 add_executable (test_ut_node ut_node.cpp)
 
 SET(SOURCES ../facette.cpp ../tetra.cpp ut_element.cpp)
@@ -53,6 +55,13 @@ target_link_libraries(test_ut_pt3D
   )
 
 target_link_libraries(test_ut_solver
+  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY}
+  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  Eigen3::Eigen
+  )
+
+target_link_libraries(test_ut_OMP_solver
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
@@ -113,6 +122,7 @@ target_link_libraries(test_ut_log-stats
 
 add_test (NAME ut_pt3D_arithmetic COMMAND test_ut_pt3D)
 add_test (NAME ut_solver COMMAND test_ut_solver)
+add_test (NAME ut_OMP_solver COMMAND test_ut_OMP_solver)
 add_test (NAME ut_node COMMAND test_ut_node)
 add_test (NAME ut_element COMMAND test_ut_element)
 add_test (NAME ut_facette COMMAND test_ut_facette)
