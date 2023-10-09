@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors
 
 from feellgood.core import mesh
+from math import *
 
 def get_params():
     import argparse
@@ -22,6 +23,7 @@ def get_params():
     parser.add_argument('solFileName', help='.sol file name to render')
     parser.add_argument('-P', '--percent', default=100, help='Percentage of the field vectors rendered')
     parser.add_argument('-q', '--qlength', default=1.0, help='quiver length')
+    parser.add_argument('-f','--filter',default="empty_pred", help='predicate: an expression with x,y,z,mx,my,mz returning a boolean')
     args = parser.parse_args()
     
     return args
@@ -33,6 +35,8 @@ def main():
     perc = float(my_args.percent)
     q_l = float(my_args.qlength)
 
+    if (my_args.filter != "empty_pred"):
+        predicate = "(lambda x,y,z,mx,my,mz: " + my_args.filter + ")"    
     path, ext = os.path.splitext(meshFileName)
     ext = ext.lower()
     if ext != '.msh':
@@ -47,12 +51,25 @@ def main():
     s_val = int(100.0/perc)
     pos = msh.Nodes[::s_val] 
     vec = my_data[::s_val]
-
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
     
-    graph = ax.quiver(pos[:,0], pos[:,1], pos[:,2], vec[:,0], vec[:,1], vec[:,2], length=q_l, cmap='rainbow', pivot='middle', normalize=True)
+    if (my_args.filter == "empty_pred"):
+        graph = ax.quiver(pos[:,0], pos[:,1], pos[:,2], vec[:,0], vec[:,1], vec[:,2], length=q_l, cmap='rainbow', pivot='middle', normalize=True)
     #ax.scatter(pos[:,0], pos[:,1], pos[:,2],color='b',s=5)
+    else:
+        f_pos = []
+        for i in range(len(pos)):
+            x,y,z = pos[i,0],pos[i,1],pos[i,2] 
+            mx,my,mz = vec[i,0],vec[i,1],vec[i,2]
+            if eval(predicate)(x,y,z,mx,my,mz):
+                f_pos.append(i)
+        X = np.empty([len(f_pos),6],dtype=float)
+        for i in range(len(f_pos)):
+            for j in range(3):
+                X[i,j] = pos[f_pos[i],j]
+                X[i,3+j] = vec[f_pos[i],j]
+        graph = ax.quiver(X[:,0], X[:,1], X[:,2], X[:,3], X[:,4], X[:,5], length=q_l, cmap='rainbow', pivot='middle', normalize=True)
     ax.axis('equal')
     ax.set_title("Magnetization")
     ax.set_xlabel("x")
