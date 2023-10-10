@@ -56,7 +56,6 @@ def main():
     
     if (my_args.filter == "empty_pred"):
         graph = ax.quiver(pos[:,0], pos[:,1], pos[:,2], vec[:,0], vec[:,1], vec[:,2], length=q_l, cmap='rainbow', pivot='middle', normalize=True)
-    #ax.scatter(pos[:,0], pos[:,1], pos[:,2],color='b',s=5)
     else:
         f_pos = []
         for i in range(len(pos)):
@@ -70,7 +69,7 @@ def main():
                 X[i,j] = pos[f_pos[i],j]
                 X[i,3+j] = vec[f_pos[i],j]
         graph = ax.quiver(X[:,0], X[:,1], X[:,2], X[:,3], X[:,4], X[:,5], length=q_l, cmap='rainbow', pivot='middle', normalize=True)
-    ax.axis('equal')
+    ax.set_box_aspect([1.0,1.0,1.0])
     ax.set_title("Magnetization")
     ax.set_xlabel("x")
     ax.set_ylabel("y")
