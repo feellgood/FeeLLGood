@@ -24,19 +24,65 @@ def get_params():
     parser.add_argument('-P', '--percent', default=100, help='Percentage of the field vectors rendered')
     parser.add_argument('-q', '--qlength', default=1.0, help='quiver length')
     parser.add_argument('-f','--filter',default="empty_pred", help='predicate: an expression with x,y,z,mx,my,mz returning a boolean')
+    parser.add_argument('-s','--subspace',default= "",help='2D quiver plot of x,y,z,mx,my,mz read from input files, user has to provide four indices, exampl 0 1 3 4 to plot on positions (x,y) the set of quivers(mx,my) ')
     args = parser.parse_args()
-    
     return args
+
+def filtering(_pos,_vec,str_pred,perc):
+    if (str_pred != "empty_pred"):
+        _pred = "(lambda x,y,z,mx,my,mz: " + str_pred + ")"
+        f_pos = []
+        for i in range(len(_pos)):
+            x,y,z = _pos[i,0],_pos[i,1],_pos[i,2] 
+            mx,my,mz = _vec[i,0],_vec[i,1],_vec[i,2]
+            if eval(_pred)(x,y,z,mx,my,mz):
+                f_pos.append(i)
+            _X = np.empty([len(f_pos),6],dtype=float)
+            for i in range(len(f_pos)):
+                for j in range(3):
+                    _X[i,j] = _pos[f_pos[i],j]
+                    _X[i,3+j] = _vec[f_pos[i],j]
+    else:
+        _X = np.vstack((_pos[:,0],_pos[:,1],_pos[:,2],_vec[:,0],_vec[:,1],_vec[:,2]))
+    nb_pts = _X.shape[1]
+    s = int(100.0/perc)
+    return _X[:,range(0,nb_pts,s)]
+
+def plot2D(fig,X,idx):
+    ax = fig.add_subplot()
+    q = ax.quiver(X[idx[0]], X[idx[1]], X[idx[2]], X[idx[3]],pivot='middle',color='blue')
+    ax.set_title("Magnetization subspace")
+    Xmin = X[idx[0]].min()
+    Xmax = X[idx[0]].max()
+    Ymin = X[idx[1]].min()
+    Ymax = X[idx[1]].max()
+    big_length = max(Ymax - Ymin, Xmax - Xmin)
+    
+    ax.set_xlim(0.5*(Xmin+Xmax) - big_length, 0.5*(Xmin+Xmax) + big_length)
+    ax.set_ylim(0.5*(Ymin+Ymax) - big_length, 0.5*(Ymin+Ymax) + big_length)
+    ax.set_box_aspect(1)
+
+def plot3D(fig,X,q_l):
+    ax = fig.add_subplot(projection='3d')
+    graph = ax.quiver(X[0], X[1], X[2], X[3], X[4], X[5], length=q_l, cmap='rainbow', pivot='middle', normalize=True)
+    ax.set_box_aspect([1.0,1.0,1.0])
+    ax.set_title("Magnetization")
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_zlabel("z")
+    #graph.set_array(X[:,2])
+    #cbar = fig.colorbar(graph,orientation='vertical')#'horizontal')
+    #cbar.set_label("Mz")
 
 def main():
     my_args = get_params()
     meshFileName = my_args.meshFileName
     solFileName = my_args.solFileName
     perc = float(my_args.percent)
+    if (perc <= 0.0) or (perc > 100):
+        print("error: -P percentage must be in ]0;100]")
+        sys.exit(1)
     q_l = float(my_args.qlength)
-
-    if (my_args.filter != "empty_pred"):
-        predicate = "(lambda x,y,z,mx,my,mz: " + my_args.filter + ")"    
     path, ext = os.path.splitext(meshFileName)
     ext = ext.lower()
     if ext != '.msh':
@@ -47,36 +93,23 @@ def main():
         my_data = np.genfromtxt(f,delimiter='\t',comments='#',dtype=np.float64, usecols=(1,2,3))
 
     msh = mesh(meshFileName)
-#slice : every s_val points to be viewed
-    s_val = int(100.0/perc)
-    pos = msh.Nodes[::s_val] 
-    vec = my_data[::s_val]
-    fig = plt.figure()
-    ax = fig.add_subplot(projection='3d')
+    pos = msh.Nodes
+    vec = my_data
+    X = filtering(pos,vec,my_args.filter,perc)
     
-    if (my_args.filter == "empty_pred"):
-        graph = ax.quiver(pos[:,0], pos[:,1], pos[:,2], vec[:,0], vec[:,1], vec[:,2], length=q_l, cmap='rainbow', pivot='middle', normalize=True)
+    fig = plt.figure()
+    if (my_args.subspace != ""):
+        str_idx = my_args.subspace.split(" ")
+        if len(str_idx) != 4:
+            print("error, --subspace option expects 4 indices")
+        else:
+            idx = []
+            for i in str_idx:
+                idx.append(int(i))
+            plot2D(fig,X,idx)
     else:
-        f_pos = []
-        for i in range(len(pos)):
-            x,y,z = pos[i,0],pos[i,1],pos[i,2] 
-            mx,my,mz = vec[i,0],vec[i,1],vec[i,2]
-            if eval(predicate)(x,y,z,mx,my,mz):
-                f_pos.append(i)
-        X = np.empty([len(f_pos),6],dtype=float)
-        for i in range(len(f_pos)):
-            for j in range(3):
-                X[i,j] = pos[f_pos[i],j]
-                X[i,3+j] = vec[f_pos[i],j]
-        graph = ax.quiver(X[:,0], X[:,1], X[:,2], X[:,3], X[:,4], X[:,5], length=q_l, cmap='rainbow', pivot='middle', normalize=True)
-    ax.set_box_aspect([1.0,1.0,1.0])
-    ax.set_title("Magnetization")
-    ax.set_xlabel("x")
-    ax.set_ylabel("y")
-    ax.set_zlabel("z")
-    graph.set_array(vec[:,2])
-    cbar = fig.colorbar(graph,orientation='vertical')#'horizontal')
-    cbar.set_label("Mz")
+        plot3D(fig,X,q_l)
+    #plt.autoscale(enable=True,axis='both')
     plt.show()
 
 if __name__ == "__main__":
