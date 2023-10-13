@@ -4,9 +4,12 @@ import vtk
 #from vtk.numpy_interface import dataset_adapter as dsa
 import sys
 import os
-import numpy as np
 import re
-from feellgood.core import mesh
+try:
+    from feellgood.core import mesh
+except:
+    # feellgood core is not installed, try to load core module from local directory
+    from core import mesh
 
 class data(object):
     def __init__(self,fileName,list_idx):
