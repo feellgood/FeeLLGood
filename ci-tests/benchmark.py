@@ -20,7 +20,7 @@ def makeSettings(mesh, surface_name, volume_name, nbThreads):
             },
         "mesh": {
             "filename": mesh,
-            "length_unit": 1e-9,
+            "length_unit": 1e-9, # we use nanometers
             "volume_regions": { volume_name: {} },
             "surface_regions": { surface_name: {} }
         },
@@ -41,29 +41,34 @@ def task2test(settings):
     val = subprocess.run(["../feellgood", "--seed", "2", "-"], input=json.dumps(settings), text=True)
     return val
 
-
-if __name__ == '__main__':
-    os.chdir(sys.path[0])
-    MaxNbThreads = int(subprocess.check_output(["getconf","_NPROCESSORS_ONLN"]))
+def bench(outputFileName,elt_sizes,listNbThreads):
     meshFileName = "cylinder.msh"
     surface_name = "surface"
     volume_name = "volume"
-    height = 32          # we use nanometers
-    radius = height / 2  # so diameter = heigh
-    elt_sizes = {2.5,3.0,3.5,4.0}
-    
-    with open('benchmark.txt','w') as f:
+    height = 32
+    radius = 3.0 * height
+    with open(outputFileName,'w') as f:
         for elt_size in elt_sizes:
             f.write(str(elt_size)+'\t')
             mesh = Cylinder(radius, height, elt_size, surface_name, volume_name)
             mesh.make(meshFileName)    
-            for nbThreads in range(MaxNbThreads//2):
-                settings = makeSettings(meshFileName,surface_name,volume_name,1+nbThreads)
+            for nbThreads in listNbThreads:
+                global settings
+                settings = makeSettings(meshFileName,surface_name,volume_name,nbThreads)
                 t = timeit.timeit("task2test(settings)", setup="from __main__ import task2test,settings",number=1)
-                if nbThreads == (MaxNbThreads//2 - 1):
+                if nbThreads == listNbThreads[-1]:
                     f.write(str(t)+'\n')
                 else:
                     f.write(str(t)+'\t')
         f.close()
+
+if __name__ == '__main__':
+    os.chdir(sys.path[0])
+    MaxNbThreads = int(subprocess.check_output(["getconf","_NPROCESSORS_ONLN"]))
+    
+    elt_sizes = [2.5,3.0,3.5,4.0]
+    listNbThreads = [1,2,4,8,16,32,64]
+    bench('benchmark.txt',elt_sizes,listNbThreads)
+    
 
 
