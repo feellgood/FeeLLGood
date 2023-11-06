@@ -6,6 +6,7 @@ import json
 import subprocess
 import timeit
 
+from math import log2,floor
 from feellgood.meshMaker import Cylinder
 
 def makeSettings(mesh, surface_name, volume_name, nbThreads):
@@ -59,9 +60,32 @@ def bench(outputFileName, elt_sizes, listNbThreads):
                     f.write(str(t) + '\t')
         f.close()
 
-if __name__ == '__main__':
-    os.chdir(sys.path[0])
+def get_params(default_elt_sizes, default_listNbThreads):
+    import argparse
+    description = 'feellgood benchmark'
+    epilogue = '''
+    runs several feellgood simulations varying meshSize of a cylinder and thread numbers 
+    '''
+    parser = argparse.ArgumentParser(description=description, epilog=epilogue,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('-s','--sizes',metavar='elt_sizes',type=float,nargs='+',
+                        help='table of mesh sizes', default=default_elt_sizes)
+    parser.add_argument('-n','--nbThreads',metavar='listNbThreads',type=int,nargs='+',
+                        help='table of number of threads', default=default_listNbThreads)
+    parser.add_argument('--version',action='version',version= __version__,help='show the version number')
+    args = parser.parse_args()
+    return args.sizes, args.nbThreads
 
-    elt_sizes = [2.5, 3.0, 3.5, 4.0]
-    listNbThreads = [1, 2, 4, 8, 16, 32, 64]
+__version__ = '1.0.0'
+if __name__ == '__main__':
+    default_elt_sizes = [4.0, 3.5, 3.0, 2.5]
+    result = subprocess.run(["nproc"],text=True,capture_output=True)
+    maxNbThreads = 2**floor(log2(int(result.stdout)))
+    nb = 2*maxNbThreads
+    default_listNbThreads = []
+    while nb >= (maxNbThreads//4):
+        default_listNbThreads.append(nb)
+        nb = nb // 2
+    elt_sizes, listNbThreads = get_params(default_elt_sizes, default_listNbThreads)
+    os.chdir(sys.path[0])
     bench('benchmark.txt', elt_sizes, listNbThreads)
