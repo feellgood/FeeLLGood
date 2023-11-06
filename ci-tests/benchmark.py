@@ -52,8 +52,7 @@ def bench(outputFileName, elt_sizes, listNbThreads):
             mesh.make(meshFileName)
             for nbThreads in listNbThreads:
                 settings = makeSettings(meshFileName, surface_name, volume_name, nbThreads)
-                t = timeit.timeit("task2test(settings)",
-                    setup="from __main__ import task2test, settings", number=1)
+                t = timeit.timeit(lambda: task2test(settings), number=1)
                 if nbThreads == listNbThreads[-1]:
                     f.write(str(t) + '\n')
                 else:
