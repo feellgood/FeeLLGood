@@ -10,6 +10,7 @@ from math import log2,floor
 from feellgood.meshMaker import Cylinder
 
 def makeSettings(mesh, surface_name, volume_name, nbThreads, final_time):
+    """ returns a dictionary of settings for feellgood input """
     settings = {
         "outputs": {
             "file_basename": "benchmark",
@@ -36,11 +37,15 @@ def makeSettings(mesh, surface_name, volume_name, nbThreads, final_time):
     return settings
 
 def task2test(settings):
-    """ feellgood runs in a subprocess with seed=2 """
+    """ elementary task to benchmark. feellgood executable runs in a subprocess with seed=2 for being deterministic """
     val = subprocess.run(["../feellgood", "--seed", "2", "-"], input=json.dumps(settings), text=True)
     return val
 
 def bench(outputFileName, elt_sizes, listNbThreads, final_time):
+    """
+    loop over mesh size and nb threads for benchmarking feellgood executable,
+    mesh is a cylinder of fixed geometry, varying mesh size
+    """
     meshFileName = "cylinder.msh"
     surface_name = "surface"
     volume_name = "volume"
@@ -61,6 +66,7 @@ def bench(outputFileName, elt_sizes, listNbThreads, final_time):
         f.close()
 
 def get_params(default_elt_sizes, default_listNbThreads, default_final_time):
+    """ command line parser """
     import argparse
     description = 'feellgood benchmark'
     epilogue = '''
