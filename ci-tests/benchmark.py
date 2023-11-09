@@ -36,6 +36,16 @@ def makeSettings(mesh, surface_name, volume_name, nbThreads, final_time):
     }
     return settings
 
+def makeListNbThreads():
+    result = subprocess.run(["nproc"],text=True,capture_output=True)
+    maxNbThreads = 2**floor(log2(int(result.stdout)))
+    nb = 2*maxNbThreads
+    listNbThreads = []
+    while nb >= (maxNbThreads//4):
+        listNbThreads.append(nb)
+        nb = nb // 2
+    return listNbThreads
+
 def task2test(settings):
     """ elementary task to benchmark. feellgood executable runs in a subprocess with seed=2 for being deterministic """
     val = subprocess.run(["../feellgood", "--seed", "2", "-"], input=json.dumps(settings), text=True)
@@ -81,20 +91,23 @@ def get_params(default_elt_sizes, default_listNbThreads, default_final_time):
     parser.add_argument('-t','--final_time',type=float,help='final physical simulation time in s',
                         default=default_final_time)
     parser.add_argument('--version',action='version',version= __version__,help='show the version number')
-    args = parser.parse_args()
-    return args.sizes, args.nbThreads, args.final_time
+    parser.add_argument('-f','--fast',help='fast benchmarking',action="store_true")
+    return parser.parse_args()
 
 __version__ = '1.0.0'
 if __name__ == '__main__':
     default_final_time = 2e-11
     default_elt_sizes = [4.0, 3.5, 3.0, 2.5]
-    result = subprocess.run(["nproc"],text=True,capture_output=True)
-    maxNbThreads = 2**floor(log2(int(result.stdout)))
-    nb = 2*maxNbThreads
-    default_listNbThreads = []
-    while nb >= (maxNbThreads//4):
-        default_listNbThreads.append(nb)
-        nb = nb // 2
-    elt_sizes, listNbThreads, final_time = get_params(default_elt_sizes, default_listNbThreads, default_final_time)
+    default_listNbThreads = makeListNbThreads()
+    args = get_params(default_elt_sizes, default_listNbThreads, default_final_time)
+    if args.fast:
+        args.final_time = 3e-12
+        args.sizes = [4.0]
+        try:
+            nb = default_listNbThreads[2]
+        except:
+            nb = 2
+        args.nbThreads = [nb]
+        print("fast benchmark with",args.nbThreads,"threads")
     os.chdir(sys.path[0])
-    bench('benchmark.txt', elt_sizes, listNbThreads, final_time)
+    bench('benchmark.txt', args.sizes, args.nbThreads, args.final_time)
