@@ -5,6 +5,7 @@ import sys
 import json
 import subprocess
 import timeit
+from gmsh import __version__ as gmshVersion
 
 from math import log2,floor
 from feellgood.meshMaker import Cylinder
@@ -109,5 +110,7 @@ if __name__ == '__main__':
             nb = 2
         args.nbThreads = [nb]
         print("fast benchmark with",args.nbThreads,"threads")
+    else:
+        print("full benchmark version "+ __version__,"using gmsh", gmshVersion)
     os.chdir(sys.path[0])
     bench('benchmark.txt', args.sizes, args.nbThreads, args.final_time)
