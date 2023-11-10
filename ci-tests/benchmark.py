@@ -6,7 +6,6 @@ import json
 import subprocess
 import timeit
 from gmsh import __version__ as gmshVersion
-
 from math import log2,floor
 from feellgood.meshMaker import Cylinder
 
@@ -113,4 +112,9 @@ if __name__ == '__main__':
     else:
         print("full benchmark version "+ __version__,"using gmsh", gmshVersion)
     os.chdir(sys.path[0])
-    bench('benchmark.txt', args.sizes, args.nbThreads, args.final_time)
+
+    try:
+        bench('benchmark.txt', args.sizes, args.nbThreads, args.final_time)
+    except KeyboardInterrupt:
+        print(" benchmark interrupted")
+        sys.exit()
