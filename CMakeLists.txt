@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.13)
 PROJECT(FEELLGOOD)
 
 ENABLE_LANGUAGE(CXX)
@@ -7,12 +7,26 @@ MESSAGE(STATUS "CXX ${CMAKE_CXX_COMPILER_ID}")
 
 find_package(OpenMP REQUIRED)
 
+
+# does not work, but should have been equivalent to command-line option of `-DCMAKE_PREFIX_PATH=...`
+#list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+#message(STATUS "${CMAKE_MODULE_PATH}")
+
+set(TBB_DIR "/opt/intel/oneapi/tbb/latest/lib/cmake/tbb")
+
 find_package(TBB REQUIRED)
 if(TBB_FOUND)
     message(STATUS "TBB Found")
 else()
     message(FATAL_ERROR "TBB NOT FOUND")
 endif()
+
+set(MKL_DIR "/opt/intel/oneapi/mkl/latest/lib/cmake/mkl")
+
+set(MKL_THREADING gnu_thread) # instead of default value intel_thread that might be the reason why OMP_LIBRARY-NOTFOUND
+set(MKL_INTERFACE lp64) # from eigen3 official doc, we need that to get eigen work with intel mkl
+find_package(MKL REQUIRED)#CONFIG REQUIRED)
+message(STATUS "${MKL_IMPORTED_TARGETS}") #Provides available list of targets based on input
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
@@ -45,10 +59,9 @@ if(${ENABLE_LTO})
     check_ipo_supported()
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
-
+#
 set(CMAKE_CXX_FLAGS
-    "-DNDEBUG -DTBB_SUPPRESS_DEPRECATED_MESSAGES \
-    -Wall -Wextra -std=c++17 -O3 -march=native"
+    "-DNDEBUG -DTBB_SUPPRESS_DEPRECATED_MESSAGES -DEIGEN_USE_MKL_ALL -Wall -Wextra -std=c++17 -O3 -march=native"
     CACHE STRING "C++ compiler flags used during builds." FORCE)
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
@@ -72,7 +85,7 @@ add_custom_command(
 
 ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES} default-settings.o)
 
-TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm duktape ANN OpenMP::OpenMP_CXX TBB::tbb Eigen3::Eigen)
+TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm duktape ANN OpenMP::OpenMP_CXX TBB::tbb MKL::MKL Eigen3::Eigen) 
 
 #===========================================================================
 # Find where to install the Python modules.
