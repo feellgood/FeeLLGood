@@ -24,11 +24,11 @@ set(MKL_INTERFACE lp64) # from eigen3 official doc, we need that to get eigen wo
 
 # Alternative to find_package(MKL REQUIRED)
 execute_process(
-    COMMAND pkg-config --cflags mkl-dynamic-lp64-iomp
+    COMMAND pkg-config --cflags mkl-dynamic-lp64-iomp tbb
     OUTPUT_VARIABLE MKL_CFLAGS OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 execute_process(
-    COMMAND pkg-config --libs mkl-dynamic-lp64-iomp
+    COMMAND pkg-config --libs mkl-dynamic-lp64-iomp tbb
     OUTPUT_VARIABLE MKL_LIBS OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
