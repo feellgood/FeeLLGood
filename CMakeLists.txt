@@ -7,11 +7,6 @@ MESSAGE(STATUS "CXX ${CMAKE_CXX_COMPILER_ID}")
 
 find_package(OpenMP REQUIRED)
 
-
-# does not work, but should have been equivalent to command-line option of `-DCMAKE_PREFIX_PATH=...`
-#list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-#message(STATUS "${CMAKE_MODULE_PATH}")
-
 find_package(TBB REQUIRED)
 if(TBB_FOUND)
     message(STATUS "TBB Found")
@@ -19,18 +14,18 @@ else()
     message(FATAL_ERROR "TBB NOT FOUND")
 endif()
 
-set(MKL_THREADING gnu_thread) # instead of default value intel_thread that might be the reason why OMP_LIBRARY-NOTFOUND
-set(MKL_INTERFACE lp64) # from eigen3 official doc, we need that to get eigen work with intel mkl
+find_package(PkgConfig REQUIRED)
 
-# Alternative to find_package(MKL REQUIRED)
-execute_process(
-    COMMAND pkg-config --cflags mkl-dynamic-lp64-iomp tbb
-    OUTPUT_VARIABLE MKL_CFLAGS OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-execute_process(
-    COMMAND pkg-config --libs mkl-dynamic-lp64-iomp tbb
-    OUTPUT_VARIABLE MKL_LIBS OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+pkg_check_modules(MKL QUIET mkl-dynamic-lp64-iomp)
+if(MKL_FOUND)
+    message(STATUS "MKL Found")
+    message(STATUS "MKL compile options =" ${MKL_CFLAGS})
+    message(STATUS "MKL LD flags =" ${MKL_LDFLAGS})
+    set(EIGEN_MKL_CFLAGS "-DEIGEN_USE_MKL_ALL")
+    set(MKL_INTERFACE lp64) # from eigen3 documentation, we need that to get eigen work with intel mkl
+else()
+    message(STATUS "MKL not found")
+endif()
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
@@ -65,10 +60,10 @@ if(${ENABLE_LTO})
 endif()
 #
 set(CMAKE_CXX_FLAGS
-    "-DNDEBUG -DTBB_SUPPRESS_DEPRECATED_MESSAGES -DEIGEN_USE_MKL_ALL -Wall -Wextra -std=c++17 -O3 -march=native ${MKL_CFLAGS}"
+    "-DNDEBUG -DTBB_SUPPRESS_DEPRECATED_MESSAGES -Wall -Wextra -std=c++17 -O3 -march=native ${EIGEN_MKL_CFLAGS} ${MKL_CFLAGS}"
     CACHE STRING "C++ compiler flags used during builds." FORCE)
 
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${MKL_LIBS} -fopenmp")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${MKL_LD_FLAGS} -fopenmp")
 
 SET(HEADERS config.h vecND.h pt3D.h node.h expression_parser.h mesh.h electrostatSolver.h
     spinTransferTorque.h time_integration.h feellgoodSettings.h tetra.h
