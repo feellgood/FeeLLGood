@@ -15,6 +15,16 @@ The code is being modified without any warranty it works. A dedicated website ca
 * [ScalFMM][] revision [22b9e4f6cf][ScalFMM-rev] (it should also work with V1.5.1)
 * [Eigen][] ≥ 3.3
 
+### License
+
+Copyright (C) 2012-2023  Jean-Christophe Toussaint, with contributions by F. Alouges, D. Gusakova, S. Jamet, M. Struma, C. Thirion and E. Bonet.
+
+FeeLLGood is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+The libraries used by feeLLGood are distributed under different licenses, and this is documented in their respective Web sites.
+
 [here]: https://feellgood.neel.cnrs.fr/
 [TBB]: https://www.threadingbuildingblocks.org/
 [yaml-cpp]: https://github.com/jbeder/yaml-cpp
