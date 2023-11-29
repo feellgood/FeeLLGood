@@ -56,7 +56,11 @@ if [ "$ID" = "rocky" ]; then
     fi
     sudo dnf install -y $packages
 else  # Debian-like OS
-    packages="$packages g++ libeigen3-dev libtbb-dev libyaml-cpp-dev duktape-dev"
+    if [ "$ID" = "debian" ]; then  # needed for libmkl-dev on Debian
+        sudo apt-get install -y software-properties-common
+        sudo apt-add-repository -y non-free
+    fi
+    packages="$packages g++ libeigen3-dev libmkl-dev libtbb-dev libyaml-cpp-dev duktape-dev"
     sudo apt-get update -q
     if [ "$unit_tests" = "true" ]; then
         packages="$packages libboost-system-dev libboost-filesystem-dev libboost-test-dev"
@@ -64,7 +68,7 @@ else  # Debian-like OS
     if [ "$doxygen" = "true" ]; then
         packages="$packages doxygen graphviz"
     fi
-    sudo apt-get install -y $packages
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y $packages
 fi
 
 # Download and build the libraries here.
