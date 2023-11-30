@@ -18,9 +18,11 @@ class element
     /** constructor */
     public:
     element(const std::vector<Nodes::Node> &_p_node /**< vector of nodes */,
-            const int _idx /**< index to params */) : idxPrm(_idx), refNode(_p_node)
+            const int _idx /**< index to params */,
+            std::initializer_list<int> & _i /**< indices to the nodes */
+            ) : idxPrm(_idx), refNode(_p_node)
         {
-        ind.resize(N);
+        ind.assign(_i);
         }
 
     /** indices to the nodes */
@@ -34,12 +36,6 @@ class element
 
     /** vector for integrales */
     double Lp[2*N];
-
-    /** index setter */
-    inline void set_ind(std::initializer_list<int> & _i)
-        {
-        ind.assign(_i.begin(),_i.end());
-        }
 
     /** getter for N */
     inline constexpr int getN(void) const { return N; }

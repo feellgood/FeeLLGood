@@ -67,10 +67,8 @@ public:
                const int _NOD /**< [in] nb nodes */,
                const int _idx /**< [in] region index in region vector */,
                std::initializer_list<int> _i /**< [in] node index */)
-        : element<N,NPI>(_p_node,_idx)
+        : element<N,NPI>(_p_node,_idx,_i)
         {
-        set_ind(_i);
-
         if (_NOD > 0)
             {
             zeroBasing();

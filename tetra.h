@@ -126,9 +126,8 @@ public:
     inline Tet(const std::vector<Nodes::Node> &_p_node /**< vector of nodes */,
                const int _idx /**< [in] region index in region vector */,
                std::initializer_list<int> _i /**< [in] node index */)
-        : element<N,NPI>(_p_node,_idx), idx(0)
+        : element<N,NPI>(_p_node,_idx,_i), idx(0)
         {
-        set_ind(_i);
         zeroBasing();
 
         if (refNode.size() > 0)
