@@ -17,7 +17,8 @@ class element
     {
     /** constructor */
     public:
-    element(const std::vector<Nodes::Node> &_p_node /**< vector of nodes */, const int _idx) : idxPrm(_idx), refNode(_p_node)
+    element(const std::vector<Nodes::Node> &_p_node /**< vector of nodes */,
+            const int _idx /**< index to params */) : idxPrm(_idx), refNode(_p_node)
         {
         ind.resize(N);
         }
@@ -25,7 +26,7 @@ class element
     /** indices to the nodes */
     std::vector<int> ind;
     
-     /** index of the material parameters of the element */
+    /** index of the material parameters of the element */
     int idxPrm;
     
     /** matrix for integrales */
