@@ -58,15 +58,13 @@ class element
 
         if (node_i == (j % N))
             {
-            const Nodes::Node &n = refNode[ind[node_i]];
-
             if (i < N)
                 {
-                val = n.ep(j / N);
+                val = refNode[ind[node_i]].ep(j / N);
                 }
             else
                 {
-                val = n.eq(j / N);
+                val = refNode[ind[node_i]].eq(j / N);
                 }
             }
         return val;
@@ -80,9 +78,7 @@ class element
             Lp[i] = 0;
             for (int k = 0; k < N; k++)
                 {
-                Lp[i] += Pcoeff(i,k) * B[k].x()
-                       + Pcoeff(i,N + k) * B[k].y()
-                       + Pcoeff(i,2*N + k) * B[k].z();
+                Lp[i] += Pt::pt3D(Pcoeff(i,k), Pcoeff(i,N + k), Pcoeff(i,2*N + k)).pScal(B[k]);
                 }
             }
         }
