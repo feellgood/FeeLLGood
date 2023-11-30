@@ -62,13 +62,6 @@ be degenerated
 class Fac : public element<N,NPI>
     {
 public:
-    /** constructor for some unit tests */
-    inline Fac(const std::vector<Nodes::Node> &_p_node /**< [in] vector of nodes */)
-        : element<N,NPI>(_p_node,0)
-        {
-        indicesToZero();
-        }
-
     /** constructor used by readMesh */
     inline Fac(const std::vector<Nodes::Node> &_p_node /**< [in] vector of nodes */,
                const int _NOD /**< [in] nb nodes */,

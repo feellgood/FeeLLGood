@@ -41,9 +41,9 @@ BOOST_AUTO_TEST_CASE(Fac_operator_infto)
     std::uniform_int_distribution<int> distrib;
 
     std::vector<Nodes::Node> node;
-    Facette::Fac f(node);
+    Facette::Fac f(node, 0, 0, {0,0,0});
     bool test_result = !(f < f);  // whatever is f, f<f must return false
-    std::cout<<" should be true: " << test_result << std::endl; 
+    std::cout<<" !(facette < facette): " << test_result << std::endl;
 
     for (int i = 0; i < 100; i++)
         {
