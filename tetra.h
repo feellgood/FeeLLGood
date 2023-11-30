@@ -126,7 +126,7 @@ public:
     inline Tet(const std::vector<Nodes::Node> &_p_node /**< vector of nodes */,
                const int _idx /**< [in] region index in region vector */,
                std::initializer_list<int> _i /**< [in] node index */)
-        : element<N,NPI>(_p_node), idxPrm(_idx), idx(0)
+        : element<N,NPI>(_p_node,_idx), idx(0)
         {
         set_ind(_i);
         zeroBasing();
@@ -143,7 +143,7 @@ public:
             if (fabs(detJ) < Tetra::epsilon)
                 {
                 std::cerr << "Singular jacobian in tetrahedron" << std::endl;
-                infos();
+                element::infos();
                 SYSTEM_ERROR;
                 }
             Pt::inverse(J, detJ);
@@ -165,8 +165,6 @@ public:
         extraCoeffs_BE = [](int, double, Pt::pt3D &, Pt::pt3D &, Pt::pt3D &, Pt::pt3D &,
                             Pt::pt3D(&)[N]) {};
         }
-
-    int idxPrm;         /**< index of the material parameters of the tetrahedron */
 
     double weight[NPI]; /**< weights \f$ w_i = |J| p_i  \f$ with  \f$ p_i = pds[i] = (D,E,E,E,E) \f$
                          */
@@ -298,42 +296,6 @@ public:
             }
         tiny::transposed_mult<double, N, NPI>(scalar_nod, a, result);
         }
-
-    /** basic infos */
-    inline void infos() const
-        {
-        std::cout << "idxPrm: " << idxPrm << " ind: ";
-        print_indices();
-        };
-
-    /** more infos */
-    inline void infos(Nodes::index idx) const
-        {
-        infos();
-
-        switch (idx)
-            {
-            case Nodes::IDX_p:
-                for (int i = 0; i < N; i++)
-                    {
-                    std::cout << "p_" << i << (refNode[ind[i]]).p << std::endl;
-                    }
-                break;
-            case Nodes::IDX_u:
-                for (int i = 0; i < N; i++)
-                    {
-                    std::cout << "m_" << i << (refNode[ind[i]]).u << std::endl;
-                    }
-                break;
-            case Nodes::IDX_phi:
-                for (int i = 0; i < N; i++)
-                    {
-                    std::cout << "phi" << i << (refNode[ind[i]]).phi << std::endl;
-                    }
-                break;
-            default: break;
-            }
-        };
 
     /** AE matrix filling */
     void lumping(int const &npi, double alpha_eff, double prefactor,

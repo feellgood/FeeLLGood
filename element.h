@@ -17,13 +17,16 @@ class element
     {
     /** constructor */
     public:
-    element(const std::vector<Nodes::Node> &_p_node /**< vector of nodes */) : refNode(_p_node)
+    element(const std::vector<Nodes::Node> &_p_node /**< vector of nodes */, const int _idx) : idxPrm(_idx), refNode(_p_node)
         {
         ind.resize(N);
         }
 
     /** indices to the nodes */
     std::vector<int> ind;
+    
+     /** index of the material parameters of the element */
+    int idxPrm;
     
     /** matrix for integrales */
     double Kp[2*N][2*N];
@@ -49,15 +52,6 @@ class element
     /** set all indices to zero */
     inline void indicesToZero(void)
         { std::fill(ind.begin(),ind.end(),0); }
-
-    /** print the node indices of the element */
-    void print_indices(void) const
-        {
-        std::cout << '(';
-        for(unsigned int i = 0; i < N-1; i++)
-            { std::cout << ind[i] << ", "; }
-        std::cout << ind[N-1] << ")\n";
-        }
 
     /** function to provide P matrix(2N,3N) coefficients, with respect to its block diagonal structure */
     double Pcoeff(const int i, const int j)
@@ -162,6 +156,15 @@ class element
             }
         }
 
+    /** info: print node indices of the element and the vector index of the associated param */
+    void infos() const
+        {
+        std::cout << "idxPrm: " << idxPrm << " ind: (";
+        for(unsigned int i = 0; i < N-1; i++)
+            { std::cout << ind[i] << ", "; }
+        std::cout << ind[N-1] << ")\n";
+        };
+    
     protected:
         /** vector of nodes */
         const std::vector<Nodes::Node> &refNode;

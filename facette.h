@@ -64,7 +64,7 @@ class Fac : public element<N,NPI>
 public:
     /** constructor for some unit tests */
     inline Fac(const std::vector<Nodes::Node> &_p_node /**< [in] vector of nodes */)
-        : element<N,NPI>(_p_node), idxPrm(0)
+        : element<N,NPI>(_p_node,0)
         {
         indicesToZero();
         }
@@ -74,7 +74,7 @@ public:
                const int _NOD /**< [in] nb nodes */,
                const int _idx /**< [in] region index in region vector */,
                std::initializer_list<int> _i /**< [in] node index */)
-        : element<N,NPI>(_p_node), idxPrm(_idx)
+        : element<N,NPI>(_p_node,_idx)
         {
         set_ind(_i);
 
@@ -89,8 +89,6 @@ public:
             Ms = 0.0;
             }  // no index shift here if NOD == 0 : usefull while reordering face indices
         }
-
-    int idxPrm; /**< index of the material parameters of the facette */
 
     double surf; /**< surface of the element */
     double Ms;   /**< magnetization at saturation of the face */
@@ -134,13 +132,6 @@ public:
         {
         interpolation<Pt::pt3D>(getter, result);
         }
-
-    /** basic infos */
-    inline void infos() const
-        {
-        std::cout << "idxPrm:" << idxPrm << "ind: ";
-        print_indices();
-        };
 
     /** computes the integral contribution of the triangular face */
     void integrales(std::vector<Facette::prm> const &params /**< [in] */,
