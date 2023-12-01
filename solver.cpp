@@ -11,8 +11,7 @@ int LinAlgebra::solver(timing const &t_prm)
 
     std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
                       [this,&w_K_TH](Tetra::Tet &my_elem) { my_elem.assemblage_mat(NOD,w_K_TH); } );
-    std::for_each(refMsh->fac.begin(), refMsh->fac.end(),
-                      [this,&w_K_TH](Facette::Fac &my_elem) { my_elem.assemblage_mat(NOD,w_K_TH); } );
+    
     K.setFromTriplets(w_K_TH.begin(),w_K_TH.end());
     _solver.analyzePattern(K);// numerical values in K are not used
     _solver.factorize(K);

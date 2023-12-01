@@ -39,11 +39,9 @@ void LinAlgebra::prepareElements(Pt::pt3D const &Hext /**< [in] applied field */
     std::for_each(std::execution::par, refMsh->fac.begin(), refMsh->fac.end(),
                   [this](Facette::Fac &fac)
                   {
-                      double Ks[3 * Facette::N][3 * Facette::N] = {{0}};
                       Pt::pt3D Ls[Facette::N];
 
                       fac.integrales(settings.paramFacette, Ls);
-                      fac.projection_mat(Ks);
                       fac.projection_vect(Ls);
                   });
     }
