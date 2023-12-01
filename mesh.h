@@ -91,11 +91,17 @@ public:
         std::cout << "  total volume:       " << vol << '\n';
         }
 
-    /** call setBasis for all nodes */
+    /** call setBasis for all nodes, and update P matrix for all elements */
     void setBasis(const double r)
         {
         std::for_each(std::execution::par, node.begin(), node.end(),
                       [&r](Nodes::Node &nod) { nod.setBasis(r); });
+
+        std::for_each(std::execution::par, tet.begin(), tet.end(),
+                      [](Tetra::Tet &t) { t.buildMatP();} );
+
+        std::for_each(std::execution::par, fac.begin(), fac.end(),
+                      [](Facette::Fac &f) { f.buildMatP();} );
         }
 
     /** make_evol on all nodes, and returns v_max */

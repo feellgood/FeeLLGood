@@ -37,6 +37,9 @@ class element
     /** vector for integrales */
     double Lp[2*N];
 
+    /** block diagonal matrix for projections */
+    double P[2*N][3*N] = {{0}};
+
     /** getter for N */
     inline constexpr int getN(void) const { return N; }
 
@@ -50,24 +53,21 @@ class element
     inline void indicesToZero(void)
         { std::fill(ind.begin(),ind.end(),0); }
 
-    /** function to provide P matrix(2N,3N) coefficients, with respect to its block diagonal structure */
-    double Pcoeff(const int i, const int j)
+    /** build matrix P, must be refreshed when ep,eq are changing (setBasis) */
+    void buildMatP(void)
         {
-        double val(0);
-        int node_i = i % N;
-
-        if (node_i == (j % N))
+        for (int i = 0; i < N; i++)
             {
-            if (i < N)
-                {
-                val = refNode[ind[node_i]].ep(j / N);
-                }
-            else
-                {
-                val = refNode[ind[node_i]].eq(j / N);
-                }
+            const Pt::pt3D &ep = refNode[ind[i]].ep;
+            P[i][i] = ep.x();
+            P[i][N + i] = ep.y();
+            P[i][2 * N + i] = ep.z();
+
+            const Pt::pt3D &eq = refNode[ind[i]].eq;
+            P[N + i][i] = eq.x();
+            P[N + i][N + i] = eq.y();
+            P[N + i][2 * N + i] = eq.z();
             }
-        return val;
         }
 
 /** make projection for tetra or facette. It computes Bp = P*B and stores result in inner vector Lp */
@@ -78,7 +78,7 @@ class element
             Lp[i] = 0;
             for (int k = 0; k < N; k++)
                 {
-                Lp[i] += Pt::pt3D(Pcoeff(i,k), Pcoeff(i,N + k), Pcoeff(i,2*N + k)).pScal(B[k]);
+                Lp[i] += P[i][k] * B[k].x() + P[i][N + k] * B[k].y() + P[i][2*N + k] * B[k].z();
                 }
             }
         }
@@ -94,7 +94,7 @@ class element
                 PA[i][k] = 0;
                 for (int j = 0; j < (3 * N); j++)
                     {
-                    PA[i][k] += Pcoeff(i, j) * A[j][k];
+                    PA[i][k] += P[i][j] * A[j][k];
                     }
                 }
             }
@@ -105,7 +105,7 @@ class element
                 Kp[i][k] = 0;
                 for (int j = 0; j < (3 * N); j++)
                     {
-                    Kp[i][k] += PA[i][j] * Pcoeff(k, j);
+                    Kp[i][k] += PA[i][j] * P[k][j];
                     }
                 }
         }
@@ -169,6 +169,26 @@ class element
     private:
         /** a method to orientate the element must be provided in derived class */
         virtual void orientate() = 0;
+
+        /** function to provide P matrix(2N,3N) coefficients, with respect to its block diagonal structure (deprecated) */
+        double Pcoeff(const int i, const int j)
+            {
+            double val(0);
+            int node_i = i % N;
+
+            if (node_i == (j % N))
+                {
+                if (i < N)
+                    {
+                    val = refNode[ind[node_i]].ep(j / N);
+                    }
+                else
+                    {
+                    val = refNode[ind[node_i]].eq(j / N);
+                    }
+                }
+            return val;
+            }
     };
     
 #endif

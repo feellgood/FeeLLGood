@@ -598,13 +598,7 @@ BOOST_AUTO_TEST_CASE(Tet_Pcoeff)
 
     // carefull with indices (starting from 1)
     Tetra::Tet t(node, 0, {1, 2, 3, 4});
-
-    double P[2 * N][3 * N] = {{0}};
-    for (int i = 0; i < 2 * N; i++)
-        for (int j = 0; j < 3 * N; j++)
-            {
-            P[i][j] = t.Pcoeff(i, j);
-            }
+    t.buildMatP();
 
     /* ref code */
     double Pref[2 * N][3 * N] = {{0}};  // P must be filled with zero
@@ -620,13 +614,13 @@ BOOST_AUTO_TEST_CASE(Tet_Pcoeff)
         Pref[N + i][2 * N + i] = n.eq.z();
         }
     /* end ref code */
-    double normP = tiny::frob_norm<double, 2 * N, 3 * N>(P);
+    double normP = tiny::frob_norm<double, 2 * N, 3 * N>(t.P);
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
 
     std::cout << "frob norm(P) = " << normP
               << " ; frob norm(Pref) = " << tiny::frob_norm<double, 2 * N, 3 * N>(Pref)
               << std::endl;
-    double result = tiny::dist<double, 2 * N, 3 * N>(P, Pref);
+    double result = tiny::dist<double, 2 * N, 3 * N>(t.P, Pref);
     std::cout << "dist(P,Pref) = " << result << std::endl;
 
     BOOST_CHECK(normP > ((double) 0));
@@ -634,7 +628,7 @@ BOOST_AUTO_TEST_CASE(Tet_Pcoeff)
     for (int i = 0; i < 2 * N; i++)
         for (int j = 0; j < 3 * N; j++)
             {
-            BOOST_CHECK(P[i][j] == Pref[i][j]);
+            BOOST_CHECK(t.P[i][j] == Pref[i][j]);
             }
     }
 

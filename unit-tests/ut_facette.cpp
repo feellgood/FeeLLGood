@@ -502,13 +502,7 @@ BOOST_AUTO_TEST_CASE(Fac_Pcoeff)
         }
 
     Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
-
-    double P[2 * N][3 * N] = {{0}};
-    for (int i = 0; i < 2 * N; i++)
-        for (int j = 0; j < 3 * N; j++)
-            {
-            P[i][j] = f.Pcoeff(i, j);
-            }
+    f.buildMatP();
 
     /* ref code */
     double Pref[2 * N][3 * N] = {{0}};  // P must be filled with zero
@@ -524,12 +518,12 @@ BOOST_AUTO_TEST_CASE(Fac_Pcoeff)
         Pref[N + i][2 * N + i] = n.eq.z();
         }
     /* end ref code */
-    double normP = tiny::frob_norm<double, 2 * N, 3 * N>(P);
+    double normP = tiny::frob_norm<double, 2 * N, 3 * N>(f.P);
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
     std::cout << "frob norm(P) = " << normP
               << " ; frob norm(Pref) = " << tiny::frob_norm<double, 2 * N, 3 * N>(Pref)
               << std::endl;
-    double result = tiny::dist<double, 2 * N, 3 * N>(P, Pref);
+    double result = tiny::dist<double, 2 * N, 3 * N>(f.P, Pref);
     std::cout << "dist(P,Pref) = " << result << std::endl;
 
     BOOST_CHECK(normP > ((double) 0));
@@ -538,7 +532,7 @@ BOOST_AUTO_TEST_CASE(Fac_Pcoeff)
     for (int i = 0; i < 2 * N; i++)
         for (int j = 0; j < 3 * N; j++)
             {
-            BOOST_CHECK(P[i][j] == Pref[i][j]);
+            BOOST_CHECK(f.P[i][j] == Pref[i][j]);
             }
     }
 
