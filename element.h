@@ -68,7 +68,7 @@ class element
         }
 
 /** make projection for tetra or facette. It computes Bp = P*B and stores result in inner vector Lp */
-    void projection_vect(Pt::pt3D *B)
+    void projection_vect(Pt::pt3D *B /**< [in] matrix */ )
         {
         for (int i = 0; i < (2 * N); i++)
             {
@@ -81,7 +81,7 @@ class element
         }
 
 /** make projection for tetra or facette. It computes Ap = (P*A)*trans(P) and stores result in inner matrix Kp */
-    void projection_mat(double (&A)[3 * N][3 * N])
+    void projection_mat(double (&A)[3 * N][3 * N] /**< [in] matrix */ )
         {
         double PA[2 * N][3 * N];  // no need to initialize with zeros
         for (int i = 0; i < (2 * N); i++)
@@ -108,7 +108,8 @@ class element
         }
 
     /** assemble the big sparse matrix K from tetra or facette inner matrix Kp */
-    void assemblage_mat(const int NOD, std::vector<Eigen::Triplet<double>> &K) const
+    void assemblage_mat(const int NOD /**< [in] nb nodes */,
+                        std::vector<Eigen::Triplet<double>> &K /**< [out] COO matrix */ ) const
         {
         for (int i = 0; i < N; i++)
             {
@@ -134,7 +135,8 @@ class element
         }
 
     /** assemble the big vector L from tetra or facette inner vector Lp */
-    void assemblage_vect(const int NOD, Eigen::Ref<Eigen::VectorXd> L) const
+    void assemblage_vect(const int NOD /**< [in] nb nodes */,
+                        Eigen::Ref<Eigen::VectorXd> L /**< [out] vector */) const
         {
         for (int i = 0; i < N; i++)
             {
@@ -168,7 +170,7 @@ class element
         virtual void orientate() = 0;
 
         /** function to provide P matrix(2N,3N) coefficients, with respect to its block diagonal structure (deprecated) */
-        double Pcoeff(const int i, const int j)
+        double Pcoeff(const int i /**< [in] index */, const int j /**< [in] index */)
             {
             double val(0);
             int node_i = i % N;
