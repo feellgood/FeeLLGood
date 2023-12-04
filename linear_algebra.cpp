@@ -27,21 +27,9 @@ void LinAlgebra::prepareElements(Pt::pt3D const &Hext /**< [in] applied field */
 
     std::for_each(std::execution::par, refMsh->tet.begin(), refMsh->tet.end(),
                   [this, &Hext, &t_prm, idx_dir](Tetra::Tet &tet)
-                  {
-                      double K[3 * Tetra::N][3 * Tetra::N] = {{0}};
-                      Pt::pt3D L[Tetra::N];
-
-                      tet.integrales(settings.paramTetra, t_prm, Hext, idx_dir, DW_vz, K, L);
-                      tet.projection_mat(K);
-                      tet.projection_vect(L);
-                  });
+                  { tet.integrales(settings.paramTetra, t_prm, Hext, idx_dir, DW_vz); });
 
     std::for_each(std::execution::par, refMsh->fac.begin(), refMsh->fac.end(),
                   [this](Facette::Fac &fac)
-                  {
-                      Pt::pt3D Ls[Facette::N];
-
-                      fac.integrales(settings.paramFacette, Ls);
-                      fac.projection_vect(Ls);
-                  });
+                  { fac.integrales(settings.paramFacette); });
     }

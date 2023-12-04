@@ -68,7 +68,7 @@ class element
         }
 
 /** make projection for tetra or facette. It computes Bp = P*B and stores result in inner vector Lp */
-    void projection_vect(Pt::pt3D *B /**< [in] matrix */ )
+    void projection_vect(const Pt::pt3D *B /**< [in] matrix */ )
         {
         for (int i = 0; i < (2 * N); i++)
             {
@@ -81,7 +81,7 @@ class element
         }
 
 /** make projection for tetra or facette. It computes Ap = (P*A)*trans(P) and stores result in inner matrix Kp */
-    void projection_mat(double (&A)[3 * N][3 * N] /**< [in] matrix */ )
+    void projection_mat(const double (&A)[3 * N][3 * N] /**< [in] matrix */ )
         {
         double PA[2 * N][3 * N];  // no need to initialize with zeros
         for (int i = 0; i < (2 * N); i++)

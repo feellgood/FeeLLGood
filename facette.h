@@ -125,8 +125,7 @@ public:
         }
 
     /** computes the integral contribution of the triangular face */
-    void integrales(std::vector<Facette::prm> const &params /**< [in] */,
-                    Pt::pt3D (&BE)[N] /**< [out] */) const;
+    void integrales(std::vector<Facette::prm> const &params /**< [in] */);
 
     /** anisotropy energy of the facette */
     double anisotropyEnergy(Facette::prm const &param /**< [in] */,

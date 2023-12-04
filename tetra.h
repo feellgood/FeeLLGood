@@ -324,8 +324,7 @@ public:
     /** computes the integral contribution of the tetrahedron to the evolution of the magnetization
      */
     void integrales(std::vector<Tetra::prm> const &params, timing const &prm_t,
-                    Pt::pt3D const &Hext, Pt::index idx_dir, double Vdrift,
-                    double (&AE)[3 * N][3 * N], Pt::pt3D (&BE)[N]) const;
+                    Pt::pt3D const &Hext, Pt::index idx_dir, double Vdrift);
 
     /** exchange energy of the tetrahedron */
     double exchangeEnergy(Tetra::prm const &param, const double (&dudx)[Pt::DIM][NPI],

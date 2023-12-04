@@ -102,8 +102,7 @@ double Tet::calc_aniso_cub(int const &npi, Pt::pt3D const &ex, Pt::pt3D const &e
     }
 
 void Tet::integrales(std::vector<Tetra::prm> const &params, timing const &prm_t,
-                     Pt::pt3D const &Hext, Pt::index idx_dir, double Vdrift,
-                     double (&AE)[3 * N][3 * N], Pt::pt3D (&BE)[N]) const
+                     Pt::pt3D const &Hext, Pt::index idx_dir, double Vdrift)
     {
     double alpha = params[idxPrm].alpha_LLG;
     double Js = params[idxPrm].J;
@@ -112,6 +111,9 @@ void Tet::integrales(std::vector<Tetra::prm> const &params, timing const &prm_t,
     double K3bis = 2.0 * (params[idxPrm].K3) / Js;
     const double s_dt = THETA * prm_t.get_dt() * gamma0;  // theta from theta scheme in config.h.in
 
+    double AE[3 * Tetra::N][3 * Tetra::N] = {{0}};
+    Pt::pt3D BE[Tetra::N];
+    
     /*-------------------- INTERPOLATION --------------------*/
     pt3D Hd[NPI], dUdx[NPI], dUdy[NPI], dUdz[NPI];
     pt3D Hv[NPI], dVdx[NPI], dVdy[NPI], dVdz[NPI];
@@ -153,6 +155,8 @@ void Tet::integrales(std::vector<Tetra::prm> const &params, timing const &prm_t,
 
         lumping(npi, prm_t.calc_alpha_eff(alpha, uHeff), prm_t.prefactor * s_dt * Abis, AE);
         }
+    projection_mat(AE);
+    projection_vect(BE);
     }
 
 double Tet::exchangeEnergy(Tetra::prm const &param, const double (&dudx)[DIM][NPI],

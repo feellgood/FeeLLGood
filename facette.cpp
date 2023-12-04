@@ -4,7 +4,7 @@
 using namespace Facette;
 using namespace Pt;
 
-void Fac::integrales(std::vector<Facette::prm> const &params, Pt::pt3D (&BE)[N]) const
+void Fac::integrales(std::vector<Facette::prm> const &params)
     {
     Pt::pt3D const &uk = params[idxPrm].uk;
     double Kbis = 2.0 * (params[idxPrm].Ks)
@@ -12,6 +12,8 @@ void Fac::integrales(std::vector<Facette::prm> const &params, Pt::pt3D (&BE)[N])
 
     Pt::pt3D u[NPI];
     interpolation<Pt::pt3D>(Nodes::get_u0, u);
+
+    Pt::pt3D BE[Facette::N];
 
     for (int npi = 0; npi < NPI; npi++)
         {
@@ -22,6 +24,7 @@ void Fac::integrales(std::vector<Facette::prm> const &params, Pt::pt3D (&BE)[N])
             BE[i] += Kbis * a[i][npi] * w_uk_u * uk;
             }
         }
+    projection_vect(BE);
     }
 
 double Fac::anisotropyEnergy(Facette::prm const &param, const Pt::pt3D (&u)[NPI]) const
