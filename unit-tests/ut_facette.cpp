@@ -509,13 +509,14 @@ BOOST_AUTO_TEST_CASE(Fac_Pcoeff)
 
     for (int i = 0; i < N; i++)
         {
-        const Nodes::Node &n = f.getNode(i);
-        Pref[i][i] = n.ep.x();
-        Pref[i][N + i] = n.ep.y();
-        Pref[i][2 * N + i] = n.ep.z();
-        Pref[N + i][i] = n.eq.x();
-        Pref[N + i][N + i] = n.eq.y();
-        Pref[N + i][2 * N + i] = n.eq.z();
+        const Pt::pt3D &ep = node[f.ind[i]].ep;
+        Pref[i][i] = ep.x();
+        Pref[i][N + i] = ep.y();
+        Pref[i][2 * N + i] = ep.z();
+        const Pt::pt3D &eq = node[f.ind[i]].eq;
+        Pref[N + i][i] = eq.x();
+        Pref[N + i][N + i] = eq.y();
+        Pref[N + i][2 * N + i] = eq.z();
         }
     /* end ref code */
     double normP = tiny::frob_norm<double, 2 * N, 3 * N>(f.P);

@@ -46,9 +46,6 @@ class element
     /** getter for NPI */
     inline constexpr int getNPI(void) const { return NPI; }
 
-    /** getter for node (only used by unit-tests ; not recommended) */
-    inline const Nodes::Node &getNode(const int i) { return refNode[ind[i]]; }
-    
     /** set all indices to zero */
     inline void indicesToZero(void)
         { std::fill(ind.begin(),ind.end(),0); }
