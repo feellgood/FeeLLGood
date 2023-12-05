@@ -23,6 +23,7 @@ class element
             ) : idxPrm(_idx), refNode(_p_node)
         {
         ind.assign(_i);
+        P.setZero();
         }
 
     /** indices to the nodes */
@@ -38,7 +39,7 @@ class element
     double Lp[2*N];
 
     /** block diagonal matrix for projections */
-    double P[2*N][3*N] = {{0}};
+    Eigen::Matrix<double,2*N,3*N> P;
 
     /** getter for N */
     inline constexpr int getN(void) const { return N; }
@@ -56,14 +57,14 @@ class element
         for (int i = 0; i < N; i++)
             {
             const Pt::pt3D &ep = refNode[ind[i]].ep;
-            P[i][i] = ep.x();
-            P[i][N + i] = ep.y();
-            P[i][2 * N + i] = ep.z();
+            P(i,i) = ep.x();
+            P(i,N + i) = ep.y();
+            P(i,2 * N + i) = ep.z();
 
             const Pt::pt3D &eq = refNode[ind[i]].eq;
-            P[N + i][i] = eq.x();
-            P[N + i][N + i] = eq.y();
-            P[N + i][2 * N + i] = eq.z();
+            P(N + i,i) = eq.x();
+            P(N + i,N + i) = eq.y();
+            P(N + i,2 * N + i) = eq.z();
             }
         }
 
@@ -75,7 +76,7 @@ class element
             Lp[i] = 0;
             for (int k = 0; k < N; k++)
                 {
-                Lp[i] += P[i][k] * B[k].x() + P[i][N + k] * B[k].y() + P[i][2*N + k] * B[k].z();
+                Lp[i] += P(i,k) * B[k].x() + P(i,N + k) * B[k].y() + P(i,2*N + k) * B[k].z();
                 }
             }
         }
@@ -91,7 +92,7 @@ class element
                 PA[i][k] = 0;
                 for (int j = 0; j < (3 * N); j++)
                     {
-                    PA[i][k] += P[i][j] * A[j][k];
+                    PA[i][k] += P(i,j) * A[j][k];
                     }
                 }
             }
@@ -102,7 +103,7 @@ class element
                 Kp[i][k] = 0;
                 for (int j = 0; j < (3 * N); j++)
                     {
-                    Kp[i][k] += PA[i][j] * P[k][j];
+                    Kp[i][k] += PA[i][j] * P(k,j);
                     }
                 }
         }

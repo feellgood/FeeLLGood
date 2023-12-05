@@ -615,21 +615,11 @@ BOOST_AUTO_TEST_CASE(Tet_Pcoeff)
         Pref[N + i][2 * N + i] = eq.z();
         }
     /* end ref code */
-    double normP = tiny::frob_norm<double, 2 * N, 3 * N>(t.P);
-    if (!DET_UT) std::cout << "seed =" << sd << std::endl;
 
-    std::cout << "frob norm(P) = " << normP
-              << " ; frob norm(Pref) = " << tiny::frob_norm<double, 2 * N, 3 * N>(Pref)
-              << std::endl;
-    double result = tiny::dist<double, 2 * N, 3 * N>(t.P, Pref);
-    std::cout << "dist(P,Pref) = " << result << std::endl;
-
-    BOOST_CHECK(normP > ((double) 0));
-    BOOST_CHECK(isfinite(result));
     for (int i = 0; i < 2 * N; i++)
         for (int j = 0; j < 3 * N; j++)
             {
-            BOOST_CHECK(t.P[i][j] == Pref[i][j]);
+            BOOST_CHECK(t.P(i,j) == Pref[i][j]);
             }
     }
 
