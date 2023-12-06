@@ -448,8 +448,9 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation2, *boost::unit_test::tolerance(UT_TOL
 
 BOOST_AUTO_TEST_CASE(Tet_lumping, *boost::unit_test::tolerance(UT_TOL))
     {
+    Eigen::Matrix<double, 3*Tetra::N, 3*Tetra::N> AE_to_check;
+    AE_to_check.setZero();
     double AE[3 * Tetra::N][3 * Tetra::N] = {{0}};
-    double AE_to_check[3 * Tetra::N][3 * Tetra::N] = {{0}};
 
     int nbNod = 4;
     std::vector<Nodes::Node> node(nbNod);
@@ -563,10 +564,12 @@ BOOST_AUTO_TEST_CASE(Tet_lumping, *boost::unit_test::tolerance(UT_TOL))
         t.lumping(npi, alfa, prm_t.prefactor * s_dt * Abis, AE_to_check);
     // end code to check
 
-    double val = tiny::dist<double, 3 * Tetra::N, 3 * Tetra::N>(AE, AE_to_check);
+    for (int i = 0; i < 3*Tetra::N; i++)
+        for (int j = 0; j < 3*Tetra::N; j++)
+            {
+            BOOST_TEST(AE_to_check(i,j) == AE[i][j]);
+            }
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
-    std::cout << "distance = " << val << std::endl;
-    BOOST_TEST(val == 0.0);
     }
 
 BOOST_AUTO_TEST_CASE(Tet_Pcoeff)

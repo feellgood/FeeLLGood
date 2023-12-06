@@ -298,7 +298,7 @@ public:
 
     /** AE matrix filling */
     void lumping(int const &npi, double alpha_eff, double prefactor,
-                 double (&AE)[3 * N][3 * N]) const;
+                 Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const;
 
     /** drift contribution due to eventual recentering to vector BE */
     void add_drift_BE(int const &npi, double alpha, double s_dt, double Vdrift, Pt::pt3D (&U)[NPI],

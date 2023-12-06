@@ -16,12 +16,12 @@ endif()
 
 find_package(PkgConfig REQUIRED)
 
-pkg_check_modules(MKL QUIET mkl-dynamic-lp64-iomp)
+pkg_check_modules(MKL QUIET IMPORTED_TARGET mkl-dynamic-lp64-iomp)
 if(MKL_FOUND)
     message(STATUS "MKL Found")
-    message(STATUS "MKL compile options =" ${MKL_CFLAGS})
-    message(STATUS "MKL LD flags =" ${MKL_LDFLAGS})
-    set(EIGEN_MKL_CFLAGS "-DEIGEN_USE_MKL_ALL")
+    #message(STATUS "MKL compile options =" ${MKL_CFLAGS})
+    #message(STATUS "MKL LD flags =" ${MKL_LDFLAGS})
+    set(EIGEN_MKL_CFLAGS "-DEIGEN_USE_MKL_ALL -DMKL_DIRECT_CALL")  # -DMKL_DIRECT_CALL : not sure we need it, neither it does something
     set(MKL_INTERFACE lp64) # from eigen3 documentation, we need that to get eigen work with intel mkl
 else()
     message(STATUS "MKL not found")
@@ -84,7 +84,17 @@ add_custom_command(
 
 ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES} default-settings.o)
 
-TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm duktape ANN OpenMP::OpenMP_CXX TBB::tbb Eigen3::Eigen) 
+#option --no-as-needed for mkl, see https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-link-line-advisor.html
+
+if (MKL_FOUND)
+    TARGET_LINK_OPTIONS(feellgood PRIVATE "-Wl,--no-as-needed")
+    # not sure we really need it since --no-as-needed is default value, though there might be a --as-needed before
+    TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm duktape ANN OpenMP::OpenMP_CXX TBB::tbb Eigen3::Eigen PkgConfig::MKL)
+else()
+    TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm duktape ANN OpenMP::OpenMP_CXX TBB::tbb Eigen3::Eigen)
+endif()
+
+
 
 #===========================================================================
 # Find where to install the Python modules.

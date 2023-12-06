@@ -54,12 +54,67 @@ target_link_libraries(test_ut_pt3D
   TBB::tbb
   )
 
-target_link_libraries(test_ut_solver
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY}
-  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-  Eigen3::Eigen
-  )
+if (MKL_FOUND)
+    target_link_libraries(test_ut_solver
+        ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
+        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+        Eigen3::Eigen
+        PkgConfig::MKL
+        )
+
+    target_link_libraries(test_ut_element
+        ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
+        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+        TBB::tbb
+        PkgConfig::MKL
+        )
+
+    target_link_libraries(test_ut_tetra
+        ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
+        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+        TBB::tbb
+        PkgConfig::MKL
+        )
+
+    target_link_libraries(test_ut_anisotropy
+        ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
+        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+        TBB::tbb
+        PkgConfig::MKL
+        )
+else()
+    target_link_libraries(test_ut_solver
+        ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
+        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+        Eigen3::Eigen
+        )
+
+    target_link_libraries(test_ut_element
+        ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
+        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+        TBB::tbb
+        )
+
+    target_link_libraries(test_ut_tetra
+        ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
+        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+        TBB::tbb
+        )
+
+    target_link_libraries(test_ut_anisotropy
+        ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
+        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+        TBB::tbb
+        )
+endif()
 
 target_link_libraries(test_ut_OMP_solver
   ${Boost_FILESYSTEM_LIBRARY}
@@ -76,13 +131,6 @@ target_link_libraries(test_ut_node
   TBB::tbb
   )
 
-target_link_libraries(test_ut_element
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY}
-  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-  TBB::tbb
-  )
-
 target_link_libraries(test_ut_facette
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
@@ -90,20 +138,6 @@ target_link_libraries(test_ut_facette
   TBB::tbb
   )
 
-target_link_libraries(test_ut_tetra
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY}
-  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-  TBB::tbb
-  )
-
-target_link_libraries(test_ut_anisotropy
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY}
-  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-  TBB::tbb
-  )
-  
 target_link_libraries(test_ut_tiny
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}

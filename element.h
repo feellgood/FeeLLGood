@@ -33,7 +33,7 @@ class element
     int idxPrm;
     
     /** matrix for integrales */
-    double Kp[2*N][2*N];
+    Eigen::Matrix<double,2*N,2*N> Kp;
 
     /** vector for integrales */
     double Lp[2*N];
@@ -81,33 +81,6 @@ class element
             }
         }
 
-/** make projection for tetra or facette. It computes Ap = (P*A)*trans(P) and stores result in inner matrix Kp */
-    void projection_mat(const double (&A)[3 * N][3 * N] /**< [in] matrix */ )
-        {
-        double PA[2 * N][3 * N];  // no need to initialize with zeros
-        for (int i = 0; i < (2 * N); i++)
-            {
-            for (int k = 0; k < (3 * N); k++)
-                {
-                PA[i][k] = 0;
-                for (int j = 0; j < (3 * N); j++)
-                    {
-                    PA[i][k] += P(i,j) * A[j][k];
-                    }
-                }
-            }
-
-        for (int i = 0; i < (2 * N); i++)
-            for (int k = 0; k < (2 * N); k++)
-                {
-                Kp[i][k] = 0;
-                for (int j = 0; j < (3 * N); j++)
-                    {
-                    Kp[i][k] += PA[i][j] * P(k,j);
-                    }
-                }
-        }
-
     /** assemble the big sparse matrix K from tetra or facette inner matrix Kp */
     void assemblage_mat(const int NOD /**< [in] nb nodes */,
                         std::vector<Eigen::Triplet<double>> &K /**< [out] COO matrix */ ) const
@@ -120,17 +93,17 @@ class element
                 {
                 int j_ = ind[j];
                 
-                if(Kp[i][j] != 0)
-                    { K.push_back(Eigen::Triplet<double>(NOD + i_, j_, Kp[i][j])); }
+                if(Kp(i,j) != 0)
+                    { K.push_back(Eigen::Triplet<double>(NOD + i_, j_, Kp(i,j))); }
                 
-                if (Kp[i][N + j] != 0)
-                    { K.push_back(Eigen::Triplet<double>(NOD + i_, NOD + j_, Kp[i][N + j])); }
+                if (Kp(i,N + j) != 0)
+                    { K.push_back(Eigen::Triplet<double>(NOD + i_, NOD + j_, Kp(i,N + j))); }
                 
-                if (Kp[N + i][j] != 0)
-                    { K.push_back(Eigen::Triplet<double>(i_, j_, Kp[N + i][j])); }
+                if (Kp(N + i,j) != 0)
+                    { K.push_back(Eigen::Triplet<double>(i_, j_, Kp(N + i,j))); }
                 
-                if (Kp[N + i][N + j] != 0)
-                    { K.push_back(Eigen::Triplet<double>(i_, NOD + j_, Kp[N + i][N + j])); }
+                if (Kp(N + i,N + j) != 0)
+                    { K.push_back(Eigen::Triplet<double>(i_, NOD + j_, Kp(N + i,N + j))); }
                 }
             }
         }

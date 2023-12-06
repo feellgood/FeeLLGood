@@ -5,7 +5,6 @@
 #include <set>
 
 #include "config.h"  // to get gamma0 constant
-
 #include "pt3D.h"
 #include "tetra.h"
 #include "time_integration.h"
@@ -17,7 +16,7 @@ using namespace Tetra;
 using namespace Pt;
 
 void Tet::lumping(int const &npi, double alpha_eff, double prefactor,
-                  double (&AE)[3 * N][3 * N]) const
+                  Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const
     {
     const double w = weight[npi];
 
@@ -26,16 +25,16 @@ void Tet::lumping(int const &npi, double alpha_eff, double prefactor,
         const double ai_w = w * a[i][npi];
         const pt3D ai_w_u0 = ai_w * Nodes::get_u0(refNode[ind[i]]);
 
-        AE[i][i] += alpha_eff * ai_w;
-        AE[N + i][N + i] += alpha_eff * ai_w;
-        AE[2 * N + i][2 * N + i] += alpha_eff * ai_w;
+        AE(i,i) += alpha_eff * ai_w;
+        AE(N + i,N + i) += alpha_eff * ai_w;
+        AE(2*N + i,2*N + i) += alpha_eff * ai_w;
 
-        AE[0 * N + i][2 * N + i] += ai_w_u0(Pt::IDX_Y);
-        AE[0 * N + i][1 * N + i] -= ai_w_u0(Pt::IDX_Z);
-        AE[1 * N + i][0 * N + i] += ai_w_u0(Pt::IDX_Z);
-        AE[1 * N + i][2 * N + i] -= ai_w_u0(Pt::IDX_X);
-        AE[2 * N + i][1 * N + i] += ai_w_u0(Pt::IDX_X);
-        AE[2 * N + i][0 * N + i] -= ai_w_u0(Pt::IDX_Y);
+        AE(i, 2*N + i) += ai_w_u0(Pt::IDX_Y);
+        AE(i, N + i) -= ai_w_u0(Pt::IDX_Z);
+        AE(N + i, i) += ai_w_u0(Pt::IDX_Z);
+        AE(N + i, 2*N + i) -= ai_w_u0(Pt::IDX_X);
+        AE(2*N + i, N + i) += ai_w_u0(Pt::IDX_X);
+        AE(2*N + i, i) -= ai_w_u0(Pt::IDX_Y);
 
         for (int j = 0; j < N; j++)
             {
@@ -43,9 +42,9 @@ void Tet::lumping(int const &npi, double alpha_eff, double prefactor,
                              * (dadx[i][npi] * dadx[j][npi] + dady[i][npi] * dady[j][npi]
                                 + dadz[i][npi] * dadz[j][npi]);
 
-            AE[i][j] += contrib;
-            AE[N + i][N + j] += contrib;
-            AE[2 * N + i][2 * N + j] += contrib;
+            AE(i,j) += contrib;
+            AE(N + i,N + j) += contrib;
+            AE(2*N + i,2*N + j) += contrib;
             }
         }
     }
@@ -111,7 +110,8 @@ void Tet::integrales(std::vector<Tetra::prm> const &params, timing const &prm_t,
     double K3bis = 2.0 * (params[idxPrm].K3) / Js;
     const double s_dt = THETA * prm_t.get_dt() * gamma0;  // theta from theta scheme in config.h.in
 
-    double AE[3 * Tetra::N][3 * Tetra::N] = {{0}};
+    Eigen::Matrix<double,3*N,3*N> AE;
+    AE.setZero();
     Pt::pt3D BE[Tetra::N];
     
     /*-------------------- INTERPOLATION --------------------*/
@@ -155,7 +155,8 @@ void Tet::integrales(std::vector<Tetra::prm> const &params, timing const &prm_t,
 
         lumping(npi, prm_t.calc_alpha_eff(alpha, uHeff), prm_t.prefactor * s_dt * Abis, AE);
         }
-    projection_mat(AE);
+    /*-------------------- PROJECTION --------------------*/
+    Kp = P*AE*P.transpose();// with MKL installed this operation should call dgemm_direct
     projection_vect(BE);
     }
 
