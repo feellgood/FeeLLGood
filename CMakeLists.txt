@@ -19,8 +19,8 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(MKL QUIET IMPORTED_TARGET mkl-dynamic-lp64-iomp)
 if(MKL_FOUND)
     message(STATUS "MKL Found")
-    #message(STATUS "MKL compile options =" ${MKL_CFLAGS})
-    #message(STATUS "MKL LD flags =" ${MKL_LDFLAGS})
+    #message(STATUS "MKL compile options = ${MKL_CFLAGS}")
+    #message(STATUS "MKL LD flags = ${MKL_LDFLAGS}")
     set(EIGEN_MKL_CFLAGS "-DEIGEN_USE_MKL_ALL -DMKL_DIRECT_CALL")  # -DMKL_DIRECT_CALL : not sure we need it, neither it does something
     set(MKL_INTERFACE lp64) # from eigen3 documentation, we need that to get eigen work with intel mkl
 else()
@@ -63,7 +63,7 @@ set(CMAKE_CXX_FLAGS
     "-DNDEBUG -DTBB_SUPPRESS_DEPRECATED_MESSAGES -Wall -Wextra -std=c++17 -O3 -march=native ${EIGEN_MKL_CFLAGS} ${MKL_CFLAGS}"
     CACHE STRING "C++ compiler flags used during builds." FORCE)
 
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${MKL_LD_FLAGS} -fopenmp")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
 
 SET(HEADERS config.h vecND.h pt3D.h node.h expression_parser.h mesh.h electrostatSolver.h
     spinTransferTorque.h time_integration.h feellgoodSettings.h tetra.h
