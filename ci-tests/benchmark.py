@@ -5,6 +5,7 @@ import sys
 import json
 import subprocess
 import timeit
+from datetime import datetime
 from gmsh import __version__ as gmshVersion
 from math import log2,floor
 from feellgood.meshMaker import Cylinder
@@ -46,12 +47,16 @@ def makeListNbThreads():
         nb = nb // 2
     return listNbThreads
 
-def task2test(settings):
+def version2test(str_executable):
+    feellgood_version = subprocess.run([str_executable, "--version"], text=True, capture_output=True)
+    return feellgood_version.stdout
+
+def task2test(str_executable, settings):
     """ elementary task to benchmark. feellgood executable runs in a subprocess with seed=2 for being deterministic """
-    val = subprocess.run(["../feellgood", "--seed", "2", "-"], input=json.dumps(settings), text=True)
+    val = subprocess.run([str_executable, "--seed", "2", "-"], input=json.dumps(settings), text=True)
     return val
 
-def bench(outputFileName, elt_sizes, listNbThreads, final_time):
+def bench(str_executable, outputFileName, elt_sizes, listNbThreads, final_time):
     """
     loop over mesh size and nb threads for benchmarking feellgood executable,
     mesh is a cylinder of fixed geometry, varying mesh size
@@ -61,14 +66,18 @@ def bench(outputFileName, elt_sizes, listNbThreads, final_time):
     volume_name = "volume"
     height = 32
     radius = 3.0 * height
+
     with open(outputFileName, 'w') as f:
+        str_date = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        f.write("# " + version2test(str_executable) + "# " + str_date + '\n')
+        f.write("# nbThreads: " + str(listNbThreads) + '\n')
         for elt_size in elt_sizes:
             f.write(str(elt_size) + '\t')
             mesh = Cylinder(radius, height, elt_size, surface_name, volume_name)
             mesh.make(meshFileName)
             for nbThreads in listNbThreads:
                 settings = makeSettings(meshFileName, surface_name, volume_name, nbThreads, final_time)
-                t = timeit.timeit(lambda: task2test(settings), number=1)
+                t = timeit.timeit(lambda: task2test(str_executable,settings), number=1)
                 if nbThreads == listNbThreads[-1]:
                     f.write(str(t) + '\n')
                 else:
@@ -94,7 +103,7 @@ def get_params(default_elt_sizes, default_listNbThreads, default_final_time):
     parser.add_argument('-f','--fast',help='fast benchmarking',action="store_true")
     return parser.parse_args()
 
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 if __name__ == '__main__':
     default_final_time = 2e-11
     default_elt_sizes = [4.0, 3.5, 3.0, 2.5]
@@ -114,7 +123,8 @@ if __name__ == '__main__':
     os.chdir(sys.path[0])
 
     try:
-        bench('benchmark.txt', args.sizes, args.nbThreads, args.final_time)
+        str_exec = "../feellgood"
+        bench(str_exec, 'benchmark.txt', args.sizes, args.nbThreads, args.final_time)
     except KeyboardInterrupt:
         print(" benchmark interrupted")
         sys.exit()
