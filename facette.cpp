@@ -13,18 +13,19 @@ void Fac::integrales(std::vector<Facette::prm> const &params)
     Pt::pt3D u[NPI];
     interpolation<Pt::pt3D>(Nodes::get_u0, u);
 
-    Pt::pt3D BE[Facette::N];
+    Eigen::Vector<double,3*N> BE;
+    BE.setZero();
 
     for (int npi = 0; npi < NPI; npi++)
         {
-        double w_uk_u = weight(npi) * pScal(uk, u[npi]);
+        double _prefactor = weight(npi) * Kbis * pScal(uk, u[npi]);
 
         for (int i = 0; i < N; i++)
-            {
-            BE[i] += Kbis * a[i][npi] * w_uk_u * uk;
-            }
+            for(int k = 0;k<Pt::DIM;k++)
+                { BE(k*N + i) += _prefactor*a[i][npi]*uk(k); }
         }
-    projection_vect(BE);
+    /*-------------------- PROJECTION --------------------*/
+    Lp = P*BE;
     }
 
 double Fac::anisotropyEnergy(Facette::prm const &param, const Pt::pt3D (&u)[NPI]) const

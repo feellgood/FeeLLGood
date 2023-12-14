@@ -24,6 +24,7 @@ class element
         {
         ind.assign(_i);
         P.setZero();
+        Lp.setZero();
         }
 
     /** indices to the nodes */
@@ -36,7 +37,7 @@ class element
     Eigen::Matrix<double,2*N,2*N> Kp;
 
     /** vector for integrales */
-    double Lp[2*N];
+    Eigen::Vector<double,2*N> Lp;
 
     /** block diagonal matrix for projections */
     Eigen::Matrix<double,2*N,3*N> P;
@@ -65,19 +66,6 @@ class element
             P(N + i,i) = eq.x();
             P(N + i,N + i) = eq.y();
             P(N + i,2 * N + i) = eq.z();
-            }
-        }
-
-/** make projection for tetra or facette. It computes Bp = P*B and stores result in inner vector Lp */
-    void projection_vect(const Pt::pt3D *B /**< [in] matrix */ )
-        {
-        for (int i = 0; i < (2 * N); i++)
-            {
-            Lp[i] = 0;
-            for (int k = 0; k < N; k++)
-                {
-                Lp[i] += P(i,k) * B[k].x() + P(i,N + k) * B[k].y() + P(i,2*N + k) * B[k].z();
-                }
             }
         }
 
@@ -142,26 +130,6 @@ class element
     private:
         /** a method to orientate the element must be provided in derived class */
         virtual void orientate() = 0;
-
-        /** function to provide P matrix(2N,3N) coefficients, with respect to its block diagonal structure (deprecated) */
-        double Pcoeff(const int i /**< [in] index */, const int j /**< [in] index */)
-            {
-            double val(0);
-            int node_i = i % N;
-
-            if (node_i == (j % N))
-                {
-                if (i < N)
-                    {
-                    val = refNode[ind[node_i]].ep(j / N);
-                    }
-                else
-                    {
-                    val = refNode[ind[node_i]].eq(j / N);
-                    }
-                }
-            return val;
-            }
     };
     
 #endif

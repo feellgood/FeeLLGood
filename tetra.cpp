@@ -51,29 +51,31 @@ void Tet::lumping(int const &npi, double alpha_eff, double prefactor,
 
 void Tet::add_drift_BE(int const &npi, double alpha, double s_dt, double Vdrift, Pt::pt3D (&U)[NPI],
                        Pt::pt3D (&V)[NPI], Pt::pt3D (&dUd_)[NPI], Pt::pt3D (&dVd_)[NPI],
-                       Pt::pt3D (&BE)[N]) const
+                       Eigen::Ref<Eigen::Vector<double,3*N>> BE) const
     {  // the artificial drift from eventual recentering is along x,y or z
     double w = weight[npi];
+    Pt::pt3D interim[N];
 
     for (int i = 0; i < N; i++)
         {
-        const double ai_w = w * a[i][npi];
-        BE[i] += ai_w * Vdrift * (alpha * dUd_[npi] + U[npi] * dUd_[npi]);
-        BE[i] += (ai_w * s_dt) * Vdrift
-                 * (alpha * dVd_[npi] + U[npi] * dVd_[npi] + V[npi] * dUd_[npi]);
+        interim[i] = a[i][npi]*(alpha*dUd_[npi] + U[npi]*dUd_[npi] + s_dt*(alpha*dVd_[npi] + U[npi]*dVd_[npi] + V[npi]*dUd_[npi]));
         }
+    
+    for (int i = 0; i < N; i++)
+        for(int k=0;k<Pt::DIM;k++)
+            { BE(k*N + i) += w*Vdrift*interim[i](k); }
     }
 
 void Tet::build_BE(int const &npi, Pt::pt3D const &H, double Abis, Pt::pt3D (&dUdx)[NPI],
-                   Pt::pt3D (&dUdy)[NPI], Pt::pt3D (&dUdz)[NPI], Pt::pt3D (&BE)[N]) const
+                   Pt::pt3D (&dUdy)[NPI], Pt::pt3D (&dUdz)[NPI],
+                   Eigen::Ref<Eigen::Vector<double,3*N>> BE) const
     {
     const double w = weight[npi];
-
     for (int i = 0; i < N; i++)
         {
-        BE[i] -= (w * Abis)
-                 * (dadx[i][npi] * dUdx[npi] + dady[i][npi] * dUdy[npi] + dadz[i][npi] * dUdz[npi]);
-        BE[i] += (w * a[i][npi]) * H;
+        const Pt::pt3D interim = -Abis*(dadx[i][npi] * dUdx[npi] + dady[i][npi] * dUdy[npi] + dadz[i][npi] * dUdz[npi]) + a[i][npi]*H;
+        for(int k=0;k<Pt::DIM;k++)
+            { BE(k*N + i) += w*interim(k); }
         }
     }
 
@@ -112,7 +114,8 @@ void Tet::integrales(std::vector<Tetra::prm> const &params, timing const &prm_t,
 
     Eigen::Matrix<double,3*N,3*N> AE;
     AE.setZero();
-    Pt::pt3D BE[Tetra::N];
+    Eigen::Vector<double,3*N> BE;
+    BE.setZero();
     
     /*-------------------- INTERPOLATION --------------------*/
     pt3D Hd[NPI], dUdx[NPI], dUdy[NPI], dUdz[NPI];
@@ -155,9 +158,9 @@ void Tet::integrales(std::vector<Tetra::prm> const &params, timing const &prm_t,
 
         lumping(npi, prm_t.calc_alpha_eff(alpha, uHeff), prm_t.prefactor * s_dt * Abis, AE);
         }
-    /*-------------------- PROJECTION --------------------*/
+    /*-------------------- PROJECTIONS --------------------*/
     Kp = P*AE*P.transpose();// with MKL installed this operation should call dgemm_direct
-    projection_vect(BE);
+    Lp = P*BE;
     }
 
 double Tet::exchangeEnergy(Tetra::prm const &param, const double (&dudx)[DIM][NPI],

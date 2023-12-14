@@ -179,8 +179,8 @@ private:
                     { _H += this->Hm[tet.idx][npi]; };
 
                     tet.extraCoeffs_BE = [this, &tet](int npi, double Js, Pt::pt3D &U,
-                                                      Pt::pt3D &dUdx, Pt::pt3D &dUdy,
-                                                      Pt::pt3D &dUdz, Pt::pt3D(&BE)[Tetra::N])
+                                                      Pt::pt3D &dUdx, Pt::pt3D &dUdy, Pt::pt3D &dUdz,
+                                                      Eigen::Ref<Eigen::Vector<double,3*Tetra::N>> BE)
                     {
                         const double prefactor = D0 / Pt::sq(p_stt.lJ) / (gamma0 * nu0 * Js);
                         Pt::pt3D const &_gV = gradV[tet.idx][npi];
@@ -194,11 +194,15 @@ private:
                                                                    dUdz(Pt::IDX_Z))));
 
                         Pt::pt3D m = pf * (ksi * j_grad_u + U * j_grad_u);
+                        Pt::pt3D interim[Tetra::N];
                         for (int i = 0; i < Tetra::N; i++)
                             {
-                            BE[i] += tet.weight[npi] * Tetra::a[i][npi]
-                                     * (Hm[tet.idx][npi] + prefactor * m);
+                            const double ai_w = tet.weight[npi] * Tetra::a[i][npi];
+                            interim[i] = ai_w*(Hm[tet.idx][npi] + prefactor*m);
                             }
+                        for (int i = 0; i < Tetra::N; i++)
+                            for(int k=0;k<Pt::DIM;k++)
+                                { BE(k*Tetra::N + i) += interim[i](k); }
                     };
                 });
         }

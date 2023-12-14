@@ -162,7 +162,7 @@ public:
         // do nothing lambda's (usefull for spin transfer torque)
         extraField = [](int, Pt::pt3D &) {};
         extraCoeffs_BE = [](int, double, Pt::pt3D &, Pt::pt3D &, Pt::pt3D &, Pt::pt3D &,
-                            Pt::pt3D(&)[N]) {};
+                            Eigen::Ref<Eigen::Vector<double,3*N>>) {};
         }
 
     double weight[NPI]; /**< weights \f$ w_i = |J| p_i  \f$ with  \f$ p_i = pds[i] = (D,E,E,E,E) \f$
@@ -303,11 +303,12 @@ public:
     /** drift contribution due to eventual recentering to vector BE */
     void add_drift_BE(int const &npi, double alpha, double s_dt, double Vdrift, Pt::pt3D (&U)[NPI],
                       Pt::pt3D (&V)[NPI], Pt::pt3D (&dUd_)[NPI], Pt::pt3D (&dVd_)[NPI],
-                      Pt::pt3D (&BE)[N]) const;
+                      Eigen::Ref<Eigen::Vector<double,3*N>> BE) const;
 
     /** BE vector filling */
     void build_BE(int const &npi, Pt::pt3D const &H, double Abis, Pt::pt3D (&dUdx)[NPI],
-                  Pt::pt3D (&dUdy)[NPI], Pt::pt3D (&dUdz)[NPI], Pt::pt3D (&BE)[N]) const;
+                  Pt::pt3D (&dUdy)[NPI], Pt::pt3D (&dUdz)[NPI],
+                  Eigen::Ref<Eigen::Vector<double,3*N>> BE) const;
 
     /** append H_aniso for uniaxial anisotropy contribution, returns contribution to uHeff (used to
      * compute the stabilizing effective damping) */
@@ -364,8 +365,7 @@ public:
 
     /** for extra contribution to the matrix BE, such as spin transfer torque contribs */
     std::function<void(int npi, double Js, Pt::pt3D &U, Pt::pt3D &dUdx, Pt::pt3D &dUdy,
-                       Pt::pt3D &dUdz, Pt::pt3D (&BE)[N])>
-            extraCoeffs_BE;
+                       Pt::pt3D &dUdz, Eigen::Ref<Eigen::Vector<double,3*N>> BE)> extraCoeffs_BE;
 
 private:
 
