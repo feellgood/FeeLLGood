@@ -66,19 +66,6 @@ void Tet::add_drift_BE(int const &npi, double alpha, double s_dt, double Vdrift,
             { BE(k*N + i) += w*Vdrift*interim[i](k); }
     }
 
-void Tet::build_BE(int const &npi, Pt::pt3D const &H, double Abis, Pt::pt3D (&dUdx)[NPI],
-                   Pt::pt3D (&dUdy)[NPI], Pt::pt3D (&dUdz)[NPI],
-                   Eigen::Ref<Eigen::Vector<double,3*N>> BE) const
-    {
-    const double w = weight[npi];
-    for (int i = 0; i < N; i++)
-        {
-        const Pt::pt3D interim = -Abis*(dadx[i][npi] * dUdx[npi] + dady[i][npi] * dUdy[npi] + dadz[i][npi] * dUdz[npi]) + a[i][npi]*H;
-        for(int k=0;k<Pt::DIM;k++)
-            { BE(k*N + i) += w*interim(k); }
-        }
-    }
-
 double Tet::calc_aniso_uniax(int const &npi, Pt::pt3D const &uk, const double Kbis,
                              const double s_dt, Pt::pt3D (&U)[NPI], Pt::pt3D (&V)[NPI],
                              Pt::pt3D &H_aniso) const
@@ -130,16 +117,20 @@ void Tet::integrales(std::vector<Tetra::prm> const &params, timing const &prm_t,
     for (int npi = 0; npi < NPI; npi++)
         {
         pt3D H_aniso;
-        double contrib_aniso(0);
-
-        contrib_aniso += calc_aniso_uniax(npi, params[idxPrm].uk, Kbis, s_dt, U, V, H_aniso);
+        double contrib_aniso = calc_aniso_uniax(npi, params[idxPrm].uk, Kbis, s_dt, U, V, H_aniso);
         contrib_aniso += calc_aniso_cub(npi, params[idxPrm].ex, params[idxPrm].ey,
                                         params[idxPrm].ez, K3bis, s_dt, U, V, H_aniso);
 
         pt3D H = H_aniso + Hd[npi] + Hext + (s_dt / gamma0) * Hv[npi];
-        build_BE(npi, H, Abis, dUdx, dUdy, dUdz, BE);
-        extraCoeffs_BE(npi, Js, U[npi], dUdx[npi], dUdy[npi], dUdz[npi], BE);  // STT
+        const double w = weight[npi];
+        for (int i = 0; i < N; i++)
+            {
+            const Pt::pt3D interim = -Abis*(dadx[i][npi] * dUdx[npi] + dady[i][npi] * dUdy[npi] + dadz[i][npi] * dUdz[npi]) + a[i][npi]*H;
+            for(int k=0;k<Pt::DIM;k++)
+                { BE(k*N + i) += w*interim(k); }
+            }
 
+        extraCoeffs_BE(npi, Js, U[npi], dUdx[npi], dUdy[npi], dUdz[npi], BE);  // STT
         if (idx_dir != Pt::IDX_UNDEF)
             {
             if (idx_dir == Pt::IDX_Z)

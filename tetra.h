@@ -300,15 +300,10 @@ public:
     void lumping(int const &npi, double alpha_eff, double prefactor,
                  Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const;
 
-    /** drift contribution due to eventual recentering to vector BE */
+    /** add drift contribution due to eventual recentering to vectors BE */
     void add_drift_BE(int const &npi, double alpha, double s_dt, double Vdrift, Pt::pt3D (&U)[NPI],
                       Pt::pt3D (&V)[NPI], Pt::pt3D (&dUd_)[NPI], Pt::pt3D (&dVd_)[NPI],
                       Eigen::Ref<Eigen::Vector<double,3*N>> BE) const;
-
-    /** BE vector filling */
-    void build_BE(int const &npi, Pt::pt3D const &H, double Abis, Pt::pt3D (&dUdx)[NPI],
-                  Pt::pt3D (&dUdy)[NPI], Pt::pt3D (&dUdz)[NPI],
-                  Eigen::Ref<Eigen::Vector<double,3*N>> BE) const;
 
     /** append H_aniso for uniaxial anisotropy contribution, returns contribution to uHeff (used to
      * compute the stabilizing effective damping) */
