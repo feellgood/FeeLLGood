@@ -80,6 +80,7 @@ BOOST_AUTO_TEST_CASE(Tet_inner_tables, *boost::unit_test::tolerance(UT_TOL))
     double J[Pt::DIM][Pt::DIM];
     double nod[Pt::DIM][Tetra::N];
     double weight[Tetra::NPI];
+    constexpr double dadu[Tetra::N][Pt::DIM] = {{-1., -1., -1.}, {1., 0., 0.}, {0., 1., 0.}, {0., 0., 1.}};
 
     for (int ie = 0; ie < Tetra::N; ie++)
         {
@@ -89,10 +90,10 @@ BOOST_AUTO_TEST_CASE(Tet_inner_tables, *boost::unit_test::tolerance(UT_TOL))
         nod[2][ie] = node[i].p(2);
         }
 
-    tiny::mult<double, Pt::DIM, Tetra::N, Pt::DIM>(nod, Tetra::dadu, J);
+    tiny::mult<double, Pt::DIM, Tetra::N, Pt::DIM>(nod, dadu, J);
     double detJ = Pt::det(J);  // lu_det(J);
     Pt::inverse(J, detJ);
-    tiny::mult<double, Tetra::N, Pt::DIM, Pt::DIM>(Tetra::dadu, J, da);
+    tiny::mult<double, Tetra::N, Pt::DIM, Pt::DIM>(dadu, J, da);
 
     for (int npi = 0; npi < Tetra::NPI; npi++)
         {

@@ -229,23 +229,21 @@ double Tet::zeemanEnergy(Tetra::prm const &param, double uz_drift, Pt::pt3D cons
     return (-param.J * weightedScalarProd(dens));
     }
 
-double Tet::Jacobian(double (&J)[DIM][DIM])
+double Tet::Jacobian(Eigen::Ref<Eigen::Matrix3d> J)
     {
-    Pt::pt3D const &p0 = refNode[ind[0]].p;
-    Pt::pt3D const &p1 = refNode[ind[1]].p;
-    Pt::pt3D const &p2 = refNode[ind[2]].p;
-    Pt::pt3D const &p3 = refNode[ind[3]].p;
-    J[0][0] = p1.x() - p0.x();
-    J[0][1] = p2.x() - p0.x();
-    J[0][2] = p3.x() - p0.x();
-    J[1][0] = p1.y() - p0.y();
-    J[1][1] = p2.y() - p0.y();
-    J[1][2] = p3.y() - p0.y();
-    J[2][0] = p1.z() - p0.z();
-    J[2][1] = p2.z() - p0.z();
-    J[2][2] = p3.z() - p0.z();
-
-    return Pt::det(J);
+    Pt::pt3D p0p1 = refNode[ind[1]].p - refNode[ind[0]].p;
+    Pt::pt3D p0p2 = refNode[ind[2]].p - refNode[ind[0]].p;
+    Pt::pt3D p0p3 = refNode[ind[3]].p - refNode[ind[0]].p;
+    J(0,0) = p0p1.x();
+    J(0,1) = p0p2.x();
+    J(0,2) = p0p3.x();
+    J(1,0) = p0p1.y();
+    J(1,1) = p0p2.y();
+    J(1,2) = p0p3.y();
+    J(2,0) = p0p1.z();
+    J(2,1) = p0p2.z();
+    J(2,2) = p0p3.z();
+    return J.determinant();
     }
 
 double Tet::calc_vol(void) const

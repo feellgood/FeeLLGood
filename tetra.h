@@ -38,9 +38,6 @@ constexpr double v[NPI] = {A, B, B, C, B};   /**< some constants to build hat fu
 constexpr double w[NPI] = {A, B, C, B, B};   /**< some constants to build hat functions */
 constexpr double pds[NPI] = {D, E, E, E, E}; /**< some constant weights to build hat functions */
 
-/** constant matrix */
-constexpr double dadu[N][Pt::DIM] = {{-1., -1., -1.}, {1., 0., 0.}, {0., 1., 0.}, {0., 0., 1.}};
-
 /** constant matrix \f$ j:0..4 \f$
 a[0][j]   = 1.-u[j]-v[j]-w[j];
 a[1][j]   = u[j];
@@ -134,10 +131,10 @@ public:
             {
             orientate();
 
-            double J[Pt::DIM][Pt::DIM];  // we have to rebuild the jacobian in case of ill oriented
-                                         // tetrahedron
+            Eigen::Matrix3d J;
+            // we have to rebuild the jacobian in case of ill oriented tetrahedron
             double detJ = Jacobian(J);
-            double da[N][Pt::DIM];
+            Eigen::Matrix<double,N,Pt::DIM> da;
 
             if (fabs(detJ) < Tetra::epsilon)
                 {
@@ -145,16 +142,17 @@ public:
                 element::infos();
                 SYSTEM_ERROR;
                 }
-            Pt::inverse(J, detJ);
-            tiny::mult<double, N, Pt::DIM, Pt::DIM>(Tetra::dadu, J, da);
+            Eigen::Matrix<double,N,Pt::DIM> dadu;
+            dadu << -1., -1., -1., 1., 0., 0., 0., 1., 0., 0., 0., 1.;
+            da = dadu * J.inverse();
 
             for (int j = 0; j < NPI; j++)
                 {
                 for (int i = 0; i < N; i++)
                     {
-                    dadx[i][j] = da[i][0];
-                    dady[i][j] = da[i][1];
-                    dadz[i][j] = da[i][2];
+                    dadx[i][j] = da(i,0);
+                    dady[i][j] = da(i,1);
+                    dadz[i][j] = da(i,2);
                     }
                 weight[j] = detJ * Tetra::pds[j];
                 }
@@ -344,7 +342,7 @@ public:
                         const double (&u)[Pt::DIM][NPI]) const;
 
     /** \return \f$ |J| \f$ build Jacobian \f$ J \f$ */
-    double Jacobian(double (&J)[Pt::DIM][Pt::DIM]);
+    double Jacobian(Eigen::Ref<Eigen::Matrix3d> J);
 
     /** computes volume of the tetrahedron ; unit test Tet_calc_vol */
     double calc_vol(void) const;
