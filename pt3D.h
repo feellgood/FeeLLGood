@@ -254,12 +254,9 @@ algebra : R^3 scalar triple product
 inline double pTriple(pt3D const &a, pt3D const &b, pt3D const &c) { return pScal(a * b, c); }
 
 /**
-algebra : R^3 euclidian distance
+algebra : R^3 euclidian distance (only used by some unit tests)
  */
-inline double dist(pt3D const &a, pt3D const &b)
-    {
-    return sqrt((a-b).norm2());
-    }
+inline double dist(pt3D const &a, pt3D const &b) { return sqrt((a-b).norm2()); }
 
 /** check orthogonality of three vectors */
 inline bool isOrthogonal(pt3D const &a, pt3D const &b, pt3D const &c, const double precision)

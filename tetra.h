@@ -375,6 +375,7 @@ public:
         }
 
 private:
+    /** local hat functions matrix, initialized by constructor: da = dadu * inverse(Jacobian) */
     Eigen::Matrix<double,N,Pt::DIM> da;
 
     void orientate(void)
