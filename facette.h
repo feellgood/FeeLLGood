@@ -166,8 +166,24 @@ public:
         return n;
         }
 
-private:
+    /** returns Gauss points in result = vec_nod*Facette::a */
+    void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> result) const
+        {
+        static const Eigen::Matrix<double,N,NPI> eigen_a = [] {
+        Eigen::Matrix<double,N,NPI> tmp; tmp << a[0][0], a[0][1], a[0][2], a[0][3],
+                                                a[1][0], a[1][1], a[1][2], a[1][3],
+                                                a[2][0], a[2][1], a[2][2], a[2][3];
+                                                return tmp; }();
+        Eigen::Matrix<double,Pt::DIM,N> vec_nod;
+        for (int i = 0; i < N; i++)
+            {
+            const Pt::pt3D & tmp = refNode[ind[i]].p;
+            vec_nod.col(i) << tmp.x(), tmp.y(), tmp.z();
+            }
+        result = vec_nod * eigen_a;
+        }
 
+private:
     void orientate(void) {}// orientation is done in mesh::indexReorder
 
     /** computes surface of the face */

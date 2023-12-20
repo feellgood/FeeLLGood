@@ -8,8 +8,6 @@
 #include "pt3D.h"
 #include "tetra.h"
 #include "time_integration.h"
-#include "tiny.h"
-
 #include "facette.h"
 
 using namespace Tetra;
@@ -125,7 +123,7 @@ void Tet::integrales(std::vector<Tetra::prm> const &params, timing const &prm_t,
         const double w = weight[npi];
         for (int i = 0; i < N; i++)
             {
-            const Pt::pt3D interim = -Abis*(dadx[i][npi] * dUdx[npi] + dady[i][npi] * dUdy[npi] + dadz[i][npi] * dUdz[npi]) + a[i][npi]*H;
+            const Pt::pt3D interim = -Abis*(da(i,0)*dUdx[npi] + da(i,1)*dUdy[npi] + da(i,2)*dUdz[npi]) + a[i][npi]*H;
             for(int k=0;k<Pt::DIM;k++)
                 { BE(k*N + i) += w*interim(k); }
             }

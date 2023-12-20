@@ -158,12 +158,13 @@ public:
     void calc_Hm(Tetra::Tet const &tet, std::array<Pt::pt3D, Tetra::NPI> const &_gradV,
                  std::array<Pt::pt3D, Tetra::NPI> &_Hm) const
         {
-        Pt::pt3D p_g[Tetra::NPI];
-        tet.interpolation(Nodes::get_p, p_g);
+        Eigen::Matrix<double,Pt::DIM,Tetra::NPI> p_g;
+        tet.getPtGauss(p_g);
 
         for (int npi = 0; npi < Tetra::NPI; npi++)
             {
-            _Hm[npi] = -p_stt.sigma * _gradV[npi] * p_g[npi];
+            Pt::pt3D tmp(p_g(0,npi),p_g(1,npi),p_g(2,npi));
+            _Hm[npi] = -p_stt.sigma * _gradV[npi] * tmp;
             }
         }
 

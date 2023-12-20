@@ -108,7 +108,7 @@ private:
 
     /**
     function template to insert volume or surface charges in tree for demag computation. class T is
-    Tet or Fac, it must have interpolation method, second template parameter is NPI of the namespace
+    Tet or Fac, it must have getPtGauss() method, second template parameter is NPI of the namespace
     containing class T
     */
     template<class T, const int NPI>
@@ -117,16 +117,15 @@ private:
         std::for_each(container.begin(), container.end(),
                       [this, c, &idx](T const &elem)
                       {
-                          Pt::pt3D gauss[NPI];
-                          elem.interpolation(
-                                  Nodes::get_p,
-                                  gauss);  // for facette it is interpolation<Pt::pt3D> called here
+                          Eigen::Matrix<double,Pt::DIM,NPI> gauss;
+                          elem.getPtGauss(gauss);
 
                           for (int j = 0; j < NPI; j++, idx++)
                               {
-                              Pt::pt3D pSource = norm * (gauss[j] - c);
-                              tree.insert(FPoint<FReal>(pSource.x(), pSource.y(), pSource.z()),
-                                          FParticleType::FParticleTypeSource, idx, 0.0);
+                              double x = norm*(gauss(0,j) - c.x());
+                              double y = norm*(gauss(1,j) - c.y());
+                              double z = norm*(gauss(2,j) - c.z());
+                              tree.insert(FPoint<FReal>(x,y,z), FParticleType::FParticleTypeSource, idx, 0.0);
                               }
                       });  // end for_each
         }
@@ -134,7 +133,6 @@ private:
     /**
     computes the demag field, with (getter  = u,setter = phi) or (getter = v,setter = phi_v)
     */
-
     void demag(std::function<const Pt::pt3D(Nodes::Node)> getter,
                std::function<void(Nodes::Node &, const double)> setter, Mesh::mesh &msh,
                Settings &settings)

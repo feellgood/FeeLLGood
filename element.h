@@ -119,6 +119,9 @@ class element
         std::cout << ind[N-1] << ")\n";
         };
     
+    /** computes Gauss point of the element, return in result */
+    virtual void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> result) const = 0;
+
     protected:
         /** vector of nodes */
         const std::vector<Nodes::Node> &refNode;
@@ -126,9 +129,9 @@ class element
         /** zeroBasing: index convention Matlab/msh (one based) -> C++ (zero based) */
         inline void zeroBasing(void)
             { for(int i=0;i<N;i++) {ind[i]--;} }
-    
+
     private:
-        /** a method to orientate the element must be provided in derived class */
+        /** a method to orientate the element */
         virtual void orientate() = 0;
     };
     

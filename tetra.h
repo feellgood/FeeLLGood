@@ -126,6 +126,7 @@ public:
         : element<N,NPI>(_p_node,_idx,_i), idx(0)
         {
         zeroBasing();
+        da.setZero();
 
         if (refNode.size() > 0)
             {
@@ -134,7 +135,6 @@ public:
             Eigen::Matrix3d J;
             // we have to rebuild the jacobian in case of ill oriented tetrahedron
             double detJ = Jacobian(J);
-            Eigen::Matrix<double,N,Pt::DIM> da;
 
             if (fabs(detJ) < Tetra::epsilon)
                 {
@@ -163,27 +163,23 @@ public:
                             Eigen::Ref<Eigen::Vector<double,3*N>>) {};
         }
 
-    double weight[NPI]; /**< weights \f$ w_i = |J| p_i  \f$ with  \f$ p_i = pds[i] = (D,E,E,E,E) \f$
-                         */
-    double dadx[N][NPI]; /**< variations of hat function along x directions */
-    double dady[N][NPI]; /**< variations of hat function along y directions */
-    double dadz[N][NPI]; /**< variations of hat function along z directions */
+    /** weights \f$ w_i = |J| p_i  \f$ with  \f$ p_i = pds[i] = (D,E,E,E,E) \f$ */
+    double weight[NPI];
+
+    /** variations of hat function along x directions */
+    double dadx[N][NPI];
+
+    /** variations of hat function along y directions */
+    double dady[N][NPI];
+
+    /** variations of hat function along z directions */
+    double dadz[N][NPI];
 
     /** weighted scalar product */
     inline double weightedScalarProd(const double (&X)[NPI]) const
         {
         return (X[0] * weight[0] + X[1] * weight[1] + X[2] * weight[2] + X[3] * weight[3]
                 + X[4] * weight[4]);
-        }
-
-    /** interpolation for 3D vector field: the getter function is given as a parameter in order to
-     * know what part of the node you want to interpolate */
-    inline void interpolation(std::function<Pt::pt3D(Nodes::Node)> getter,
-                              Pt::pt3D (&result)[NPI]) const
-        {
-        Pt::pt3D vec_nod[N];
-        getDataFromNode<Pt::pt3D>(getter, vec_nod);
-        tiny::mult<double, N, NPI>(vec_nod, a, result);
         }
 
     /** interpolation for scalar field : the getter function is given as a parameter in order to
@@ -360,7 +356,26 @@ public:
     std::function<void(int npi, double Js, Pt::pt3D &U, Pt::pt3D &dUdx, Pt::pt3D &dUdy,
                        Pt::pt3D &dUdz, Eigen::Ref<Eigen::Vector<double,3*N>> BE)> extraCoeffs_BE;
 
+    /** returns gauss points in result = vec_nod*Tetra::a  */
+    void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> result) const
+        {
+        static const Eigen::Matrix<double,N,NPI> eigen_a = [] {
+        Eigen::Matrix<double,N,NPI> tmp; tmp << a[0][0], a[0][1], a[0][2], a[0][3], a[0][4],
+                                            a[1][0], a[1][1], a[1][2], a[1][3], a[1][4],
+                                            a[2][0], a[2][1], a[2][2], a[2][3], a[2][4],
+                                            a[3][0], a[3][1], a[3][2], a[3][3], a[3][4];
+                                            return tmp; }();
+        Eigen::Matrix<double,Pt::DIM,N> vec_nod;
+        for (int i = 0; i < N; i++)
+            {
+            const Pt::pt3D & tmp = refNode[ind[i]].p;
+            vec_nod.col(i) << tmp.x(), tmp.y(), tmp.z();
+            }
+        result = vec_nod * eigen_a;
+        }
+
 private:
+    Eigen::Matrix<double,N,Pt::DIM> da;
 
     void orientate(void)
         {

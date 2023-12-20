@@ -1,5 +1,4 @@
 #include "facette.h"
-#include "tiny.h"
 
 using namespace Facette;
 using namespace Pt;
@@ -118,10 +117,8 @@ double Fac::potential(std::function<Pt::pt3D(Nodes::Node)> getter, int i) const
 void Fac::calcCorr(std::function<const Pt::pt3D(Nodes::Node)> getter, std::vector<double> &corr,
                    Pt::pt3D (&u)[NPI]) const
     {
-    // calc coord gauss
-    Pt::pt3D gauss[NPI];
-
-    interpolation<Pt::pt3D>(Nodes::get_p, gauss);
+    Eigen::Matrix<double,Pt::DIM,NPI> gauss;
+    getPtGauss(gauss);
     // calc corr node by node
     Pt::pt3D n = calc_norm();
 
@@ -131,7 +128,8 @@ void Fac::calcCorr(std::function<const Pt::pt3D(Nodes::Node)> getter, std::vecto
         const Pt::pt3D &p_i_ = refNode[i_].p;
         for (int j = 0; j < NPI; j++)
             {
-            corr[i_] -= Ms * pScal(u[j], n) * weight(j) / Pt::dist(p_i_, gauss[j]);
+            double d_ij= sqrt( sq( p_i_.x() - gauss(0,j) ) + sq( p_i_.y() - gauss(1,j) ) + sq( p_i_.z() - gauss(2,j) ) );
+            corr[i_] -= Ms * pScal(u[j], n) * weight(j) / d_ij;
             }
         corr[i_] += potential(getter, i);
         }
