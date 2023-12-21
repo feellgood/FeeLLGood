@@ -358,11 +358,12 @@ private:
                                         Pt::pTriple(
                                                 p1 - p0, p2 - p0,
                                                 fa.calc_norm()));  // carefull here, calc_norm
-                                                                   // recomputes the normal to the
+                                                                   // computes the normal to the
                                                                    // face before the idx swap
                                 }
                             std::swap(i1, i2);  // it seems from ref archive we do not want to swap
                                                 // inner fac indices but local i1 and i2
+                            fa.n = fa.calc_norm(); // update normal vector
                             }                   // end perm
                         }
                 });  // end for_each

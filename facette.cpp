@@ -42,7 +42,6 @@ void Fac::charges(std::function<Pt::pt3D(Nodes::Node)> getter, std::vector<doubl
     {
     Pt::pt3D u[NPI];
     interpolation<Pt::pt3D>(getter, u);
-    Pt::pt3D n = calc_norm();
 
     for (int j = 0; j < NPI; j++, nsrc++)
         {
@@ -55,7 +54,6 @@ void Fac::charges(std::function<Pt::pt3D(Nodes::Node)> getter, std::vector<doubl
 double Fac::demagEnergy(const Pt::pt3D (&u)[NPI], const double (&phi)[NPI]) const
     {
     double q[NPI];
-    Pt::pt3D n = calc_norm();
 
     for (int npi = 0; npi < NPI; npi++)
         {
@@ -103,7 +101,6 @@ double Fac::potential(std::function<Pt::pt3D(Nodes::Node)> getter, int i) const
     double log_1 = log((c * t + h + f(c) * r) / (b * (c + f(c))));
     double xi = b * log_1 / f(c);
 
-    Pt::pt3D n = calc_norm();
     double s1 = Pt::pScal(getter(node1), n);
     double s2 = Pt::pScal(getter(node2), n);
     double s3 = Pt::pScal(getter(node3), n);
@@ -120,8 +117,6 @@ void Fac::calcCorr(std::function<const Pt::pt3D(Nodes::Node)> getter, std::vecto
     Eigen::Matrix<double,Pt::DIM,NPI> gauss;
     getPtGauss(gauss);
     // calc corr node by node
-    Pt::pt3D n = calc_norm();
-
     for (int i = 0; i < N; i++)
         {
         const int i_ = ind[i];

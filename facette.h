@@ -73,15 +73,18 @@ public:
             {
             zeroBasing();
             surf = calc_surf();
+            n = calc_norm();
             }
         else
             {
             surf = 0.0;
+            n = Pt::pt3D(0,0,0);
             Ms = 0.0;
             }  // no index shift here if NOD == 0 : usefull while reordering face indices
         }
 
     double surf; /**< surface of the element */
+    Pt::pt3D n; /**< normal vector (unit vector) */
     double Ms;   /**< magnetization at saturation of the face */
 
     /** weighted scalar product : factorized formulation: weight(1)=weight(2)=weight(3) */
@@ -161,9 +164,9 @@ public:
     /** computes the norm to the face, returns a unit vector */
     inline Pt::pt3D calc_norm(void) const
         {
-        Pt::pt3D n = normal_vect();
-        n.normalize();
-        return n;
+        Pt::pt3D _n = normal_vect();
+        _n.normalize();
+        return _n;
         }
 
     /** returns Gauss points in result = vec_nod*Facette::a */
@@ -192,11 +195,10 @@ private:
     /** return normal to the triangular face, not normalized */
     inline Pt::pt3D normal_vect() const
         {
-        Pt::pt3D p0 = refNode[ind[0]].p;
-        Pt::pt3D p1 = refNode[ind[1]].p;
-        Pt::pt3D p2 = refNode[ind[2]].p;
+        Pt::pt3D p0p1 = refNode[ind[1]].p - refNode[ind[0]].p;
+        Pt::pt3D p0p2 = refNode[ind[2]].p - refNode[ind[0]].p;
 
-        return ((p1 - p0) * (p2 - p0));
+        return p0p1*p0p2;
         }
     };  // end class Fac
 
