@@ -117,16 +117,6 @@ public:
         result[0] /= 3.0;
         }
 
-    /** interpolation for 3D vector field : the getter function is given as a parameter in order to
-     know what part of the node you want to interpolate This function is only usefull for
-     fmm_demag.h, in other parts of the code the generic interpolation template is directly called
-     */
-    inline void interpolation(std::function<Pt::pt3D(Nodes::Node)> getter /**< [in] */,
-                              Pt::pt3D (&result)[NPI] /**< [out] */) const
-        {
-        interpolation<Pt::pt3D>(getter, result);
-        }
-
     /** computes the integral contribution of the triangular face */
     void integrales(std::vector<Facette::prm> const &params /**< [in] */);
 
