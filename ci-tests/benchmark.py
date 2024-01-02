@@ -103,7 +103,7 @@ def get_params(default_elt_sizes, default_listNbThreads, default_final_time):
     parser.add_argument('-f','--fast',help='fast benchmarking',action="store_true")
     return parser.parse_args()
 
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 if __name__ == '__main__':
     default_final_time = 2e-11
     default_elt_sizes = [4.0, 3.5, 3.0, 2.5]
@@ -124,7 +124,9 @@ if __name__ == '__main__':
 
     try:
         str_exec = "../feellgood"
-        bench(str_exec, 'benchmark.txt', args.sizes, args.nbThreads, args.final_time)
+        str_version = version2test(str_exec)
+        outputFileName = 'benchmark' + str_version[-8:-1] + '.txt'
+        bench(str_exec, outputFileName, args.sizes, args.nbThreads, args.final_time)
     except KeyboardInterrupt:
         print(" benchmark interrupted")
         sys.exit()
