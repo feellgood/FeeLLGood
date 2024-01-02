@@ -84,8 +84,12 @@ void mesh::readMesh(Settings const &mySets)
 
                 for (int i = 0; i < nbNod; i++)
                     {
-                    msh >> symb >> node[i].p;
-                    node[i].p.rescale(scale);
+                    double x,y,z;
+                    msh >> symb >> x >> y >> z;//node[i].p;
+                    x *= scale;
+                    y *= scale;
+                    z *= scale;
+                    node[i].p = Eigen::Vector3d(x,y,z);//.rescale(scale);
                     }
                 }
 

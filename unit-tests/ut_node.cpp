@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(Stupid)
 BOOST_AUTO_TEST_CASE(node_get_p_lvl0)
     {
     Nodes::Node n;
-    Pt::pt3D pPos(1.0, 0.0, 0.0);
+    Eigen::Vector3d pPos(1.0, 0.0, 0.0);
 
     n.p = pPos;
 
@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(node_get_p_lvl0)
 BOOST_AUTO_TEST_CASE(node_get_p_lvl1, *boost::unit_test::tolerance(UT_TOL))
     {
     Nodes::Node n;
-    Pt::pt3D pPos(1.0, 3.0, 5.0);
+    Eigen::Vector3d pPos(1.0, 3.0, 5.0);
 
     n.p = pPos;
     n.p.normalize();

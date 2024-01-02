@@ -192,7 +192,14 @@ void Tet::charges(std::function<Pt::pt3D(Nodes::Node)> getter, std::vector<doubl
                   int &nsrc, double Ms) const
     {
     double dudx[DIM][NPI], dudy[DIM][NPI], dudz[DIM][NPI];
-    interpolation(getter, dudx, dudy, dudz);
+    //interpolation(getter, dudx, dudy, dudz);
+
+    Pt::pt3D vec_nod[N];
+    getDataFromNode<Pt::pt3D>(getter, vec_nod);
+
+    tiny::mult<double, N, NPI>(vec_nod, dadx, dudx);
+    tiny::mult<double, N, NPI>(vec_nod, dady, dudy);
+    tiny::mult<double, N, NPI>(vec_nod, dadz, dudz);
 
     for (int j = 0; j < NPI; j++, nsrc++)
         {
@@ -229,9 +236,9 @@ double Tet::zeemanEnergy(Tetra::prm const &param, double uz_drift, Pt::pt3D cons
 
 double Tet::Jacobian(Eigen::Ref<Eigen::Matrix3d> J)
     {
-    Pt::pt3D p0p1 = refNode[ind[1]].p - refNode[ind[0]].p;
-    Pt::pt3D p0p2 = refNode[ind[2]].p - refNode[ind[0]].p;
-    Pt::pt3D p0p3 = refNode[ind[3]].p - refNode[ind[0]].p;
+    Eigen::Vector3d p0p1 = refNode[ind[1]].p - refNode[ind[0]].p;
+    Eigen::Vector3d p0p2 = refNode[ind[2]].p - refNode[ind[0]].p;
+    Eigen::Vector3d p0p3 = refNode[ind[3]].p - refNode[ind[0]].p;
     J(0,0) = p0p1.x();
     J(0,1) = p0p2.x();
     J(0,2) = p0p3.x();
@@ -246,12 +253,11 @@ double Tet::Jacobian(Eigen::Ref<Eigen::Matrix3d> J)
 
 double Tet::calc_vol(void) const
     {
-    Pt::pt3D const &p0 = refNode[ind[0]].p;
-    Pt::pt3D const &p1 = refNode[ind[1]].p;
-    Pt::pt3D const &p2 = refNode[ind[2]].p;
-    Pt::pt3D const &p3 = refNode[ind[3]].p;
+    Eigen::Vector3d p0p1 = refNode[ind[1]].p - refNode[ind[0]].p;
+    Eigen::Vector3d p0p2 = refNode[ind[2]].p - refNode[ind[0]].p;
+    Eigen::Vector3d p0p3 = refNode[ind[3]].p - refNode[ind[0]].p;
 
-    return Pt::pTriple(p1 - p0, p2 - p0, p3 - p0) / 6.0;
+    return p0p1.dot(p0p2.cross(p0p3))/6.0; //Pt::pTriple(p1 - p0, p2 - p0, p3 - p0) / 6.0;
     }
 
 std::set<Facette::Fac> Tet::ownedFac() const

@@ -194,6 +194,7 @@ public:
 
     /** interpolation for a tensor : the getter function is given as a parameter in order to know
      * what part of the node you want to interpolate */
+/*
     inline void interpolation(std::function<Pt::pt3D(Nodes::Node)> getter,
                               double (&Tx)[Pt::DIM][NPI], double (&Ty)[Pt::DIM][NPI],
                               double (&Tz)[Pt::DIM][NPI]) const
@@ -205,6 +206,7 @@ public:
         tiny::mult<double, N, NPI>(vec_nod, dady, Ty);
         tiny::mult<double, N, NPI>(vec_nod, dadz, Tz);
         }
+*/
 
     /** interpolation for 3D vector field and a tensor : getter function is given as a parameter to
      * know what part of the node you want to interpolate */
@@ -368,8 +370,8 @@ public:
         Eigen::Matrix<double,Pt::DIM,N> vec_nod;
         for (int i = 0; i < N; i++)
             {
-            const Pt::pt3D & tmp = refNode[ind[i]].p;
-            vec_nod.col(i) << tmp.x(), tmp.y(), tmp.z();
+            //const Pt::pt3D & tmp = refNode[ind[i]].p;
+            vec_nod.col(i) << refNode[ind[i]].p;//tmp.x(), tmp.y(), tmp.z();
             }
         result = vec_nod * eigen_a;
         }

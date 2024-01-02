@@ -7,6 +7,8 @@
 
 #include <memory>
 
+#include <eigen3/Eigen/Dense>
+
 #include "config.h"
 #include "pt3D.h"
 
@@ -36,7 +38,7 @@ m(p,t) \f$. Many other values for the computation of the scalar potential \f$ \p
 */
 struct Node
     {
-    Pt::pt3D p;  /**< Physical position p=(x,y,z)  of the node */
+    Eigen::Vector3d p;  /**< Physical position p=(x,y,z)  of the node */
     Pt::pt3D u0; /**< magnetization at the start of the current time step */
     Pt::pt3D v0; /**< magnetization speed at the start of the current time step */
     Pt::pt3D u;  /**< magnetization after the current time step */
@@ -118,7 +120,7 @@ struct Node
     };  // end struct node
 
 /** getter for p */
-inline Pt::pt3D get_p(Node const &n /**< [in] */) { return n.p; }
+inline Eigen::Vector3d get_p(Node const &n /**< [in] */) { return n.p; }
 
 /** getter for u0*/
 inline const Pt::pt3D get_u0(Node const &n /**< [in] */) { return n.u0; }

@@ -96,7 +96,7 @@ Pt::pt3D VectorParser::get_vector(double arg) const
     return compute_vector(1);
     }
 
-Pt::pt3D VectorParser::get_vector(const Pt::pt3D &arg) const
+Pt::pt3D VectorParser::get_vector(const Eigen::Ref<Eigen::Vector3d> arg) const
     {
     duk_dup(ctx, -1);               // -> [ f f ]
     duk_push_number(ctx, arg.x());  // -> [ f f arg.x ]

@@ -102,7 +102,8 @@ bool Fem::recenter(double thres, char recentering_direction)
 
     for (int i = 0; i < msh.getNbNodes(); i++)
         {
-        pt3D p = msh.getNode_p(i) + D_i * p_dir;
+        Eigen::Vector3d tmp = msh.getNode_p(i);
+        pt3D p = pt3D(tmp.x(),tmp.y(),tmp.z()) + D_i * p_dir;
 
         if (p(idx_dir) - msh.c(idx_dir) > +0.5 * msh.l(idx_dir))
             {

@@ -45,7 +45,7 @@ void Fac::charges(std::function<Pt::pt3D(Nodes::Node)> getter, std::vector<doubl
 
     for (int j = 0; j < NPI; j++, nsrc++)
         {
-        srcDen[nsrc] = Ms * weight(j) * pScal(u[j], n);
+        srcDen[nsrc] = Ms * weight(j) * (u[j].x()*n(0) + u[j].y()*n(1) + u[j].z()*n(2) );//pScal(u[j], n);
         }
 
     calcCorr(getter, corr, u);
@@ -57,7 +57,7 @@ double Fac::demagEnergy(const Pt::pt3D (&u)[NPI], const double (&phi)[NPI]) cons
 
     for (int npi = 0; npi < NPI; npi++)
         {
-        q[npi] = Ms * pScal(u[npi], n);
+        q[npi] = Ms * (u[npi].x()*n(0) + u[npi].y()*n(1) + u[npi].z()*n(2));//pScal(u[npi], n);
         }
     double dens[NPI];
     for (int npi = 0; npi < NPI; npi++)
@@ -76,14 +76,14 @@ double Fac::potential(std::function<Pt::pt3D(Nodes::Node)> getter, int i) const
     Nodes::Node const &node2 = refNode[ind[ii]];
     Nodes::Node const &node3 = refNode[ind[iii]];
 
-    Pt::pt3D p1p2 = node2.p - node1.p;
-    Pt::pt3D p1p3 = node3.p - node1.p;
+    Eigen::Vector3d p1p2 = node2.p - node1.p;
+    Eigen::Vector3d p1p3 = node3.p - node1.p;
 
     std::function<double(double)> f = [](double x) { return sqrt(1.0 + x * x); };
 
     double b = p1p2.norm();
-    double t = Pt::pScal(p1p2, p1p3)
-               / b;  // carefull with t , if cos(p1p2,p1p3) is negative then t is negative
+    //double t = Pt::pScal(p1p2, p1p3) / b;
+    double t = p1p2.dot(p1p3) / b;  // carefull with t , if cos(p1p2,p1p3) < 0 then t < 0
     double _2s = 2. * calc_surf();
     double h = _2s / b;
 
@@ -101,9 +101,9 @@ double Fac::potential(std::function<Pt::pt3D(Nodes::Node)> getter, int i) const
     double log_1 = log((c * t + h + f(c) * r) / (b * (c + f(c))));
     double xi = b * log_1 / f(c);
 
-    double s1 = Pt::pScal(getter(node1), n);
-    double s2 = Pt::pScal(getter(node2), n);
-    double s3 = Pt::pScal(getter(node3), n);
+    double s1 = getter(node1).x()*n(0) + getter(node1).y()*n(1) + getter(node1).z()*n(2); //Pt::pScal(getter(node1), n);
+    double s2 = getter(node2).x()*n(0) + getter(node2).y()*n(1) + getter(node2).z()*n(2); //Pt::pScal(getter(node2), n);
+    double s3 = getter(node3).x()*n(0) + getter(node3).y()*n(1) + getter(node3).z()*n(2); //Pt::pScal(getter(node3), n);
 
     double pot = xi * s1
                  + ((xi * (h + c * t) - b * (r - b)) * s2 + b * (r - b - c * xi) * s3) * b
@@ -120,11 +120,11 @@ void Fac::calcCorr(std::function<const Pt::pt3D(Nodes::Node)> getter, std::vecto
     for (int i = 0; i < N; i++)
         {
         const int i_ = ind[i];
-        const Pt::pt3D &p_i_ = refNode[i_].p;
+        const Eigen::Vector3d &p_i_ = refNode[i_].p;
         for (int j = 0; j < NPI; j++)
             {
             double d_ij= sqrt( sq( p_i_.x() - gauss(0,j) ) + sq( p_i_.y() - gauss(1,j) ) + sq( p_i_.z() - gauss(2,j) ) );
-            corr[i_] -= Ms * pScal(u[j], n) * weight(j) / d_ij;
+            corr[i_] -= Ms * ( u[j].x()*n(0) + u[j].y()*n(1) + u[j].z()*n(2) ) * weight(j) / d_ij;//Ms * pScal(u[j], n) * weight(j) / d_ij;
             }
         corr[i_] += potential(getter, i);
         }

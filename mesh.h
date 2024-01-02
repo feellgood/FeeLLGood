@@ -68,7 +68,7 @@ public:
     inline int getNbTets(void) const { return tet.size(); }
 
     /** getter : return node.p */
-    inline const Pt::pt3D getNode_p(const int i) const { return node[i].p; }
+    inline const Eigen::Vector3d getNode_p(const int i) const { return node[i].p; }
     
     /** getter : return node */
     inline const Pt::pt3D getNode_u(const int i) const { return node[i].u; }
@@ -182,7 +182,8 @@ public:
         {
         for (unsigned int i = 0; i < node.size(); i++)
             {
-            node[i].u0 = mySets.getMagnetization(Nodes::get_p(node[i]));
+            Eigen::Vector3d tmp_p = Nodes::get_p(node[i]);
+            node[i].u0 = mySets.getMagnetization(tmp_p);
             node[i].u = node[i].u0;
             node[i].phi = 0.;
             node[i].phiv = 0.;
@@ -347,19 +348,14 @@ private:
 
                             if (it != sf.end())
                                 {  // found
-                                const Pt::pt3D &p0 = node[it->ind[0]].p;
-                                const Pt::pt3D &p1 = node[it->ind[1]].p;
-                                const Pt::pt3D &p2 = node[it->ind[2]].p;
-
+                                Eigen::Vector3d p0p1 = node[it->ind[1]].p - node[it->ind[0]].p;
+                                Eigen::Vector3d p0p2 = node[it->ind[2]].p - node[it->ind[0]].p;
+                                
                                 // fa.Ms will have the magnitude of first arg of copysign, with the
                                 // sign of second arg
                                 fa.Ms = std::copysign(
                                         nu0 * settings.paramTetra[it->idxPrm].J,
-                                        Pt::pTriple(
-                                                p1 - p0, p2 - p0,
-                                                fa.calc_norm()));  // carefull here, calc_norm
-                                                                   // computes the normal to the
-                                                                   // face before the idx swap
+                                        p0p1.dot(p0p2.cross(fa.calc_norm())) );  // carefull, calc_norm computes the normal to the face before idx swap
                                 }
                             std::swap(i1, i2);  // it seems from ref archive we do not want to swap
                                                 // inner fac indices but local i1 and i2

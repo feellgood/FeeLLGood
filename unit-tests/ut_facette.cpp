@@ -85,8 +85,8 @@ BOOST_AUTO_TEST_CASE(Fac_calc_surf, *boost::unit_test::tolerance(UT_TOL))
     int nbNod = 3;
     std::vector<Nodes::Node> node(nbNod);
 
-    Pt::pt3D p1(1, 0, 0), p2(0, 1, 0), p3(1, 1, 0), u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0),
-            v(0, 0, 0);
+    Eigen::Vector3d p1(1, 0, 0), p2(0, 1, 0), p3(1, 1, 0);
+    Pt::pt3D u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
     double phi0(0), phi(0), phiv0(0), phiv(0);
 
     Nodes::Node n1 = {p1,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
@@ -119,8 +119,8 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_pt3D, *boost::unit_test::tolerance(UT_TOL
     std::mt19937 gen(sd);
     std::uniform_real_distribution<> distrib(0.0, 1.0);
 
-    Pt::pt3D p1(1, 0, 0), p2(0, 1, 0), p3(1, 1, 0), u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0),
-            v(0, 0, 0);
+    Eigen::Vector3d p1(1, 0, 0), p2(0, 1, 0), p3(1, 1, 0);
+    Pt::pt3D u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
     double phi0(0), phi(0), phiv0(0), phiv(0);
 
     Nodes::Node n1 = {p1,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
@@ -174,7 +174,8 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_double, *boost::unit_test::tolerance(UT_T
     std::mt19937 gen(sd);
     std::uniform_real_distribution<> distrib(0.0, 1.0);
 
-    Pt::pt3D p1(1, 0, 0), p2(0, 1, 0), p3(1, 1, 0), u, v, u0, v0;
+    Eigen::Vector3d p1(1, 0, 0), p2(0, 1, 0), p3(1, 1, 0);
+    Pt::pt3D u, v, u0, v0;
     double phi0(0), phi(0), phiv0(0), phiv(0);
 
     Nodes::Node n1 = {p1,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
@@ -227,7 +228,7 @@ BOOST_AUTO_TEST_CASE(Fac_potential_u, *boost::unit_test::tolerance(UT_TOL))
     std::mt19937 gen(sd);
     std::uniform_real_distribution<> distrib(0.0, 1.0);
 
-    Pt::pt3D p1(1 + (distrib(gen) - 0.5) / 10.0, (distrib(gen) - 0.5) / 10.0,
+    Eigen::Vector3d p1(1 + (distrib(gen) - 0.5) / 10.0, (distrib(gen) - 0.5) / 10.0,
                 (distrib(gen) - 0.5) / 10.0),
             p2((distrib(gen) - 0.5) / 10.0, 1 + (distrib(gen) - 0.5) / 10.0,
                1 + (distrib(gen) - 0.5) / 10.0),
@@ -260,7 +261,7 @@ BOOST_AUTO_TEST_CASE(Fac_potential_u, *boost::unit_test::tolerance(UT_TOL))
     // src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
     double nx, ny, nz, Ms;
 
-    Pt::pt3D f_norm = f.calc_norm();
+    Eigen::Vector3d f_norm = f.calc_norm();
     nx = f_norm.x();
     ny = f_norm.y();
     nz = f_norm.z();
@@ -356,7 +357,7 @@ BOOST_AUTO_TEST_CASE(Fac_potential_v, *boost::unit_test::tolerance(10.0*UT_TOL))
     std::mt19937 gen(sd);
     std::uniform_real_distribution<> distrib(0.0, 1.0);
 
-    Pt::pt3D p1(1 + (distrib(gen) - 0.5) / 10.0, (distrib(gen) - 0.5) / 10.0,
+    Eigen::Vector3d p1(1 + (distrib(gen) - 0.5) / 10.0, (distrib(gen) - 0.5) / 10.0,
                 (distrib(gen) - 0.5) / 10.0),
             p2((distrib(gen) - 0.5) / 10.0, 1 + (distrib(gen) - 0.5) / 10.0,
                1 + (distrib(gen) - 0.5) / 10.0),
@@ -389,7 +390,7 @@ BOOST_AUTO_TEST_CASE(Fac_potential_v, *boost::unit_test::tolerance(10.0*UT_TOL))
     // src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
     double nx, ny, nz, Ms;
 
-    Pt::pt3D f_norm = f.calc_norm();
+    Eigen::Vector3d f_norm = f.calc_norm();
     nx = f_norm.x();
     ny = f_norm.y();
     nz = f_norm.z();
@@ -487,8 +488,8 @@ BOOST_AUTO_TEST_CASE(Fac_Pcoeff)
     std::mt19937 gen(sd);
     std::uniform_real_distribution<> distrib(0.0, 1.0);
 
-    Pt::pt3D p1(1, 0, 0), p2(0, 1, 0), p3(1, 1, 0), u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0),
-            v(0, 0, 0);
+    Eigen::Vector3d p1(1, 0, 0), p2(0, 1, 0), p3(1, 1, 0);
+    Pt::pt3D u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
     double phi0(0), phi(0), phiv0(0), phiv(0);
 
     node[0] = {p1, u0, v0, u, v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0), phi0, phi, phiv0, phiv};

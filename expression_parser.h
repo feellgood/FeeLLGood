@@ -10,6 +10,8 @@
 #include <duktape.h>
 #include <string>
 
+#include <eigen3/Eigen/Dense>
+
 /**
  * This class handles a JavaScript function that computes the three components of a vector, which
  * depends on either a single parameter t or on (x, y, z).
@@ -45,7 +47,7 @@ public:
     /**
      * Compute a vector from the given vector argument.
      */
-    Pt::pt3D get_vector(const Pt::pt3D &arg) const;
+    Pt::pt3D get_vector(const Eigen::Ref<Eigen::Vector3d> arg) const;
 
 private:
     /**

@@ -78,13 +78,13 @@ public:
         else
             {
             surf = 0.0;
-            n = Pt::pt3D(0,0,0);
+            n = Eigen::Vector3d(0,0,0);
             Ms = 0.0;
             }  // no index shift here if NOD == 0 : usefull while reordering face indices
         }
 
     double surf; /**< surface of the element */
-    Pt::pt3D n; /**< normal vector (unit vector) */
+    Eigen::Vector3d n; /**< normal vector (unit vector) */
     double Ms;   /**< magnetization at saturation of the face */
 
     /** weighted scalar product : factorized formulation: weight(1)=weight(2)=weight(3) */
@@ -152,9 +152,9 @@ public:
         }
 
     /** computes the norm to the face, returns a unit vector */
-    inline Pt::pt3D calc_norm(void) const
+    inline Eigen::Vector3d calc_norm(void) const
         {
-        Pt::pt3D _n = normal_vect();
+        Eigen::Vector3d _n = normal_vect();
         _n.normalize();
         return _n;
         }
@@ -170,8 +170,8 @@ public:
         Eigen::Matrix<double,Pt::DIM,N> vec_nod;
         for (int i = 0; i < N; i++)
             {
-            const Pt::pt3D & tmp = refNode[ind[i]].p;
-            vec_nod.col(i) << tmp.x(), tmp.y(), tmp.z();
+            //const Pt::pt3D & tmp = refNode[ind[i]].p;
+            vec_nod.col(i) << refNode[ind[i]].p;//tmp.x(), tmp.y(), tmp.z();
             }
         result = vec_nod * eigen_a;
         }
@@ -183,12 +183,12 @@ private:
     inline double calc_surf(void) const { return 0.5 * normal_vect().norm(); }
 
     /** return normal to the triangular face, not normalized */
-    inline Pt::pt3D normal_vect() const
+    inline Eigen::Vector3d normal_vect() const
         {
-        Pt::pt3D p0p1 = refNode[ind[1]].p - refNode[ind[0]].p;
-        Pt::pt3D p0p2 = refNode[ind[2]].p - refNode[ind[0]].p;
+        Eigen::Vector3d p0p1 = refNode[ind[1]].p - refNode[ind[0]].p;
+        Eigen::Vector3d p0p2 = refNode[ind[2]].p - refNode[ind[0]].p;
 
-        return p0p1*p0p2;
+        return p0p1.cross(p0p2);
         }
     };  // end class Fac
 

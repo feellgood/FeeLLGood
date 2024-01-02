@@ -210,9 +210,10 @@ public:
     /** evaluation of the magnetization components through math expression, each component of the
      magnetization is a function of (x,y,z). \return unit vector
      */
-    inline Pt::pt3D getMagnetization(const Pt::pt3D &p) const
+    inline Pt::pt3D getMagnetization(const Eigen::Ref<Eigen::Vector3d> p) const
         {
-        return mag_parser.get_vector(p).normalize();
+        Pt::pt3D tmp = mag_parser.get_vector(p);
+        return tmp.normalize();
         }
 
     /** evaluation of the field components through math expression, each component of the field is a
