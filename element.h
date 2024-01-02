@@ -80,18 +80,10 @@ class element
             for (int j = 0; j < N; j++)
                 {
                 int j_ = ind[j];
-                
-                if(Kp(i,j) != 0)
-                    { K.push_back(Eigen::Triplet<double>(NOD + i_, j_, Kp(i,j))); }
-                
-                if (Kp(i,N + j) != 0)
-                    { K.push_back(Eigen::Triplet<double>(NOD + i_, NOD + j_, Kp(i,N + j))); }
-                
-                if (Kp(N + i,j) != 0)
-                    { K.push_back(Eigen::Triplet<double>(i_, j_, Kp(N + i,j))); }
-                
-                if (Kp(N + i,N + j) != 0)
-                    { K.push_back(Eigen::Triplet<double>(i_, NOD + j_, Kp(N + i,N + j))); }
+                if(Kp(i,j) != 0) K.emplace_back( NOD + i_, j_, Kp(i,j) );
+                if (Kp(i,N + j) != 0) K.emplace_back( NOD + i_, NOD + j_, Kp(i,N + j) );
+                if (Kp(N + i,j) != 0) K.emplace_back( i_, j_, Kp(N + i,j) );
+                if (Kp(N + i,N + j) != 0) K.emplace_back( i_, NOD + j_, Kp(N + i,N + j) );
                 }
             }
         }
