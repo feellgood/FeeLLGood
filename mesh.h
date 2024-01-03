@@ -223,21 +223,6 @@ public:
                  std::string const &metadata /**< [in] */,
                  std::vector<double> const &val /**< [in] */) const;
 
-    /** computes all charges for the demag field to feed a tree in the fast multipole algo (scalfmm)
-     */
-    void calc_charges(std::function<const Pt::pt3D(Nodes::Node)> getter,
-                      std::vector<double> &srcDen, std::vector<double> &corr)
-        {
-        int nsrc = 0;
-        std::for_each(tet.begin(), tet.end(),
-                      [&srcDen, getter, &nsrc](Tetra::Tet const &tet)
-                      { tet.charges(getter, srcDen, nsrc); });
-
-        std::for_each(fac.begin(), fac.end(),
-                      [&srcDen, &corr, getter, &nsrc](Facette::Fac const &fac)
-                      { fac.charges(getter, srcDen, corr, nsrc); });
-        }
-
     /** setter for node[i]; what_to_set will fix what is the part of the node struct to set (usefull
      * for fmm_demag.h) */
     inline void set(const int i, std::function<void(Nodes::Node &, const double)> what_to_set,

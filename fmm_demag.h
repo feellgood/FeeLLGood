@@ -67,8 +67,7 @@ public:
     /** constructor, initialize memory for tree, kernel, sources corrections, initialize all sources
      */
     inline fmm(Mesh::mesh &msh /**< [in] */, const int ScalfmmNbThreads /**< [in] */)
-        : NOD(msh.getNbNodes()), FAC(msh.getNbFacs()), TET(msh.getNbTets()),
-          SRC(FAC * Facette::NPI + TET * Tetra::NPI),
+        : NOD(msh.getNbNodes()),
           tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels(NbLevels, boxWidth, boxCenter)
         {
         omp_set_num_threads(ScalfmmNbThreads);
@@ -88,6 +87,9 @@ public:
 
         insertCharges<Tetra::Tet, Tetra::NPI>(msh.tet, idxPart, msh.c);
         insertCharges<Facette::Fac, Facette::NPI>(msh.fac, idxPart, msh.c);
+
+        srcDen.resize( msh.getNbFacs()*Facette::NPI + msh.getNbTets()*Tetra::NPI );
+        corr.resize(NOD);
         }
 
     /**
@@ -99,11 +101,14 @@ public:
         demag(Nodes::get_v, Nodes::set_phiv, msh);
         }
 
+    /** sources */
+    std::vector<double> srcDen;
+    
+    /** corrections associated to the nodes, contributions only due to the facettes */
+    std::vector<double> corr;
+
 private:
     const int NOD; /**< number of nodes */
-    const int FAC; /**< number of facettes */
-    const int TET; /**< number of tetrahedrons */
-    const int SRC; /**< number of charge sources */
 
     OctreeClass tree;    /**< tree initialized by constructor */
     KernelClass kernels; /**< kernel initialized by constructor */
@@ -134,6 +139,20 @@ private:
                       });  // end for_each
         }
 
+    /** computes all charges from tetraedrons and facettes for the demag field to feed a tree in the fast multipole algo (scalfmm)
+     */
+    void calc_charges(std::function<const Pt::pt3D(Nodes::Node)> getter, Mesh::mesh &msh)
+        {
+        int nsrc = 0;
+        std::for_each(msh.tet.begin(), msh.tet.end(),
+                      [this, getter, &nsrc](Tetra::Tet const &tet)
+                      { tet.charges(getter, srcDen, nsrc); });
+
+        std::for_each(msh.fac.begin(), msh.fac.end(),
+                      [this, getter, &nsrc](Facette::Fac const &fac)
+                      { fac.charges(getter, srcDen, corr, nsrc); });
+        }
+
     /**
     computes the demag field, with (getter  = u,setter = phi) or (getter = v,setter = phi_v)
     */
@@ -142,14 +161,13 @@ private:
         {
         FmmClass algo(&tree, &kernels);
 
-        std::vector<double> srcDen(SRC, 0);
-        std::vector<double> corr(NOD, 0);
-
-        msh.calc_charges(getter, srcDen, corr);
+        std::fill(srcDen.begin(),srcDen.end(),0);
+        std::fill(corr.begin(),corr.end(),0);
+        calc_charges(getter, msh);
 
         // reset potentials and forces - physicalValues[idxPart] = Q
         tree.forEachLeaf(
-                [this, &srcDen](LeafClass *leaf)
+                [this](LeafClass *leaf)
                 {
                     const int nbParticlesInLeaf = leaf->getSrc()->getNbParticles();
                     const FVector<long long> &indexes = leaf->getSrc()->getIndexes();
@@ -168,7 +186,7 @@ private:
         algo.execute();
 
         tree.forEachLeaf(
-                [this, &corr, &msh, setter](LeafClass *leaf)
+                [this, &msh, setter](LeafClass *leaf)
                 {
                     const FReal *const potentials = leaf->getTargets()->getPotentials();
                     const int nbParticlesInLeaf = leaf->getTargets()->getNbParticles();
