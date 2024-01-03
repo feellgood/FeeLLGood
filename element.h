@@ -20,7 +20,7 @@ class element
     element(const std::vector<Nodes::Node> &_p_node /**< vector of nodes */,
             const int _idx /**< index to params */,
             std::initializer_list<int> & _i /**< indices to the nodes */
-            ) : idxPrm(_idx), refNode(_p_node)
+            ) : idxPrm(_idx), Ms(0), refNode(_p_node)
         {
         ind.assign(_i);
         P.setZero();
@@ -32,6 +32,9 @@ class element
     
     /** index of the material parameters of the element */
     int idxPrm;
+    
+    /** magnetization at saturation of the element */
+    double Ms;
     
     /** matrix for integrales */
     Eigen::Matrix<double,2*N,2*N> Kp;

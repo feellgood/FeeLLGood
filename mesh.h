@@ -54,6 +54,10 @@ public:
         vol = std::transform_reduce(std::execution::par, tet.begin(), tet.end(), 0.0, std::plus{},
                                     [](Tetra::Tet const &te) { return te.calc_vol(); });
 
+        // devNote: Ms for tetra is computed here, might be better to do it in Tet constructor
+        std::for_each(std::execution::par, tet.begin(), tet.end(), [&mySets](Tetra::Tet &te)
+                      { te.Ms = nu0 * mySets.paramTetra[te.idxPrm].J; }  );
+
         surf = std::transform_reduce(std::execution::par, fac.begin(), fac.end(), 0.0, std::plus{},
                                      [](Facette::Fac const &fa) { return fa.surf; });
         }
@@ -222,14 +226,12 @@ public:
     /** computes all charges for the demag field to feed a tree in the fast multipole algo (scalfmm)
      */
     void calc_charges(std::function<const Pt::pt3D(Nodes::Node)> getter,
-                      std::vector<double> &srcDen, std::vector<double> &corr,
-                      Settings const &settings)
+                      std::vector<double> &srcDen, std::vector<double> &corr)
         {
         int nsrc = 0;
-        std::for_each(
-                tet.begin(), tet.end(),
-                [&srcDen, getter, &nsrc, &settings](Tetra::Tet const &tet)
-                { tet.charges(getter, srcDen, nsrc, nu0 * settings.paramTetra[tet.idxPrm].J); });
+        std::for_each(tet.begin(), tet.end(),
+                      [&srcDen, getter, &nsrc](Tetra::Tet const &tet)
+                      { tet.charges(getter, srcDen, nsrc); });
 
         std::for_each(fac.begin(), fac.end(),
                       [&srcDen, &corr, getter, &nsrc](Facette::Fac const &fac)

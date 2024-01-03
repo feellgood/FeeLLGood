@@ -6,9 +6,7 @@ using namespace Pt;
 void Fac::integrales(std::vector<Facette::prm> const &params)
     {
     Pt::pt3D const &uk = params[idxPrm].uk;
-    double Kbis = 2.0 * (params[idxPrm].Ks)
-                  / Ms;  // carefull Ms of the facette here (could lead to div by zero ?)
-
+    double Kbis = 2.0*(params[idxPrm].Ks) / Ms;
     Pt::pt3D u[NPI];
     interpolation<Pt::pt3D>(Nodes::get_u0, u);
 

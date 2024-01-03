@@ -328,10 +328,10 @@ public:
 
     /** volume charges  */
     void charges(std::function<Pt::pt3D(Nodes::Node)> getter, std::vector<double> &srcDen,
-                 int &nsrc, double Ms) const;
+                 int &nsrc) const;
 
     /** demagnetizing energy of the tetrahedron */
-    double demagEnergy(Tetra::prm const &param, const double (&dudx)[Pt::DIM][NPI],
+    double demagEnergy(const double (&dudx)[Pt::DIM][NPI],
                        const double (&dudy)[Pt::DIM][NPI], const double (&dudz)[Pt::DIM][NPI],
                        const double (&phi)[NPI]) const;
 

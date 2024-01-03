@@ -93,10 +93,10 @@ public:
     /**
     launch the calculation of the demag field with second order corrections
     */
-    void calc_demag(Mesh::mesh &msh /**< [in] */, Settings &mySettings /**< [in] */)
+    void calc_demag(Mesh::mesh &msh /**< [in] */)
         {
-        demag(Nodes::get_u, Nodes::set_phi, msh, mySettings);
-        demag(Nodes::get_v, Nodes::set_phiv, msh, mySettings);
+        demag(Nodes::get_u, Nodes::set_phi, msh);
+        demag(Nodes::get_v, Nodes::set_phiv, msh);
         }
 
 private:
@@ -138,15 +138,14 @@ private:
     computes the demag field, with (getter  = u,setter = phi) or (getter = v,setter = phi_v)
     */
     void demag(std::function<const Pt::pt3D(Nodes::Node)> getter,
-               std::function<void(Nodes::Node &, const double)> setter, Mesh::mesh &msh,
-               Settings &settings)
+               std::function<void(Nodes::Node &, const double)> setter, Mesh::mesh &msh)
         {
         FmmClass algo(&tree, &kernels);
 
         std::vector<double> srcDen(SRC, 0);
         std::vector<double> corr(NOD, 0);
 
-        msh.calc_charges(getter, srcDen, corr, settings);
+        msh.calc_charges(getter, srcDen, corr);
 
         // reset potentials and forces - physicalValues[idxPart] = Q
         tree.forEachLeaf(

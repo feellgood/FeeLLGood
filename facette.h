@@ -79,13 +79,11 @@ public:
             {
             surf = 0.0;
             n = Eigen::Vector3d(0,0,0);
-            Ms = 0.0;
             }  // no index shift here if NOD == 0 : usefull while reordering face indices
         }
 
     double surf; /**< surface of the element */
     Eigen::Vector3d n; /**< normal vector (unit vector) */
-    double Ms;   /**< magnetization at saturation of the face */
 
     /** weighted scalar product : factorized formulation: weight(1)=weight(2)=weight(3) */
     inline double weightedScalarProd(const double (&X)[NPI] /**< [in] */) const

@@ -189,7 +189,7 @@ double Tet::anisotropyEnergy(Tetra::prm const &param, const double (&u)[DIM][NPI
     }
 
 void Tet::charges(std::function<Pt::pt3D(Nodes::Node)> getter, std::vector<double> &srcDen,
-                  int &nsrc, double Ms) const
+                  int &nsrc) const
     {
     double dudx[DIM][NPI], dudy[DIM][NPI], dudz[DIM][NPI];
     //interpolation(getter, dudx, dudy, dudz);
@@ -207,12 +207,12 @@ void Tet::charges(std::function<Pt::pt3D(Nodes::Node)> getter, std::vector<doubl
         }
     }
 
-double Tet::demagEnergy(Tetra::prm const &param, const double (&dudx)[DIM][NPI],
+double Tet::demagEnergy(const double (&dudx)[DIM][NPI],
                         const double (&dudy)[DIM][NPI], const double (&dudz)[DIM][NPI],
                         const double (&phi)[NPI]) const
     {
     double dens[NPI];
-    double Ms = nu0 * param.J;
+    //double Ms = nu0 * param.J;
 
     for (int npi = 0; npi < NPI; npi++)
         {
