@@ -35,18 +35,20 @@ double Fac::anisotropyEnergy(Facette::prm const &param, const Pt::pt3D (&u)[NPI]
     return weightedScalarProd(dens);
     }
 
-void Fac::charges(std::function<Pt::pt3D(Nodes::Node)> getter, std::vector<double> &srcDen,
-                  std::vector<double> &corr, int &nsrc) const
+Eigen::Vector<double,NPI> Fac::charges(std::function<Pt::pt3D(Nodes::Node)> getter, std::vector<double> &corr) const
     {
     Pt::pt3D u[NPI];
     interpolation<Pt::pt3D>(getter, u);
 
-    for (int j = 0; j < NPI; j++, nsrc++)
+    Eigen::Vector<double,NPI> result;
+
+    for (int j = 0; j < NPI; j++)
         {
-        srcDen[nsrc] = Ms * weight(j) * (u[j].x()*n(0) + u[j].y()*n(1) + u[j].z()*n(2) );//pScal(u[j], n);
+        result(j) = Ms * weight(j) * (u[j].x()*n(0) + u[j].y()*n(1) + u[j].z()*n(2) );//pScal(u[j], n);
         }
 
     calcCorr(getter, corr, u);
+    return result;
     }
 
 double Fac::demagEnergy(const Pt::pt3D (&u)[NPI], const double (&phi)[NPI]) const

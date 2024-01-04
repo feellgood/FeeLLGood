@@ -188,11 +188,9 @@ double Tet::anisotropyEnergy(Tetra::prm const &param, const double (&u)[DIM][NPI
     return weightedScalarProd(dens);
     }
 
-void Tet::charges(std::function<Pt::pt3D(Nodes::Node)> getter, std::vector<double> &srcDen,
-                  int &nsrc) const
+Eigen::Vector<double,NPI> Tet::charges(std::function<Pt::pt3D(Nodes::Node)> getter) const
     {
     double dudx[DIM][NPI], dudy[DIM][NPI], dudz[DIM][NPI];
-    //interpolation(getter, dudx, dudy, dudz);
 
     Pt::pt3D vec_nod[N];
     getDataFromNode<Pt::pt3D>(getter, vec_nod);
@@ -201,10 +199,12 @@ void Tet::charges(std::function<Pt::pt3D(Nodes::Node)> getter, std::vector<doubl
     tiny::mult<double, N, NPI>(vec_nod, dady, dudy);
     tiny::mult<double, N, NPI>(vec_nod, dadz, dudz);
 
-    for (int j = 0; j < NPI; j++, nsrc++)
+    Eigen::Vector<double,NPI> result;
+    for (int j = 0; j < NPI; j++)
         {
-        srcDen[nsrc] = -Ms * (dudx[0][j] + dudy[1][j] + dudz[2][j]) * weight[j];
+        result(j) = -Ms * (dudx[0][j] + dudy[1][j] + dudz[2][j]) * weight[j];
         }
+    return result;
     }
 
 double Tet::demagEnergy(const double (&dudx)[DIM][NPI],

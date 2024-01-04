@@ -143,14 +143,22 @@ private:
      */
     void calc_charges(std::function<const Pt::pt3D(Nodes::Node)> getter, Mesh::mesh &msh)
         {
-        int nsrc = 0;
+        int nsrc(0);
         std::for_each(msh.tet.begin(), msh.tet.end(),
                       [this, getter, &nsrc](Tetra::Tet const &tet)
-                      { tet.charges(getter, srcDen, nsrc); });
+                          {
+                          Eigen::Vector<double,Tetra::NPI> result = tet.charges(getter); 
+                          for(int i=0;i<Tetra::NPI;i++) { srcDen[nsrc+i] = result(i); }
+                          nsrc += Tetra::NPI;
+                          });
 
         std::for_each(msh.fac.begin(), msh.fac.end(),
                       [this, getter, &nsrc](Facette::Fac const &fac)
-                      { fac.charges(getter, srcDen, corr, nsrc); });
+                          {
+                          Eigen::Vector<double,Facette::NPI> result =  fac.charges(getter, corr);
+                          for(int i=0;i<Facette::NPI;i++) { srcDen[nsrc+i] = result(i); }
+                          nsrc += Facette::NPI;
+                          });
         }
 
     /**

@@ -122,9 +122,9 @@ public:
     double anisotropyEnergy(Facette::prm const &param /**< [in] */,
                             const Pt::pt3D (&u)[NPI] /**< [in] */) const;
 
-    /** surface charges  */
-    void charges(std::function<Pt::pt3D(Nodes::Node)> getter, std::vector<double> &srcDen,
-                 std::vector<double> &corr, int &nsrc) const;
+    /** return surface charges and computes some corrections */
+    Eigen::Vector<double,NPI> charges(std::function<Pt::pt3D(Nodes::Node)> getter /**< [in] */,
+                                      std::vector<double> &corr /**< [in|out]*/ ) const;
 
     /** demagnetizing energy of the facette */
     double demagEnergy(const Pt::pt3D (&u)[NPI] /**< [in] */,

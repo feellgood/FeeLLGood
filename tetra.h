@@ -326,9 +326,8 @@ public:
     /** anisotropy energy of the tetrahedron */
     double anisotropyEnergy(Tetra::prm const &param, const double (&u)[Pt::DIM][NPI]) const;
 
-    /** volume charges  */
-    void charges(std::function<Pt::pt3D(Nodes::Node)> getter, std::vector<double> &srcDen,
-                 int &nsrc) const;
+    /** return volume charges  */
+    Eigen::Vector<double,NPI> charges(std::function<Pt::pt3D(Nodes::Node)> getter) const;
 
     /** demagnetizing energy of the tetrahedron */
     double demagEnergy(const double (&dudx)[Pt::DIM][NPI],
