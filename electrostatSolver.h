@@ -69,7 +69,7 @@ void integrales(Facette::Fac const &fac, double pot_val, std::vector<double> &BE
     for (int npi = 0; npi < Facette::NPI; npi++)
         for (int ie = 0; ie < Facette::N; ie++)
             {
-            BE[ie] -= Facette::a[ie][npi] * pot_val * fac.weight(npi);
+            BE[ie] -= Facette::a[ie][npi] * pot_val * fac.weight[npi];
             }
     }
 

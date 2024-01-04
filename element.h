@@ -36,6 +36,9 @@ class element
     /** magnetization at saturation of the element */
     double Ms;
     
+    /** weights hat function of the element */
+    Eigen::Vector<double,NPI> weight;
+
     /** matrix for integrales */
     Eigen::Matrix<double,2*N,2*N> Kp;
 

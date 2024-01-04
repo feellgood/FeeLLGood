@@ -80,6 +80,10 @@ public:
             surf = 0.0;
             n = Eigen::Vector3d(0,0,0);
             }  // no index shift here if NOD == 0 : usefull while reordering face indices
+
+        // computes weight coefficients
+        for(int i=0;i<NPI;i++)
+            { weight[i] = 2.0 * surf * Facette::pds[i]; }
         }
 
     double surf; /**< surface of the element */
@@ -88,7 +92,7 @@ public:
     /** weighted scalar product : factorized formulation: weight(1)=weight(2)=weight(3) */
     inline double weightedScalarProd(const double (&X)[NPI] /**< [in] */) const
         {
-        return (X[0] * weight(0) + (X[1] + X[2] + X[3]) * weight(1));
+        return (X[0] * weight[0] + (X[1] + X[2] + X[3]) * weight[1]);
         }
 
     /** interpolation template; T == 3D vector field or T == double .The getter function is given as
@@ -129,9 +133,6 @@ public:
     /** demagnetizing energy of the facette */
     double demagEnergy(const Pt::pt3D (&u)[NPI] /**< [in] */,
                        const double (&phi)[NPI] /**< [in] */) const;
-
-    /** computes weight coefficients */
-    inline double weight(const int i) const { return 2.0 * surf * Facette::pds[i]; }
 
     /** computes correction on potential*/
     double potential(std::function<Pt::pt3D(Nodes::Node)> getter, int i) const;

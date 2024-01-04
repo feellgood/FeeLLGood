@@ -117,9 +117,10 @@ indices convention is<br>
 class Tet : public element<N,NPI>
     {
 public:
-    /** constructor for readMesh. It initializes weight hat function and dad(x|y|z) if \f$ | detJ |
-< \epsilon \f$ jacobian is considered degenerated unit tests : Tet_constructor; Tet_inner_tables
-*/
+    /** constructor. It initializes weight hat function with weights \f$ w_i = |J| p_i \f$
+    with  \f$ p_i = pds[i] = (D,E,E,E,E) \f$ and dad(x|y|z) if \f$ | detJ | < \epsilon \f$ jacobian
+    is considered degenerated unit tests : Tet_constructor; Tet_inner_tables
+    */
     inline Tet(const std::vector<Nodes::Node> &_p_node /**< vector of nodes */,
                const int _idx /**< [in] region index in region vector */,
                std::initializer_list<int> _i /**< [in] node index */)
@@ -162,9 +163,6 @@ public:
         extraCoeffs_BE = [](int, double, Pt::pt3D &, Pt::pt3D &, Pt::pt3D &, Pt::pt3D &,
                             Eigen::Ref<Eigen::Vector<double,3*N>>) {};
         }
-
-    /** weights \f$ w_i = |J| p_i  \f$ with  \f$ p_i = pds[i] = (D,E,E,E,E) \f$ */
-    double weight[NPI];
 
     /** variations of hat function along x directions */
     double dadx[N][NPI];

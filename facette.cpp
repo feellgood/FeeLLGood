@@ -15,7 +15,7 @@ void Fac::integrales(std::vector<Facette::prm> const &params)
 
     for (int npi = 0; npi < NPI; npi++)
         {
-        double _prefactor = weight(npi) * Kbis * pScal(uk, u[npi]);
+        double _prefactor = weight[npi] * Kbis * pScal(uk, u[npi]);
 
         for (int i = 0; i < N; i++)
             for(int k = 0;k<Pt::DIM;k++)
@@ -39,14 +39,9 @@ Eigen::Vector<double,NPI> Fac::charges(std::function<Pt::pt3D(Nodes::Node)> gett
     {
     Pt::pt3D u[NPI];
     interpolation<Pt::pt3D>(getter, u);
-
     Eigen::Vector<double,NPI> result;
-
     for (int j = 0; j < NPI; j++)
-        {
-        result(j) = Ms * weight(j) * (u[j].x()*n(0) + u[j].y()*n(1) + u[j].z()*n(2) );//pScal(u[j], n);
-        }
-
+        { result(j) = Ms * weight[j] * (u[j].x()*n(0) + u[j].y()*n(1) + u[j].z()*n(2) );} //pScal(u[j], n);
     calcCorr(getter, corr, u);
     return result;
     }
@@ -124,7 +119,7 @@ void Fac::calcCorr(std::function<const Pt::pt3D(Nodes::Node)> getter, std::vecto
         for (int j = 0; j < NPI; j++)
             {
             double d_ij= sqrt( sq( p_i_.x() - gauss(0,j) ) + sq( p_i_.y() - gauss(1,j) ) + sq( p_i_.z() - gauss(2,j) ) );
-            corr[i_] -= Ms * ( u[j].x()*n(0) + u[j].y()*n(1) + u[j].z()*n(2) ) * weight(j) / d_ij;//Ms * pScal(u[j], n) * weight(j) / d_ij;
+            corr[i_] -= Ms * ( u[j].x()*n(0) + u[j].y()*n(1) + u[j].z()*n(2) ) * weight[j] / d_ij;//Ms * pScal(u[j], n) * weight(j) / d_ij;
             }
         corr[i_] += potential(getter, i);
         }
