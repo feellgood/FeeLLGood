@@ -131,10 +131,6 @@ public:
     /** computes correction on potential*/
     double potential(std::function<Pt::pt3D(Nodes::Node)> getter, int i) const;
 
-    /** computes correction values */
-    void calcCorr(std::function<const Pt::pt3D(Nodes::Node)> getter, std::vector<double> &corr,
-                  Pt::pt3D (&u)[NPI]) const;
-
     /** lexicographic order on indices */
     inline bool operator<(const Fac &f) const
         {

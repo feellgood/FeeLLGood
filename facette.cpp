@@ -39,10 +39,27 @@ Eigen::Vector<double,NPI> Fac::charges(std::function<Pt::pt3D(Nodes::Node)> gett
     {
     Pt::pt3D u[NPI];
     interpolation<Pt::pt3D>(getter, u);
-    Eigen::Vector<double,NPI> result;
-    for (int j = 0; j < NPI; j++)
-        { result(j) = Ms * weight[j] * (u[j].x()*n(0) + u[j].y()*n(1) + u[j].z()*n(2) );} //pScal(u[j], n);
-    calcCorr(getter, corr, u);
+    
+    Eigen::Matrix<double,Pt::DIM,NPI> _u;
+    for (int i=0;i<Pt::DIM;i++)
+        for(int j=0;j<Facette::NPI;j++) _u(i,j) = u[j](i);
+
+    Eigen::Vector<double,NPI> result = Ms*weight.cwiseProduct( _u.transpose()*n );
+    Eigen::Matrix<double,Pt::DIM,NPI> gauss;
+    getPtGauss(gauss);
+    // calc corr node by node
+    for (int i = 0; i < N; i++)
+        {
+        const int i_ = ind[i];
+        const Eigen::Vector3d &p_i_ = refNode[i_].p;
+        for (int j = 0; j < NPI; j++)
+            {
+            double d_ij= (p_i_ - gauss.col(j)).norm();
+            corr[i_] -= result(j)/d_ij;//Ms * pScal(u[j], n) * weight(j) / d_ij;
+            }
+        corr[i_] += potential(getter, i);
+        }
+    
     return result;
     }
 
@@ -96,21 +113,3 @@ double Fac::potential(std::function<Pt::pt3D(Nodes::Node)> getter, int i) const
     return 0.5 * Ms * pot;
     }
 
-void Fac::calcCorr(std::function<const Pt::pt3D(Nodes::Node)> getter, std::vector<double> &corr,
-                   Pt::pt3D (&u)[NPI]) const
-    {
-    Eigen::Matrix<double,Pt::DIM,NPI> gauss;
-    getPtGauss(gauss);
-    // calc corr node by node
-    for (int i = 0; i < N; i++)
-        {
-        const int i_ = ind[i];
-        const Eigen::Vector3d &p_i_ = refNode[i_].p;
-        for (int j = 0; j < NPI; j++)
-            {
-            double d_ij= sqrt( sq( p_i_.x() - gauss(0,j) ) + sq( p_i_.y() - gauss(1,j) ) + sq( p_i_.z() - gauss(2,j) ) );
-            corr[i_] -= Ms * ( u[j].x()*n(0) + u[j].y()*n(1) + u[j].z()*n(2) ) * weight[j] / d_ij;//Ms * pScal(u[j], n) * weight(j) / d_ij;
-            }
-        corr[i_] += potential(getter, i);
-        }
-    }
