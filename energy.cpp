@@ -42,7 +42,14 @@ void Fem::energy(double const t, Settings &settings)
                           {
                           E_aniso += fa.anisotropyEnergy(param, u);
                           }
-                      E_demag += fa.demagEnergy(u, phi);
+                      
+                      //devNote: these copy will be removed when interpolation rewritten with eigen
+                      Eigen::Matrix<double,Pt::DIM,Facette::NPI> _u;
+                      for (int i=0;i<Pt::DIM;i++)
+                        for(int j=0;j<Facette::NPI;j++) _u(i,j) = u[j](i);
+                      
+                      Eigen::Vector<double,Facette::NPI> _phi {phi[0],phi[1],phi[2],phi[3]};
+                      E_demag += fa.demagEnergy(_u, _phi);
                   });
 
     calc_Etot();

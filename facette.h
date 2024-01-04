@@ -89,12 +89,6 @@ public:
     double surf; /**< surface of the element */
     Eigen::Vector3d n; /**< normal vector (unit vector) */
 
-    /** weighted scalar product : factorized formulation: weight(1)=weight(2)=weight(3) */
-    inline double weightedScalarProd(const double (&X)[NPI] /**< [in] */) const
-        {
-        return (X[0] * weight[0] + (X[1] + X[2] + X[3]) * weight[1]);
-        }
-
     /** interpolation template; T == 3D vector field or T == double .The getter function is given as
     a parameter in order to know what part of the node you want to interpolate if T is Pt::pt3D then
     result = vec_nod * a : mind the transposition due to the fact that vec_nod is an array of pt3D
@@ -131,8 +125,8 @@ public:
                                       std::vector<double> &corr /**< [in|out]*/ ) const;
 
     /** demagnetizing energy of the facette */
-    double demagEnergy(const Pt::pt3D (&u)[NPI] /**< [in] */,
-                       const double (&phi)[NPI] /**< [in] */) const;
+    double demagEnergy(Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> u /**< [in] */,
+                       Eigen::Ref<Eigen::Vector<double,NPI>> phi /**< [in] */) const;
 
     /** computes correction on potential*/
     double potential(std::function<Pt::pt3D(Nodes::Node)> getter, int i) const;

@@ -27,12 +27,12 @@ void Fac::integrales(std::vector<Facette::prm> const &params)
 
 double Fac::anisotropyEnergy(Facette::prm const &param, const Pt::pt3D (&u)[NPI]) const
     {  // surface Neel anisotropy (uk is a uniaxial easy axis)
-    double dens[NPI];
+    Eigen::Vector<double,NPI> dens;
     for (int npi = 0; npi < NPI; npi++)
         {
         dens[npi] = -param.Ks * Pt::sq(pScal(param.uk, u[npi]));
         }
-    return weightedScalarProd(dens);
+    return dens.dot(weight);
     }
 
 Eigen::Vector<double,NPI> Fac::charges(std::function<Pt::pt3D(Nodes::Node)> getter, std::vector<double> &corr) const
@@ -46,20 +46,10 @@ Eigen::Vector<double,NPI> Fac::charges(std::function<Pt::pt3D(Nodes::Node)> gett
     return result;
     }
 
-double Fac::demagEnergy(const Pt::pt3D (&u)[NPI], const double (&phi)[NPI]) const
+double Fac::demagEnergy(Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> u, Eigen::Ref<Eigen::Vector<double,NPI>> phi) const
     {
-    double q[NPI];
-
-    for (int npi = 0; npi < NPI; npi++)
-        {
-        q[npi] = Ms * (u[npi].x()*n(0) + u[npi].y()*n(1) + u[npi].z()*n(2));//pScal(u[npi], n);
-        }
-    double dens[NPI];
-    for (int npi = 0; npi < NPI; npi++)
-        {
-        dens[npi] = 0.5 * mu0 * q[npi] * phi[npi];
-        }
-    return weightedScalarProd(dens);
+    Eigen::Vector<double,NPI> dens = (u.transpose()*n).cwiseProduct(phi);
+    return 0.5*mu0*Ms*dens.dot(weight);
     }
 
 double Fac::potential(std::function<Pt::pt3D(Nodes::Node)> getter, int i) const
@@ -74,12 +64,15 @@ double Fac::potential(std::function<Pt::pt3D(Nodes::Node)> getter, int i) const
     Eigen::Vector3d p1p2 = node2.p - node1.p;
     Eigen::Vector3d p1p3 = node3.p - node1.p;
 
+    Eigen::Vector3d getter_n1 { getter(node1).x(), getter(node1).y(), getter(node1).z()};
+    Eigen::Vector3d getter_n2 { getter(node2).x(), getter(node2).y(), getter(node2).z()};
+    Eigen::Vector3d getter_n3 { getter(node3).x(), getter(node3).y(), getter(node3).z()};
+
     std::function<double(double)> f = [](double x) { return sqrt(1.0 + x * x); };
 
     double b = p1p2.norm();
-    //double t = Pt::pScal(p1p2, p1p3) / b;
     double t = p1p2.dot(p1p3) / b;  // carefull with t , if cos(p1p2,p1p3) < 0 then t < 0
-    double _2s = 2. * calc_surf();
+    double _2s = 2. * surf;
     double h = _2s / b;
 
     if (_2s < 0)
@@ -89,16 +82,13 @@ double Fac::potential(std::function<Pt::pt3D(Nodes::Node)> getter, int i) const
         }
 
     double c = (t - b) / h;
-    double r =
-            h
-            * f(t
-                / h);  // if _2s is positive it is the same as double r = sqrt( sq(_2s/b) + sq(t));
+    double r = h*f(t/h);  // if _2s > 0 it is the same as double r = sqrt( sq(_2s/b) + sq(t));
     double log_1 = log((c * t + h + f(c) * r) / (b * (c + f(c))));
     double xi = b * log_1 / f(c);
 
-    double s1 = getter(node1).x()*n(0) + getter(node1).y()*n(1) + getter(node1).z()*n(2); //Pt::pScal(getter(node1), n);
-    double s2 = getter(node2).x()*n(0) + getter(node2).y()*n(1) + getter(node2).z()*n(2); //Pt::pScal(getter(node2), n);
-    double s3 = getter(node3).x()*n(0) + getter(node3).y()*n(1) + getter(node3).z()*n(2); //Pt::pScal(getter(node3), n);
+    double s1 = getter_n1.dot(n);
+    double s2 = getter_n2.dot(n);
+    double s3 = getter_n3.dot(n);
 
     double pot = xi * s1
                  + ((xi * (h + c * t) - b * (r - b)) * s2 + b * (r - b - c * xi) * s3) * b
