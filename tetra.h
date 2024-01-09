@@ -393,13 +393,6 @@ private:
                 std::swap(ind[2], ind[3]);
         }
 
-    /** template getter to access and copy parts of the node vector of type T= double | Pt::pt3D */
-    template<class T>
-    void getDataFromNode(std::function<T(Nodes::Node)> getter, T (&X_data)[N]) const
-        {
-        for (int i = 0; i < N; i++)
-            X_data[i] = getter(refNode[ind[i]]);
-        }
     };  // end class Tetra
     }   // end namespace Tetra
 
