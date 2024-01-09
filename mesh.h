@@ -45,9 +45,9 @@ public:
         double zmin = minNodes(Pt::IDX_Z);
         double zmax = maxNodes(Pt::IDX_Z);
 
-        l = Pt::pt3D(xmax - xmin, ymax - ymin, zmax - zmin);
-        diam = l.maxLength();
-        c = Pt::pt3D(0.5 * (xmax + xmin), 0.5 * (ymax + ymin), 0.5 * (zmax + zmin));
+        l = Eigen::Vector3d(xmax - xmin, ymax - ymin, zmax - zmin);
+        diam = l.maxCoeff();
+        c = Eigen::Vector3d(0.5 * (xmax + xmin), 0.5 * (ymax + ymin), 0.5 * (zmax + zmin));
 
         sortNodes();
 
@@ -151,10 +151,10 @@ public:
         }
 
     /** isobarycenter */
-    Pt::pt3D c;
+    Eigen::Vector3d c;
 
     /** lengths along x,y,z axis */
-    Pt::pt3D l;
+    Eigen::Vector3d l;
 
     /** max of l coordinates, to define a bounding box */
     double diam;

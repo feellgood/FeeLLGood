@@ -14,7 +14,7 @@ void Fem::direction(enum index idx_dir)
     if (!dists) SYSTEM_ERROR;
     ANNpoint queryPt = annAllocPt(Pt::DIM);
 
-    pt3D qPt = msh.c - 0.5 * pDirect(pt3D(idx_dir), msh.l);
+    Eigen::Vector3d qPt = msh.c - 0.5 * msh.l.cwiseProduct(Eigen::Vector3d::Unit(idx_dir));
 
     /* left */
     queryPt[0] = qPt.x();
@@ -26,7 +26,7 @@ void Fem::direction(enum index idx_dir)
     double u2L = msh.getNode_u(ns)(idx_dir);
 
     /* right */
-    qPt = msh.c + 0.5 * pDirect(pt3D(idx_dir), msh.l);
+    qPt = msh.c + 0.5 * msh.l.cwiseProduct(Eigen::Vector3d::Unit(idx_dir));
     queryPt[0] = qPt.x();
     queryPt[1] = qPt.y();
     queryPt[2] = qPt.z();
@@ -69,8 +69,8 @@ bool Fem::recenter(double thres, char recentering_direction)
     if (!dists) SYSTEM_ERROR;
     ANNpoint queryPt = annAllocPt(Pt::DIM);
 
-    pt3D p_dir = pt3D(idx_dir);  // unit vector
-    pt3D qPt = msh.c - 0.5 * pDirect(p_dir, msh.l);
+    Eigen::Vector3d p_dir = Eigen::Vector3d::Unit(idx_dir);  // unit vector
+    Eigen::Vector3d qPt = msh.c - 0.5 * p_dir.cwiseProduct(msh.l);
 
     /* left frontier */
     queryPt[0] = qPt.x();
@@ -82,7 +82,7 @@ bool Fem::recenter(double thres, char recentering_direction)
     double u2L = msh.getNode_u(ns)(idx_dir);
 
     // right frontier
-    qPt = msh.c + 0.5 * pDirect(p_dir, msh.l);
+    qPt = msh.c + 0.5 * p_dir.cwiseProduct(msh.l);
     queryPt[0] = qPt.x();
     queryPt[1] = qPt.y();
     queryPt[2] = qPt.z();
@@ -102,8 +102,7 @@ bool Fem::recenter(double thres, char recentering_direction)
 
     for (int i = 0; i < msh.getNbNodes(); i++)
         {
-        Eigen::Vector3d tmp = msh.getNode_p(i);
-        pt3D p = pt3D(tmp.x(),tmp.y(),tmp.z()) + D_i * p_dir;
+        Eigen::Vector3d p = msh.getNode_p(i) + D_i * p_dir;
 
         if (p(idx_dir) - msh.c(idx_dir) > +0.5 * msh.l(idx_dir))
             {

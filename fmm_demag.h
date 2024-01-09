@@ -121,7 +121,7 @@ private:
     containing class T
     */
     template<class T, const int NPI>
-    void insertCharges(std::vector<T> const &container, FSize &idx, Pt::pt3D const &c)
+    void insertCharges(std::vector<T> const &container, FSize &idx, Eigen::Ref<Eigen::Vector3d> const c)
         {
         std::for_each(container.begin(), container.end(),
                       [this, c, &idx](T const &elem)

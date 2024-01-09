@@ -51,6 +51,7 @@ constexpr double a[N][NPI] = {{1. - u[0] - v[0] - w[0], 1. - u[1] - v[1] - w[1],
                               {v[0], v[1], v[2], v[3], v[4]},
                               {w[0], w[1], w[2], w[3], w[4]}};
 
+/** eigen constant matrix a */
 static const Eigen::Matrix<double,N,NPI> eigen_a = [] {
         Eigen::Matrix<double,N,NPI> tmp; tmp << a[0][0], a[0][1], a[0][2], a[0][3], a[0][4],
                                             a[1][0], a[1][1], a[1][2], a[1][3], a[1][4],
@@ -175,13 +176,13 @@ public:
         }
 
     /** variations of hat function along x directions */
-    Eigen::Matrix<double,N,NPI> dadx;//[N][NPI];
+    Eigen::Matrix<double,N,NPI> dadx;
 
     /** variations of hat function along y directions */
-    Eigen::Matrix<double,N,NPI> dady;//[N][NPI];
+    Eigen::Matrix<double,N,NPI> dady;
 
     /** variations of hat function along z directions */
-    Eigen::Matrix<double,N,NPI> dadz;//[N][NPI];
+    Eigen::Matrix<double,N,NPI> dadz;
 
     /** weighted scalar product */
     inline double weightedScalarProd(const double (&X)[NPI]) const
@@ -197,8 +198,7 @@ public:
         {
         Eigen::Vector<double,N> scalar_nod;
         for (int i = 0; i < N; i++) scalar_nod(i) = getter(refNode[ind[i]]);
-        //getDataFromNode<double>(getter, scalar_nod);
-        result = -scalar_nod.transpose() * eigen_a; //tiny::transposed_mult<double, N, NPI>(scalar_nod, a, result);
+        result = -scalar_nod.transpose() * eigen_a;
         }
 
     /** interpolation for 3D vector field and a tensor : getter function is given as a parameter to
@@ -210,46 +210,21 @@ public:
                               Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> Ty,
                               Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> Tz) const
         {
-        //double dudx[Pt::DIM][NPI], dudy[Pt::DIM][NPI], dudz[Pt::DIM][NPI];
-        //Eigen::Vector3d vec_nod[N];
         Eigen::Matrix<double,Pt::DIM,N> vec_nod;
         for (int i = 0; i < N; i++) vec_nod.col(i) = getter(refNode[ind[i]]);
-        //getDataFromNode<Eigen::Vector3d>(getter, vec_nod);
-
-        //Eigen::Matrix<double,Pt::DIM,NPI> u
-        result = vec_nod * eigen_a; //tiny::mult<double, N, NPI>(vec_nod, a, u);
-        Eigen::Matrix<double,Pt::DIM,NPI> dudx = vec_nod * dadx; //tiny::mult<double, N, NPI>(vec_nod, dadx, dudx);
-        Eigen::Matrix<double,Pt::DIM,NPI> dudy = vec_nod * dady; //tiny::mult<double, N, NPI>(vec_nod, dady, dudy);
-        Eigen::Matrix<double,Pt::DIM,NPI> dudz = vec_nod * dadz; //tiny::mult<double, N, NPI>(vec_nod, dadz, dudz);
+        
+        result = vec_nod * eigen_a;
+        Eigen::Matrix<double,Pt::DIM,NPI> dudx = vec_nod * dadx;
+        Eigen::Matrix<double,Pt::DIM,NPI> dudy = vec_nod * dady;
+        Eigen::Matrix<double,Pt::DIM,NPI> dudz = vec_nod * dadz;
 
         for (int npi = 0; npi < NPI; npi++)
             {
-            //result[npi] = Pt::pt3D(u[0][npi], u[1][npi], u[2][npi]);
             Tx.col(npi) << dudx(0,npi), dudx(1,npi), dudx(2,npi);
             Ty.col(npi) << dudy(0,npi), dudy(1,npi), dudy(2,npi);
             Tz.col(npi) << dudz(0,npi), dudz(1,npi), dudz(2,npi);
             }
         }
-
-
-    /** interpolation for 3D vector field and a tensor : the getter function is given as a parameter
-     * in order to know what part of the node you want to interpolate */
-/*
-    inline void interpolation(std::function<Eigen::Vector3d(Nodes::Node)> getter,
-                              double (&result)[Pt::DIM][NPI], double (&Tx)[Pt::DIM][NPI],
-                              double (&Ty)[Pt::DIM][NPI], double (&Tz)[Pt::DIM][NPI]) const
-        {
-        //Eigen::Vector3d vec_nod[N];
-        //getDataFromNode<Eigen::Vector3d>(getter, vec_nod);
-        Eigen::Matrix<double,Pt::DIM,N> vec_nod;
-        for (int i = 0; i < N; i++) vec_nod.col(i) = getter(refNode[ind[i]]);
-
-        tiny::mult<double, N, NPI>(vec_nod, a, result);
-        tiny::mult<double, N, NPI>(vec_nod, dadx, Tx);
-        tiny::mult<double, N, NPI>(vec_nod, dady, Ty);
-        tiny::mult<double, N, NPI>(vec_nod, dadz, Tz);
-        }
-*/
 
     /** interpolation for components of a field : the getter function is given as a parameter in
      * order to know what part of the node you want to interpolate */
@@ -258,10 +233,8 @@ public:
         {
         Eigen::Vector<double,N> scalar_nod;
         for (int i = 0; i < N; i++) scalar_nod(i) = getter(refNode[ind[i]]);
-        //getDataFromNode<double>(getter, scalar_nod);
-
+        
         X.setZero();
-        // same as tiny::neg_transposed_mult
         for (int j = 0; j < NPI; j++)
             {
             for (int i = 0; i < N; i++)
@@ -271,22 +244,9 @@ public:
             }
         }
 
-    /** interpolation for components of a field : the getter function is given as a parameter in
-     * order to know what part of the node you want to interpolate */
-    /*
-    inline void interpolation(std::function<double(Nodes::Node)> getter, double (&Xx)[NPI],
-                              double (&Xy)[NPI], double (&Xz)[NPI]) const
-        {
-        double scalar_nod[N];
-        getDataFromNode<double>(getter, scalar_nod);
-        tiny::neg_transposed_mult<double, N, NPI>(scalar_nod, dadx, Xx);
-        tiny::neg_transposed_mult<double, N, NPI>(scalar_nod, dady, Xy);
-        tiny::neg_transposed_mult<double, N, NPI>(scalar_nod, dadz, Xz);
-        }
-*/
-
     /** interpolation for scalar field : the getter function is given as a parameter in order to
      * know what part of the node you want to interpolate */
+
     inline void interpolation(std::function<double(Nodes::Node, Pt::index)> getter, Pt::index idx,
                               double (&result)[NPI]) const
         {

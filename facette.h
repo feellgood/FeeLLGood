@@ -92,16 +92,12 @@ public:
             { weight[i] = 2.0 * surf * Facette::pds[i]; }
         }
 
-    /** constant matrix for hat functions */
-    
-
     double surf; /**< surface of the element */
     Eigen::Vector3d n; /**< normal vector (unit vector) */
 
     /** interpolation function on the output of the getter.
     result = vec_nod * a 
     */
-    // tiny::mult<double, DIM, N, NPI> (vec_nod, a, result);
     void interpolation(std::function<Eigen::Vector3d(Nodes::Node)> getter /**< [in] */,
                        Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> result /**< [out] */) const
         {
@@ -109,19 +105,11 @@ public:
         for (int i = 0; i < N; i++) vec_nod.col(i) = getter(refNode[ind[i]]);
         
         result = vec_nod * eigen_a;
-        /*
-        result[0] = x0 + x1 + x2;
-        result[1] = (result[0] + 2.0 * x0) / 5.0;
-        result[2] = (result[0] + 2.0 * x1) / 5.0;
-        result[3] = (result[0] + 2.0 * x2) / 5.0;
-        result[0] /= 3.0;
-        */
         }
 
     /** interpolation function on the output of the getter,
      mind the transposition: result = transpose(scalar_nod) * a
     */
-    // tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result);
     void interpolation(std::function<double(Nodes::Node)> getter /**< [in] */,
                        Eigen::Ref<Eigen::Vector<double,NPI>> result /**< [out] */) const
         {
@@ -129,13 +117,6 @@ public:
         for (int i = 0; i < N; i++) scalar_nod(i) = getter(refNode[ind[i]]);
         
         result = scalar_nod.transpose() * eigen_a;
-        /*
-        result[0] = x0 + x1 + x2;
-        result[1] = (result[0] + 2.0 * x0) / 5.0;
-        result[2] = (result[0] + 2.0 * x1) / 5.0;
-        result[3] = (result[0] + 2.0 * x2) / 5.0;
-        result[0] /= 3.0;
-        */
         }
 
     /** computes the integral contribution of the triangular face */
