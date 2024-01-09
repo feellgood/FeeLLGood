@@ -7,19 +7,10 @@
 #include "facette.h"
 #include "node.h"
 #include "tiny.h"
+#include "ut_tools.h"
 #include "ut_config.h"
 
 BOOST_AUTO_TEST_SUITE(ut_facette)
-
-/*---------------------------------------*/
-/* minus one test: check boost is fine   */
-/*---------------------------------------*/
-
-BOOST_AUTO_TEST_CASE(Stupid)
-    {
-    float x = 1.0;
-    BOOST_CHECK(x != 0.0f);
-    }
 
 /*-----------------------------------------------------*/
 /* zero lvl tests : direct elementary member functions */
@@ -85,16 +76,14 @@ BOOST_AUTO_TEST_CASE(Fac_calc_surf, *boost::unit_test::tolerance(UT_TOL))
     int nbNod = 3;
     std::vector<Nodes::Node> node(nbNod);
 
-    Eigen::Vector3d p1(1, 0, 0), p2(0, 1, 0), p3(1, 1, 0);
-    Pt::pt3D u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
+    Eigen::Vector3d p1(1, 0, 0), p2(0, 1, 0), p3(1, 1, 0),
+                    u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
+    Eigen::Vector3d zero(0,0,0);
     double phi0(0), phi(0), phiv0(0), phiv(0);
 
-    Nodes::Node n1 = {p1,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n2 = {p2,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n3 = {p3,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
+    Nodes::Node n1 = {p1,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n2 = {p2,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n3 = {p3,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
 
     node[0] = n1;
     node[1] = n2;
@@ -119,29 +108,29 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_pt3D, *boost::unit_test::tolerance(UT_TOL
     std::mt19937 gen(sd);
     std::uniform_real_distribution<> distrib(0.0, 1.0);
 
-    Eigen::Vector3d p1(1, 0, 0), p2(0, 1, 0), p3(1, 1, 0);
-    Pt::pt3D u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
+    Eigen::Vector3d p1(1, 0, 0), p2(0, 1, 0), p3(1, 1, 0), u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
+    Eigen::Vector3d zero(0,0,0);
     double phi0(0), phi(0), phiv0(0), phiv(0);
 
-    Nodes::Node n1 = {p1,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n2 = {p2,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n3 = {p3,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
+    Nodes::Node n1 = {p1,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n2 = {p2,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n3 = {p3,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
 
     node[0] = n1;
     node[1] = n2;
     node[2] = n3;
 
-    node[0].u0 = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
-    node[1].u0 = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
-    node[2].u0 = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+    node[0].u0 = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+    node[1].u0 = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+    node[2].u0 = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
 
     Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
 
-    Pt::pt3D _u[Facette::NPI];
-    f.interpolation<Pt::pt3D>(Nodes::get_u0, _u);
+    Eigen::Matrix<double,Pt::DIM,Facette::N> _vec_nod;
+    for (int i = 0; i < Facette::N; i++) _vec_nod.col(i) = Nodes::get_u0(node[f.ind[i]]);
+    
+    Eigen::Matrix<double,Pt::DIM,Facette::NPI> _u = _vec_nod * Facette::eigen_a;
+    //f.interpolation<Eigen::Vector3d>(Nodes::get_u0, _u);
 
     double vec_nod[Pt::DIM][Facette::N];
     for (int i = 0; i < Pt::DIM; i++)
@@ -157,7 +146,7 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_pt3D, *boost::unit_test::tolerance(UT_TOL
 
     for (int i = 0; i < Pt::DIM; i++)
         for (int j = 0; j < Facette::NPI; j++)
-            diff_r += Pt::sq(result[i][j] - _u[j](i));
+            diff_r += Pt::sq(result[i][j] - _u(i,j));
 
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
     std::cout << "raw difference result =" << diff_r << std::endl;
@@ -174,16 +163,13 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_double, *boost::unit_test::tolerance(UT_T
     std::mt19937 gen(sd);
     std::uniform_real_distribution<> distrib(0.0, 1.0);
 
-    Eigen::Vector3d p1(1, 0, 0), p2(0, 1, 0), p3(1, 1, 0);
-    Pt::pt3D u, v, u0, v0;
+    Eigen::Vector3d p1(1, 0, 0), p2(0, 1, 0), p3(1, 1, 0), u, v, u0, v0;
+    Eigen::Vector3d zero(0,0,0);
     double phi0(0), phi(0), phiv0(0), phiv(0);
 
-    Nodes::Node n1 = {p1,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n2 = {p2,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n3 = {p3,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
+    Nodes::Node n1 = {p1,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n2 = {p2,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n3 = {p3,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
 
     node[0] = n1;
     node[1] = n2;
@@ -195,18 +181,17 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_double, *boost::unit_test::tolerance(UT_T
 
     Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
 
-    double _p[Facette::NPI];
-    f.interpolation<double>(Nodes::get_phi0, _p);
+    Eigen::Vector<double,Facette::NPI> _p;
+    f.interpolation(Nodes::get_phi0, _p);
 
+    // code ref
     double scal_nod[Facette::N];
     for (int j = 0; j < Facette::N; j++)
-        {
-        scal_nod[j] = node[j].phi0;
-        }
+        { scal_nod[j] = node[j].phi0; }
 
     double result[Facette::NPI];
-    // a[N][NPI]
     tiny::transposed_mult<double, Facette::N, Facette::NPI>(scal_nod, Facette::a, result);
+    // end code ref
 
     double diff_r = 0;
 
@@ -234,19 +219,17 @@ BOOST_AUTO_TEST_CASE(Fac_potential_u, *boost::unit_test::tolerance(UT_TOL))
                1 + (distrib(gen) - 0.5) / 10.0),
             p3((distrib(gen) - 0.5) / 10.0, 1 + (distrib(gen) - 0.5) / 10.0,
                (distrib(gen) - 0.5) / 10.0);
-    Pt::pt3D u0(M_PI * distrib(gen), 2 * M_PI * distrib(gen)),
-            u(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
-    Pt::pt3D v0(2 * distrib(gen) - 1, 2 * distrib(gen) - 1, 2 * distrib(gen) - 1),
+    Eigen::Vector3d u0 = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+    Eigen::Vector3d u = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+    Eigen::Vector3d v0(2 * distrib(gen) - 1, 2 * distrib(gen) - 1, 2 * distrib(gen) - 1),
             v(2 * distrib(gen) - 1, 2 * distrib(gen) - 1, 2 * distrib(gen) - 1);
 
+    Eigen::Vector3d zero(0,0,0);
     double phi0(0), phi(0), phiv0(0), phiv(0);
 
-    Nodes::Node n1 = {p1,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n2 = {p2,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n3 = {p3,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
+    Nodes::Node n1 = {p1,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n2 = {p2,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n3 = {p3,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
 
     node[0] = n1;
     node[1] = n2;
@@ -363,19 +346,17 @@ BOOST_AUTO_TEST_CASE(Fac_potential_v, *boost::unit_test::tolerance(10.0*UT_TOL))
                1 + (distrib(gen) - 0.5) / 10.0),
             p3((distrib(gen) - 0.5) / 10.0, 1 + (distrib(gen) - 0.5) / 10.0,
                (distrib(gen) - 0.5) / 10.0);
-    Pt::pt3D u0(M_PI * distrib(gen), 2 * M_PI * distrib(gen)),
-            u(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
-    Pt::pt3D v0(2 * distrib(gen) - 1, 2 * distrib(gen) - 1, 2 * distrib(gen) - 1),
+    Eigen::Vector3d u0 = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+    Eigen::Vector3d u = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+    Eigen::Vector3d v0(2 * distrib(gen) - 1, 2 * distrib(gen) - 1, 2 * distrib(gen) - 1),
             v(2 * distrib(gen) - 1, 2 * distrib(gen) - 1, 2 * distrib(gen) - 1);
 
+    Eigen::Vector3d zero(0,0,0);
     double phi0(0), phi(0), phiv0(0), phiv(0);
 
-    Nodes::Node n1 = {p1,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n2 = {p2,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n3 = {p3,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
+    Nodes::Node n1 = {p1,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n2 = {p2,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n3 = {p3,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
 
     node[0] = n1;
     node[1] = n2;
@@ -488,17 +469,17 @@ BOOST_AUTO_TEST_CASE(Fac_Pcoeff)
     std::mt19937 gen(sd);
     std::uniform_real_distribution<> distrib(0.0, 1.0);
 
-    Eigen::Vector3d p1(1, 0, 0), p2(0, 1, 0), p3(1, 1, 0);
-    Pt::pt3D u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
+    Eigen::Vector3d p1(1, 0, 0), p2(0, 1, 0), p3(1, 1, 0), u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
+    Eigen::Vector3d zero(0,0,0);
     double phi0(0), phi(0), phiv0(0), phiv(0);
 
-    node[0] = {p1, u0, v0, u, v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0), phi0, phi, phiv0, phiv};
-    node[1] = {p2, u0, v0, u, v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0), phi0, phi, phiv0, phiv};
-    node[2] = {p3, u0, v0, u, v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0), phi0, phi, phiv0, phiv};
+    node[0] = {p1, u0, v0, u, v, zero, zero, phi0, phi, phiv0, phiv};
+    node[1] = {p2, u0, v0, u, v, zero, zero, phi0, phi, phiv0, phiv};
+    node[2] = {p3, u0, v0, u, v, zero, zero, phi0, phi, phiv0, phiv};
 
     for (int i = 0; i < nbNod; i++)
         {
-        node[i].u0 = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        node[i].u0 = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
         node[i].setBasis(2 * M_PI * distrib(gen));
         }
 
@@ -510,11 +491,11 @@ BOOST_AUTO_TEST_CASE(Fac_Pcoeff)
 
     for (int i = 0; i < N; i++)
         {
-        const Pt::pt3D &ep = node[f.ind[i]].ep;
+        const Eigen::Vector3d &ep = node[f.ind[i]].ep;
         Pref[i][i] = ep.x();
         Pref[i][N + i] = ep.y();
         Pref[i][2 * N + i] = ep.z();
-        const Pt::pt3D &eq = node[f.ind[i]].eq;
+        const Eigen::Vector3d &eq = node[f.ind[i]].eq;
         Pref[N + i][i] = eq.x();
         Pref[N + i][N + i] = eq.y();
         Pref[N + i][2 * N + i] = eq.z();

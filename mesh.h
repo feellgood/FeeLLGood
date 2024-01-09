@@ -75,13 +75,13 @@ public:
     inline const Eigen::Vector3d getNode_p(const int i) const { return node[i].p; }
     
     /** getter : return node */
-    inline const Pt::pt3D getNode_u(const int i) const { return node[i].u; }
+    inline const Eigen::Vector3d getNode_u(const int i) const { return node[i].u; }
 
     /** setter for u0 */
-    inline void set_node_u0(const int i, Pt::pt3D const &val) { node[i].u0 = val; }
+    inline void set_node_u0(const int i, Eigen::Vector3d const &val) { node[i].u0 = val; }
 
     /** fix to zero node[i].v */
-    inline void set_node_zero_v(const int i) { node[i].v = Pt::pt3D(0., 0., 0.); }
+    inline void set_node_zero_v(const int i) { node[i].v.setZero(); }
 
     /** basic informations on the mesh */
     void infos(void) const
@@ -136,10 +136,10 @@ public:
 
         for (unsigned int i = 0; i < NOD; i++)
             {
-            Pt::pt3D const& n_v = node[i].v;
+            Eigen::Vector3d const& n_v = node[i].v;
             
-            G(i) = n_v.pScal(node[i].ep) / gamma0;
-            G(NOD + i) = n_v.pScal(node[i].eq) / gamma0;
+            G(i) = n_v.dot(node[i].ep) / gamma0;
+            G(NOD + i) = n_v.dot(node[i].eq) / gamma0;
             }
         }
 

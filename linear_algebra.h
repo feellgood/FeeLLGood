@@ -15,7 +15,6 @@
 #include "feellgoodSettings.h"
 #include "mesh.h"
 #include "node.h"
-#include "pt3D.h"
 #include "tetra.h"
 
 /** \class LinAlgebra
@@ -41,7 +40,7 @@ public:
         }
 
     /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors) */
-    void prepareElements(Pt::pt3D const &Hext /**< [in] applied field */, timing const &t_prm /**< [in] */);
+    void prepareElements(Eigen::Vector3d const &Hext /**< [in] applied field */, timing const &t_prm /**< [in] */);
 
     /**  solver, uses bicgstab, sparse matrix and vector are filled with multiThreading */
     int solver(timing const &t_prm /**< [in] */);

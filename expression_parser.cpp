@@ -78,7 +78,7 @@ double VectorParser::get_vector_component(int idx) const
     return val;
     }
 
-Pt::pt3D VectorParser::compute_vector(int argument_count) const
+Eigen::Vector3d VectorParser::compute_vector(int argument_count) const
     {
     duk_int_t err = duk_pcall(ctx, argument_count);  // [ f f args... ] -> [ f v ]
     die_if_error(err);
@@ -86,17 +86,17 @@ Pt::pt3D VectorParser::compute_vector(int argument_count) const
     double y = get_vector_component(1);
     double z = get_vector_component(2);
     duk_pop(ctx);  // -> [ f ]
-    return Pt::pt3D(x, y, z);
+    return Eigen::Vector3d(x, y, z);
     }
 
-Pt::pt3D VectorParser::get_vector(double arg) const
+Eigen::Vector3d VectorParser::get_vector(double arg) const
     {
     duk_dup(ctx, -1);           // -> [ f f ]
     duk_push_number(ctx, arg);  // -> [ f f arg ]
     return compute_vector(1);
     }
 
-Pt::pt3D VectorParser::get_vector(const Eigen::Ref<Eigen::Vector3d> arg) const
+Eigen::Vector3d VectorParser::get_vector(const Eigen::Ref<Eigen::Vector3d> arg) const
     {
     duk_dup(ctx, -1);               // -> [ f f ]
     duk_push_number(ctx, arg.x());  // -> [ f f arg.x ]

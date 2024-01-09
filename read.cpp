@@ -227,9 +227,10 @@ double mesh::readSol(bool VERBOSE, const std::string fileName)
 
     for (unsigned int i = 0; i < node.size(); i++)
         {
-        Nodes::Node &n = node[i];
+        double mx,my,mz;
         unsigned int i_;
-        fin >> i_ >> n.u >> n.phi;
+        fin >> i_ >> mx >> my >> mz >> node[i].phi;
+        node[i].u = Eigen::Vector3d(mx,my,mz);
         if (i != i_)
             {
             std::cerr << "error: mesh node index mismatch between mesh and input .sol file"

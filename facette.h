@@ -30,6 +30,12 @@ constexpr double a[N][NPI] = {
         {u[0], u[1], u[2], u[3]},
         {v[0], v[1], v[2], v[3]}};
 
+static const Eigen::Matrix<double,N,NPI> eigen_a = [] {
+    Eigen::Matrix<double,N,NPI> tmp; tmp << a[0][0], a[0][1], a[0][2], a[0][3],
+                                            a[1][0], a[1][1], a[1][2], a[1][3],
+                                            a[2][0], a[2][1], a[2][2], a[2][3];
+                                            return tmp; }();
+
 /** \class prm
 region number and material constants
 */
@@ -86,31 +92,50 @@ public:
             { weight[i] = 2.0 * surf * Facette::pds[i]; }
         }
 
+    /** constant matrix for hat functions */
+    
+
     double surf; /**< surface of the element */
     Eigen::Vector3d n; /**< normal vector (unit vector) */
 
-    /** interpolation template; T == 3D vector field or T == double .The getter function is given as
-    a parameter in order to know what part of the node you want to interpolate if T is Pt::pt3D then
-    result = vec_nod * a : mind the transposition due to the fact that vec_nod is an array of pt3D
-    if T is double then result = transpose(scalar_nod) * a
-        */
-
-    // tiny::mult<double, DIM, N, NPI> (vec_nod, a, result); //if T == PT::pt3D
-    // tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result); //if T == double
-    template<class T>
-    void interpolation(std::function<T(Nodes::Node)> getter /**< [in] */,
-                       T (&result)[NPI] /**< [out] */) const
+    /** interpolation function on the output of the getter.
+    result = vec_nod * a 
+    */
+    // tiny::mult<double, DIM, N, NPI> (vec_nod, a, result);
+    void interpolation(std::function<Eigen::Vector3d(Nodes::Node)> getter /**< [in] */,
+                       Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> result /**< [out] */) const
         {
-        const T x0(getter(refNode[ind[0]])), x1(getter(refNode[ind[1]])),
-                x2(getter(refNode[ind[2]]));
-
-        result[0] = x0;
-        result[0] += x1;
-        result[0] += x2;
+        Eigen::Matrix<double,Pt::DIM,N> vec_nod;
+        for (int i = 0; i < N; i++) vec_nod.col(i) = getter(refNode[ind[i]]);
+        
+        result = vec_nod * eigen_a;
+        /*
+        result[0] = x0 + x1 + x2;
         result[1] = (result[0] + 2.0 * x0) / 5.0;
         result[2] = (result[0] + 2.0 * x1) / 5.0;
         result[3] = (result[0] + 2.0 * x2) / 5.0;
         result[0] /= 3.0;
+        */
+        }
+
+    /** interpolation function on the output of the getter,
+     mind the transposition: result = transpose(scalar_nod) * a
+    */
+    // tiny::transposed_mult<double, N, NPI> (scalar_nod, a, result);
+    void interpolation(std::function<double(Nodes::Node)> getter /**< [in] */,
+                       Eigen::Ref<Eigen::Vector<double,NPI>> result /**< [out] */) const
+        {
+        Eigen::Vector<double,N> scalar_nod;
+        for (int i = 0; i < N; i++) scalar_nod(i) = getter(refNode[ind[i]]);
+        
+        result = scalar_nod.transpose() * eigen_a;
+        /*
+        result[0] = x0 + x1 + x2;
+        result[1] = (result[0] + 2.0 * x0) / 5.0;
+        result[2] = (result[0] + 2.0 * x1) / 5.0;
+        result[3] = (result[0] + 2.0 * x2) / 5.0;
+        result[0] /= 3.0;
+        */
         }
 
     /** computes the integral contribution of the triangular face */
@@ -118,10 +143,10 @@ public:
 
     /** anisotropy energy of the facette */
     double anisotropyEnergy(Facette::prm const &param /**< [in] */,
-                            const Pt::pt3D (&u)[NPI] /**< [in] */) const;
+                            Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> const u /**< [in] */) const;
 
     /** return surface charges and computes some corrections */
-    Eigen::Vector<double,NPI> charges(std::function<Pt::pt3D(Nodes::Node)> getter /**< [in] */,
+    Eigen::Vector<double,NPI> charges(std::function<Eigen::Vector3d(Nodes::Node)> getter /**< [in] */,
                                       std::vector<double> &corr /**< [in|out]*/ ) const;
 
     /** demagnetizing energy of the facette */
@@ -129,7 +154,7 @@ public:
                        Eigen::Ref<Eigen::Vector<double,NPI>> phi /**< [in] */) const;
 
     /** computes correction on potential*/
-    double potential(std::function<Pt::pt3D(Nodes::Node)> getter, int i) const;
+    double potential(std::function<Eigen::Vector3d(Nodes::Node)> getter, int i) const;
 
     /** lexicographic order on indices */
     inline bool operator<(const Fac &f) const
@@ -151,17 +176,9 @@ public:
     /** returns Gauss points in result = vec_nod*Facette::a */
     void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> result) const
         {
-        static const Eigen::Matrix<double,N,NPI> eigen_a = [] {
-        Eigen::Matrix<double,N,NPI> tmp; tmp << a[0][0], a[0][1], a[0][2], a[0][3],
-                                                a[1][0], a[1][1], a[1][2], a[1][3],
-                                                a[2][0], a[2][1], a[2][2], a[2][3];
-                                                return tmp; }();
         Eigen::Matrix<double,Pt::DIM,N> vec_nod;
         for (int i = 0; i < N; i++)
-            {
-            //const Pt::pt3D & tmp = refNode[ind[i]].p;
-            vec_nod.col(i) << refNode[ind[i]].p;//tmp.x(), tmp.y(), tmp.z();
-            }
+            { vec_nod.col(i) << refNode[ind[i]].p; }
         result = vec_nod * eigen_a;
         }
 

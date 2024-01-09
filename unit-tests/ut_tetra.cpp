@@ -5,6 +5,7 @@
 #include <random>
 
 #include "tetra.h"
+#include "ut_tools.h"
 #include "ut_config.h"
 
 BOOST_AUTO_TEST_SUITE(ut_tetra)
@@ -45,27 +46,22 @@ BOOST_AUTO_TEST_CASE(Tet_inner_tables, *boost::unit_test::tolerance(UT_TOL))
     std::mt19937 gen(sd);
     std::uniform_real_distribution<> distrib(0.0, 1.0);
 
-    Eigen::Vector3d p0(0, 0, 0), p1(1, 0, 0), p2(0, 1, 0), p3(0, 0, 1);
-    Pt::pt3D u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
+    Eigen::Vector3d p0(0, 0, 0), p1(1, 0, 0), p2(0, 1, 0), p3(0, 0, 1), 
+                    u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
+    Eigen::Vector3d zero(0,0,0);
     double phi0(0), phi(0), phiv0(0), phiv(0);
 
-    Nodes::Node n0 = {p0,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n1 = {p1,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n2 = {p2,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n3 = {p3,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
+    Nodes::Node n0 = {p0,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n1 = {p1,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n2 = {p2,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n3 = {p3,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
 
     node[0] = n0;
     node[1] = n1;
     node[2] = n2;
     node[3] = n3;
     for (int i = 0; i < nbNod; i++)
-        {
-        node[i].u0 = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
-        }
+        { node[i].u0 = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen)); }
 
     // carefull with indices (starting from 1)
     Tetra::Tet t(node, 0, {1, 2, 3, 4});
@@ -115,9 +111,9 @@ BOOST_AUTO_TEST_CASE(Tet_inner_tables, *boost::unit_test::tolerance(UT_TOL))
         {
         for (int ie = 0; ie < Tetra::N; ie++)
             {
-            result_dadx += Pt::sq(_dadx[ie][npi] - t.dadx[ie][npi]);
-            result_dady += Pt::sq(_dady[ie][npi] - t.dady[ie][npi]);
-            result_dadz += Pt::sq(_dadz[ie][npi] - t.dadz[ie][npi]);
+            result_dadx += Pt::sq(_dadx[ie][npi] - t.dadx(ie,npi));
+            result_dady += Pt::sq(_dady[ie][npi] - t.dady(ie,npi));
+            result_dadz += Pt::sq(_dadz[ie][npi] - t.dadz(ie,npi));
             }
         result_w += Pt::sq(weight[npi] - t.weight[npi]);
         }
@@ -138,18 +134,15 @@ BOOST_AUTO_TEST_CASE(Tet_calc_vol, *boost::unit_test::tolerance(UT_TOL))
     int nbNod = 4;
     std::vector<Nodes::Node> node(nbNod);
 
-    Eigen::Vector3d p0(0, 0, 0), p1(1, 0, 0), p2(0, 1, 0), p3(0, 0, 1);
-    Pt::pt3D u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
+    Eigen::Vector3d p0(0, 0, 0), p1(1, 0, 0), p2(0, 1, 0), p3(0, 0, 1), 
+                    u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
+    Eigen::Vector3d zero(0,0,0);
     double phi0(0), phi(0), phiv0(0), phiv(0);
 
-    Nodes::Node n0 = {p0,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n1 = {p1,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n2 = {p2,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n3 = {p3,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
+    Nodes::Node n0 = {p0,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n1 = {p1,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n2 = {p2,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n3 = {p3,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
 
     node[0] = n0;
     node[1] = n1;
@@ -165,29 +158,29 @@ BOOST_AUTO_TEST_CASE(Tet_calc_vol, *boost::unit_test::tolerance(UT_TOL))
     BOOST_TEST(vol == result);
     }
 
-double sq_dist(double _x[Pt::DIM][Tetra::NPI], Pt::pt3D X[Tetra::NPI])
+double sq_dist(double _x[Pt::DIM][Tetra::NPI], Eigen::Ref<Eigen::Matrix<double,Pt::DIM,Tetra::NPI>> X)
     {
     double val(0.0);
 
-    for (int i = 0; i < Tetra::N; i++)
+    for (int i = 0; i < Tetra::NPI; i++)
         for (int j = 0; j < Pt::DIM; j++)
             {
-            val += Pt::sq(_x[j][i] - X[i](j));
+            val += Pt::sq(_x[j][i] - X(j,i));
             }
 
     return val;
     }
 
 double sq_dist(double _x[Tetra::NPI], double _y[Tetra::NPI], double _z[Tetra::NPI],
-               Pt::pt3D X[Tetra::NPI])
+               Eigen::Ref<Eigen::Matrix<double,Pt::DIM,Tetra::NPI>> X)
     {
     double val(0.0);
 
-    for (int i = 0; i < Tetra::N; i++)
+    for (int i = 0; i < Tetra::NPI; i++)
         {
-        val += Pt::sq(_x[i] - X[i].x());
-        val += Pt::sq(_y[i] - X[i].y());
-        val += Pt::sq(_z[i] - X[i].z());
+        val += Pt::sq(_x[i] - X.col(i).x());
+        val += Pt::sq(_y[i] - X.col(i).y());
+        val += Pt::sq(_z[i] - X.col(i).z());
         }
 
     return val;
@@ -202,18 +195,15 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation, *boost::unit_test::tolerance(UT_TOL)
     std::mt19937 gen(sd);
     std::uniform_real_distribution<> distrib(0.0, 1.0);
 
-    Eigen::Vector3d p0(0, 0, 0), p1(1, 0, 0), p2(0, 1, 0), p3(0, 0, 1);
-    Pt::pt3D u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
+    Eigen::Vector3d p0(0, 0, 0), p1(1, 0, 0), p2(0, 1, 0), p3(0, 0, 1), 
+                    u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
+    Eigen::Vector3d zero(0,0,0);
     double phi0(0), phi(0), phiv0(0), phiv(0);
 
-    Nodes::Node n0 = {p0,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n1 = {p1,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n2 = {p2,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n3 = {p3,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
+    Nodes::Node n0 = {p0,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n1 = {p1,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n2 = {p2,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n3 = {p3,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
 
     node[0] = n0;
     node[1] = n1;
@@ -222,13 +212,22 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation, *boost::unit_test::tolerance(UT_TOL)
 
     for (int i = 0; i < nbNod; i++)
         {
-        node[i].u0 = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
-        node[i].v0 = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        node[i].u0 = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        node[i].v0 = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
         }
 
     // carefull with indices (starting from 1)
     Tetra::Tet t(node, 0, {1, 2, 3, 4});
 
+    double t_dadx[Tetra::N][Tetra::NPI],t_dady[Tetra::N][Tetra::NPI],t_dadz[Tetra::N][Tetra::NPI];
+    
+    for(int i=0;i<Tetra::N;i++)
+        for(int j=0;j<Tetra::NPI;j++)
+            {
+            t_dadx[i][j] = t.dadx(i,j);
+            t_dady[i][j] = t.dady(i,j);
+            t_dadz[i][j] = t.dadz(i,j);
+            }
     // ref code (with minimal adaptations of integrales method in file MuMag_integrales.cc of
     // src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
     double _u_nod[3][Tetra::N], _u[3][Tetra::NPI];
@@ -248,20 +247,25 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation, *boost::unit_test::tolerance(UT_TOL)
             }
         }
     tiny::mult<double, 3, Tetra::N, Tetra::NPI>(_u_nod, Tetra::a, _u);
-    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(_u_nod, t.dadx, dudx);
-    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(_u_nod, t.dady, dudy);
-    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(_u_nod, t.dadz, dudz);
+    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(_u_nod, t_dadx, dudx);
+    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(_u_nod, t_dady, dudy);
+    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(_u_nod, t_dadz, dudz);
 
     tiny::mult<double, 3, Tetra::N, Tetra::NPI>(_v_nod, Tetra::a, _v);
-    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(_v_nod, t.dadx, dvdx);
-    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(_v_nod, t.dady, dvdy);
-    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(_v_nod, t.dadz, dvdz);
+    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(_v_nod, t_dadx, dvdx);
+    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(_v_nod, t_dady, dvdy);
+    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(_v_nod, t_dadz, dvdz);
     // end ref code
 
     // code to check
-    Pt::pt3D dUdx[Tetra::NPI], dUdy[Tetra::NPI], dUdz[Tetra::NPI];
-    Pt::pt3D dVdx[Tetra::NPI], dVdy[Tetra::NPI], dVdz[Tetra::NPI];
-    Pt::pt3D U[Tetra::NPI], V[Tetra::NPI];
+    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> dUdx;
+    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> dUdy;
+    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> dUdz;
+    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> dVdx;
+    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> dVdy;
+    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> dVdz;
+    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> U;
+    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> V;
 
     t.interpolation(Nodes::get_u0, U, dUdx, dUdy, dUdz);
     t.interpolation(Nodes::get_v0, V, dVdx, dVdy, dVdz);
@@ -287,15 +291,15 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation, *boost::unit_test::tolerance(UT_TOL)
     double dist_dvdy_dVdy = sq_dist(dvdy, dVdy);
     double dist_dvdz_dVdz = sq_dist(dvdz, dVdz);
 
-    double n_U = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(U));
-    double n_dUdx = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(dUdx));
-    double n_dUdy = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(dUdy));
-    double n_dUdz = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(dUdz));
+    double n_U = sqrt(sq_frobenius_norm<Tetra::NPI>(U));
+    double n_dUdx = sqrt(sq_frobenius_norm<Tetra::NPI>(dUdx));
+    double n_dUdy = sqrt(sq_frobenius_norm<Tetra::NPI>(dUdy));
+    double n_dUdz = sqrt(sq_frobenius_norm<Tetra::NPI>(dUdz));
 
-    double n_V = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(V));
-    double n_dVdx = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(dVdx));
-    double n_dVdy = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(dVdy));
-    double n_dVdz = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(dVdz));
+    double n_V = sqrt(sq_frobenius_norm<Tetra::NPI>(V));
+    double n_dVdx = sqrt(sq_frobenius_norm<Tetra::NPI>(dVdx));
+    double n_dVdy = sqrt(sq_frobenius_norm<Tetra::NPI>(dVdy));
+    double n_dVdz = sqrt(sq_frobenius_norm<Tetra::NPI>(dVdz));
 
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
     std::cout << "distance^2 (u,U) =" << dist_uU << std::endl;
@@ -355,18 +359,15 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation2, *boost::unit_test::tolerance(UT_TOL
     std::mt19937 gen(sd);
     std::uniform_real_distribution<> distrib(0.0, 1.0);
 
-    Eigen::Vector3d p0(0, 0, 0), p1(1, 0, 0), p2(0, 1, 0), p3(0, 0, 1);
-    Pt::pt3D u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
+    Eigen::Vector3d p0(0, 0, 0), p1(1, 0, 0), p2(0, 1, 0), p3(0, 0, 1),
+                    u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
+    Eigen::Vector3d zero(0,0,0);
     double phi0(0), phi(0), phiv0(0), phiv(0);
 
-    Nodes::Node n0 = {p0,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n1 = {p1,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n2 = {p2,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n3 = {p3,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
+    Nodes::Node n0 = {p0,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n1 = {p1,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n2 = {p2,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n3 = {p3,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
 
     node[0] = n0;
     node[1] = n1;
@@ -382,6 +383,16 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation2, *boost::unit_test::tolerance(UT_TOL
     // carefull with indices (starting from 1)
     Tetra::Tet t(node, 0, {1, 2, 3, 4});
 
+    double t_dadx[Tetra::N][Tetra::NPI],t_dady[Tetra::N][Tetra::NPI],t_dadz[Tetra::N][Tetra::NPI];
+    
+    for(int i=0;i<Tetra::N;i++)
+        for(int j=0;j<Tetra::NPI;j++)
+            {
+            t_dadx[i][j] = t.dadx(i,j);
+            t_dady[i][j] = t.dady(i,j);
+            t_dadz[i][j] = t.dadz(i,j);
+            }
+
     // ref code (with minimal adaptations of integrales method in file MuMag_integrales.cc of
     // src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
     double negphi0_nod[Tetra::N], Hdx[Tetra::NPI], Hdy[Tetra::NPI], Hdz[Tetra::NPI];
@@ -396,20 +407,20 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation2, *boost::unit_test::tolerance(UT_TOL
         negphiv0_nod[ie] = -nod.phiv0;
         }
 
-    tiny::transposed_mult<double, Tetra::N, Tetra::NPI>(negphi0_nod, t.dadx, Hdx);
-    tiny::transposed_mult<double, Tetra::N, Tetra::NPI>(negphi0_nod, t.dady, Hdy);
-    tiny::transposed_mult<double, Tetra::N, Tetra::NPI>(negphi0_nod, t.dadz, Hdz);
+    tiny::transposed_mult<double, Tetra::N, Tetra::NPI>(negphi0_nod, t_dadx, Hdx);
+    tiny::transposed_mult<double, Tetra::N, Tetra::NPI>(negphi0_nod, t_dady, Hdy);
+    tiny::transposed_mult<double, Tetra::N, Tetra::NPI>(negphi0_nod, t_dadz, Hdz);
 
-    tiny::transposed_mult<double, Tetra::N, Tetra::NPI>(negphiv0_nod, t.dadx, Hvx);
-    tiny::transposed_mult<double, Tetra::N, Tetra::NPI>(negphiv0_nod, t.dady, Hvy);
-    tiny::transposed_mult<double, Tetra::N, Tetra::NPI>(negphiv0_nod, t.dadz, Hvz);
+    tiny::transposed_mult<double, Tetra::N, Tetra::NPI>(negphiv0_nod, t_dadx, Hvx);
+    tiny::transposed_mult<double, Tetra::N, Tetra::NPI>(negphiv0_nod, t_dady, Hvy);
+    tiny::transposed_mult<double, Tetra::N, Tetra::NPI>(negphiv0_nod, t_dadz, Hvz);
     // end ref code
 
     // code to check
-    Pt::pt3D Hd[Tetra::NPI], Hv[Tetra::NPI];
+    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> Hd, Hv;
 
-    t.interpolation(Nodes::get_phi0, Hd);
-    t.interpolation(Nodes::get_phiv0, Hv);
+    t.interpolation_field(Nodes::get_phi0, Hd);
+    t.interpolation_field(Nodes::get_phiv0, Hv);
     // end code to check
 
     double n_Hdx = tiny::frob_norm<double, Tetra::NPI>(Hdx);
@@ -425,8 +436,8 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation2, *boost::unit_test::tolerance(UT_TOL
     double dist_Hd = sq_dist(Hdx, Hdy, Hdz, Hd);
     double dist_Hv = sq_dist(Hvx, Hvy, Hvz, Hv);
 
-    double n_Hd = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(Hd));
-    double n_Hv = sqrt(Pt::sq_frobenius_norm<Tetra::NPI>(Hv));
+    double n_Hd = sqrt(sq_frobenius_norm<Tetra::NPI>(Hd));
+    double n_Hv = sqrt(sq_frobenius_norm<Tetra::NPI>(Hv));
 
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
     std::cout << "distance^2 Hd =" << dist_Hd << std::endl;
@@ -460,18 +471,15 @@ BOOST_AUTO_TEST_CASE(Tet_lumping, *boost::unit_test::tolerance(UT_TOL))
     std::mt19937 gen(sd);
     std::uniform_real_distribution<> distrib(0.0, 1.0);
 
-    Eigen::Vector3d p0(0, 0, 0), p1(1, 0, 0), p2(0, 1, 0), p3(0, 0, 1);
-    Pt::pt3D u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
+    Eigen::Vector3d p0(0, 0, 0), p1(1, 0, 0), p2(0, 1, 0), p3(0, 0, 1), 
+                    u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
+    Eigen::Vector3d zero(0,0,0);
     double phi0(0), phi(0), phiv0(0), phiv(0);
 
-    Nodes::Node n0 = {p0,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n1 = {p1,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n2 = {p2,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
-    Nodes::Node n3 = {p3,   u0,  v0,    u,   v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0),
-                      phi0, phi, phiv0, phiv};
+    Nodes::Node n0 = {p0,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n1 = {p1,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n2 = {p2,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
+    Nodes::Node n3 = {p3,   u0,  v0,    u,   v, zero, zero, phi0, phi, phiv0, phiv};
 
     node[0] = n0;
     node[1] = n1;
@@ -480,7 +488,7 @@ BOOST_AUTO_TEST_CASE(Tet_lumping, *boost::unit_test::tolerance(UT_TOL))
 
     for (int i = 0; i < nbNod; i++)
         {
-        node[i].u0 = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        node[i].u0 = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
         }
 
     // carefull with indices (starting from 1)
@@ -529,9 +537,9 @@ BOOST_AUTO_TEST_CASE(Tet_lumping, *boost::unit_test::tolerance(UT_TOL))
         for (int ie = 0; ie < Tetra::N; ie++)
             {
             ai = Tetra::a[ie][npi];
-            dai_dx = t.dadx[ie][npi];
-            dai_dy = t.dady[ie][npi];
-            dai_dz = t.dadz[ie][npi];
+            dai_dx = t.dadx(ie,npi);
+            dai_dy = t.dady(ie,npi);
+            dai_dz = t.dadz(ie,npi);
 
             AE[ie][ie] += alfa * ai * w;  // lumping
             AE[Tetra::N + ie][Tetra::N + ie] += alfa * ai * w;
@@ -546,9 +554,9 @@ BOOST_AUTO_TEST_CASE(Tet_lumping, *boost::unit_test::tolerance(UT_TOL))
 
             for (int je = 0; je < Tetra::N; je++)
                 {
-                daj_dx = t.dadx[je][npi];
-                daj_dy = t.dady[je][npi];
-                daj_dz = t.dadz[je][npi];
+                daj_dx = t.dadx(je,npi);
+                daj_dy = t.dady(je,npi);
+                daj_dz = t.dadz(je,npi);
                 Dai_Daj = dai_dx * daj_dx + dai_dy * daj_dy + dai_dz * daj_dz;
 
                 AE[ie][je] += s_dt * (1. + R) * 2 * A / Js * Dai_Daj * w;
@@ -585,18 +593,19 @@ BOOST_AUTO_TEST_CASE(Tet_Pcoeff)
     std::mt19937 gen(sd);
     std::uniform_real_distribution<> distrib(0.0, 1.0);
 
-    Eigen::Vector3d p1(1, 0, 0), p2(0, 1, 0), p3(1, 1, 0), p4(0, 0, 1);
-    Pt::pt3D u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
+    Eigen::Vector3d p1(1, 0, 0), p2(0, 1, 0), p3(1, 1, 0), p4(0, 0, 1),
+                    u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
+    Eigen::Vector3d zero {0,0,0};
     double phi0(0), phi(0), phiv0(0), phiv(0);
 
-    node[0] = {p1, u0, v0, u, v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0), phi0, phi, phiv0, phiv};
-    node[1] = {p2, u0, v0, u, v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0), phi0, phi, phiv0, phiv};
-    node[2] = {p3, u0, v0, u, v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0), phi0, phi, phiv0, phiv};
-    node[3] = {p4, u0, v0, u, v, Pt::pt3D(0, 0, 0), Pt::pt3D(0, 0, 0), phi0, phi, phiv0, phiv};
+    node[0] = {p1, u0, v0, u, v, zero, zero, phi0, phi, phiv0, phiv};
+    node[1] = {p2, u0, v0, u, v, zero, zero, phi0, phi, phiv0, phiv};
+    node[2] = {p3, u0, v0, u, v, zero, zero, phi0, phi, phiv0, phiv};
+    node[3] = {p4, u0, v0, u, v, zero, zero, phi0, phi, phiv0, phiv};
 
     for (int i = 0; i < nbNod; i++)
         {
-        node[i].u0 = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        node[i].u0 = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
         node[i].setBasis(2 * M_PI * distrib(gen));
         }
 
@@ -609,11 +618,11 @@ BOOST_AUTO_TEST_CASE(Tet_Pcoeff)
 
     for (int i = 0; i < N; i++)
         {
-        const Pt::pt3D &ep = node[t.ind[i]].ep;
+        const Eigen::Vector3d &ep = node[t.ind[i]].ep;
         Pref[i][i] = ep.x();
         Pref[i][N + i] = ep.y();
         Pref[i][2 * N + i] = ep.z();
-        const Pt::pt3D &eq = node[t.ind[i]].eq;
+        const Eigen::Vector3d &eq = node[t.ind[i]].eq;
         Pref[N + i][i] = eq.x();
         Pref[N + i][N + i] = eq.y();
         Pref[N + i][2 * N + i] = eq.z();

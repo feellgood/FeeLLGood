@@ -301,21 +301,6 @@ inline void inverse(double M[DIM][DIM], double detM)
     M[2][2] = (m00 * m11 - m01 * m10) / detM;
     }
 
-/**
- frobenius norm of a table of pt3D
- */
-// this template is only used by some unit tests
-template<int nbVect>
-double sq_frobenius_norm(const pt3D X[nbVect])
-    {
-    double val(0.0);
-    for (int i = 0; i < nbVect; i++)
-        {
-        val += X[i].norm2();
-        }
-    return val;
-    }
-
     }  // end namespace Pt
 
 #endif /* pt3D_h */

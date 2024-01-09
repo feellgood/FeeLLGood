@@ -59,10 +59,10 @@ BOOST_AUTO_TEST_CASE(node_get_p_lvl1, *boost::unit_test::tolerance(UT_TOL))
 // Build a unit vector from the cylindrical coordinates (theta, z).
 // If theta and z are uniformly distributed in [-pi, pi] and [-1, 1]
 // respectively, the resulting vector is isotropically distributed.
-static Pt::pt3D unit_vector(double theta, double z)
+static Eigen::Vector3d unit_vector(double theta, double z)
     {
     double r = sqrt(1 - z * z);
-    return Pt::pt3D(r * cos(theta), r * sin(theta), z);
+    return Eigen::Vector3d(r * cos(theta), r * sin(theta), z);
     }
 
 BOOST_AUTO_TEST_CASE(node_e_p, *boost::unit_test::tolerance(10.0 * UT_TOL))
@@ -78,12 +78,12 @@ BOOST_AUTO_TEST_CASE(node_e_p, *boost::unit_test::tolerance(10.0 * UT_TOL))
     n.setBasis(M_PI * distrib(gen));
 
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
-    BOOST_TEST(n.u0.norm() == 1.0);
-    BOOST_TEST(n.ep.norm() == 1.0);
-    BOOST_TEST(n.eq.norm() == 1.0);
-    BOOST_TEST(Pt::pScal(n.u0, n.ep) == 0.0);
-    BOOST_TEST(Pt::pScal(n.ep, n.eq) == 0.0);
-    BOOST_TEST(Pt::pScal(n.eq, n.u0) == 0.0);
+    BOOST_TEST( n.u0.norm() == 1.0 );
+    BOOST_TEST( n.ep.norm() == 1.0 );
+    BOOST_TEST( n.eq.norm() == 1.0 );
+    BOOST_TEST( n.u0.dot(n.ep) == 0.0 );
+    BOOST_TEST( n.ep.dot(n.eq) == 0.0 );
+    BOOST_TEST( n.eq.dot(n.u0) == 0.0 );
     }
 
 BOOST_AUTO_TEST_CASE(node_evol, *boost::unit_test::tolerance(1e3 * UT_TOL))
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(node_evol, *boost::unit_test::tolerance(1e3 * UT_TOL))
     n.u0 = unit_vector(M_PI * distrib(gen), distrib(gen));
     n.setBasis(M_PI * distrib(gen));
 
-    Pt::pt3D v = vp * n.ep + vq * n.eq;
+    Eigen::Vector3d v = vp * n.ep + vq * n.eq;
 
     n.make_evol(vp, vq, dt);
 
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(node_evol, *boost::unit_test::tolerance(1e3 * UT_TOL))
     std::cout << "v = " << v << std::endl;
     std::cout << "simplify[v] = " << n.v << std::endl;
 
-    BOOST_TEST(Pt::dist(n.v, v) == 0.0);
+    BOOST_TEST( (n.v - v).norm() == 0.0);
     }
 
 BOOST_AUTO_TEST_SUITE_END()

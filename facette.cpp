@@ -5,17 +5,18 @@ using namespace Pt;
 
 void Fac::integrales(std::vector<Facette::prm> const &params)
     {
-    Pt::pt3D const &uk = params[idxPrm].uk;
+    Eigen::Vector3d uk { params[idxPrm].uk.x(), params[idxPrm].uk.y(), params[idxPrm].uk.z() };
     double Kbis = 2.0*(params[idxPrm].Ks) / Ms;
-    Pt::pt3D u[NPI];
-    interpolation<Pt::pt3D>(Nodes::get_u0, u);
+    
+    Eigen::Matrix<double,Pt::DIM,NPI> u;//Pt::pt3D u[NPI];
+    interpolation(Nodes::get_u0, u);
 
     Eigen::Vector<double,3*N> BE;
     BE.setZero();
 
     for (int npi = 0; npi < NPI; npi++)
         {
-        double _prefactor = weight[npi] * Kbis * pScal(uk, u[npi]);
+        double _prefactor = weight[npi] * Kbis * uk.dot(u.col(npi));
 
         for (int i = 0; i < N; i++)
             for(int k = 0;k<Pt::DIM;k++)
@@ -25,25 +26,32 @@ void Fac::integrales(std::vector<Facette::prm> const &params)
     Lp = P*BE;
     }
 
-double Fac::anisotropyEnergy(Facette::prm const &param, const Pt::pt3D (&u)[NPI]) const
+double Fac::anisotropyEnergy(Facette::prm const &param,
+                             Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> const u) const
     {  // surface Neel anisotropy (uk is a uniaxial easy axis)
+    Eigen::Vector3d uk { param.uk.x(), param.uk.y(), param.uk.z() };
     Eigen::Vector<double,NPI> dens;
     for (int npi = 0; npi < NPI; npi++)
         {
-        dens[npi] = -param.Ks * Pt::sq(pScal(param.uk, u[npi]));
+        dens[npi] = -param.Ks * Pt::sq( uk.dot( u.col(npi) ) );
         }
     return dens.dot(weight);
     }
 
-Eigen::Vector<double,NPI> Fac::charges(std::function<Pt::pt3D(Nodes::Node)> getter, std::vector<double> &corr) const
+Eigen::Vector<double,NPI> Fac::charges(std::function<Eigen::Vector3d(Nodes::Node)> getter, std::vector<double> &corr) const
     {
-    Pt::pt3D u[NPI];
-    interpolation<Pt::pt3D>(getter, u);
+    //Pt::pt3D u[NPI];
+    //interpolation<Pt::pt3D>(getter, u);
+    // vecnod = { pt3D x0(getter(refNode[ind[0]])), x1(getter(refNode[ind[1]])),x2(getter(refNode[ind[2]])) };
     
-    Eigen::Matrix<double,Pt::DIM,NPI> _u;
-    for (int i=0;i<Pt::DIM;i++)
-        for(int j=0;j<Facette::NPI;j++) _u(i,j) = u[j](i);
+    Eigen::Matrix<double,Pt::DIM,N> vec_nod;// NPI ou N ?
+    for(int i=0;i<N;i++)
+        vec_nod.col(i) << getter(refNode[ind[i]]);
 
+    Eigen::Matrix<double,Pt::DIM,NPI> _u = vec_nod * eigen_a; // tiny::mult<double, DIM, N, NPI> (vec_nod, a, u);
+/*    for (int i=0;i<Pt::DIM;i++)
+        for(int j=0;j<Facette::NPI;j++) _u(i,j) = u[j](i);
+*/
     Eigen::Vector<double,NPI> result = Ms*weight.cwiseProduct( _u.transpose()*n );
     Eigen::Matrix<double,Pt::DIM,NPI> gauss;
     getPtGauss(gauss);
@@ -69,7 +77,7 @@ double Fac::demagEnergy(Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> u, Eigen::
     return 0.5*mu0*Ms*dens.dot(weight);
     }
 
-double Fac::potential(std::function<Pt::pt3D(Nodes::Node)> getter, int i) const
+double Fac::potential(std::function<Eigen::Vector3d(Nodes::Node)> getter, int i) const
     {
     int ii = (i + 1) % 3;
     int iii = (i + 2) % 3;
@@ -81,9 +89,9 @@ double Fac::potential(std::function<Pt::pt3D(Nodes::Node)> getter, int i) const
     Eigen::Vector3d p1p2 = node2.p - node1.p;
     Eigen::Vector3d p1p3 = node3.p - node1.p;
 
-    Eigen::Vector3d getter_n1 { getter(node1).x(), getter(node1).y(), getter(node1).z()};
-    Eigen::Vector3d getter_n2 { getter(node2).x(), getter(node2).y(), getter(node2).z()};
-    Eigen::Vector3d getter_n3 { getter(node3).x(), getter(node3).y(), getter(node3).z()};
+    //Eigen::Vector3d getter_n1 { getter(node1).x(), getter(node1).y(), getter(node1).z()};
+    //Eigen::Vector3d getter_n2 { getter(node2).x(), getter(node2).y(), getter(node2).z()};
+    //Eigen::Vector3d getter_n3 { getter(node3).x(), getter(node3).y(), getter(node3).z()};
 
     std::function<double(double)> f = [](double x) { return sqrt(1.0 + x * x); };
 
@@ -103,9 +111,9 @@ double Fac::potential(std::function<Pt::pt3D(Nodes::Node)> getter, int i) const
     double log_1 = log((c * t + h + f(c) * r) / (b * (c + f(c))));
     double xi = b * log_1 / f(c);
 
-    double s1 = getter_n1.dot(n);
-    double s2 = getter_n2.dot(n);
-    double s3 = getter_n3.dot(n);
+    double s1 = getter(node1).dot(n);
+    double s2 = getter(node2).dot(n);
+    double s3 = getter(node3).dot(n);
 
     double pot = xi * s1
                  + ((xi * (h + c * t) - b * (r - b)) * s2 + b * (r - b - c * xi) * s3) * b

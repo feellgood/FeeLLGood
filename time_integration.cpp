@@ -192,7 +192,7 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
                 goto bailout;
                 }
 
-            Pt::pt3D Hext = settings.getField(t_prm.get_t());
+            Eigen::Vector3d Hext = settings.getField(t_prm.get_t());
 
             linAlg.prepareElements(Hext, t_prm);
             int err = linAlg.solver(t_prm);

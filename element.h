@@ -63,12 +63,12 @@ class element
         {
         for (int i = 0; i < N; i++)
             {
-            const Pt::pt3D &ep = refNode[ind[i]].ep;
+            const Eigen::Vector3d &ep = refNode[ind[i]].ep;
             P(i,i) = ep.x();
             P(i,N + i) = ep.y();
             P(i,2 * N + i) = ep.z();
 
-            const Pt::pt3D &eq = refNode[ind[i]].eq;
+            const Eigen::Vector3d &eq = refNode[ind[i]].eq;
             P(N + i,i) = eq.x();
             P(N + i,N + i) = eq.y();
             P(N + i,2 * N + i) = eq.z();

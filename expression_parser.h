@@ -6,7 +6,6 @@
 #ifndef expression_parser_h
 #define expression_parser_h
 
-#include "pt3D.h"
 #include <duktape.h>
 #include <string>
 
@@ -42,12 +41,12 @@ public:
     /**
      * Compute a vector from the given scalar argument.
      */
-    Pt::pt3D get_vector(double arg) const;
+    Eigen::Vector3d get_vector(double arg) const;
 
     /**
      * Compute a vector from the given vector argument.
      */
-    Pt::pt3D get_vector(const Eigen::Ref<Eigen::Vector3d> arg) const;
+    Eigen::Vector3d get_vector(const Eigen::Ref<Eigen::Vector3d> arg) const;
 
 private:
     /**
@@ -65,7 +64,7 @@ private:
      * Compute a vector. This must be called after duk_dup(ctx, -1) and one or more calls to
      * duk_push_number(). `argument_count` should match the number of arguments pushed.
      */
-    Pt::pt3D compute_vector(int argument_count) const;
+    Eigen::Vector3d compute_vector(int argument_count) const;
 
     /**
      * Ducktape context holding the internal state of the interpreter.

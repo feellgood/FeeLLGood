@@ -47,6 +47,20 @@ static bool assign(T &var, const YAML::Node &node)
     }
 
 // Overload of the previous template for a unit vector.
+static bool assign(Eigen::Vector3d &var, const YAML::Node &node)
+    {
+    if (node)
+        {
+        if (!node.IsSequence()) error("vectors should be YAML sequences.");
+        if (node.size() != 3) error("vectors should have three components.");
+        var = Eigen::Vector3d(node[0].as<double>(), node[1].as<double>(), node[2].as<double>());
+        var.normalize();
+        return true;
+        }
+    return false;
+    }
+
+// Overload of the previous template for a unit vector.
 static bool assign(Pt::pt3D &var, const YAML::Node &node)
     {
     if (node)
@@ -62,6 +76,13 @@ static bool assign(Pt::pt3D &var, const YAML::Node &node)
 
 // Stringify a boolean
 static const char *str(bool x) { return x ? "true" : "false"; }
+
+// Stringify a vector
+static const std::string str(Eigen::Vector3d v)
+    {
+    return std::string("[") + std::to_string(v.x()) + ", " + std::to_string(v.y()) + ", "
+           + std::to_string(v.z()) + "]";
+    }
 
 // Stringify a vector
 static const std::string str(Pt::pt3D v)
@@ -93,6 +114,14 @@ static const std::string str(std::string s)
         }
 
     return s;
+    }
+
+bool isOrthogonal(Eigen::Ref<Eigen::Vector3d> a, Eigen::Ref<Eigen::Vector3d> b, Eigen::Ref<Eigen::Vector3d> c, const double precision)
+    {
+    bool val = (fabs(a.dot(b)) < precision);
+    val &= (fabs(b.dot(c)) < precision);
+    val &= (fabs(c.dot(a)) < precision);
+    return val;
     }
 
 /***********************************************************************
@@ -321,7 +350,7 @@ void Settings::read(YAML::Node yaml)
                 assign(p.ex, volume["ex"]);
                 assign(p.ey, volume["ey"]);
                 assign(p.ez, volume["ez"]);
-                if (!Pt::isOrthogonal(p.ex, p.ey, p.ez, USER_TOL))
+                if (!isOrthogonal(p.ex, p.ey, p.ez, USER_TOL))
                     std::cout << "Warning: (ex, ey, ez) is not orthogonal.\n";
                 assign(p.alpha_LLG, volume["alpha_LLG"]);
 

@@ -39,13 +39,13 @@ m(p,t) \f$. Many other values for the computation of the scalar potential \f$ \p
 struct Node
     {
     Eigen::Vector3d p;  /**< Physical position p=(x,y,z)  of the node */
-    Pt::pt3D u0; /**< magnetization at the start of the current time step */
-    Pt::pt3D v0; /**< magnetization speed at the start of the current time step */
-    Pt::pt3D u;  /**< magnetization after the current time step */
-    Pt::pt3D v;  /**< magnetization speed after the current time step */
+    Eigen::Vector3d u0; /**< magnetization at the start of the current time step */
+    Eigen::Vector3d v0; /**< magnetization speed at the start of the current time step */
+    Eigen::Vector3d u;  /**< magnetization after the current time step */
+    Eigen::Vector3d v;  /**< magnetization speed after the current time step */
 
-    Pt::pt3D ep; /**< local vector basis : \f$ e_p = \vec{rand} \times u0 \f$ , then normalized */
-    Pt::pt3D eq; /**< local vector basis : \f$ e_q = u0 \times e_p \f$ , then normalized */
+    Eigen::Vector3d ep; /**< local vector basis : \f$ e_p = \vec{rand} \times u0 \f$ , then normalized */
+    Eigen::Vector3d eq; /**< local vector basis : \f$ e_q = u0 \times e_p \f$ , then normalized */
 
     double phi0;  /**< scalar potential at the start of the current time step */
     double phi;   /**< scalar potential after the current time step */
@@ -56,25 +56,32 @@ struct Node
     inline void setBasis(const double r)
         {
         // Choose for an initial ep the direction, among (X, Y, Z), which is further away from u0.
+        // devNote: Eigen documentation recommends NOT to use ternary operations (see General Topics/common pitfalls)
         double abs_x = fabs(u0.x()), abs_y = fabs(u0.y()), abs_z = fabs(u0.z());
         if (abs_x < abs_y)
             {
-            ep = abs_x < abs_z ? Pt::pt3D(Pt::IDX_X) : Pt::pt3D(Pt::IDX_Z);
+            if (abs_x < abs_z)
+                { ep = Eigen::Vector3d::UnitX(); }
+            else
+                { ep = Eigen::Vector3d::UnitZ(); }
             }
         else
             {
-            ep = abs_y < abs_z ? Pt::pt3D(Pt::IDX_Y) : Pt::pt3D(Pt::IDX_Z);
+            if (abs_y < abs_z)
+                { ep = Eigen::Vector3d::UnitY(); }
+            else
+                { ep = Eigen::Vector3d::UnitZ(); }
             }
 
         // Gram-Schmidt orthonormalization of (u0, ep).
-        ep -= pScal(ep, u0) * u0;
+        ep -= ep.dot(u0) * u0;
         ep.normalize();
 
         // Complete the basis with a vector product.
-        eq = u0 * ep;
+        eq = u0.cross(ep);
 
         // Rotate (ep, eq) by the random angle.
-        Pt::pt3D new_ep = cos(r) * ep - sin(r) * eq;
+        Eigen::Vector3d new_ep = cos(r) * ep - sin(r) * eq;
         eq = sin(r) * ep + cos(r) * eq;
         ep = new_ep;
 
@@ -83,10 +90,10 @@ struct Node
         if (PARANOID_ORTHONORMALIZATION)
             {
             // Modified Gram-Schmidt orthonormalization.
-            ep -= pScal(ep, u0) * u0;
+            ep -= ep.dot(u0) * u0;
             ep.normalize();
-            eq -= pScal(eq, u0) * u0;
-            eq -= pScal(eq, ep) * ep;
+            eq -= eq.dot(u0) * u0;
+            eq -= eq.dot(ep) * ep;
             eq.normalize();
             }
         }
@@ -123,16 +130,16 @@ struct Node
 inline Eigen::Vector3d get_p(Node const &n /**< [in] */) { return n.p; }
 
 /** getter for u0*/
-inline const Pt::pt3D get_u0(Node const &n /**< [in] */) { return n.u0; }
+inline const Eigen::Vector3d get_u0(Node const &n /**< [in] */) { return n.u0; }
 
 /** getter for v0*/
-inline const Pt::pt3D get_v0(Node const &n /**< [in] */) { return n.v0; }
+inline const Eigen::Vector3d get_v0(Node const &n /**< [in] */) { return n.v0; }
 
 /** getter for u */
-inline const Pt::pt3D get_u(Node const &n /**< [in] */) { return n.u; }
+inline const Eigen::Vector3d get_u(Node const &n /**< [in] */) { return n.u; }
 
 /** getter for v */
-inline const Pt::pt3D get_v(Node const &n /**< [in] */) { return n.v; }
+inline const Eigen::Vector3d get_v(Node const &n /**< [in] */) { return n.v; }
 
 /** getter for u component */
 inline double get_u_comp(Node const &n /**< [in] */, Pt::index idx /**< [in] */)

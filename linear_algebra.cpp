@@ -10,7 +10,7 @@ void LinAlgebra::base_projection()
     refMsh->setBasis(M_2_PI * r);
     }
 
-void LinAlgebra::prepareElements(Pt::pt3D const &Hext /**< [in] applied field */,
+void LinAlgebra::prepareElements(Eigen::Vector3d const &Hext /**< [in] applied field */,
                                  timing const &t_prm /**< [in] */)
     {
     base_projection();
@@ -27,7 +27,7 @@ void LinAlgebra::prepareElements(Pt::pt3D const &Hext /**< [in] applied field */
 
     std::for_each(std::execution::par, refMsh->tet.begin(), refMsh->tet.end(),
                   [this, &Hext, &t_prm, idx_dir](Tetra::Tet &tet)
-                  { tet.integrales(settings.paramTetra, t_prm, Hext, idx_dir, DW_vz); });
+                  { tet.integrales(settings.paramTetra[tet.idxPrm], t_prm, Hext, idx_dir, DW_vz); });
 
     std::for_each(std::execution::par, refMsh->fac.begin(), refMsh->fac.end(),
                   [this](Facette::Fac &fac)

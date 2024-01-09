@@ -48,15 +48,15 @@ void integrales(Tetra::Tet const &tet, double sigma, double AE[Tetra::N][Tetra::
 
         for (int ie = 0; ie < Tetra::N; ie++)
             {
-            double dai_dx = tet.dadx[ie][npi];
-            double dai_dy = tet.dady[ie][npi];
-            double dai_dz = tet.dadz[ie][npi];
+            double dai_dx = tet.dadx(ie,npi);
+            double dai_dy = tet.dady(ie,npi);
+            double dai_dz = tet.dadz(ie,npi);
 
             for (int je = 0; je < Tetra::N; je++)
                 {
-                double daj_dx = tet.dadx[je][npi];
-                double daj_dy = tet.dady[je][npi];
-                double daj_dz = tet.dadz[je][npi];
+                double daj_dx = tet.dadx(je,npi);
+                double daj_dy = tet.dady(je,npi);
+                double daj_dz = tet.dadz(je,npi);
                 AE[ie][je] += sigma * (dai_dx * daj_dx + dai_dy * daj_dy + dai_dz * daj_dz) * w;
                 }
             }
@@ -146,9 +146,9 @@ public:
             for (int i = 0; i < Tetra::N; i++)
                 {
                 const double V_tet = V[tet.ind[i]];
-                vx += V_tet * tet.dadx[i][npi];
-                vy += V_tet * tet.dady[i][npi];
-                vz += V_tet * tet.dadz[i][npi];
+                vx += V_tet * tet.dadx(i,npi);
+                vy += V_tet * tet.dady(i,npi);
+                vz += V_tet * tet.dadz(i,npi);
                 }
             _gradV[npi] = Pt::pt3D(vx, vy, vz);
             }
@@ -176,11 +176,13 @@ private:
                 msh.tet.begin(), msh.tet.end(),
                 [this](Tetra::Tet &tet)
                 {
-                    tet.extraField = [this, &tet](int npi, Pt::pt3D &_H)
+                    tet.extraField = [this, &tet](int npi, Pt::pt3D & _H)
                     { _H += this->Hm[tet.idx][npi]; };
 
-                    tet.extraCoeffs_BE = [this, &tet](int npi, double Js, Pt::pt3D &U,
-                                                      Pt::pt3D &dUdx, Pt::pt3D &dUdy, Pt::pt3D &dUdz,
+                    tet.extraCoeffs_BE = [this, &tet](int npi, double Js, Eigen::Ref<Eigen::Vector3d> U,
+                                                      Eigen::Ref<Eigen::Vector3d> dUdx,
+                                                      Eigen::Ref<Eigen::Vector3d> dUdy,
+                                                      Eigen::Ref<Eigen::Vector3d> dUdz,
                                                       Eigen::Ref<Eigen::Vector<double,3*Tetra::N>> BE)
                     {
                         const double prefactor = D0 / Pt::sq(p_stt.lJ) / (gamma0 * nu0 * Js);
@@ -194,7 +196,7 @@ private:
                                            Pt::pScal(_gV, Pt::pt3D(dUdx(Pt::IDX_Z), dUdy(Pt::IDX_Z),
                                                                    dUdz(Pt::IDX_Z))));
 
-                        Pt::pt3D m = pf * (ksi * j_grad_u + U * j_grad_u);
+                        Pt::pt3D m = pf * (ksi * j_grad_u + Pt::pt3D(U.x(),U.y(),U.z()) * j_grad_u);
                         Pt::pt3D interim[Tetra::N];
                         for (int i = 0; i < Tetra::N; i++)
                             {
@@ -245,7 +247,7 @@ private:
 
     /** table of the Hm vectors (contribution of the STT to the tet::integrales) ; Hm.size() is the
      * number of tetra */
-    std::vector<std::array<Pt::pt3D, Tetra::NPI>> Hm;
+    std::vector<std::array< Pt::pt3D, Tetra::NPI>> Hm;
 
     /** basic informations on boundary conditions */
     inline void infos(void)

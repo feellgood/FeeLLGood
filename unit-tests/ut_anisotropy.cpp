@@ -7,6 +7,7 @@
 #include <eigen3/Eigen/Dense>
 
 #include "tetra.h"
+#include "ut_tools.h"
 #include "ut_config.h"
 
 /**
@@ -26,17 +27,14 @@ BOOST_AUTO_TEST_CASE(anisotropy_uniax, *boost::unit_test::tolerance(10.0 * UT_TO
     std::mt19937 gen(sd);
     std::uniform_real_distribution<> distrib(0.0, 1.0);
 
-    Eigen::Vector3d p0(0, 0, 0), p1(1, 0, 0), p2(0, 1, 0), p3(0, 0, 1);
-    Pt::pt3D u0(0, 0, 0), v0(0, 0, 0);
+    Eigen::Vector3d p0(0, 0, 0), p1(1, 0, 0), p2(0, 1, 0), p3(0, 0, 1), u0(0, 0, 0), v0(0, 0, 0);
+    Eigen::Vector3d zero(0,0,0);
     double phi0(0), phi(0), phiv0(0), phiv(0);
 
     Nodes::Node n0 = {p0,
                       u0,
                       v0,
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
+                      zero,zero,zero,zero,
                       phi0,
                       phi,
                       phiv0,
@@ -44,10 +42,7 @@ BOOST_AUTO_TEST_CASE(anisotropy_uniax, *boost::unit_test::tolerance(10.0 * UT_TO
     Nodes::Node n1 = {p1,
                       u0,
                       v0,
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
+                      zero,zero,zero,zero,
                       phi0,
                       phi,
                       phiv0,
@@ -55,10 +50,7 @@ BOOST_AUTO_TEST_CASE(anisotropy_uniax, *boost::unit_test::tolerance(10.0 * UT_TO
     Nodes::Node n2 = {p2,
                       u0,
                       v0,
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
+                      zero,zero,zero,zero,
                       phi0,
                       phi,
                       phiv0,
@@ -66,10 +58,7 @@ BOOST_AUTO_TEST_CASE(anisotropy_uniax, *boost::unit_test::tolerance(10.0 * UT_TO
     Nodes::Node n3 = {p3,
                       u0,
                       v0,
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
+                      zero,zero,zero,zero,
                       phi0,
                       phi,
                       phiv0,
@@ -82,15 +71,15 @@ BOOST_AUTO_TEST_CASE(anisotropy_uniax, *boost::unit_test::tolerance(10.0 * UT_TO
 
     for (int i = 0; i < nbNod; i++)
         {
-        node[i].u0 = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
-        node[i].v0 = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        node[i].u0 = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        node[i].v0 = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
         }
     // carefull with indices (starting from 1)
     Tetra::Tet t(node, 0, {1, 2, 3, 4});
 
     double dt = distrib(gen);
 
-    Pt::pt3D uk = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+    Eigen::Vector3d uk = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
 
     double uk00 = uk.x();
     double uk01 = uk.y();
@@ -125,12 +114,12 @@ BOOST_AUTO_TEST_CASE(anisotropy_uniax, *boost::unit_test::tolerance(10.0 * UT_TO
     tiny::mult<double, 3, Tetra::N, Tetra::NPI>(u_nod, Tetra::a, u);
     tiny::mult<double, 3, Tetra::N, Tetra::NPI>(v_nod, Tetra::a, v);
 
-    Pt::pt3D U[Tetra::NPI];
-    Pt::pt3D V[Tetra::NPI];
+    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> U;
+    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> V;
     for (int npi = 0; npi < Tetra::NPI; npi++)
         {
-        U[npi] = Pt::pt3D(u[0][npi], u[1][npi], u[2][npi]);
-        V[npi] = Pt::pt3D(v[0][npi], v[1][npi], v[2][npi]);
+        U.col(npi) << u[0][npi], u[1][npi], u[2][npi];
+        V.col(npi) << v[0][npi], v[1][npi], v[2][npi];
         }  // deep copy instead of re-computing
 
     for (int npi = 0; npi < Tetra::NPI; npi++)
@@ -150,15 +139,16 @@ BOOST_AUTO_TEST_CASE(anisotropy_uniax, *boost::unit_test::tolerance(10.0 * UT_TO
         H[1] = (2 * K / Js * uk0_u * uk01);
         H[2] = (2 * K / Js * uk0_u * uk02);
 
-        Pt::pt3D H_aniso;
+        Eigen::Vector3d H_aniso;
+        H_aniso.setZero();
         contrib_aniso =
                 t.calc_aniso_uniax(npi, uk, Kbis, THETA * dt, U, V, H_aniso);  // code to test
 
-        Pt::pt3D refHval = Pt::pt3D(H[0] + THETA * dt * Ht[0], H[1] + THETA * dt * Ht[1],
-                                    H[2] + THETA * dt * Ht[2]);
+        Eigen::Vector3d refHval = Eigen::Vector3d( H[0] + THETA * dt * Ht[0], H[1] + THETA * dt * Ht[1],
+                                    H[2] + THETA * dt * Ht[2] );
         std::cout << "ref H value = " << refHval << "; H_aniso=" << H_aniso << std::endl;
 
-        BOOST_TEST(Pt::dist(refHval, H_aniso) == 0.0,
+        BOOST_TEST( (refHval - H_aniso).norm() == 0.0,
                    "mismatch in uniaxial anisotropy field value");
 
         BOOST_TEST(uHau == contrib_aniso);
@@ -174,17 +164,14 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TO
     std::mt19937 gen(sd);
     std::uniform_real_distribution<> distrib(0.0, 1.0);
 
-    Eigen::Vector3d p0(0, 0, 0), p1(1, 0, 0), p2(0, 1, 0), p3(0, 0, 1);
-    Pt::pt3D u0(0, 0, 0), v0(0, 0, 0);
+    Eigen::Vector3d p0(0, 0, 0), p1(1, 0, 0), p2(0, 1, 0), p3(0, 0, 1), u0(0, 0, 0), v0(0, 0, 0);
+    Eigen::Vector3d zero(0,0,0);
     double phi0(0), phi(0), phiv0(0), phiv(0);
 
     Nodes::Node n0 = {p0,
                       u0,
                       v0,
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
+                      zero,zero,zero,zero,
                       phi0,
                       phi,
                       phiv0,
@@ -192,10 +179,7 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TO
     Nodes::Node n1 = {p1,
                       u0,
                       v0,
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
+                      zero,zero,zero,zero,
                       phi0,
                       phi,
                       phiv0,
@@ -203,10 +187,7 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TO
     Nodes::Node n2 = {p2,
                       u0,
                       v0,
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
+                      zero,zero,zero,zero,
                       phi0,
                       phi,
                       phiv0,
@@ -214,10 +195,7 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TO
     Nodes::Node n3 = {p3,
                       u0,
                       v0,
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
-                      Pt::pt3D(0, 0, 0),
+                      zero,zero,zero,zero,
                       phi0,
                       phi,
                       phiv0,
@@ -230,18 +208,21 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TO
 
     for (int i = 0; i < nbNod; i++)
         {
-        node[i].u0 = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
-        node[i].v0 = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        node[i].u0 = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        node[i].v0 = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
         }
     // carefull with indices (starting from 1)
     Tetra::Tet t(node, 0, {1, 2, 3, 4});
 
     double dt = distrib(gen);
 
-    Pt::pt3D rand_vect = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
-    Pt::pt3D ex = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
-    Pt::pt3D ey = ex * rand_vect;
-    Pt::pt3D ez = ex * ey;
+    Pt::pt3D tmp_rand_v = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+    Eigen::Vector3d rand_vect { tmp_rand_v.x(), tmp_rand_v.y(), tmp_rand_v.z() };
+    
+    Pt::pt3D tmp(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+    Eigen::Vector3d ex {tmp.x(),tmp.y(),tmp.z()}; 
+    Eigen::Vector3d ey = ex.cross(rand_vect);
+    Eigen::Vector3d ez = ex.cross(ey);
     ey.normalize();
     ez.normalize();
 
@@ -289,12 +270,11 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TO
     tiny::mult<double, 3, Tetra::N, Tetra::NPI>(u_nod, Tetra::a, u);
     tiny::mult<double, 3, Tetra::N, Tetra::NPI>(v_nod, Tetra::a, v);
 
-    Pt::pt3D U[Tetra::NPI];
-    Pt::pt3D V[Tetra::NPI];
+    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> U,V;
     for (int npi = 0; npi < Tetra::NPI; npi++)
         {
-        U[npi] = Pt::pt3D(u[0][npi], u[1][npi], u[2][npi]);
-        V[npi] = Pt::pt3D(v[0][npi], v[1][npi], v[2][npi]);
+        U.col(npi) << u[0][npi], u[1][npi], u[2][npi];
+        V.col(npi) << v[0][npi], v[1][npi], v[2][npi];
         }  // deep copy instead of re-computing
 
     for (int npi = 0; npi < Tetra::NPI; npi++)
@@ -335,14 +315,13 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TO
                - 2 * K3 / Js * uk1_u * (1 - uk1_u * uk1_u) * uk12
                - 2 * K3 / Js * uk2_u * (1 - uk2_u * uk2_u) * uk22;
 
-        Pt::pt3D H_aniso;
-        contrib_aniso = t.calc_aniso_cub(npi, ex, ey, ez, K3bis, THETA * dt, U, V,
-                                         H_aniso);  // code to test
+        Eigen::Vector3d H_aniso;
+        H_aniso.setZero();
+        contrib_aniso = t.calc_aniso_cub(npi, ex, ey, ez, K3bis, THETA * dt, U, V, H_aniso);  // code to test
 
-        Pt::pt3D refHval = Pt::pt3D(H[0] + THETA * dt * Ht[0], H[1] + THETA * dt * Ht[1],
-                                    H[2] + THETA * dt * Ht[2]);
+        Eigen::Vector3d refHval { H[0] + THETA*dt*Ht[0], H[1] + THETA*dt*Ht[1], H[2] + THETA*dt*Ht[2] };
         std::cout << "ref H value = " << refHval << "; H_aniso=" << H_aniso << std::endl;
-        BOOST_TEST(Pt::dist(refHval, H_aniso) == 0.0, "mismatch in cubic anisotropy field value");
+        BOOST_TEST( (refHval - H_aniso).norm() == 0.0, "mismatch in cubic anisotropy field value");
 
         BOOST_TEST(uHa3u == contrib_aniso);
         }
