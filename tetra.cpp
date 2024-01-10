@@ -206,23 +206,12 @@ double Tet::anisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<d
 
 Eigen::Vector<double,NPI> Tet::charges(std::function<Eigen::Vector3d(Nodes::Node)> getter) const
     {
-    //double dudx[DIM][NPI], dudy[DIM][NPI], dudz[DIM][NPI];
-
-    //Eigen::Vector3d vec_nod[N];
-    //getDataFromNode<Eigen::Vector3d>(getter, vec_nod);
-    Eigen::Matrix<double,DIM,N> vec_nod;
-    for (int i = 0; i < N; i++)
-            vec_nod.col(i) = getter(refNode[ind[i]]);
-
-    Eigen::Matrix<double,DIM,NPI> dudx = vec_nod * dadx;//tiny::mult<double, N, NPI>(vec_nod, dadx, dudx);
-    Eigen::Matrix<double,DIM,NPI> dudy = vec_nod * dady;//tiny::mult<double, N, NPI>(vec_nod, dady, dudy);
-    Eigen::Matrix<double,DIM,NPI> dudz = vec_nod * dadz;//tiny::mult<double, N, NPI>(vec_nod, dadz, dudz);
-
+    Eigen::Matrix<double,DIM,NPI> dudx,dudy,dudz;
+    interpolation(getter,dudx,dudy,dudz);
+    
     Eigen::Vector<double,NPI> result;
     for (int j = 0; j < NPI; j++)
-        {
-        result(j) = -Ms * (dudx(0,j) + dudy(1,j) + dudz(2,j)) * weight[j];
-        }
+        { result(j) = -Ms * (dudx(0,j) + dudy(1,j) + dudz(2,j)) * weight[j]; }
     return result;
     }
 
@@ -232,12 +221,9 @@ double Tet::demagEnergy(Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> dudx,
                        Eigen::Ref<Eigen::Vector<double,NPI>> phi) const
     {
     double dens[NPI];
-    //double Ms = nu0 * param.J;
 
     for (int npi = 0; npi < NPI; npi++)
-        {
-        dens[npi] = (dudx(0,npi) + dudy(1,npi) + dudz(2,npi)) * phi[npi];
-        }
+        { dens[npi] = (dudx(0,npi) + dudy(1,npi) + dudz(2,npi)) * phi[npi]; }
     return (-0.5 * mu0 * Ms * weightedScalarProd(dens));
     }
 
@@ -247,10 +233,7 @@ double Tet::zeemanEnergy(Tetra::prm const &param, double uz_drift, Eigen::Ref<Ei
     double dens[NPI];
 
     for (int npi = 0; npi < NPI; npi++)
-        {
-        //Pt::pt3D u_npi = Pt::pt3D(u[0][npi], u[1][npi], u[2][npi]);
-        dens[npi] = u.col(npi).dot(Hext) + uz_drift * Hext.z();
-        }
+        { dens[npi] = u.col(npi).dot(Hext) + uz_drift * Hext.z(); }
     return (-param.J * weightedScalarProd(dens));
     }
 
@@ -277,7 +260,7 @@ double Tet::calc_vol(void) const
     Eigen::Vector3d p0p2 = refNode[ind[2]].p - refNode[ind[0]].p;
     Eigen::Vector3d p0p3 = refNode[ind[3]].p - refNode[ind[0]].p;
 
-    return p0p1.dot(p0p2.cross(p0p3))/6.0; //Pt::pTriple(p1 - p0, p2 - p0, p3 - p0) / 6.0;
+    return p0p1.dot(p0p2.cross(p0p3))/6.0;
     }
 
 std::set<Facette::Fac> Tet::ownedFac() const

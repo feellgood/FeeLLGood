@@ -219,6 +219,22 @@ public:
         Tz = vec_nod * dadz;
         }
 
+    /** interpolation for a tensor : getter function is given as a parameter to
+     * know what part of the node you want to interpolate */
+
+    inline void interpolation(std::function<Eigen::Vector3d(Nodes::Node)> getter,
+                              Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> Tx,
+                              Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> Ty,
+                              Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> Tz) const
+        {
+        Eigen::Matrix<double,Pt::DIM,N> vec_nod;
+        for (int i = 0; i < N; i++) vec_nod.col(i) = getter(refNode[ind[i]]);
+
+        Tx = vec_nod * dadx;
+        Ty = vec_nod * dady;
+        Tz = vec_nod * dadz;
+        }
+
     /** interpolation for components of a field : the getter function is given as a parameter in
      * order to know what part of the node you want to interpolate */
     inline void interpolation_field(std::function<double(Nodes::Node)> getter,
