@@ -68,7 +68,7 @@ void Tet::add_drift_BE(int const &npi, double alpha, double s_dt, double Vdrift,
             { BE(k*N + i) += w*Vdrift*interim[i](k); }
     }
 
-double Tet::calc_aniso_uniax(int const &npi, Eigen::Ref<Eigen::Vector3d> const uk, const double Kbis,
+double Tet::calc_aniso_uniax(const int npi, Eigen::Ref<const Eigen::Vector3d> uk, const double Kbis,
                              const double s_dt,
                              Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> U,
                              Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> V,
@@ -78,10 +78,11 @@ double Tet::calc_aniso_uniax(int const &npi, Eigen::Ref<Eigen::Vector3d> const u
     return Kbis * sq( uk.dot(U.col(npi)));
     }
 
-double Tet::calc_aniso_cub(int const &npi,
-                           Eigen::Ref<Eigen::Vector3d> ex,
-                           Eigen::Ref<Eigen::Vector3d> ey,
-                           Eigen::Ref<Eigen::Vector3d> ez, const double K3bis, const double s_dt,
+double Tet::calc_aniso_cub(const int npi,
+                           Eigen::Ref<const Eigen::Vector3d> ex,
+                           Eigen::Ref<const Eigen::Vector3d> ey,
+                           Eigen::Ref<const Eigen::Vector3d> ez,
+                           const double K3bis, const double s_dt,
                            Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> U,
                            Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> V,
                            Eigen::Ref<Eigen::Vector3d> H_aniso) const
@@ -166,14 +167,8 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
         Eigen::Vector3d H_aniso;
         H_aniso.setZero();
         
-        //devNote: for some obscure reason we have to deep copy uk and ex,ey,ez for calc_aniso_xxx functions ??
-        Eigen::Vector3d uk { param.uk.x(),param.uk.y() ,param.uk.z() };
-        double contrib_aniso = calc_aniso_uniax(npi, uk, Kbis, s_dt, U, V, H_aniso);
-        
-        Eigen::Vector3d ex { param.ex.x(), param.ex.y(), param.ex.z() };
-        Eigen::Vector3d ey { param.ey.x(), param.ey.y(), param.ey.z() };
-        Eigen::Vector3d ez { param.ez.x(), param.ez.y(), param.ez.z() };
-        contrib_aniso += calc_aniso_cub(npi, ex, ey, ez, K3bis, s_dt, U, V, H_aniso);
+        double contrib_aniso = calc_aniso_uniax(npi, param.uk, Kbis, s_dt, U, V, H_aniso);
+        contrib_aniso += calc_aniso_cub(npi, param.ex, param.ey, param.ez, K3bis, s_dt, U, V, H_aniso);
 
         Eigen::Vector3d H = H_aniso + Hd.col(npi) + Hext + (s_dt / gamma0) * Hv.col(npi);
         const double w = weight[npi];
