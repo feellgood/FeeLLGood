@@ -120,11 +120,11 @@ public:
             std::for_each(msh.tet.begin(), msh.tet.end(),
                           [this](Tetra::Tet const &tet)
                           {
-                              std::array<Pt::pt3D, Tetra::NPI> _gradV;
+                              std::array<Eigen::Vector3d, Tetra::NPI> _gradV;
                               calc_gradV(tet, _gradV);
                               gradV.push_back(_gradV);
 
-                              std::array<Pt::pt3D, Tetra::NPI> _Hm;
+                              std::array<Eigen::Vector3d, Tetra::NPI> _Hm;
                               calc_Hm(tet, _gradV, _Hm);
                               Hm.push_back(_Hm);
                           });
@@ -138,7 +138,7 @@ public:
         }
 
     /** computes the gradient(V) for tetra tet */
-    void calc_gradV(Tetra::Tet const &tet, std::array<Pt::pt3D, Tetra::NPI> &_gradV) const
+    void calc_gradV(Tetra::Tet const &tet, std::array<Eigen::Vector3d, Tetra::NPI> &_gradV) const
         {
         for (int npi = 0; npi < Tetra::NPI; npi++)
             {
@@ -150,22 +150,19 @@ public:
                 vy += V_tet * tet.dady(i,npi);
                 vz += V_tet * tet.dadz(i,npi);
                 }
-            _gradV[npi] = Pt::pt3D(vx, vy, vz);
+            _gradV[npi] = Eigen::Vector3d(vx, vy, vz);
             }
         }
 
     /** computes Hm contributions for each npi for tetrahedron tet */
-    void calc_Hm(Tetra::Tet const &tet, std::array<Pt::pt3D, Tetra::NPI> const &_gradV,
-                 std::array<Pt::pt3D, Tetra::NPI> &_Hm) const
+    void calc_Hm(Tetra::Tet const &tet, std::array<Eigen::Vector3d, Tetra::NPI> const &_gradV,
+                 std::array<Eigen::Vector3d, Tetra::NPI> &_Hm) const
         {
         Eigen::Matrix<double,Pt::DIM,Tetra::NPI> p_g;
         tet.getPtGauss(p_g);
 
         for (int npi = 0; npi < Tetra::NPI; npi++)
-            {
-            Pt::pt3D tmp(p_g(0,npi),p_g(1,npi),p_g(2,npi));
-            _Hm[npi] = -p_stt.sigma * _gradV[npi] * tmp;
-            }
+            { _Hm[npi] = -p_stt.sigma * _gradV[npi].cross(p_g.col(npi)); }
         }
 
 private:
@@ -176,8 +173,8 @@ private:
                 msh.tet.begin(), msh.tet.end(),
                 [this](Tetra::Tet &tet)
                 {
-                    tet.extraField = [this, &tet](int npi, Pt::pt3D & _H)
-                    { _H += this->Hm[tet.idx][npi]; };
+                    tet.extraField = [this, &tet](int npi) -> Eigen::Vector3d
+                    { return this->Hm[tet.idx][npi]; };
 
                     tet.extraCoeffs_BE = [this, &tet](int npi, double Js, Eigen::Ref<Eigen::Vector3d> U,
                                                       Eigen::Ref<Eigen::Vector3d> dUdx,
@@ -186,18 +183,15 @@ private:
                                                       Eigen::Ref<Eigen::Vector<double,3*Tetra::N>> BE)
                     {
                         const double prefactor = D0 / Pt::sq(p_stt.lJ) / (gamma0 * nu0 * Js);
-                        Pt::pt3D const &_gV = gradV[tet.idx][npi];
-                        Pt::pt3D j_grad_u =
+                        Eigen::Vector3d const &_gV = gradV[tet.idx][npi];
+                        Eigen::Vector3d j_grad_u =
                                 -p_stt.sigma
-                                * Pt::pt3D(Pt::pScal(_gV, Pt::pt3D(dUdx(Pt::IDX_X), dUdy(Pt::IDX_X),
-                                                                   dUdz(Pt::IDX_X))),
-                                           Pt::pScal(_gV, Pt::pt3D(dUdx(Pt::IDX_Y), dUdy(Pt::IDX_Y),
-                                                                   dUdz(Pt::IDX_Y))),
-                                           Pt::pScal(_gV, Pt::pt3D(dUdx(Pt::IDX_Z), dUdy(Pt::IDX_Z),
-                                                                   dUdz(Pt::IDX_Z))));
+                                * Eigen::Vector3d(_gV.dot( Eigen::Vector3d(dUdx(Pt::IDX_X), dUdy(Pt::IDX_X), dUdz(Pt::IDX_X))),
+                                                  _gV.dot( Eigen::Vector3d(dUdx(Pt::IDX_Y), dUdy(Pt::IDX_Y), dUdz(Pt::IDX_Y))),
+                                                  _gV.dot( Eigen::Vector3d(dUdx(Pt::IDX_Z), dUdy(Pt::IDX_Z), dUdz(Pt::IDX_Z))));
 
-                        Pt::pt3D m = pf * (ksi * j_grad_u + Pt::pt3D(U.x(),U.y(),U.z()) * j_grad_u);
-                        Pt::pt3D interim[Tetra::N];
+                        Eigen::Vector3d m = pf * (ksi * j_grad_u + U.cross(j_grad_u));
+                        Eigen::Vector3d interim[Tetra::N];
                         for (int i = 0; i < Tetra::N; i++)
                             {
                             const double ai_w = tet.weight[npi] * Tetra::a[i][npi];
@@ -243,11 +237,11 @@ private:
     std::vector<double> V;
 
     /** table of the gradients of the potential, gradV.size() is the number of tetra */
-    std::vector<std::array<Pt::pt3D, Tetra::NPI>> gradV;
+    std::vector<std::array<Eigen::Vector3d, Tetra::NPI>> gradV;
 
     /** table of the Hm vectors (contribution of the STT to the tet::integrales) ; Hm.size() is the
      * number of tetra */
-    std::vector<std::array< Pt::pt3D, Tetra::NPI>> Hm;
+    std::vector<std::array< Eigen::Vector3d, Tetra::NPI>> Hm;
 
     /** basic informations on boundary conditions */
     inline void infos(void)

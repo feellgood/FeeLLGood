@@ -191,9 +191,8 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
             }
 
         H = Hext + Hd.col(npi);
-        Pt::pt3D tmp_H(0,0,0);
-        extraField(npi, tmp_H);  // add STT contribution to the effective field H through tmp_H
-        H += Eigen::Vector3d(tmp_H.x(),tmp_H.y(),tmp_H.z());
+        Eigen::Vector3d tmp_H = extraField(npi);  // computes STT contrib
+        H += tmp_H;
         
         double uHeff =
                 contrib_aniso - Abis *( dUdx.col(npi).squaredNorm() + dUdy.col(npi).squaredNorm() + dUdz.col(npi).squaredNorm());

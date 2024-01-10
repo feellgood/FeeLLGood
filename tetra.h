@@ -167,7 +167,7 @@ public:
                 }
             }
         // do nothing lambda's (usefull for spin transfer torque)
-        extraField = [](int, Pt::pt3D &) {};
+        extraField = [] (int) -> Eigen::Vector3d { return Eigen::Vector3d(0,0,0);};
         extraCoeffs_BE = [](int, double, Eigen::Ref<Eigen::Vector3d>,
                             Eigen::Ref<Eigen::Vector3d>,
                             Eigen::Ref<Eigen::Vector3d>,
@@ -329,7 +329,7 @@ public:
     int idx;
 
     /** for extra contribution to the effective field, such as spin transfert torque Hm */
-    std::function<void(int npi, Pt::pt3D &Hm)> extraField;
+    std::function<Eigen::Vector3d(int npi)> extraField;
 
     /** for extra contribution to the matrix BE, such as spin transfer torque contribs */
     std::function<void(int npi, double Js, Eigen::Ref<Eigen::Vector3d> U, Eigen::Ref<Eigen::Vector3d> dUdx, Eigen::Ref<Eigen::Vector3d> dUdy,
