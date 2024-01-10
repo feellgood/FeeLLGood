@@ -214,16 +214,9 @@ public:
         for (int i = 0; i < N; i++) vec_nod.col(i) = getter(refNode[ind[i]]);
         
         result = vec_nod * eigen_a;
-        Eigen::Matrix<double,Pt::DIM,NPI> dudx = vec_nod * dadx;
-        Eigen::Matrix<double,Pt::DIM,NPI> dudy = vec_nod * dady;
-        Eigen::Matrix<double,Pt::DIM,NPI> dudz = vec_nod * dadz;
-
-        for (int npi = 0; npi < NPI; npi++)
-            {
-            Tx.col(npi) << dudx(0,npi), dudx(1,npi), dudx(2,npi);
-            Ty.col(npi) << dudy(0,npi), dudy(1,npi), dudy(2,npi);
-            Tz.col(npi) << dudz(0,npi), dudz(1,npi), dudz(2,npi);
-            }
+        Tx = vec_nod * dadx;
+        Ty = vec_nod * dady;
+        Tz = vec_nod * dadz;
         }
 
     /** interpolation for components of a field : the getter function is given as a parameter in

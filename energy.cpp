@@ -10,8 +10,7 @@ void Fem::energy(double const t, Settings &settings)
                   {
                       Tetra::prm const &param = settings.paramTetra[te.idxPrm];
                       Eigen::Matrix<double,Pt::DIM,Tetra::NPI> u,dudx,dudy,dudz;
-                      //double u[Pt::DIM][Tetra::NPI], dudx[Pt::DIM][Tetra::NPI], dudy[Pt::DIM][Tetra::NPI], dudz[Pt::DIM][Tetra::NPI];
-                      Eigen::Vector<double,Tetra::NPI> phi;//double phi[Tetra::NPI];
+                      Eigen::Vector<double,Tetra::NPI> phi;
 
                       te.interpolation(Nodes::get_u, u, dudx, dudy, dudz);
                       te.interpolation(Nodes::get_phi, phi);
@@ -46,11 +45,7 @@ void Fem::energy(double const t, Settings &settings)
                       Eigen::Vector<double,Facette::NPI> _phi {phi[0],phi[1],phi[2],phi[3]};
                       E_demag += fa.demagEnergy(u, _phi);
                   });
-
     calc_Etot();
-
     if (settings.verbose && (Etot > Etot0))
-        {
-        std::cout << "WARNING: energy increased from " << Etot0 << " to " << Etot << "\n";
-        }
+        { std::cout << "WARNING: energy increased from " << Etot0 << " to " << Etot << "\n"; }
     }

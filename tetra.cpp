@@ -5,7 +5,6 @@
 #include <set>
 
 #include "config.h"  // to get gamma0 constant
-#include "pt3D.h"
 #include "tetra.h"
 #include "time_integration.h"
 #include "facette.h"
@@ -114,53 +113,15 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     BE.setZero();
     
     /*-------------------- INTERPOLATION --------------------*/
-    
-    //interpolation(Nodes::get_u0, U, dUdx, dUdy, dUdz);
-    Eigen::Matrix<double,Pt::DIM,N> vec_nod;
-    for (int i = 0; i < N; i++)
-            vec_nod.col(i) = Nodes::get_u0(refNode[ind[i]]);
-    //getDataFromNode<Eigen::Vector3d>(Nodes::get_u0, vec_nod);
-    Eigen::Matrix<double,Pt::DIM,NPI> U = vec_nod * eigen_a;
-    Eigen::Matrix<double,Pt::DIM,NPI> dUdx = vec_nod * dadx;
-    Eigen::Matrix<double,Pt::DIM,NPI> dUdy = vec_nod * dady;
-    Eigen::Matrix<double,Pt::DIM,NPI> dUdz = vec_nod * dadz;
-    
-    //interpolation(Nodes::get_v0, V, dVdx, dVdy, dVdz);
-    for (int i = 0; i < N; i++)
-            vec_nod.col(i) = Nodes::get_v0(refNode[ind[i]]);
-    //getDataFromNode<Eigen::Vector3d>(Nodes::get_v0, vec_nod);
-    Eigen::Matrix<double,Pt::DIM,NPI> V = vec_nod * eigen_a;
-    Eigen::Matrix<double,Pt::DIM,NPI> dVdx = vec_nod * dadx;
-    Eigen::Matrix<double,Pt::DIM,NPI> dVdy = vec_nod * dady;
-    Eigen::Matrix<double,Pt::DIM,NPI> dVdz = vec_nod * dadz;
-    
-
+    Eigen::Matrix<double,Pt::DIM,NPI> U,dUdx,dUdy,dUdz;
+    interpolation(Nodes::get_u0, U, dUdx, dUdy, dUdz);
+    Eigen::Matrix<double,Pt::DIM,NPI> V,dVdx,dVdy,dVdz;
+    interpolation(Nodes::get_v0, V, dVdx, dVdy, dVdz);
     Eigen::Matrix<double,Pt::DIM,NPI> Hd;
-    //interpolation(Nodes::get_phi0, Hd);    
-    
-    Eigen::Vector<double,N> scalar_nod;
-    for (int i = 0; i < N; i++)
-        scalar_nod[i] = Nodes::get_phi0(refNode[ind[i]]);
-    // same as tiny::neg_transposed_mult
-    for (int j = 0; j < NPI; j++)
-        {
-        Hd.col(j).setZero();
-            for (int i = 0; i < N; i++)
-            { Hd.col(j) -= scalar_nod[i] * Eigen::Vector3d(dadx(i,j), dady(i,j), dadz(i,j)); }
-        }
-    
+    interpolation_field(Nodes::get_phi0, Hd);
     Eigen::Matrix<double,Pt::DIM,NPI> Hv;
-    //interpolation(Nodes::get_phiv0, Hv);
-    for (int i = 0; i < N; i++)
-        scalar_nod[i] = Nodes::get_phiv0(refNode[ind[i]]);
-    
-    for (int j = 0; j < NPI; j++)
-        {
-        Hv.col(j).setZero();
-            for (int i = 0; i < N; i++)
-                { Hv.col(j) -= scalar_nod[i] * Eigen::Vector3d(dadx(i,j), dady(i,j), dadz(i,j)); }
-        }
-/*-------------------- END INTERPOLATION --------------------*/
+    interpolation_field(Nodes::get_phiv0, Hv);
+    /*-------------------- END INTERPOLATION ----------------*/
 
     for (int npi = 0; npi < NPI; npi++)
         {
