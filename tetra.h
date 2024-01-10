@@ -253,19 +253,16 @@ public:
             }
         }
 
-    /** interpolation for scalar field : the getter function is given as a parameter in order to
+    /** interpolation for the component idx of a field : the getter function is given as a parameter in order to
      * know what part of the node you want to interpolate */
 
     inline void interpolation(std::function<double(Nodes::Node, Pt::index)> getter, Pt::index idx,
-                              double (&result)[NPI]) const
+                              Eigen::Ref<Eigen::Vector<double,Tetra::NPI>> result) const
         {
-        double scalar_nod[N];
+        Eigen::Vector<double,N> scalar_nod;
 
-        for (int i = 0; i < N; i++)
-            {
-            scalar_nod[i] = getter(refNode[ind[i]], idx);
-            }
-        tiny::transposed_mult<double, N, NPI>(scalar_nod, a, result);
+        for (int i = 0; i < N; i++) { scalar_nod[i] = getter(refNode[ind[i]], idx); }
+        result = scalar_nod.transpose() * eigen_a;
         }
 
     /** AE matrix filling */

@@ -204,9 +204,9 @@ public:
                 std::transform_reduce(std::execution::par, tet.begin(), tet.end(), 0.0, std::plus{},
                                       [getter, &d](Tetra::Tet const &te)
                                       {
-                                          double val[Tetra::NPI];
+                                          Eigen::Vector<double,Tetra::NPI> val;
                                           te.interpolation(getter, d, val);
-                                          return te.weightedScalarProd(val);
+                                          return te.weight.dot(val);
                                       });
 
         return sum / vol;
