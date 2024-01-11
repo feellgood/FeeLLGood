@@ -175,9 +175,9 @@ double Tet::exchangeEnergy(Tetra::prm const &param,
 
     for (int npi = 0; npi < NPI; npi++)
         {
-        dens[npi] = sq(dudx(0,npi)) + sq(dudy(0,npi)) + sq(dudz(0,npi))
-                  + sq(dudx(1,npi)) + sq(dudy(1,npi)) + sq(dudz(1,npi))
-                  + sq(dudx(2,npi)) + sq(dudy(2,npi)) + sq(dudz(2,npi));
+        dens[npi] = dudx.col(npi).squaredNorm()
+                  + dudy.col(npi).squaredNorm()
+                  + dudz.col(npi).squaredNorm();
         }
     return param.A * weight.dot(dens);
     }
