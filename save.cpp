@@ -10,6 +10,7 @@
 #include "chronometer.h"
 
 using namespace std;
+using namespace Nodes;
 
 void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const int nt) const
     {
@@ -46,27 +47,27 @@ void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const i
             }
         if (keyVal == "<Mx>")
             {
-            fout << msh.avg(Nodes::get_u_comp, Pt::IDX_X) << sep;
+            fout << msh.avg(Nodes::get_u_comp, IDX_X) << sep;
             }
         if (keyVal == "<My>")
             {
-            fout << msh.avg(Nodes::get_u_comp, Pt::IDX_Y) << sep;
+            fout << msh.avg(Nodes::get_u_comp, IDX_Y) << sep;
             }
         if (keyVal == "<Mz>")
             {
-            fout << msh.avg(Nodes::get_u_comp, Pt::IDX_Z) << sep;
+            fout << msh.avg(Nodes::get_u_comp, IDX_Z) << sep;
             }
         if (keyVal == "<dMx/dt>")
             {
-            fout << msh.avg(Nodes::get_v_comp, Pt::IDX_X) << sep;
+            fout << msh.avg(Nodes::get_v_comp, IDX_X) << sep;
             }
         if (keyVal == "<dMy/dt>")
             {
-            fout << msh.avg(Nodes::get_v_comp, Pt::IDX_Y) << sep;
+            fout << msh.avg(Nodes::get_v_comp, IDX_Y) << sep;
             }
         if (keyVal == "<dMz/dt>")
             {
-            fout << msh.avg(Nodes::get_v_comp, Pt::IDX_Z) << sep;
+            fout << msh.avg(Nodes::get_v_comp, IDX_Z) << sep;
             }
         if (keyVal == "E_ex")
             {

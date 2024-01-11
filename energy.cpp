@@ -9,7 +9,7 @@ void Fem::energy(double const t, Settings &settings)
                   [this, &Hext, &settings](Tetra::Tet const &te)
                   {
                       Tetra::prm const &param = settings.paramTetra[te.idxPrm];
-                      Eigen::Matrix<double,Pt::DIM,Tetra::NPI> u,dudx,dudy,dudz;
+                      Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> u,dudx,dudy,dudz;
                       Eigen::Vector<double,Tetra::NPI> phi;
 
                       te.interpolation(Nodes::get_u, u, dudx, dudy, dudz);
@@ -32,7 +32,7 @@ void Fem::energy(double const t, Settings &settings)
                   {
                       Facette::prm const &param = settings.paramFacette[fa.idxPrm];
                       Eigen::Vector<double,Facette::NPI> phi;
-                      Eigen::Matrix<double,Pt::DIM,Facette::NPI> u;
+                      Eigen::Matrix<double,Nodes::DIM,Facette::NPI> u;
 
                       fa.interpolation(Nodes::get_u, u);
                       fa.interpolation(Nodes::get_phi, phi);

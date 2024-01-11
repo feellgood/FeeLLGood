@@ -36,14 +36,14 @@ public:
         indexReorder(mySets);  // reordering of index nodes for facette orientation, also some
                                // modifications on fac::Ms
 
-        double xmin = minNodes(Pt::IDX_X);
-        double xmax = maxNodes(Pt::IDX_X);
+        double xmin = minNodes(Nodes::IDX_X);
+        double xmax = maxNodes(Nodes::IDX_X);
 
-        double ymin = minNodes(Pt::IDX_Y);
-        double ymax = maxNodes(Pt::IDX_Y);
+        double ymin = minNodes(Nodes::IDX_Y);
+        double ymax = maxNodes(Nodes::IDX_Y);
 
-        double zmin = minNodes(Pt::IDX_Z);
-        double zmax = maxNodes(Pt::IDX_Z);
+        double zmin = minNodes(Nodes::IDX_Z);
+        double zmax = maxNodes(Nodes::IDX_Z);
 
         l = Eigen::Vector3d(xmax - xmin, ymax - ymin, zmax - zmin);
         diam = l.maxCoeff();
@@ -197,8 +197,8 @@ public:
     /**
     average component of either u or v through getter on the whole set of tetetrahedron
     */
-    double avg(std::function<double(Nodes::Node, Pt::index)> getter /**< [in] */,
-               Pt::index d /**< [in] */) const
+    double avg(std::function<double(Nodes::Node, Nodes::index)> getter /**< [in] */,
+               Nodes::index d /**< [in] */) const
         {
         double sum =
                 std::transform_reduce(std::execution::par, tet.begin(), tet.end(), 0.0, std::plus{},
@@ -252,7 +252,7 @@ private:
     void readMesh(Settings const &mySets);
 
     /** loop on nodes to apply predicate 'whatTodo'  */
-    double doOnNodes(const double init_val, const Pt::index coord,
+    double doOnNodes(const double init_val, const Nodes::index coord,
                      std::function<bool(double, double)> whatToDo) const
         {
         double result(init_val);
@@ -266,13 +266,13 @@ private:
         }
 
     /** return the minimum of all nodes coordinate along coord axis */
-    inline double minNodes(const Pt::index coord) const
+    inline double minNodes(const Nodes::index coord) const
         {
         return doOnNodes(__DBL_MAX__, coord, [](double a, double b) { return a < b; });
         }
 
     /** return the maximum of all nodes coordinate along coord axis */
-    inline double maxNodes(const Pt::index coord) const
+    inline double maxNodes(const Nodes::index coord) const
         {
         return doOnNodes(__DBL_MIN__, coord, [](double a, double b) { return a > b; });
         }
@@ -361,20 +361,20 @@ private:
     void sortNodes()
         {
         // Find the longest axis of the sample.
-        Pt::index long_axis;
+        Nodes::index long_axis;
         if (l.x() > l.y())
             {
             if (l.x() > l.z())
-                long_axis = Pt::IDX_X;
+                long_axis = Nodes::IDX_X;
             else
-                long_axis = Pt::IDX_Z;
+                long_axis = Nodes::IDX_Z;
             }
         else
             {
             if (l.y() > l.z())
-                long_axis = Pt::IDX_Y;
+                long_axis = Nodes::IDX_Y;
             else
-                long_axis = Pt::IDX_Z;
+                long_axis = Nodes::IDX_Z;
             }
 
         // Sort the nodes along this axis, indirectly through an array of indices.

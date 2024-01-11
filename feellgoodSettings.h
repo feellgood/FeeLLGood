@@ -95,7 +95,7 @@ public:
     bool recenter;
 
     /** recentering direction, should be IDX_X|IDX_Y|IDX_Z */
-    Pt::index recentering_direction;
+    Nodes::index recentering_direction;
 
     /** threshold value to recenter or not versus avg(M_recentering_direction) */
     double threshold;

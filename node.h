@@ -5,12 +5,10 @@
 \brief header to define struct Node
 */
 
-#include <memory>
-
+//#include <memory>
+#include <iostream>
 #include <eigen3/Eigen/Dense>
-
 #include "config.h"
-#include "pt3D.h"
 
 /**
  \namespace Nodes
@@ -18,19 +16,20 @@
  */
 namespace Nodes
     {
-/** convenient enum mainly to access some data values in calculations, used by some templates */
-enum index
-    {
-    IDX_p = 0,
-    IDX_u0 = 1,
-    IDX_v0 = 2,
-    IDX_u = 3,
-    IDX_v = 4,
-    IDX_phi0 = 5,
-    IDX_phi = 6,
-    IDX_phiv0 = 7,
-    IDX_phiv = 8
-    };
+     /** space dimension */
+    const int DIM = 3;
+
+    /** convenient enum to specify what coordinate in calculations */
+    enum index
+        {
+        IDX_UNDEF = -1,
+        IDX_X = 0,
+        IDX_Y = 1,
+        IDX_Z = 2
+        };
+
+/** \return \f$ x^2 \f$ */
+inline double sq(const double x) { return x * x; }
 
 /** \struct Node
 Node is containing physical point of coordinates \f$ p = (x,y,z) \f$, magnetization value at \f$
@@ -142,19 +141,19 @@ inline const Eigen::Vector3d get_u(Node const &n /**< [in] */) { return n.u; }
 inline const Eigen::Vector3d get_v(Node const &n /**< [in] */) { return n.v; }
 
 /** getter for u component */
-inline double get_u_comp(Node const &n /**< [in] */, Pt::index idx /**< [in] */)
+inline double get_u_comp(Node const &n /**< [in] */, index idx /**< [in] */)
     {
     return n.u(idx);
     }
 
 /** getter for v component */
-inline double get_v_comp(Node const &n /**< [in] */, Pt::index idx /**< [in] */)
+inline double get_v_comp(Node const &n /**< [in] */, index idx /**< [in] */)
     {
     return n.v(idx);
     }
 
 /** getter for v0 component */
-inline double get_v0_comp(Node const &n /**< [in] */, Pt::index idx /**< [in] */)
+inline double get_v0_comp(Node const &n /**< [in] */, index idx /**< [in] */)
     {
     return n.v0(idx);
     }

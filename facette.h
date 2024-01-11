@@ -44,7 +44,7 @@ struct prm
     std::string regName;   /**< region name */
     bool suppress_charges; /**< suppress charges if true */
     double Ks;             /**< uniaxial surface anisotropy constant */
-    Pt::pt3D uk;           /**< anisotropy axis */
+    Eigen::Vector3d uk;    /**< anisotropy axis */
 
     /** print the struct parameters */
     inline void infos()
@@ -99,9 +99,9 @@ public:
     result = vec_nod * a 
     */
     void interpolation(std::function<Eigen::Vector3d(Nodes::Node)> getter /**< [in] */,
-                       Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> result /**< [out] */) const
+                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result /**< [out] */) const
         {
-        Eigen::Matrix<double,Pt::DIM,N> vec_nod;
+        Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
         for (int i = 0; i < N; i++) vec_nod.col(i) = getter(refNode[ind[i]]);
         
         result = vec_nod * eigen_a;
@@ -120,18 +120,18 @@ public:
         }
 
     /** computes the integral contribution of the triangular face */
-    void integrales(std::vector<Facette::prm> const &params /**< [in] */);
+    void integrales(Facette::prm const &params /**< [in] */);
 
     /** anisotropy energy of the facette */
     double anisotropyEnergy(Facette::prm const &param /**< [in] */,
-                            Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> const u /**< [in] */) const;
+                            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> const u /**< [in] */) const;
 
     /** return surface charges and computes some corrections */
     Eigen::Vector<double,NPI> charges(std::function<Eigen::Vector3d(Nodes::Node)> getter /**< [in] */,
                                       std::vector<double> &corr /**< [in|out]*/ ) const;
 
     /** demagnetizing energy of the facette */
-    double demagEnergy(Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> u /**< [in] */,
+    double demagEnergy(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u /**< [in] */,
                        Eigen::Ref<Eigen::Vector<double,NPI>> phi /**< [in] */) const;
 
     /** computes correction on potential*/
@@ -155,9 +155,9 @@ public:
         }
 
     /** returns Gauss points in result = vec_nod*Facette::a */
-    void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> result) const
+    void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result) const
         {
-        Eigen::Matrix<double,Pt::DIM,N> vec_nod;
+        Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
         for (int i = 0; i < N; i++)
             { vec_nod.col(i) << refNode[ind[i]].p; }
         result = vec_nod * eigen_a;

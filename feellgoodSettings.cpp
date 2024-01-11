@@ -5,6 +5,8 @@
 #include "tags.h"
 #include "feellgoodSettings.h"
 
+using namespace Nodes;
+
 /***********************************************************************
  * Access to the default configuration embedded from the file
  * default-settings.yml.
@@ -53,21 +55,7 @@ static bool assign(Eigen::Vector3d &var, const YAML::Node &node)
         {
         if (!node.IsSequence()) error("vectors should be YAML sequences.");
         if (node.size() != 3) error("vectors should have three components.");
-        var = Eigen::Vector3d(node[0].as<double>(), node[1].as<double>(), node[2].as<double>());
-        var.normalize();
-        return true;
-        }
-    return false;
-    }
-
-// Overload of the previous template for a unit vector.
-static bool assign(Pt::pt3D &var, const YAML::Node &node)
-    {
-    if (node)
-        {
-        if (!node.IsSequence()) error("vectors should be YAML sequences.");
-        if (node.size() != 3) error("vectors should have three components.");
-        var = Pt::pt3D(node[0].as<double>(), node[1].as<double>(), node[2].as<double>());
+        var = { node[0].as<double>(), node[1].as<double>(), node[2].as<double>() };
         var.normalize();
         return true;
         }
@@ -79,13 +67,6 @@ static const char *str(bool x) { return x ? "true" : "false"; }
 
 // Stringify a vector
 static const std::string str(Eigen::Vector3d v)
-    {
-    return std::string("[") + std::to_string(v.x()) + ", " + std::to_string(v.y()) + ", "
-           + std::to_string(v.z()) + "]";
-    }
-
-// Stringify a vector
-static const std::string str(Pt::pt3D v)
     {
     return std::string("[") + std::to_string(v.x()) + ", " + std::to_string(v.y()) + ", "
            + std::to_string(v.z()) + "]";
@@ -198,10 +179,10 @@ void Settings::infos()
         std::cout << "  direction: ";
         switch (recentering_direction)
             {
-            case Pt::IDX_UNDEF: std::cout << "UNDEF\n"; break;
-            case Pt::IDX_X: std::cout << "X\n"; break;
-            case Pt::IDX_Y: std::cout << "Y\n"; break;
-            case Pt::IDX_Z: std::cout << "Z\n"; break;
+            case IDX_UNDEF: std::cout << "UNDEF\n"; break;
+            case IDX_X: std::cout << "X\n"; break;
+            case IDX_Y: std::cout << "Y\n"; break;
+            case IDX_Z: std::cout << "Z\n"; break;
             }
         std::cout << "  threshold: " << threshold << "\n";
         }
@@ -403,7 +384,7 @@ void Settings::read(YAML::Node yaml)
             }
         else if (magnetization.IsSequence())
             {
-            if (magnetization.size() != 3)
+            if (magnetization.size() != DIM)
                 error("initial_magnetization should have three components.");
             sMx = magnetization[0].as<std::string>();
             sMy = magnetization[1].as<std::string>();
@@ -425,9 +406,9 @@ void Settings::read(YAML::Node yaml)
             error("recentering.direction should be X, Y or Z.");
         switch (direction[0])
             {
-            case 'X': recentering_direction = Pt::IDX_X; break;
-            case 'Y': recentering_direction = Pt::IDX_Y; break;
-            case 'Z': recentering_direction = Pt::IDX_Z; break;
+            case 'X': recentering_direction = IDX_X; break;
+            case 'Y': recentering_direction = IDX_Y; break;
+            case 'Z': recentering_direction = IDX_Z; break;
             }
         assign(threshold, recentering["threshold"]);
         }  // recentering
@@ -442,7 +423,7 @@ void Settings::read(YAML::Node yaml)
             }
         else if (field.IsSequence())
             {
-            if (field.size() != 3) error("Bext should have three components.");
+            if (field.size() != DIM) error("Bext should have three components.");
             sBx = field[0].as<std::string>();
             sBy = field[1].as<std::string>();
             sBz = field[2].as<std::string>();

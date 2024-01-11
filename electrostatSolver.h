@@ -92,9 +92,9 @@ public:
         : msh(_msh), p_stt(_p_stt), verbose(v), MAXITER(max_iter), precision(PRECISION_STT),
           fileName(_fileName)
         {
-        ksi = Pt::sq(p_stt.lJ / p_stt.lsf);
-        D0 = 2.0 * p_stt.sigma / (Pt::sq(CHARGE_ELECTRON) * p_stt.N0);
-        pf = Pt::sq(p_stt.lJ) / (D0 * (1. + ksi * ksi)) * BOHRS_MUB * p_stt.beta / CHARGE_ELECTRON;
+        ksi = Nodes::sq(p_stt.lJ / p_stt.lsf);
+        D0 = 2.0 * p_stt.sigma / (Nodes::sq(CHARGE_ELECTRON) * p_stt.N0);
+        pf = Nodes::sq(p_stt.lJ) / (D0 * (1. + ksi * ksi)) * BOHRS_MUB * p_stt.beta / CHARGE_ELECTRON;
 
         if (verbose)
             {
@@ -158,7 +158,7 @@ public:
     void calc_Hm(Tetra::Tet const &tet, std::array<Eigen::Vector3d, Tetra::NPI> const &_gradV,
                  std::array<Eigen::Vector3d, Tetra::NPI> &_Hm) const
         {
-        Eigen::Matrix<double,Pt::DIM,Tetra::NPI> p_g;
+        Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> p_g;
         tet.getPtGauss(p_g);
 
         for (int npi = 0; npi < Tetra::NPI; npi++)
@@ -182,13 +182,13 @@ private:
                                                       Eigen::Ref<Eigen::Vector3d> dUdz,
                                                       Eigen::Ref<Eigen::Vector<double,3*Tetra::N>> BE)
                     {
-                        const double prefactor = D0 / Pt::sq(p_stt.lJ) / (gamma0 * nu0 * Js);
+                        const double prefactor = D0 / Nodes::sq(p_stt.lJ) / (gamma0 * nu0 * Js);
                         Eigen::Vector3d const &_gV = gradV[tet.idx][npi];
                         Eigen::Vector3d j_grad_u =
                                 -p_stt.sigma
-                                * Eigen::Vector3d(_gV.dot( Eigen::Vector3d(dUdx(Pt::IDX_X), dUdy(Pt::IDX_X), dUdz(Pt::IDX_X))),
-                                                  _gV.dot( Eigen::Vector3d(dUdx(Pt::IDX_Y), dUdy(Pt::IDX_Y), dUdz(Pt::IDX_Y))),
-                                                  _gV.dot( Eigen::Vector3d(dUdx(Pt::IDX_Z), dUdy(Pt::IDX_Z), dUdz(Pt::IDX_Z))));
+                                * Eigen::Vector3d(_gV.dot( Eigen::Vector3d(dUdx(Nodes::IDX_X), dUdy(Nodes::IDX_X), dUdz(Nodes::IDX_X))),
+                                                  _gV.dot( Eigen::Vector3d(dUdx(Nodes::IDX_Y), dUdy(Nodes::IDX_Y), dUdz(Nodes::IDX_Y))),
+                                                  _gV.dot( Eigen::Vector3d(dUdx(Nodes::IDX_Z), dUdy(Nodes::IDX_Z), dUdz(Nodes::IDX_Z))));
 
                         Eigen::Vector3d m = pf * (ksi * j_grad_u + U.cross(j_grad_u));
                         Eigen::Vector3d interim[Tetra::N];
@@ -198,7 +198,7 @@ private:
                             interim[i] = ai_w*(Hm[tet.idx][npi] + prefactor*m);
                             }
                         for (int i = 0; i < Tetra::N; i++)
-                            for(int k=0;k<Pt::DIM;k++)
+                            for(int k=0;k<Nodes::DIM;k++)
                                 { BE(k*Tetra::N + i) += interim[i](k); }
                     };
                 });

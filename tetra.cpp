@@ -10,7 +10,7 @@
 #include "facette.h"
 
 using namespace Tetra;
-using namespace Pt;
+using namespace Nodes;
 
 void Tet::lumping(int const &npi, double alpha_eff, double prefactor,
                   Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const
@@ -26,12 +26,12 @@ void Tet::lumping(int const &npi, double alpha_eff, double prefactor,
         AE(N + i,N + i) += alpha_eff * ai_w;
         AE(2*N + i,2*N + i) += alpha_eff * ai_w;
 
-        AE(i, 2*N + i) += ai_w_u0(Pt::IDX_Y);
-        AE(i, N + i) -= ai_w_u0(Pt::IDX_Z);
-        AE(N + i, i) += ai_w_u0(Pt::IDX_Z);
-        AE(N + i, 2*N + i) -= ai_w_u0(Pt::IDX_X);
-        AE(2*N + i, N + i) += ai_w_u0(Pt::IDX_X);
-        AE(2*N + i, i) -= ai_w_u0(Pt::IDX_Y);
+        AE(i, 2*N + i) += ai_w_u0(IDX_Y);
+        AE(i, N + i) -= ai_w_u0(IDX_Z);
+        AE(N + i, i) += ai_w_u0(IDX_Z);
+        AE(N + i, 2*N + i) -= ai_w_u0(IDX_X);
+        AE(2*N + i, N + i) += ai_w_u0(IDX_X);
+        AE(2*N + i, i) -= ai_w_u0(IDX_Y);
 
         for (int j = 0; j < N; j++)
             {
@@ -47,10 +47,10 @@ void Tet::lumping(int const &npi, double alpha_eff, double prefactor,
     }
 
 void Tet::add_drift_BE(int const &npi, double alpha, double s_dt, double Vdrift,
-                       Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> U,
-                       Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> V, 
-                       Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> dUd_,
-                       Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> dVd_,
+                       Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> U,
+                       Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> V, 
+                       Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUd_,
+                       Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dVd_,
                        Eigen::Ref<Eigen::Vector<double,3*N>> BE) const
     {  // the artificial drift from eventual recentering is along x,y or z
     double w = weight[npi];
@@ -63,14 +63,14 @@ void Tet::add_drift_BE(int const &npi, double alpha, double s_dt, double Vdrift,
         }
     
     for (int i = 0; i < N; i++)
-        for(int k=0;k<Pt::DIM;k++)
+        for(int k=0;k<DIM;k++)
             { BE(k*N + i) += w*Vdrift*interim[i](k); }
     }
 
 double Tet::calc_aniso_uniax(const int npi, Eigen::Ref<const Eigen::Vector3d> uk, const double Kbis,
                              const double s_dt,
-                             Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> U,
-                             Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> V,
+                             Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> U,
+                             Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> V,
                              Eigen::Ref<Eigen::Vector3d> H_aniso) const
     {
     H_aniso += (Kbis * uk.dot( U.col(npi) + s_dt * V.col(npi))) * uk;
@@ -82,8 +82,8 @@ double Tet::calc_aniso_cub(const int npi,
                            Eigen::Ref<const Eigen::Vector3d> ey,
                            Eigen::Ref<const Eigen::Vector3d> ez,
                            const double K3bis, const double s_dt,
-                           Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> U,
-                           Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> V,
+                           Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> U,
+                           Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> V,
                            Eigen::Ref<Eigen::Vector3d> H_aniso) const
     {
     Eigen::Vector3d uk_u = Eigen::Vector3d(ex.dot(U.col(npi)), ey.dot(U.col(npi)), ez.dot(U.col(npi)));
@@ -98,7 +98,7 @@ double Tet::calc_aniso_cub(const int npi,
     }
 
 void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
-                     Eigen::Vector3d const &Hext, Pt::index idx_dir, double Vdrift)
+                     Eigen::Vector3d const &Hext, Nodes::index idx_dir, double Vdrift)
     {
     double alpha = param.alpha_LLG;
     double Js = param.J;
@@ -113,13 +113,13 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     BE.setZero();
     
     /*-------------------- INTERPOLATION --------------------*/
-    Eigen::Matrix<double,Pt::DIM,NPI> U,dUdx,dUdy,dUdz;
+    Eigen::Matrix<double,DIM,NPI> U,dUdx,dUdy,dUdz;
     interpolation(Nodes::get_u0, U, dUdx, dUdy, dUdz);
-    Eigen::Matrix<double,Pt::DIM,NPI> V,dVdx,dVdy,dVdz;
+    Eigen::Matrix<double,DIM,NPI> V,dVdx,dVdy,dVdz;
     interpolation(Nodes::get_v0, V, dVdx, dVdy, dVdz);
-    Eigen::Matrix<double,Pt::DIM,NPI> Hd;
+    Eigen::Matrix<double,DIM,NPI> Hd;
     interpolation_field(Nodes::get_phi0, Hd);
-    Eigen::Matrix<double,Pt::DIM,NPI> Hv;
+    Eigen::Matrix<double,DIM,NPI> Hv;
     interpolation_field(Nodes::get_phiv0, Hv);
     /*-------------------- END INTERPOLATION ----------------*/
 
@@ -136,18 +136,18 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
         for (int i = 0; i < N; i++)
             {
             const Eigen::Vector3d interim = -Abis*(da(i,0)*dUdx.col(npi) + da(i,1)*dUdy.col(npi) + da(i,2)*dUdz.col(npi)) + a[i][npi]*H;
-            for(int k=0;k<Pt::DIM;k++)
+            for(int k=0;k<DIM;k++)
                 { BE(k*N + i) += w*interim(k); }
             }
 
         extraCoeffs_BE(npi, Js, U.col(npi), dUdx.col(npi), dUdy.col(npi), dUdz.col(npi), BE);  // STT
-        if (idx_dir != Pt::IDX_UNDEF)
+        if (idx_dir != IDX_UNDEF)
             {
-            if (idx_dir == Pt::IDX_Z)
+            if (idx_dir == IDX_Z)
                 add_drift_BE(npi, alpha, s_dt, Vdrift, U, V, dUdz, dVdz, BE);
-            else if (idx_dir == Pt::IDX_Y)
+            else if (idx_dir == IDX_Y)
                 add_drift_BE(npi, alpha, s_dt, Vdrift, U, V, dUdy, dVdy, BE);
-            else if (idx_dir == Pt::IDX_X)
+            else if (idx_dir == IDX_X)
                 add_drift_BE(npi, alpha, s_dt, Vdrift, U, V, dUdx, dVdx, BE);
             }
 
@@ -167,9 +167,9 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     }
 
 double Tet::exchangeEnergy(Tetra::prm const &param,
-                           Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> dudx,
-                           Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> dudy,
-                           Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> dudz) const
+                           Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudx,
+                           Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudy,
+                           Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudz) const
     {
     double dens[NPI];
 
@@ -182,7 +182,7 @@ double Tet::exchangeEnergy(Tetra::prm const &param,
     return (param.A * weightedScalarProd(dens));
     }
 
-double Tet::anisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> u) const
+double Tet::anisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> u) const
     {
     double dens[NPI];
 
@@ -215,9 +215,9 @@ Eigen::Vector<double,NPI> Tet::charges(std::function<Eigen::Vector3d(Nodes::Node
     return result;
     }
 
-double Tet::demagEnergy(Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> dudx,
-                       Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> dudy,
-                       Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> dudz,
+double Tet::demagEnergy(Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudx,
+                       Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudy,
+                       Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudz,
                        Eigen::Ref<Eigen::Vector<double,NPI>> phi) const
     {
     double dens[NPI];
@@ -228,7 +228,7 @@ double Tet::demagEnergy(Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> dudx,
     }
 
 double Tet::zeemanEnergy(Tetra::prm const &param, double uz_drift, Eigen::Ref<Eigen::Vector3d> const Hext,
-                        Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> const u) const
+                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> const u) const
     {
     double dens[NPI];
 

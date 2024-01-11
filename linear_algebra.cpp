@@ -14,16 +14,12 @@ void LinAlgebra::prepareElements(Eigen::Vector3d const &Hext /**< [in] applied f
                                  timing const &t_prm /**< [in] */)
     {
     base_projection();
-    Pt::index idx_dir;
+    Nodes::index idx_dir;
 
     if (!settings.recenter)
-        {
-        idx_dir = Pt::IDX_UNDEF;
-        }
+        { idx_dir = Nodes::IDX_UNDEF; }
     else
-        {
-        idx_dir = settings.recentering_direction;
-        }
+        { idx_dir = settings.recentering_direction; }
 
     std::for_each(std::execution::par, refMsh->tet.begin(), refMsh->tet.end(),
                   [this, &Hext, &t_prm, idx_dir](Tetra::Tet &tet)
@@ -31,5 +27,5 @@ void LinAlgebra::prepareElements(Eigen::Vector3d const &Hext /**< [in] applied f
 
     std::for_each(std::execution::par, refMsh->fac.begin(), refMsh->fac.end(),
                   [this](Facette::Fac &fac)
-                  { fac.integrales(settings.paramFacette); });
+                  { fac.integrales(settings.paramFacette[fac.idxPrm]); });
     }

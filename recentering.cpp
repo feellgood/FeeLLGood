@@ -2,7 +2,7 @@
 
 #include "fem.h"
 
-using namespace Pt;
+using namespace Nodes;
 
 void Fem::direction(enum index idx_dir)
     {
@@ -12,7 +12,7 @@ void Fem::direction(enum index idx_dir)
     if (!nnIdx) SYSTEM_ERROR;
     ANNdistArray dists = new ANNdist[NPS];
     if (!dists) SYSTEM_ERROR;
-    ANNpoint queryPt = annAllocPt(Pt::DIM);
+    ANNpoint queryPt = annAllocPt(DIM);
 
     Eigen::Vector3d qPt = msh.c - 0.5 * msh.l.cwiseProduct(Eigen::Vector3d::Unit(idx_dir));
 
@@ -50,10 +50,10 @@ bool Fem::recenter(double thres, char recentering_direction)
 
     switch (recentering_direction)
         {
-        case 'X': idx_dir = Pt::IDX_X; break;
-        case 'Y': idx_dir = Pt::IDX_Y; break;
-        case 'Z': idx_dir = Pt::IDX_Z; break;
-        default: idx_dir = Pt::IDX_Z; break;
+        case 'X': idx_dir = IDX_X; break;
+        case 'Y': idx_dir = IDX_Y; break;
+        case 'Z': idx_dir = IDX_Z; break;
+        default: idx_dir = IDX_Z; break;
         }
 
     thres = abs(thres);
@@ -67,7 +67,7 @@ bool Fem::recenter(double thres, char recentering_direction)
     if (!nnIdx) SYSTEM_ERROR;
     ANNdistArray dists = new ANNdist[NPS];
     if (!dists) SYSTEM_ERROR;
-    ANNpoint queryPt = annAllocPt(Pt::DIM);
+    ANNpoint queryPt = annAllocPt(DIM);
 
     Eigen::Vector3d p_dir = Eigen::Vector3d::Unit(idx_dir);  // unit vector
     Eigen::Vector3d qPt = msh.c - 0.5 * p_dir.cwiseProduct(msh.l);

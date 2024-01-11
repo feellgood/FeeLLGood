@@ -54,7 +54,7 @@ public:
                 {
                 std::cout << "Approximate nearest neighbors:\n";
                 }
-            pts = annAllocPts(msh.getNbNodes(), Pt::DIM);
+            pts = annAllocPts(msh.getNbNodes(), Nodes::DIM);
             if (!pts)
                 {
                 std::cout << "ANN memory error while allocating points" << std::endl;
@@ -77,7 +77,7 @@ public:
                 std::cout << "  building kd_tree\n";
                 }
 
-            kdtree = new ANNkd_tree(pts, msh.getNbNodes(), Pt::DIM);
+            kdtree = new ANNkd_tree(pts, msh.getNbNodes(), Nodes::DIM);
             if (!kdtree)
                 {
                 std::cout << "ANN memory error while allocating kd_tree" << std::endl;
@@ -106,7 +106,7 @@ public:
 
         if (mySets.recenter)
             {
-            direction(Pt::IDX_Z);
+            direction(Nodes::IDX_Z);
             } /* DW propagation direction for recentering */
         }
 
@@ -184,7 +184,7 @@ private:
     ANNpointArray pts;  /**< container for the building of the kdtree (handled by ANN library) */
 
     /** find direction of motion of DW */
-    void direction(enum Pt::index idx_dir /**< [in] */);
+    void direction(enum Nodes::index idx_dir /**< [in] */);
 
     /** zeroing of all energies */
     inline void zeroEnergy(void)

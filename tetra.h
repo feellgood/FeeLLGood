@@ -12,8 +12,6 @@
 #include "facette.h"
 #include "node.h"
 #include "time_integration.h"
-#include "tiny.h"
-
 #include "element.h"
 
 /** \namespace Tetra
@@ -151,7 +149,7 @@ public:
                 element::infos();
                 SYSTEM_ERROR;
                 }
-            Eigen::Matrix<double,N,Pt::DIM> dadu;
+            Eigen::Matrix<double,N,Nodes::DIM> dadu;
             dadu << -1., -1., -1., 1., 0., 0., 0., 1., 0., 0., 0., 1.;
             da = dadu * J.inverse();
 
@@ -205,12 +203,12 @@ public:
      * know what part of the node you want to interpolate */
 
     inline void interpolation(std::function<Eigen::Vector3d(Nodes::Node)> getter,
-                              Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> result,
-                              Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> Tx,
-                              Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> Ty,
-                              Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> Tz) const
+                              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result,
+                              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> Tx,
+                              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> Ty,
+                              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> Tz) const
         {
-        Eigen::Matrix<double,Pt::DIM,N> vec_nod;
+        Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
         for (int i = 0; i < N; i++) vec_nod.col(i) = getter(refNode[ind[i]]);
         
         result = vec_nod * eigen_a;
@@ -223,11 +221,11 @@ public:
      * know what part of the node you want to interpolate */
 
     inline void interpolation(std::function<Eigen::Vector3d(Nodes::Node)> getter,
-                              Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> Tx,
-                              Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> Ty,
-                              Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> Tz) const
+                              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> Tx,
+                              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> Ty,
+                              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> Tz) const
         {
-        Eigen::Matrix<double,Pt::DIM,N> vec_nod;
+        Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
         for (int i = 0; i < N; i++) vec_nod.col(i) = getter(refNode[ind[i]]);
 
         Tx = vec_nod * dadx;
@@ -238,7 +236,7 @@ public:
     /** interpolation for components of a field : the getter function is given as a parameter in
      * order to know what part of the node you want to interpolate */
     inline void interpolation_field(std::function<double(Nodes::Node)> getter,
-                                    Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> X) const
+                                    Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> X) const
         {
         Eigen::Vector<double,N> scalar_nod;
         for (int i = 0; i < N; i++) scalar_nod(i) = getter(refNode[ind[i]]);
@@ -256,7 +254,7 @@ public:
     /** interpolation for the component idx of a field : the getter function is given as a parameter in order to
      * know what part of the node you want to interpolate */
 
-    inline void interpolation(std::function<double(Nodes::Node, Pt::index)> getter, Pt::index idx,
+    inline void interpolation(std::function<double(Nodes::Node, Nodes::index)> getter, Nodes::index idx,
                               Eigen::Ref<Eigen::Vector<double,Tetra::NPI>> result) const
         {
         Eigen::Vector<double,N> scalar_nod;
@@ -271,18 +269,18 @@ public:
 
     /** add drift contribution due to eventual recentering to vectors BE */
     void add_drift_BE(int const &npi, double alpha, double s_dt, double Vdrift,
-                      Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> U,
-                      Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> V, 
-                      Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> dUd_,
-                      Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> dVd_,
+                      Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
+                      Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V, 
+                      Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUd_,
+                      Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dVd_,
                       Eigen::Ref<Eigen::Vector<double,3*N>> BE) const;
 
     /** append H_aniso for uniaxial anisotropy contribution, returns contribution to uHeff (used to
      * compute the stabilizing effective damping) */
     double calc_aniso_uniax(const int npi, Eigen::Ref<const Eigen::Vector3d> uk, const double Kbis,
                             const double s_dt,
-                            Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> U,
-                            Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> V,
+                            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
+                            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V,
                             Eigen::Ref<Eigen::Vector3d> H_aniso) const;
 
     /** append H_aniso for cubic anisotropy contribution, returns contribution to uHeff (used to
@@ -291,36 +289,36 @@ public:
                           Eigen::Ref<const Eigen::Vector3d> ey,
                           Eigen::Ref<const Eigen::Vector3d> ez,
                           const double K3bis, const double s_dt,
-                          Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> U,
-                          Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> V,
+                          Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
+                          Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V,
                           Eigen::Ref<Eigen::Vector3d> H_aniso) const;
 
     /** computes the integral contribution of the tetrahedron to the evolution of the magnetization
      */
     void integrales( Tetra::prm const &param, timing const &prm_t,
-                    Eigen::Vector3d const &Hext, Pt::index idx_dir, double Vdrift);
+                    Eigen::Vector3d const &Hext, Nodes::index idx_dir, double Vdrift);
 
     /** exchange energy of the tetrahedron */
     double exchangeEnergy(Tetra::prm const &param,
-                          Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> dudx,
-                          Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> dudy,
-                          Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> dudz) const;
+                          Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudx,
+                          Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudy,
+                          Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudz) const;
 
     /** anisotropy energy of the tetrahedron */
-    double anisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> u) const;
+    double anisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u) const;
 
     /** return volume charges  */
     Eigen::Vector<double,NPI> charges(std::function<Eigen::Vector3d(Nodes::Node)> getter) const;
 
     /** demagnetizing energy of the tetrahedron */
-    double demagEnergy(Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> dudx,
-                       Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> dudy,
-                       Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> dudz,
+    double demagEnergy(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudx,
+                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudy,
+                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudz,
                        Eigen::Ref<Eigen::Vector<double,NPI>> phi) const;
 
     /** zeeman energy of the tetrahedron */
     double zeemanEnergy(Tetra::prm const &param, double uz_drift, Eigen::Ref<Eigen::Vector3d> const Hext,
-                        Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> const u) const;
+                        Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> const u) const;
 
     /** \return \f$ |J| \f$ build Jacobian \f$ J \f$ */
     double Jacobian(Eigen::Ref<Eigen::Matrix3d> J);
@@ -342,9 +340,9 @@ public:
                        Eigen::Ref<Eigen::Vector3d> dUdz, Eigen::Ref<Eigen::Vector<double,3*N>> BE)> extraCoeffs_BE;
 
     /** returns gauss points in result = vec_nod*Tetra::a  */
-    void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> result) const
+    void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result) const
         {
-        Eigen::Matrix<double,Pt::DIM,N> vec_nod;
+        Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
         for (int i = 0; i < N; i++)
             { vec_nod.col(i) << refNode[ind[i]].p; }
         result = vec_nod * eigen_a;
@@ -352,7 +350,7 @@ public:
 
 private:
     /** local hat functions matrix, initialized by constructor: da = dadu * inverse(Jacobian) */
-    Eigen::Matrix<double,N,Pt::DIM> da;
+    Eigen::Matrix<double,N,Nodes::DIM> da;
 
     void orientate(void)
         {

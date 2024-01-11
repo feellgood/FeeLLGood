@@ -7,6 +7,7 @@
 #include <eigen3/Eigen/Dense>
 
 #include "tetra.h"
+#include "tiny.h"
 #include "ut_tools.h"
 #include "ut_config.h"
 

@@ -118,7 +118,7 @@ class element
         };
     
     /** computes Gauss point of the element, return in result */
-    virtual void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Pt::DIM,NPI>> result) const = 0;
+    virtual void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result) const = 0;
 
     protected:
         /** vector of nodes */

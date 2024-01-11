@@ -1,8 +1,8 @@
 #ifndef spinTransferTorque_h
 #define spinTransferTorque_h
 
+#include <vector>
 #include "config.h"
-#include "pt3D.h"
 
 /** \struct STT
  container for Spin Transfert Torque constants, Thiaville model, Dirichlet boundary conditions

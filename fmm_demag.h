@@ -76,12 +76,8 @@ public:
         FSize idxPart = 0;
         for (idxPart = 0; idxPart < NOD; ++idxPart)
             {
-            Eigen::Vector3d tmp = msh.getNode_p(idxPart);
-            double pTargetx = norm * (tmp(0) - msh.c.x());
-            double pTargety = norm * (tmp(1) - msh.c.y());
-            double pTargetz = norm * (tmp(2) - msh.c.z());
-            //Pt::pt3D pTarget = norm * (msh.getNode_p(idxPart) - msh.c);
-            tree.insert(FPoint<FReal>(pTargetx, pTargety, pTargetz),
+            Eigen::Vector3d pTarget = norm*(msh.getNode_p(idxPart) - msh.c);
+            tree.insert(FPoint<FReal>(pTarget.x(), pTarget.y(), pTarget.z()),
                         FParticleType::FParticleTypeTarget, idxPart);
             }
 
@@ -126,7 +122,7 @@ private:
         std::for_each(container.begin(), container.end(),
                       [this, c, &idx](T const &elem)
                       {
-                          Eigen::Matrix<double,Pt::DIM,NPI> gauss;
+                          Eigen::Matrix<double,Nodes::DIM,NPI> gauss;
                           elem.getPtGauss(gauss);
 
                           for (int j = 0; j < NPI; j++, idx++)
