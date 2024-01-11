@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_double, *boost::unit_test::tolerance(UT_T
 
     Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
 
-    Eigen::Vector<double,Facette::NPI> _p;
+    Eigen::Matrix<double,Facette::NPI,1> _p;
     f.interpolation(Nodes::get_phi0, _p);
 
     // code ref

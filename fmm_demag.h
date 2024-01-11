@@ -143,7 +143,7 @@ private:
         std::for_each(msh.tet.begin(), msh.tet.end(),
                       [this, getter, &nsrc](Tetra::Tet const &tet)
                           {
-                          Eigen::Vector<double,Tetra::NPI> result = tet.charges(getter); 
+                          Eigen::Matrix<double,Tetra::NPI,1> result = tet.charges(getter); 
                           for(int i=0;i<Tetra::NPI;i++) { srcDen[nsrc+i] = result(i); }
                           nsrc += Tetra::NPI;
                           });
@@ -151,7 +151,7 @@ private:
         std::for_each(msh.fac.begin(), msh.fac.end(),
                       [this, getter, &nsrc](Facette::Fac const &fac)
                           {
-                          Eigen::Vector<double,Facette::NPI> result =  fac.charges(getter, corr);
+                          Eigen::Matrix<double,Facette::NPI,1> result =  fac.charges(getter, corr);
                           for(int i=0;i<Facette::NPI;i++) { srcDen[nsrc+i] = result(i); }
                           nsrc += Facette::NPI;
                           });

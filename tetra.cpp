@@ -51,7 +51,7 @@ void Tet::add_drift_BE(int const &npi, double alpha, double s_dt, double Vdrift,
                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> V, 
                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUd_,
                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dVd_,
-                       Eigen::Ref<Eigen::Vector<double,3*N>> BE) const
+                       Eigen::Ref<Eigen::Matrix<double,3*N,1>> BE) const
     {  // the artificial drift from eventual recentering is along x,y or z
     double w = weight[npi];
     Eigen::Vector3d interim[N];
@@ -109,7 +109,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
 
     Eigen::Matrix<double,3*N,3*N> AE;
     AE.setZero();
-    Eigen::Vector<double,3*N> BE;
+    Eigen::Matrix<double,3*N,1> BE;
     BE.setZero();
     
     /*-------------------- INTERPOLATION --------------------*/
@@ -204,12 +204,12 @@ double Tet::anisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<d
     return weightedScalarProd(dens);
     }
 
-Eigen::Vector<double,NPI> Tet::charges(std::function<Eigen::Vector3d(Nodes::Node)> getter) const
+Eigen::Matrix<double,NPI,1> Tet::charges(std::function<Eigen::Vector3d(Nodes::Node)> getter) const
     {
     Eigen::Matrix<double,DIM,NPI> dudx,dudy,dudz;
     interpolation(getter,dudx,dudy,dudz);
     
-    Eigen::Vector<double,NPI> result;
+    Eigen::Matrix<double,NPI,1> result;
     for (int j = 0; j < NPI; j++)
         { result(j) = -Ms * (dudx(0,j) + dudy(1,j) + dudz(2,j)) * weight[j]; }
     return result;
@@ -218,7 +218,7 @@ Eigen::Vector<double,NPI> Tet::charges(std::function<Eigen::Vector3d(Nodes::Node
 double Tet::demagEnergy(Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudx,
                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudy,
                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudz,
-                       Eigen::Ref<Eigen::Vector<double,NPI>> phi) const
+                       Eigen::Ref<Eigen::Matrix<double,NPI,1>> phi) const
     {
     double dens[NPI];
 

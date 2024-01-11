@@ -37,13 +37,13 @@ class element
     double Ms;
     
     /** weights hat function of the element */
-    Eigen::Vector<double,NPI> weight;
+    Eigen::Matrix<double,NPI,1> weight;
 
     /** matrix for integrales */
     Eigen::Matrix<double,2*N,2*N> Kp;
 
     /** vector for integrales */
-    Eigen::Vector<double,2*N> Lp;
+    Eigen::Matrix<double,2*N,1> Lp;
 
     /** block diagonal matrix for projections */
     Eigen::Matrix<double,2*N,3*N> P;

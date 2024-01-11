@@ -204,7 +204,7 @@ public:
                 std::transform_reduce(std::execution::par, tet.begin(), tet.end(), 0.0, std::plus{},
                                       [getter, &d](Tetra::Tet const &te)
                                       {
-                                          Eigen::Vector<double,Tetra::NPI> val;
+                                          Eigen::Matrix<double,Tetra::NPI,1> val;
                                           te.interpolation(getter, d, val);
                                           return te.weight.dot(val);
                                       });

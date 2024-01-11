@@ -11,7 +11,7 @@ void Fac::integrales(Facette::prm const &params)
     Eigen::Matrix<double,DIM,NPI> u;
     interpolation(Nodes::get_u0, u);
 
-    Eigen::Vector<double,3*N> BE;
+    Eigen::Matrix<double,3*N,1> BE;
     BE.setZero();
 
     for (int npi = 0; npi < NPI; npi++)
@@ -30,7 +30,7 @@ double Fac::anisotropyEnergy(Facette::prm const &param,
                              Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> const u) const
     {  // surface Neel anisotropy (uk is a uniaxial easy axis)
     //Eigen::Vector3d uk { param.uk.x(), param.uk.y(), param.uk.z() };
-    Eigen::Vector<double,NPI> dens;
+    Eigen::Matrix<double,NPI,1> dens;
     for (int npi = 0; npi < NPI; npi++)
         {
         dens[npi] = -param.Ks * sq( param.uk.dot( u.col(npi) ) );
@@ -38,7 +38,7 @@ double Fac::anisotropyEnergy(Facette::prm const &param,
     return dens.dot(weight);
     }
 
-Eigen::Vector<double,NPI> Fac::charges(std::function<Eigen::Vector3d(Nodes::Node)> getter, std::vector<double> &corr) const
+Eigen::Matrix<double,NPI,1> Fac::charges(std::function<Eigen::Vector3d(Nodes::Node)> getter, std::vector<double> &corr) const
     {
     Eigen::Matrix<double,DIM,N> vec_nod;
     for(int i=0;i<N;i++)
@@ -46,7 +46,7 @@ Eigen::Vector<double,NPI> Fac::charges(std::function<Eigen::Vector3d(Nodes::Node
 
     Eigen::Matrix<double,DIM,NPI> _u = vec_nod * eigen_a;
 
-    Eigen::Vector<double,NPI> result = Ms*weight.cwiseProduct( _u.transpose()*n );
+    Eigen::Matrix<double,NPI,1> result = Ms*weight.cwiseProduct( _u.transpose()*n );
     Eigen::Matrix<double,DIM,NPI> gauss;
     getPtGauss(gauss);
     // calc corr node by node
@@ -65,9 +65,9 @@ Eigen::Vector<double,NPI> Fac::charges(std::function<Eigen::Vector3d(Nodes::Node
     return result;
     }
 
-double Fac::demagEnergy(Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> u, Eigen::Ref<Eigen::Vector<double,NPI>> phi) const
+double Fac::demagEnergy(Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> u, Eigen::Ref<Eigen::Matrix<double,NPI,1>> phi) const
     {
-    Eigen::Vector<double,NPI> dens = (u.transpose()*n).cwiseProduct(phi);
+    Eigen::Matrix<double,NPI,1> dens = (u.transpose()*n).cwiseProduct(phi);
     return 0.5*mu0*Ms*dens.dot(weight);
     }
 

@@ -111,9 +111,9 @@ public:
      mind the transposition: result = transpose(scalar_nod) * a
     */
     void interpolation(std::function<double(Nodes::Node)> getter /**< [in] */,
-                       Eigen::Ref<Eigen::Vector<double,NPI>> result /**< [out] */) const
+                       Eigen::Ref<Eigen::Matrix<double,NPI,1>> result /**< [out] */) const
         {
-        Eigen::Vector<double,N> scalar_nod;
+        Eigen::Matrix<double,N,1> scalar_nod;
         for (int i = 0; i < N; i++) scalar_nod(i) = getter(refNode[ind[i]]);
         
         result = scalar_nod.transpose() * eigen_a;
@@ -127,12 +127,12 @@ public:
                             Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> const u /**< [in] */) const;
 
     /** return surface charges and computes some corrections */
-    Eigen::Vector<double,NPI> charges(std::function<Eigen::Vector3d(Nodes::Node)> getter /**< [in] */,
+    Eigen::Matrix<double,NPI,1> charges(std::function<Eigen::Vector3d(Nodes::Node)> getter /**< [in] */,
                                       std::vector<double> &corr /**< [in|out]*/ ) const;
 
     /** demagnetizing energy of the facette */
     double demagEnergy(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u /**< [in] */,
-                       Eigen::Ref<Eigen::Vector<double,NPI>> phi /**< [in] */) const;
+                       Eigen::Ref<Eigen::Matrix<double,NPI,1>> phi /**< [in] */) const;
 
     /** computes correction on potential*/
     double potential(std::function<Eigen::Vector3d(Nodes::Node)> getter, int i) const;

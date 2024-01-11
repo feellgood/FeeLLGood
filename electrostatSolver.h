@@ -180,7 +180,7 @@ private:
                                                       Eigen::Ref<Eigen::Vector3d> dUdx,
                                                       Eigen::Ref<Eigen::Vector3d> dUdy,
                                                       Eigen::Ref<Eigen::Vector3d> dUdz,
-                                                      Eigen::Ref<Eigen::Vector<double,3*Tetra::N>> BE)
+                                                      Eigen::Ref<Eigen::Matrix<double,3*Tetra::N,1>> BE)
                     {
                         const double prefactor = D0 / Nodes::sq(p_stt.lJ) / (gamma0 * nu0 * Js);
                         Eigen::Vector3d const &_gV = gradV[tet.idx][npi];

@@ -10,7 +10,7 @@ void Fem::energy(double const t, Settings &settings)
                   {
                       Tetra::prm const &param = settings.paramTetra[te.idxPrm];
                       Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> u,dudx,dudy,dudz;
-                      Eigen::Vector<double,Tetra::NPI> phi;
+                      Eigen::Matrix<double,Tetra::NPI,1> phi;
 
                       te.interpolation(Nodes::get_u, u, dudx, dudy, dudz);
                       te.interpolation(Nodes::get_phi, phi);
@@ -31,7 +31,7 @@ void Fem::energy(double const t, Settings &settings)
                   [this, &settings](Facette::Fac const &fa)
                   {
                       Facette::prm const &param = settings.paramFacette[fa.idxPrm];
-                      Eigen::Vector<double,Facette::NPI> phi;
+                      Eigen::Matrix<double,Facette::NPI,1> phi;
                       Eigen::Matrix<double,Nodes::DIM,Facette::NPI> u;
 
                       fa.interpolation(Nodes::get_u, u);
@@ -42,7 +42,7 @@ void Fem::energy(double const t, Settings &settings)
                           E_aniso += fa.anisotropyEnergy(param, u);
                           }
                       
-                      Eigen::Vector<double,Facette::NPI> _phi {phi[0],phi[1],phi[2],phi[3]};
+                      Eigen::Matrix<double,Facette::NPI,1> _phi {phi[0],phi[1],phi[2],phi[3]};
                       E_demag += fa.demagEnergy(u, _phi);
                   });
     calc_Etot();
