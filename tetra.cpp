@@ -171,7 +171,7 @@ double Tet::exchangeEnergy(Tetra::prm const &param,
                            Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudy,
                            Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudz) const
     {
-    double dens[NPI];
+    Eigen::Matrix<double,NPI,1> dens;
 
     for (int npi = 0; npi < NPI; npi++)
         {
@@ -179,12 +179,12 @@ double Tet::exchangeEnergy(Tetra::prm const &param,
                   + sq(dudx(1,npi)) + sq(dudy(1,npi)) + sq(dudz(1,npi))
                   + sq(dudx(2,npi)) + sq(dudy(2,npi)) + sq(dudz(2,npi));
         }
-    return (param.A * weightedScalarProd(dens));
+    return param.A * weight.dot(dens);
     }
 
 double Tet::anisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> u) const
     {
-    double dens[NPI];
+    Eigen::Matrix<double,NPI,1> dens;
 
     for (int npi = 0; npi < NPI; npi++)
         {
@@ -201,7 +201,7 @@ double Tet::anisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<d
                      * (sq(al0 * al1) + sq(al1 * al2) + sq(al2 * al0));  // cubic anisotropy (K3)
         }
 
-    return weightedScalarProd(dens);
+    return weight.dot(dens);
     }
 
 Eigen::Matrix<double,NPI,1> Tet::charges(std::function<Eigen::Vector3d(Nodes::Node)> getter) const
@@ -220,21 +220,21 @@ double Tet::demagEnergy(Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudx,
                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudz,
                        Eigen::Ref<Eigen::Matrix<double,NPI,1>> phi) const
     {
-    double dens[NPI];
+    Eigen::Matrix<double,NPI,1> dens;
 
     for (int npi = 0; npi < NPI; npi++)
         { dens[npi] = (dudx(0,npi) + dudy(1,npi) + dudz(2,npi)) * phi[npi]; }
-    return (-0.5 * mu0 * Ms * weightedScalarProd(dens));
+    return -0.5*mu0*Ms*weight.dot(dens);
     }
 
 double Tet::zeemanEnergy(Tetra::prm const &param, double uz_drift, Eigen::Ref<Eigen::Vector3d> const Hext,
                         Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> const u) const
     {
-    double dens[NPI];
+    Eigen::Matrix<double,NPI,1> dens;
 
     for (int npi = 0; npi < NPI; npi++)
         { dens[npi] = u.col(npi).dot(Hext) + uz_drift * Hext.z(); }
-    return (-param.J * weightedScalarProd(dens));
+    return -param.J*weight.dot(dens);
     }
 
 double Tet::Jacobian(Eigen::Ref<Eigen::Matrix3d> J)

@@ -182,13 +182,6 @@ public:
     /** variations of hat function along z directions */
     Eigen::Matrix<double,N,NPI> dadz;
 
-    /** weighted scalar product */
-    inline double weightedScalarProd(const double (&X)[NPI]) const
-        {
-        return (X[0] * weight[0] + X[1] * weight[1] + X[2] * weight[2] + X[3] * weight[3]
-                + X[4] * weight[4]);
-        }
-
     /** interpolation for scalar field : the getter function is given as a parameter in order to
      * know what part of the node you want to interpolate */
     inline void interpolation(std::function<double(Nodes::Node)> getter,
