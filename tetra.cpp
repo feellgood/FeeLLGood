@@ -51,20 +51,17 @@ void Tet::add_drift_BE(int const &npi, double alpha, double s_dt, double Vdrift,
                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> V, 
                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUd_,
                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dVd_,
-                       Eigen::Ref<Eigen::Matrix<double,3*N,1>> BE) const
+                       Eigen::Ref<Eigen::Matrix<double,DIM,N>> BE) const
     {  // the artificial drift from eventual recentering is along x,y or z
     double w = weight[npi];
-    Eigen::Vector3d interim[N];
+    Eigen::Matrix<double,DIM,N> interim;
 
     for (int i = 0; i < N; i++)
         {
-        interim[i] = a[i][npi]*( alpha*dUd_.col(npi) + U.col(npi).cross(dUd_.col(npi)) 
+        interim.col(i) = a[i][npi]*( alpha*dUd_.col(npi) + U.col(npi).cross(dUd_.col(npi)) 
                     + s_dt*(alpha*dVd_.col(npi) + U.col(npi).cross(dVd_.col(npi)) + V.col(npi).cross(dUd_.col(npi))) );
         }
-    
-    for (int i = 0; i < N; i++)
-        for(int k=0;k<DIM;k++)
-            { BE(k*N + i) += w*Vdrift*interim[i](k); }
+    BE += w*Vdrift*interim;
     }
 
 double Tet::calc_aniso_uniax(const int npi, Eigen::Ref<const Eigen::Vector3d> uk, const double Kbis,
@@ -89,7 +86,7 @@ double Tet::calc_aniso_cub(const int npi,
     Eigen::Vector3d uk_u = Eigen::Vector3d(ex.dot(U.col(npi)), ey.dot(U.col(npi)), ez.dot(U.col(npi)));
     Eigen::Vector3d uk_v = Eigen::Vector3d(ex.dot(V.col(npi)), ey.dot(V.col(npi)), ez.dot(V.col(npi)));
     
-    Eigen::Vector3d uk_uuu = uk_u - uk_u.unaryExpr( [](double x){ return x*x*x;} );
+    Eigen::Vector3d uk_uuu = uk_u - uk_u.unaryExpr( [](double x){ return x*x*x;} ); // should be replaced by cube()
     Eigen::Vector3d tmp = uk_v.cwiseProduct(ex);
 
     H_aniso += -K3bis * (uk_uuu(0) * ex + uk_uuu(1) * ey + uk_uuu(2) * ez
@@ -109,7 +106,8 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
 
     Eigen::Matrix<double,3*N,3*N> AE;
     AE.setZero();
-    Eigen::Matrix<double,3*N,1> BE;
+    //Eigen::Matrix<double,3*N,1> BE;
+    Eigen::Matrix<double,DIM,N> BE;
     BE.setZero();
     
     /*-------------------- INTERPOLATION --------------------*/
@@ -135,9 +133,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
         const double w = weight[npi];
         for (int i = 0; i < N; i++)
             {
-            const Eigen::Vector3d interim = -Abis*(da(i,0)*dUdx.col(npi) + da(i,1)*dUdy.col(npi) + da(i,2)*dUdz.col(npi)) + a[i][npi]*H;
-            for(int k=0;k<DIM;k++)
-                { BE(k*N + i) += w*interim(k); }
+            BE.col(i) += w*(-Abis*(da(i,0)*dUdx.col(npi) + da(i,1)*dUdy.col(npi) + da(i,2)*dUdz.col(npi)) + a[i][npi]*H);
             }
 
         extraCoeffs_BE(npi, Js, U.col(npi), dUdx.col(npi), dUdy.col(npi), dUdz.col(npi), BE);  // STT
@@ -163,7 +159,13 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
         }
     /*-------------------- PROJECTIONS --------------------*/
     Kp = P*AE*P.transpose();// with MKL installed this operation should call dgemm_direct
-    Lp = P*BE;
+
+    // the following deep copy might be replaced by reshaped(), but it is in eigen since version 3.4, not 3.3
+    Eigen::Matrix<double,DIM*N,1> tmp;
+    for(int k=0;k<DIM;k++)
+        for(int i=0;i<N;i++)
+            tmp(k*N+i) = BE(k,i);
+    Lp = P*tmp;
     }
 
 double Tet::exchangeEnergy(Tetra::prm const &param,

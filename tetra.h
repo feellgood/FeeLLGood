@@ -170,7 +170,7 @@ public:
                             Eigen::Ref<Eigen::Vector3d>,
                             Eigen::Ref<Eigen::Vector3d>,
                             Eigen::Ref<Eigen::Vector3d>,
-                            Eigen::Ref<Eigen::Matrix<double,3*N,1>>) {};
+                            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,N>>) {};
         }
 
     /** variations of hat function along x directions */
@@ -266,7 +266,7 @@ public:
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V, 
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUd_,
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dVd_,
-                      Eigen::Ref<Eigen::Matrix<double,3*N,1>> BE) const;
+                      Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,N>> BE) const;
 
     /** append H_aniso for uniaxial anisotropy contribution, returns contribution to uHeff (used to
      * compute the stabilizing effective damping) */
@@ -330,7 +330,7 @@ public:
 
     /** for extra contribution to the matrix BE, such as spin transfer torque contribs */
     std::function<void(int npi, double Js, Eigen::Ref<Eigen::Vector3d> U, Eigen::Ref<Eigen::Vector3d> dUdx, Eigen::Ref<Eigen::Vector3d> dUdy,
-                       Eigen::Ref<Eigen::Vector3d> dUdz, Eigen::Ref<Eigen::Matrix<double,3*N,1>> BE)> extraCoeffs_BE;
+                       Eigen::Ref<Eigen::Vector3d> dUdz, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,N>> BE)> extraCoeffs_BE;
 
     /** returns gauss points in result = vec_nod*Tetra::a  */
     void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result) const

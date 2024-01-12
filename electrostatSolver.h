@@ -180,7 +180,7 @@ private:
                                                       Eigen::Ref<Eigen::Vector3d> dUdx,
                                                       Eigen::Ref<Eigen::Vector3d> dUdy,
                                                       Eigen::Ref<Eigen::Vector3d> dUdz,
-                                                      Eigen::Ref<Eigen::Matrix<double,3*Tetra::N,1>> BE)
+                                                      Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::N>> BE)
                     {
                         const double prefactor = D0 / Nodes::sq(p_stt.lJ) / (gamma0 * nu0 * Js);
                         Eigen::Vector3d const &_gV = gradV[tet.idx][npi];
@@ -198,8 +198,7 @@ private:
                             interim[i] = ai_w*(Hm[tet.idx][npi] + prefactor*m);
                             }
                         for (int i = 0; i < Tetra::N; i++)
-                            for(int k=0;k<Nodes::DIM;k++)
-                                { BE(k*Tetra::N + i) += interim[i](k); }
+                            { BE.col(i) += interim[i]; }
                     };
                 });
         }
