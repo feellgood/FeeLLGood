@@ -160,12 +160,15 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     /*-------------------- PROJECTIONS --------------------*/
     Kp = P*AE*P.transpose();// with MKL installed this operation should call dgemm_direct
 
-    // the following deep copy might be replaced by reshaped(), but it is in eigen since version 3.4, not 3.3
-    Eigen::Matrix<double,DIM*N,1> tmp;
-    for(int k=0;k<DIM;k++)
-        for(int i=0;i<N;i++)
-            tmp(k*N+i) = BE(k,i);
-    Lp = P*tmp;
+    #if EIGEN_VERSION_AT_LEAST(3,4,0)
+        Lp = P * BE.reshaped<Eigen::RowMajor>();
+    #else
+        Eigen::Matrix<double,DIM*N,1> tmp;
+        for(int k=0;k<DIM;k++)
+            for(int i=0;i<N;i++)
+                tmp(k*N+i) = BE(k,i);
+        Lp = P*tmp;
+    #endif
     }
 
 double Tet::exchangeEnergy(Tetra::prm const &param,
