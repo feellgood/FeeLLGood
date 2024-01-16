@@ -184,14 +184,13 @@ public:
      * simulation */
     inline void init_distrib(Settings const &mySets /**< [in] */)
         {
-        for (unsigned int i = 0; i < node.size(); i++)
-            {
-            Eigen::Vector3d tmp_p = Nodes::get_p(node[i]);
-            node[i].u0 = mySets.getMagnetization(tmp_p);
-            node[i].u = node[i].u0;
-            node[i].phi = 0.;
-            node[i].phiv = 0.;
-            }
+        std::for_each(std::execution::par,node.begin(),node.end(),[&mySets](Nodes::Node &n)
+                                              {
+                                              n.u0 = mySets.getMagnetization(n.p);
+                                              n.u = n.u0;
+                                              n.phi = 0.;
+                                              n.phiv =0.;
+                                              } );
         }
 
     /**
