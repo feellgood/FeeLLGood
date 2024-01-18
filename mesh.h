@@ -184,12 +184,12 @@ public:
      * simulation */
     inline void init_distrib(Settings const &mySets /**< [in] */)
         {
-        std::for_each(std::execution::par,node.begin(),node.end(),[&mySets](Nodes::Node &n)
+        std::for_each(node.begin(),node.end(),[&mySets](Nodes::Node &n)
                                               {
                                               n.u0 = mySets.getMagnetization(n.p);
                                               n.u = n.u0;
                                               n.phi = 0.;
-                                              n.phiv =0.;
+                                              n.phiv = 0.;
                                               } );
         }
 
