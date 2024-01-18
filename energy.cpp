@@ -16,13 +16,10 @@ void Fem::energy(double const t, Settings &settings)
                       te.interpolation(Nodes::get_phi, phi);
 
                       E_exch += te.exchangeEnergy(param, dudx, dudy, dudz);
-
                       E_demag += te.demagEnergy(dudx, dudy, dudz, phi);
 
                       if ((param.K != 0.0) || (param.K3 != 0.0))
-                          {
-                          E_aniso += te.anisotropyEnergy(param, u);
-                          }
+                          { E_aniso += te.anisotropyEnergy(param, u); }
 
                       E_zeeman += te.zeemanEnergy(param, Hext, u);
                   });
@@ -38,12 +35,9 @@ void Fem::energy(double const t, Settings &settings)
                       fa.interpolation(Nodes::get_phi, phi);
 
                       if (param.Ks != 0.0)
-                          {
-                          E_aniso += fa.anisotropyEnergy(param, u);
-                          }
+                          { E_aniso += fa.anisotropyEnergy(param, u); }
                       
-                      Eigen::Matrix<double,Facette::NPI,1> _phi {phi[0],phi[1],phi[2],phi[3]};
-                      E_demag += fa.demagEnergy(u, _phi);
+                      E_demag += fa.demagEnergy(u, phi);
                   });
     calc_Etot();
     if (settings.verbose && (Etot > Etot0))
