@@ -24,7 +24,7 @@ void Fem::energy(double const t, Settings &settings)
                           E_aniso += te.anisotropyEnergy(param, u);
                           }
 
-                      E_zeeman += te.zeemanEnergy(param, 0, Hext, u);
+                      E_zeeman += te.zeemanEnergy(param, Hext, u);
                   });
 
     std::for_each(msh.fac.begin(), msh.fac.end(),

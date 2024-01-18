@@ -227,13 +227,11 @@ double Tet::demagEnergy(Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudx,
     return -0.5*mu0*Ms*weight.dot(dens);
     }
 
-double Tet::zeemanEnergy(Tetra::prm const &param, double uz_drift, Eigen::Ref<Eigen::Vector3d> const Hext,
+double Tet::zeemanEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Vector3d> const Hext,
                         Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> const u) const
     {
-    Eigen::Matrix<double,NPI,1> dens;
+    Eigen::Matrix<double,NPI,1> dens = u.transpose() * Hext;
 
-    for (int npi = 0; npi < NPI; npi++)
-        { dens[npi] = u.col(npi).dot(Hext) + uz_drift * Hext.z(); }
     return -param.J*weight.dot(dens);
     }
 

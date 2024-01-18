@@ -310,7 +310,7 @@ public:
                        Eigen::Ref<Eigen::Matrix<double,NPI,1>> phi) const;
 
     /** zeeman energy of the tetrahedron */
-    double zeemanEnergy(Tetra::prm const &param, double uz_drift, Eigen::Ref<Eigen::Vector3d> const Hext,
+    double zeemanEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Vector3d> const Hext,
                         Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> const u) const;
 
     /** \return \f$ |J| \f$ build Jacobian \f$ J \f$ */
