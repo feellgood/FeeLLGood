@@ -211,8 +211,8 @@ Eigen::Matrix<double,NPI,1> Tet::charges(std::function<Eigen::Vector3d(Nodes::No
     
     Eigen::Matrix<double,NPI,1> result;
     for (int j = 0; j < NPI; j++)
-        { result(j) = -Ms * (dudx(0,j) + dudy(1,j) + dudz(2,j)) * weight[j]; }
-    return result;
+        { result(j) = dudx(0,j) + dudy(1,j) + dudz(2,j); }
+    return -Ms*weight.cwiseProduct(result);
     }
 
 double Tet::demagEnergy(Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudx,
