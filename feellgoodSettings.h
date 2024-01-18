@@ -208,7 +208,9 @@ public:
         };
 
     /** evaluation of the magnetization components through math expression, each component of the
-     magnetization is a function of (x,y,z). \return unit vector
+     * magnetization is a function of (x,y,z). It is not safe to call this method simultaneously
+     * from multiple threads.
+     * \return unit vector
      */
     inline Eigen::Vector3d getMagnetization(const Eigen::Ref<Eigen::Vector3d> p) const
         {
