@@ -175,15 +175,10 @@ double Tet::exchangeEnergy(Tetra::prm const &param,
                            Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudx,
                            Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudy,
                            Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudz) const
-    {
-    Eigen::Matrix<double,NPI,1> dens;
-
-    for (int npi = 0; npi < NPI; npi++)
-        {
-        dens[npi] = dudx.col(npi).squaredNorm()
-                  + dudy.col(npi).squaredNorm()
-                  + dudz.col(npi).squaredNorm();
-        }
+    {// partial reduction on columns with colwise()
+    Eigen::Matrix<double,NPI,1> dens = dudx.colwise().squaredNorm()
+                                     + dudy.colwise().squaredNorm()
+                                     + dudz.colwise().squaredNorm();
     return param.A * weight.dot(dens);
     }
 
