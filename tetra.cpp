@@ -128,14 +128,16 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
 
     Eigen::Matrix<double,DIM,NPI> H_aniso;
     H_aniso.setZero();
-    Eigen::Matrix<double,NPI,1> contrib_aniso;
-    contrib_aniso.setZero();
+    Eigen::Matrix<double,NPI,1> uHeff;
+    uHeff.setZero();
 
-    if((Kbis != 0) || (K3bis != 0))
-        {
-        contrib_aniso = calc_aniso_uniax(param.uk, Kbis, s_dt, U, V, H_aniso);
-        contrib_aniso += calc_aniso_cub(param.ex, param.ey, param.ez, K3bis, s_dt, U, V, H_aniso);
-        }
+    if(Kbis != 0)
+        { uHeff += calc_aniso_uniax(param.uk, Kbis, s_dt, U, V, H_aniso); }
+
+    if(K3bis != 0)
+        { uHeff += calc_aniso_cub(param.ex, param.ey, param.ez, K3bis, s_dt, U, V, H_aniso); }
+
+    uHeff -= Abis *( dUdx.colwise().squaredNorm() + dUdy.colwise().squaredNorm() + dUdz.colwise().squaredNorm());
 
     for (int npi = 0; npi < NPI; npi++)
         {
@@ -161,11 +163,8 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
         Eigen::Vector3d tmp_H = extraField(npi);  // computes STT contrib
         H += tmp_H;
         
-        double uHeff = contrib_aniso(npi) 
-                     - Abis *( dUdx.col(npi).squaredNorm() + dUdy.col(npi).squaredNorm() + dUdz.col(npi).squaredNorm());
-        uHeff += H.dot( U.col(npi) );
-
-        lumping(npi, prm_t.calc_alpha_eff(alpha, uHeff), prm_t.prefactor * s_dt * Abis, AE);
+        uHeff(npi) += H.dot( U.col(npi) );
+        lumping(npi, prm_t.calc_alpha_eff(alpha, uHeff(npi)), prm_t.prefactor * s_dt * Abis, AE);
         }
     /*-------------------- PROJECTIONS --------------------*/
     Kp = P*AE*P.transpose();// with MKL installed this operation should call dgemm_direct
