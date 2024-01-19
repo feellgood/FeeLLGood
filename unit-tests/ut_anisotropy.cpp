@@ -88,11 +88,11 @@ BOOST_AUTO_TEST_CASE(anisotropy_uniax, *boost::unit_test::tolerance(10.0 * UT_TO
     double K = distrib(gen);
     double Js = 0.5 + distrib(gen);  // add 0.5 to center Js around 1
 
-    double contrib_aniso(0);
     double Kbis = 2.0 * K / Js;
     std::cout << "uniaxial anisotropy test on a tetrahedron" << std::endl;
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
     std::cout << "uk =" << uk << std::endl;
+
 
     // ref code (with minimal adaptations of integrales method in file MuMag_integrales.cc of
     // src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
@@ -123,6 +123,14 @@ BOOST_AUTO_TEST_CASE(anisotropy_uniax, *boost::unit_test::tolerance(10.0 * UT_TO
         V.col(npi) << v[0][npi], v[1][npi], v[2][npi];
         }  // deep copy instead of re-computing
 
+    //code to test
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> H_aniso;
+    H_aniso.setZero();
+    Eigen::Matrix<double,Tetra::NPI,1> contrib_aniso;
+    contrib_aniso.setZero();
+    contrib_aniso = t.calc_aniso_uniax(uk, Kbis, THETA * dt, U, V, H_aniso);
+    // end of code to test
+
     for (int npi = 0; npi < Tetra::NPI; npi++)
         {
         double uk0_u = uk00 * u[0][npi] + uk01 * u[1][npi] + uk02 * u[2][npi];
@@ -140,19 +148,14 @@ BOOST_AUTO_TEST_CASE(anisotropy_uniax, *boost::unit_test::tolerance(10.0 * UT_TO
         H[1] = (2 * K / Js * uk0_u * uk01);
         H[2] = (2 * K / Js * uk0_u * uk02);
 
-        Eigen::Vector3d H_aniso;
-        H_aniso.setZero();
-        contrib_aniso =
-                t.calc_aniso_uniax(npi, uk, Kbis, THETA * dt, U, V, H_aniso);  // code to test
-
         Eigen::Vector3d refHval = Eigen::Vector3d( H[0] + THETA * dt * Ht[0], H[1] + THETA * dt * Ht[1],
                                     H[2] + THETA * dt * Ht[2] );
         std::cout << "ref H value = " << refHval << "; H_aniso=" << H_aniso << std::endl;
 
-        BOOST_TEST( (refHval - H_aniso).norm() == 0.0,
+        BOOST_TEST( (refHval - H_aniso.col(npi)).norm() == 0.0,
                    "mismatch in uniaxial anisotropy field value");
 
-        BOOST_TEST(uHau == contrib_aniso);
+        BOOST_TEST(uHau == contrib_aniso(npi));
         }
     }
 
@@ -242,7 +245,6 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TO
     double K3 = distrib(gen);
     double Js = 0.5 + distrib(gen);  // add 0.5 to center Js around 1
 
-    double contrib_aniso(0);
     double K3bis = 2.0 * K3 / Js;
     std::cout << "cubic anisotropy test on a tetrahedron" << std::endl;
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
@@ -277,6 +279,14 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TO
         U.col(npi) << u[0][npi], u[1][npi], u[2][npi];
         V.col(npi) << v[0][npi], v[1][npi], v[2][npi];
         }  // deep copy instead of re-computing
+
+        //code to test
+        Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> H_aniso;
+        H_aniso.setZero();
+        Eigen::Matrix<double,Tetra::NPI,1> contrib_aniso;
+        contrib_aniso.setZero();
+        contrib_aniso = t.calc_aniso_cub(ex, ey, ez, K3bis, THETA * dt, U, V, H_aniso);
+        // end of code to test
 
     for (int npi = 0; npi < Tetra::NPI; npi++)
         {
@@ -316,15 +326,12 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TO
                - 2 * K3 / Js * uk1_u * (1 - uk1_u * uk1_u) * uk12
                - 2 * K3 / Js * uk2_u * (1 - uk2_u * uk2_u) * uk22;
 
-        Eigen::Vector3d H_aniso;
-        H_aniso.setZero();
-        contrib_aniso = t.calc_aniso_cub(npi, ex, ey, ez, K3bis, THETA * dt, U, V, H_aniso);  // code to test
-
         Eigen::Vector3d refHval { H[0] + THETA*dt*Ht[0], H[1] + THETA*dt*Ht[1], H[2] + THETA*dt*Ht[2] };
-        std::cout << "ref H value = " << refHval << "; H_aniso=" << H_aniso << std::endl;
-        BOOST_TEST( (refHval - H_aniso).norm() == 0.0, "mismatch in cubic anisotropy field value");
-
-        BOOST_TEST(uHa3u == contrib_aniso);
+        std::cout << "ref H value = " << refHval << "; H_aniso=" << H_aniso.col(npi) << std::endl;
+        double result = (refHval - H_aniso.col(npi)).norm();
+        std::cout << "result= " << result << std::endl;
+        BOOST_TEST( (refHval - H_aniso.col(npi)).norm() == 0.0, "mismatch in cubic anisotropy field value");
+        BOOST_TEST(uHa3u == contrib_aniso(npi), "mismatch in cubic anisotropy contrib_aniso value");
         }
     }
 

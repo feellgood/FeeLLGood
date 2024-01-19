@@ -268,23 +268,23 @@ public:
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dVd_,
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,N>> BE) const;
 
-    /** append H_aniso for uniaxial anisotropy contribution, returns contribution to uHeff (used to
+    /** append(+=) H_aniso for uniaxial anisotropy contribution, returns contribution to uHeff (used to
      * compute the stabilizing effective damping) */
-    double calc_aniso_uniax(const int npi, Eigen::Ref<const Eigen::Vector3d> uk, const double Kbis,
-                            const double s_dt,
-                            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
-                            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V,
-                            Eigen::Ref<Eigen::Vector3d> H_aniso) const;
+    Eigen::Matrix<double,NPI,1> calc_aniso_uniax(Eigen::Ref<const Eigen::Vector3d> uk,
+                                                 const double Kbis, const double s_dt,
+                                                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
+                                                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V,
+                                                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H_aniso) const;
 
-    /** append H_aniso for cubic anisotropy contribution, returns contribution to uHeff (used to
+    /** append(+=) H_aniso for cubic anisotropy contribution, returns contribution to uHeff (used to
      * compute the stabilizing effective damping) */
-    double calc_aniso_cub(const int npi, Eigen::Ref<const Eigen::Vector3d> ex,
-                          Eigen::Ref<const Eigen::Vector3d> ey,
-                          Eigen::Ref<const Eigen::Vector3d> ez,
-                          const double K3bis, const double s_dt,
-                          Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
-                          Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V,
-                          Eigen::Ref<Eigen::Vector3d> H_aniso) const;
+    Eigen::Matrix<double,NPI,1> calc_aniso_cub(Eigen::Ref<const Eigen::Vector3d> ex,
+                                               Eigen::Ref<const Eigen::Vector3d> ey,
+                                               Eigen::Ref<const Eigen::Vector3d> ez,
+                                               const double K3bis, const double s_dt,
+                                               Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
+                                               Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V,
+                                               Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H_aniso) const;
 
     /** computes the integral contribution of the tetrahedron to the evolution of the magnetization
      */

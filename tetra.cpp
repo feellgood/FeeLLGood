@@ -64,34 +64,39 @@ void Tet::add_drift_BE(int const &npi, double alpha, double s_dt, double Vdrift,
     BE += w*Vdrift*interim;
     }
 
-double Tet::calc_aniso_uniax(const int npi, Eigen::Ref<const Eigen::Vector3d> uk, const double Kbis,
+Eigen::Matrix<double,NPI,1> Tet::calc_aniso_uniax(Eigen::Ref<const Eigen::Vector3d> uk, const double Kbis,
                              const double s_dt,
                              Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> U,
                              Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> V,
-                             Eigen::Ref<Eigen::Vector3d> H_aniso) const
+                             Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> H_aniso) const
     {
-    H_aniso += (Kbis * uk.dot( U.col(npi) + s_dt * V.col(npi))) * uk;
-    return Kbis * sq( uk.dot(U.col(npi)));
+    for(int npi = 0;npi<NPI;npi++)
+        { H_aniso.col(npi) += (Kbis * uk.dot( U.col(npi) + s_dt * V.col(npi))) * uk; }
+    return Kbis * (U.transpose() * uk).array().square();
     }
 
-double Tet::calc_aniso_cub(const int npi,
-                           Eigen::Ref<const Eigen::Vector3d> ex,
+Eigen::Matrix<double,NPI,1> Tet::calc_aniso_cub(Eigen::Ref<const Eigen::Vector3d> ex,
                            Eigen::Ref<const Eigen::Vector3d> ey,
                            Eigen::Ref<const Eigen::Vector3d> ez,
                            const double K3bis, const double s_dt,
                            Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> U,
                            Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> V,
-                           Eigen::Ref<Eigen::Vector3d> H_aniso) const
+                           Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> H_aniso) const
     {
-    Eigen::Vector3d uk_u = Eigen::Vector3d(ex.dot(U.col(npi)), ey.dot(U.col(npi)), ez.dot(U.col(npi)));
-    Eigen::Vector3d uk_v = Eigen::Vector3d(ex.dot(V.col(npi)), ey.dot(V.col(npi)), ez.dot(V.col(npi)));
-    
-    Eigen::Vector3d uk_uuu = uk_u - uk_u.unaryExpr( [](double x){ return x*x*x;} ); // should be replaced by cube()
-    Eigen::Vector3d tmp = uk_v.cwiseProduct(ex);
+    Eigen::Matrix<double,NPI,1> result;
+    for(int npi = 0;npi<NPI;npi++)
+        {
+        Eigen::Vector3d uk_u = Eigen::Vector3d(ex.dot(U.col(npi)), ey.dot(U.col(npi)), ez.dot(U.col(npi)));
+        Eigen::Vector3d uk_v = Eigen::Vector3d(ex.dot(V.col(npi)), ey.dot(V.col(npi)), ez.dot(V.col(npi)));
+        Eigen::Vector3d uk_uuu = uk_u.unaryExpr( [](double x){ return x*(1.0 - x*x);} );
+        Eigen::Vector3d tmp = uk_v.cwiseProduct(ex);
 
-    H_aniso += -K3bis * (uk_uuu(0) * ex + uk_uuu(1) * ey + uk_uuu(2) * ez
+        H_aniso.col(npi) += -K3bis * (uk_uuu(0) * ex + uk_uuu(1) * ey + uk_uuu(2) * ez
                   + s_dt * tmp.cwiseProduct( Eigen::Vector3d(1, 1, 1) - 3*uk_u.cwiseProduct(uk_u) ));
-    return -K3bis *uk_u.dot(uk_uuu);
+
+        result[npi] = uk_u.dot(uk_uuu);
+        }
+    return -K3bis*result;
     }
 
 void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
@@ -121,15 +126,20 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     interpolation_field(Nodes::get_phiv0, Hv);
     /*-------------------- END INTERPOLATION ----------------*/
 
+    Eigen::Matrix<double,DIM,NPI> H_aniso;
+    H_aniso.setZero();
+    Eigen::Matrix<double,NPI,1> contrib_aniso;
+    contrib_aniso.setZero();
+
+    if((Kbis != 0) || (K3bis != 0))
+        {
+        contrib_aniso = calc_aniso_uniax(param.uk, Kbis, s_dt, U, V, H_aniso);
+        contrib_aniso += calc_aniso_cub(param.ex, param.ey, param.ez, K3bis, s_dt, U, V, H_aniso);
+        }
+
     for (int npi = 0; npi < NPI; npi++)
         {
-        Eigen::Vector3d H_aniso;
-        H_aniso.setZero();
-        
-        double contrib_aniso = calc_aniso_uniax(npi, param.uk, Kbis, s_dt, U, V, H_aniso);
-        contrib_aniso += calc_aniso_cub(npi, param.ex, param.ey, param.ez, K3bis, s_dt, U, V, H_aniso);
-
-        Eigen::Vector3d H = H_aniso + Hd.col(npi) + Hext + (s_dt / gamma0) * Hv.col(npi);
+        Eigen::Vector3d H = H_aniso.col(npi) + Hd.col(npi) + Hext + (s_dt / gamma0) * Hv.col(npi);
         const double w = weight[npi];
         for (int i = 0; i < N; i++)
             {
@@ -151,8 +161,8 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
         Eigen::Vector3d tmp_H = extraField(npi);  // computes STT contrib
         H += tmp_H;
         
-        double uHeff =
-                contrib_aniso - Abis *( dUdx.col(npi).squaredNorm() + dUdy.col(npi).squaredNorm() + dUdz.col(npi).squaredNorm());
+        double uHeff = contrib_aniso(npi) 
+                     - Abis *( dUdx.col(npi).squaredNorm() + dUdy.col(npi).squaredNorm() + dUdz.col(npi).squaredNorm());
         uHeff += H.dot( U.col(npi) );
 
         lumping(npi, prm_t.calc_alpha_eff(alpha, uHeff), prm_t.prefactor * s_dt * Abis, AE);
