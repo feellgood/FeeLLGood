@@ -10,7 +10,7 @@ void Fac::integrales(Facette::prm const &params)
     Eigen::Matrix<double,DIM,NPI> u;
     interpolation(Nodes::get_u0, u);
 
-    Eigen::Matrix<double,3*N,1> BE;
+    Eigen::Matrix<double,DIM,N> BE;//Eigen::Matrix<double,3*N,1> BE;
     BE.setZero();
 
     for (int npi = 0; npi < NPI; npi++)
@@ -19,21 +19,28 @@ void Fac::integrales(Facette::prm const &params)
 
         for (int i = 0; i < N; i++)
             for(int k = 0;k<DIM;k++)
-                { BE(k*N + i) += _prefactor*a[i][npi]*params.uk(k); }
+                {
+                BE(k,i) += _prefactor*a[i][npi]*params.uk(k);//BE(k*N + i) += _prefactor*a[i][npi]*params.uk(k);
+                }
         }
     /*-------------------- PROJECTION --------------------*/
-    Lp = P*BE;
+    #if EIGEN_VERSION_AT_LEAST(3,4,0)
+        Lp = P * BE.reshaped<Eigen::RowMajor>();
+    #else
+        Eigen::Matrix<double,DIM*N,1> tmp;
+        for(int k=0;k<DIM;k++)
+            for(int i=0;i<N;i++)
+                tmp(k*N+i) = BE(k,i);
+        Lp = P*tmp;
+    #endif
+    //Lp = P*BE;
     }
 
 double Fac::anisotropyEnergy(Facette::prm const &param,
                              Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> const u) const
     {  // surface Neel anisotropy (uk is a uniaxial easy axis)
-    Eigen::Matrix<double,NPI,1> dens;
-    for (int npi = 0; npi < NPI; npi++)
-        {
-        dens[npi] = -param.Ks * sq( param.uk.dot( u.col(npi) ) );
-        }
-    return dens.dot(weight);
+    Eigen::Matrix<double,NPI,1> dens = (u.transpose()*param.uk).array().square();
+    return -param.Ks*weight.dot(dens);
     }
 
 Eigen::Matrix<double,NPI,1> Fac::charges(std::function<Eigen::Vector3d(Nodes::Node)> getter, std::vector<double> &corr) const
