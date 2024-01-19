@@ -62,8 +62,8 @@ struct prm
     };
 
 /** \class Fac
-Face is a class containing the index references to nodes, it has a triangular shape and should not
-be degenerated
+Face is a class containing the index references to nodes, its surface and its normal unit vector, it has a triangular shape and should not
+be degenerated, orientation must be defined in adequation with the mesh
 */
 class Fac : public element<N,NPI>
     {
@@ -87,13 +87,15 @@ public:
             n = Eigen::Vector3d(0,0,0);
             }  // no index shift here if NOD == 0 : usefull while reordering face indices
 
-        // computes weight coefficients
         for(int i=0;i<NPI;i++)
             { weight[i] = 2.0 * surf * Facette::pds[i]; }
         }
 
-    double surf; /**< surface of the element */
-    Eigen::Vector3d n; /**< normal vector (unit vector) */
+    /** surface of the element */
+    double surf;
+
+    /** normal vector (unit vector) */
+    Eigen::Vector3d n;
 
     /** interpolation function on the output of the getter.
     result = vec_nod * a 
@@ -119,7 +121,7 @@ public:
         result = scalar_nod.transpose() * eigen_a;
         }
 
-    /** computes the integral contribution of the triangular face */
+    /** computes the integral contribution of the triangular face, the only contribution comes from Neel surface anisotropy */
     void integrales(Facette::prm const &params /**< [in] */);
 
     /** anisotropy energy of the facette */
