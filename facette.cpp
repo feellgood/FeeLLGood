@@ -5,7 +5,6 @@ using namespace Nodes;
 
 void Fac::integrales(Facette::prm const &params)
     {
-    //Eigen::Vector3d uk { params[idxPrm].uk.x(), params[idxPrm].uk.y(), params[idxPrm].uk.z() };
     double Kbis = 2.0*params.Ks / Ms;
     
     Eigen::Matrix<double,DIM,NPI> u;
@@ -29,7 +28,6 @@ void Fac::integrales(Facette::prm const &params)
 double Fac::anisotropyEnergy(Facette::prm const &param,
                              Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> const u) const
     {  // surface Neel anisotropy (uk is a uniaxial easy axis)
-    //Eigen::Vector3d uk { param.uk.x(), param.uk.y(), param.uk.z() };
     Eigen::Matrix<double,NPI,1> dens;
     for (int npi = 0; npi < NPI; npi++)
         {
@@ -82,10 +80,6 @@ double Fac::potential(std::function<Eigen::Vector3d(Nodes::Node)> getter, int i)
 
     Eigen::Vector3d p1p2 = node2.p - node1.p;
     Eigen::Vector3d p1p3 = node3.p - node1.p;
-
-    //Eigen::Vector3d getter_n1 { getter(node1).x(), getter(node1).y(), getter(node1).z()};
-    //Eigen::Vector3d getter_n2 { getter(node2).x(), getter(node2).y(), getter(node2).z()};
-    //Eigen::Vector3d getter_n3 { getter(node3).x(), getter(node3).y(), getter(node3).z()};
 
     std::function<double(double)> f = [](double x) { return sqrt(1.0 + x * x); };
 

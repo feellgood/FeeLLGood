@@ -27,5 +27,9 @@ void LinAlgebra::prepareElements(Eigen::Vector3d const &Hext /**< [in] applied f
 
     std::for_each(std::execution::par, refMsh->fac.begin(), refMsh->fac.end(),
                   [this](Facette::Fac &fac)
-                  { fac.integrales(settings.paramFacette[fac.idxPrm]); });
+                  {
+                  // the contribution to Lp computed in integrales is due to surface anisotropy
+                  if (settings.paramFacette[fac.idxPrm].Ks != 0)
+                    { fac.integrales(settings.paramFacette[fac.idxPrm]);  }
+                  });
     }
