@@ -164,7 +164,7 @@ bool Mesh::mesh::savesol(const int precision, const std::string fileName,
         {
         for (unsigned int i = 0; i < node.size(); i++)
             {
-            fout << i << '\t' << val[i] << endl;
+            fout << i << '\t' << val[node_index[i]] << endl;
             }
         }
     else
