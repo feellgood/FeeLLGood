@@ -140,7 +140,7 @@ void Mesh::mesh::savesol(const int precision, const std::string fileName,
     Eigen::IOFormat outputSolFmt(precision, Eigen::DontAlignCols, "\t", "\t", "", "", "", "");
     for (unsigned int i = 0; i < node.size(); i++)
         {
-        const Node &n = node[inverse_perm[i]];
+        const Node &n = node[node_index[i]];
         fout << i << '\t' << n.u.format(outputSolFmt) << '\t' << n.phi << endl;
         }
 

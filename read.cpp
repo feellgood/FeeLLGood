@@ -228,7 +228,7 @@ double mesh::readSol(bool VERBOSE, const std::string fileName)
         {
         double mx,my,mz;
         unsigned int i_;
-        int node_idx = inverse_perm[i];
+        int node_idx = node_index[i];
         fin >> i_ >> mx >> my >> mz >> node[node_idx].phi;
         node[node_idx].u = Eigen::Vector3d(mx,my,mz);
         if (i != i_)

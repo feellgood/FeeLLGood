@@ -235,8 +235,12 @@ private:
      * function init_node */
     std::vector<Nodes::Node> node;
 
-    /** Inverse of the permutation we applied when sorting the nodes. */
-    std::vector<int> inverse_perm;
+    /** Index of a node in the `node` vector. This vector is itself indexed by the node position in
+     * the *.msh and *.sol files. In other words, the node found at `file_idx` in a file is stored
+     * as `node[node_index[file_idx]]`.
+     *
+     * This is the inverse of the permutation we applied when sorting the nodes. */
+    std::vector<int> node_index;
 
     /** map of the surface region physical names from mesh file */
     std::map<int, std::string> surfRegNames;
@@ -382,9 +386,9 @@ private:
         std::sort(permutation.begin(), permutation.end(),
                   [this, long_axis](int a, int b)
                   { return node[a].p(long_axis) < node[b].p(long_axis); });
-        inverse_perm.resize(node.size());
+        node_index.resize(node.size());
         for (size_t i = 0; i < node.size(); i++)
-            inverse_perm[permutation[i]] = i;
+            node_index[permutation[i]] = i;
 
         // Actually sort the array of nodes.
         std::vector<Nodes::Node> node_copy(node);
@@ -395,17 +399,17 @@ private:
         std::for_each(tet.begin(), tet.end(),
                       [this](Tetra::Tet &tetrahedron)
                       {
-                          tetrahedron.ind[0] = inverse_perm[tetrahedron.ind[0]];
-                          tetrahedron.ind[1] = inverse_perm[tetrahedron.ind[1]];
-                          tetrahedron.ind[2] = inverse_perm[tetrahedron.ind[2]];
-                          tetrahedron.ind[3] = inverse_perm[tetrahedron.ind[3]];
+                          tetrahedron.ind[0] = node_index[tetrahedron.ind[0]];
+                          tetrahedron.ind[1] = node_index[tetrahedron.ind[1]];
+                          tetrahedron.ind[2] = node_index[tetrahedron.ind[2]];
+                          tetrahedron.ind[3] = node_index[tetrahedron.ind[3]];
                       });
         std::for_each(fac.begin(), fac.end(),
                       [this](Facette::Fac &facette)
                       {
-                          facette.ind[0] = inverse_perm[facette.ind[0]];
-                          facette.ind[1] = inverse_perm[facette.ind[1]];
-                          facette.ind[2] = inverse_perm[facette.ind[2]];
+                          facette.ind[0] = node_index[facette.ind[0]];
+                          facette.ind[1] = node_index[facette.ind[1]];
+                          facette.ind[2] = node_index[facette.ind[2]];
                       });
         std::for_each(s.begin(), s.end(),
                       [this](Mesh::Surf &surface)
@@ -414,9 +418,9 @@ private:
                           std::for_each(elements.begin(), elements.end(),
                                         [this](Mesh::Triangle &tri)
                                         {
-                                            tri.ind[0] = inverse_perm[tri.ind[0]];
-                                            tri.ind[1] = inverse_perm[tri.ind[1]];
-                                            tri.ind[2] = inverse_perm[tri.ind[2]];
+                                            tri.ind[0] = node_index[tri.ind[0]];
+                                            tri.ind[1] = node_index[tri.ind[1]];
+                                            tri.ind[2] = node_index[tri.ind[2]];
                                         });
                       });
         }
