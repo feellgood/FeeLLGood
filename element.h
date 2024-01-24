@@ -57,10 +57,6 @@ class element
     /** getter for NPI */
     inline constexpr int getNPI(void) const { return NPI; }
 
-    /** set all indices to zero */
-    inline void indicesToZero(void)
-        { std::fill(ind.begin(),ind.end(),0); }
-
     /** build matrix P, must be refreshed when ep,eq are changing (setBasis) */
     void buildMatP(void)
         {
