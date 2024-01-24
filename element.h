@@ -22,7 +22,10 @@ class element
             std::initializer_list<int> & _i /**< indices to the nodes */
             ) : idxPrm(_idx), Ms(0), refNode(_p_node)
         {
-        ind.assign(_i);
+        if(_i.size() == N)
+            { ind.assign(_i); }
+        else
+            { std::cout<<"Warning: element constructor is given an init list with size() != N\n"; }
         P.setZero();
         Lp.setZero();
         }
@@ -126,7 +129,7 @@ class element
 
         /** zeroBasing: index convention Matlab/msh (one based) -> C++ (zero based) */
         inline void zeroBasing(void)
-            { for(int i=0;i<N;i++) {ind[i]--;} }
+            { std::for_each(ind.begin(),ind.end(),[](int & _i){ _i--; } ); }
 
     private:
         /** a method to orientate the element */

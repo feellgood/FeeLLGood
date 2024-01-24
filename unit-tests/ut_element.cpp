@@ -68,13 +68,6 @@ BOOST_AUTO_TEST_CASE(Tet_constructor_with_wrong_init_list)
     std::vector<Nodes::Node> node(0);
     const int extra = 123;
     Tetra::Tet tet(node, idxPrmToTest, {0, 0, 0, 0, extra});
-    const int idx = -1;
-    
-    BOOST_CHECK(tet.ind[0] == idx);
-    BOOST_CHECK(tet.ind[1] == idx);
-    BOOST_CHECK(tet.ind[2] == idx);
-    BOOST_CHECK(tet.ind[3] == idx);
-    std::cout << "extra idx= " << tet.ind[4] << std::endl;
-    BOOST_CHECK(tet.ind[4] == extra); // really weird!!
+    BOOST_CHECK(tet.ind.empty());
     }
 BOOST_AUTO_TEST_SUITE_END()
