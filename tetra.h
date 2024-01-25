@@ -189,7 +189,7 @@ public:
         {
         Eigen::Matrix<double,N,1> scalar_nod;
         for (int i = 0; i < N; i++) scalar_nod(i) = getter(refNode[ind[i]]);
-        result = -scalar_nod.transpose() * eigen_a;
+        result = scalar_nod.transpose() * eigen_a;
         }
 
     /** interpolation for 3D vector field and a tensor : getter function is given as a parameter to

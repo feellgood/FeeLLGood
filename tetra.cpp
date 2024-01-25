@@ -233,7 +233,7 @@ double Tet::demagEnergy(Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudx,
 
     for (int npi = 0; npi < NPI; npi++)
         { dens[npi] = (dudx(0,npi) + dudy(1,npi) + dudz(2,npi)) * phi[npi]; }
-    return 0.5*mu0*Ms*weight.dot(dens);
+    return -0.5*mu0*Ms*weight.dot(dens);
     }
 
 double Tet::zeemanEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Vector3d> const Hext,
