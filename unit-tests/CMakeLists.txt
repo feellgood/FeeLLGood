@@ -38,7 +38,7 @@ add_executable (test_ut_facette ${SOURCES})
 SET(SOURCES ../tetra.cpp ut_tetra.cpp)
 add_executable (test_ut_tetra ${SOURCES})
 
-SET(SOURCES ../tetra.cpp ut_energy.cpp)
+SET(SOURCES ../tetra.cpp ut_energy.cpp ../facette.cpp)
 add_executable (test_ut_energy ${SOURCES})
 
 SET(SOURCES ../tetra.cpp ut_anisotropy.cpp)

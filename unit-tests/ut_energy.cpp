@@ -5,6 +5,7 @@
 #include <random>
 
 #include "tetra.h"
+#include "facette.h"
 #include "tiny.h"
 #include "ut_tools.h"
 #include "ut_config.h"
@@ -86,7 +87,6 @@ BOOST_AUTO_TEST_CASE(demagEnergy, *boost::unit_test::tolerance(UT_TOL))
     for (int npi=0; npi<Tetra::NPI; npi++) { Edemag += dens[npi]*t.weight[npi]; }
     // end ref code
     
-    /*
     //code to test
     Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _u,dudx,dudy,dudz;
     Eigen::Matrix<double,Tetra::NPI,1> _phi;
@@ -96,13 +96,31 @@ BOOST_AUTO_TEST_CASE(demagEnergy, *boost::unit_test::tolerance(UT_TOL))
     
     Eigen::Matrix<double,Facette::NPI,1> phi_fa;
     Eigen::Matrix<double,Nodes::DIM,Facette::NPI> u_fa;
-    fa.interpolation(Nodes::get_u, u_fa);
-    fa.interpolation(Nodes::get_phi, phi_fa);
-    result_to_test += fa.demagEnergy(u_fa, phi_fa);
+    
+    Facette::Fac fa1(node, nbNod, 0, {1, 3, 2});
+    Facette::Fac fa2(node, nbNod, 0, {1, 3, 4});
+    Facette::Fac fa3(node, nbNod, 0, {1, 4, 2});
+    Facette::Fac fa4(node, nbNod, 0, {2, 3, 4});
+    
+    fa1.interpolation(Nodes::get_u, u_fa);
+    fa1.interpolation(Nodes::get_phi, phi_fa);
+    result_to_test += fa1.demagEnergy(u_fa, phi_fa);
+    
+    fa2.interpolation(Nodes::get_u, u_fa);
+    fa2.interpolation(Nodes::get_phi, phi_fa);
+    result_to_test += fa2.demagEnergy(u_fa, phi_fa);
+    
+    fa3.interpolation(Nodes::get_u, u_fa);
+    fa3.interpolation(Nodes::get_phi, phi_fa);
+    result_to_test += fa3.demagEnergy(u_fa, phi_fa);
+    
+    fa4.interpolation(Nodes::get_u, u_fa);
+    fa4.interpolation(Nodes::get_phi, phi_fa);
+    result_to_test += fa4.demagEnergy(u_fa, phi_fa);
     
     // end code to test
-    BOOST_TEST(result_to_test == Edemag);
-    */
+    
+    //BOOST_TEST(result_to_test == Edemag);
     BOOST_TEST(UT_TOL == 0);
     }
 
