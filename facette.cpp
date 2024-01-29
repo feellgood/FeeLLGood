@@ -10,7 +10,7 @@ void Fac::integrales(Facette::prm const &params)
     Eigen::Matrix<double,DIM,NPI> u;
     interpolation(Nodes::get_u0, u);
 
-    Eigen::Matrix<double,DIM,N> BE;//Eigen::Matrix<double,3*N,1> BE;
+    Eigen::Matrix<double,DIM,N> BE;
     BE.setZero();
 
     for (int npi = 0; npi < NPI; npi++)
@@ -20,7 +20,7 @@ void Fac::integrales(Facette::prm const &params)
         for (int i = 0; i < N; i++)
             for(int k = 0;k<DIM;k++)
                 {
-                BE(k,i) += _prefactor*a[i][npi]*params.uk(k);//BE(k*N + i) += _prefactor*a[i][npi]*params.uk(k);
+                BE(k,i) += _prefactor*a[i][npi]*params.uk(k);
                 }
         }
     /*-------------------- PROJECTION --------------------*/
@@ -47,7 +47,7 @@ Eigen::Matrix<double,NPI,1> Fac::charges(std::function<Eigen::Vector3d(Nodes::No
     {
     Eigen::Matrix<double,DIM,N> vec_nod;
     for(int i=0;i<N;i++)
-        vec_nod.col(i) << getter(refNode[ind[i]]);
+        vec_nod.col(i) << getter(getNode(i));
 
     Eigen::Matrix<double,DIM,NPI> _u = vec_nod * eigen_a;
 
@@ -58,7 +58,7 @@ Eigen::Matrix<double,NPI,1> Fac::charges(std::function<Eigen::Vector3d(Nodes::No
     for (int i = 0; i < N; i++)
         {
         const int i_ = ind[i];
-        const Eigen::Vector3d &p_i_ = refNode[i_].p;
+        const Eigen::Vector3d &p_i_ = getNode(i).p;
         for (int j = 0; j < NPI; j++)
             {
             double d_ij= (p_i_ - gauss.col(j)).norm();
@@ -81,9 +81,9 @@ double Fac::potential(std::function<Eigen::Vector3d(Nodes::Node)> getter, int i)
     int ii = (i + 1) % 3;
     int iii = (i + 2) % 3;
 
-    Nodes::Node const &node1 = refNode[ind[i]];
-    Nodes::Node const &node2 = refNode[ind[ii]];
-    Nodes::Node const &node3 = refNode[ind[iii]];
+    Nodes::Node const &node1 = getNode(i);
+    Nodes::Node const &node2 = getNode(ii);
+    Nodes::Node const &node3 = getNode(iii);
 
     Eigen::Vector3d p1p2 = node2.p - node1.p;
     Eigen::Vector3d p1p3 = node3.p - node1.p;

@@ -20,7 +20,7 @@ void Tet::lumping(int const &npi, double alpha_eff, double prefactor,
     for (int i = 0; i < N; i++)
         {
         const double ai_w = w * a[i][npi];
-        const Eigen::Vector3d ai_w_u0 = ai_w * Nodes::get_u0(refNode[ind[i]]);
+        const Eigen::Vector3d ai_w_u0 = ai_w * Nodes::get_u0(getNode(i));
 
         AE(i,i) += alpha_eff * ai_w;
         AE(N + i,N + i) += alpha_eff * ai_w;
@@ -246,9 +246,9 @@ double Tet::zeemanEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Vector3d> co
 
 double Tet::Jacobian(Eigen::Ref<Eigen::Matrix3d> J)
     {
-    Eigen::Vector3d p0p1 = refNode[ind[1]].p - refNode[ind[0]].p;
-    Eigen::Vector3d p0p2 = refNode[ind[2]].p - refNode[ind[0]].p;
-    Eigen::Vector3d p0p3 = refNode[ind[3]].p - refNode[ind[0]].p;
+    Eigen::Vector3d p0p1 = getNode(1).p - getNode(0).p;
+    Eigen::Vector3d p0p2 = getNode(2).p - getNode(0).p;
+    Eigen::Vector3d p0p3 = getNode(3).p - getNode(0).p;
     J(0,0) = p0p1.x();
     J(0,1) = p0p2.x();
     J(0,2) = p0p3.x();
@@ -263,26 +263,10 @@ double Tet::Jacobian(Eigen::Ref<Eigen::Matrix3d> J)
 
 double Tet::calc_vol(void) const
     {
-    Eigen::Vector3d p0p1 = refNode[ind[1]].p - refNode[ind[0]].p;
-    Eigen::Vector3d p0p2 = refNode[ind[2]].p - refNode[ind[0]].p;
-    Eigen::Vector3d p0p3 = refNode[ind[3]].p - refNode[ind[0]].p;
+    Eigen::Vector3d p0p1 = getNode(1).p - getNode(0).p;
+    Eigen::Vector3d p0p2 = getNode(2).p - getNode(0).p;
+    Eigen::Vector3d p0p3 = getNode(3).p - getNode(0).p;
 
     return p0p1.dot(p0p2.cross(p0p3))/6.0;
     }
 
-std::set<Facette::Fac> Tet::ownedFac() const
-    {
-    std::set<Facette::Fac> s;
-
-    const int ia = ind[0];
-    const int ib = ind[1];
-    const int ic = ind[2];
-    const int id = ind[3];
-
-    s.insert(Facette::Fac(refNode, 0, idxPrm, {ia, ic, ib} ));
-    s.insert(Facette::Fac(refNode, 0, idxPrm, {ib, ic, id} ));
-    s.insert(Facette::Fac(refNode, 0, idxPrm, {ia, id, ic} ));
-    s.insert(Facette::Fac(refNode, 0, idxPrm, {ia, ib, id} ));
-
-    return s;
-    }

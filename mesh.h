@@ -309,10 +309,17 @@ private:
         std::set<Facette::Fac> sf;  // implicit use of operator< overloaded in class Fac
 
         std::for_each(tet.begin(), tet.end(),
-                      [&sf](Tetra::Tet const &te)
+                      [this,&sf](Tetra::Tet const &te)
                       {
-                          std::set<Facette::Fac> tet_set = te.ownedFac();
-                          sf.insert(tet_set.begin(), tet_set.end());
+                      const int ia = te.ind[0];
+                      const int ib = te.ind[1];
+                      const int ic = te.ind[2];
+                      const int id = te.ind[3];
+
+                      sf.insert(Facette::Fac(node, 0, te.idxPrm, {ia, ic, ib} ));
+                      sf.insert(Facette::Fac(node, 0, te.idxPrm, {ib, ic, id} ));
+                      sf.insert(Facette::Fac(node, 0, te.idxPrm, {ia, id, ic} ));
+                      sf.insert(Facette::Fac(node, 0, te.idxPrm, {ia, ib, id} ));
                       });  // end for_each
 
         std::for_each(

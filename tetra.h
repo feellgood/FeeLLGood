@@ -135,7 +135,7 @@ public:
         zeroBasing();
         da.setZero();
 
-        if (refNode.size() > 0)
+        if (existNodes())
             {
             orientate();
 
@@ -188,7 +188,7 @@ public:
                               Eigen::Ref<Eigen::Matrix<double,NPI,1>> result) const
         {
         Eigen::Matrix<double,N,1> scalar_nod;
-        for (int i = 0; i < N; i++) scalar_nod(i) = getter(refNode[ind[i]]);
+        for (int i = 0; i < N; i++) scalar_nod(i) = getter(getNode(i));
         result = scalar_nod.transpose() * eigen_a;
         }
 
@@ -202,7 +202,7 @@ public:
                               Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> Tz) const
         {
         Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
-        for (int i = 0; i < N; i++) vec_nod.col(i) = getter(refNode[ind[i]]);
+        for (int i = 0; i < N; i++) vec_nod.col(i) = getter(getNode(i));
         
         result = vec_nod * eigen_a;
         Tx = vec_nod * dadx;
@@ -219,7 +219,7 @@ public:
                               Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> Tz) const
         {
         Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
-        for (int i = 0; i < N; i++) vec_nod.col(i) = getter(refNode[ind[i]]);
+        for (int i = 0; i < N; i++) vec_nod.col(i) = getter(getNode(i));
 
         Tx = vec_nod * dadx;
         Ty = vec_nod * dady;
@@ -232,7 +232,7 @@ public:
                                     Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> X) const
         {
         Eigen::Matrix<double,N,1> scalar_nod;
-        for (int i = 0; i < N; i++) scalar_nod(i) = getter(refNode[ind[i]]);
+        for (int i = 0; i < N; i++) scalar_nod(i) = getter(getNode(i));
         
         X.setZero();
         for (int j = 0; j < NPI; j++)
@@ -252,7 +252,10 @@ public:
         {
         Eigen::Matrix<double,N,1> scalar_nod;
 
-        for (int i = 0; i < N; i++) { scalar_nod[i] = getter(refNode[ind[i]], idx); }
+        for (int i = 0; i < N; i++)
+            {
+            scalar_nod[i] = getter(getNode(i),idx);
+            }
         result = scalar_nod.transpose() * eigen_a;
         }
 
@@ -319,9 +322,6 @@ public:
     /** computes volume of the tetrahedron ; unit test Tet_calc_vol */
     double calc_vol(void) const;
 
-    /** return a set of the four facettes of the tetrahedron */
-    std::set<Facette::Fac> ownedFac() const;
-
     /** idx is the index of the tetrahedron in the vector of tetrahedron */
     int idx;
 
@@ -337,7 +337,9 @@ public:
         {
         Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
         for (int i = 0; i < N; i++)
-            { vec_nod.col(i) << refNode[ind[i]].p; }
+            {
+            vec_nod.col(i) << getNode(i).p;
+            }
         result = vec_nod * eigen_a;
         }
 

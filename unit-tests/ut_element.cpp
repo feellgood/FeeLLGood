@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(Tet_constructor_with_wrong_init_list)
     {
     std::cout << "constructor test with empty node vector\n";
     std::vector<Nodes::Node> node(0);
-    const int extra = 123;
+    const int extra(0);
     Tetra::Tet tet(node, idxPrmToTest, {0, 0, 0, 0, extra});
     BOOST_CHECK(tet.ind.empty());
     }

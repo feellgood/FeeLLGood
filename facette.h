@@ -104,7 +104,7 @@ public:
                        Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result /**< [out] */) const
         {
         Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
-        for (int i = 0; i < N; i++) vec_nod.col(i) = getter(refNode[ind[i]]);
+        for (int i = 0; i < N; i++) vec_nod.col(i) = getter(getNode(i));
         
         result = vec_nod * eigen_a;
         }
@@ -116,7 +116,7 @@ public:
                        Eigen::Ref<Eigen::Matrix<double,NPI,1>> result /**< [out] */) const
         {
         Eigen::Matrix<double,N,1> scalar_nod;
-        for (int i = 0; i < N; i++) scalar_nod(i) = getter(refNode[ind[i]]);
+        for (int i = 0; i < N; i++) scalar_nod(i) = getter(getNode(i));
         
         result = scalar_nod.transpose() * eigen_a;
         }
@@ -161,7 +161,9 @@ public:
         {
         Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
         for (int i = 0; i < N; i++)
-            { vec_nod.col(i) << refNode[ind[i]].p; }
+            {
+            vec_nod.col(i) << getNode(i).p;
+            }
         result = vec_nod * eigen_a;
         }
 
@@ -174,8 +176,8 @@ private:
     /** return normal to the triangular face, not normalized */
     inline Eigen::Vector3d normal_vect() const
         {
-        Eigen::Vector3d p0p1 = refNode[ind[1]].p - refNode[ind[0]].p;
-        Eigen::Vector3d p0p2 = refNode[ind[2]].p - refNode[ind[0]].p;
+        Eigen::Vector3d p0p1 = getNode(1).p - getNode(0).p;
+        Eigen::Vector3d p0p2 = getNode(2).p - getNode(0).p;
 
         return p0p1.cross(p0p2);
         }

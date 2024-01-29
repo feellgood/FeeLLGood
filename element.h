@@ -25,7 +25,9 @@ class element
         if(_i.size() == N)
             { ind.assign(_i); }
         else
-            { std::cout<<"Warning: element constructor is given an init list with size() != N\n"; }
+            {
+            std::cout<<"Warning: element constructor is given an init list with size() != N\n";
+            }
         P.setZero();
         Lp.setZero();
         }
@@ -62,12 +64,12 @@ class element
         {
         for (int i = 0; i < N; i++)
             {
-            const Eigen::Vector3d &ep = refNode[ind[i]].ep;
+            const Eigen::Vector3d &ep = getNode(i).ep;
             P(i,i) = ep.x();
             P(i,N + i) = ep.y();
             P(i,2 * N + i) = ep.z();
 
-            const Eigen::Vector3d &eq = refNode[ind[i]].eq;
+            const Eigen::Vector3d &eq = getNode(i).eq;
             P(N + i,i) = eq.x();
             P(N + i,N + i) = eq.y();
             P(N + i,2 * N + i) = eq.z();
@@ -120,14 +122,21 @@ class element
     virtual void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result) const = 0;
 
     protected:
-        /** vector of nodes */
-        const std::vector<Nodes::Node> &refNode;
+        /** returns reference to node at ind[i] from mesh node vector */
+        inline const Nodes::Node & getNode(const int i) const { return refNode[ind[i]]; }
+
+        /** returns true if mesh node vector is not empty */
+        inline bool existNodes(void)
+        { return (refNode.size() > 0); }
 
         /** zeroBasing: index convention Matlab/msh (one based) -> C++ (zero based) */
         inline void zeroBasing(void)
             { std::for_each(ind.begin(),ind.end(),[](int & _i){ _i--; } ); }
 
     private:
+        /** vector of nodes */
+        const std::vector<Nodes::Node> & refNode;
+
         /** a method to orientate the element */
         virtual void orientate() = 0;
     };
