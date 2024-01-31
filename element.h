@@ -9,7 +9,12 @@
 #include "node.h"
 
 /** \class element
-template class, mother class for tetraedrons and facettes
+\brief Template abstract class, mother class for tetraedrons and facettes.
+
+template parameters are N number of sommits and NPI number of interpolation points. It contains a list of indices to the N nodes of the element, a reference to the full nodes vector, and index refering to the associated material parameters. All indices are zero based, derived class constructor should call zerobasing() if needed. It contains also the vector and matrix weight, Kp, Lp, P related to finite element computations. weight values are not initialized, they have to be set by derived class constructor.
+Member function getPtGauss() returns Gauss points.
+orientate() is a pure virtual function, it should manipulate indices to orientate positively the element.
+Magnetization at saturation Ms is also stored in class element instead of prm class associated to derived class tetra and facette.
 */
 
 template <int N,int NPI>
