@@ -11,16 +11,6 @@
 
 BOOST_AUTO_TEST_SUITE(ut_tetra)
 
-/*---------------------------------------*/
-/* minus one test: check boost is fine   */
-/*---------------------------------------*/
-
-BOOST_AUTO_TEST_CASE(Stupid)
-    {
-    float x = 1.0;
-    BOOST_CHECK(x != 0.0f);
-    }
-
 /*-----------------------------------------------------*/
 /* zero lvl tests : direct elementary member functions */
 /*-----------------------------------------------------*/
@@ -500,18 +490,14 @@ BOOST_AUTO_TEST_CASE(Tet_lumping, *boost::unit_test::tolerance(UT_TOL))
 
     timing prm_t = timing(1.0, std::min(a, b), std::max(a, b));
 
-    double s_dt = THETA * prm_t.get_dt();  // theta from theta scheme in config.h.in
-
+    double dt = prm_t.get_dt();
+    double s_dt = THETA * dt;  // theta from theta scheme in config.h.in
     double alpha_LLG = 0.5;
     double uHeff = distrib(gen);
-    double alfa = prm_t.calc_alpha_eff(alpha_LLG, uHeff);
-
-    double dt = prm_t.get_dt();
+    double alfa = Tetra::calc_alpha_eff(dt, alpha_LLG, uHeff);
     double A = distrib(gen);         // Ae
     double Js = 0.5 + distrib(gen);  // 0.5 offset to center on 1 the Js value
-
     double Abis = 2.0 * A / Js;
-
     double TAUR = prm_t.TAUR;
 
     // ref code (with minimal adaptations of integrales method in file MuMag_integrales.cc of

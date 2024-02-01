@@ -62,32 +62,6 @@ public:
     /** setter for t */
     inline void set_t(double _t) { t = _t; }
 
-    /** to perform some second order corrections, an effective \f$ \alpha \f$ is computed here with
-     * a piecewise formula */
-    inline double calc_alpha_eff(const double alpha, const double h) const
-        {
-        double reduced_dt = gamma0 * dt;
-        double a_eff = alpha;
-        const double r = 0.1;  // what is that constant, where does it come from ?
-        const double M = 2. * alpha * r / reduced_dt;
-
-        if (h > 0.)
-            {
-            if (h > M)
-                a_eff = alpha + reduced_dt / 2. * M;
-            else
-                a_eff = alpha + reduced_dt / 2. * h;
-            }
-        else
-            {
-            if (h < -M)
-                a_eff = alpha / (1. + reduced_dt / (2. * alpha) * M);
-            else
-                a_eff = alpha / (1. - reduced_dt / (2. * alpha) * h);
-            }
-        return a_eff;
-        }
-
 private:
     double t; /**< physical current time of the simulation */
 

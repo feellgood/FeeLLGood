@@ -7,6 +7,7 @@
 #include <random>
 
 #include "pt3D.h"
+#include "tetra.h"
 #include "time_integration.h"
 #include "ut_config.h"  // for tolerance UT_TOL macro
 
@@ -66,7 +67,8 @@ BOOST_AUTO_TEST_CASE(calc_alpha_eff, *boost::unit_test::tolerance(UT_TOL))
 
     // ref code (with minimal adaptations of MuMag_Integrales.cc of
     // src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
-    double reduced_dt = gamma0 * prm_t.get_dt();
+    double dt = prm_t.get_dt();
+    double reduced_dt = gamma0 * dt;
     double alpha = alpha_LLG;
     double uHeff = X;
     double r = 0.1;
@@ -91,7 +93,7 @@ BOOST_AUTO_TEST_CASE(calc_alpha_eff, *boost::unit_test::tolerance(UT_TOL))
     // end ref code
 
     // code to check
-    double my_alpha = prm_t.calc_alpha_eff(alpha_LLG, X);
+    double my_alpha = Tetra::calc_alpha_eff(dt, alpha_LLG, X);
     // end code to check
 
     std::cout << "test that calc_alpha_eff gives correct effective damping parameter relatively to "

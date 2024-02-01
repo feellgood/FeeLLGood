@@ -105,7 +105,8 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     const double alpha = param.alpha_LLG;
     const double Js = param.J;
     const double Abis = 2.0 * param.A / Js;
-    const double s_dt = THETA * prm_t.get_dt() * gamma0;  // theta from theta scheme in config.h.in
+    const double dt = prm_t.get_dt();
+    const double s_dt = THETA * dt * gamma0;  // theta from theta scheme in config.h.in
 
     Eigen::Matrix<double,3*N,3*N> AE;
     AE.setZero();
@@ -165,7 +166,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
 
         Eigen::Vector3d Heff = Hd.col(npi) + extraField(npi);// extraField computes STT contrib
         uHeff(npi) += U.col(npi).dot(Heff);
-        lumping(npi, prm_t.calc_alpha_eff(alpha, uHeff(npi)), prm_t.prefactor * s_dt * Abis, AE);
+        lumping(npi, calc_alpha_eff(dt, alpha, uHeff(npi)), prm_t.prefactor * s_dt * Abis, AE);
         }
     /*-------------------- PROJECTIONS --------------------*/
     Kp = P*AE*P.transpose();// with MKL installed this operation should call dgemm_direct

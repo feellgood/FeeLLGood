@@ -354,6 +354,32 @@ private:
         }
 
     };  // end class Tetra
+
+    /** to perform some second order corrections, an effective \f$ \alpha \f$ is computed here with
+     * a piecewise formula */
+    inline double calc_alpha_eff(const double dt, const double alpha, const double h)
+        {
+        double reduced_dt = gamma0 * dt;
+        double a_eff = alpha;
+        const double r = 0.1;  // what is that constant, where does it come from ?
+        const double M = 2. * alpha * r / reduced_dt;
+
+        if (h > 0.)
+            {
+            if (h > M)
+                a_eff = alpha + reduced_dt / 2. * M;
+            else
+                a_eff = alpha + reduced_dt / 2. * h;
+            }
+        else
+            {
+            if (h < -M)
+                a_eff = alpha / (1. + reduced_dt / (2. * alpha) * M);
+            else
+                a_eff = alpha / (1. - reduced_dt / (2. * alpha) * h);
+            }
+        return a_eff;
+        }
     }   // end namespace Tetra
 
 #endif /* tetra_h */
