@@ -12,36 +12,39 @@
 using namespace Tetra;
 using namespace Nodes;
 
-void Tet::lumping(int const &npi, double alpha_eff, double prefactor,
+void Tet::lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double prefactor,
                   Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const
     {
-    const double w = weight[npi];
-
-    for (int i = 0; i < N; i++)
+    for(int npi = 0; npi < NPI; npi++)
         {
-        const double ai_w = w * a[i][npi];
-        const Eigen::Vector3d ai_w_u0 = ai_w * Nodes::get_u0(getNode(i));
+        const double w = weight[npi];
 
-        AE(i,i) += alpha_eff * ai_w;
-        AE(N + i,N + i) += alpha_eff * ai_w;
-        AE(2*N + i,2*N + i) += alpha_eff * ai_w;
-
-        AE(i, 2*N + i) += ai_w_u0(IDX_Y);
-        AE(i, N + i) -= ai_w_u0(IDX_Z);
-        AE(N + i, i) += ai_w_u0(IDX_Z);
-        AE(N + i, 2*N + i) -= ai_w_u0(IDX_X);
-        AE(2*N + i, N + i) += ai_w_u0(IDX_X);
-        AE(2*N + i, i) -= ai_w_u0(IDX_Y);
-
-        for (int j = 0; j < N; j++)
+        for (int i = 0; i < N; i++)
             {
-            double contrib = w * prefactor
-                             * (dadx(i,npi) * dadx(j,npi) + dady(i,npi) * dady(j,npi)
-                                + dadz(i,npi) * dadz(j,npi));
+            const double ai_w = w * a[i][npi];
+            const Eigen::Vector3d ai_w_u0 = ai_w * Nodes::get_u0(getNode(i));
 
-            AE(i,j) += contrib;
-            AE(N + i,N + j) += contrib;
-            AE(2*N + i,2*N + j) += contrib;
+            AE(i,i) += alpha_eff(npi) * ai_w;
+            AE(N + i,N + i) += alpha_eff(npi) * ai_w;
+            AE(2*N + i,2*N + i) += alpha_eff(npi) * ai_w;
+
+            AE(i, 2*N + i) += ai_w_u0(IDX_Y);
+            AE(i, N + i) -= ai_w_u0(IDX_Z);
+            AE(N + i, i) += ai_w_u0(IDX_Z);
+            AE(N + i, 2*N + i) -= ai_w_u0(IDX_X);
+            AE(2*N + i, N + i) += ai_w_u0(IDX_X);
+            AE(2*N + i, i) -= ai_w_u0(IDX_Y);
+
+            for (int j = 0; j < N; j++)
+                {
+                double contrib = w * prefactor
+                                 * (dadx(i,npi) * dadx(j,npi) + dady(i,npi) * dady(j,npi)
+                                    + dadz(i,npi) * dadz(j,npi));
+
+                AE(i,j) += contrib;
+                AE(N + i,N + j) += contrib;
+                AE(2*N + i,2*N + j) += contrib;
+                }
             }
         }
     }
@@ -166,8 +169,11 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
 
         Eigen::Vector3d Heff = Hd.col(npi) + extraField(npi);// extraField computes STT contrib
         uHeff(npi) += U.col(npi).dot(Heff);
-        lumping(npi, calc_alpha_eff(dt, alpha, uHeff(npi)), prm_t.prefactor * s_dt * Abis, AE);
         }
+
+    Eigen::Matrix<double,NPI,1> a_eff = calc_alpha_eff(dt, alpha, uHeff);
+    lumping(a_eff, prm_t.prefactor * s_dt * Abis, AE);
+
     /*-------------------- PROJECTIONS --------------------*/
     Kp = P*AE*P.transpose();// with MKL installed this operation should call dgemm_direct
 

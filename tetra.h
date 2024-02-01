@@ -260,8 +260,8 @@ public:
         }
 
     /** AE matrix filling */
-    void lumping(int const &npi, double alpha_eff, double prefactor,
-                 Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const;
+    void lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double prefactor,
+                  Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const;
 
     /** add drift contribution due to eventual recentering to vectors BE */
     void add_drift_BE(int const &npi, double alpha, double s_dt, double Vdrift,
@@ -357,26 +357,32 @@ private:
 
     /** to perform some second order corrections, an effective \f$ \alpha \f$ is computed here with
      * a piecewise formula */
-    inline double calc_alpha_eff(const double dt, const double alpha, const double h)
+    inline Eigen::Matrix<double,NPI,1> calc_alpha_eff(const double dt, const double alpha,
+                                                      Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff)
         {
         double reduced_dt = gamma0 * dt;
-        double a_eff = alpha;
+        Eigen::Matrix<double,NPI,1> a_eff;
+        a_eff.setConstant(alpha);
         const double r = 0.1;  // what is that constant, where does it come from ?
         const double M = 2. * alpha * r / reduced_dt;
 
-        if (h > 0.)
+        for(int npi=0;npi<NPI;npi++)
             {
-            if (h > M)
-                a_eff = alpha + reduced_dt / 2. * M;
+            double h = uHeff(npi);
+            if (h > 0.)
+                {
+                if (h > M)
+                    a_eff(npi) = alpha + reduced_dt / 2. * M;
+                else
+                    a_eff(npi) = alpha + reduced_dt / 2. * h;
+                }
             else
-                a_eff = alpha + reduced_dt / 2. * h;
-            }
-        else
-            {
-            if (h < -M)
-                a_eff = alpha / (1. + reduced_dt / (2. * alpha) * M);
-            else
-                a_eff = alpha / (1. - reduced_dt / (2. * alpha) * h);
+                {
+                if (h < -M)
+                    a_eff(npi) = alpha / (1. + reduced_dt / (2. * alpha) * M);
+                else
+                    a_eff(npi) = alpha / (1. - reduced_dt / (2. * alpha) * h);
+                }
             }
         return a_eff;
         }

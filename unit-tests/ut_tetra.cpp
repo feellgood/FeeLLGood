@@ -493,8 +493,9 @@ BOOST_AUTO_TEST_CASE(Tet_lumping, *boost::unit_test::tolerance(UT_TOL))
     double dt = prm_t.get_dt();
     double s_dt = THETA * dt;  // theta from theta scheme in config.h.in
     double alpha_LLG = 0.5;
-    double uHeff = distrib(gen);
-    double alfa = Tetra::calc_alpha_eff(dt, alpha_LLG, uHeff);
+    Eigen::Matrix<double,Tetra::NPI,1> uHeff;
+    uHeff.setConstant(distrib(gen));
+    Eigen::Matrix<double,Tetra::NPI,1> alfa = Tetra::calc_alpha_eff(dt, alpha_LLG, uHeff);
     double A = distrib(gen);         // Ae
     double Js = 0.5 + distrib(gen);  // 0.5 offset to center on 1 the Js value
     double Abis = 2.0 * A / Js;
@@ -528,9 +529,9 @@ BOOST_AUTO_TEST_CASE(Tet_lumping, *boost::unit_test::tolerance(UT_TOL))
             dai_dy = t.dady(ie,npi);
             dai_dz = t.dadz(ie,npi);
 
-            AE[ie][ie] += alfa * ai * w;  // lumping
-            AE[Tetra::N + ie][Tetra::N + ie] += alfa * ai * w;
-            AE[2 * Tetra::N + ie][2 * Tetra::N + ie] += alfa * ai * w;
+            AE[ie][ie] += alfa(npi) * ai * w;  // lumping
+            AE[Tetra::N + ie][Tetra::N + ie] += alfa(npi) * ai * w;
+            AE[2 * Tetra::N + ie][2 * Tetra::N + ie] += alfa(npi) * ai * w;
 
             AE[ie][2 * Tetra::N + ie] += +u_nod[1][ie] * ai * w;  // lumping
             AE[ie][Tetra::N + ie] += -u_nod[2][ie] * ai * w;
@@ -556,8 +557,7 @@ BOOST_AUTO_TEST_CASE(Tet_lumping, *boost::unit_test::tolerance(UT_TOL))
     // end ref code
 
     // code to check
-    for (int npi = 0; npi < Tetra::NPI; npi++)
-        t.lumping(npi, alfa, prm_t.prefactor * s_dt * Abis, AE_to_check);
+    t.lumping(alfa, prm_t.prefactor * s_dt * Abis, AE_to_check);
     // end code to check
 
     for (int i = 0; i < 3*Tetra::N; i++)

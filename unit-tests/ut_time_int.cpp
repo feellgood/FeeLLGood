@@ -13,16 +13,6 @@
 
 BOOST_AUTO_TEST_SUITE(ut_time_int)
 
-/*---------------------------------------*/
-/* minus one test: check boost is fine   */
-/*---------------------------------------*/
-
-BOOST_AUTO_TEST_CASE(Stupid)
-    {
-    float x = 1.0;
-    BOOST_CHECK(x != 0.0f);
-    }
-
 /*-----------------------------------------------------*/
 /* zero lvl tests : direct elementary member functions */
 /*-----------------------------------------------------*/
@@ -71,6 +61,8 @@ BOOST_AUTO_TEST_CASE(calc_alpha_eff, *boost::unit_test::tolerance(UT_TOL))
     double reduced_dt = gamma0 * dt;
     double alpha = alpha_LLG;
     double uHeff = X;
+    Eigen::Matrix<double,Tetra::NPI,1> _uHeff;
+    _uHeff.setConstant(X);
     double r = 0.1;
     double M = 2. * alpha * r / reduced_dt;
 
@@ -93,14 +85,15 @@ BOOST_AUTO_TEST_CASE(calc_alpha_eff, *boost::unit_test::tolerance(UT_TOL))
     // end ref code
 
     // code to check
-    double my_alpha = Tetra::calc_alpha_eff(dt, alpha_LLG, X);
+    Eigen::Matrix<double,Tetra::NPI,1> my_alpha = Tetra::calc_alpha_eff(dt, alpha_LLG, _uHeff);
     // end code to check
 
     std::cout << "test that calc_alpha_eff gives correct effective damping parameter relatively to "
                  "ref source code"
               << std::endl;
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
-    BOOST_TEST(my_alpha == alfa);
+    for(int npi=0;npi<Tetra::NPI;npi++)
+        { BOOST_TEST(my_alpha(npi) == alfa); }
     }
 
 BOOST_AUTO_TEST_SUITE_END()
