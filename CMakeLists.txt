@@ -14,17 +14,32 @@ else()
     message(FATAL_ERROR "TBB NOT FOUND")
 endif()
 
-find_package(PkgConfig REQUIRED)
-
-pkg_check_modules(MKL QUIET IMPORTED_TARGET mkl-dynamic-lp64-iomp)
+# Use the Intel MKL library if we can find it.
+# First, try find_package(), which should work on a oneAPI environment.
+set(MKL_INTERFACE lp64)
+set(MKL_THREADING intel_thread)
+find_package(MKL QUIET)
 if(MKL_FOUND)
-    message(STATUS "MKL Found")
-    #message(STATUS "MKL compile options = ${MKL_CFLAGS}")
-    #message(STATUS "MKL LD flags = ${MKL_LDFLAGS}")
-    set(EIGEN_MKL_CFLAGS "-DEIGEN_USE_MKL_ALL -DMKL_DIRECT_CALL")  # -DMKL_DIRECT_CALL : not sure we need it, neither it does something
-    set(MKL_INTERFACE lp64) # from eigen3 documentation, we need that to get eigen work with intel mkl
+    message(STATUS "Found MKL with find_package()")
+    set(MKL_TARGET "MKL::MKL")
 else()
-    message(STATUS "MKL not found")
+    # As find_package() failed to find MKL, try pkg-config.
+    find_package(PkgConfig)
+    if(PKG_CONFIG_FOUND)
+        pkg_check_modules(MKL QUIET IMPORTED_TARGET mkl-dynamic-lp64-iomp)
+        if(MKL_FOUND)
+            message(STATUS "Found MKL with pkg-config")
+            set(MKL_TARGET "PkgConfig::MKL")
+        endif()
+    else()
+        message(STATUS "Not found: PkgConfig, needed for MKL")
+    endif()
+endif()
+
+if(MKL_FOUND)
+    set(EIGEN_MKL_CFLAGS "-DEIGEN_USE_MKL_ALL -DMKL_DIRECT_CALL")  # -DMKL_DIRECT_CALL : not sure we need it, neither it does something
+else()
+    message(STATUS "Not found: MKL")
 endif()
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
@@ -89,7 +104,7 @@ ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES} default-settings.o)
 if (MKL_FOUND)
     TARGET_LINK_OPTIONS(feellgood PRIVATE "-Wl,--no-as-needed")
     # not sure we really need it since --no-as-needed is default value, though there might be a --as-needed before
-    TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm duktape ANN OpenMP::OpenMP_CXX TBB::tbb Eigen3::Eigen PkgConfig::MKL)
+    TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm duktape ANN OpenMP::OpenMP_CXX TBB::tbb Eigen3::Eigen ${MKL_TARGET})
 else()
     TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm duktape ANN OpenMP::OpenMP_CXX TBB::tbb Eigen3::Eigen)
 endif()
