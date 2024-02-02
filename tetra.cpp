@@ -183,8 +183,8 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
             BE.col(i) -= w*Abis*(da(i,0)*dUdx.col(npi) + da(i,1)*dUdy.col(npi) + da(i,2)*dUdz.col(npi));
             BE.col(i) += w*a[i][npi]*H.col(npi);
             }
-        extraCoeffs_BE(npi, Js, U.col(npi), dUdx.col(npi), dUdy.col(npi), dUdz.col(npi), BE);  // STT
         }
+    extraCoeffs_BE(Js, U, dUdx, dUdy, dUdz, BE);  // STT
 
     /*--------------------   PROJECTION: BE->Lp   --------------------*/
     #if EIGEN_VERSION_AT_LEAST(3,4,0)

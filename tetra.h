@@ -166,10 +166,10 @@ public:
             }
         // do nothing lambda's (usefull for spin transfer torque)
         extraField = [] ( Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> ) {};
-        extraCoeffs_BE = [](int, double, Eigen::Ref<Eigen::Vector3d>,
-                            Eigen::Ref<Eigen::Vector3d>,
-                            Eigen::Ref<Eigen::Vector3d>,
-                            Eigen::Ref<Eigen::Vector3d>,
+        extraCoeffs_BE = [](double, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>>,
+                            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>>,
+                            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>>,
+                            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>>,
                             Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,N>>) {};
         }
 
@@ -329,8 +329,11 @@ public:
     std::function<void( Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)> extraField;
 
     /** for extra contribution to the matrix BE, such as spin transfer torque contribs */
-    std::function<void(int npi, double Js, Eigen::Ref<Eigen::Vector3d> U, Eigen::Ref<Eigen::Vector3d> dUdx, Eigen::Ref<Eigen::Vector3d> dUdy,
-                       Eigen::Ref<Eigen::Vector3d> dUdz, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,N>> BE)> extraCoeffs_BE;
+    std::function<void(double Js, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
+                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdx,
+                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdy,
+                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdz,
+                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,N>> BE)> extraCoeffs_BE;
 
     /** returns gauss points in result = vec_nod*Tetra::a  */
     void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result) const
