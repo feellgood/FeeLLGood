@@ -49,22 +49,24 @@ void Tet::lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double pref
         }
     }
 
-void Tet::add_drift_BE(int const &npi, double alpha, double s_dt, double Vdrift,
+void Tet::add_drift_BE(double alpha, double s_dt, double Vdrift,
                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> U,
                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> V, 
                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUd_,
                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dVd_,
                        Eigen::Ref<Eigen::Matrix<double,DIM,N>> BE) const
     {  // the artificial drift from eventual recentering is along x,y or z
-    double w = weight[npi];
     Eigen::Matrix<double,DIM,N> interim;
 
-    for (int i = 0; i < N; i++)
+    for (int npi = 0; npi < NPI; npi++)
         {
-        interim.col(i) = a[i][npi]*( alpha*dUd_.col(npi) + U.col(npi).cross(dUd_.col(npi)) 
+        for (int i = 0; i < N; i++)
+            {
+            interim.col(i) = a[i][npi]*( alpha*dUd_.col(npi) + U.col(npi).cross(dUd_.col(npi))
                     + s_dt*(alpha*dVd_.col(npi) + U.col(npi).cross(dVd_.col(npi)) + V.col(npi).cross(dUd_.col(npi))) );
+            }
+        BE += Vdrift*weight[npi]*interim;
         }
-    BE += w*Vdrift*interim;
     }
 
 Eigen::Matrix<double,NPI,1> Tet::calc_aniso_uniax(Eigen::Ref<const Eigen::Vector3d> uk, const double Kbis,
@@ -121,6 +123,11 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     interpolation(Nodes::get_u0, U, dUdx, dUdy, dUdz);
     Eigen::Matrix<double,DIM,NPI> V,dVdx,dVdy,dVdz;
     interpolation(Nodes::get_v0, V, dVdx, dVdy, dVdz);
+    /*
+    devNote: we should not compute all dVd(x|y|z).
+    Only one of them is used by add_drift_BE, which is idx_dir dependent
+    */
+
     Eigen::Matrix<double,DIM,NPI> Hd;
     interpolation_field(Nodes::get_phi0, Hd);
     Eigen::Matrix<double,DIM,NPI> Hv;
@@ -147,6 +154,16 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     H.colwise() = Hext;// set all columns of H to Hext
     H += H_aniso + Hd + (s_dt / gamma0) * Hv;
 
+    if (idx_dir != IDX_UNDEF)
+        {
+        if (idx_dir == IDX_Z)
+            add_drift_BE(alpha, s_dt, Vdrift, U, V, dUdz, dVdz, BE);
+        else if (idx_dir == IDX_Y)
+            add_drift_BE(alpha, s_dt, Vdrift, U, V, dUdy, dVdy, BE);
+        else if (idx_dir == IDX_X)
+            add_drift_BE(alpha, s_dt, Vdrift, U, V, dUdx, dVdx, BE);
+        }
+
     for (int npi = 0; npi < NPI; npi++)
         {
         const double w = weight[npi];
@@ -157,16 +174,6 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
             }
 
         extraCoeffs_BE(npi, Js, U.col(npi), dUdx.col(npi), dUdy.col(npi), dUdz.col(npi), BE);  // STT
-        if (idx_dir != IDX_UNDEF)
-            {
-            if (idx_dir == IDX_Z)
-                add_drift_BE(npi, alpha, s_dt, Vdrift, U, V, dUdz, dVdz, BE);
-            else if (idx_dir == IDX_Y)
-                add_drift_BE(npi, alpha, s_dt, Vdrift, U, V, dUdy, dVdy, BE);
-            else if (idx_dir == IDX_X)
-                add_drift_BE(npi, alpha, s_dt, Vdrift, U, V, dUdx, dVdx, BE);
-            }
-
         Eigen::Vector3d Heff = Hd.col(npi) + extraField(npi);// extraField computes STT contrib
         uHeff(npi) += U.col(npi).dot(Heff);
         }

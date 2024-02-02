@@ -264,7 +264,7 @@ public:
                   Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const;
 
     /** add drift contribution due to eventual recentering to vectors BE */
-    void add_drift_BE(int const &npi, double alpha, double s_dt, double Vdrift,
+    void add_drift_BE(double alpha, double s_dt, double Vdrift,
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V, 
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUd_,
