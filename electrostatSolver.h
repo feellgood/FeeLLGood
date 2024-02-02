@@ -173,8 +173,11 @@ private:
                 msh.tet.begin(), msh.tet.end(),
                 [this](Tetra::Tet &tet)
                 {
-                    tet.extraField = [this, &tet](int npi) -> Eigen::Vector3d
-                    { return this->Hm[tet.idx][npi]; };
+                    const int _idx = tet.idx;
+                    tet.extraField = [this, _idx](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> H)
+                    {
+                    for(int npi = 0; npi<Tetra::NPI; npi++) { H.col(npi) += Hm[_idx][npi]; }
+                    };
 
                     tet.extraCoeffs_BE = [this, &tet](int npi, double Js, Eigen::Ref<Eigen::Vector3d> U,
                                                       Eigen::Ref<Eigen::Vector3d> dUdx,
@@ -182,7 +185,7 @@ private:
                                                       Eigen::Ref<Eigen::Vector3d> dUdz,
                                                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::N>> BE)
                     {
-                        const double prefactor = D0 / Nodes::sq(p_stt.lJ) / (gamma0 * nu0 * Js);
+                        const double prefactor = D0 / Nodes::sq(p_stt.lJ) / (gamma0 * nu0 * Js); //nu0*Js shall be replaced by tet.Ms
                         Eigen::Vector3d const &_gV = gradV[tet.idx][npi];
                         Eigen::Vector3d j_grad_u =
                                 -p_stt.sigma

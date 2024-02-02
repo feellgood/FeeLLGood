@@ -115,8 +115,6 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
 
     Eigen::Matrix<double,3*N,3*N> AE;
     AE.setZero();
-    Eigen::Matrix<double,DIM,N> BE;
-    BE.setZero();
 
     /*-------------------- INTERPOLATION --------------------*/
     Eigen::Matrix<double,DIM,NPI> U,dUdx,dUdy,dUdz;
@@ -150,10 +148,19 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
 
     uHeff -= Abis *( dUdx.colwise().squaredNorm() + dUdy.colwise().squaredNorm() + dUdz.colwise().squaredNorm());
 
-    Eigen::Matrix<double,DIM,NPI> H;
-    H.colwise() = Hext;// set all columns of H to Hext
-    H += H_aniso + Hd + (s_dt / gamma0) * Hv;
+    Eigen::Matrix<double,DIM,NPI> Heff = Hd;
+    extraField(Heff);// extraField do a +=like for STT contrib on Heff
+    uHeff += (U.cwiseProduct(Heff)).colwise().sum();//dot product on each col of U and Heff
 
+    Eigen::Matrix<double,NPI,1> a_eff = calc_alpha_eff(dt, alpha, uHeff);
+    lumping(a_eff, prm_t.prefactor * s_dt * Abis, AE);
+
+    /*--------------------   PROJECTION: AE->Kp   --------------------*/
+    Kp = P*AE*P.transpose();// with MKL installed this operation should call dgemm_direct
+    
+    /*********************   calculations on BE   *********************/
+    Eigen::Matrix<double,DIM,N> BE;
+    BE.setZero();
     if (idx_dir != IDX_UNDEF)
         {
         if (idx_dir == IDX_Z)
@@ -164,6 +171,10 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
             add_drift_BE(alpha, s_dt, Vdrift, U, V, dUdx, dVdx, BE);
         }
 
+    Eigen::Matrix<double,DIM,NPI> H;
+    H.colwise() = Hext;// set all columns of H to Hext
+    H += H_aniso + Hd + (s_dt / gamma0) * Hv;
+    
     for (int npi = 0; npi < NPI; npi++)
         {
         const double w = weight[npi];
@@ -172,18 +183,10 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
             BE.col(i) -= w*Abis*(da(i,0)*dUdx.col(npi) + da(i,1)*dUdy.col(npi) + da(i,2)*dUdz.col(npi));
             BE.col(i) += w*a[i][npi]*H.col(npi);
             }
-
         extraCoeffs_BE(npi, Js, U.col(npi), dUdx.col(npi), dUdy.col(npi), dUdz.col(npi), BE);  // STT
-        Eigen::Vector3d Heff = Hd.col(npi) + extraField(npi);// extraField computes STT contrib
-        uHeff(npi) += U.col(npi).dot(Heff);
         }
 
-    Eigen::Matrix<double,NPI,1> a_eff = calc_alpha_eff(dt, alpha, uHeff);
-    lumping(a_eff, prm_t.prefactor * s_dt * Abis, AE);
-
-    /*-------------------- PROJECTIONS --------------------*/
-    Kp = P*AE*P.transpose();// with MKL installed this operation should call dgemm_direct
-
+    /*--------------------   PROJECTION: BE->Lp   --------------------*/
     #if EIGEN_VERSION_AT_LEAST(3,4,0)
         Lp = P * BE.reshaped<Eigen::RowMajor>();
     #else
