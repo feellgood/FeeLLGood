@@ -8,11 +8,7 @@ MESSAGE(STATUS "CXX ${CMAKE_CXX_COMPILER_ID}")
 find_package(OpenMP REQUIRED)
 
 find_package(TBB REQUIRED)
-if(TBB_FOUND)
-    message(STATUS "TBB Found")
-else()
-    message(FATAL_ERROR "TBB NOT FOUND")
-endif()
+message(STATUS "Found TBB")
 
 # Use the Intel MKL library if we can find it.
 # First, try find_package(), which should work on a oneAPI environment.
