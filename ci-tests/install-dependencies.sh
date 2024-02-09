@@ -60,7 +60,7 @@ else  # Debian-like OS
         sudo apt-get install -y software-properties-common
         sudo apt-add-repository -y non-free
     fi
-    packages="$packages g++ libeigen3-dev libmkl-dev libtbb-dev libyaml-cpp-dev duktape-dev"
+    packages="$packages wget g++ libeigen3-dev libmkl-dev libtbb-dev libyaml-cpp-dev duktape-dev"
     sudo apt-get update -q
     if [ "$unit_tests" = "true" ]; then
         packages="$packages libboost-system-dev libboost-filesystem-dev libboost-test-dev"
