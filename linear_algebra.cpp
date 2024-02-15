@@ -14,22 +14,15 @@ void LinAlgebra::prepareElements(Eigen::Vector3d const &Hext /**< [in] applied f
                                  timing const &t_prm /**< [in] */)
     {
     base_projection();
-    Nodes::index idx_dir;
-
-    if (!settings.recenter)
-        { idx_dir = Nodes::IDX_UNDEF; }
-    else
-        { idx_dir = settings.recentering_direction; }
-
     std::for_each(std::execution::par, refMsh->tet.begin(), refMsh->tet.end(),
-                  [this, &Hext, &t_prm, idx_dir](Tetra::Tet &tet)
-                  { tet.integrales(settings.paramTetra[tet.idxPrm], t_prm, Hext, idx_dir, DW_vz); });
+                  [this, &Hext, &t_prm](Tetra::Tet &tet)
+                  { tet.integrales(prmTetra[tet.idxPrm], t_prm, Hext, idx_dir, DW_vz); });
 
     std::for_each(std::execution::par, refMsh->fac.begin(), refMsh->fac.end(),
                   [this](Facette::Fac &fac)
                   {
                   // the contribution to Lp computed in integrales is due to surface anisotropy
-                  if (settings.paramFacette[fac.idxPrm].Ks != 0)
-                    { fac.integrales(settings.paramFacette[fac.idxPrm]);  }
+                  if (prmFacette[fac.idxPrm].Ks != 0)
+                    { fac.integrales(prmFacette[fac.idxPrm]);  }
                   });
     }

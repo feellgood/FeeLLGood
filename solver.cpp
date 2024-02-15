@@ -12,7 +12,7 @@ int LinAlgebra::solver(timing const &t_prm)
     std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
                       [this,&w_K_TH](Tetra::Tet &my_elem) { my_elem.assemblage_mat(NOD,w_K_TH); } );
     
-    if (settings.verbose)
+    if (verbose)
         {
         std::cout << "matrix assembly done in " << counter.millis() << std::endl;
         counter.reset();
@@ -24,7 +24,7 @@ int LinAlgebra::solver(timing const &t_prm)
 
     if(_solver.info() != Eigen::Success)
         { std::cout <<"sparse matrix factorize(): decomposition failed.\n";exit(1); }
-    else if (settings.verbose)
+    else if (verbose)
         { std::cout << "K factorized (ILU precond) done in " << counter.millis() << std::endl; }
 
     L_TH.setZero(2*NOD);
@@ -41,9 +41,9 @@ int LinAlgebra::solver(timing const &t_prm)
     int nb_iter = _solver.iterations();
     double solver_error= _solver.error();
 
-    if( (nb_iter > settings.MAXITER) || (solver_error > settings.TOL) )
+    if( (nb_iter > MAXITER) || (solver_error > TOL) )
         {
-        if (settings.verbose)
+        if (verbose)
             {
             std::cout << "solver: bicgstab FAILED after " << nb_iter
             << " iterations, in " << counter.millis() << std::endl;
@@ -51,7 +51,7 @@ int LinAlgebra::solver(timing const &t_prm)
         return 1;
         }
 
-        if (settings.verbose)
+        if (verbose)
             {
             std::cout << "solver: bicgstab converged in " << nb_iter
             << " iterations, " << counter.millis() << std::endl;

@@ -27,7 +27,8 @@ class LinAlgebra
 public:
     /** constructor */
     inline LinAlgebra(Settings &s /**< [in] */, Mesh::mesh &my_msh /**< [in] */)
-        : NOD(my_msh.getNbNodes()), refMsh(&my_msh), settings(s)
+        : NOD(my_msh.getNbNodes()), MAXITER(s.MAXITER), TOL(s.TOL), verbose(s.verbose),
+          prmTetra(s.paramTetra), prmFacette(s.paramFacette), refMsh(&my_msh)
         {
         Eigen::setNbThreads(s.solverNbTh);
         base_projection();
@@ -37,6 +38,10 @@ public:
         L_TH.resize(2*NOD);
         _solver.setTolerance(s.TOL);
         _solver.setMaxIterations(s.MAXITER);
+        if (!s.recenter)
+            { idx_dir = Nodes::IDX_UNDEF; }
+        else
+            { idx_dir = s.recentering_direction; }
         }
 
     /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors) */
@@ -52,20 +57,32 @@ public:
     inline double get_v_max(void) { return v_max; }
 
 private:
+    /** recentering index direction if any */
+    Nodes::index idx_dir;
+
     /** number of nodes, also an offset for filling sparseMatrix, initialized by constructor */
     const int NOD;
 
+    /** maximum number of iteration for bicgstab */
+    const int MAXITER;
+
     /** solver tolerance */
-    //const double _TOL;
+    const double TOL;
+
+    /** verbosity */
+    const int verbose;
+
+    /** material parameters of the tetrahedrons */
+    const std::vector<Tetra::prm> &prmTetra;
+
+    /** material parameters of the facettes */
+    const std::vector<Facette::prm> &prmFacette;
 
     /** direct access to the mesh */
     Mesh::mesh *refMsh;
 
     /** speed of the domain wall */
     double DW_vz;
-
-    /** settings */
-    const Settings &settings;
 
     /** maximum speed of the magnetization in the whole physical object */
     double v_max;
