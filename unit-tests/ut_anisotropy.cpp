@@ -335,4 +335,23 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TO
         }
     }
 
+BOOST_AUTO_TEST_CASE(anisotropy_H_aniso, *boost::unit_test::tolerance(10.0 * UT_TOL))
+    {
+    double Kbis(.5);
+    Eigen::Vector3d uk {1,3,5};
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> bob,H_a;
+    H_a.setZero();
+    bob << 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15;
+    for(int npi = 0;npi<Tetra::NPI;npi++)
+        { H_a.col(npi) += (Kbis * uk.dot( bob.col(npi))) * uk; }
+    std::cout << "H_a= " << H_a << std::endl << "Kbis*uk.trans()*bob= " << Kbis*uk.transpose()*bob <<std::endl;
+
+    Eigen::Array<double,Nodes::DIM,Tetra::NPI> tmp;
+    tmp.colwise() = uk.array();
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> test = tmp.rowwise() * (Kbis*uk.transpose()*bob).array() ;
+    std::cout << "test= " << test << std::endl;
+    double dist = (H_a - test).norm();
+    BOOST_TEST( dist == 0. );
+    }
+
 BOOST_AUTO_TEST_SUITE_END()
