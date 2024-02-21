@@ -38,6 +38,9 @@ public:
         L_TH.resize(2*NOD);
         _solver.setTolerance(s.TOL);
         _solver.setMaxIterations(s.MAXITER);
+        _solver.preconditioner().setDroptol(s.ILU_tol);
+        _solver.preconditioner().setFillfactor(s.ILU_fill_factor);
+
         if (!s.recenter)
             { idx_dir = Nodes::IDX_UNDEF; }
         else
@@ -96,7 +99,7 @@ private:
     /** RHS vector of the system to solve */
     Eigen::VectorXd L_TH;
 
-    /** eigen stabilized biconjugate gradient solver, for row major sparse matrix and ILU preconditionner. Row major sparse matrix allows some parallelism with openMP multithreading */
+    /** eigen stabilized biconjugate gradient solver, for row major sparse matrix and ILU preconditionner. Row major sparse matrix allows some parallelism with multithreading */
     Eigen::BiCGSTAB<Eigen::SparseMatrix<double,Eigen::RowMajor>,Eigen::IncompleteLUT<double>> _solver;
 
     /** computes local vector basis {ep,eq} in the tangeant plane for projection on the elements */

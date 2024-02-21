@@ -223,6 +223,8 @@ void Settings::infos()
     std::cout << "  nb_threads: " << solverNbTh << "\n";
     std::cout << "  max(iter): " << MAXITER << "\n";
     std::cout << "  tolerance: " << TOL << "\n";
+    std::cout << "  ILU_tolerance: " << ILU_tol << "\n";
+    std::cout << "  ILU_fill_factor: " << ILU_fill_factor << "\n";
     std::cout << "time_integration:\n";
     std::cout << "  max(du): " << DUMAX << "\n";
     std::cout << "  min(dt): " << dt_min << "\n";
@@ -481,6 +483,8 @@ void Settings::read(YAML::Node yaml)
         if (solverNbTh <= 0) solverNbTh = available_cpu_count;
         assign(MAXITER, solver["max(iter)"]);
         assign(TOL,solver["tolerance"]);
+        assign(ILU_tol,solver["ILU_tolerance"]);
+        assign(ILU_fill_factor,solver["ILU_fill_factor"]);
         }  // finite_element_solver
 
     YAML::Node time_integration = yaml["time_integration"];

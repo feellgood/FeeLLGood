@@ -192,6 +192,12 @@ finite_element_solver:
   # solver tolerance.
   tolerance: 1e-6
 
+  # ILU preconditioner tolerance
+  ILU_tolerance: 1e-2
+
+  # ILU preconditioner filling factor
+  ILU_fill_factor: 10
+
 # Parameters for the integration of the dynamic equation.
 time_integration:
 
