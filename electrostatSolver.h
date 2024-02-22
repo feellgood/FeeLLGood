@@ -101,6 +101,7 @@ public:
             std::cout << "Dirichlet boundary conditions..." << std::endl;
             infos();
             }
+        V.resize(_msh.getNbNodes());
         bool has_converged = solve(_tol);
         if (has_converged)
             {
@@ -120,11 +121,11 @@ public:
             std::for_each(msh.tet.begin(), msh.tet.end(),
                           [this](Tetra::Tet const &tet)
                           {
-                              std::array<Eigen::Vector3d, Tetra::NPI> _gradV;
+                              Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _gradV;
                               calc_gradV(tet, _gradV);
                               gradV.push_back(_gradV);
 
-                              std::array<Eigen::Vector3d, Tetra::NPI> _Hm;
+                              Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _Hm;
                               calc_Hm(tet, _gradV, _Hm);
                               Hm.push_back(_Hm);
                           });
@@ -138,31 +139,28 @@ public:
         }
 
     /** computes the gradient(V) for tetra tet */
-    void calc_gradV(Tetra::Tet const &tet, std::array<Eigen::Vector3d, Tetra::NPI> &_gradV) const
+    void calc_gradV(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV) const
         {
         for (int npi = 0; npi < Tetra::NPI; npi++)
             {
-            double vx(0), vy(0), vz(0);
+            Eigen::Vector3d v(0,0,0);
             for (int i = 0; i < Tetra::N; i++)
                 {
-                const double V_tet = V[tet.ind[i]];
-                vx += V_tet * tet.dadx(i,npi);
-                vy += V_tet * tet.dady(i,npi);
-                vz += V_tet * tet.dadz(i,npi);
+                v += V[tet.ind[i]] * Eigen::Vector3d(tet.dadx(i,npi), tet.dady(i,npi), tet.dadz(i,npi));
                 }
-            _gradV[npi] = Eigen::Vector3d(vx, vy, vz);
+            _gradV.col(npi) = v;
             }
         }
 
     /** computes Hm contributions for each npi for tetrahedron tet */
-    void calc_Hm(Tetra::Tet const &tet, std::array<Eigen::Vector3d, Tetra::NPI> const &_gradV,
-                 std::array<Eigen::Vector3d, Tetra::NPI> &_Hm) const
+    void calc_Hm(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV,
+                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _Hm) const
         {
         Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> p_g;
         tet.getPtGauss(p_g);
 
         for (int npi = 0; npi < Tetra::NPI; npi++)
-            { _Hm[npi] = -p_stt.sigma * _gradV[npi].cross(p_g.col(npi)); }
+            { _Hm.col(npi) = -p_stt.sigma * _gradV.col(npi).cross(p_g.col(npi)); }
         }
 
 private:
@@ -176,7 +174,7 @@ private:
                     const int _idx = tet.idx;
                     tet.extraField = [this, _idx](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> H)
                     {
-                    for(int npi = 0; npi<Tetra::NPI; npi++) { H.col(npi) += Hm[_idx][npi]; }
+                    for(int npi = 0; npi<Tetra::NPI; npi++) { H.col(npi) += Hm[_idx].col(npi); }
                     };
 
                     tet.extraCoeffs_BE = [this, &tet](double Js, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> U,
@@ -188,7 +186,7 @@ private:
                     const double prefactor = D0 / Nodes::sq(p_stt.lJ) / (gamma0 * nu0 * Js); //nu0*Js shall be replaced by tet.Ms
                     for (int npi = 0; npi < Tetra::NPI; npi++)
                         {
-                        Eigen::Vector3d const &_gV = gradV[tet.idx][npi];
+                        Eigen::Vector3d const &_gV = gradV[tet.idx].col(npi);
                         Eigen::Vector3d j_grad_u =
                                 -p_stt.sigma
                                 * Eigen::Vector3d(_gV.dot( Eigen::Vector3d(dUdx(Nodes::IDX_X,npi), dUdy(Nodes::IDX_X,npi), dUdz(Nodes::IDX_X,npi))),
@@ -196,13 +194,11 @@ private:
                                                   _gV.dot( Eigen::Vector3d(dUdx(Nodes::IDX_Z,npi), dUdy(Nodes::IDX_Z,npi), dUdz(Nodes::IDX_Z,npi))));
 
                         Eigen::Vector3d m = pf * (ksi * j_grad_u + U.col(npi).cross(j_grad_u));
-                        Eigen::Vector3d interim[Tetra::N];
                         for (int i = 0; i < Tetra::N; i++)
                             {
                             const double ai_w = tet.weight[npi] * Tetra::a[i][npi];
-                            interim[i] = ai_w*(Hm[tet.idx][npi] + prefactor*m);
+                            BE.col(i) += ai_w*(Hm[tet.idx].col(npi) + prefactor*m);
                             }
-                        for (int i = 0; i < Tetra::N; i++) { BE.col(i) += interim[i]; }
                         } // end loop on npi
                     }; //end lambda
                 });//end for_each 
@@ -241,11 +237,11 @@ private:
     std::vector<double> V;
 
     /** table of the gradients of the potential, gradV.size() is the number of tetra */
-    std::vector<std::array<Eigen::Vector3d, Tetra::NPI>> gradV;
+    std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > gradV;
 
     /** table of the Hm vectors (contribution of the STT to the tet::integrales) ; Hm.size() is the
      * number of tetra */
-    std::vector<std::array< Eigen::Vector3d, Tetra::NPI>> Hm;
+    std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > Hm;
 
     /** basic informations on boundary conditions */
     inline void infos(void)
@@ -369,8 +365,6 @@ private:
         _solver.compute(Kr);
         
         Eigen::VectorXd sol = _solver.solve(Lw); 
-
-        V.resize(NOD);
         for (int i=0;i<NOD;i++)
             { V[i]= sol(i); }
         return (_solver.iterations() < MAXITER);
