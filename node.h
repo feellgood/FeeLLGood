@@ -145,24 +145,21 @@ struct Node
 
     };  // end struct node
 
-/** getter for p */
-inline Eigen::Vector3d get_p(Node const &n /**< [in] */) { return n.p; }
-
+/** getter for magnetizations */
 template <step K>
 Eigen::Vector3d get_u(Node const &n /**< [in] */) { return n.d[K].u; }
 
-/** getter for u0*/
-//inline const Eigen::Vector3d get_u0(Node const &n /**< [in] */) { return n.d[0].u; }
+/** getter for speed magnetizations */
+template <step K>
+Eigen::Vector3d get_v(Node const &n /**< [in] */) { return n.d[K].v; }
 
-/** getter for v0*/
-inline const Eigen::Vector3d get_v0(Node const &n /**< [in] */) { return n.d[0].v; }
+/** getter for phis */
+template <step K>
+double get_phi(Node const &n /**< [in] */) { return n.d[K].phi; }
 
-/** getter for u */
-//inline const Eigen::Vector3d get_u(Node const &n /**< [in] */) { return n.d[NEXT].u; }
-
-/** getter for v */
-inline const Eigen::Vector3d get_v(Node const &n /**< [in] */) { return n.d[NEXT].v; }
-
+/** getter for phivs */
+template <step K>
+double get_phiv(Node const &n /**< [in] */) { return n.d[K].phiv; }
 
 /** getter for u component */
 inline double get_u_comp(Node const &n /**< [in] */, index idx /**< [in] */)
@@ -171,19 +168,6 @@ inline double get_u_comp(Node const &n /**< [in] */, index idx /**< [in] */)
 /** getter for v component */
 inline double get_v_comp(Node const &n /**< [in] */, index idx /**< [in] */)
     { return n.d[NEXT].v(idx); }
-
-/** getter for v0 component */
-inline double get_v0_comp(Node const &n /**< [in] */, index idx /**< [in] */)
-    { return n.d[0].v(idx); }
-
-/** getter for phi */
-inline double get_phi(Node const &n /**< [in] */) { return n.d[NEXT].phi; }
-
-/** getter for phi0 */
-inline double get_phi0(Node const &n /**< [in] */) { return n.d[0].phi; }
-
-/** getter for phiv0 */
-inline double get_phiv0(Node const &n /**< [in] */) { return n.d[0].phiv; }
 
 /** setter for phi */
 inline void set_phi(Node &n, double val) { n.d[NEXT].phi = val; }

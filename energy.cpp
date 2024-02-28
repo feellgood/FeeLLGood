@@ -15,7 +15,7 @@ void Fem::energy(double const t, Settings &settings)
                       Eigen::Matrix<double,Tetra::NPI,1> phi;
 
                       te.interpolation(Nodes::get_u<NEXT>, u, dudx, dudy, dudz);
-                      te.interpolation(Nodes::get_phi, phi);
+                      te.interpolation(Nodes::get_phi<NEXT>, phi);
 
                       E_exch += te.exchangeEnergy(param, dudx, dudy, dudz);
                       E_demag += te.demagEnergy(dudx, dudy, dudz, phi);
@@ -34,7 +34,7 @@ void Fem::energy(double const t, Settings &settings)
                       Eigen::Matrix<double,Nodes::DIM,Facette::NPI> u;
 
                       fa.interpolation(Nodes::get_u<NEXT>, u);
-                      fa.interpolation(Nodes::get_phi, phi);
+                      fa.interpolation(Nodes::get_phi<NEXT>, phi);
 
                       if (param.Ks != 0.0)
                           { E_aniso += fa.anisotropyEnergy(param, u); }

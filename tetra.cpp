@@ -120,16 +120,16 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     Eigen::Matrix<double,DIM,NPI> U,dUdx,dUdy,dUdz;
     interpolation(Nodes::get_u<ZERO>, U, dUdx, dUdy, dUdz);
     Eigen::Matrix<double,DIM,NPI> V,dVdx,dVdy,dVdz;
-    interpolation(Nodes::get_v0, V, dVdx, dVdy, dVdz);
+    interpolation(Nodes::get_v<ZERO>, V, dVdx, dVdy, dVdz);
     /*
     devNote: we should not compute all dVd(x|y|z).
     Only one of them is used by add_drift_BE, which is idx_dir dependent
     */
 
     Eigen::Matrix<double,DIM,NPI> Hd;
-    interpolation_field(Nodes::get_phi0, Hd);
+    interpolation_field(Nodes::get_phi<ZERO>, Hd);
     Eigen::Matrix<double,DIM,NPI> Hv;
-    interpolation_field(Nodes::get_phiv0, Hv);
+    interpolation_field(Nodes::get_phiv<ZERO>, Hv);
     /*-------------------- END INTERPOLATION ----------------*/
 
     Eigen::Matrix<double,DIM,NPI> H_aniso;

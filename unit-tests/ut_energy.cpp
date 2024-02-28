@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(demagEnergy, *boost::unit_test::tolerance(UT_TOL))
     Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _u,dudx,dudy,dudz;
     Eigen::Matrix<double,Tetra::NPI,1> _phi;
     t.interpolation(Nodes::get_u<Nodes::NEXT>, _u, dudx, dudy, dudz);
-    t.interpolation(Nodes::get_phi, _phi);
+    t.interpolation(Nodes::get_phi<Nodes::NEXT>, _phi);
     double result_to_test = t.demagEnergy(dudx, dudy, dudz, _phi);
     std::cout << "E_demag(vol)= " << result_to_test << std::endl;
     
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(demagEnergy, *boost::unit_test::tolerance(UT_TOL))
         Eigen::Matrix<double,Facette::NPI,1> phi_fa;
         Eigen::Matrix<double,Nodes::DIM,Facette::NPI> u_fa;
         f.interpolation(Nodes::get_u<Nodes::NEXT>, u_fa);
-        f.interpolation(Nodes::get_phi, phi_fa);
+        f.interpolation(Nodes::get_phi<Nodes::NEXT>, phi_fa);
         result_to_test += f.demagEnergy(u_fa, phi_fa);
         });
     // end code to test

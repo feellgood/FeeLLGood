@@ -229,7 +229,7 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation, *boost::unit_test::tolerance(UT_TOL)
     Eigen::Matrix<double,Pt::DIM,Tetra::NPI> V;
 
     t.interpolation(Nodes::get_u<Nodes::ZERO>, U, dUdx, dUdy, dUdz);
-    t.interpolation(Nodes::get_v0, V, dVdx, dVdy, dVdz);
+    t.interpolation(Nodes::get_v<Nodes::ZERO>, V, dVdx, dVdy, dVdz);
     // end code to check
 
     double n_u = tiny::frob_norm<double, 3, Tetra::NPI>(_u);
@@ -366,8 +366,8 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation2, *boost::unit_test::tolerance(UT_TOL
     // code to check
     Eigen::Matrix<double,Pt::DIM,Tetra::NPI> Hd, Hv;
 
-    t.interpolation_field(Nodes::get_phi0, Hd);
-    t.interpolation_field(Nodes::get_phiv0, Hv);
+    t.interpolation_field(Nodes::get_phi<Nodes::ZERO>, Hd);
+    t.interpolation_field(Nodes::get_phiv<Nodes::ZERO>, Hv);
     // end code to check
 
     double n_Hdx = tiny::frob_norm<double, Tetra::NPI>(Hdx);

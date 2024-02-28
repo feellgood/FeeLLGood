@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_double, *boost::unit_test::tolerance(UT_T
     Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
 
     Eigen::Matrix<double,Facette::NPI,1> _p;
-    f.interpolation(Nodes::get_phi0, _p);
+    f.interpolation(Nodes::get_phi<Nodes::ZERO>, _p);
 
     // code ref
     double scal_nod[Facette::N];
@@ -405,7 +405,7 @@ BOOST_AUTO_TEST_CASE(Fac_potential_v, *boost::unit_test::tolerance(10.0*UT_TOL))
     double result_ref = Ms * pot;
     // end ref code
 
-    double result_to_test = f.potential(Nodes::get_v, i);
+    double result_to_test = f.potential(Nodes::get_v<Nodes::NEXT>, i);
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
     std::cout << "raw difference result =" << result_to_test - result_ref << std::endl;
     BOOST_TEST(result_to_test == result_ref,

@@ -22,9 +22,9 @@ BOOST_AUTO_TEST_CASE(node_get_p_lvl0)
 
     n.p = pPos;
 
-    BOOST_CHECK(Nodes::get_p(n).x() == 1.0);
-    BOOST_CHECK(Nodes::get_p(n).y() == 0.0);
-    BOOST_CHECK(Nodes::get_p(n).z() == 0.0);
+    BOOST_CHECK(n.p.x() == 1.0);
+    BOOST_CHECK(n.p.y() == 0.0);
+    BOOST_CHECK(n.p.z() == 0.0);
     }
 
 /*---------------------------------------*/
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(node_get_p_lvl1, *boost::unit_test::tolerance(UT_TOL))
     n.p = pPos;
     n.p.normalize();
 
-    BOOST_TEST(Nodes::get_p(n).norm() == 1.0);
+    BOOST_TEST(n.p.norm() == 1.0);
     }
 
 /*---------------------------------------*/
