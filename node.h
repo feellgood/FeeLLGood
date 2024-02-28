@@ -18,6 +18,16 @@ namespace Nodes
     {
      /** space dimension */
     const int DIM = 3;
+    
+    /** size of the array of dataNode */
+    const int NB_DATANODE = 2;
+
+    /** convenient enum to avoid direct index manipulation in the array of struct dataNode */
+    enum step
+        {
+        ZERO = 0,
+        NEXT = 1
+        };
 
     /** convenient enum to specify what coordinate in calculations */
     enum index
@@ -31,6 +41,18 @@ namespace Nodes
 /** \return \f$ x^2 \f$ */
 inline double sq(const double x) { return x * x; }
 
+/** \struct dataNode
+contains the vector fields u,v and the two associated scalar potentials
+*/
+
+struct dataNode
+    {
+    Eigen::Vector3d u;  /**< magnetization */
+    Eigen::Vector3d v;  /**< magnetization speed */
+    double phi;         /**< scalar potential */
+    double phiv;        /**< scalar potential of velocity */
+    };
+
 /** \struct Node
 Node is containing physical point of coordinates \f$ p = (x,y,z) \f$, magnetization value at \f$
 m(p,t) \f$. Many other values for the computation of the scalar potential \f$ \phi \f$
@@ -38,25 +60,21 @@ m(p,t) \f$. Many other values for the computation of the scalar potential \f$ \p
 struct Node
     {
     Eigen::Vector3d p;  /**< Physical position p=(x,y,z)  of the node */
-    Eigen::Vector3d u0; /**< magnetization at the start of the current time step */
-    Eigen::Vector3d v0; /**< magnetization speed at the start of the current time step */
-    Eigen::Vector3d u;  /**< magnetization after the current time step */
-    Eigen::Vector3d v;  /**< magnetization speed after the current time step */
-
     Eigen::Vector3d ep; /**< local vector basis : \f$ e_p = \vec{rand} \times u0 \f$ , then normalized */
     Eigen::Vector3d eq; /**< local vector basis : \f$ e_q = u0 \times e_p \f$ , then normalized */
-
-    double phi0;  /**< scalar potential at the start of the current time step */
-    double phi;   /**< scalar potential after the current time step */
-    double phiv0; /**< scalar potential of velocity at the start of the current time step */
-    double phiv;  /**< scalar potential of velocity after the current time step */
+    
+    /** datas associated to position p
+    step ZERO (0) : start of the time step
+    step NEXT (1) : after the current time step 
+    */ 
+    dataNode d[NB_DATANODE];
 
     /** setter for the local basis vector */
     inline void setBasis(const double r)
         {
         // Choose for an initial ep the direction, among (X, Y, Z), which is further away from u0.
         // devNote: Eigen documentation recommends NOT to use ternary operations (see General Topics/common pitfalls)
-        double abs_x = fabs(u0.x()), abs_y = fabs(u0.y()), abs_z = fabs(u0.z());
+        double abs_x = fabs(d[0].u.x()), abs_y = fabs(d[0].u.y()), abs_z = fabs(d[0].u.z());
         if (abs_x < abs_y)
             {
             if (abs_x < abs_z)
@@ -73,11 +91,11 @@ struct Node
             }
 
         // Gram-Schmidt orthonormalization of (u0, ep).
-        ep -= ep.dot(u0) * u0;
+        ep -= ep.dot(d[0].u) * d[0].u;
         ep.normalize();
 
         // Complete the basis with a vector product.
-        eq = u0.cross(ep);
+        eq = d[0].u.cross(ep);
 
         // Rotate (ep, eq) by the random angle.
         Eigen::Vector3d new_ep = cos(r) * ep - sin(r) * eq;
@@ -89,9 +107,9 @@ struct Node
         if (PARANOID_ORTHONORMALIZATION)
             {
             // Modified Gram-Schmidt orthonormalization.
-            ep -= ep.dot(u0) * u0;
+            ep -= ep.dot(d[0].u) * d[0].u;
             ep.normalize();
-            eq -= eq.dot(u0) * u0;
+            eq -= eq.dot(d[0].u) * d[0].u;
             eq -= eq.dot(ep) * ep;
             eq.normalize();
             }
@@ -100,13 +118,7 @@ struct Node
     /**
     preparation of the quantities u0,v0,phi0,phiv0 for incomming time-step
     */
-    inline void evolution(void)
-        {
-        u0 = u;
-        v0 = v;
-        phi0 = phi;
-        phiv0 = phiv;
-        }
+    inline void evolution(void) { d[step::ZERO] = d[step::NEXT]; }
 
     /**
     integration of the evolution of the magnetization for time step dt
@@ -118,10 +130,18 @@ struct Node
     inline void make_evol(const double vp /**< [in] */, const double vq /**< [in] */,
                           const double dt /**< [in] */)
         {
-        v = vp * ep + vq * eq;
-        u = u0 + dt * v;
-        u.normalize();
+        d[NEXT].v = vp * ep + vq * eq;
+        d[NEXT].u = d[0].u + dt * d[NEXT].v;
+        d[NEXT].u.normalize();
         }
+
+    /** getter for u at step k */
+    inline const Eigen::Vector3d get_u(step k /**< [in] */) const
+    { return d[k].u; }
+    
+    /** getter for v at step k */
+    inline const Eigen::Vector3d get_v(step k /**< [in] */) const 
+    { return d[k].v; }
 
     };  // end struct node
 
@@ -129,49 +149,44 @@ struct Node
 inline Eigen::Vector3d get_p(Node const &n /**< [in] */) { return n.p; }
 
 /** getter for u0*/
-inline const Eigen::Vector3d get_u0(Node const &n /**< [in] */) { return n.u0; }
+inline const Eigen::Vector3d get_u0(Node const &n /**< [in] */) { return n.d[0].u; }
 
 /** getter for v0*/
-inline const Eigen::Vector3d get_v0(Node const &n /**< [in] */) { return n.v0; }
+inline const Eigen::Vector3d get_v0(Node const &n /**< [in] */) { return n.d[0].v; }
 
 /** getter for u */
-inline const Eigen::Vector3d get_u(Node const &n /**< [in] */) { return n.u; }
+inline const Eigen::Vector3d get_u(Node const &n /**< [in] */) { return n.d[NEXT].u; }
 
 /** getter for v */
-inline const Eigen::Vector3d get_v(Node const &n /**< [in] */) { return n.v; }
+inline const Eigen::Vector3d get_v(Node const &n /**< [in] */) { return n.d[NEXT].v; }
+
 
 /** getter for u component */
 inline double get_u_comp(Node const &n /**< [in] */, index idx /**< [in] */)
-    {
-    return n.u(idx);
-    }
+    { return n.d[NEXT].u(idx); }
 
 /** getter for v component */
 inline double get_v_comp(Node const &n /**< [in] */, index idx /**< [in] */)
-    {
-    return n.v(idx);
-    }
+    { return n.d[NEXT].v(idx); }
 
 /** getter for v0 component */
 inline double get_v0_comp(Node const &n /**< [in] */, index idx /**< [in] */)
-    {
-    return n.v0(idx);
-    }
+    { return n.d[0].v(idx); }
 
 /** getter for phi */
-inline double get_phi(Node const &n /**< [in] */) { return n.phi; }
+inline double get_phi(Node const &n /**< [in] */) { return n.d[NEXT].phi; }
 
 /** getter for phi0 */
-inline double get_phi0(Node const &n /**< [in] */) { return n.phi0; }
+inline double get_phi0(Node const &n /**< [in] */) { return n.d[0].phi; }
 
 /** getter for phiv0 */
-inline double get_phiv0(Node const &n /**< [in] */) { return n.phiv0; }
+inline double get_phiv0(Node const &n /**< [in] */) { return n.d[0].phiv; }
 
 /** setter for phi */
-inline void set_phi(Node &n, double val) { n.phi = val; }
+inline void set_phi(Node &n, double val) { n.d[NEXT].phi = val; }
 
 /** setter for phi_v */
-inline void set_phiv(Node &n, double val) { n.phiv = val; }
+inline void set_phiv(Node &n, double val) { n.d[NEXT].phiv = val; }
 
     }  // end namespace Nodes
 

@@ -17,63 +17,35 @@
  src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz ) and feellgood 'public'
  */
 
+void dummyNodes(std::vector<Nodes::Node> &node)
+    {
+    node.resize(4);
+    Eigen::Vector3d p0(0, 0, 0), p1(1, 0, 0), p2(0, 1, 0), p3(0, 0, 1);
+    Eigen::Vector3d zero(0,0,0),u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
+    double phi0(0), phi(0), phiv0(0), phiv(0);
+    Nodes::Node n1 = {p0, zero, zero, {{u0, v0, phi0, phiv0}, {u,v,phi,phiv}} };
+    Nodes::Node n2 = {p1, zero, zero, {{u0, v0, phi0, phiv0}, {u,v,phi,phiv}} };
+    Nodes::Node n3 = {p2, zero, zero, {{u0, v0, phi0, phiv0}, {u,v,phi,phiv}} };
+    Nodes::Node n4 = {p3, zero, zero, {{u0, v0, phi0, phiv0}, {u,v,phi,phiv}} };
+    node = {n1,n2,n3,n4};
+    }
+
 BOOST_AUTO_TEST_SUITE(ut_anisotropy)
 
 BOOST_AUTO_TEST_CASE(anisotropy_uniax, *boost::unit_test::tolerance(10.0 * UT_TOL))
     {
-    int nbNod = 4;
-    std::vector<Nodes::Node> node(nbNod);
+    const int nbNod = 4;
+    std::vector<Nodes::Node> node;
+    dummyNodes(node);
 
     unsigned sd = my_seed();
     std::mt19937 gen(sd);
     std::uniform_real_distribution<> distrib(0.0, 1.0);
-
-    Eigen::Vector3d p0(0, 0, 0), p1(1, 0, 0), p2(0, 1, 0), p3(0, 0, 1), u0(0, 0, 0), v0(0, 0, 0);
-    Eigen::Vector3d zero(0,0,0);
-    double phi0(0), phi(0), phiv0(0), phiv(0);
-
-    Nodes::Node n0 = {p0,
-                      u0,
-                      v0,
-                      zero,zero,zero,zero,
-                      phi0,
-                      phi,
-                      phiv0,
-                      phiv};
-    Nodes::Node n1 = {p1,
-                      u0,
-                      v0,
-                      zero,zero,zero,zero,
-                      phi0,
-                      phi,
-                      phiv0,
-                      phiv};
-    Nodes::Node n2 = {p2,
-                      u0,
-                      v0,
-                      zero,zero,zero,zero,
-                      phi0,
-                      phi,
-                      phiv0,
-                      phiv};
-    Nodes::Node n3 = {p3,
-                      u0,
-                      v0,
-                      zero,zero,zero,zero,
-                      phi0,
-                      phi,
-                      phiv0,
-                      phiv};
-
-    node[0] = n0;
-    node[1] = n1;
-    node[2] = n2;
-    node[3] = n3;
-
+    
     for (int i = 0; i < nbNod; i++)
         {
-        node[i].u0 = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
-        node[i].v0 = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        node[i].d[0].u = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        node[i].d[0].v = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
         }
     // carefull with indices (starting from 1)
     Tetra::Tet t(node, 0, {1, 2, 3, 4});
@@ -104,11 +76,11 @@ BOOST_AUTO_TEST_CASE(anisotropy_uniax, *boost::unit_test::tolerance(10.0 * UT_TO
     for (int ie = 0; ie < Tetra::N; ie++)
         {
         int i = t.ind[ie];
-        Nodes::Node &nod = node[i];
-        for (int d = 0; d < 3; d++)
+        Nodes::dataNode &d0 = node[i].d[0];
+        for (int dim = 0; dim < 3; dim++)
             {
-            u_nod[d][ie] = nod.u0(d);
-            v_nod[d][ie] = nod.v0(d);
+            u_nod[dim][ie] = d0.u(dim);
+            v_nod[dim][ie] = d0.v(dim);
             }
         }
 
@@ -161,59 +133,18 @@ BOOST_AUTO_TEST_CASE(anisotropy_uniax, *boost::unit_test::tolerance(10.0 * UT_TO
 
 BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TOL))
     {
-    int nbNod = 4;
-    std::vector<Nodes::Node> node(nbNod);
+    const int nbNod = 4;
+    std::vector<Nodes::Node> node;
+    dummyNodes(node);
 
     unsigned sd = my_seed();
     std::mt19937 gen(sd);
     std::uniform_real_distribution<> distrib(0.0, 1.0);
 
-    Eigen::Vector3d p0(0, 0, 0), p1(1, 0, 0), p2(0, 1, 0), p3(0, 0, 1), u0(0, 0, 0), v0(0, 0, 0);
-    Eigen::Vector3d zero(0,0,0);
-    double phi0(0), phi(0), phiv0(0), phiv(0);
-
-    Nodes::Node n0 = {p0,
-                      u0,
-                      v0,
-                      zero,zero,zero,zero,
-                      phi0,
-                      phi,
-                      phiv0,
-                      phiv};
-    Nodes::Node n1 = {p1,
-                      u0,
-                      v0,
-                      zero,zero,zero,zero,
-                      phi0,
-                      phi,
-                      phiv0,
-                      phiv};
-    Nodes::Node n2 = {p2,
-                      u0,
-                      v0,
-                      zero,zero,zero,zero,
-                      phi0,
-                      phi,
-                      phiv0,
-                      phiv};
-    Nodes::Node n3 = {p3,
-                      u0,
-                      v0,
-                      zero,zero,zero,zero,
-                      phi0,
-                      phi,
-                      phiv0,
-                      phiv};
-
-    node[0] = n0;
-    node[1] = n1;
-    node[2] = n2;
-    node[3] = n3;
-
     for (int i = 0; i < nbNod; i++)
         {
-        node[i].u0 = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
-        node[i].v0 = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        node[i].d[0].u = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        node[i].d[0].v = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
         }
     // carefull with indices (starting from 1)
     Tetra::Tet t(node, 0, {1, 2, 3, 4});
@@ -262,11 +193,11 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TO
     for (int ie = 0; ie < Tetra::N; ie++)
         {
         int i = t.ind[ie];
-        Nodes::Node &nod = node[i];
-        for (int d = 0; d < 3; d++)
+        Nodes::dataNode &d0 = node[i].d[0];
+        for (int dim = 0; dim < 3; dim++)
             {
-            u_nod[d][ie] = nod.u0(d);
-            v_nod[d][ie] = nod.v0(d);
+            u_nod[dim][ie] = d0.u(dim);
+            v_nod[dim][ie] = d0.v(dim);
             }
         }
 

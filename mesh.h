@@ -74,14 +74,17 @@ public:
     /** getter : return node.p */
     inline const Eigen::Vector3d getNode_p(const int i) const { return node[i].p; }
     
-    /** getter : return node */
-    inline const Eigen::Vector3d getNode_u(const int i) const { return node[i].u; }
+    /** getter : return node.u */
+    inline const Eigen::Vector3d getNode_u(const int i) const { return node[i].get_u(Nodes::NEXT); }
+
+    /** getter : return node.v */
+    inline const Eigen::Vector3d getNode_v(const int i) const { return node[i].get_v(Nodes::NEXT); }
 
     /** setter for u0 */
-    inline void set_node_u0(const int i, Eigen::Vector3d const &val) { node[i].u0 = val; }
+    inline void set_node_u0(const int i, Eigen::Vector3d const &val) { node[i].d[0].u = val; }
 
     /** fix to zero node[i].v */
-    inline void set_node_zero_v(const int i) { node[i].v.setZero(); }
+    inline void set_node_zero_v(const int i) { node[i].d[Nodes::NEXT].v.setZero(); }
 
     /** basic informations on the mesh */
     void infos(void) const
@@ -136,7 +139,7 @@ public:
 
         for (unsigned int i = 0; i < NOD; i++)
             {
-            Eigen::Vector3d const& n_v = node[i].v;
+            Eigen::Vector3d const& n_v = getNode_v(i);//node[i].v;
             
             G(i) = n_v.dot(node[i].ep) / gamma0;
             G(NOD + i) = n_v.dot(node[i].eq) / gamma0;
@@ -186,10 +189,10 @@ public:
         {
         std::for_each(node.begin(),node.end(),[&mySets](Nodes::Node &n)
                                               {
-                                              n.u0 = mySets.getMagnetization(n.p);
-                                              n.u = n.u0;
-                                              n.phi = 0.;
-                                              n.phiv = 0.;
+                                              n.d[0].u = mySets.getMagnetization(n.p);
+                                              n.d[Nodes::NEXT].u = n.d[0].u;
+                                              n.d[Nodes::NEXT].phi = 0.;
+                                              n.d[Nodes::NEXT].phiv = 0.;
                                               } );
         }
 

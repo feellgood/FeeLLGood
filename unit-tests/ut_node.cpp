@@ -11,16 +11,6 @@
 
 BOOST_AUTO_TEST_SUITE(ut_node)
 
-/*---------------------------------------*/
-/* minus one test: check boost is fine   */
-/*---------------------------------------*/
-
-BOOST_AUTO_TEST_CASE(Stupid)
-    {
-    float x = 1.0;
-    BOOST_CHECK(x != 0.0f);
-    }
-
 /*-----------------------------------------------------*/
 /* zero lvl tests : direct elementary member functions */
 /*-----------------------------------------------------*/
@@ -74,16 +64,16 @@ BOOST_AUTO_TEST_CASE(node_e_p, *boost::unit_test::tolerance(10.0 * UT_TOL))
     Nodes::Node n;
 
     // test the orthonormality of the basis (u0, ep, eq)
-    n.u0 = unit_vector(M_PI * distrib(gen), distrib(gen));
+    n.d[0].u = unit_vector(M_PI * distrib(gen), distrib(gen));
     n.setBasis(M_PI * distrib(gen));
 
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
-    BOOST_TEST( n.u0.norm() == 1.0 );
+    BOOST_TEST( n.d[0].u.norm() == 1.0 );
     BOOST_TEST( n.ep.norm() == 1.0 );
     BOOST_TEST( n.eq.norm() == 1.0 );
-    BOOST_TEST( n.u0.dot(n.ep) == 0.0 );
+    BOOST_TEST( n.d[0].u.dot(n.ep) == 0.0 );
     BOOST_TEST( n.ep.dot(n.eq) == 0.0 );
-    BOOST_TEST( n.eq.dot(n.u0) == 0.0 );
+    BOOST_TEST( n.eq.dot(n.d[0].u) == 0.0 );
     }
 
 BOOST_AUTO_TEST_CASE(node_evol, *boost::unit_test::tolerance(1e3 * UT_TOL))
@@ -98,7 +88,7 @@ BOOST_AUTO_TEST_CASE(node_evol, *boost::unit_test::tolerance(1e3 * UT_TOL))
     double vq = distrib(gen);
     double dt = distrib(gen) + 1.0;
 
-    n.u0 = unit_vector(M_PI * distrib(gen), distrib(gen));
+    n.d[0].u = unit_vector(M_PI * distrib(gen), distrib(gen));
     n.setBasis(M_PI * distrib(gen));
 
     Eigen::Vector3d v = vp * n.ep + vq * n.eq;
@@ -107,9 +97,9 @@ BOOST_AUTO_TEST_CASE(node_evol, *boost::unit_test::tolerance(1e3 * UT_TOL))
 
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
     std::cout << "v = " << v << std::endl;
-    std::cout << "simplify[v] = " << n.v << std::endl;
+    std::cout << "simplify[v] = " << n.get_v(Nodes::NEXT) << std::endl;
 
-    BOOST_TEST( (n.v - v).norm() == 0.0);
+    BOOST_TEST( (n.get_v(Nodes::NEXT) - v).norm() == 0.0);
     }
 
 BOOST_AUTO_TEST_SUITE_END()
