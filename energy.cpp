@@ -1,5 +1,7 @@
 #include "fem.h"
 
+using namespace Nodes;
+
 void Fem::energy(double const t, Settings &settings)
     {
     zeroEnergy();
@@ -12,7 +14,7 @@ void Fem::energy(double const t, Settings &settings)
                       Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> u,dudx,dudy,dudz;
                       Eigen::Matrix<double,Tetra::NPI,1> phi;
 
-                      te.interpolation(Nodes::get_u, u, dudx, dudy, dudz);
+                      te.interpolation(Nodes::get_u<NEXT>, u, dudx, dudy, dudz);
                       te.interpolation(Nodes::get_phi, phi);
 
                       E_exch += te.exchangeEnergy(param, dudx, dudy, dudz);
@@ -31,7 +33,7 @@ void Fem::energy(double const t, Settings &settings)
                       Eigen::Matrix<double,Facette::NPI,1> phi;
                       Eigen::Matrix<double,Nodes::DIM,Facette::NPI> u;
 
-                      fa.interpolation(Nodes::get_u, u);
+                      fa.interpolation(Nodes::get_u<NEXT>, u);
                       fa.interpolation(Nodes::get_phi, phi);
 
                       if (param.Ks != 0.0)

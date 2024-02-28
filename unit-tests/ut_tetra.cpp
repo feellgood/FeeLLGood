@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation, *boost::unit_test::tolerance(UT_TOL)
     Eigen::Matrix<double,Pt::DIM,Tetra::NPI> U;
     Eigen::Matrix<double,Pt::DIM,Tetra::NPI> V;
 
-    t.interpolation(Nodes::get_u0, U, dUdx, dUdy, dUdz);
+    t.interpolation(Nodes::get_u<Nodes::ZERO>, U, dUdx, dUdy, dUdz);
     t.interpolation(Nodes::get_v0, V, dVdx, dVdy, dVdz);
     // end code to check
 

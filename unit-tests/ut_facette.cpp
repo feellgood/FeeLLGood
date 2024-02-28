@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_pt3D, *boost::unit_test::tolerance(UT_TOL
     Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
 
     Eigen::Matrix<double,Pt::DIM,Facette::N> _vec_nod;
-    for (int i = 0; i < Facette::N; i++) _vec_nod.col(i) = Nodes::get_u0(node[f.ind[i]]);
+    for (int i = 0; i < Facette::N; i++) _vec_nod.col(i) = node[f.ind[i]].get_u(Nodes::ZERO);
     
     Eigen::Matrix<double,Pt::DIM,Facette::NPI> _u = _vec_nod * Facette::eigen_a;
     //f.interpolation<Eigen::Vector3d>(Nodes::get_u0, _u);
@@ -199,19 +199,6 @@ BOOST_AUTO_TEST_CASE(Fac_potential_u, *boost::unit_test::tolerance(UT_TOL))
         node[i].d[0].v = Eigen::Vector3d(2*distrib(gen) - 1, 2*distrib(gen) - 1, 2*distrib(gen) - 1);
         node[i].d[1].v = Eigen::Vector3d(2*distrib(gen) - 1, 2*distrib(gen) - 1, 2*distrib(gen) - 1);
         }
-    /*
-    Eigen::Vector3d p1(1 + (distrib(gen) - 0.5) / 10.0, (distrib(gen) - 0.5) / 10.0,
-                (distrib(gen) - 0.5) / 10.0),
-            p2((distrib(gen) - 0.5) / 10.0, 1 + (distrib(gen) - 0.5) / 10.0,
-               1 + (distrib(gen) - 0.5) / 10.0),
-            p3((distrib(gen) - 0.5) / 10.0, 1 + (distrib(gen) - 0.5) / 10.0,
-               (distrib(gen) - 0.5) / 10.0);
-
-    Eigen::Vector3d u0 = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
-    Eigen::Vector3d u = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
-    Eigen::Vector3d v0(2 * distrib(gen) - 1, 2 * distrib(gen) - 1, 2 * distrib(gen) - 1),
-            v(2 * distrib(gen) - 1, 2 * distrib(gen) - 1, 2 * distrib(gen) - 1);
-    */
     
     Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
     f.Ms = distrib(gen);
@@ -301,7 +288,7 @@ BOOST_AUTO_TEST_CASE(Fac_potential_u, *boost::unit_test::tolerance(UT_TOL))
     double result_ref = Ms * pot;
     // end ref code
 
-    double result_to_test = f.potential(Nodes::get_u, i);
+    double result_to_test = f.potential(Nodes::get_u<Nodes::NEXT>, i);
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
     std::cout << "raw difference result =" << result_to_test - result_ref << std::endl;
     BOOST_TEST(result_to_test == result_ref,

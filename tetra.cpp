@@ -22,7 +22,7 @@ void Tet::lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double pref
         for (int i = 0; i < N; i++)
             {
             const double ai_w = w * a[i][npi];
-            const Eigen::Vector3d ai_w_u0 = ai_w * Nodes::get_u0(getNode(i));
+            const Eigen::Vector3d ai_w_u0 = ai_w * getNode(i).get_u(Nodes::ZERO);
 
             AE(i,i) += alpha_eff(npi) * ai_w;
             AE(N + i,N + i) += alpha_eff(npi) * ai_w;
@@ -118,7 +118,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
 
     /*-------------------- INTERPOLATION --------------------*/
     Eigen::Matrix<double,DIM,NPI> U,dUdx,dUdy,dUdz;
-    interpolation(Nodes::get_u0, U, dUdx, dUdy, dUdz);
+    interpolation(Nodes::get_u<ZERO>, U, dUdx, dUdy, dUdz);
     Eigen::Matrix<double,DIM,NPI> V,dVdx,dVdy,dVdz;
     interpolation(Nodes::get_v0, V, dVdx, dVdy, dVdz);
     /*

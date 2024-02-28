@@ -93,7 +93,7 @@ public:
     */
     void calc_demag(Mesh::mesh &msh /**< [in] */)
         {
-        demag(Nodes::get_u, Nodes::set_phi, msh);
+        demag(Nodes::get_u<Nodes::ZERO>, Nodes::set_phi, msh);
         demag(Nodes::get_v, Nodes::set_phiv, msh);
         }
 

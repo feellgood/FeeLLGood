@@ -148,14 +148,17 @@ struct Node
 /** getter for p */
 inline Eigen::Vector3d get_p(Node const &n /**< [in] */) { return n.p; }
 
+template <step K>
+Eigen::Vector3d get_u(Node const &n /**< [in] */) { return n.d[K].u; }
+
 /** getter for u0*/
-inline const Eigen::Vector3d get_u0(Node const &n /**< [in] */) { return n.d[0].u; }
+//inline const Eigen::Vector3d get_u0(Node const &n /**< [in] */) { return n.d[0].u; }
 
 /** getter for v0*/
 inline const Eigen::Vector3d get_v0(Node const &n /**< [in] */) { return n.d[0].v; }
 
 /** getter for u */
-inline const Eigen::Vector3d get_u(Node const &n /**< [in] */) { return n.d[NEXT].u; }
+//inline const Eigen::Vector3d get_u(Node const &n /**< [in] */) { return n.d[NEXT].u; }
 
 /** getter for v */
 inline const Eigen::Vector3d get_v(Node const &n /**< [in] */) { return n.d[NEXT].v; }
