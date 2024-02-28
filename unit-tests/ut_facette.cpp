@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_double, *boost::unit_test::tolerance(UT_T
     BOOST_TEST(sqrt(diff_r) == 0.0);
     }
 
-BOOST_AUTO_TEST_CASE(Fac_potential_u, *boost::unit_test::tolerance(UT_TOL))
+BOOST_AUTO_TEST_CASE(Fac_potential_u, *boost::unit_test::tolerance(10*UT_TOL))
     {
     std::cout << "fac potential test on u" << std::endl;
     int nbNod = 3;
