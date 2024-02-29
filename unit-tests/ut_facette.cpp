@@ -10,18 +10,6 @@
 #include "ut_tools.h"
 #include "ut_config.h"
 
-void dummyNodes(std::vector<Nodes::Node> &node)
-    {
-    node.resize(3);
-    Eigen::Vector3d p1(1, 0, 0), p2(0, 1, 0), p3(1, 1, 0);
-    Eigen::Vector3d zero(0,0,0),u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
-    double phi0(0), phi(0), phiv0(0), phiv(0);
-    Nodes::Node n1 = {p1, zero, zero, {{u0, v0, phi0, phiv0}, {u,v,phi,phiv}} };
-    Nodes::Node n2 = {p2, zero, zero, {{u0, v0, phi0, phiv0}, {u,v,phi,phiv}} };
-    Nodes::Node n3 = {p3, zero, zero, {{u0, v0, phi0, phiv0}, {u,v,phi,phiv}} };
-    node = {n1,n2,n3};
-    }
-
 BOOST_AUTO_TEST_SUITE(ut_facette)
 
 /*-----------------------------------------------------*/
@@ -86,7 +74,7 @@ BOOST_AUTO_TEST_CASE(Fac_calc_surf, *boost::unit_test::tolerance(UT_TOL))
     std::cout << "calc_surf test" << std::endl;
     const int nbNod = 3;
     std::vector<Nodes::Node> node;
-    dummyNodes(node);
+    dummyNodes<nbNod>(node);
 
     Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
 
@@ -101,7 +89,7 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_pt3D, *boost::unit_test::tolerance(UT_TOL
     std::cout << "surf interpolation test" << std::endl;
     const int nbNod = 3;
     std::vector<Nodes::Node> node;
-    dummyNodes(node);
+    dummyNodes<nbNod>(node);
 
     unsigned sd = my_seed();
     std::mt19937 gen(sd);
@@ -144,7 +132,7 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_double, *boost::unit_test::tolerance(UT_T
     std::cout << "surf interpolation test" << std::endl;
     const int nbNod = 3;
     std::vector<Nodes::Node> node;
-    dummyNodes(node);
+    dummyNodes<nbNod>(node);
 
     unsigned sd = my_seed();
     std::mt19937 gen(sd);
@@ -181,9 +169,9 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_double, *boost::unit_test::tolerance(UT_T
 BOOST_AUTO_TEST_CASE(Fac_potential_u, *boost::unit_test::tolerance(10*UT_TOL))
     {
     std::cout << "fac potential test on u" << std::endl;
-    int nbNod = 3;
+    const int nbNod = 3;
     std::vector<Nodes::Node> node;
-    dummyNodes(node);
+    dummyNodes<nbNod>(node);
 
     unsigned sd = my_seed();
     std::mt19937 gen(sd);
@@ -298,9 +286,9 @@ BOOST_AUTO_TEST_CASE(Fac_potential_u, *boost::unit_test::tolerance(10*UT_TOL))
 BOOST_AUTO_TEST_CASE(Fac_potential_v, *boost::unit_test::tolerance(10.0*UT_TOL))
     {
     std::cout << "fac potential test on v" << std::endl;
-    int nbNod = 3;
+    const int nbNod = 3;
     std::vector<Nodes::Node> node;
-    dummyNodes(node);
+    dummyNodes<nbNod>(node);
 
     unsigned sd = my_seed();
     std::mt19937 gen(sd);
@@ -417,9 +405,9 @@ BOOST_AUTO_TEST_CASE(Fac_Pcoeff)
     std::cout << "fac test on Nodes::Pcoeff template" << std::endl;
     const int N = Facette::N;
 
-    int nbNod = 3;
+    const int nbNod = 3;
     std::vector<Nodes::Node> node;
-    dummyNodes(node);
+    dummyNodes<nbNod>(node);
 
     unsigned sd = my_seed();
     std::mt19937 gen(sd);

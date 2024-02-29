@@ -10,19 +10,6 @@
 #include "ut_tools.h"
 #include "ut_config.h"
 
-void dummyNodes(std::vector<Nodes::Node> &node)
-    {
-    node.resize(4);
-    Eigen::Vector3d p0(0, 0, 0), p1(1, 0, 0), p2(0, 1, 0), p3(0, 0, 1);
-    Eigen::Vector3d zero(0,0,0),u0(0, 0, 0), v0(0, 0, 0), u(0, 0, 0), v(0, 0, 0);
-    double phi0(0), phi(0), phiv0(0), phiv(0);
-    Nodes::Node n1 = {p0, zero, zero, {{u0, v0, phi0, phiv0}, {u,v,phi,phiv}} };
-    Nodes::Node n2 = {p1, zero, zero, {{u0, v0, phi0, phiv0}, {u,v,phi,phiv}} };
-    Nodes::Node n3 = {p2, zero, zero, {{u0, v0, phi0, phiv0}, {u,v,phi,phiv}} };
-    Nodes::Node n4 = {p3, zero, zero, {{u0, v0, phi0, phiv0}, {u,v,phi,phiv}} };
-    node = {n1,n2,n3,n4};
-    }
-
 BOOST_AUTO_TEST_SUITE(ut_energy)
 
 /*---------------------------------------*/
@@ -33,7 +20,7 @@ BOOST_AUTO_TEST_CASE(demagEnergy, *boost::unit_test::tolerance(UT_TOL))
     {
     const int nbNod = 4;
     std::vector<Nodes::Node> node;
-    dummyNodes(node);
+    dummyNodes<nbNod>(node);
 
     unsigned sd = my_seed();
     std::mt19937 gen(sd);
