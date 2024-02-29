@@ -55,6 +55,50 @@ static Eigen::Vector3d unit_vector(double theta, double z)
     return Eigen::Vector3d(r * cos(theta), r * sin(theta), z);
     }
 
+BOOST_AUTO_TEST_CASE(node_setBasis_eigen_formula, *boost::unit_test::tolerance(10.0 * UT_TOL))
+    {
+    unsigned sd = my_seed();
+    std::mt19937 gen(sd);
+    std::uniform_real_distribution<> distrib(-1.0, 1.0);
+
+    Nodes::Node n;
+    n.d[0].u = unit_vector(M_PI * distrib(gen), distrib(gen));
+    n.setBasis(M_PI * distrib(gen));
+
+    /* code to test */
+    Eigen::Index minIdx;
+    n.d[0].u.cwiseAbs().minCoeff(&minIdx);
+    n.ep.setUnit(minIdx);
+    /* end code to test */
+
+    /* reference code */
+    Eigen::Vector3d ep_ref;
+    double abs_x = fabs(n.d[0].u.x()), abs_y = fabs(n.d[0].u.y()), abs_z = fabs(n.d[0].u.z());
+        if (abs_x < abs_y)
+            {
+            if (abs_x < abs_z)
+                { ep_ref = Eigen::Vector3d::UnitX(); }
+            else
+                { ep_ref = Eigen::Vector3d::UnitZ(); }
+            }
+        else
+            {
+            if (abs_y < abs_z)
+                { ep_ref = Eigen::Vector3d::UnitY(); }
+            else
+                { ep_ref = Eigen::Vector3d::UnitZ(); }
+            }
+    /* end reference code */
+
+    if (!DET_UT) std::cout << "seed =" << sd << std::endl;
+    std::cout << "u= " << n.d[0].u << std::endl;
+    std::cout << "ep_ref= " << ep_ref << std::endl;
+    std::cout << "ep= " << n.ep << std::endl;
+    Eigen::Vector3d result = ep_ref - n.ep;
+    BOOST_TEST( result.norm() == 0.0 );
+    }
+
+
 BOOST_AUTO_TEST_CASE(node_e_p, *boost::unit_test::tolerance(10.0 * UT_TOL))
     {
     unsigned sd = my_seed();

@@ -73,22 +73,9 @@ struct Node
     inline void setBasis(const double r)
         {
         // Choose for an initial ep the direction, among (X, Y, Z), which is further away from u0.
-        // devNote: Eigen documentation recommends NOT to use ternary operations (see General Topics/common pitfalls)
-        double abs_x = fabs(d[0].u.x()), abs_y = fabs(d[0].u.y()), abs_z = fabs(d[0].u.z());
-        if (abs_x < abs_y)
-            {
-            if (abs_x < abs_z)
-                { ep = Eigen::Vector3d::UnitX(); }
-            else
-                { ep = Eigen::Vector3d::UnitZ(); }
-            }
-        else
-            {
-            if (abs_y < abs_z)
-                { ep = Eigen::Vector3d::UnitY(); }
-            else
-                { ep = Eigen::Vector3d::UnitZ(); }
-            }
+        Eigen::Index minIdx;
+        d[0].u.cwiseAbs().minCoeff(&minIdx);
+        ep.setUnit(minIdx);
 
         // Gram-Schmidt orthonormalization of (u0, ep).
         ep -= ep.dot(d[0].u) * d[0].u;
