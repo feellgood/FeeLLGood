@@ -6,7 +6,6 @@
 #include <iostream>
 #include <random>
 
-#include "pt3D.h"
 #include "tetra.h"
 #include "time_integration.h"
 #include "ut_config.h"  // for tolerance UT_TOL macro

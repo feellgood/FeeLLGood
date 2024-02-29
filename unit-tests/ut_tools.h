@@ -1,5 +1,5 @@
 #include <eigen3/Eigen/Dense>
-#include "pt3D.h"
+#include "tetra.h"
 
 template <int nbNod>
 void dummyNodes(std::vector<Nodes::Node> &node)
@@ -34,22 +34,8 @@ Eigen::Vector3d rand_vec3d(double theta, double phi)
     return Eigen::Vector3d( si_t*cos(phi), si_t*sin(phi), cos(theta) );
     }
 
-/**
- frobenius norm of a table of pt3D
- */
 template<int nbVect>
-double sq_frobenius_norm(const Pt::pt3D X[nbVect])
-    {
-    double val(0.0);
-    for (int i = 0; i < nbVect; i++)
-        {
-        val += X[i].norm2();
-        }
-    return val;
-    }
-
-template<int nbVect>
-double sq_frobenius_norm(Eigen::Ref<Eigen::Matrix<double,Pt::DIM,nbVect>> const X)
+double sq_frobenius_norm(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,nbVect>> const X)
     {
     double val(0.0);
     for (int i = 0; i < nbVect; i++)
@@ -57,5 +43,60 @@ double sq_frobenius_norm(Eigen::Ref<Eigen::Matrix<double,Pt::DIM,nbVect>> const 
         val += X.col(i).squaredNorm();
         }
     return val;
+    }
+
+double sq_dist(double _x[Nodes::DIM][Tetra::NPI], Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> X)
+    {
+    double val(0.0);
+
+    for (int i = 0; i < Tetra::NPI; i++)
+        for (int j = 0; j < Nodes::DIM; j++)
+            { val += Nodes::sq(_x[j][i] - X(j,i)); }
+    return val;
+    }
+
+double sq_dist(double _x[Tetra::NPI], double _y[Tetra::NPI], double _z[Tetra::NPI],
+               Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> X)
+    {
+    double val(0.0);
+
+    for (int i = 0; i < Tetra::NPI; i++)
+        {
+        val += Nodes::sq(_x[i] - X.col(i).x());
+        val += Nodes::sq(_y[i] - X.col(i).y());
+        val += Nodes::sq(_z[i] - X.col(i).z());
+        }
+
+    return val;
+    }
+
+double det(const double M[Nodes::DIM][Nodes::DIM])
+    {
+    return (M[0][0] * (M[1][1] * M[2][2] - M[1][2] * M[2][1])
+            - M[0][1] * (M[1][0] * M[2][2] - M[1][2] * M[2][0])
+            + M[0][2] * (M[1][0] * M[2][1] - M[1][1] * M[2][0]));
+    }
+
+void inverse(double M[Nodes::DIM][Nodes::DIM], double detM)
+    {
+    double m00 = M[0][0];
+    double m01 = M[0][1];
+    double m02 = M[0][2];
+    double m10 = M[1][0];
+    double m11 = M[1][1];
+    double m12 = M[1][2];
+    double m20 = M[2][0];
+    double m21 = M[2][1];
+    double m22 = M[2][2];
+
+    M[0][0] = (m11 * m22 - m12 * m21) / detM;
+    M[0][1] = (m02 * m21 - m01 * m22) / detM;
+    M[0][2] = (m01 * m12 - m02 * m11) / detM;
+    M[1][0] = (m12 * m20 - m10 * m22) / detM;
+    M[1][1] = (m00 * m22 - m02 * m20) / detM;
+    M[1][2] = (m02 * m10 - m00 * m12) / detM;
+    M[2][0] = (m10 * m21 - m11 * m20) / detM;
+    M[2][1] = (m01 * m20 - m00 * m21) / detM;
+    M[2][2] = (m00 * m11 - m01 * m10) / detM;
     }
 

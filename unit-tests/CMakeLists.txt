@@ -21,8 +21,6 @@ set( BOOST_TEST_LOG_LEVEL "all" )
 
 add_definitions (-DBOOST_TEST_DYN_LINK)
 
-add_executable (test_ut_pt3D ut_pt3D.cpp)
-
 add_executable (test_ut_solver ut_solver.cpp)
 
 add_executable (test_ut_OMP_solver ut_OMP_solver.cpp)
@@ -49,13 +47,6 @@ add_executable (test_ut_tiny ut_tiny.cpp)
 add_executable (test_ut_time_int ut_time_int.cpp)
 
 add_executable (test_ut_log-stats ut_log-stats.cpp)
-
-target_link_libraries(test_ut_pt3D
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY}
-  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-  TBB::tbb
-  )
 
 if (MKL_FOUND)
     target_link_libraries(test_ut_solver
@@ -165,7 +156,6 @@ target_link_libraries(test_ut_log-stats
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
   )
 
-add_test (NAME ut_pt3D_arithmetic COMMAND test_ut_pt3D)
 add_test (NAME ut_solver COMMAND test_ut_solver)
 add_test (NAME ut_OMP_solver COMMAND test_ut_OMP_solver)
 add_test (NAME ut_node COMMAND test_ut_node)

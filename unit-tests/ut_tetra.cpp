@@ -4,7 +4,6 @@
 
 #include <random>
 
-#include "tetra.h"
 #include "tiny.h"
 #include "ut_tools.h"
 #include "ut_config.h"
@@ -26,6 +25,7 @@ BOOST_AUTO_TEST_SUITE(ut_tetra)
 /*---------------------------------------*/
 BOOST_AUTO_TEST_CASE(Tet_inner_tables, *boost::unit_test::tolerance(UT_TOL))
     {
+    using namespace Nodes;
     // this test is dedicated to  check dadx,dady,dadz and weight tables, those values are
     // initilized once by Tet constructor
     std::cout << "constructor test with 4 nodes in node vector\n";
@@ -49,11 +49,11 @@ BOOST_AUTO_TEST_CASE(Tet_inner_tables, *boost::unit_test::tolerance(UT_TOL))
     double _dadx[Tetra::N][Tetra::NPI];
     double _dady[Tetra::N][Tetra::NPI];
     double _dadz[Tetra::N][Tetra::NPI];
-    double da[Tetra::N][Pt::DIM];
-    double J[Pt::DIM][Pt::DIM];
-    double nod[Pt::DIM][Tetra::N];
+    double da[Tetra::N][DIM];
+    double J[DIM][DIM];
+    double nod[DIM][Tetra::N];
     double weight[Tetra::NPI];
-    constexpr double dadu[Tetra::N][Pt::DIM] = {{-1., -1., -1.}, {1., 0., 0.}, {0., 1., 0.}, {0., 0., 1.}};
+    constexpr double dadu[Tetra::N][DIM] = {{-1., -1., -1.}, {1., 0., 0.}, {0., 1., 0.}, {0., 0., 1.}};
 
     for (int ie = 0; ie < Tetra::N; ie++)
         {
@@ -63,10 +63,10 @@ BOOST_AUTO_TEST_CASE(Tet_inner_tables, *boost::unit_test::tolerance(UT_TOL))
         nod[2][ie] = node[i].p(2);
         }
 
-    tiny::mult<double, Pt::DIM, Tetra::N, Pt::DIM>(nod, dadu, J);
-    double detJ = Pt::det(J);  // lu_det(J);
-    Pt::inverse(J, detJ);
-    tiny::mult<double, Tetra::N, Pt::DIM, Pt::DIM>(dadu, J, da);
+    tiny::mult<double, DIM, Tetra::N, DIM>(nod, dadu, J);
+    double detJ = det(J);// from ut_tools.h
+    inverse(J, detJ);// from ut_tools.h
+    tiny::mult<double, Tetra::N, DIM, DIM>(dadu, J, da);
 
     for (int npi = 0; npi < Tetra::NPI; npi++)
         {
@@ -88,11 +88,11 @@ BOOST_AUTO_TEST_CASE(Tet_inner_tables, *boost::unit_test::tolerance(UT_TOL))
         {
         for (int ie = 0; ie < Tetra::N; ie++)
             {
-            result_dadx += Pt::sq(_dadx[ie][npi] - t.dadx(ie,npi));
-            result_dady += Pt::sq(_dady[ie][npi] - t.dady(ie,npi));
-            result_dadz += Pt::sq(_dadz[ie][npi] - t.dadz(ie,npi));
+            result_dadx += sq(_dadx[ie][npi] - t.dadx(ie,npi));
+            result_dady += sq(_dady[ie][npi] - t.dady(ie,npi));
+            result_dadz += sq(_dadz[ie][npi] - t.dadz(ie,npi));
             }
-        result_w += Pt::sq(weight[npi] - t.weight[npi]);
+        result_w += sq(weight[npi] - t.weight[npi]);
         }
 
     std::cout << "sq_frob norm diff dadx,dady,dadz= " << result_dadx << " ; " << result_dady
@@ -121,36 +121,9 @@ BOOST_AUTO_TEST_CASE(Tet_calc_vol, *boost::unit_test::tolerance(UT_TOL))
     BOOST_TEST(vol == result);
     }
 
-double sq_dist(double _x[Pt::DIM][Tetra::NPI], Eigen::Ref<Eigen::Matrix<double,Pt::DIM,Tetra::NPI>> X)
-    {
-    double val(0.0);
-
-    for (int i = 0; i < Tetra::NPI; i++)
-        for (int j = 0; j < Pt::DIM; j++)
-            {
-            val += Pt::sq(_x[j][i] - X(j,i));
-            }
-
-    return val;
-    }
-
-double sq_dist(double _x[Tetra::NPI], double _y[Tetra::NPI], double _z[Tetra::NPI],
-               Eigen::Ref<Eigen::Matrix<double,Pt::DIM,Tetra::NPI>> X)
-    {
-    double val(0.0);
-
-    for (int i = 0; i < Tetra::NPI; i++)
-        {
-        val += Pt::sq(_x[i] - X.col(i).x());
-        val += Pt::sq(_y[i] - X.col(i).y());
-        val += Pt::sq(_z[i] - X.col(i).z());
-        }
-
-    return val;
-    }
-
 BOOST_AUTO_TEST_CASE(Tet_nod_interpolation, *boost::unit_test::tolerance(UT_TOL))
     {
+    using namespace Nodes;
     const int nbNod = 4;
     std::vector<Nodes::Node> node;
     dummyNodes<nbNod>(node);
@@ -179,56 +152,56 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation, *boost::unit_test::tolerance(UT_TOL)
             }
     // ref code (with minimal adaptations of integrales method in file MuMag_integrales.cc of
     // src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
-    double _u_nod[3][Tetra::N], _u[3][Tetra::NPI];
-    double dudx[3][Tetra::NPI], dudy[3][Tetra::NPI], dudz[3][Tetra::NPI];
+    double _u_nod[DIM][Tetra::N], _u[DIM][Tetra::NPI];
+    double dudx[DIM][Tetra::NPI], dudy[DIM][Tetra::NPI], dudz[DIM][Tetra::NPI];
 
-    double _v_nod[3][Tetra::N], _v[3][Tetra::NPI];
-    double dvdx[3][Tetra::NPI], dvdy[3][Tetra::NPI], dvdz[3][Tetra::NPI];
+    double _v_nod[DIM][Tetra::N], _v[DIM][Tetra::NPI];
+    double dvdx[DIM][Tetra::NPI], dvdy[DIM][Tetra::NPI], dvdz[DIM][Tetra::NPI];
 
     for (int ie = 0; ie < Tetra::N; ie++)
         {
         int i = t.ind[ie];
         Nodes::dataNode &d0 = node[i].d[0];
-        for (int dim = 0; dim < 3; dim++)
+        for (int dim = 0; dim < DIM; dim++)
             {
             _u_nod[dim][ie] = d0.u(dim);
             _v_nod[dim][ie] = d0.v(dim);
             }
         }
-    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(_u_nod, Tetra::a, _u);
-    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(_u_nod, t_dadx, dudx);
-    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(_u_nod, t_dady, dudy);
-    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(_u_nod, t_dadz, dudz);
+    tiny::mult<double, DIM, Tetra::N, Tetra::NPI>(_u_nod, Tetra::a, _u);
+    tiny::mult<double, DIM, Tetra::N, Tetra::NPI>(_u_nod, t_dadx, dudx);
+    tiny::mult<double, DIM, Tetra::N, Tetra::NPI>(_u_nod, t_dady, dudy);
+    tiny::mult<double, DIM, Tetra::N, Tetra::NPI>(_u_nod, t_dadz, dudz);
 
-    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(_v_nod, Tetra::a, _v);
-    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(_v_nod, t_dadx, dvdx);
-    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(_v_nod, t_dady, dvdy);
-    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(_v_nod, t_dadz, dvdz);
+    tiny::mult<double, DIM, Tetra::N, Tetra::NPI>(_v_nod, Tetra::a, _v);
+    tiny::mult<double, DIM, Tetra::N, Tetra::NPI>(_v_nod, t_dadx, dvdx);
+    tiny::mult<double, DIM, Tetra::N, Tetra::NPI>(_v_nod, t_dady, dvdy);
+    tiny::mult<double, DIM, Tetra::N, Tetra::NPI>(_v_nod, t_dadz, dvdz);
     // end ref code
 
     // code to check
-    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> dUdx;
-    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> dUdy;
-    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> dUdz;
-    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> dVdx;
-    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> dVdy;
-    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> dVdz;
-    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> U;
-    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> V;
+    Eigen::Matrix<double,DIM,Tetra::NPI> dUdx;
+    Eigen::Matrix<double,DIM,Tetra::NPI> dUdy;
+    Eigen::Matrix<double,DIM,Tetra::NPI> dUdz;
+    Eigen::Matrix<double,DIM,Tetra::NPI> dVdx;
+    Eigen::Matrix<double,DIM,Tetra::NPI> dVdy;
+    Eigen::Matrix<double,DIM,Tetra::NPI> dVdz;
+    Eigen::Matrix<double,DIM,Tetra::NPI> U;
+    Eigen::Matrix<double,DIM,Tetra::NPI> V;
 
     t.interpolation(Nodes::get_u<Nodes::ZERO>, U, dUdx, dUdy, dUdz);
     t.interpolation(Nodes::get_v<Nodes::ZERO>, V, dVdx, dVdy, dVdz);
     // end code to check
 
-    double n_u = tiny::frob_norm<double, 3, Tetra::NPI>(_u);
-    double n_dudx = tiny::frob_norm<double, 3, Tetra::NPI>(dudx);
-    double n_dudy = tiny::frob_norm<double, 3, Tetra::NPI>(dudy);
-    double n_dudz = tiny::frob_norm<double, 3, Tetra::NPI>(dudz);
+    double n_u = tiny::frob_norm<double, DIM, Tetra::NPI>(_u);
+    double n_dudx = tiny::frob_norm<double, DIM, Tetra::NPI>(dudx);
+    double n_dudy = tiny::frob_norm<double, DIM, Tetra::NPI>(dudy);
+    double n_dudz = tiny::frob_norm<double, DIM, Tetra::NPI>(dudz);
 
-    double n_v = tiny::frob_norm<double, 3, Tetra::NPI>(_v);
-    double n_dvdx = tiny::frob_norm<double, 3, Tetra::NPI>(dvdx);
-    double n_dvdy = tiny::frob_norm<double, 3, Tetra::NPI>(dvdy);
-    double n_dvdz = tiny::frob_norm<double, 3, Tetra::NPI>(dvdz);
+    double n_v = tiny::frob_norm<double, DIM, Tetra::NPI>(_v);
+    double n_dvdx = tiny::frob_norm<double, DIM, Tetra::NPI>(dvdx);
+    double n_dvdy = tiny::frob_norm<double, DIM, Tetra::NPI>(dvdy);
+    double n_dvdz = tiny::frob_norm<double, DIM, Tetra::NPI>(dvdz);
 
     double dist_uU = sq_dist(_u, U);
     double dist_dudx_dUdx = sq_dist(dudx, dUdx);
@@ -301,6 +274,7 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation, *boost::unit_test::tolerance(UT_TOL)
 
 BOOST_AUTO_TEST_CASE(Tet_nod_interpolation2, *boost::unit_test::tolerance(UT_TOL))
     {
+    using namespace Nodes;
     const int nbNod = 4;
     std::vector<Nodes::Node> node;
     dummyNodes<nbNod>(node);
@@ -352,7 +326,7 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation2, *boost::unit_test::tolerance(UT_TOL
     // end ref code
 
     // code to check
-    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> Hd, Hv;
+    Eigen::Matrix<double,DIM,Tetra::NPI> Hd, Hv;
 
     t.interpolation_field(Nodes::get_phi<Nodes::ZERO>, Hd);
     t.interpolation_field(Nodes::get_phiv<Nodes::ZERO>, Hv);
@@ -361,12 +335,12 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation2, *boost::unit_test::tolerance(UT_TOL
     double n_Hdx = tiny::frob_norm<double, Tetra::NPI>(Hdx);
     double n_Hdy = tiny::frob_norm<double, Tetra::NPI>(Hdy);
     double n_Hdz = tiny::frob_norm<double, Tetra::NPI>(Hdz);
-    double n_Hd_ref = sqrt(Pt::sq(n_Hdx) + Pt::sq(n_Hdy) + Pt::sq(n_Hdz));
+    double n_Hd_ref = sqrt(sq(n_Hdx) + sq(n_Hdy) + sq(n_Hdz));
 
     double n_Hvx = tiny::frob_norm<double, Tetra::NPI>(Hvx);
     double n_Hvy = tiny::frob_norm<double, Tetra::NPI>(Hvy);
     double n_Hvz = tiny::frob_norm<double, Tetra::NPI>(Hvz);
-    double n_Hv_ref = sqrt(Pt::sq(n_Hvx) + Pt::sq(n_Hvy) + Pt::sq(n_Hvz));
+    double n_Hv_ref = sqrt(sq(n_Hvx) + sq(n_Hvy) + sq(n_Hvz));
 
     double dist_Hd = sq_dist(Hdx, Hdy, Hdz, Hd);
     double dist_Hv = sq_dist(Hvx, Hvy, Hvz, Hv);
@@ -438,7 +412,7 @@ BOOST_AUTO_TEST_CASE(Tet_lumping, *boost::unit_test::tolerance(UT_TOL))
         {
         int i = t.ind[ie];
         Nodes::dataNode &d0 = node[i].d[0];
-        for (int dim = 0; dim < 3; dim++)
+        for (int dim = 0; dim < Nodes::DIM; dim++)
             {
             u_nod[dim][ie] = d0.u(dim);  // aimantation
             }

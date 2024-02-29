@@ -10,8 +10,9 @@ addition, substraction, frobenius norms and dist implemented only for unit tests
 feellgood algebra
 */
 #include <iostream>
+#include <cmath>
 
-#include "pt3D.h"
+double _sq(const double x) { return x * x; }
 
 /**
 \namespace tiny to grab altogether the templates to compute some linear algebra
@@ -40,7 +41,7 @@ inline double frob_norm(const T A[N])
     T result = T(0);
 
     for (int j = 0; j < N; j++)
-        result += Pt::sq(A[j]);
+        result += _sq(A[j]);
 
     return sqrt(result);
     }
@@ -55,7 +56,7 @@ inline double frob_norm(const T A[M][N])
     for (int i = 0; i < M; i++)
         {
         for (int j = 0; j < N; j++)
-            result += Pt::sq(A[i][j]);
+            result += _sq(A[i][j]);
         }
     return sqrt(result);
     }
@@ -69,7 +70,7 @@ inline double dist(const T A[M][N], const T B[M][N])
 
     for (int i = 0; i < M; i++)
         for (int j = 0; j < N; j++)
-            result += Pt::sq(A[i][j] - B[i][j]);
+            result += _sq(A[i][j] - B[i][j]);
 
     return sqrt(result);
     }
@@ -140,42 +141,6 @@ inline void direct_transposed_mult(T A[M][N], T B[P][N], T C[M][P])
             T v = T(0);
             for (int j = 0; j < N; j++)
                 v += A[i][j] * B[k][j];
-            C[i][k] = v;
-            }
-    }
-
-/** matrix multiplication: \f$ C = A B \f$
-\param[in] A vector of Pt::pt3D, interpreted as a 3-row input matrix
-\param[in] B input matrix
-\param[out] C result: a 3-row matrix represented as a vector of Pt::pt3D
-*/
-template<typename T, int N, int P>
-inline void mult(const Pt::pt3D A[N], const T B[N][P], Pt::pt3D C[P])
-    {
-    for (int i = 0; i < Pt::DIM; i++)
-        for (int k = 0; k < P; k++)
-            {
-            T v = T(0);
-            for (int j = 0; j < N; j++)
-                v += A[j](i) * B[j][k];
-            C[k](i, v);
-            }
-    }
-
-/** matrix multiplication: \f$ C = A B \f$
-\param[in] A vector of Pt::pt3D, interpreted as a 3-row input matrix
-\param[in] B input matrix
-\param[out] C result
-*/
-template<typename T, int N, int P>
-inline void mult(const Pt::pt3D A[N], const T B[N][P], T C[Pt::DIM][P])
-    {
-    for (int i = 0; i < Pt::DIM; i++)
-        for (int k = 0; k < P; k++)
-            {
-            T v = T(0);
-            for (int j = 0; j < N; j++)
-                v += A[j](i) * B[j][k];
             C[i][k] = v;
             }
     }

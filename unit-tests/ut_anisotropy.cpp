@@ -21,6 +21,7 @@ BOOST_AUTO_TEST_SUITE(ut_anisotropy)
 
 BOOST_AUTO_TEST_CASE(anisotropy_uniax, *boost::unit_test::tolerance(10.0 * UT_TOL))
     {
+    using namespace Nodes;
     const int nbNod = 4;
     std::vector<Nodes::Node> node;
     dummyNodes<nbNod>(node);
@@ -52,7 +53,6 @@ BOOST_AUTO_TEST_CASE(anisotropy_uniax, *boost::unit_test::tolerance(10.0 * UT_TO
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
     std::cout << "uk =" << uk << std::endl;
 
-
     // ref code (with minimal adaptations of integrales method in file MuMag_integrales.cc of
     // src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
     double u_nod[3][Tetra::N];
@@ -74,8 +74,8 @@ BOOST_AUTO_TEST_CASE(anisotropy_uniax, *boost::unit_test::tolerance(10.0 * UT_TO
     tiny::mult<double, 3, Tetra::N, Tetra::NPI>(u_nod, Tetra::a, u);
     tiny::mult<double, 3, Tetra::N, Tetra::NPI>(v_nod, Tetra::a, v);
 
-    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> U;
-    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> V;
+    Eigen::Matrix<double,DIM,Tetra::NPI> U;
+    Eigen::Matrix<double,DIM,Tetra::NPI> V;
     for (int npi = 0; npi < Tetra::NPI; npi++)
         {
         U.col(npi) << u[0][npi], u[1][npi], u[2][npi];
@@ -120,6 +120,7 @@ BOOST_AUTO_TEST_CASE(anisotropy_uniax, *boost::unit_test::tolerance(10.0 * UT_TO
 
 BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TOL))
     {
+    using namespace Nodes;
     const int nbNod = 4;
     std::vector<Nodes::Node> node;
     dummyNodes<nbNod>(node);
@@ -137,12 +138,8 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TO
     Tetra::Tet t(node, 0, {1, 2, 3, 4});
 
     double dt = distrib(gen);
-
-    Pt::pt3D tmp_rand_v = Pt::pt3D(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
-    Eigen::Vector3d rand_vect { tmp_rand_v.x(), tmp_rand_v.y(), tmp_rand_v.z() };
-    
-    Pt::pt3D tmp(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
-    Eigen::Vector3d ex {tmp.x(),tmp.y(),tmp.z()}; 
+    Eigen::Vector3d rand_vect = rand_vec3d( M_PI * distrib(gen), 2 * M_PI * distrib(gen) );
+    Eigen::Vector3d ex = rand_vec3d( M_PI * distrib(gen), 2 * M_PI * distrib(gen) );
     Eigen::Vector3d ey = ex.cross(rand_vect);
     Eigen::Vector3d ez = ex.cross(ey);
     ey.normalize();
@@ -172,26 +169,26 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TO
 
     // ref code (with minimal adaptations of integrales method in file MuMag_integrales.cc of
     // src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
-    double u_nod[3][Tetra::N];
-    double v_nod[3][Tetra::N];
-    double u[3][Tetra::NPI];
-    double v[3][Tetra::NPI];
+    double u_nod[DIM][Tetra::N];
+    double v_nod[DIM][Tetra::N];
+    double u[DIM][Tetra::NPI];
+    double v[DIM][Tetra::NPI];
 
     for (int ie = 0; ie < Tetra::N; ie++)
         {
         int i = t.ind[ie];
         Nodes::dataNode &d0 = node[i].d[0];
-        for (int dim = 0; dim < 3; dim++)
+        for (int dim = 0; dim < DIM; dim++)
             {
             u_nod[dim][ie] = d0.u(dim);
             v_nod[dim][ie] = d0.v(dim);
             }
         }
 
-    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(u_nod, Tetra::a, u);
-    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(v_nod, Tetra::a, v);
+    tiny::mult<double, DIM, Tetra::N, Tetra::NPI>(u_nod, Tetra::a, u);
+    tiny::mult<double, DIM, Tetra::N, Tetra::NPI>(v_nod, Tetra::a, v);
 
-    Eigen::Matrix<double,Pt::DIM,Tetra::NPI> U,V;
+    Eigen::Matrix<double,DIM,Tetra::NPI> U,V;
     for (int npi = 0; npi < Tetra::NPI; npi++)
         {
         U.col(npi) << u[0][npi], u[1][npi], u[2][npi];
@@ -199,7 +196,7 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TO
         }  // deep copy instead of re-computing
 
         //code to test
-        Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> H_aniso;
+        Eigen::Matrix<double,DIM,Tetra::NPI> H_aniso;
         H_aniso.setZero();
         Eigen::Matrix<double,Tetra::NPI,1> contrib_aniso;
         contrib_aniso.setZero();

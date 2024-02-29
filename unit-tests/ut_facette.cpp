@@ -86,6 +86,7 @@ BOOST_AUTO_TEST_CASE(Fac_calc_surf, *boost::unit_test::tolerance(UT_TOL))
 
 BOOST_AUTO_TEST_CASE(Fac_interpolation_pt3D, *boost::unit_test::tolerance(UT_TOL))
     {
+    using namespace Nodes;
     std::cout << "surf interpolation test" << std::endl;
     const int nbNod = 3;
     std::vector<Nodes::Node> node;
@@ -101,26 +102,26 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_pt3D, *boost::unit_test::tolerance(UT_TOL
 
     Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
 
-    Eigen::Matrix<double,Pt::DIM,Facette::N> _vec_nod;
+    Eigen::Matrix<double,DIM,Facette::N> _vec_nod;
     for (int i = 0; i < Facette::N; i++) _vec_nod.col(i) = node[f.ind[i]].get_u(Nodes::ZERO);
     
-    Eigen::Matrix<double,Pt::DIM,Facette::NPI> _u = _vec_nod * Facette::eigen_a;
+    Eigen::Matrix<double,DIM,Facette::NPI> _u = _vec_nod * Facette::eigen_a;
     //f.interpolation<Eigen::Vector3d>(Nodes::get_u0, _u);
 
-    double vec_nod[Pt::DIM][Facette::N];
-    for (int i = 0; i < Pt::DIM; i++)
+    double vec_nod[DIM][Facette::N];
+    for (int i = 0; i < DIM; i++)
         for (int j = 0; j < Facette::N; j++)
             {
             vec_nod[i][j] = node[j].d[0].u(i);
             }  // hidden transposition here
-    double result[Pt::DIM][Facette::NPI];
-    tiny::mult<double, Pt::DIM, Facette::N, Facette::NPI>(vec_nod, Facette::a, result);
+    double result[DIM][Facette::NPI];
+    tiny::mult<double, DIM, Facette::N, Facette::NPI>(vec_nod, Facette::a, result);
 
     double diff_r = 0;
 
-    for (int i = 0; i < Pt::DIM; i++)
+    for (int i = 0; i < DIM; i++)
         for (int j = 0; j < Facette::NPI; j++)
-            diff_r += Pt::sq(result[i][j] - _u(i,j));
+            diff_r += sq(result[i][j] - _u(i,j));
 
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
     std::cout << "raw difference result =" << diff_r << std::endl;
@@ -159,7 +160,7 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_double, *boost::unit_test::tolerance(UT_T
     double diff_r = 0;
 
     for (int j = 0; j < Facette::NPI; j++)
-        diff_r += Pt::sq(result[j] - _p[j]);
+        diff_r += Nodes::sq(result[j] - _p[j]);
 
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
     std::cout << "raw difference result =" << diff_r << std::endl;
@@ -168,6 +169,7 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_double, *boost::unit_test::tolerance(UT_T
 
 BOOST_AUTO_TEST_CASE(Fac_potential_u, *boost::unit_test::tolerance(10*UT_TOL))
     {
+    using namespace Nodes;
     std::cout << "fac potential test on u" << std::endl;
     const int nbNod = 3;
     std::vector<Nodes::Node> node;
@@ -228,7 +230,7 @@ BOOST_AUTO_TEST_CASE(Fac_potential_u, *boost::unit_test::tolerance(10*UT_TOL))
     z3 = node3.p.z();
 
     double b, t, h;
-    b = sqrt(Pt::sq(x2 - x1) + Pt::sq(y2 - y1) + Pt::sq(z2 - z1));
+    b = sqrt(sq(x2 - x1) + sq(y2 - y1) + sq(z2 - z1));
     t = (x2 - x1) * (x3 - x1) + (y2 - y1) * (y3 - y1) + (z2 - z1) * (z3 - z1);
     h = 2. * f.surf;
     t /= b;
@@ -285,6 +287,7 @@ BOOST_AUTO_TEST_CASE(Fac_potential_u, *boost::unit_test::tolerance(10*UT_TOL))
 
 BOOST_AUTO_TEST_CASE(Fac_potential_v, *boost::unit_test::tolerance(10.0*UT_TOL))
     {
+    using namespace Nodes;
     std::cout << "fac potential test on v" << std::endl;
     const int nbNod = 3;
     std::vector<Nodes::Node> node;
@@ -345,7 +348,7 @@ BOOST_AUTO_TEST_CASE(Fac_potential_v, *boost::unit_test::tolerance(10.0*UT_TOL))
     z3 = node3.p.z();
 
     double b, t, h;
-    b = sqrt(Pt::sq(x2 - x1) + Pt::sq(y2 - y1) + Pt::sq(z2 - z1));
+    b = sqrt(sq(x2 - x1) + sq(y2 - y1) + sq(z2 - z1));
     t = (x2 - x1) * (x3 - x1) + (y2 - y1) * (y3 - y1) + (z2 - z1) * (z3 - z1);
     h = 2. * f.surf;
     t /= b;
