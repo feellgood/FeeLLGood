@@ -74,15 +74,15 @@ struct Node
         {
         // Choose for an initial ep the direction, among (X, Y, Z), which is further away from u0.
         Eigen::Index minIdx;
-        d[0].u.cwiseAbs().minCoeff(&minIdx);
+        d[CURRENT].u.cwiseAbs().minCoeff(&minIdx);
         ep.setUnit(minIdx);
 
         // Gram-Schmidt orthonormalization of (u0, ep).
-        ep -= ep.dot(d[0].u) * d[0].u;
+        ep -= ep.dot(d[CURRENT].u) * d[CURRENT].u;
         ep.normalize();
 
         // Complete the basis with a vector product.
-        eq = d[0].u.cross(ep);
+        eq = d[CURRENT].u.cross(ep);
 
         // Rotate (ep, eq) by the random angle.
         Eigen::Vector3d new_ep = cos(r) * ep - sin(r) * eq;
@@ -94,9 +94,9 @@ struct Node
         if (PARANOID_ORTHONORMALIZATION)
             {
             // Modified Gram-Schmidt orthonormalization.
-            ep -= ep.dot(d[0].u) * d[0].u;
+            ep -= ep.dot(d[CURRENT].u) * d[CURRENT].u;
             ep.normalize();
-            eq -= eq.dot(d[0].u) * d[0].u;
+            eq -= eq.dot(d[CURRENT].u) * d[CURRENT].u;
             eq -= eq.dot(ep) * ep;
             eq.normalize();
             }
@@ -118,7 +118,7 @@ struct Node
                           const double dt /**< [in] */)
         {
         d[NEXT].v = vp * ep + vq * eq;
-        d[NEXT].u = d[0].u + dt * d[NEXT].v;
+        d[NEXT].u = d[CURRENT].u + dt * d[NEXT].v;
         d[NEXT].u.normalize();
         }
 

@@ -81,7 +81,10 @@ public:
     inline const Eigen::Vector3d getNode_v(const int i) const { return node[i].get_v(Nodes::NEXT); }
 
     /** setter for u0 */
-    inline void set_node_u0(const int i, Eigen::Vector3d const &val) { node[i].d[0].u = val; }
+    inline void set_node_u0(const int i, Eigen::Vector3d const &val)
+        {
+        node[i].d[Nodes::CURRENT].u = val;
+        }
 
     /** fix to zero node[i].v */
     inline void set_node_zero_v(const int i) { node[i].d[Nodes::NEXT].v.setZero(); }
@@ -189,8 +192,8 @@ public:
         {
         std::for_each(node.begin(),node.end(),[&mySets](Nodes::Node &n)
                                               {
-                                              n.d[0].u = mySets.getMagnetization(n.p);
-                                              n.d[Nodes::NEXT].u = n.d[0].u;
+                                              n.d[Nodes::CURRENT].u = mySets.getMagnetization(n.p);
+                                              n.d[Nodes::NEXT].u = n.d[Nodes::CURRENT].u;
                                               n.d[Nodes::NEXT].phi = 0.;
                                               n.d[Nodes::NEXT].phiv = 0.;
                                               } );
