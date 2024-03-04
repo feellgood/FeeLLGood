@@ -25,7 +25,7 @@ namespace Nodes
     /** convenient enum to avoid direct index manipulation in the array of struct dataNode */
     enum step
         {
-        ZERO = 0,
+        CURRENT = 0,
         NEXT = 1
         };
 
@@ -64,7 +64,7 @@ struct Node
     Eigen::Vector3d eq; /**< local vector basis : \f$ e_q = u0 \times e_p \f$ , then normalized */
     
     /** datas associated to position p
-    step ZERO (0) : start of the time step
+    step CURRENT (0) : start of the time step
     step NEXT (1) : after the current time step 
     */ 
     dataNode d[NB_DATANODE];
@@ -105,7 +105,7 @@ struct Node
     /**
     preparation of the quantities u0,v0,phi0,phiv0 for incomming time-step
     */
-    inline void evolution(void) { d[step::ZERO] = d[step::NEXT]; }
+    inline void evolution(void) { d[step::CURRENT] = d[step::NEXT]; }
 
     /**
     integration of the evolution of the magnetization for time step dt

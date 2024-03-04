@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_pt3D, *boost::unit_test::tolerance(UT_TOL
     Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
 
     Eigen::Matrix<double,DIM,Facette::N> _vec_nod;
-    for (int i = 0; i < Facette::N; i++) _vec_nod.col(i) = node[f.ind[i]].get_u(Nodes::ZERO);
+    for (int i = 0; i < Facette::N; i++) _vec_nod.col(i) = node[f.ind[i]].get_u(Nodes::CURRENT);
     
     Eigen::Matrix<double,DIM,Facette::NPI> _u = _vec_nod * Facette::eigen_a;
     //f.interpolation<Eigen::Vector3d>(Nodes::get_u0, _u);
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_double, *boost::unit_test::tolerance(UT_T
     Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
 
     Eigen::Matrix<double,Facette::NPI,1> _p;
-    f.interpolation(Nodes::get_phi<Nodes::ZERO>, _p);
+    f.interpolation(Nodes::get_phi<Nodes::CURRENT>, _p);
 
     // code ref
     double scal_nod[Facette::N];

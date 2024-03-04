@@ -8,7 +8,7 @@ void Fac::integrales(Facette::prm const &params)
     double Kbis = 2.0*params.Ks / Ms;
     
     Eigen::Matrix<double,DIM,NPI> u;
-    interpolation(Nodes::get_u<ZERO>, u);
+    interpolation(Nodes::get_u<CURRENT>, u);
 
     Eigen::Matrix<double,DIM,N> BE;
     BE.setZero();
