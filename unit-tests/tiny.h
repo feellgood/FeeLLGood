@@ -11,8 +11,9 @@ feellgood algebra
 */
 #include <iostream>
 #include <cmath>
+#include "node.h"
 
-double _sq(const double x) { return x * x; }
+using Nodes::sq;
 
 /**
 \namespace tiny to grab altogether the templates to compute some linear algebra
@@ -41,7 +42,7 @@ inline double frob_norm(const T A[N])
     T result = T(0);
 
     for (int j = 0; j < N; j++)
-        result += _sq(A[j]);
+        result += sq(A[j]);
 
     return sqrt(result);
     }
@@ -56,7 +57,7 @@ inline double frob_norm(const T A[M][N])
     for (int i = 0; i < M; i++)
         {
         for (int j = 0; j < N; j++)
-            result += _sq(A[i][j]);
+            result += sq(A[i][j]);
         }
     return sqrt(result);
     }
@@ -70,7 +71,7 @@ inline double dist(const T A[M][N], const T B[M][N])
 
     for (int i = 0; i < M; i++)
         for (int j = 0; j < N; j++)
-            result += _sq(A[i][j] - B[i][j]);
+            result += sq(A[i][j] - B[i][j]);
 
     return sqrt(result);
     }
