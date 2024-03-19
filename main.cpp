@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
         }
 
     chronometer fmm_counter(2);
-    scal_fmm::fmm myFMM(fem.msh, mySettings.paramTetra, mySettings.scalfmmNbTh);
+    scal_fmm::fmm myFMM(fem.msh, mySettings.paramTetra, mySettings.paramFacette, mySettings.scalfmmNbTh);
     if (mySettings.verbose)
             {
             std::cout << "Magnetostatics: particles inserted, using " << mySettings.scalfmmNbTh

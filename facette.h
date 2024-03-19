@@ -133,8 +133,9 @@ public:
                             Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> const u /**< [in] */) const;
 
     /** return surface charges and computes some corrections */
-    Eigen::Matrix<double,NPI,1> charges(std::function<Eigen::Vector3d(Nodes::Node)> getter /**< [in] */,
-                                      std::vector<double> &corr /**< [in|out]*/ ) const;
+    Eigen::Matrix<double,NPI,1> charges(Facette::prm const &param /**< [in] */,
+                                        std::function<Eigen::Vector3d(Nodes::Node)> getter /**< [in] */,
+                                        std::vector<double> &corr /**< [in|out]*/ ) const;
 
     /** demagnetizing energy of the facette */
     double demagEnergy(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u /**< [in] */,

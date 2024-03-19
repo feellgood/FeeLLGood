@@ -43,30 +43,38 @@ double Fac::anisotropyEnergy(Facette::prm const &param,
     return -param.Ks*weight.dot(dens);
     }
 
-Eigen::Matrix<double,NPI,1> Fac::charges(std::function<Eigen::Vector3d(Nodes::Node)> getter, std::vector<double> &corr) const
+Eigen::Matrix<double,NPI,1> Fac::charges(Facette::prm const &param,
+                                         std::function<Eigen::Vector3d(Nodes::Node)> getter,
+                                         std::vector<double> &corr) const
     {
-    Eigen::Matrix<double,DIM,N> vec_nod;
-    for(int i=0;i<N;i++)
-        vec_nod.col(i) << getter(getNode(i));
+    Eigen::Matrix<double,NPI,1> result;
 
-    Eigen::Matrix<double,DIM,NPI> _u = vec_nod * eigen_a;
-
-    Eigen::Matrix<double,NPI,1> result = Ms*weight.cwiseProduct( _u.transpose()*n );
-    Eigen::Matrix<double,DIM,NPI> gauss;
-    getPtGauss(gauss);
-    // calc corr node by node
-    for (int i = 0; i < N; i++)
+    if (!(param.suppress_charges))
         {
-        const int i_ = ind[i];
-        const Eigen::Vector3d &p_i_ = getNode(i).p;
-        for (int j = 0; j < NPI; j++)
+        Eigen::Matrix<double,DIM,N> vec_nod;
+        for(int i=0;i<N;i++) { vec_nod.col(i) << getter(getNode(i)); }
+
+        Eigen::Matrix<double,DIM,NPI> _u = vec_nod * eigen_a;
+        result = Ms*weight.cwiseProduct( _u.transpose()*n );
+        Eigen::Matrix<double,DIM,NPI> gauss;
+        getPtGauss(gauss);
+        // calc corr node by node
+        for (int i = 0; i < N; i++)
             {
-            double d_ij= (p_i_ - gauss.col(j)).norm();
-            corr[i_] -= result(j)/d_ij;//Ms * pScal(u[j], n) * weight(j) / d_ij;
+            const int i_ = ind[i];
+            const Eigen::Vector3d &p_i_ = getNode(i).p;
+            for (int j = 0; j < NPI; j++)
+                {
+                double d_ij= (p_i_ - gauss.col(j)).norm();
+                corr[i_] -= result(j)/d_ij;//Ms * pScal(u[j], n) * weight(j) / d_ij;
+                }
+            corr[i_] += potential(getter, i);
             }
-        corr[i_] += potential(getter, i);
         }
-    
+    else
+        {// no correction applied
+        result.setZero();
+        }
     return result;
     }
 

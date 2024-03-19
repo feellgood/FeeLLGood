@@ -33,8 +33,9 @@ public:
     inline mesh(Settings const &mySets /**< [in] */)
         {
         readMesh(mySets);
-        indexReorder(mySets);  // reordering of index nodes for facette orientation, also some
-                               // modifications on fac::Ms
+        indexReorder(mySets.paramTetra);  // reordering of index nodes for facette orientation and defines fac::Ms
+        if (mySets.verbose)
+            { std::cout << "  reindexed\n"; }
 
         double xmin = minNodes(Nodes::IDX_X);
         double xmax = maxNodes(Nodes::IDX_X);
@@ -53,9 +54,6 @@ public:
 
         vol = std::transform_reduce(std::execution::par, tet.begin(), tet.end(), 0.0, std::plus{},
                                     [](Tetra::Tet const &te) { return te.calc_vol(); });
-
-        // devNote: Ms for tetra is computed here, might be better to do it in Tet constructor
-//        std::for_each(std::execution::par, tet.begin(), tet.end(), [&mySets](Tetra::Tet &te) { te.Ms = nu0 * mySets.paramTetra[te.idxPrm].J; }  );
 
         surf = std::transform_reduce(std::execution::par, fac.begin(), fac.end(), 0.0, std::plus{},
                                      [](Facette::Fac const &fa) { return fa.surf; });
@@ -309,12 +307,11 @@ private:
                         ` w
 
 */
-    void indexReorder(Settings const &settings)
+    void indexReorder(std::vector<Tetra::prm> const &prmTetra)
         {
-        std::set<Facette::Fac> sf;  // implicit use of operator< overloaded in class Fac
+        std::set<Facette::Fac> sf;  // implicit use of operator< redefined in class Fac
 
-        std::for_each(tet.begin(), tet.end(),
-                      [this,&sf](Tetra::Tet const &te)
+        std::for_each(tet.begin(), tet.end(), [this,&sf](Tetra::Tet const &te)
                       {
                       const int ia = te.ind[0];
                       const int ib = te.ind[1];
@@ -327,48 +324,36 @@ private:
                       sf.insert(Facette::Fac(node, 0, te.idxPrm, {ia, ib, id} ));
                       });  // end for_each
 
-        std::for_each(
-                fac.begin(), fac.end(),
-                [this, &settings, &sf](Facette::Fac &fa)
-                {
-                    fa.Ms = 0.;
-                    if (!(settings.paramFacette[fa.idxPrm].suppress_charges))
-                        {
-                        int i0 = fa.ind[0], i1 = fa.ind[1], i2 = fa.ind[2];
-                        std::set<Facette::Fac>::iterator it = sf.end();
-                        for (int perm = 0; perm < 2; perm++)
-                            {
-                            for (int nrot = 0; nrot < 3; nrot++)
-                                {
-                                Facette::Fac fc(node, 0, 0, {0, 0, 0} );
-                                fc.ind[(0 + nrot) % 3] = i0;
-                                fc.ind[(1 + nrot) % 3] = i1;
-                                fc.ind[(2 + nrot) % 3] = i2;
-                                it = sf.find(fc);
-                                if (it != sf.end()) break;
-                                }
+        std::for_each(fac.begin(), fac.end(), [this, &prmTetra, &sf](Facette::Fac &fa)
+                      {
+                      int i0 = fa.ind[0], i1 = fa.ind[1], i2 = fa.ind[2];
+                      std::set<Facette::Fac>::iterator it = sf.end();
+                      for (int perm = 0; perm < 2; perm++)
+                          {
+                          for (int nrot = 0; nrot < 3; nrot++)
+                              {
+                              Facette::Fac fc(node, 0, 0, {0, 0, 0} );
+                              fc.ind[(0 + nrot) % 3] = i0;
+                              fc.ind[(1 + nrot) % 3] = i1;
+                              fc.ind[(2 + nrot) % 3] = i2;
+                              it = sf.find(fc);
+                              if (it != sf.end()) break;
+                              }
 
-                            if (it != sf.end())
-                                {  // found
-                                Eigen::Vector3d p0p1 = node[it->ind[1]].p - node[it->ind[0]].p;
-                                Eigen::Vector3d p0p2 = node[it->ind[2]].p - node[it->ind[0]].p;
+                          if (it != sf.end())
+                              {  // found
+                              Eigen::Vector3d p0p1 = node[it->ind[1]].p - node[it->ind[0]].p;
+                              Eigen::Vector3d p0p2 = node[it->ind[2]].p - node[it->ind[0]].p;
                                 
-                                // fa.Ms will have the magnitude of first arg of copysign, with the
-                                // sign of second arg
-                                fa.Ms = std::copysign(
-                                        settings.paramTetra[it->idxPrm].J/mu0,
-                                        p0p1.dot(p0p2.cross(fa.calc_norm())) );  // carefull, calc_norm computes the normal to the face before idx swap
-                                }
-                            std::swap(i1, i2);  // it seems from ref archive we do not want to swap
+                              // fa.Ms will have the magnitude of first arg of copysign, with second arg sign
+                              fa.Ms = std::copysign( prmTetra[it->idxPrm].J/mu0,
+                                    p0p1.dot(p0p2.cross(fa.calc_norm())) );  // carefull, calc_norm computes the normal to the face before idx swap
+                            }
+                        std::swap(i1, i2);  // it seems from ref archive we do not want to swap
                                                 // inner fac indices but local i1 and i2
-                            fa.n = fa.calc_norm(); // update normal vector
-                            }                   // end perm
-                        }
+                        fa.n = fa.calc_norm(); // update normal vector
+                        }                   // end perm
                 });  // end for_each
-        if (settings.verbose)
-            {
-            std::cout << "  reindexed\n";
-            }
         }
 
     /** Sort the nodes along the longest axis of the sample. This should reduce the bandwidth of

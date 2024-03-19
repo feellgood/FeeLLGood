@@ -67,12 +67,14 @@ public:
     /** constructor, initialize memory for tree, kernel, sources corrections, initialize all sources
      */
     inline fmm(Mesh::mesh &msh /**< [in] */,
-               std::vector<Tetra::prm> & prm /**< [in] */,
+               std::vector<Tetra::prm> & prmTet /**< [in] */,
+               std::vector<Facette::prm> & prmFac /**< [in] */,
                const int ScalfmmNbThreads /**< [in] */)
         : NOD(msh.getNbNodes()),
           tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels(NbLevels, boxWidth, boxCenter)
         {
-        prmTetra = prm;
+        prmTetra = prmTet;
+        prmFacette = prmFac;
         omp_set_num_threads(ScalfmmNbThreads);
         norm = 1. / (2. * msh.diam);
 
@@ -107,6 +109,8 @@ public:
     std::vector<double> corr;
 
     std::vector<Tetra::prm> prmTetra;
+
+    std::vector<Facette::prm> prmFacette;
 
 private:
     const int NOD; /**< number of nodes */
@@ -156,7 +160,7 @@ private:
         std::for_each(msh.fac.begin(), msh.fac.end(),
                       [this, getter, &nsrc](Facette::Fac const &fac)
                           {
-                          Eigen::Matrix<double,Facette::NPI,1> result =  fac.charges(getter, corr);
+                          Eigen::Matrix<double,Facette::NPI,1> result =  fac.charges(prmFacette[fac.idxPrm], getter, corr);
                           for(int i=0;i<Facette::NPI;i++) { srcDen[nsrc+i] = result(i); }
                           nsrc += Facette::NPI;
                           });
