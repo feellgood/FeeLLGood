@@ -56,7 +56,6 @@ BOOST_AUTO_TEST_CASE(Tet_constructor)
     BOOST_CHECK(tet.ind[2] == idx);
     BOOST_CHECK(tet.ind[3] == idx);
     BOOST_CHECK((tet.getN() == Tetra::N) && (tet.getNPI() == Tetra::NPI));
-    BOOST_CHECK(tet.Ms == 0);
     BOOST_CHECK(tet.idxPrm == idxPrmToTest);
     BOOST_CHECK(tet.P.norm() == 0);
     BOOST_CHECK(tet.Lp.norm() == 0);

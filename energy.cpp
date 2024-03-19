@@ -18,7 +18,7 @@ void Fem::energy(double const t, Settings &settings)
                       te.interpolation(Nodes::get_phi<NEXT>, phi);
 
                       E_exch += te.exchangeEnergy(param, dudx, dudy, dudz);
-                      E_demag += te.demagEnergy(dudx, dudy, dudz, phi);
+                      E_demag += te.demagEnergy(param, dudx, dudy, dudz, phi);
 
                       if ((param.K != 0.0) || (param.K3 != 0.0))
                           { E_aniso += te.anisotropyEnergy(param, u); }

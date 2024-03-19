@@ -66,10 +66,13 @@ class fmm
 public:
     /** constructor, initialize memory for tree, kernel, sources corrections, initialize all sources
      */
-    inline fmm(Mesh::mesh &msh /**< [in] */, const int ScalfmmNbThreads /**< [in] */)
+    inline fmm(Mesh::mesh &msh /**< [in] */,
+               std::vector<Tetra::prm> & prm /**< [in] */,
+               const int ScalfmmNbThreads /**< [in] */)
         : NOD(msh.getNbNodes()),
           tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels(NbLevels, boxWidth, boxCenter)
         {
+        prmTetra = prm;
         omp_set_num_threads(ScalfmmNbThreads);
         norm = 1. / (2. * msh.diam);
 
@@ -102,6 +105,8 @@ public:
     
     /** corrections associated to the nodes, contributions only due to the facettes */
     std::vector<double> corr;
+
+    std::vector<Tetra::prm> prmTetra;
 
 private:
     const int NOD; /**< number of nodes */
@@ -143,7 +148,7 @@ private:
         std::for_each(msh.tet.begin(), msh.tet.end(),
                       [this, getter, &nsrc](Tetra::Tet const &tet)
                           {
-                          Eigen::Matrix<double,Tetra::NPI,1> result = tet.charges(getter); 
+                          Eigen::Matrix<double,Tetra::NPI,1> result = tet.charges(prmTetra[tet.idxPrm], getter); 
                           for(int i=0;i<Tetra::NPI;i++) { srcDen[nsrc+i] = result(i); }
                           nsrc += Tetra::NPI;
                           });

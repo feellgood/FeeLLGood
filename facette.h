@@ -75,6 +75,7 @@ public:
                std::initializer_list<int> _i /**< [in] node index */)
         : element<N,NPI>(_p_node,_idx,_i)
         {
+        Ms = 0;
         if (_NOD > 0)
             {
             zeroBasing();
@@ -93,6 +94,9 @@ public:
 
     /** surface of the element */
     double surf;
+
+    /** magnetization at saturation of the facette */
+    double Ms;
 
     /** normal vector (unit vector) */
     Eigen::Vector3d n;

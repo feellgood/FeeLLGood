@@ -34,9 +34,6 @@ BOOST_AUTO_TEST_CASE(demagEnergy, *boost::unit_test::tolerance(UT_TOL))
 
     // carefull with indices (starting from 1)
     Tetra::Tet t(node, 0, {1, 2, 3, 4});
-    t.Ms = 1.0;
-    //Tetra::prm p_vol;
-    //p_vol.J = 1.0;
 
     double t_dadx[Tetra::N][Tetra::NPI],t_dady[Tetra::N][Tetra::NPI],t_dadz[Tetra::N][Tetra::NPI];
     
@@ -50,7 +47,8 @@ BOOST_AUTO_TEST_CASE(demagEnergy, *boost::unit_test::tolerance(UT_TOL))
     // ref code (with minimal adaptations of MuMag::energy method in file MuMag_energy.cc of
     // src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
 
-    double Js = mu0 * t.Ms;
+    double Ms = distrib(gen);
+    double Js = mu0 * Ms;
     double u_nod[3][Tetra::N], u[3][Tetra::NPI];
     double negphi_nod[Tetra::N], Hdx[Tetra::NPI], Hdy[Tetra::NPI], Hdz[Tetra::NPI];
     
@@ -80,7 +78,9 @@ BOOST_AUTO_TEST_CASE(demagEnergy, *boost::unit_test::tolerance(UT_TOL))
     Eigen::Matrix<double,Tetra::NPI,1> _phi;
     t.interpolation(Nodes::get_u<Nodes::NEXT>, _u, dudx, dudy, dudz);
     t.interpolation(Nodes::get_phi<Nodes::NEXT>, _phi);
-    double result_to_test = t.demagEnergy(dudx, dudy, dudz, _phi);
+    Tetra::prm param;
+    param.J = Js;
+    double result_to_test = t.demagEnergy(param, dudx, dudy, dudz, _phi);
     std::cout << "E_demag(vol)= " << result_to_test << std::endl;
     
     const int ia = t.ind[0] + 1;
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(demagEnergy, *boost::unit_test::tolerance(UT_TOL))
     fa.push_back( Facette::Fac(node, nbNod, 0, {ib, ic, id} ));
     fa.push_back( Facette::Fac(node, nbNod, 0, {ia, id, ic} ));
     fa.push_back( Facette::Fac(node, nbNod, 0, {ia, ib, id} ));
-    std::for_each(fa.begin(),fa.end(),[&t](Facette::Fac &f){ f.Ms = t.Ms;});
+    std::for_each(fa.begin(),fa.end(),[Ms](Facette::Fac &f){ f.Ms = Ms;});
     
     std::for_each(fa.begin(),fa.end(), [&result_to_test](Facette::Fac &f)
         {

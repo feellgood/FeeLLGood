@@ -55,8 +55,7 @@ public:
                                     [](Tetra::Tet const &te) { return te.calc_vol(); });
 
         // devNote: Ms for tetra is computed here, might be better to do it in Tet constructor
-        std::for_each(std::execution::par, tet.begin(), tet.end(), [&mySets](Tetra::Tet &te)
-                      { te.Ms = nu0 * mySets.paramTetra[te.idxPrm].J; }  );
+//        std::for_each(std::execution::par, tet.begin(), tet.end(), [&mySets](Tetra::Tet &te) { te.Ms = nu0 * mySets.paramTetra[te.idxPrm].J; }  );
 
         surf = std::transform_reduce(std::execution::par, fac.begin(), fac.end(), 0.0, std::plus{},
                                      [](Facette::Fac const &fa) { return fa.surf; });

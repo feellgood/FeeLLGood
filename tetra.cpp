@@ -231,7 +231,7 @@ double Tet::anisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<d
     return weight.dot(dens);
     }
 
-Eigen::Matrix<double,NPI,1> Tet::charges(std::function<Eigen::Vector3d(Nodes::Node)> getter) const
+Eigen::Matrix<double,NPI,1> Tet::charges(Tetra::prm const &param, std::function<Eigen::Vector3d(Nodes::Node)> getter) const
     {
     Eigen::Matrix<double,DIM,NPI> dudx,dudy,dudz;
     interpolation(getter,dudx,dudy,dudz);
@@ -239,10 +239,11 @@ Eigen::Matrix<double,NPI,1> Tet::charges(std::function<Eigen::Vector3d(Nodes::No
     Eigen::Matrix<double,NPI,1> result;
     for (int j = 0; j < NPI; j++)
         { result(j) = dudx(0,j) + dudy(1,j) + dudz(2,j); }
-    return -Ms*weight.cwiseProduct(result);
+    return -nu0 * param.J * weight.cwiseProduct(result);
     }
 
-double Tet::demagEnergy(Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudx,
+double Tet::demagEnergy(Tetra::prm const &param,
+                       Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudx,
                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudy,
                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudz,
                        Eigen::Ref<Eigen::Matrix<double,NPI,1>> phi) const
@@ -251,7 +252,7 @@ double Tet::demagEnergy(Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dudx,
 
     for (int npi = 0; npi < NPI; npi++)
         { dens[npi] = (dudx(0,npi) + dudy(1,npi) + dudz(2,npi)) * phi[npi]; }
-    return -0.5*mu0*Ms*weight.dot(dens);
+    return -0.5*param.J*weight.dot(dens);
     }
 
 double Tet::zeemanEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Vector3d> const Hext,

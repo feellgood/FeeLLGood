@@ -303,11 +303,13 @@ public:
     /** anisotropy energy of the tetrahedron */
     double anisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u) const;
 
-    /** return volume charges  */
-    Eigen::Matrix<double,NPI,1> charges(std::function<Eigen::Vector3d(Nodes::Node)> getter) const;
+    /** return volume charges */
+    Eigen::Matrix<double,NPI,1> charges(Tetra::prm const &param,
+                                        std::function<Eigen::Vector3d(Nodes::Node)> getter) const;
 
     /** demagnetizing energy of the tetrahedron */
-    double demagEnergy(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudx,
+    double demagEnergy(Tetra::prm const &param,
+                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudx,
                        Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudy,
                        Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudz,
                        Eigen::Ref<Eigen::Matrix<double,NPI,1>> phi) const;
