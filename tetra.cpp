@@ -239,7 +239,7 @@ Eigen::Matrix<double,NPI,1> Tet::charges(Tetra::prm const &param, std::function<
     Eigen::Matrix<double,NPI,1> result;
     for (int j = 0; j < NPI; j++)
         { result(j) = dudx(0,j) + dudy(1,j) + dudz(2,j); }
-    return -nu0 * param.J * weight.cwiseProduct(result);
+    return -param.J * weight.cwiseProduct(result)/mu0;
     }
 
 double Tet::demagEnergy(Tetra::prm const &param,

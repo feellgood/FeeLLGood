@@ -234,7 +234,7 @@ public:
      */
     inline Eigen::Vector3d getField(const double t_val) const
         {
-        return nu0 * (field_parser.get_vector(t_val));
+        return (field_parser.get_vector(t_val))/mu0;
         }
 
 private:

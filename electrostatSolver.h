@@ -183,7 +183,7 @@ private:
                                                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> dUdz,
                                                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::N>> BE)
                     {
-                    const double prefactor = D0 / Nodes::sq(p_stt.lJ) / (gamma0 * nu0 * Js); //nu0*Js shall be replaced by tet.Ms
+                    const double prefactor = D0 / Nodes::sq(p_stt.lJ) / (gamma0*Js/mu0);
                     for (int npi = 0; npi < Tetra::NPI; npi++)
                         {
                         Eigen::Vector3d const &_gV = gradV[tet.idx].col(npi);

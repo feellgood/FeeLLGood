@@ -356,7 +356,7 @@ private:
                                 // fa.Ms will have the magnitude of first arg of copysign, with the
                                 // sign of second arg
                                 fa.Ms = std::copysign(
-                                        nu0 * settings.paramTetra[it->idxPrm].J,
+                                        settings.paramTetra[it->idxPrm].J/mu0,
                                         p0p1.dot(p0p2.cross(fa.calc_norm())) );  // carefull, calc_norm computes the normal to the face before idx swap
                                 }
                             std::swap(i1, i2);  // it seems from ref archive we do not want to swap
