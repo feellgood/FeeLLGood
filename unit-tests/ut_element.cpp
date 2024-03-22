@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(Fac_full_constructor)
     BOOST_CHECK(f.ind[1] == idx);
     BOOST_CHECK(f.ind[2] == idx);
     BOOST_CHECK((f.getN() == Facette::N) && (f.getNPI() == Facette::NPI));
-    BOOST_CHECK(f.Ms == 0);
+    BOOST_CHECK(f.dMs == 0);
     BOOST_CHECK(f.idxPrm == idxPrmToTest);
     BOOST_CHECK(f.P.norm() == 0);
     BOOST_CHECK(f.Lp.norm() == 0);

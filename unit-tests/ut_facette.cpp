@@ -191,27 +191,23 @@ BOOST_AUTO_TEST_CASE(Fac_potential_u, *boost::unit_test::tolerance(10*UT_TOL))
         }
     
     Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
-    f.Ms = distrib(gen);
-
+    f.dMs = distrib(gen);
     int i = 0;
     int Hv = 0;
     // ref code (from MuMag_potential.cc with minimal adaptations of
     // src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
-    double nx, ny, nz, Ms;
+    double nx, ny, nz, dMs(f.dMs);
 
     Eigen::Vector3d f_norm = f.calc_norm();
     nx = f_norm.x();
     ny = f_norm.y();
     nz = f_norm.z();
-    Ms = f.Ms;
 
     int ii = (i + 1) % 3;
     int iii = (i + 2) % 3;
-
-    int i_, ii_, iii_;
-    i_ = f.ind[i];
-    ii_ = f.ind[ii];
-    iii_ = f.ind[iii];
+    int i_ = f.ind[i];
+    int ii_ = f.ind[ii];
+    int iii_ = f.ind[iii];
 
     double x1, x2, x3, y1, y2, y3, z1, z2, z3;
 
@@ -275,7 +271,7 @@ BOOST_AUTO_TEST_CASE(Fac_potential_u, *boost::unit_test::tolerance(10*UT_TOL))
     pot = pot1 + pot2 + pot3 + h * (k * h / 2. + l) * (1 - log(h * (a + sqrt(a * a + 1))))
           - k * h * h / 4.;
 
-    double result_ref = Ms * pot;
+    double result_ref = dMs*pot;
     // end ref code
 
     double result_to_test = f.potential(Nodes::get_u<Nodes::NEXT>, i);
@@ -309,19 +305,18 @@ BOOST_AUTO_TEST_CASE(Fac_potential_v, *boost::unit_test::tolerance(10.0*UT_TOL))
         }
     
     Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
-    f.Ms = distrib(gen);
+    f.dMs = distrib(gen);
 
     int i = 0;
     int Hv = 1;
     // ref code (from MuMag_potential.cc with minimal adaptations of
     // src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
-    double nx, ny, nz, Ms;
+    double nx, ny, nz, dMs(f.dMs);
 
     Eigen::Vector3d f_norm = f.calc_norm();
     nx = f_norm.x();
     ny = f_norm.y();
     nz = f_norm.z();
-    Ms = f.Ms;
 
     int ii = (i + 1) % 3;
     int iii = (i + 2) % 3;
@@ -393,7 +388,7 @@ BOOST_AUTO_TEST_CASE(Fac_potential_v, *boost::unit_test::tolerance(10.0*UT_TOL))
     pot = pot1 + pot2 + pot3 + h * (k * h / 2. + l) * (1 - log(h * (a + sqrt(a * a + 1))))
           - k * h * h / 4.;
 
-    double result_ref = Ms * pot;
+    double result_ref = dMs * pot;
     // end ref code
 
     double result_to_test = f.potential(Nodes::get_v<Nodes::NEXT>, i);

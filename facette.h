@@ -73,9 +73,8 @@ public:
                const int _NOD /**< [in] nb nodes */,
                const int _idx /**< [in] region index in region vector */,
                std::initializer_list<int> _i /**< [in] node index */)
-        : element<N,NPI>(_p_node,_idx,_i)
+        : element<N,NPI>(_p_node,_idx,_i),dMs(0)
         {
-        Ms = 0;
         if (_NOD > 0)
             {
             zeroBasing();
@@ -95,8 +94,8 @@ public:
     /** surface of the element */
     double surf;
 
-    /** magnetization at saturation of the facette */
-    double Ms;
+    /** difference (d for delta) of magnetization at the facette between corresponding tetrahedrons */
+    double dMs;
 
     /** normal vector (unit vector) */
     Eigen::Vector3d n;

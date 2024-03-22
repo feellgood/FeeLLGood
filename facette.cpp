@@ -5,7 +5,7 @@ using namespace Nodes;
 
 void Fac::integrales(Facette::prm const &params)
     {
-    double Kbis = 2.0*params.Ks / Ms;
+    double Kbis = 2.0*params.Ks / dMs;
     
     Eigen::Matrix<double,DIM,NPI> u;
     interpolation(Nodes::get_u<CURRENT>, u);
@@ -33,7 +33,6 @@ void Fac::integrales(Facette::prm const &params)
                 tmp(k*N+i) = BE(k,i);
         Lp = P*tmp;
     #endif
-    //Lp = P*BE;
     }
 
 double Fac::anisotropyEnergy(Facette::prm const &param,
@@ -55,7 +54,7 @@ Eigen::Matrix<double,NPI,1> Fac::charges(Facette::prm const &param,
         for(int i=0;i<N;i++) { vec_nod.col(i) << getter(getNode(i)); }
 
         Eigen::Matrix<double,DIM,NPI> _u = vec_nod * eigen_a;
-        result = Ms*weight.cwiseProduct( _u.transpose()*n );
+        result = dMs*weight.cwiseProduct( _u.transpose()*n );
         Eigen::Matrix<double,DIM,NPI> gauss;
         getPtGauss(gauss);
         // calc corr node by node
@@ -81,7 +80,7 @@ Eigen::Matrix<double,NPI,1> Fac::charges(Facette::prm const &param,
 double Fac::demagEnergy(Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> u, Eigen::Ref<Eigen::Matrix<double,NPI,1>> phi) const
     {
     Eigen::Matrix<double,NPI,1> dens = (u.transpose()*n).cwiseProduct(phi);
-    return 0.5*mu0*Ms*dens.dot(weight);
+    return 0.5*mu0*dMs*dens.dot(weight);
     }
 
 double Fac::potential(std::function<Eigen::Vector3d(Nodes::Node)> getter, int i) const
@@ -121,6 +120,6 @@ double Fac::potential(std::function<Eigen::Vector3d(Nodes::Node)> getter, int i)
     double pot = xi * s1
                  + ((xi * (h + c * t) - b * (r - b)) * s2 + b * (r - b - c * xi) * s3) * b
                            / (_2s * (1 + c * c));
-    return 0.5 * Ms * pot;
+    return 0.5 * dMs * pot;
     }
 

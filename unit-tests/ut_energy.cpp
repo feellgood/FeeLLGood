@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(demagEnergy, *boost::unit_test::tolerance(UT_TOL))
     fa.push_back( Facette::Fac(node, nbNod, 0, {ib, ic, id} ));
     fa.push_back( Facette::Fac(node, nbNod, 0, {ia, id, ic} ));
     fa.push_back( Facette::Fac(node, nbNod, 0, {ia, ib, id} ));
-    std::for_each(fa.begin(),fa.end(),[Ms](Facette::Fac &f){ f.Ms = Ms;});
+    std::for_each(fa.begin(),fa.end(),[Ms](Facette::Fac &f){ f.dMs = Ms;});
     
     std::for_each(fa.begin(),fa.end(), [&result_to_test](Facette::Fac &f)
         {
