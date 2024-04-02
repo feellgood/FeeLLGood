@@ -21,7 +21,7 @@ class element
     {
     /** constructor */
     public:
-    element(const std::vector<Nodes::Node> &_p_node /**< vector of nodes */,
+    explicit element(const std::vector<Nodes::Node> &_p_node /**< vector of nodes */,
             const int _idx /**< index to params */,
             std::initializer_list<int> & _i /**< indices to the nodes */
             ) : idxPrm(_idx), refNode(_p_node)

@@ -14,6 +14,9 @@
 
 BOOST_AUTO_TEST_SUITE(ut_solver)
 
+/*
+silly_problem_solver tests if eigen::bicgstab solves Ax=b with A = Id and b=(1  1 ... 1) with default diagonal precond in 1 iteration
+*/
 BOOST_AUTO_TEST_CASE(silly_problem_solver, *boost::unit_test::tolerance(UT_TOL))
     {
     const int MAX_ITER = 100;
@@ -42,6 +45,11 @@ BOOST_AUTO_TEST_CASE(silly_problem_solver, *boost::unit_test::tolerance(UT_TOL))
     BOOST_CHECK( (x-b).norm() == 0.0 );
     }
 
+/*
+rand_sp_mat_problem_solver tests if eigen::bicgstab solves Ax=b with
+ A = Id + extras 1 coefficients randomly placed, with their symmetric 
+ and b=(1  1 ... 1) and an initial stupid guess x=2
+*/
 BOOST_AUTO_TEST_CASE(rand_sp_mat_problem_solver, *boost::unit_test::tolerance(UT_TOL))
     {
     const int MAX_ITER = 2000;
@@ -59,7 +67,7 @@ BOOST_AUTO_TEST_CASE(rand_sp_mat_problem_solver, *boost::unit_test::tolerance(UT
         }
 
     std::mt19937 gen(my_seed());
-    std::uniform_int_distribution<> distrib(0, N);
+    std::uniform_int_distribution<> distrib(0, N-1);
 
     for (int nb=0; nb<400; nb++)
         {
@@ -78,9 +86,16 @@ BOOST_AUTO_TEST_CASE(rand_sp_mat_problem_solver, *boost::unit_test::tolerance(UT
     std::cout << "estimated error: " << solver.error()      << std::endl;
     BOOST_CHECK( solver.iterations() > 1);
     BOOST_CHECK( (x-b).norm() != 0.0 );
-    BOOST_CHECK( ((A*x)-b).norm() <= _TOL );
+    double err_result = ((A*x)-b).norm(); 
+    std::cout << "norm(Ax - b)= " << err_result << std::endl;
+    BOOST_CHECK( err_result < _TOL );
     }
 
+/*
+rand_asym_sp_mat_problem_solver tests if eigen::bicgstab solves Ax=b with
+ A = Id + extras 1 coefficients randomly placed ( A is not symmetric) 
+ and b=(1  1 ... 1) and an initial stupid guess x=2
+*/
 BOOST_AUTO_TEST_CASE(rand_asym_sp_mat_problem_solver, *boost::unit_test::tolerance(UT_TOL))
     {
     const int MAX_ITER = 2000;

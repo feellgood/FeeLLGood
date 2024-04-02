@@ -33,7 +33,7 @@ public:
     inline mesh(Settings const &mySets /**< [in] */)
         {
         readMesh(mySets);
-        indexReorder(mySets.paramTetra);  // reordering of index nodes for facette orientation and defines fac::Ms
+        indexReorder(mySets.paramTetra);  // reordering of index nodes for facette orientation and defines fac::dMs
         if (mySets.verbose)
             { std::cout << "  reindexed\n"; }
 
@@ -107,6 +107,8 @@ public:
         std::for_each(std::execution::par, tet.begin(), tet.end(),
                       [](Tetra::Tet &t) { t.buildMatP();} );
 
+        //std::sort(tet.begin(),tet.end(), [] (Tetra::Tet &t1, Tetra::Tet &t2) {return t1.idxPrm < t2.idxPrm; } );
+        
         std::for_each(std::execution::par, fac.begin(), fac.end(),
                       [](Facette::Fac &f) { f.buildMatP();} );
         }

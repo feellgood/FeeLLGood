@@ -7,21 +7,8 @@
 
 BOOST_AUTO_TEST_SUITE(ut_tiny)
 
-/*---------------------------------------*/
-/* minus one test: check boost is fine   */
-/*---------------------------------------*/
 
-BOOST_AUTO_TEST_CASE(Stupid)
-    {
-    float x = 1.0;
-    BOOST_CHECK(x != 0.0f);
-    }
-
-/*-----------------------------------------------------*/
-/* zero lvl tests : direct elementary member functions */
-/*-----------------------------------------------------*/
-
-BOOST_AUTO_TEST_CASE(tiny_add)
+BOOST_AUTO_TEST_CASE(tiny_add, *boost::unit_test::tolerance(UT_TOL))
     {
     const int M = 3;
     const int N = 2;
@@ -31,13 +18,11 @@ BOOST_AUTO_TEST_CASE(tiny_add)
     const double val_ref[M][N] = {{5, 33}, {-2, 4}, {5, 7}};
     tiny::add<double, M, N>(A, B, C);
 
-    bool result = (C[0][0] == val_ref[0][0]);
+    std::cout << "basic test addition" << std::endl;
+    
     for (int i = 0; i < M; i++)
         for (int j = 0; j < N; j++)
-            result &= (C[i][j] == val_ref[i][j]);
-
-    std::cout << "basic test addition" << std::endl;
-    BOOST_CHECK(result == true);
+            BOOST_CHECK(C[i][j] == val_ref[i][j]);
     }
 
 BOOST_AUTO_TEST_CASE(tiny_mult_mat_vect)
@@ -50,12 +35,9 @@ BOOST_AUTO_TEST_CASE(tiny_mult_mat_vect)
     const double val_ref[M] = {0, -2, -4};
     tiny::mult<double, M, N>(A, B, C);
 
-    bool result = (C[0] == val_ref[0]);
-    for (int j = 0; j < M; j++)
-        result &= (C[j] == val_ref[j]);
-
     std::cout << "basic test mat*vect multiplication" << std::endl;
-    BOOST_CHECK(result == true);
+    for (int j = 0; j < M; j++)
+        BOOST_CHECK(C[j] == val_ref[j]);
     }
 
 BOOST_AUTO_TEST_CASE(tiny_mult_mat_mat)
@@ -69,13 +51,10 @@ BOOST_AUTO_TEST_CASE(tiny_mult_mat_mat)
     const double val_ref[M][P] = {{8, 7, 13, 8}, {14, 15, 23, 16}, {20, 23, 33, 24}};
     tiny::mult<double, M, N, P>(A, B, C);
 
-    bool result = (C[0][0] == val_ref[0][0]);
+    std::cout << "basic test mat*mat multiplication" << std::endl;
     for (int i = 0; i < M; i++)
         for (int j = 0; j < P; j++)
-            result &= (C[i][j] == val_ref[i][j]);
-
-    std::cout << "basic test mat*mat multiplication" << std::endl;
-    BOOST_CHECK(result == true);
+            BOOST_CHECK(C[i][j] == val_ref[i][j]);
     }
 
 BOOST_AUTO_TEST_CASE(tiny_sub)
@@ -88,22 +67,11 @@ BOOST_AUTO_TEST_CASE(tiny_sub)
     const double val_ref[M][N] = {{-3, -29}, {8, 4}, {5, 5}};
     tiny::sub<double, M, N>(A, B, C);
 
-    bool result = (C[0][0] == val_ref[0][0]);
+    std::cout << "basic test substraction" << std::endl;
     for (int i = 0; i < M; i++)
         for (int j = 0; j < N; j++)
-            result &= (C[i][j] == val_ref[i][j]);
-
-    std::cout << "basic test substraction" << std::endl;
-    BOOST_CHECK(result == true);
+            BOOST_CHECK(C[i][j] == val_ref[i][j]);
     }
-
-/*---------------------------------------*/
-/* first lvl tests : nested calculus,... */
-/*---------------------------------------*/
-
-/*---------------------------------------*/
-/* second lvl tests : pure mathematics   */
-/*---------------------------------------*/
 
 BOOST_AUTO_TEST_CASE(tiny_frobenius, *boost::unit_test::tolerance(UT_TOL))
     {

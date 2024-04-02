@@ -1,25 +1,17 @@
-PROJECT (FEELLGOOD)
-
+PROJECT (feellgood CXX)
+message(STATUS " *** unit test cmaking *** ")
 find_package (Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
-
 find_package(OpenMP REQUIRED)
-
 find_package(TBB REQUIRED)
-if(TBB_FOUND)
-    message(STATUS "TBB Found")
-else()
-    message(FATAL_ERROR "TBB NOT FOUND")
-endif()
-
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
-include_directories (${CMAKE_SOURCE_DIR}
-  ${Boost_INCLUDE_DIRS}
-  )
+include_directories (${CMAKE_SOURCE_DIR} ${Boost_INCLUDE_DIRS} )
 
 set( BOOST_TEST_LOG_LEVEL "all" )
 
-add_definitions (-DBOOST_TEST_DYN_LINK)
+add_definitions ( -DBOOST_TEST_DYN_LINK -DTBB_SUPPRESS_DEPRECATED_MESSAGES )
+#add_compile_options( -fsanitize=leak )
+#add_link_options( -fsanitize=leak )
 
 add_executable (test_ut_solver ut_solver.cpp)
 
@@ -49,6 +41,8 @@ add_executable (test_ut_time_int ut_time_int.cpp)
 add_executable (test_ut_log-stats ut_log-stats.cpp)
 
 if (MKL_FOUND)
+    #target_compile_options(test_ut_solver PUBLIC -fsanitize=leak )
+    #target_link_options(test_ut_solver PUBLIC -fsanitize=leak )
     target_link_libraries(test_ut_solver
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
@@ -57,6 +51,8 @@ if (MKL_FOUND)
         PkgConfig::MKL
         )
 
+    #target_compile_options(test_ut_element PUBLIC -fsanitize=leak )
+    #target_link_options(test_ut_element PUBLIC -fsanitize=leak ) # -> SEGFAULT
     target_link_libraries(test_ut_element
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
@@ -65,6 +61,8 @@ if (MKL_FOUND)
         PkgConfig::MKL
         )
 
+    #target_compile_options(test_ut_tetra PUBLIC -fsanitize=leak )
+    #target_link_options(test_ut_tetra PUBLIC -fsanitize=leak )
     target_link_libraries(test_ut_tetra
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
@@ -118,6 +116,8 @@ else()
         )
 endif()
 
+#target_compile_options(test_ut_OMP_solver PUBLIC -fsanitize=leak )
+#target_link_options(test_ut_OMP_solver PUBLIC -fsanitize=leak )
 target_link_libraries(test_ut_OMP_solver
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
@@ -126,13 +126,16 @@ target_link_libraries(test_ut_OMP_solver
   OpenMP::OpenMP_CXX
   )
 
+#target_compile_options(test_ut_node PUBLIC -fsanitize=leak )
+#target_link_options(test_ut_node PUBLIC -fsanitize=leak ) # -> random SEGFAULT
 target_link_libraries(test_ut_node
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-  TBB::tbb
   )
 
+#target_compile_options(test_ut_facette PUBLIC -fsanitize=leak )
+#target_link_options(test_ut_facette PUBLIC -fsanitize=leak )
 target_link_libraries(test_ut_facette
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
@@ -140,22 +143,30 @@ target_link_libraries(test_ut_facette
   TBB::tbb
   )
 
+#target_compile_options(test_ut_tiny PUBLIC -fsanitize=leak )
+#target_link_options(test_ut_tiny PUBLIC -fsanitize=leak )
 target_link_libraries(test_ut_tiny
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
   )
 
+#target_compile_options(test_ut_time_int PUBLIC -fsanitize=leak )
+#target_link_options(test_ut_time_int PUBLIC -fsanitize=leak )
 target_link_libraries(test_ut_time_int
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  TBB::tbb
   )
 
+#target_compile_options(test_ut_log-stats PUBLIC -fsanitize=leak )
+#target_link_options(test_ut_log-stats PUBLIC -fsanitize=leak )
 target_link_libraries(test_ut_log-stats
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
   )
 
+# setarch --addr-no-randomize ./test_ut_* to disable ASLR to avoid -fsanitize=leak to bug
 add_test (NAME ut_solver COMMAND test_ut_solver)
 add_test (NAME ut_OMP_solver COMMAND test_ut_OMP_solver)
 add_test (NAME ut_node COMMAND test_ut_node)
