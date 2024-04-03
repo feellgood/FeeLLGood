@@ -38,6 +38,9 @@ settings = {
 
 val = subprocess.run(["../feellgood", "--seed", "2", "-"], input=json.dumps(settings), text=True)
 
+#(devNote) to avoid -fsanitize=leak ASLR bug, we turn off address randomizer
+#val = subprocess.run(["setarch", "--addr-no-randomize", "../feellgood", "--seed", "2", "-"], input=json.dumps(settings), text=True)
+
 if(val.returncode==0):
     with open("full_test.evol","r") as f:
         for line in f:

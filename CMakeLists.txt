@@ -11,11 +11,23 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS OFF) # ON to get a .json with compiler calls f
 
 find_package(OpenMP REQUIRED)
 
-find_package(TBB REQUIRED)
-if(TBB_FOUND)
-    message(STATUS "Found TBB")
-else()
-    message(FATAL_ERROR "TBB NOT FOUND")
+#===========================================================================
+# cmake . -DENABLE_SEQ=OFF
+# execution policy, by default it is parallel, sequential is for debug purpose.
+# when ENABLE_SEQ is ON, executable does not link to TBB
+#===========================================================================
+
+option(ENABLE_SEQ "Enable sequential execution policy" OFF)
+message( STATUS "Enable sequential execution policy: ENABLE_SEQ = " ${ENABLE_SEQ} )
+
+if(NOT ${ENABLE_SEQ})
+    find_package(TBB REQUIRED)
+    if(TBB_FOUND)
+        message(STATUS "Found TBB")
+        set(TBB_LINK TBB::tbb)
+    else()
+        message(FATAL_ERROR "TBB NOT FOUND")
+    endif()
 endif()
 
 # Use the Intel MKL library if we can find it.
@@ -94,8 +106,7 @@ add_custom_command(
 # Compiler options
 #===========================================================================
 # -ffast-math -msse4.2 -mfpmath=sse (on X86 -mfpmath=sse set by default) or -mavx
-# -fsanitize=address leak  null undefined
-# ${MKL_CFLAGS} is a -I* option
+# -fsanitize=address leak null undefined # both compiler and linker
 #===========================================================================
 
 ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES} default-settings.o)
@@ -106,9 +117,9 @@ if (MKL_FOUND)
     #option --no-as-needed for mkl, see https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-link-line-advisor.html
     target_link_options(feellgood PUBLIC "-Wl,--no-as-needed" ${MKL_CFLAGS}) # ${MKL_CFLAGS} is a -I* option
     # not sure we really need it since --no-as-needed is default value, though there might be a --as-needed before
-    TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm duktape ANN OpenMP::OpenMP_CXX TBB::tbb Eigen3::Eigen ${MKL_TARGET})
+    TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm duktape ANN OpenMP::OpenMP_CXX ${TBB_LINK} Eigen3::Eigen ${MKL_TARGET})
 else()
-    TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm duktape ANN OpenMP::OpenMP_CXX TBB::tbb Eigen3::Eigen)
+    TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm duktape ANN OpenMP::OpenMP_CXX ${TBB_LINK} Eigen3::Eigen)
 endif()
 
 #===========================================================================

@@ -52,10 +52,10 @@ public:
 
         sortNodes();
 
-        vol = std::transform_reduce(std::execution::par, tet.begin(), tet.end(), 0.0, std::plus{},
+        vol = std::transform_reduce(EXEC_POL, tet.begin(), tet.end(), 0.0, std::plus{},
                                     [](Tetra::Tet const &te) { return te.calc_vol(); });
 
-        surf = std::transform_reduce(std::execution::par, fac.begin(), fac.end(), 0.0, std::plus{},
+        surf = std::transform_reduce(EXEC_POL, fac.begin(), fac.end(), 0.0, std::plus{},
                                      [](Facette::Fac const &fa) { return fa.surf; });
         }
 
@@ -101,15 +101,13 @@ public:
     /** call setBasis for all nodes, and update P matrix for all elements */
     void setBasis(const double r)
         {
-        std::for_each(std::execution::par, node.begin(), node.end(),
+        std::for_each(EXEC_POL, node.begin(), node.end(),
                       [&r](Nodes::Node &nod) { nod.setBasis(r); });
 
-        std::for_each(std::execution::par, tet.begin(), tet.end(),
+        std::for_each(EXEC_POL, tet.begin(), tet.end(),
                       [](Tetra::Tet &t) { t.buildMatP();} );
 
-        //std::sort(tet.begin(),tet.end(), [] (Tetra::Tet &t1, Tetra::Tet &t2) {return t1.idxPrm < t2.idxPrm; } );
-        
-        std::for_each(std::execution::par, fac.begin(), fac.end(),
+        std::for_each(EXEC_POL, fac.begin(), fac.end(),
                       [](Facette::Fac &f) { f.buildMatP();} );
         }
 
@@ -151,7 +149,7 @@ public:
     /** call evolution for all the nodes */
     inline void evolution(void)
         {
-        std::for_each(std::execution::par, node.begin(), node.end(),
+        std::for_each(EXEC_POL, node.begin(), node.end(),
                       [](Nodes::Node &nod) { nod.evolution(); });
         }
 
@@ -205,7 +203,7 @@ public:
                Nodes::index d /**< [in] */) const
         {
         double sum =
-                std::transform_reduce(std::execution::par, tet.begin(), tet.end(), 0.0, std::plus{},
+                std::transform_reduce(EXEC_POL, tet.begin(), tet.end(), 0.0, std::plus{},
                                       [getter, &d](Tetra::Tet const &te)
                                       {
                                           Eigen::Matrix<double,Tetra::NPI,1> val;
