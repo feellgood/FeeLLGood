@@ -38,7 +38,7 @@ set(MKL_INTERFACE lp64)
 set(MKL_THREADING intel_thread)
 find_package(MKL QUIET)
 if(MKL_FOUND)
-    message(STATUS "Found MKL with find_package()")
+    message(STATUS "Found MKL with find_package(), MKL_CFLAGS= " ${MKL_CFLAGS})
     set(MKL_TARGET "MKL::MKL")
 else()
     # As find_package() failed to find MKL, try pkg-config.
@@ -46,7 +46,7 @@ else()
     if(PKG_CONFIG_FOUND)
         pkg_check_modules(MKL QUIET IMPORTED_TARGET mkl-dynamic-lp64-iomp)
         if(MKL_FOUND)
-            message(STATUS "Found MKL with pkg-config")
+            message(STATUS "Found MKL with pkg-config, MKL_CFLAGS= " ${MKL_CFLAGS})
             set(MKL_TARGET "PkgConfig::MKL")
         endif()
     else()
@@ -112,12 +112,12 @@ add_custom_command(
 #===========================================================================
 
 ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES} default-settings.o)
-target_compile_options( feellgood PUBLIC -Wall -Wextra -O3 -march=native )
+target_compile_options( feellgood PUBLIC -Wall -Wextra -O3 -march=native ${MKL_CFLAGS} )
 target_compile_definitions(feellgood PUBLIC -DNDEBUG -DTBB_SUPPRESS_DEPRECATED_MESSAGES ${EIGEN_MKL_CFLAGS} )
 
 if (MKL_FOUND)
     #option --no-as-needed for mkl, see https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-link-line-advisor.html
-    target_link_options(feellgood PUBLIC "-Wl,--no-as-needed" ${MKL_CFLAGS}) # ${MKL_CFLAGS} is a -I* option
+    target_link_options(feellgood PUBLIC "-Wl,--no-as-needed" )
     # not sure we really need it since --no-as-needed is default value, though there might be a --as-needed before
     TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm duktape ANN OpenMP::OpenMP_CXX ${TBB_LINK} Eigen3::Eigen ${MKL_TARGET})
 else()
