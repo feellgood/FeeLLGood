@@ -70,11 +70,9 @@ public:
                std::vector<Tetra::prm> & prmTet /**< [in] */,
                std::vector<Facette::prm> & prmFac /**< [in] */,
                const int ScalfmmNbThreads /**< [in] */)
-        : NOD(msh.getNbNodes()),
+        : prmTetra(prmTet), prmFacette(prmFac), NOD(msh.getNbNodes()),
           tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels(NbLevels, boxWidth, boxCenter)
         {
-        prmTetra = prmTet;
-        prmFacette = prmFac;
         omp_set_num_threads(ScalfmmNbThreads);
         norm = 1. / (2. * msh.diam);
 
@@ -108,8 +106,10 @@ public:
     /** corrections associated to the nodes, contributions only due to the facettes */
     std::vector<double> corr;
 
+    /** all volume region parameters for the tetraedrons */
     std::vector<Tetra::prm> prmTetra;
 
+    /** all surface region parameters for the facettes */
     std::vector<Facette::prm> prmFacette;
 
 private:
