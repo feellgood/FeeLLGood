@@ -243,8 +243,8 @@ private:
     double _scale;               /**< scaling factor from gmsh files to feellgood */
     std::string simName;         /**< simulation name */
     std::string pbName;          /**< mesh file, gmsh file format */
-    VectorParser mag_parser;     /**< parser for the magnetization expressions */
-    VectorParser field_parser;   /**< parser for the time dependant applied field expressions */
+    ExpressionParser mag_parser; /**< parser for the magnetization expressions */
+    ExpressionParser field_parser; /**< parser for the time dependant applied field expressions */
     };
 
 #endif /* feellgoodSettings_h */

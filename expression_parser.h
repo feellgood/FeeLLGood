@@ -15,13 +15,13 @@
  * This class handles a JavaScript function that computes the three components of a vector, which
  * depends on either a single parameter t or on (x, y, z).
  */
-class VectorParser
+class ExpressionParser
     {
 public:
-    VectorParser();
-    VectorParser(const VectorParser &) = delete;
-    VectorParser &operator=(const VectorParser &) = delete;
-    ~VectorParser();
+    ExpressionParser();
+    ExpressionParser(const ExpressionParser &) = delete;
+    ExpressionParser &operator=(const ExpressionParser &) = delete;
+    ~ExpressionParser();
 
     /**
      * Use the provided JavaScript function expression for subsequent computations of vectors. The

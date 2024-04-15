@@ -1,5 +1,5 @@
 /*
- * Implementation of VectorParser.
+ * Implementation of ExpressionParser.
  */
 
 #include "expression_parser.h"
@@ -27,7 +27,7 @@ function asinh(x) { return abs(x)<1e-5 ? x : sign(x) * (log(abs(x)/2 + hypot(1, 
 function atanh(x) { return abs(x)<1e-5 ? x : log((1 + x)/(1 - x)) / 2; }
 )--";
 
-VectorParser::VectorParser()
+ExpressionParser::ExpressionParser()
     {
     ctx = duk_create_heap_default();
     duk_int_t err = duk_peval_string(ctx, js_library);
@@ -35,9 +35,9 @@ VectorParser::VectorParser()
     duk_pop(ctx);  // drop the result of the evaluation
     }
 
-VectorParser::~VectorParser() { duk_destroy_heap(ctx); }
+ExpressionParser::~ExpressionParser() { duk_destroy_heap(ctx); }
 
-void VectorParser::die_if_error(duk_int_t err) const
+void ExpressionParser::die_if_error(duk_int_t err) const
     {
     if (err == DUK_ERR_NONE) return;
     std::cerr << "Script " << duk_safe_to_string(ctx, -1) << '\n';
@@ -45,7 +45,7 @@ void VectorParser::die_if_error(duk_int_t err) const
     }
 
 // Compile a function expression and leave it as the sole value on the Duktape stack.
-void VectorParser::set_function(const std::string &js_function) const
+void ExpressionParser::set_function(const std::string &js_function) const
     {
     duk_set_top(ctx, 0);  // clear the stack
     duk_int_t err = duk_pcompile_string(ctx, DUK_COMPILE_FUNCTION, js_function.c_str());
@@ -57,14 +57,14 @@ void VectorParser::set_function(const std::string &js_function) const
         }
     }
 
-void VectorParser::set_expressions(const std::string &parameters, const std::string &expr_x,
-                                   const std::string &expr_y, const std::string &expr_z)
+void ExpressionParser::set_expressions(const std::string &parameters, const std::string &expr_x,
+                                       const std::string &expr_y, const std::string &expr_z)
     {
     set_function("function(" + parameters + ") { return [(" + expr_x + "), (" + expr_y + "), ("
                  + expr_z + ")]; }");
     }
 
-double VectorParser::get_vector_component(int idx) const
+double ExpressionParser::get_vector_component(int idx) const
     {
     duk_push_int(ctx, idx);                      // [ ... v ] -> [ ... v idx ]
     duk_bool_t success = duk_get_prop(ctx, -2);  //           -> [ ... v v[idx] ]
@@ -78,7 +78,7 @@ double VectorParser::get_vector_component(int idx) const
     return val;
     }
 
-Eigen::Vector3d VectorParser::compute_vector(int argument_count) const
+Eigen::Vector3d ExpressionParser::compute_vector(int argument_count) const
     {
     duk_int_t err = duk_pcall(ctx, argument_count);  // [ f f args... ] -> [ f v ]
     die_if_error(err);
@@ -89,14 +89,14 @@ Eigen::Vector3d VectorParser::compute_vector(int argument_count) const
     return Eigen::Vector3d(x, y, z);
     }
 
-Eigen::Vector3d VectorParser::get_vector(double arg) const
+Eigen::Vector3d ExpressionParser::get_vector(double arg) const
     {
     duk_dup(ctx, -1);           // -> [ f f ]
     duk_push_number(ctx, arg);  // -> [ f f arg ]
     return compute_vector(1);
     }
 
-Eigen::Vector3d VectorParser::get_vector(const Eigen::Ref<Eigen::Vector3d> arg) const
+Eigen::Vector3d ExpressionParser::get_vector(const Eigen::Ref<Eigen::Vector3d> arg) const
     {
     duk_dup(ctx, -1);               // -> [ f f ]
     duk_push_number(ctx, arg.x());  // -> [ f f arg.x ]
