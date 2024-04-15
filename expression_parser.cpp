@@ -64,6 +64,17 @@ void ExpressionParser::set_expressions(const std::string &parameters, const std:
                  + expr_z + ")]; }");
     }
 
+double ExpressionParser::get_scalar(double arg) const
+    {
+    duk_dup(ctx, -1);                   // -> [ f f ]
+    duk_push_number(ctx, arg);          // -> [ f f arg ]
+    duk_int_t err = duk_pcall(ctx, 1);  // -> [ f result ]
+    die_if_error(err);
+    double result = duk_get_number(ctx, -1);
+    duk_pop(ctx);  // -> [ f ]
+    return result;
+    }
+
 double ExpressionParser::get_vector_component(int idx) const
     {
     duk_push_int(ctx, idx);                      // [ ... v ] -> [ ... v idx ]

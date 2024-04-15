@@ -1,6 +1,7 @@
 /*
  * Parser/evaluator for the analytic expressions given by the user:
- * the initial magnetization M(x, y, z) and the applied field B(t).
+ * the initial magnetization M(x, y, z), the applied field (B(t) or B(x, y, z))
+ * and a time-dependent scalar field amplitude.
  */
 
 #ifndef expression_parser_h
@@ -12,8 +13,8 @@
 #include <eigen3/Eigen/Dense>
 
 /**
- * This class handles a JavaScript function that computes the three components of a vector, which
- * depends on either a single parameter t or on (x, y, z).
+ * This class handles a JavaScript function that computes either a scalar or a 3D vector,
+ * which depends on either a single parameter t or on (x, y, z).
  */
 class ExpressionParser
     {
@@ -24,9 +25,9 @@ public:
     ~ExpressionParser();
 
     /**
-     * Use the provided JavaScript function expression for subsequent computations of vectors. The
-     * provided function should take either one or three numeric parameters, and return an array of
-     * three numbers.
+     * Use the provided JavaScript function expression for subsequent computations. The provided
+     * function should take either one or three numeric parameters, and return either a number or an
+     * array of three numbers.
      */
     void set_function(const std::string &js_function) const;
 
@@ -37,6 +38,11 @@ public:
      */
     void set_expressions(const std::string &parameters, const std::string &expr_x,
                          const std::string &expr_y, const std::string &expr_z);
+
+    /**
+     * Compute a scalar from the given scalar argument.
+     */
+    double get_scalar(double arg) const;
 
     /**
      * Compute a vector from the given scalar argument.
