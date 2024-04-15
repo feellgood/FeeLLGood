@@ -20,6 +20,19 @@ output file format wanted by the user. This is done mainly with the class Settin
 #include "tetra.h"
 #include "time_integration.h"
 
+ /** specify the different type of applied magnetic field when math expression(s) provided
+ * RtoR3 means (t) -> (Bx,By,Bz)
+ * R4toR3 means two expressions, (t) -> A(t) and (x,y,z)-> (fx(x,y,z),fy(x,y,z),fz(x,y,z))
+ * so B(x,y,z,t) = A(t)*(fx(x,y,z),fy(x,y,z),fz(x,y,z))
+ */
+
+enum field_exprType
+    {
+    UNDEF = -1,
+    RtoR3 = 1,
+    R4toR3 = 2
+    };
+
 /** \class Settings
 container class to store many setting parameters, such as file names, parameters for the solver,
 output file format. It also handles text user interation through terminal, and some parsing
@@ -249,12 +262,23 @@ private:
     double _scale;               /**< scaling factor from gmsh files to feellgood */
     std::string simName;         /**< simulation name */
     std::string pbName;          /**< mesh file, gmsh file format */
-    ExpressionParser mag_parser;     /**< parser for the magnetization expressions */
-    ExpressionParser field_parser;   /**< parser for the time dependant applied field expressions */
+    ExpressionParser mag_parser;     /**< parser for the magnetization expressions R³->R³ */
+
+    /** applied field might be either expression defined (t) -> (Bx(t),By(t),Bz(t))
+    or a couple of math expressions (t) -> A(t) and (x,y,z) -> (fx(x,y,z),fy(x,y,z),fz(x,y,z))
+    with B(x,y,z,t) = A(t) * (fx(x,y,z),fy(x,y,z),fz(x,y,z))
+    */
+    field_exprType field_type;
+
+    /** parser for the time dependant applied field expressions R->R³ */
+    ExpressionParser field_parser;
 
     // field(x,y,z,t) = field_time(t) * field_space(x,y,z) with field_time R -> R and field_space R³->R³
-    ExpressionParser field_time_parser; /**< parser for the field time dependant scalar expression */
-    ExpressionParser field_space_parser;/**< parser for the field space dependant vector expressions */
+    /** parser for the field time dependant scalar expression */
+    ExpressionParser field_time_parser;
+
+    /** parser for the field space dependant vector expressions */
+    ExpressionParser field_space_parser;
     };
 
 #endif /* feellgoodSettings_h */

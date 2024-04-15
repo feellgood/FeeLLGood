@@ -115,6 +115,7 @@ Settings::Settings()
                     // to residual errors
     verbose = 0;
     withTsv = true;
+    field_type = UNDEF;
     read(YAML::Load(get_default_yaml()));  // load defaults
     }
 
@@ -422,6 +423,7 @@ void Settings::read(YAML::Node yaml)
             {
             sB = field.as<std::string>();
             field_parser.set_function(sB);
+            field_type = RtoR3;
             }
         else if (field.IsSequence())
             {
@@ -430,6 +432,7 @@ void Settings::read(YAML::Node yaml)
             sBy = field[1].as<std::string>();
             sBz = field[2].as<std::string>();
             field_parser.set_expressions("t", sBx, sBy, sBz);
+            field_type = RtoR3;
             }
         else
             {
@@ -447,6 +450,7 @@ void Settings::read(YAML::Node yaml)
                     sB_time = field_time.as<std::string>();
                     field_time_parser.set_function(sB_time);
                     }
+                field_type = R4toR3;
                 }
             else
                 error("Bext should be a function or a vector of expressions or space & time expressions.");
