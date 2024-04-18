@@ -105,7 +105,8 @@ Eigen::Matrix<double,NPI,1> Tet::calc_aniso_cub(Eigen::Ref<const Eigen::Vector3d
     }
 
 void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
-                     Eigen::Vector3d const &Hext, Nodes::index idx_dir, double Vdrift)
+                     std::function<void( Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> Hext )> calc_Hext,//Eigen::Vector3d const &Hext,
+                     Nodes::index idx_dir, double Vdrift)
     {
     const double alpha = param.alpha_LLG;
     const double Js = param.J;
@@ -134,7 +135,9 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
 
     Eigen::Matrix<double,DIM,NPI> H_aniso;
     H_aniso.setZero();
-    Eigen::Matrix<double,NPI,1> uHeff = U.transpose() * Hext;
+    Eigen::Matrix<double,DIM,NPI> Hext;
+    calc_Hext(Hext);// Hext is defined on gauss points
+    Eigen::Matrix<double,NPI,1> uHeff = (U.cwiseProduct(Hext)).colwise().sum();// U.transpose() * Hext.col(0);//only works if Hext is independant from space
     if(param.K != 0)
         {
         double Kbis = 2.0 * param.K / Js;
@@ -172,7 +175,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
         }
 
     Eigen::Matrix<double,DIM,NPI> H;
-    H.colwise() = Hext;// set all columns of H to Hext
+    H = Hext;
     H += H_aniso + Hd + (s_dt / gamma0) * Hv;
     
     for (int npi = 0; npi < NPI; npi++)

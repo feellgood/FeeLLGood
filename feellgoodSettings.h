@@ -256,6 +256,20 @@ public:
         return (field_parser.get_vector(t_val))/mu0;
         }
 
+    /** returns field type, either expression defined (t) -> (Bx(t),By(t),Bz(t))
+    or a couple of math expressions (t) -> A(t) and (x,y,z) -> (fx(x,y,z),fy(x,y,z),fz(x,y,z))
+    with B(x,y,z,t) = A(t) * (fx(x,y,z),fy(x,y,z),fz(x,y,z)) */
+    inline field_exprType getFieldType(void) const
+        { return field_type; }
+
+    /** evaluation of the space dependant vector distribution of the applied field when defined from math expressions */
+    inline Eigen::Vector3d getFieldSpace(const Eigen::Ref<Eigen::Vector3d> p) const
+        { return field_space_parser.get_vector(p); }
+
+    /** evaluation of the time dependant amplitude of the applied field when defined from math expressions, mu0 is there */
+    inline double getFieldTime(const double t_val) const
+        { return (field_time_parser.get_scalar(t_val))/mu0; }
+
 private:
     int precision;               /**< numeric precision for .sol output text files */
     std::string fileDisplayName; /**< parameters file name : either a yaml file or standard input */

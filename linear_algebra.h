@@ -45,10 +45,16 @@ public:
             { idx_dir = Nodes::IDX_UNDEF; }
         else
             { idx_dir = s.recentering_direction; }
+
+        if(s.getFieldType() == R4toR3)
+            { setExtSpaceField(s); }
         }
 
     /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors) */
     void prepareElements(Eigen::Vector3d const &Hext /**< [in] applied field */, timing const &t_prm /**< [in] */);
+
+    /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors) */
+    void prepareElements(double const A_Hext /**< [in] amplitude applied field */, timing const &t_prm /**< [in] */);
 
     /**  solver, uses bicgstab, sparse matrix and vector are filled with multiThreading */
     int solver(timing const &t_prm /**< [in] */);
@@ -58,6 +64,9 @@ public:
 
     /** getter for v_max */
     inline double get_v_max(void) { return v_max; }
+
+    /** when external applied field is of field_type R4toR3 values of field_space are stored in spaceField */
+    void setExtSpaceField(Settings &s /**< [in] */);
 
 private:
     /** recentering index direction if any */
@@ -104,5 +113,8 @@ private:
 
     /** computes local vector basis {ep,eq} in the tangeant plane for projection on the elements */
     void base_projection();
+
+    /** external applied space field, values on gauss points, size is number of tetraedrons */
+    std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > extSpaceField;
     };// end class linAlgebra
 #endif

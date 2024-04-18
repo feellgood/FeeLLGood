@@ -292,7 +292,8 @@ public:
     /** computes the integral contribution of the tetrahedron to the evolution of the magnetization
      */
     void integrales( Tetra::prm const &param, timing const &prm_t,
-                    Eigen::Vector3d const &Hext, Nodes::index idx_dir, double Vdrift);
+                    std::function<void( Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> Hext )> calc_Hext,//Eigen::Vector3d const &Hext,
+                    Nodes::index idx_dir, double Vdrift);
 
     /** exchange energy of the tetrahedron */
     double exchangeEnergy(Tetra::prm const &param,

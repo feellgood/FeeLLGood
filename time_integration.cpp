@@ -192,9 +192,17 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
                 goto bailout;
                 }
 
-            Eigen::Vector3d Hext = settings.getField(t_prm.get_t());
+            if(settings.getFieldType() == RtoR3)
+                {
+                Eigen::Vector3d Hext = settings.getField(t_prm.get_t());
+                linAlg.prepareElements(Hext, t_prm);
+                }
+            else if(settings.getFieldType() == R4toR3)
+                {
+                double amp_field_time = settings.getFieldTime(t_prm.get_t());
+                linAlg.prepareElements(amp_field_time,t_prm);
+                }
 
-            linAlg.prepareElements(Hext, t_prm);
             int err = linAlg.solver(t_prm);
             fem.vmax = linAlg.get_v_max();
 
