@@ -132,12 +132,10 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     Eigen::Matrix<double,DIM,NPI> Hv;
     interpolation_field(Nodes::get_phiv<CURRENT>, Hv);
     /*-------------------- END INTERPOLATION ----------------*/
-
+    Eigen::Matrix<double,NPI,1> uHeff = -Abis *( dUdx.colwise().squaredNorm() + dUdy.colwise().squaredNorm() + dUdz.colwise().squaredNorm());
     Eigen::Matrix<double,DIM,NPI> H_aniso;
     H_aniso.setZero();
-    Eigen::Matrix<double,DIM,NPI> Hext;
-    calc_Hext(Hext);// Hext is defined on gauss points
-    Eigen::Matrix<double,NPI,1> uHeff = (U.cwiseProduct(Hext)).colwise().sum();// U.transpose() * Hext.col(0);//only works if Hext is independant from space
+
     if(param.K != 0)
         {
         double Kbis = 2.0 * param.K / Js;
@@ -149,9 +147,10 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
         uHeff += calc_aniso_cub(param.ex, param.ey, param.ez, K3bis, s_dt, U, V, H_aniso);
         }
 
-    uHeff -= Abis *( dUdx.colwise().squaredNorm() + dUdy.colwise().squaredNorm() + dUdz.colwise().squaredNorm());
+    Eigen::Matrix<double,DIM,NPI> Hext;
+    calc_Hext(Hext);// Hext is defined on gauss points, calc_Hext do a = on Hext
 
-    Eigen::Matrix<double,DIM,NPI> Heff = Hd;
+    Eigen::Matrix<double,DIM,NPI> Heff = Hd + Hext;
     extraField(Heff);// extraField do a +=like for STT contrib on Heff
     uHeff += (U.cwiseProduct(Heff)).colwise().sum();//dot product on each col of U and Heff
 
