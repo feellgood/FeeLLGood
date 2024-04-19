@@ -174,9 +174,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
             add_drift_BE(alpha, s_dt, Vdrift, U, V, dUdx, dVdx, BE);
         }
 
-    Eigen::Matrix<double,DIM,NPI> H;
-    H = Hext;
-    H += H_aniso + Hd + (s_dt / gamma0) * Hv;
+    Eigen::Matrix<double,DIM,NPI> H = Hext + H_aniso + Hd + (s_dt / gamma0) * Hv;
     
     for (int npi = 0; npi < NPI; npi++)
         {
