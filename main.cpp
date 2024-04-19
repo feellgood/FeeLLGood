@@ -210,7 +210,9 @@ int main(int argc, char *argv[])
         std::cout << "-- settings: -----------------------------------\n";
         mySettings.infos();
         std::cout << "-- end of settings -----------------------------\n";
-        t_prm.infos();
+        std::cout << "simulation:\n";
+        std::cout << "  final time:         " << t_prm.tf << '\n';
+        std::cout << "  initial time step:  " << t_prm.get_dt() << '\n';
         fem.msh.infos();
         }
 

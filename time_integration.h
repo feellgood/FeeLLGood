@@ -1,19 +1,16 @@
 #ifndef time_integration_h
 #define time_integration_h
 
-#include "config.h"
-#include <iostream>
-
-/** all timing parameters for integrating in time LLG with adaptative time-step */
-
+/** all timing parameters for integrating in time LLG with adaptative time-step and relaxation corrections throught prefactor=f(dt) */
 class timing
     {
 public:
-    /** constructor : fully initializes the timing parameters */
+    /** constructor : fully initializes the timing parameters,
+     initial time step initialized with geometric average of DTMIN and DTMAX */
     inline timing(const double _tf, const double _dtmin, const double _dtmax)
         : tf(_tf), DTMIN(_dtmin), DTMAX(_dtmax), TAUR(100. * DTMAX), t(0)
         {
-        set_dt_init();
+        set_dt(sqrt(DTMIN * DTMAX));
         }
 
     /** final time of the simulation */
@@ -31,23 +28,16 @@ public:
     /** this prefactor must be synchronized with dt value */
     double prefactor;
 
-    /** some informations */
-    inline void infos()
-        {
-        std::cout << "simulation:\n";
-        std::cout << "  final time:         " << tf << '\n';
-        std::cout << "  initial time step:  " << dt << '\n';
-        }
-
     /** getter for time step dt */
     inline double get_dt() const { return dt; }
 
     /** setter for time step dt : prefactor is computed from the new dt value to maintain
      * synchronization of dt and prefactor */
-    inline void set_dt(double _dt)
+    inline void set_dt(const double _dt)
         {
         dt = _dt;
-        set_prefactor();
+        double t_tilde = _dt / TAUR;
+        prefactor = (1. + t_tilde * abs(log( t_tilde)));
         }
 
     /** basic test to know if dt is too small */
@@ -64,14 +54,7 @@ public:
 
 private:
     double t; /**< physical current time of the simulation */
-
     double dt; /**< time-step */
-
-    /** initialize variable time step with geometric average of DTMIN and DTMAX */
-    inline void set_dt_init() { set_dt(sqrt(DTMIN * DTMAX)); }
-
-    /** prefactor setter */
-    inline void set_prefactor() { prefactor = (1. + dt / TAUR * abs(log(dt / TAUR))); }
     };
 
 #endif
