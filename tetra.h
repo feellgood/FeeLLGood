@@ -259,7 +259,10 @@ public:
         result = scalar_nod.transpose() * eigen_a;
         }
 
-    /** AE matrix filling */
+    /** AE matrix filling with exchange contribution */
+    void exchange_lumping(double prefactor, Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const;
+    
+    /** AE matrix filling with all other contributions than exchange */
     void lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double prefactor,
                   Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const;
 

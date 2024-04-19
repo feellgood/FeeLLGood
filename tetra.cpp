@@ -12,6 +12,29 @@
 using namespace Tetra;
 using namespace Nodes;
 
+void Tet::exchange_lumping(double prefactor, Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const
+    {
+    //devNote: this should be done using a matrix block technique 
+    for(int npi = 0; npi < NPI; npi++)
+        {
+        const double w = weight[npi];
+
+        for (int i = 0; i < N; i++)
+            {
+            for (int j = 0; j < N; j++)
+                {
+                double contrib = w * prefactor
+                                 * (dadx(i,npi) * dadx(j,npi) + dady(i,npi) * dady(j,npi)
+                                    + dadz(i,npi) * dadz(j,npi));
+
+                AE(i,j) += contrib;
+                AE(N + i,N + j) += contrib;
+                AE(2*N + i,2*N + j) += contrib;
+                }
+            }
+        }
+    }
+
 void Tet::lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double prefactor,
                   Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const
     {
@@ -34,19 +57,9 @@ void Tet::lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double pref
             AE(N + i, 2*N + i) -= ai_w_u0(IDX_X);
             AE(2*N + i, N + i) += ai_w_u0(IDX_X);
             AE(2*N + i, i) -= ai_w_u0(IDX_Y);
-
-            for (int j = 0; j < N; j++)
-                {
-                double contrib = w * prefactor
-                                 * (dadx(i,npi) * dadx(j,npi) + dady(i,npi) * dady(j,npi)
-                                    + dadz(i,npi) * dadz(j,npi));
-
-                AE(i,j) += contrib;
-                AE(N + i,N + j) += contrib;
-                AE(2*N + i,2*N + j) += contrib;
-                }
             }
         }
+    exchange_lumping(prefactor,AE);
     }
 
 void Tet::add_drift_BE(double alpha, double s_dt, double Vdrift,
@@ -114,9 +127,6 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     const double dt = prm_t.get_dt();
     const double s_dt = THETA * dt * gamma0;  // theta from theta scheme in config.h.in
 
-    Eigen::Matrix<double,3*N,3*N> AE;
-    AE.setZero();
-
     /*-------------------- INTERPOLATION --------------------*/
     Eigen::Matrix<double,DIM,NPI> U,dUdx,dUdy,dUdz;
     interpolation(Nodes::get_u<CURRENT>, U, dUdx, dUdy, dUdz);
@@ -155,6 +165,9 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     uHeff += (U.cwiseProduct(Heff)).colwise().sum();//dot product on each col of U and Heff
 
     Eigen::Matrix<double,NPI,1> a_eff = calc_alpha_eff(dt, alpha, uHeff);
+    
+    Eigen::Matrix<double,3*N,3*N> AE;
+    AE.setZero();
     lumping(a_eff, prm_t.prefactor * s_dt * Abis, AE);
 
     /*--------------------   PROJECTION: AE->Kp   --------------------*/
