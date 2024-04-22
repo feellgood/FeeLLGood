@@ -10,24 +10,19 @@
 
 BOOST_AUTO_TEST_SUITE(ut_tetra)
 
-/*-----------------------------------------------------*/
-/* zero lvl tests : direct elementary member functions */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------
 
-// Tetra::Tet constructor is tested in ut_element.cpp
+ Tetra::Tet constructor is tested in ut_element.cpp
+Lumping is tested in ut_tet_lumping.cpp
 
-/*---------------------------------------*/
-/* first lvl tests : nested calculus,... */
-/*---------------------------------------*/
+Here are tested constant table values, interpolations, various inner matrices and P matrix
 
-/*---------------------------------------*/
-/* second lvl tests : pure mathematics   */
-/*---------------------------------------*/
+---------------------------------------*/
 BOOST_AUTO_TEST_CASE(Tet_inner_tables, *boost::unit_test::tolerance(UT_TOL))
     {
     using namespace Nodes;
     // this test is dedicated to  check dadx,dady,dadz and weight tables, those values are
-    // initilized once by Tet constructor
+    // initialized once by Tet constructor
     std::cout << "constructor test with 4 nodes in node vector\n";
     const int nbNod = 4;
     std::vector<Nodes::Node> node;
@@ -40,8 +35,7 @@ BOOST_AUTO_TEST_CASE(Tet_inner_tables, *boost::unit_test::tolerance(UT_TOL))
     for (int i = 0; i < nbNod; i++)
         { node[i].d[0].u = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen)); }
 
-    // carefull with indices (starting from 1)
-    Tetra::Tet t(node, 0, {1, 2, 3, 4});
+    Tetra::Tet t(node, 0, {1, 2, 3, 4});// carefull with indices (starting from 1)
     t.infos();
 
     // ref code (with minimal adaptations of dad(x|y|z) in file Mesh_hat.cc of
@@ -355,9 +349,6 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation2, *boost::unit_test::tolerance(UT_TOL
     std::cout << "distance^2 Hv =" << dist_Hv << std::endl;
     BOOST_TEST(sqrt(dist_Hv) == 0.0);
 
-    // to avoid gag of comparing pure zeros we also check that matrices norm are equal
-    // let's be paranoid
-
     std::cout << "frobenius norm of ref code Hd=" << n_Hd_ref << std::endl;
     std::cout << "frobenius norm of code to test Hd=" << n_Hd << std::endl;
     BOOST_TEST(n_Hd_ref == n_Hd);
@@ -365,111 +356,6 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation2, *boost::unit_test::tolerance(UT_TOL
     std::cout << "frobenius norm of ref code Hv=" << n_Hv_ref << std::endl;
     std::cout << "frobenius norm of code to test Hv=" << n_Hv << std::endl;
     BOOST_TEST(n_Hv_ref == n_Hv);
-    }
-
-BOOST_AUTO_TEST_CASE(Tet_lumping, *boost::unit_test::tolerance(UT_TOL))
-    {
-    Eigen::Matrix<double, 3*Tetra::N, 3*Tetra::N> AE_to_check;
-    AE_to_check.setZero();
-    double AE[3 * Tetra::N][3 * Tetra::N] = {{0}};
-
-    const int nbNod = 4;
-    std::vector<Nodes::Node> node;
-    dummyNodes<nbNod>(node);
-
-    unsigned sd = my_seed();
-    std::mt19937 gen(sd);
-    std::uniform_real_distribution<> distrib(0.0, 1.0);
-    
-    for (int i = 0; i < nbNod; i++)
-        {
-        node[i].d[0].u = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
-        }
-
-    // carefull with indices (starting from 1)
-    Tetra::Tet t(node, 0, {1, 2, 3, 4});
-    
-    double a = distrib(gen);
-    double b = distrib(gen);
-
-    timing prm_t = timing(1.0, std::min(a, b), std::max(a, b));
-
-    double dt = prm_t.get_dt();
-    double s_dt = THETA * dt;  // theta from theta scheme in config.h.in
-    double alpha_LLG = 0.5;
-    Eigen::Matrix<double,Tetra::NPI,1> uHeff;
-    uHeff.setConstant(distrib(gen));
-    Eigen::Matrix<double,Tetra::NPI,1> alfa = Tetra::calc_alpha_eff(dt, alpha_LLG, uHeff);
-    double A = distrib(gen);         // Ae
-    double Js = 0.5 + distrib(gen);  // 0.5 offset to center on 1 the Js value
-    double Abis = 2.0 * A / Js;
-    double TAUR = prm_t.TAUR;
-
-    // ref code (with minimal adaptations of integrales method in file MuMag_integrales.cc of
-    // src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
-    double u_nod[3][Tetra::N];
-    for (int ie = 0; ie < Tetra::N; ie++)
-        {
-        int i = t.ind[ie];
-        Nodes::dataNode &d0 = node[i].d[0];
-        for (int dim = 0; dim < Nodes::DIM; dim++)
-            {
-            u_nod[dim][ie] = d0.u(dim);  // aimantation
-            }
-        }
-
-    for (int npi = 0; npi < Tetra::NPI; npi++)
-        {
-        double w, ai, dai_dx, dai_dy, dai_dz, daj_dx, daj_dy, daj_dz;
-        double Dai_Daj;
-
-        double R = dt / TAUR * abs(log(dt / TAUR));
-
-        w = t.weight[npi];
-        for (int ie = 0; ie < Tetra::N; ie++)
-            {
-            ai = Tetra::a[ie][npi];
-            dai_dx = t.dadx(ie,npi);
-            dai_dy = t.dady(ie,npi);
-            dai_dz = t.dadz(ie,npi);
-
-            AE[ie][ie] += alfa(npi) * ai * w;  // lumping
-            AE[Tetra::N + ie][Tetra::N + ie] += alfa(npi) * ai * w;
-            AE[2 * Tetra::N + ie][2 * Tetra::N + ie] += alfa(npi) * ai * w;
-
-            AE[ie][2 * Tetra::N + ie] += +u_nod[1][ie] * ai * w;  // lumping
-            AE[ie][Tetra::N + ie] += -u_nod[2][ie] * ai * w;
-            AE[Tetra::N + ie][ie] += +u_nod[2][ie] * ai * w;
-            AE[Tetra::N + ie][2 * Tetra::N + ie] += -u_nod[0][ie] * ai * w;
-            AE[2 * Tetra::N + ie][Tetra::N + ie] += +u_nod[0][ie] * ai * w;
-            AE[2 * Tetra::N + ie][ie] += -u_nod[1][ie] * ai * w;
-
-            for (int je = 0; je < Tetra::N; je++)
-                {
-                daj_dx = t.dadx(je,npi);
-                daj_dy = t.dady(je,npi);
-                daj_dz = t.dadz(je,npi);
-                Dai_Daj = dai_dx * daj_dx + dai_dy * daj_dy + dai_dz * daj_dz;
-
-                AE[ie][je] += s_dt * (1. + R) * 2 * A / Js * Dai_Daj * w;
-                AE[Tetra::N + ie][Tetra::N + je] += s_dt * (1. + R) * 2 * A / Js * Dai_Daj * w;
-                AE[2 * Tetra::N + ie][2 * Tetra::N + je] +=
-                        s_dt * (1. + R) * 2 * A / Js * Dai_Daj * w;
-                }
-            }
-        }
-    // end ref code
-
-    // code to check
-    t.lumping(alfa, prm_t.prefactor * s_dt * Abis, AE_to_check);
-    // end code to check
-
-    for (int i = 0; i < 3*Tetra::N; i++)
-        for (int j = 0; j < 3*Tetra::N; j++)
-            {
-            BOOST_TEST(AE_to_check(i,j) == AE[i][j]);
-            }
-    if (!DET_UT) std::cout << "seed =" << sd << std::endl;
     }
 
 BOOST_AUTO_TEST_CASE(Tet_Pcoeff)
@@ -491,8 +377,7 @@ BOOST_AUTO_TEST_CASE(Tet_Pcoeff)
         node[i].setBasis(2 * M_PI * distrib(gen));
         }
 
-    // carefull with indices (starting from 1)
-    Tetra::Tet t(node, 0, {1, 2, 3, 4});
+    Tetra::Tet t(node, 0, {1, 2, 3, 4});// carefull with indices (starting from 1)
     t.buildMatP();
 
     /* ref code */
