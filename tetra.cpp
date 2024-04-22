@@ -14,22 +14,8 @@ using namespace Nodes;
 
 void Tet::exchange_lumping(double prefactor, Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const
     {
-    Eigen::Matrix<double,N,N> exch_block;
-    exch_block.setZero();
-
-    for(int npi = 0; npi < NPI; npi++)
-        {
-        const double w = weight[npi];
-
-        for (int i = 0; i < N; i++)
-            {
-            for (int j = 0; j < N; j++)
-                {
-                exch_block(i,j) += w * prefactor * (dadx(i,npi) * dadx(j,npi) + dady(i,npi) * dady(j,npi)
-                                                    + dadz(i,npi) * dadz(j,npi));
-                }
-            }
-        }
+    Eigen::Matrix<double,N,N> exch_block = da*da.transpose();
+    exch_block *= prefactor*weight.sum();
     AE.block<N,N>(0,0) += exch_block;
     AE.block<N,N>(N,N) += exch_block;
     AE.block<N,N>(2*N,2*N) += exch_block;
@@ -47,6 +33,7 @@ void Tet::lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double pref
             const double ai_w = w * a[i][npi];
             const Eigen::Vector3d ai_w_u0 = ai_w * getNode(i).get_u(Nodes::CURRENT);
 
+            // devNote: that diagonal increment should be done using block matrix technique, using asDiagonal()
             AE(i,i) += alpha_eff(npi) * ai_w;
             AE(N + i,N + i) += alpha_eff(npi) * ai_w;
             AE(2*N + i,2*N + i) += alpha_eff(npi) * ai_w;

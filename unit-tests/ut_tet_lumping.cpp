@@ -59,6 +59,12 @@ BOOST_AUTO_TEST_CASE(tet_exchange_lumping, *boost::unit_test::tolerance(UT_TOL))
     Eigen::Matrix<double, 3*Tetra::N, 3*Tetra::N> AE_to_check;
     AE_to_check.setZero();
     t.exchange_lumping(prefactor,AE_to_check);
+    for (int i = 0; i < Tetra::N; i++)
+        for (int j = 0; j < Tetra::N; j++)
+            {// AE is block diagonal, we just print the block
+            std::cout << "ref val= " << AE_to_check(i,j) << "found = " << AE(i,j) << std::endl;
+            }
+
     for (int i = 0; i < 3*Tetra::N; i++)
         for (int j = 0; j < 3*Tetra::N; j++)
             {
