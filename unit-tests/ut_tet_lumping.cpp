@@ -14,6 +14,58 @@ class tetra Lumping is tested here
 
 -------------------------------------------------------*/
 
+BOOST_AUTO_TEST_CASE(tet_exchange_lumping, *boost::unit_test::tolerance(UT_TOL))
+    {
+    const int nbNod = 4;
+    std::vector<Nodes::Node> node;
+    dummyNodes<nbNod>(node);
+
+    unsigned sd = my_seed();
+    std::mt19937 gen(sd);
+    std::uniform_real_distribution<> distrib(0.0, 1.0);
+
+    for (int i = 0; i < nbNod; i++)
+        {
+        node[i].d[0].u = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        }
+
+    // carefull with indices (starting from 1)
+    Tetra::Tet t(node, 0, {1, 2, 3, 4});
+
+    double prefactor = 1.0 + distrib(gen);
+    Eigen::Matrix<double, 3*Tetra::N, 3*Tetra::N> AE;
+    AE.setZero();
+    // ref code
+    for(int npi = 0; npi < Tetra::NPI; npi++)
+        {
+        const double w = t.weight[npi];
+
+        for (int i = 0; i < Tetra::N; i++)
+            {
+            for (int j = 0; j < Tetra::N; j++)
+                {
+                double contrib = w * prefactor
+                                 * (t.dadx(i,npi) * t.dadx(j,npi) + t.dady(i,npi) * t.dady(j,npi)
+                                    + t.dadz(i,npi) * t.dadz(j,npi));
+
+                AE(i,j) += contrib;
+                AE(Tetra::N + i,Tetra::N + j) += contrib;
+                AE(2*Tetra::N + i,2*Tetra::N + j) += contrib;
+                }
+            }
+        }
+    // end ref code
+
+    Eigen::Matrix<double, 3*Tetra::N, 3*Tetra::N> AE_to_check;
+    AE_to_check.setZero();
+    t.exchange_lumping(prefactor,AE_to_check);
+    for (int i = 0; i < 3*Tetra::N; i++)
+        for (int j = 0; j < 3*Tetra::N; j++)
+            {
+            BOOST_TEST(AE_to_check(i,j) == AE(i,j));
+            }
+    }
+
 BOOST_AUTO_TEST_CASE(tet_lumping, *boost::unit_test::tolerance(UT_TOL))
     {
     Eigen::Matrix<double, 3*Tetra::N, 3*Tetra::N> AE_to_check;
