@@ -14,7 +14,9 @@ using namespace Nodes;
 
 void Tet::exchange_lumping(double prefactor, Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const
     {
-    //devNote: this should be done using a matrix block technique 
+    Eigen::Matrix<double,N,N> exch_block;
+    exch_block.setZero();
+
     for(int npi = 0; npi < NPI; npi++)
         {
         const double w = weight[npi];
@@ -23,16 +25,14 @@ void Tet::exchange_lumping(double prefactor, Eigen::Ref<Eigen::Matrix<double,3*N
             {
             for (int j = 0; j < N; j++)
                 {
-                double contrib = w * prefactor
-                                 * (dadx(i,npi) * dadx(j,npi) + dady(i,npi) * dady(j,npi)
-                                    + dadz(i,npi) * dadz(j,npi));
-
-                AE(i,j) += contrib;
-                AE(N + i,N + j) += contrib;
-                AE(2*N + i,2*N + j) += contrib;
+                exch_block(i,j) += w * prefactor * (dadx(i,npi) * dadx(j,npi) + dady(i,npi) * dady(j,npi)
+                                                    + dadz(i,npi) * dadz(j,npi));
                 }
             }
         }
+    AE.block<N,N>(0,0) += exch_block;
+    AE.block<N,N>(N,N) += exch_block;
+    AE.block<N,N>(2*N,2*N) += exch_block;
     }
 
 void Tet::lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double prefactor,
