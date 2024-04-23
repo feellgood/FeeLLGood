@@ -154,15 +154,7 @@ public:
             da = dadu * J.inverse();
 
             for (int j = 0; j < NPI; j++)
-                {
-                for (int i = 0; i < N; i++)
-                    {
-                    dadx(i,j) = da(i,0);
-                    dady(i,j) = da(i,1);
-                    dadz(i,j) = da(i,2);
-                    }
-                weight[j] = detJ * Tetra::pds[j];
-                }
+                { weight[j] = detJ * Tetra::pds[j]; }
             }
         // do nothing lambda's (usefull for spin transfer torque)
         extraField = [] ( Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> ) {};
@@ -173,14 +165,8 @@ public:
                             Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,N>>) {};
         }
 
-    /** variations of hat function along x directions */
-    Eigen::Matrix<double,N,NPI> dadx;
-
-    /** variations of hat function along y directions */
-    Eigen::Matrix<double,N,NPI> dady;
-
-    /** variations of hat function along z directions */
-    Eigen::Matrix<double,N,NPI> dadz;
+    /** local hat functions matrix, initialized by constructor: da = dadu * inverse(Jacobian) */
+    Eigen::Matrix<double,N,Nodes::DIM> da;
 
     /** interpolation for scalar field : the getter function is given as a parameter in order to
      * know what part of the node you want to interpolate */
@@ -203,11 +189,11 @@ public:
         {
         Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
         for (int i = 0; i < N; i++) vec_nod.col(i) = getter(getNode(i));
-        
+
         result = vec_nod * eigen_a;
-        Tx = vec_nod * dadx;
-        Ty = vec_nod * dady;
-        Tz = vec_nod * dadz;
+        Tx = vec_nod * (da.col(Nodes::IDX_X)).replicate(1,NPI);
+        Ty = vec_nod * (da.col(Nodes::IDX_Y)).replicate(1,NPI);
+        Tz = vec_nod * (da.col(Nodes::IDX_Z)).replicate(1,NPI);
         }
 
     /** interpolation for a tensor : getter function is given as a parameter to
@@ -221,9 +207,9 @@ public:
         Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
         for (int i = 0; i < N; i++) vec_nod.col(i) = getter(getNode(i));
 
-        Tx = vec_nod * dadx;
-        Ty = vec_nod * dady;
-        Tz = vec_nod * dadz;
+        Tx = vec_nod * (da.col(Nodes::IDX_X)).replicate(1,NPI);
+        Ty = vec_nod * (da.col(Nodes::IDX_Y)).replicate(1,NPI);
+        Tz = vec_nod * (da.col(Nodes::IDX_Z)).replicate(1,NPI);
         }
 
     /** interpolation for components of a field : the getter function is given as a parameter in
@@ -239,7 +225,7 @@ public:
             {
             for (int i = 0; i < N; i++)
                 {
-                X.col(j) -= (scalar_nod[i] * Eigen::Vector3d(dadx(i,j), dady(i,j), dadz(i,j)));
+                X.col(j) -= (scalar_nod[i] * da.row(i));//Eigen::Vector3d(da(i,0), da(i,1), da(i,2)));
                 }
             }
         }
@@ -353,9 +339,7 @@ public:
         }
 
 private:
-    /** local hat functions matrix, initialized by constructor: da = dadu * inverse(Jacobian) */
-    Eigen::Matrix<double,N,Nodes::DIM> da;
-
+    /** orientation redefined through index swaping if needed */
     void orientate(void)
         {
         if (calc_vol() < 0.0)

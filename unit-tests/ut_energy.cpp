@@ -40,9 +40,9 @@ BOOST_AUTO_TEST_CASE(demagEnergy, *boost::unit_test::tolerance(UT_TOL))
     for(int i=0;i<Tetra::N;i++)
         for(int j=0;j<Tetra::NPI;j++)
             {
-            t_dadx[i][j] = t.dadx(i,j);
-            t_dady[i][j] = t.dady(i,j);
-            t_dadz[i][j] = t.dadz(i,j);
+            t_dadx[i][j] = t.da(i,0);//t.dadx(i,j);
+            t_dady[i][j] = t.da(i,1);//t.dady(i,j);
+            t_dadz[i][j] = t.da(i,2);//t.dadz(i,j);
             }
     // ref code (with minimal adaptations of MuMag::energy method in file MuMag_energy.cc of
     // src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )

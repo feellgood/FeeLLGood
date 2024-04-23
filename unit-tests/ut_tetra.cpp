@@ -82,9 +82,9 @@ BOOST_AUTO_TEST_CASE(Tet_inner_tables, *boost::unit_test::tolerance(UT_TOL))
         {
         for (int ie = 0; ie < Tetra::N; ie++)
             {
-            result_dadx += sq(_dadx[ie][npi] - t.dadx(ie,npi));
-            result_dady += sq(_dady[ie][npi] - t.dady(ie,npi));
-            result_dadz += sq(_dadz[ie][npi] - t.dadz(ie,npi));
+            result_dadx += sq(_dadx[ie][npi] - t.da(ie,0));
+            result_dady += sq(_dady[ie][npi] - t.da(ie,1));
+            result_dadz += sq(_dadz[ie][npi] - t.da(ie,2));
             }
         result_w += sq(weight[npi] - t.weight[npi]);
         }
@@ -140,9 +140,9 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation, *boost::unit_test::tolerance(UT_TOL)
     for(int i=0;i<Tetra::N;i++)
         for(int j=0;j<Tetra::NPI;j++)
             {
-            t_dadx[i][j] = t.dadx(i,j);
-            t_dady[i][j] = t.dady(i,j);
-            t_dadz[i][j] = t.dadz(i,j);
+            t_dadx[i][j] = t.da(i,0);
+            t_dady[i][j] = t.da(i,1);
+            t_dadz[i][j] = t.da(i,2);
             }
     // ref code (with minimal adaptations of integrales method in file MuMag_integrales.cc of
     // src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
@@ -291,9 +291,9 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation2, *boost::unit_test::tolerance(UT_TOL
     for(int i=0;i<Tetra::N;i++)
         for(int j=0;j<Tetra::NPI;j++)
             {
-            t_dadx[i][j] = t.dadx(i,j);
-            t_dady[i][j] = t.dady(i,j);
-            t_dadz[i][j] = t.dadz(i,j);
+            t_dadx[i][j] = t.da(i,0);
+            t_dady[i][j] = t.da(i,1);
+            t_dadz[i][j] = t.da(i,2);
             }
 
     // ref code (with minimal adaptations of integrales method in file MuMag_integrales.cc of

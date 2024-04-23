@@ -48,15 +48,15 @@ void integrales(Tetra::Tet const &tet, double sigma, double AE[Tetra::N][Tetra::
 
         for (int ie = 0; ie < Tetra::N; ie++)
             {
-            double dai_dx = tet.dadx(ie,npi);
-            double dai_dy = tet.dady(ie,npi);
-            double dai_dz = tet.dadz(ie,npi);
+            double dai_dx = tet.da(ie,Nodes::IDX_X);
+            double dai_dy = tet.da(ie,Nodes::IDX_Y);
+            double dai_dz = tet.da(ie,Nodes::IDX_Z);
 
             for (int je = 0; je < Tetra::N; je++)
                 {
-                double daj_dx = tet.dadx(je,npi);
-                double daj_dy = tet.dady(je,npi);
-                double daj_dz = tet.dadz(je,npi);
+                double daj_dx = tet.da(je,Nodes::IDX_X);
+                double daj_dy = tet.da(je,Nodes::IDX_Y);
+                double daj_dz = tet.da(je,Nodes::IDX_Z);
                 AE[ie][je] += sigma * (dai_dx * daj_dx + dai_dy * daj_dy + dai_dz * daj_dz) * w;
                 }
             }
@@ -146,7 +146,7 @@ public:
             Eigen::Vector3d v(0,0,0);
             for (int i = 0; i < Tetra::N; i++)
                 {
-                v += V[tet.ind[i]] * Eigen::Vector3d(tet.dadx(i,npi), tet.dady(i,npi), tet.dadz(i,npi));
+                v += V[tet.ind[i]] * tet.da.row(i);
                 }
             _gradV.col(npi) = v;
             }

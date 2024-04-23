@@ -36,6 +36,17 @@ BOOST_AUTO_TEST_CASE(tet_exchange_lumping, *boost::unit_test::tolerance(UT_TOL))
     Eigen::Matrix<double, 3*Tetra::N, 3*Tetra::N> AE;
     AE.setZero();
     // ref code
+    Eigen::Matrix<double,Tetra::N,Tetra::NPI> dadx,dady,dadz;// matrices dad(x|y|z) are repetition of da parts
+    for (int j = 0; j < Tetra::NPI; j++)
+        {
+        for (int i = 0; i < Tetra::N; i++)
+            {
+            dadx(i,j) = t.da(i,0);
+            dady(i,j) = t.da(i,1);
+            dadz(i,j) = t.da(i,2);
+            }
+        }
+    
     for(int npi = 0; npi < Tetra::NPI; npi++)
         {
         const double w = t.weight[npi];
@@ -45,8 +56,8 @@ BOOST_AUTO_TEST_CASE(tet_exchange_lumping, *boost::unit_test::tolerance(UT_TOL))
             for (int j = 0; j < Tetra::N; j++)
                 {
                 double contrib = w * prefactor
-                                 * (t.dadx(i,npi) * t.dadx(j,npi) + t.dady(i,npi) * t.dady(j,npi)
-                                    + t.dadz(i,npi) * t.dadz(j,npi));
+                                 * (dadx(i,npi) * dadx(j,npi) + dady(i,npi) * dady(j,npi)
+                                    + dadz(i,npi) * dadz(j,npi));
 
                 AE(i,j) += contrib;
                 AE(Tetra::N + i,Tetra::N + j) += contrib;
@@ -134,9 +145,9 @@ BOOST_AUTO_TEST_CASE(tet_lumping, *boost::unit_test::tolerance(UT_TOL))
         for (int ie = 0; ie < Tetra::N; ie++)
             {
             ai = Tetra::a[ie][npi];
-            dai_dx = t.dadx(ie,npi);
-            dai_dy = t.dady(ie,npi);
-            dai_dz = t.dadz(ie,npi);
+            dai_dx = t.da(ie,0);
+            dai_dy = t.da(ie,1);
+            dai_dz = t.da(ie,2);
 
             AE[ie][ie] += alfa(npi) * ai * w;  // lumping
             AE[Tetra::N + ie][Tetra::N + ie] += alfa(npi) * ai * w;
@@ -151,9 +162,9 @@ BOOST_AUTO_TEST_CASE(tet_lumping, *boost::unit_test::tolerance(UT_TOL))
 
             for (int je = 0; je < Tetra::N; je++)
                 {
-                daj_dx = t.dadx(je,npi);
-                daj_dy = t.dady(je,npi);
-                daj_dz = t.dadz(je,npi);
+                daj_dx = t.da(je,0);
+                daj_dy = t.da(je,1);
+                daj_dz = t.da(je,2);
                 Dai_Daj = dai_dx * daj_dx + dai_dy * daj_dy + dai_dz * daj_dz;
 
                 AE[ie][je] += s_dt * (1. + R) * 2 * A / Js * Dai_Daj * w;
