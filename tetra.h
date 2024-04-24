@@ -244,11 +244,16 @@ public:
             }
         result = scalar_nod.transpose() * eigen_a;
         }
-
-    /** AE matrix filling with exchange contribution */
-    void exchange_lumping(double prefactor, Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const;
     
-    /** AE matrix filling with all other contributions than exchange */
+    /** AE matrix filling with exchange contributions, diagonal contributions and magnetization contribution
+    AE has a block structure:
+    ( E -Z +Y)
+    ( +Z E -X)
+    ( -Y +X E)
+    E X Y Z are N*N matrices
+    E is the sum of the exchange contribution and modified alpha (scheme stabilizer) on its diagonal 
+    X Y Z are diagonal matrices with magnetization component contributions
+     */
     void lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double prefactor,
                   Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const;
 
@@ -350,35 +355,8 @@ private:
 
     /** to perform some second order corrections, an effective \f$ \alpha \f$ is computed here with
      * a piecewise formula */
-    inline Eigen::Matrix<double,NPI,1> calc_alpha_eff(const double dt, const double alpha,
-                                                      Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff)
-        {
-        double reduced_dt = gamma0 * dt;
-        Eigen::Matrix<double,NPI,1> a_eff;
-        a_eff.setConstant(alpha);
-        const double r = 0.1;  // what is that constant, where does it come from ?
-        const double M = 2. * alpha * r / reduced_dt;
-
-        for(int npi=0;npi<NPI;npi++)
-            {
-            double h = uHeff(npi);
-            if (h > 0.)
-                {
-                if (h > M)
-                    a_eff(npi) = alpha + reduced_dt / 2. * M;
-                else
-                    a_eff(npi) = alpha + reduced_dt / 2. * h;
-                }
-            else
-                {
-                if (h < -M)
-                    a_eff(npi) = alpha / (1. + reduced_dt / (2. * alpha) * M);
-                else
-                    a_eff(npi) = alpha / (1. - reduced_dt / (2. * alpha) * h);
-                }
-            }
-        return a_eff;
-        }
+    Eigen::Matrix<double,NPI,1> calc_alpha_eff(const double dt, const double alpha,
+                                               Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff);
     }   // end namespace Tetra
 
 #endif /* tetra_h */

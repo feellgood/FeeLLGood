@@ -12,41 +12,62 @@
 using namespace Tetra;
 using namespace Nodes;
 
-void Tet::exchange_lumping(double prefactor, Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const
+Eigen::Matrix<double,NPI,1> Tetra::calc_alpha_eff(const double dt, const double alpha,
+                                                      Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff)
     {
-    Eigen::Matrix<double,N,N> exch_block = da*da.transpose();
-    exch_block *= prefactor*weight.sum();
-    AE.block<N,N>(0,0) += exch_block;
-    AE.block<N,N>(N,N) += exch_block;
-    AE.block<N,N>(2*N,2*N) += exch_block;
+    double reduced_dt = gamma0 * dt;
+    Eigen::Matrix<double,NPI,1> a_eff;
+    a_eff.setConstant(alpha);
+    const double r = 0.1;  // what is that constant, where does it come from ?
+    const double M = 2. * alpha * r / reduced_dt;
+
+    for(int npi=0;npi<NPI;npi++)
+        {
+        double h = uHeff(npi);
+        if (h > 0.)
+            {
+            if (h > M)
+                a_eff(npi) = alpha + reduced_dt / 2. * M;
+            else
+                a_eff(npi) = alpha + reduced_dt / 2. * h;
+            }
+        else
+            {
+            if (h < -M)
+                a_eff(npi) = alpha / (1. + reduced_dt / (2. * alpha) * M);
+            else
+                a_eff(npi) = alpha / (1. - reduced_dt / (2. * alpha) * h);
+            }
+        }
+    return a_eff;
     }
 
 void Tet::lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double prefactor,
                   Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const
     {
-    for(int npi = 0; npi < NPI; npi++)
+    Eigen::Matrix<double,N,N> exch_block = da*da.transpose();
+    exch_block *= prefactor*weight.sum();
+    // contrib is alpha contribution to the diagonal of AE; to help stabilizing the scheme, alpha is modified
+    Eigen::Matrix<double,N,1> contrib = eigen_a * weight.cwiseProduct(alpha_eff);
+    exch_block.diagonal() += contrib;
+    
+    AE.block<N,N>(0,0) += exch_block;
+    AE.block<N,N>(N,N) += exch_block;
+    AE.block<N,N>(2*N,2*N) += exch_block;
+      
+    // off diagonal blocks are filled with magnetization components weighted products
+    // it could be rewritten using block matrix and avoid getNode().get_u() in the loop 
+    Eigen::Matrix<double,N,1> a_w = eigen_a * weight; 
+    for (int i = 0; i < N; i++)
         {
-        const double w = weight[npi];
-
-        for (int i = 0; i < N; i++)
-            {
-            const double ai_w = w * a[i][npi];
-            const Eigen::Vector3d ai_w_u0 = ai_w * getNode(i).get_u(Nodes::CURRENT);
-
-            // devNote: that diagonal increment should be done using block matrix technique, using asDiagonal()
-            AE(i,i) += alpha_eff(npi) * ai_w;
-            AE(N + i,N + i) += alpha_eff(npi) * ai_w;
-            AE(2*N + i,2*N + i) += alpha_eff(npi) * ai_w;
-
-            AE(i, 2*N + i) += ai_w_u0(IDX_Y);
-            AE(i, N + i) -= ai_w_u0(IDX_Z);
-            AE(N + i, i) += ai_w_u0(IDX_Z);
-            AE(N + i, 2*N + i) -= ai_w_u0(IDX_X);
-            AE(2*N + i, N + i) += ai_w_u0(IDX_X);
-            AE(2*N + i, i) -= ai_w_u0(IDX_Y);
-            }
+        const Eigen::Vector3d ai_w_u0 = a_w[i] * getNode(i).get_u(Nodes::CURRENT);
+        AE(i, 2*N + i) += ai_w_u0(IDX_Y);
+        AE(i, N + i) -= ai_w_u0(IDX_Z);
+        AE(N + i, i) += ai_w_u0(IDX_Z);
+        AE(N + i, 2*N + i) -= ai_w_u0(IDX_X);
+        AE(2*N + i, N + i) += ai_w_u0(IDX_X);
+        AE(2*N + i, i) -= ai_w_u0(IDX_Y);
         }
-    exchange_lumping(prefactor,AE);
     }
 
 void Tet::add_drift_BE(double alpha, double s_dt, double Vdrift,

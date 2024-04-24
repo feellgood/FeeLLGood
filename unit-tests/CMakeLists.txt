@@ -41,7 +41,8 @@ add_executable (test_ut_anisotropy ${SOURCES})
 
 add_executable (test_ut_tiny ut_tiny.cpp)
 
-add_executable (test_ut_time_int ut_time_int.cpp)
+set(SOURCES ../tetra.cpp ut_time_int.cpp)
+add_executable (test_ut_time_int ${SOURCES})
 
 add_executable (test_ut_log-stats ut_log-stats.cpp)
 
