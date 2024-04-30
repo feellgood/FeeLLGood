@@ -400,7 +400,7 @@ BOOST_AUTO_TEST_CASE(Fac_potential_v, *boost::unit_test::tolerance(10.0*UT_TOL))
 
 BOOST_AUTO_TEST_CASE(Fac_Pcoeff)
     {
-    std::cout << "fac test on Nodes::Pcoeff template" << std::endl;
+    std::cout << "fac test on Facette::buildMatP()" << std::endl;
     const int N = Facette::N;
 
     const int nbNod = 3;
@@ -418,7 +418,8 @@ BOOST_AUTO_TEST_CASE(Fac_Pcoeff)
         }
 
     Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
-    f.buildMatP();
+    Eigen::Matrix<double,2*N,3*N> P;
+    f.buildMatP(P);
 
     /* ref code */
     double Pref[2 * N][3 * N] = {{0}};  // P must be filled with zero
@@ -439,7 +440,7 @@ BOOST_AUTO_TEST_CASE(Fac_Pcoeff)
     for (int i = 0; i < 2 * N; i++)
         for (int j = 0; j < 3 * N; j++)
             {
-            BOOST_CHECK(f.P(i,j) == Pref[i][j]);
+            BOOST_CHECK(P(i,j) == Pref[i][j]);
             }
     }
 

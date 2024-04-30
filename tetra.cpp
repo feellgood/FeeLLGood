@@ -178,6 +178,9 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     AE.setZero();
     lumping(a_eff, prm_t.prefactor * s_dt * Abis, AE);
 
+    Eigen::Matrix<double,2*N,3*N> P;
+    buildMatP(P);
+
     /*--------------------   PROJECTION: AE->Kp   --------------------*/
     Kp = P*AE*P.transpose();// with MKL installed this operation should call dgemm_direct
     

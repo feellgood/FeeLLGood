@@ -23,6 +23,10 @@ void Fac::integrales(Facette::prm const &params)
                 BE(k,i) += _prefactor*a[i][npi]*params.uk(k);
                 }
         }
+    
+    Eigen::Matrix<double,2*N,3*N> P;
+    buildMatP(P);
+    
     /*-------------------- PROJECTION --------------------*/
     #if EIGEN_VERSION_AT_LEAST(3,4,0)
         Lp = P * BE.reshaped<Eigen::RowMajor>();

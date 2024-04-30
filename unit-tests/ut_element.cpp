@@ -35,7 +35,6 @@ BOOST_AUTO_TEST_CASE(Fac_full_constructor)
     BOOST_CHECK((f.getN() == Facette::N) && (f.getNPI() == Facette::NPI));
     BOOST_CHECK(f.dMs == 0);
     BOOST_CHECK(f.idxPrm == idxPrmToTest);
-    BOOST_CHECK(f.P.norm() == 0);
     BOOST_CHECK(f.Lp.norm() == 0);
     }
 
@@ -57,7 +56,6 @@ BOOST_AUTO_TEST_CASE(Tet_constructor)
     BOOST_CHECK(tet.ind[3] == idx);
     BOOST_CHECK((tet.getN() == Tetra::N) && (tet.getNPI() == Tetra::NPI));
     BOOST_CHECK(tet.idxPrm == idxPrmToTest);
-    BOOST_CHECK(tet.P.norm() == 0);
     BOOST_CHECK(tet.Lp.norm() == 0);
     }
 

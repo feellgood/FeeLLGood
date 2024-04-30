@@ -360,7 +360,7 @@ BOOST_AUTO_TEST_CASE(Tet_nod_interpolation2, *boost::unit_test::tolerance(UT_TOL
 
 BOOST_AUTO_TEST_CASE(Tet_Pcoeff)
     {
-    std::cout << "Tet test on Nodes::Pcoeff template" << std::endl;
+    std::cout << "Tet test on Tetra::buildMatP()" << std::endl;
     const int N = Tetra::N;
 
     const int nbNod = 4;
@@ -378,7 +378,8 @@ BOOST_AUTO_TEST_CASE(Tet_Pcoeff)
         }
 
     Tetra::Tet t(node, 0, {1, 2, 3, 4});// carefull with indices (starting from 1)
-    t.buildMatP();
+    Eigen::Matrix<double,2*N,3*N> P;
+    t.buildMatP(P);
 
     /* ref code */
     double Pref[2 * N][3 * N] = {{0}};  // P must be filled with zero
@@ -399,7 +400,7 @@ BOOST_AUTO_TEST_CASE(Tet_Pcoeff)
     for (int i = 0; i < 2 * N; i++)
         for (int j = 0; j < 3 * N; j++)
             {
-            BOOST_CHECK(t.P(i,j) == Pref[i][j]);
+            BOOST_CHECK(P(i,j) == Pref[i][j]);
             }
     }
 

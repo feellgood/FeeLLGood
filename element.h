@@ -32,7 +32,6 @@ class element
             {
             std::cout<<"Warning: element constructor is given an init list with size() != N\n";
             }
-        P.setZero();
         Lp.setZero();
         }
 
@@ -51,30 +50,34 @@ class element
     /** vector for integrales */
     Eigen::Matrix<double,2*N,1> Lp;
 
-    /** block diagonal matrix for projections */
-    Eigen::Matrix<double,2*N,3*N> P;
-
     /** getter for N */
     inline constexpr int getN(void) const { return N; }
 
     /** getter for NPI */
     inline constexpr int getNPI(void) const { return NPI; }
 
-    /** build matrix P, must be refreshed when ep,eq are changing (setBasis) */
-    void buildMatP(void)
+/** build matrix P direcly from ep,eq in nodes
+* P is block diagonal:
+( Epx Epy Epz )
+( Eqz Eqy Eqz )
+with each block E(p|q)(x|y|z) a N*N diagonal matrix
+* see here http://eigen.tuxfamily.org/dox-devel/TopicTemplateKeyword.html for the wierd template syntax
+*/
+    void buildMatP(Eigen::Ref<Eigen::Matrix<double,2*N,3*N>> P /**< [out] block diagonal matrix */)
         {
-        for (int i = 0; i < N; i++)
-            {
-            const Eigen::Vector3d &ep = getNode(i).ep;
-            P(i,i) = ep.x();
-            P(i,N + i) = ep.y();
-            P(i,2 * N + i) = ep.z();
+        P.setZero();
+        Eigen::Matrix<double,Nodes::DIM,N,Eigen::RowMajor> tempo;
+        for (int i = 0; i < N; i++) { tempo.col(i) = getNode(i).ep; }
 
-            const Eigen::Vector3d &eq = getNode(i).eq;
-            P(N + i,i) = eq.x();
-            P(N + i,N + i) = eq.y();
-            P(N + i,2 * N + i) = eq.z();
-            }
+        P.template block<N,N>(0,0).diagonal() = tempo.row(Nodes::IDX_X);
+        P.template block<N,N>(0,N).diagonal() = tempo.row(Nodes::IDX_Y);
+        P.template block<N,N>(0,2*N).diagonal() = tempo.row(Nodes::IDX_Z);
+
+        for (int i = 0; i < N; i++) { tempo.col(i) = getNode(i).eq; }
+
+        P.template block<N,N>(N,0).diagonal() = tempo.row(Nodes::IDX_X);
+        P.template block<N,N>(N,N).diagonal() = tempo.row(Nodes::IDX_Y);
+        P.template block<N,N>(N,2*N).diagonal() = tempo.row(Nodes::IDX_Z);
         }
 
     /** assemble the big sparse matrix K from tetra or facette inner matrix Kp */

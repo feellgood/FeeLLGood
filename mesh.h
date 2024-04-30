@@ -103,12 +103,6 @@ public:
         {
         std::for_each(EXEC_POL, node.begin(), node.end(),
                       [&r](Nodes::Node &nod) { nod.setBasis(r); });
-
-        std::for_each(EXEC_POL, tet.begin(), tet.end(),
-                      [](Tetra::Tet &t) { t.buildMatP();} );
-
-        std::for_each(EXEC_POL, fac.begin(), fac.end(),
-                      [](Facette::Fac &f) { f.buildMatP();} );
         }
 
     /** make_evol on all nodes, and returns v_max */
