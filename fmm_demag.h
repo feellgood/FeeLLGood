@@ -151,11 +151,7 @@ private:
         int nsrc(0);
         std::for_each(msh.tet.begin(), msh.tet.end(),
                       [this, getter, &nsrc](Tetra::Tet const &tet)
-                          {
-                          Eigen::Matrix<double,Tetra::NPI,1> result = tet.charges(prmTetra[tet.idxPrm], getter); 
-                          for(int i=0;i<Tetra::NPI;i++) { srcDen[nsrc+i] = result(i); }
-                          nsrc += Tetra::NPI;
-                          });
+                          { tet.charges(prmTetra[tet.idxPrm], getter, srcDen, nsrc); });
 
         std::for_each(msh.fac.begin(), msh.fac.end(),
                       [this, getter, &nsrc](Facette::Fac const &fac)
