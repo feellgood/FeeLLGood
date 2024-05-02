@@ -155,11 +155,7 @@ private:
 
         std::for_each(msh.fac.begin(), msh.fac.end(),
                       [this, getter, &nsrc](Facette::Fac const &fac)
-                          {
-                          Eigen::Matrix<double,Facette::NPI,1> result =  fac.charges(prmFacette[fac.idxPrm], getter, corr);
-                          for(int i=0;i<Facette::NPI;i++) { srcDen[nsrc+i] = result(i); }
-                          nsrc += Facette::NPI;
-                          });
+                          { fac.charges(prmFacette[fac.idxPrm], getter, srcDen, nsrc, corr); });
         }
 
     /**

@@ -46,19 +46,21 @@ double Fac::anisotropyEnergy(Facette::prm const &param,
     return -param.Ks*weight.dot(dens);
     }
 
-Eigen::Matrix<double,NPI,1> Fac::charges(Facette::prm const &param,
-                                         std::function<Eigen::Vector3d(Nodes::Node)> getter,
-                                         std::vector<double> &corr) const
+void Fac::charges(Facette::prm const &param,
+                  std::function<Eigen::Vector3d(Nodes::Node)> getter,
+                  std::vector<double> &srcDen,
+                  int &nsrc,
+                  std::vector<double> &corr) const
     {
-    Eigen::Matrix<double,NPI,1> result;
-
     if (!(param.suppress_charges))
         {
         Eigen::Matrix<double,DIM,N> vec_nod;
-        for(int i=0;i<N;i++) { vec_nod.col(i) << getter(getNode(i)); }
-
+        for(int i=0;i<N;i++)
+            { vec_nod.col(i) << getter(getNode(i)); }
         Eigen::Matrix<double,DIM,NPI> _u = vec_nod * eigen_a;
-        result = dMs*weight.cwiseProduct( _u.transpose()*n );
+        Eigen::Matrix<double,NPI,1> result = dMs*weight.cwiseProduct( _u.transpose()*n );
+        for(int i=0;i<Facette::NPI;i++)
+            { srcDen[nsrc+i] = result(i); }
         Eigen::Matrix<double,DIM,NPI> gauss;
         getPtGauss(gauss);
         // calc corr node by node
@@ -74,11 +76,7 @@ Eigen::Matrix<double,NPI,1> Fac::charges(Facette::prm const &param,
             corr[i_] += potential(getter, i);
             }
         }
-    else
-        {// no correction applied
-        result.setZero();
-        }
-    return result;
+    nsrc += Facette::NPI;
     }
 
 double Fac::demagEnergy(Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> u, Eigen::Ref<Eigen::Matrix<double,NPI,1>> phi) const
