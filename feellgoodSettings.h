@@ -136,6 +136,12 @@ public:
     /** string for a JavaScript function defining B, alternative to (sBx, sBy, sBz) */
     std::string sB;
 
+    /** string for a JavaScript function defining B space: (x,y,z)->[,,] */
+    std::string sB_space;
+
+    /** string for a JavaScript function defining B time, (t) -> real */
+    std::string sB_time;
+
     /** input file name for continuing a calculation (sol.in) */
     std::string restoreFileName;
 
@@ -243,8 +249,12 @@ private:
     double _scale;               /**< scaling factor from gmsh files to feellgood */
     std::string simName;         /**< simulation name */
     std::string pbName;          /**< mesh file, gmsh file format */
-    ExpressionParser mag_parser; /**< parser for the magnetization expressions */
-    ExpressionParser field_parser; /**< parser for the time dependant applied field expressions */
+    ExpressionParser mag_parser;     /**< parser for the magnetization expressions */
+    ExpressionParser field_parser;   /**< parser for the time dependant applied field expressions */
+
+    // field(x,y,z,t) = field_time(t) * field_space(x,y,z) with field_time R -> R and field_space R³->R³
+    ExpressionParser field_time_parser; /**< parser for the field time dependant scalar expression */
+    ExpressionParser field_space_parser;/**< parser for the field space dependant vector expressions */
     };
 
 #endif /* feellgoodSettings_h */

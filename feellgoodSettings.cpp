@@ -433,7 +433,23 @@ void Settings::read(YAML::Node yaml)
             }
         else
             {
-            error("Bext should be a function or a vector of expressions.");
+            YAML::Node field_space = field["space"];
+            YAML::Node field_time = field["time"];
+            if (field_space && field_time)
+                {
+                if (field_space.IsScalar())
+                    {
+                    sB_space = field_space.as<std::string>();
+                    field_space_parser.set_function(sB_space);
+                    }
+                if (field_time.IsScalar())
+                    {
+                    sB_time = field_time.as<std::string>();
+                    field_time_parser.set_function(sB_time);
+                    }
+                }
+            else
+                error("Bext should be a function or a vector of expressions or space & time expressions.");
             }
         }  // Bext
 
