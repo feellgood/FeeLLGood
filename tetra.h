@@ -180,7 +180,6 @@ public:
 
     /** interpolation for 3D vector field and a tensor : getter function is given as a parameter to
      * know what part of the node you want to interpolate */
-
     inline void interpolation(std::function<Eigen::Vector3d(Nodes::Node)> getter,
                               Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result,
                               Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> Tx,
@@ -191,22 +190,6 @@ public:
         for (int i = 0; i < N; i++) vec_nod.col(i) = getter(getNode(i));
 
         result = vec_nod * eigen_a;
-        Tx = vec_nod * (da.col(Nodes::IDX_X)).replicate(1,NPI);
-        Ty = vec_nod * (da.col(Nodes::IDX_Y)).replicate(1,NPI);
-        Tz = vec_nod * (da.col(Nodes::IDX_Z)).replicate(1,NPI);
-        }
-
-    /** interpolation for a tensor : getter function is given as a parameter to
-     * know what part of the node you want to interpolate */
-
-    inline void interpolation(std::function<Eigen::Vector3d(Nodes::Node)> getter,
-                              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> Tx,
-                              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> Ty,
-                              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> Tz) const
-        {
-        Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
-        for (int i = 0; i < N; i++) vec_nod.col(i) = getter(getNode(i));
-
         Tx = vec_nod * (da.col(Nodes::IDX_X)).replicate(1,NPI);
         Ty = vec_nod * (da.col(Nodes::IDX_Y)).replicate(1,NPI);
         Tz = vec_nod * (da.col(Nodes::IDX_Z)).replicate(1,NPI);
@@ -225,14 +208,13 @@ public:
             {
             for (int i = 0; i < N; i++)
                 {
-                X.col(j) -= (scalar_nod[i] * da.row(i));//Eigen::Vector3d(da(i,0), da(i,1), da(i,2)));
+                X.col(j) -= (scalar_nod[i] * da.row(i));
                 }
             }
         }
 
     /** interpolation for the component idx of a field : the getter function is given as a parameter in order to
      * know what part of the node you want to interpolate */
-
     inline void interpolation(std::function<double(Nodes::Node, Nodes::index)> getter, Nodes::index idx,
                               Eigen::Ref<Eigen::Matrix<double,Tetra::NPI,1>> result) const
         {
@@ -286,7 +268,7 @@ public:
     /** computes the integral contribution of the tetrahedron to the evolution of the magnetization
      */
     void integrales( Tetra::prm const &param, timing const &prm_t,
-                    std::function<void( Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> Hext )> calc_Hext,//Eigen::Vector3d const &Hext,
+                    std::function<void( Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> Hext )> calc_Hext,
                     Nodes::index idx_dir, double Vdrift);
 
     /** exchange energy of the tetrahedron */
@@ -298,7 +280,7 @@ public:
     /** anisotropy energy of the tetrahedron */
     double anisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u) const;
 
-    /** computes volume charges, result is stored in srcDen, at nsrc position */
+    /** computes volume charges, the divergence of the magnetization. Result is stored in srcDen, at nsrc position */
     void charges(Tetra::prm const &param,
                  std::function<Eigen::Vector3d(Nodes::Node)> getter,
                  std::vector<double> &srcDen,

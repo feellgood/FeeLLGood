@@ -260,16 +260,17 @@ void Tet::charges(Tetra::prm const &param,
                   std::vector<double> &srcDen,
                   int &nsrc) const
     {
-    Eigen::Matrix<double,DIM,NPI> dudx,dudy,dudz;
-    interpolation(getter,dudx,dudy,dudz);
+    Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
+    for (int i = 0; i < N; i++)
+        { vec_nod.col(i) = getter(getNode(i)); }
+
+    double dud_sum = (vec_nod.row(IDX_X)).dot( da.col(IDX_X) )
+                   + (vec_nod.row(IDX_Y)).dot( da.col(IDX_Y) )
+                   + (vec_nod.row(IDX_Z)).dot( da.col(IDX_Z) );
     
-    Eigen::Matrix<double,NPI,1> result;
-    for (int j = 0; j < NPI; j++)
-        { result(j) = dudx(0,j) + dudy(1,j) + dudz(2,j); }
-    result = weight.cwiseProduct(result);
-    result *= -param.J/mu0;
+    dud_sum *= -param.J/mu0;
     for(int i=0;i<Tetra::NPI;i++)
-        { srcDen[nsrc+i] = result(i); }
+        { srcDen[nsrc+i] = weight(i)*dud_sum; }
     nsrc += Tetra::NPI;
     }
 
