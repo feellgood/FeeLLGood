@@ -149,10 +149,12 @@ private:
     void calc_charges(std::function<const Eigen::Vector3d(Nodes::Node)> getter, Mesh::mesh &msh)
         {
         int nsrc(0);
+        std::fill(srcDen.begin(),srcDen.end(),0);
+
         std::for_each(msh.tet.begin(), msh.tet.end(),
                       [this, getter, &nsrc](Tetra::Tet const &tet)
                           { tet.charges(prmTetra[tet.idxPrm], getter, srcDen, nsrc); });
-
+        std::fill(corr.begin(),corr.end(),0);
         std::for_each(msh.fac.begin(), msh.fac.end(),
                       [this, getter, &nsrc](Facette::Fac const &fac)
                           { fac.charges(prmFacette[fac.idxPrm], getter, srcDen, nsrc, corr); });
@@ -165,9 +167,6 @@ private:
                std::function<void(Nodes::Node &, const double)> setter, Mesh::mesh &msh)
         {
         FmmClass algo(&tree, &kernels);
-
-        std::fill(srcDen.begin(),srcDen.end(),0);
-        std::fill(corr.begin(),corr.end(),0);
         calc_charges(getter, msh);
 
         // reset potentials and forces - physicalValues[idxPart] = Q
