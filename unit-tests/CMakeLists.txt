@@ -5,7 +5,18 @@ find_package(OpenMP REQUIRED)
 find_package(TBB REQUIRED)
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
-include_directories (${CMAKE_SOURCE_DIR} ${Boost_INCLUDE_DIRS} )
+find_library(GMSH_LIB gmsh)
+if(NOT GMSH_LIB)
+    message(STATUS "Could not find libgmsh")
+    set(GMSH_TARGET "GMSH::GMSH")
+endif()
+
+find_path(GMSH_INC gmsh.h)
+if(NOT GMSH_INC)
+  message(FATAL_ERROR "Could not find gmsh.h")
+endif()
+
+include_directories (${CMAKE_SOURCE_DIR} ${Boost_INCLUDE_DIRS} ${GMSH_INC})
 
 set( BOOST_TEST_LOG_LEVEL "all" )
 
@@ -48,6 +59,8 @@ set(SOURCES ../tetra.cpp ut_time_int.cpp)
 add_executable (test_ut_time_int ${SOURCES})
 
 add_executable (test_ut_log-stats ut_log-stats.cpp)
+
+add_executable(test_ut_readMesh ut_readMesh.cpp)
 
 if (MKL_FOUND)
     #target_compile_options(test_ut_solver PUBLIC -fsanitize=leak )
@@ -199,6 +212,12 @@ target_link_libraries(test_ut_log-stats
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
   )
 
+target_link_libraries(test_ut_readMesh
+  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  ${GMSH_LIB}
+  TBB::tbb
+  )
+
 # setarch --addr-no-randomize ./test_ut_* to disable ASLR to avoid -fsanitize=leak to bug
 add_test (NAME ut_solver COMMAND test_ut_solver)
 add_test (NAME ut_OMP_solver COMMAND test_ut_OMP_solver)
@@ -214,3 +233,4 @@ add_test (NAME ut_anisotropy COMMAND test_ut_anisotropy)
 add_test (NAME ut_tiny COMMAND test_ut_tiny)
 add_test (NAME ut_time_int COMMAND test_ut_time_int)
 add_test (NAME ut_log-stats COMMAND test_ut_log-stats)
+add_test (NAME ut_readMesh COMMAND test_ut_readMesh)
