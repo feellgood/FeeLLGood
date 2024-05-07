@@ -47,9 +47,9 @@ def makeListNbThreads():
         nb = nb // 2
     return listNbThreads
 
-def version2test(str_executable):
-    feellgood_version = subprocess.run([str_executable, "--version"], text=True, capture_output=True)
-    return feellgood_version.stdout
+def version2test():
+    feellgood_version = subprocess.run(["git", "show-ref", "--head", "--hash", "--abbrev", "HEAD" ], text=True, capture_output=True)
+    return feellgood_version.stdout[0:7]
 
 def task2test(str_executable, settings):
     """ elementary task to benchmark. feellgood executable runs in a subprocess with seed=2 for being deterministic """
@@ -125,16 +125,14 @@ if __name__ == '__main__':
     os.chdir(sys.path[0])
     print("ILU tolerance:", args.ILU_tol," ILU filling factor:", args.ILU_fillFactor)
     try:
-        str_exec = "../feellgood"
-        str_version = version2test(str_exec)
-        outputFileName = 'benchmark' + str_version[-8:-1] + '.txt'
-        
+        str_version = version2test()
+        outputFileName = 'benchmark-' + str_version + '.txt'
         metadata = "# " + str_version
-        metadata += "# " + datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        metadata += "\n# " + datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         metadata += "\n# ILU tolerance: " + str(args.ILU_tol)
         metadata += "\n# ILU filling factor: " + str(args.ILU_fillFactor)
         metadata += "\n# nbThreads: " + str(args.nbThreads) + '\n'
-        
+        str_exec = "../feellgood"
         bench(str_exec, outputFileName, metadata, args.sizes, args.nbThreads, args.final_time, args.ILU_tol, args.ILU_fillFactor)
     except KeyboardInterrupt:
         print(" benchmark interrupted")
