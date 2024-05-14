@@ -53,9 +53,6 @@ public:
 
         vol = std::transform_reduce(EXEC_POL, tet.begin(), tet.end(), 0.0, std::plus{},
                                     [](Tetra::Tet const &te) { return te.calc_vol(); });
-
-        surf = std::transform_reduce(EXEC_POL, fac.begin(), fac.end(), 0.0, std::plus{},
-                                     [](Facette::Fac const &fa) { return fa.surf; });
         }
 
     /** return number of nodes  */
@@ -78,9 +75,7 @@ public:
 
     /** setter for u0 */
     inline void set_node_u0(const int i, Eigen::Vector3d const &val)
-        {
-        node[i].d[Nodes::CURRENT].u = val;
-        }
+        { node[i].d[Nodes::CURRENT].u = val; }
 
     /** fix to zero node[i].v */
     inline void set_node_zero_v(const int i) { node[i].d[Nodes::NEXT].v.setZero(); }
@@ -92,7 +87,6 @@ public:
         std::cout << "  nodes:              " << getNbNodes() << '\n';
         std::cout << "  faces:              " << fac.size() << '\n';
         std::cout << "  tetraedrons:        " << tet.size() << '\n';
-        std::cout << "  total surface:      " << surf << '\n';
         std::cout << "  total volume:       " << vol << '\n';
         }
 
@@ -150,9 +144,6 @@ public:
 
     /** lengths along x,y,z axis */
     Eigen::Vector3d l;
-
-    /** total surface */
-    double surf;
 
     /** total volume of the mesh */
     double vol;
