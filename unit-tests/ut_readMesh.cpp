@@ -6,98 +6,69 @@
 #include <iostream>
 #include <gmsh.h>
 
+#include "tags.h"
 #include "ut_tools.h"
 #include "ut_config.h"
 
-// very inspired of https://gitlab.onelab.info/gmsh/gmsh/blob/gmsh_4_10_5/tutorials/c++/x1.cpp
+// see https://gitlab.onelab.info/gmsh/gmsh/blob/gmsh_4_10_5/tutorials/c++/x1.cpp for more about reading .msh files
 
 BOOST_AUTO_TEST_SUITE(ut_readMesh)
 
 BOOST_AUTO_TEST_CASE(readMesh)
     {
+    using namespace tags::msh;
     gmsh::initialize();
-    
+
     std::string fileName("../examples/ellipsoid.msh");
     gmsh::open(fileName);
-    
+
     std::string name;
     gmsh::model::getCurrent(name);
     int dim = gmsh::model::getDimension();
     std::cout << "Model " << name << " (" << dim << "D)\n";
     BOOST_CHECK(name == "ellipsoid");
-    BOOST_CHECK(dim == 3);
-
-    std::vector<std::pair<int, int> > entities;
-    gmsh::model::getEntities(entities);
+    BOOST_CHECK(dim == DIM_OBJ_3D);
 
     std::vector<std::size_t> nodeT;
-    std::vector<double> nodeC, nodePrms;
-    dim = 2;
-    int tag=1;
-    gmsh::model::mesh::getNodes(nodeT, nodeC, nodePrms, dim, tag);
-    BOOST_CHECK(nodeT.size() == 162); // surface has 162 nodes
-    
-    for(auto e : entities)
+    std::vector<double> nodeC, nodeP;
+    gmsh::model::mesh::getNodes(nodeT, nodeC, nodeP, -1,-1); // all nodes of the mesh
+    BOOST_CHECK(nodeT.size() == 163);
+
+    std::vector<int> elemTypes;
+    gmsh::model::mesh::getElementTypes(elemTypes, DIM_OBJ_3D, -1);
+    BOOST_CHECK(elemTypes.size() == 1); // only one type of element allowed
+    BOOST_CHECK(elemTypes[0] == TYP_ELEM_TETRAEDRON); // only Tetrahedrons
+
+    gmsh::model::mesh::getElementTypes(elemTypes, DIM_OBJ_2D, -1);
+    BOOST_CHECK(elemTypes.size() == 1); // only one type of element allowed
+    BOOST_CHECK(elemTypes[0] == TYP_ELEM_TRIANGLE); // only Triangles
+
+    std::vector<std::pair<int, int> > physGroups;
+    gmsh::model::getPhysicalGroups(physGroups,-1); // -1 for all
+    std::for_each(physGroups.begin(),physGroups.end(),[]( std::pair<int, int> &pGroup)
         {
-        int dim = e.first, tag = e.second;
-        std::vector<std::size_t> nodeTags;
-        std::vector<double> nodeCoords, nodeParams;
-        gmsh::model::mesh::getNodes(nodeTags, nodeCoords, nodeParams, dim, tag);
-
-        std::vector<int> elemTypes;
-        std::vector<std::vector<std::size_t> > elemTags, elemNodeTags;
-        gmsh::model::mesh::getElements(elemTypes, elemTags, elemNodeTags, dim, tag);
-
-        std::string type;
-        gmsh::model::getType(dim, tag, type);
-        std::string name;
-        gmsh::model::getEntityName(dim, tag, name);
-        if(name.size()) name += " ";
-        std::cout << "Entity " << name << "(" << dim << "," << tag << ") of type " << type << "\n";
-
-        int numElem = 0;
-        for(auto &tags : elemTags) numElem += tags.size();
-        std::cout << " - Mesh has " << nodeTags.size() << " nodes and " << numElem << " elements\n";
-
-        std::vector<int> physicalTags;
-        gmsh::model::getPhysicalGroupsForEntity(dim, tag, physicalTags);
-        if(physicalTags.size())
+        std::string physGroupName;
+        gmsh::model::getPhysicalName(pGroup.first, pGroup.second, physGroupName);
+        std::cout << pGroup.first << " ; "<< pGroup.second <<  " Name= " << physGroupName << std::endl;
+        if (pGroup.first == DIM_OBJ_3D)
             {
-            std::cout << " - Physical group: ";
-            for(auto physTag : physicalTags)
-                {
-                std::string n;
-                gmsh::model::getPhysicalName(dim, physTag, n);
-                if(n.size()) n += " ";
-                std::cout << n << "(" << dim << ", " << physTag << ") ";
-                }
-            std::cout << "\n";
+            std::vector<std::size_t> elemTags, nodeTags;
+            gmsh::model::mesh::getElementsByType(TYP_ELEM_TETRAEDRON,elemTags, nodeTags );
+            std::cout << "3D:\n\telemTags.size= " << elemTags.size() << std::endl;
+            std::cout << "\tnodeTags.size= " << nodeTags.size() << std::endl;
+            BOOST_CHECK(elemTags.size() == 320);
+            BOOST_CHECK(nodeTags.size() == 1280);
             }
-
-        std::vector<int> partitions;
-        gmsh::model::getPartitions(dim, tag, partitions);
-        if(partitions.size())
+        else if (pGroup.first == DIM_OBJ_2D)
             {
-            std::cout << " - Partition tags:";
-            for(auto part : partitions) std::cout << " " << part;
-            int parentDim, parentTag;
-            gmsh::model::getParent(dim, tag, parentDim, parentTag);
-            std::cout << " - parent entity (" << parentDim << "," << parentTag << ")\n";
+            std::vector<std::size_t> elemTags, nodeTags;
+            gmsh::model::mesh::getElementsByType(TYP_ELEM_TRIANGLE,elemTags, nodeTags );
+            std::cout << "2D:\n\telemTags.size= " << elemTags.size() << std::endl;
+            std::cout << "\tnodeTags.size= " << nodeTags.size() << std::endl;
+            BOOST_CHECK(elemTags.size() == 320);
+            BOOST_CHECK(nodeTags.size() == 960);
             }
-
-        for(auto elemType : elemTypes)
-            {
-            std::string name;
-            int d, order, numv, numpv;
-            std::vector<double> param;
-            gmsh::model::mesh::getElementProperties(elemType, name, d, order, numv, param, numpv);
-            std::cout << " - Element type: " << name << ", order " << order << "\n";
-            std::cout << "   with " << numv << " nodes in param coord: (";
-            for(auto p : param) std::cout << p << " ";
-            std::cout << ")\n";
-            }
-        }
-
+        } );
     gmsh::clear();
     gmsh::finalize();
     }
