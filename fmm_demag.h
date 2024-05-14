@@ -74,7 +74,7 @@ public:
           tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels(NbLevels, boxWidth, boxCenter)
         {
         omp_set_num_threads(ScalfmmNbThreads);
-        norm = 1. / (2. * msh.diam);
+        norm = 1. / (2. * msh.l.maxCoeff());
 
         FSize idxPart = 0;
         for (idxPart = 0; idxPart < NOD; ++idxPart)
