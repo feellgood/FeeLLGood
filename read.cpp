@@ -79,16 +79,16 @@ void mesh::readMesh(Settings const &mySets)
             if (tags::lookFor(true, msh, tags::msh::begin_nodes))
                 {
                 msh >> nbNod;
-                init_node(nbNod);
+                if (nbNod > 0) node.resize(nbNod);
 
                 for (int i = 0; i < nbNod; i++)
                     {
                     double x,y,z;
-                    msh >> symb >> x >> y >> z;//node[i].p;
+                    msh >> symb >> x >> y >> z;
                     x *= scale;
                     y *= scale;
                     z *= scale;
-                    node[i].p = Eigen::Vector3d(x,y,z);//.rescale(scale);
+                    node[i].p = Eigen::Vector3d(x,y,z);
                     }
                 }
 

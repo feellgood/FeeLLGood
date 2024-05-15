@@ -159,9 +159,9 @@ public:
 
     /** setter for node[i]; what_to_set will fix what is the part of the node struct to set (usefull
      * for fmm_demag.h) */
-    inline void set(const int i,
-                    std::function<void(Nodes::Node &, const double)> what_to_set,
-                    const double val)
+    inline void set(const int i /**< [in] */,
+                    std::function<void(Nodes::Node &, const double)> what_to_set /**< [in] */,
+                    const double val /**< [in] */)
         { what_to_set(node[i], val); }
 
 private:
@@ -182,25 +182,22 @@ private:
     /** map of the volume region physical names from mesh file */
     std::map<int, std::string> volRegNames;
 
-    /** memory allocation for the nodes */
-    inline void init_node(const int Nb) { node.resize(Nb); }
-
     /** reading mesh format 2.2 text file function */
-    void readMesh(Settings const &mySets);
+    void readMesh(Settings const &mySets /**< [in] */);
 
     /** loop on nodes to apply predicate 'whatTodo'  */
-    double doOnNodes(const double init_val,
-                     const Nodes::index coord,
-                     std::function<bool(double, double)> whatToDo) const;
+    double doOnNodes(const double init_val /**< [in] */,
+                     const Nodes::index coord /**< [in] */,
+                     std::function<bool(double, double)> whatToDo /**< [in] */) const;
 
     /** return the minimum of all nodes coordinate along coord axis */
-    inline double minNodes(const Nodes::index coord) const
+    inline double minNodes(const Nodes::index coord /**< [in] */) const
         {
         return doOnNodes(__DBL_MAX__, coord, [](double a, double b) { return a < b; });
         }
 
     /** return the maximum of all nodes coordinate along coord axis */
-    inline double maxNodes(const Nodes::index coord) const
+    inline double maxNodes(const Nodes::index coord /**< [in] */) const
         {
         return doOnNodes(__DBL_MIN__, coord, [](double a, double b) { return a > b; });
         }
