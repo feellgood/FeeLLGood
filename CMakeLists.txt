@@ -95,7 +95,7 @@ SET(HEADERS config.h node.h expression_parser.h mesh.h electrostatSolver.h
 SET(SOURCES feellgoodSettings.cpp time_integration.cpp solver.cpp
     read.cpp save.cpp linear_algebra.cpp recentering.cpp tetra.cpp
     energy.cpp facette.cpp expression_parser.cpp chronometer.cpp
-    tags.cpp)
+    tags.cpp mesh.cpp)
 
 configure_file(config.h.in ./config.h)
 
