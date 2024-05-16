@@ -119,25 +119,8 @@ void mesh::indexReorder(std::vector<Tetra::prm> const &prmTetra)
                   });  // end for_each
     }
 
-void mesh::sortNodes()
+void mesh::sortNodes(Nodes::index long_axis)
     {
-    // Find the longest axis of the sample.
-    Nodes::index long_axis;
-    if (l.x() > l.y())
-        {
-        if (l.x() > l.z())
-            long_axis = Nodes::IDX_X;
-        else
-            long_axis = Nodes::IDX_Z;
-        }
-    else
-        {
-        if (l.y() > l.z())
-            long_axis = Nodes::IDX_Y;
-        else
-            long_axis = Nodes::IDX_Z;
-        }
-
     // Sort the nodes along this axis, indirectly through an array of indices.
     std::vector<int> permutation(node.size());
     std::iota(permutation.begin(), permutation.end(), 0);

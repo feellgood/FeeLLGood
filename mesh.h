@@ -31,27 +31,52 @@ public:
      center and length along coordinates,full volume */
     inline mesh(Settings const &mySets /**< [in] */)
         {
-        readMesh(mySets);
-        indexReorder(mySets.paramTetra);  // reordering of index nodes for facette orientation and defines fac::dMs
-        if (mySets.verbose)
-            { std::cout << "  reindexed\n"; }
+        if (!checkMeshFile(mySets))
+            {
+            std::cout << "Error, mesh file is not usable by FeeLLGood\n"; 
+            exit(1);
+            }
+        else
+            {            
+            readMesh(mySets);
+            indexReorder(mySets.paramTetra);
 
-        double xmin = minNodes(Nodes::IDX_X);
-        double xmax = maxNodes(Nodes::IDX_X);
+            if (mySets.verbose)
+                { std::cout << "  reindexed\n"; }
 
-        double ymin = minNodes(Nodes::IDX_Y);
-        double ymax = maxNodes(Nodes::IDX_Y);
+            double xmin = minNodes(Nodes::IDX_X);
+            double xmax = maxNodes(Nodes::IDX_X);
 
-        double zmin = minNodes(Nodes::IDX_Z);
-        double zmax = maxNodes(Nodes::IDX_Z);
+            double ymin = minNodes(Nodes::IDX_Y);
+            double ymax = maxNodes(Nodes::IDX_Y);
 
-        l = Eigen::Vector3d(xmax - xmin, ymax - ymin, zmax - zmin);
-        c = Eigen::Vector3d(0.5 * (xmax + xmin), 0.5 * (ymax + ymin), 0.5 * (zmax + zmin));
+            double zmin = minNodes(Nodes::IDX_Z);
+            double zmax = maxNodes(Nodes::IDX_Z);
 
-        sortNodes();
+            l = Eigen::Vector3d(xmax - xmin, ymax - ymin, zmax - zmin);
+            c = Eigen::Vector3d(0.5 * (xmax + xmin), 0.5 * (ymax + ymin), 0.5 * (zmax + zmin));
 
-        vol = std::transform_reduce(EXEC_POL, tet.begin(), tet.end(), 0.0, std::plus{},
-                                    [](Tetra::Tet const &te) { return te.calc_vol(); });
+            // Find the longest axis of the sample.
+            Nodes::index long_axis;
+            if (l.x() > l.y())
+                {
+                if (l.x() > l.z())
+                    long_axis = Nodes::IDX_X;
+                else
+                    long_axis = Nodes::IDX_Z;
+                }
+            else
+                {
+                if (l.y() > l.z())
+                    long_axis = Nodes::IDX_Y;
+                else
+                    long_axis = Nodes::IDX_Z;
+                }
+            sortNodes(long_axis);
+
+            vol = std::transform_reduce(EXEC_POL, tet.begin(), tet.end(), 0.0, std::plus{},
+                                        [](Tetra::Tet const &te) { return te.calc_vol(); });
+            }
         }
 
     /** return number of nodes  */
@@ -182,6 +207,9 @@ private:
     /** map of the volume region physical names from mesh file */
     std::map<int, std::string> volRegNames;
 
+    /** test if mesh file contains surfaces and regions mentionned in yaml settings and their dimensions */
+    bool checkMeshFile(Settings const &mySets /**< [in] */);
+    
     /** reading mesh format 2.2 text file function */
     void readMesh(Settings const &mySets /**< [in] */);
 
@@ -229,7 +257,7 @@ private:
 
     /** Sort the nodes along the longest axis of the sample. This should reduce the bandwidth of
      * the matrix we will have to solve for. */
-    void sortNodes();
+    void sortNodes(Nodes::index long_axis /**< [in] */);
 
     }; // end class mesh
 
