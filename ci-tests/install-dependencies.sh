@@ -61,6 +61,7 @@ else  # Debian-like OS
         sudo apt-add-repository -y non-free
     fi
     packages="$packages wget g++ libeigen3-dev libmkl-dev libtbb-dev libyaml-cpp-dev duktape-dev"
+    packages="$packages libgmsh-dev"
     sudo apt-get update -q
     if [ "$unit_tests" = "true" ]; then
         packages="$packages libboost-system-dev libboost-filesystem-dev libboost-test-dev"
@@ -88,7 +89,7 @@ sudo cp lib/libANN.a /usr/local/lib/
 sudo cp include/ANN/ANN.h /usr/local/include/
 cd ..
 
-# On Rocky Linux, download and install Duktape.
+# On Rocky Linux, download and install Duktape and GMSH.
 # On Debian and Ubuntu, it has already been installed with apt.
 if [ "$ID" = "rocky" ]; then
     if [ ! -f "duktape-2.7.0.tar.xz" ]; then
@@ -100,6 +101,18 @@ if [ "$ID" = "rocky" ]; then
     ar rcs libduktape.a duktape.o
     sudo cp libduktape.a /usr/local/lib/
     sudo cp duktape.h duk_config.h /usr/local/include/
+    cd ../..
+
+    if [ ! -f "gmsh-4.8.4-source.tgz" ]; then
+        wget -nv https://gmsh.info/src/gmsh-4.8.4-source.tgz
+    fi
+    tar -xzf gmsh-4.8.4-source.tgz
+    cd gmsh-4.8.4-source
+    mkdir build
+    cd build
+    cmake -DDEFAULT=0 -DENABLE_BUILD_SHARED=1 ..
+    make
+    sudo make install/strip
     cd ../..
 fi
 

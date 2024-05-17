@@ -14,6 +14,7 @@ The code is being modified without any warranty it works. A dedicated website ca
 * [Duktape][] 2.7.0
 * [ScalFMM][] revision [22b9e4f6cf][ScalFMM-rev] (it should also work with V1.5.1)
 * [Eigen][] ≥ 3.3
+* [GMSH][] ≥ 4.8
 
 ### License
 
@@ -35,3 +36,4 @@ The libraries used by feeLLGood are distributed under different licenses, and th
 [ScalFMM]: https://gitlab.inria.fr/solverstack/ScalFMM/
 [ScalFMM-rev]: https://gitlab.inria.fr/solverstack/ScalFMM/-/archive/22b9e4f6cf4ea721d71198a71e3f5d2c5ae5e7cc/ScalFMM-22b9e4f6cf4ea721d71198a71e3f5d2c5ae5e7cc.tar.gz
 [Eigen]: https://eigen.tuxfamily.org/
+[GMSH]: http://gmsh.info/
