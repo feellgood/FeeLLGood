@@ -31,52 +31,45 @@ public:
      center and length along coordinates,full volume */
     inline mesh(Settings const &mySets /**< [in] */)
         {
-        if (!checkMeshFile(mySets))
+        checkMeshFile(mySets);
+        readMesh(mySets);
+        indexReorder(mySets.paramTetra);
+
+        if (mySets.verbose)
+            { std::cout << "  reindexed\n"; }
+
+        double xmin = minNodes(Nodes::IDX_X);
+        double xmax = maxNodes(Nodes::IDX_X);
+
+        double ymin = minNodes(Nodes::IDX_Y);
+        double ymax = maxNodes(Nodes::IDX_Y);
+
+        double zmin = minNodes(Nodes::IDX_Z);
+        double zmax = maxNodes(Nodes::IDX_Z);
+
+        l = Eigen::Vector3d(xmax - xmin, ymax - ymin, zmax - zmin);
+        c = Eigen::Vector3d(0.5 * (xmax + xmin), 0.5 * (ymax + ymin), 0.5 * (zmax + zmin));
+
+        // Find the longest axis of the sample.
+        Nodes::index long_axis;
+        if (l.x() > l.y())
             {
-            std::cout << "Error, mesh file is not usable by FeeLLGood\n"; 
-            exit(1);
+            if (l.x() > l.z())
+                long_axis = Nodes::IDX_X;
+            else
+                long_axis = Nodes::IDX_Z;
             }
         else
-            {            
-            readMesh(mySets);
-            indexReorder(mySets.paramTetra);
-
-            if (mySets.verbose)
-                { std::cout << "  reindexed\n"; }
-
-            double xmin = minNodes(Nodes::IDX_X);
-            double xmax = maxNodes(Nodes::IDX_X);
-
-            double ymin = minNodes(Nodes::IDX_Y);
-            double ymax = maxNodes(Nodes::IDX_Y);
-
-            double zmin = minNodes(Nodes::IDX_Z);
-            double zmax = maxNodes(Nodes::IDX_Z);
-
-            l = Eigen::Vector3d(xmax - xmin, ymax - ymin, zmax - zmin);
-            c = Eigen::Vector3d(0.5 * (xmax + xmin), 0.5 * (ymax + ymin), 0.5 * (zmax + zmin));
-
-            // Find the longest axis of the sample.
-            Nodes::index long_axis;
-            if (l.x() > l.y())
-                {
-                if (l.x() > l.z())
-                    long_axis = Nodes::IDX_X;
-                else
-                    long_axis = Nodes::IDX_Z;
-                }
+            {
+            if (l.y() > l.z())
+                long_axis = Nodes::IDX_Y;
             else
-                {
-                if (l.y() > l.z())
-                    long_axis = Nodes::IDX_Y;
-                else
-                    long_axis = Nodes::IDX_Z;
-                }
-            sortNodes(long_axis);
-
-            vol = std::transform_reduce(EXEC_POL, tet.begin(), tet.end(), 0.0, std::plus{},
-                                        [](Tetra::Tet const &te) { return te.calc_vol(); });
+                long_axis = Nodes::IDX_Z;
             }
+        sortNodes(long_axis);
+
+        vol = std::transform_reduce(EXEC_POL, tet.begin(), tet.end(), 0.0, std::plus{},
+                                    [](Tetra::Tet const &te) { return te.calc_vol(); });
         }
 
     /** return number of nodes  */
@@ -208,7 +201,7 @@ private:
     std::map<int, std::string> volRegNames;
 
     /** test if mesh file contains surfaces and regions mentionned in yaml settings and their dimensions */
-    bool checkMeshFile(Settings const &mySets /**< [in] */);
+    void checkMeshFile(Settings const &mySets /**< [in] */);
     
     /** reading mesh format 2.2 text file function */
     void readMesh(Settings const &mySets /**< [in] */);

@@ -4,72 +4,39 @@
 
 #include "feellgoodSettings.h"
 #include "mesh.h"
-#include "tags.h"
+#include "meshUtils.h"
 
 namespace Mesh
     {
-bool mesh::checkMeshFile(Settings const &mySets)
+void mesh::checkMeshFile(Settings const &mySets)
     {
     using namespace tags::msh;
-    bool existRegions(true);
     
     gmsh::initialize();
-    gmsh::option::setNumber("General.Terminal",0); // to silent gmsh
+    if (!mySets.verbose)
+        { gmsh::option::setNumber("General.Terminal",0); } // to silent gmsh
     gmsh::open(mySets.getPbName());
     
-    int msh_dim = gmsh::model::getDimension();
-    
-    bool msh_available = (msh_dim == DIM_OBJ_3D);
-    
+    bool msh_available = (gmsh::model::getDimension() == DIM_OBJ_3D);
+    if (!msh_available)
+        { std::cout<<"Fatal Error: mesh file " << mySets.getPbName() << " is not 3D\n"; exit(1); }
     std::vector<int> elemTypes;
     gmsh::model::mesh::getElementTypes(elemTypes, DIM_OBJ_3D, -1);
     msh_available = msh_available && (elemTypes.size() == 1); // only one type of 3D element allowed
     msh_available = msh_available && (elemTypes[0] == TYP_ELEM_TETRAEDRON); // only Tetrahedrons
-
+    if (!msh_available)
+        { std::cout<<"Fatal Error: mesh file contains other 3D elements than tetraedrons.\n"; exit(1); }
     gmsh::model::mesh::getElementTypes(elemTypes, DIM_OBJ_2D, -1);
     msh_available = msh_available && (elemTypes.size() == 1); // only one type of 2D element allowed
     msh_available = msh_available && (elemTypes[0] == TYP_ELEM_TRIANGLE); // only Triangles
-    
-    std::vector<std::pair<int, int> > physGroups2D;
-    gmsh::model::getPhysicalGroups(physGroups2D,DIM_OBJ_2D);
-    std::vector<std::string> names2D;
-    std::for_each(physGroups2D.begin(),physGroups2D.end(),[&names2D]( std::pair<int, int> &pGroup)
-        {
-        std::string physGroupName;
-        gmsh::model::getPhysicalName(pGroup.first, pGroup.second, physGroupName);
-        names2D.push_back(physGroupName);
-        });
-    
-    std::for_each(mySets.paramFacette.begin(),mySets.paramFacette.end(),[&existRegions,&names2D](auto p)
-                  {
-                  if (p.regName != "__default__")
-                      {
-                      existRegions = existRegions && std::any_of(names2D.begin(),names2D.end(),
-                          [&p] (std::string &elem) { return p.regName == elem; } );
-                      } 
-                  } );
-    
-    std::vector<std::pair<int, int> > physGroups3D;
-    gmsh::model::getPhysicalGroups(physGroups3D,DIM_OBJ_3D);
-    std::vector<std::string> names3D;
-    std::for_each(physGroups3D.begin(),physGroups3D.end(),[&names3D]( std::pair<int, int> &pGroup)
-        {
-        std::string physGroupName;
-        gmsh::model::getPhysicalName(pGroup.first, pGroup.second, physGroupName);
-        names3D.push_back(physGroupName);
-        });
-        
-    std::for_each(mySets.paramTetra.begin(),mySets.paramTetra.end(),[&existRegions,&names3D](auto p)
-                  {
-                  if (p.regName != "__default__")
-                      {
-                      existRegions = existRegions && std::any_of(names3D.begin(),names3D.end(),
-                          [&p] (std::string &elem) { return p.regName == elem; } );
-                      }
-                  } );
+    if (!msh_available)
+        { std::cout<<"Fatal Error: mesh file contains other 2D elements than triangles.\n"; exit(1); }
+    bool o_2D = checkNamedObjects<Facette::prm>(mySets.paramFacette,DIM_OBJ_2D);
+    bool o_3D = checkNamedObjects<Tetra::prm>(mySets.paramTetra,DIM_OBJ_3D);
     gmsh::clear();
     gmsh::finalize();
-    return (existRegions && msh_available);
+    if (!(o_2D && o_3D))
+        { std::cout <<"Fatal Error: mismatch between input mesh file and yaml regions.\n"; exit(1); }
     }
 
 void mesh::readMesh(Settings const &mySets)
