@@ -31,8 +31,8 @@ public:
      center and length along coordinates,full volume */
     inline mesh(Settings const &mySets /**< [in] */)
         {
-        checkMeshFile(mySets);
-        readMesh(mySets);
+        fromFile(mySets);
+        //readMesh(mySets);
         indexReorder(mySets.paramTetra);
 
         if (mySets.verbose)
@@ -200,9 +200,21 @@ private:
     /** map of the volume region physical names from mesh file */
     std::map<int, std::string> volRegNames;
 
+    /** check file, read nodes, ... */
+    void fromFile(Settings const &mySets);
+
     /** test if mesh file contains surfaces and regions mentionned in yaml settings and their dimensions */
     void checkMeshFile(Settings const &mySets /**< [in] */);
     
+    /** read Nodes from mesh file */
+    void readNodes(Settings const &mySets /**< [in] */);
+
+    /** read tetraedrons of the settings volume regions */
+    void readTetraedrons(Settings const &mySets /**< [in] */);
+
+    /** read facettes of the settings surface regions */
+    void readTriangles(Settings const &mySets /**< [in] */);
+
     /** reading mesh format 2.2 text file function */
     void readMesh(Settings const &mySets /**< [in] */);
 
