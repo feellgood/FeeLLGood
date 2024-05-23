@@ -2,6 +2,10 @@
 
 #include "tags.h"
 
+template <int TYPE>
+bool all_elems_are(std::vector<int> &container)
+    { return std::all_of(container.begin(), container.end(), [](int &e_type){return e_type == TYPE;} ); }
+
 template <class T>
     bool checkNamedObjects(std::vector<T> const &v_prm, const int dim_obj)
         {

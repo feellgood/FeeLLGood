@@ -88,8 +88,7 @@ void mesh::readTetraedrons(Settings const &mySets /**< [in] */)
                     std::vector<int> elemTypes;
                     std::vector<std::vector<std::size_t> > elemTags, elemNodeTags;
                     gmsh::model::mesh::getElements(elemTypes, elemTags, elemNodeTags, p.first, p.second);
-
-                    if (std::all_of(elemTypes.begin(), elemTypes.end(), [](int &e_type){return e_type == TYP_ELEM_TETRAEDRON;} ))
+                    if (all_elems_are<TYP_ELEM_TETRAEDRON>(elemTypes))
                         { // all elements are tetrahedrons
                         int idx = mySets.findTetraRegionIdx(n);
                         for(unsigned int i=0;i<elemNodeTags[0].size();i+=4)
@@ -133,7 +132,7 @@ void mesh::readTriangles(Settings const &mySets /**< [in] */)
                     std::vector<int> elemTypes;
                     std::vector<std::vector<std::size_t> > elemTags, elemNodeTags;
                     gmsh::model::mesh::getElements(elemTypes, elemTags, elemNodeTags, p.first, p.second);
-                    if (std::all_of(elemTypes.begin(), elemTypes.end(), [](int &e_type){return e_type == TYP_ELEM_TRIANGLE;} ))
+                    if (all_elems_are<TYP_ELEM_TRIANGLE>(elemTypes))
                         { // all elements are triangles
                         int idx = mySets.findFacetteRegionIdx(n);
                         const int nbNod = node.size();
