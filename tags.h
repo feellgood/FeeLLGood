@@ -39,6 +39,9 @@ namespace tags
         
         const int TYP_ELEM_TRIANGLE = 2;
         const int TYP_ELEM_TETRAEDRON = 4;
+
+        const int SIZE_TRIANGLE = 3;
+        const int SIZE_TETRAEDRON = 4;
         }
 
     /**
