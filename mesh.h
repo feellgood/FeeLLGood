@@ -193,15 +193,6 @@ private:
      * This is the inverse of the permutation we applied when sorting the nodes. */
     std::vector<int> node_index;
 
-    /** map of the surface region physical names from mesh file */
-    std::map<int, std::string> surfRegNames;
-
-    /** map of the volume region physical names from mesh file */
-    std::map<int, std::string> volRegNames;
-
-    /** check file, read nodes, ... */
-    void fromFile(Settings const &mySets);
-
     /** test if mesh file contains surfaces and regions mentionned in yaml settings and their dimensions */
     void checkMeshFile(Settings const &mySets /**< [in] */);
     
