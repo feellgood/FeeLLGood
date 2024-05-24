@@ -21,7 +21,7 @@ Vagrant.configure("2") do |config|
   ######################################################################
   # Distro-specific configuration.
 
-  # Ubuntu development branch, future 24.04 LTS "Noble Numbat"
+  # Ubuntu 24.04 LTS "Noble Numbat"
   config.vm.define "ubuntu_noble", autostart: false do |machine|
     machine.vm.box = "ubuntu/noble64"
   end
@@ -29,11 +29,6 @@ Vagrant.configure("2") do |config|
   # Ubuntu 22.04 LTS "Jammy Jellyfish"
   config.vm.define "ubuntu_jammy", autostart: false do |machine|
     machine.vm.box = "ubuntu/jammy64"
-  end
-
-  # Ubuntu 20.04 LTS "Focal Fossa"
-  config.vm.define "ubuntu_focal", autostart: false do |machine|
-    machine.vm.box = "ubuntu/focal64"
   end
 
   # Debian Testing, future Debian 13 "Trixie"
