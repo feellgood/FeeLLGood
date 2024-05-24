@@ -3,15 +3,18 @@
 from math import sqrt
 import numpy as np
 
-def my_gmsh_init(objName):
+def gmsh_init(objName,fileFormat,binary):
     """
-    initializations of gmsh used by some classes below.
+    initializations of gmsh used by some classes below. Output file format set to 2.2 or 4.1 and text or binary
     """
     import gmsh
     global gmsh
     gmsh.initialize()
     gmsh.option.setNumber("General.Terminal",False) # to silent gmsh
-    gmsh.option.set_number("Mesh.MshFileVersion", 2.2) # to force mesh file format to 2.2
+    file_format_versions = [2.1, 2.2, 4.0, 4.1]
+    if (fileFormat in file_format_versions):
+        gmsh.option.setNumber("Mesh.MshFileVersion", fileFormat)
+    gmsh.option.setNumber("Mesh.Binary",binary)
     gmsh.model.add(objName)
 
 def gmsh_mesh_build(name,_optimize):
@@ -47,8 +50,8 @@ class Hexahedron(object):
     def __init__ (self,pt_min,pt_max,mesh_size,surfName,volName,optimize):
         """
         hexahedron defined by pt_min and pt_max, mesh_size average tetrahedron size
-        bool optimize is optional optimization of the mesh by relocating of the nodes
-        gmsh file format 2.2 is used to write the mesh text file
+        bool optimize is optional optimization of the mesh by relocating of the nodes.
+        output mesh file is written using binary file format 4.1
         """
         self.msh_s = mesh_size
         self.surfName = surfName
@@ -56,10 +59,10 @@ class Hexahedron(object):
         self.optimize = optimize
         self.p_min = pt_min
         self.p_max = pt_max
-        my_gmsh_init("hex")
+        gmsh_init("hex",4.1,1) # binary 4.1 output format
         
     def make(self,meshFileName):
-        """ write hexahedron mesh file in gmsh 2.2 text format """
+        """ write hexahedron mesh file """
         
         p = np.empty(4, dtype=object)
         p[0] = gmsh.model.geo.addPoint(self.p_min[0],self.p_min[1],self.p_min[2],self.msh_s)
@@ -98,7 +101,7 @@ class Cylinder(object):
         """ 
             geometrical cylinder is zero centered, with radius r and length t along (Oz), build by extrusion
             this cylinder mesh is generated with geo
-            gmsh file format 2.2 is used to write the mesh text file
+            gmsh file format 4.1 is used to write the mesh binary file
         """
         
         self.r = radius
@@ -107,7 +110,7 @@ class Cylinder(object):
         self.surfName = surfName
         self.volName = volName
         self.withExtraSurf = False
-        my_gmsh_init("cyl")
+        gmsh_init("cyl",4.1,1)
 
     def addEdgeSurf(self,name1,name2):
         """ optional surfaces : name1 will refer to the base surface, name2 will refer to the translated name1 surface from extrusion """
@@ -116,7 +119,7 @@ class Cylinder(object):
         self.withExtraSurf = True
     
     def make(self,meshFileName):
-        """ write cylinder mesh file in gmsh 2.2 text format """
+        """ write cylinder mesh file """
         
         p_origin = gmsh.model.geo.addPoint(0,0,-0.5*self.t,self.msh_s)
 
@@ -170,7 +173,7 @@ class Ellipsoid(object):
         """ 
             geometrical ellipsoid is zero centered, with radius r1 in the plane (Oxy) and r2 along (Oz)
             this ellipsoid mesh is generated with open cascade (occ)
-            gmsh file format 2.2 is used to write the mesh text file  
+            gmsh file format 4.1 is used to write the mesh binary file
         """
         
         self.r1 = r1
@@ -178,11 +181,11 @@ class Ellipsoid(object):
         self.msh_s = mesh_size
         self.surfName = surfName
         self.volName = volName
-        my_gmsh_init("ellipsoid")
-    
+        gmsh_init("ellipsoid",4.1,1)
+
     def make(self,meshFileName):
-        """ write ellipsoid mesh file in gmsh 2.2 text format """
-        
+        """ write ellipsoid mesh file """
+
         sph = gmsh.model.occ.addSphere(0,0,0,self.r1)
         gmsh.model.occ.dilate([(3,sph)],0,0,0,1,1,self.r2)
         gmsh.model.occ.synchronize() # we have to sync before calling addPhysicalGroup
@@ -197,7 +200,7 @@ class Ellipsoid(object):
         gmsh.model.addPhysicalGroup(volumes[0][0], [volumes[0][1]], volume_tag) # first parameter should be 3
         gmsh.model.setPhysicalName(3,volume_tag,self.volName)
 
-        gmsh.model.occ.synchronize() # we have to synchronize before the call to 'generate' to build the mesh
+        gmsh.model.occ.synchronize() # we have to synchronize before the 'generate' call to build the mesh
         
         eps = 1e-3
         xmin = -self.r1 - eps
@@ -347,7 +350,7 @@ class Cuboid(object):
 
     
     def make(self,meshFileName,volRegionName,surfRegionName):
-        """ write mesh file in gmsh 2.2 format """
+        """ write mesh file in gmsh 2.2 text format """
         meshFile = open(meshFileName,'w')
         meshFile.write("$MeshFormat\n2.2\t0\t8\n$EndMeshFormat\n")
         nbTotNames = 2 + len(self.subSurfRegName)
@@ -387,18 +390,20 @@ class Cuboid(object):
         meshFile.close()
         print(f"Generated {meshFileName}: {len(self.pts)} nodes, {len(self.Tet)} tetrahedra")
 
-# Ico class
-# make builds a mesh of an icosahedron format 2.2, each tetrahedron is built with a outer face of the icosahedron linked to the barycenter of the icosahedron (zero). The mesh file is directly written in the output textfile, without calling gmsh module.
-# https://fr.wikipedia.org/wiki/Icosa%C3%A8dre
-
+# Ico class: an icosahedron mesh from scratch
 class Ico(object):
     def __init__ (self):
+        """
+            builds a mesh of an icosahedron in text format 2.2, each tetrahedron is built with a outer face of the icosahedron linked to the barycenter.
+            see https://fr.wikipedia.org/wiki/Icosa%C3%A8dre for more informations. Mesh file is written in the output text file without gmsh module.
+        """
         self.phi = (1+sqrt(5))/2
         self.pts = np.array([[self.phi,1,0], [self.phi,-1,0], [-self.phi,1,0], [-self.phi,-1,0],[1,0,self.phi], [1,0,-self.phi], [-1,0,self.phi], [-1,0,-self.phi],[0,self.phi,1], [0,self.phi,-1], [0,-self.phi,1], [0,-self.phi,-1], [0,0,0]] )
 
         self.f_idx = [ [0,8,4], [0,4,1], [0,1,5], [0,5,9], [0,9,8], [8,9,2], [8,2,6], [8,6,4], [6,10,4], [6,3,10], [6,2,3], [10,3,11], [10,11,1], [10,1,4], [1,11,5], [11,3,7], [11,7,5], [3,2,7], [7,9,2],  [5,7,9] ]
 
     def make(self,meshFileName,volRegionName,surfRegionName):
+        """ write mesh file in gmsh 2.2 text format """
         meshFile = open(meshFileName,'w')
         meshFile.write("$MeshFormat\n2.2\t0\t8\n$EndMeshFormat\n")
         meshFile.write("$PhysicalNames\n2\n")
