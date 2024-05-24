@@ -31,8 +31,7 @@ public:
      center and length along coordinates,full volume */
     inline mesh(Settings const &mySets /**< [in] */)
         {
-        fromFile(mySets);
-        //readMesh(mySets);
+        readMesh(mySets);
         indexReorder(mySets.paramTetra);
 
         if (mySets.verbose)
