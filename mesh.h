@@ -7,9 +7,6 @@
 
 #include <algorithm>
 #include <execution>
-#include <map>
-#include <numeric>
-#include <set>
 
 #include "facette.h"
 #include "node.h"

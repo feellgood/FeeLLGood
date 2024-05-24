@@ -5,6 +5,7 @@
 #include "feellgoodSettings.h"
 #include "mesh.h"
 #include "meshUtils.h"
+#include "tags.h"
 
 namespace Mesh
     {

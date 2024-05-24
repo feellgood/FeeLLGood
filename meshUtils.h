@@ -1,7 +1,5 @@
 #include <gmsh.h>
 
-#include "tags.h"
-
 template <int TYPE>
 bool all_elems_are(std::vector<int> &container)
     { return std::all_of(container.begin(), container.end(), [](int &e_type){return e_type == TYPE;} ); }
