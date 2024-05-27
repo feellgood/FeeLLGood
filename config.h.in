@@ -40,9 +40,9 @@ const double BOHRS_MUB = CHARGE_ELECTRON * PLANCKS_HBAR / (2. * MASS_ELECTRON); 
 #cmakedefine01 ENABLE_SEQ
 
 #if ENABLE_SEQ
-    #define EXEC_POL std::execution::seq
+    #define EXEC_POL std::execution::seq /**< sequential execution policy */
 #else
-    #define EXEC_POL std::execution::par
+    #define EXEC_POL std::execution::par /**< parallel execution policy */
 #endif
 
 /** do an extra orthonormalization of the (u0, ep, eq) basis in order to minimize the rounding
