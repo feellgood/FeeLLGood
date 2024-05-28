@@ -4,7 +4,8 @@ using namespace Nodes;
 
 void Fem::energy(double const t, Settings &settings)
     {
-    zeroEnergy();
+    std::fill(E.begin(),E.end(),0);
+    Etot = 0.0;
     Eigen::Vector3d Hext = settings.getField(t);
 
     std::for_each(msh.tet.begin(), msh.tet.end(),
@@ -17,13 +18,13 @@ void Fem::energy(double const t, Settings &settings)
                       te.interpolation(Nodes::get_u<NEXT>, u, dudx, dudy, dudz);
                       te.interpolation(Nodes::get_phi<NEXT>, phi);
 
-                      E_exch += te.exchangeEnergy(param, dudx, dudy, dudz);
-                      E_demag += te.demagEnergy(param, dudx, dudy, dudz, phi);
+                      E[EXCHANGE] += te.exchangeEnergy(param, dudx, dudy, dudz);
+                      E[DEMAG] += te.demagEnergy(param, dudx, dudy, dudz, phi);
 
                       if ((param.K != 0.0) || (param.K3 != 0.0))
-                          { E_aniso += te.anisotropyEnergy(param, u); }
+                          { E[ANISOTROPY] += te.anisotropyEnergy(param, u); }
 
-                      E_zeeman += te.zeemanEnergy(param, Hext, u);
+                      E[ZEEMAN] += te.zeemanEnergy(param, Hext, u);
                   });
 
     std::for_each(msh.fac.begin(), msh.fac.end(),
@@ -37,11 +38,11 @@ void Fem::energy(double const t, Settings &settings)
                       fa.interpolation(Nodes::get_phi<NEXT>, phi);
 
                       if (param.Ks != 0.0)
-                          { E_aniso += fa.anisotropyEnergy(param, u); }
+                          { E[ANISOTROPY] += fa.anisotropyEnergy(param, u); }
                       
-                      E_demag += fa.demagEnergy(u, phi);
+                      E[DEMAG] += fa.demagEnergy(u, phi);
                   });
-    calc_Etot();
+    Etot = std::reduce(E.begin(),E.end());//sum of all terms
     if (settings.verbose && (Etot > Etot0))
         { std::cout << "WARNING: energy increased from " << Etot0 << " to " << Etot << "\n"; }
     }

@@ -28,6 +28,18 @@ It does also contains the definition of many constants for the solver, and for s
 #include "ANN.h"
 #include "feellgoodSettings.h"
 
+/** number of energy terms in energy array E */
+const int NB_ENERGY_TERMS = 4;
+
+/** correspondance nature/index of the energy terms in energy array E */
+enum ENERGY_TYPE
+    {
+    EXCHANGE = 0,
+    ANISOTROPY = 1,
+    DEMAG = 2,
+    ZEEMAN = 3
+    };
+
 /** \class Fem
 class container to grab altogether all parameters of a simulation, including mesh geometry,
 containers for the mesh
@@ -39,11 +51,7 @@ public:
     inline Fem(Settings const &mySets, timing &t_prm) : msh(mySets)
         {
         vmax = 0.0;
-
-        E_exch0 = E_exch = 0.0;
-        E_aniso0 = E_aniso = 0.0;
-        E_demag0 = E_demag = 0.0;
-        E_zeeman0 = E_zeeman = 0.0;
+        std::fill(E.begin(),E.end(),0);
         Etot0 = INFINITY;  // avoid "WARNING: energy increased" on first time step
         Etot = 0.0;
 
@@ -120,22 +128,20 @@ public:
             }
         }
 
-    double vmax; /**< maximum speed of magnetization */
+    /** maximum speed of magnetization */
+    double vmax;
 
-    double E_exch0;   /**< previous iteration exchange energy  */
-    double E_aniso0;  /**< previous iteration anisotropy energy  */
-    double E_demag0;  /**< previous iteration demagnetizing energy  */
-    double E_zeeman0; /**< previous iteration zeeman energy  */
+    /** current iteration energies */
+    std::array<double,NB_ENERGY_TERMS> E;
 
-    double E_exch;   /**< exchange energy */
-    double E_aniso;  /**< anisotropy energy  */
-    double E_demag;  /**< demagnetizing energy  */
-    double E_zeeman; /**< zeeman energy  */
+    /** direction of the domain wall */
+    double DW_dir;
 
-    double DW_dir; /**< direction of the domain wall */
-
-    double Etot0; /**< initial total energy */
-    double Etot;  /**< total energy */
+    /** initial total energy */
+    double Etot0;
+    
+    /** total energy */
+    double Etot;
 
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh */
     Mesh::mesh msh;
@@ -143,8 +149,7 @@ public:
     /** computes all the energies */
     void energy(double const t /**< [in] time in second, used to compute zeeman contribution if
                                   applied field is time dependant */
-                ,
-                Settings &settings /**< [in] */);
+                ,Settings &settings /**< [in] */);
 
     /**
     time evolution : one step in time
@@ -152,10 +157,6 @@ public:
     inline void evolution(void)
         {
         msh.evolution();
-        E_exch0 = E_exch;
-        E_aniso0 = E_aniso;
-        E_demag0 = E_demag;
-        E_zeeman0 = E_zeeman;
         Etot0 = Etot;
         }
 
@@ -185,20 +186,6 @@ private:
 
     /** find direction of motion of DW */
     void direction(enum Nodes::index idx_dir /**< [in] */);
-
-    /** zeroing of all energies */
-    inline void zeroEnergy(void)
-        {
-        E_exch = 0.0;
-        E_aniso = 0.0;
-        E_demag = 0.0;
-        E_zeeman = 0.0;
-        Etot = 0.0;
-        }
-
-    /** computes the sum of all energies */
-    inline void calc_Etot(void) { Etot = E_exch + E_aniso + E_demag + E_zeeman; }
-
     };  // end class
 
 #endif

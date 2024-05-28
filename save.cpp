@@ -71,19 +71,19 @@ void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const i
             }
         if (keyVal == "E_ex")
             {
-            fout << E_exch << sep;
+            fout << E[EXCHANGE] << sep;
             }
         if (keyVal == "E_aniso")
             {
-            fout << E_aniso << sep;
+            fout << E[ANISOTROPY] << sep;
             }
         if (keyVal == "E_demag")
             {
-            fout << E_demag << sep;
+            fout << E[DEMAG] << sep;
             }
         if (keyVal == "E_zeeman")
             {
-            fout << E_zeeman << sep;
+            fout << E[ZEEMAN] << sep;
             }
         if (keyVal == "E_tot")
             {
