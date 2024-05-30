@@ -10,8 +10,8 @@ def gmsh_init(objName,fileFormat,binary):
     import gmsh
     global gmsh
     gmsh.initialize()
-    gmsh.option.setNumber("General.Terminal",False) # to silent gmsh
-    file_format_versions = [2.1, 2.2, 4.0, 4.1]
+    gmsh.option.setNumber("General.Terminal",True) #False) # to silent gmsh
+    file_format_versions = [2.1, 2.2, 3.0, 4.0, 4.1]
     if (fileFormat in file_format_versions):
         gmsh.option.setNumber("Mesh.MshFileVersion", fileFormat)
     gmsh.option.setNumber("Mesh.Binary",binary)
@@ -51,7 +51,7 @@ class Hexahedron(object):
         """
         hexahedron defined by pt_min and pt_max, mesh_size average tetrahedron size
         bool optimize is optional optimization of the mesh by relocating of the nodes.
-        output mesh file is written using binary file format 4.1
+        output mesh file is written using text file format 4.1
         """
         self.msh_s = mesh_size
         self.surfName = surfName
@@ -59,7 +59,7 @@ class Hexahedron(object):
         self.optimize = optimize
         self.p_min = pt_min
         self.p_max = pt_max
-        gmsh_init("hex",4.1,1) # binary 4.1 output format
+        gmsh_init("hex",4.1,0) # text 4.1 output format
         
     def make(self,meshFileName):
         """ write hexahedron mesh file """
@@ -101,7 +101,7 @@ class Cylinder(object):
         """ 
             geometrical cylinder is zero centered, with radius r and length t along (Oz), build by extrusion
             this cylinder mesh is generated with geo
-            gmsh file format 4.1 is used to write the mesh binary file
+            gmsh file format 4.1 is used to write the mesh text file
         """
         
         self.r = radius
@@ -110,7 +110,7 @@ class Cylinder(object):
         self.surfName = surfName
         self.volName = volName
         self.withExtraSurf = False
-        gmsh_init("cyl",4.1,1)
+        gmsh_init("cyl",4.1,0)
 
     def addEdgeSurf(self,name1,name2):
         """ optional surfaces : name1 will refer to the base surface, name2 will refer to the translated name1 surface from extrusion """
@@ -173,7 +173,7 @@ class Ellipsoid(object):
         """ 
             geometrical ellipsoid is zero centered, with radius r1 in the plane (Oxy) and r2 along (Oz)
             this ellipsoid mesh is generated with open cascade (occ)
-            gmsh file format 4.1 is used to write the mesh binary file
+            gmsh file format 4.1 is used to write the mesh text file
         """
         
         self.r1 = r1
@@ -181,7 +181,7 @@ class Ellipsoid(object):
         self.msh_s = mesh_size
         self.surfName = surfName
         self.volName = volName
-        gmsh_init("ellipsoid",4.1,1)
+        gmsh_init("ellipsoid",4.1,0)
 
     def make(self,meshFileName):
         """ write ellipsoid mesh file """
