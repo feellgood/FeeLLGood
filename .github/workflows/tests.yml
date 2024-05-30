@@ -4,7 +4,7 @@ on: [pull_request, push, repository_dispatch]
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     env:
       CCACHE_COMPRESS: "true"
