@@ -21,9 +21,6 @@ BOOST_AUTO_TEST_CASE(Fac_full_constructor)
     std::cout << "4 param constructor" << std::endl;
     
     Facette::Fac f(node, 0, idxPrmToTest, {0, 0, 0});
-
-    std::cout << "infos:\t";
-    f.infos();
     /*
     The constructor facette does not modify all indices to fit to zero based index convention
     it's done later
@@ -44,8 +41,6 @@ BOOST_AUTO_TEST_CASE(Tet_constructor)
     std::vector<Nodes::Node> node(0);
 
     Tetra::Tet tet(node, idxPrmToTest, {0, 0, 0, 0});
-    std::cout << "infos:\t";
-    tet.infos();
     /*
     The constructor tetra do modify all indices to fit to zero based index convention
     */

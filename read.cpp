@@ -14,14 +14,20 @@ void mesh::readMesh(Settings const &mySets)
     gmsh::initialize();
     if (!mySets.verbose)
         { gmsh::option::setNumber("General.Terminal",0); } // to silent gmsh
-
     checkMeshFile(mySets);
+    if (mySets.verbose)
+        { std::cout<< "Checking mesh file: done.\n"; }
     readNodes(mySets);
+    if (mySets.verbose)
+        { std::cout<< "Nodes loaded.\n"; }
     readTetraedrons(mySets);
     for (unsigned int i = 0; i < tet.size(); i++)
         { tet[i].idx = i; }
+    if (mySets.verbose)
+        { std::cout<< "Tetraedrons built.\n"; }
     readTriangles(mySets);
-
+    if (mySets.verbose)
+        { std::cout<< "triangles built.\n"; }
     gmsh::clear();
     gmsh::finalize();
     }
@@ -53,15 +59,24 @@ void mesh::checkMeshFile(Settings const &mySets)
 
 void mesh::readNodes(Settings const &mySets /**< [in] */)
     {
-    std::vector<std::size_t> nodeT;
-    std::vector<double> nodeC, nodeP;
-    gmsh::model::mesh::getNodes(nodeT, nodeC, nodeP, -1,-1); // all nodes of the mesh
-    node.resize( nodeT.size() );
-    for(unsigned int i=0;i<nodeT.size();i++)
+    using namespace tags::msh;
+    double scale = mySets.getScale();
+    std::vector<std::pair<int, int> > physGroups;
+    gmsh::model::getPhysicalGroups(physGroups,DIM_OBJ_3D);
+    int i(0);
+    std::for_each(physGroups.begin(),physGroups.end(),[this,scale,&i](std::pair<int, int> &pGroup)
         {
-        double scale = mySets.getScale();
-        node[i].p = Eigen::Vector3d(nodeC[3*i],nodeC[3*i + 1],nodeC[3*i + 2]) * scale;
-        }
+        std::vector<std::size_t> nodeT;
+        std::vector<double> nodeC;
+        gmsh::model::mesh::getNodesForPhysicalGroup(DIM_OBJ_3D,pGroup.second,nodeT,nodeC);
+        node.resize( node.size() + nodeT.size() );// ouch...
+        std::for_each(nodeT.begin(),nodeT.end(),[this,&i,scale,&nodeC](std::size_t &loc_idx)
+            {
+            long j = loc_idx-1;
+            node[i].p = Eigen::Vector3d(nodeC[3*j], nodeC[3*j + 1], nodeC[3*j + 2]) * scale;
+            i++;
+            });
+        });
     }
 
 void mesh::readTetraedrons(Settings const &mySets /**< [in] */)
@@ -98,7 +113,10 @@ void mesh::readTetraedrons(Settings const &mySets /**< [in] */)
                             int i1 = elemNodeTags[0][i+1];
                             int i2 = elemNodeTags[0][i+2];
                             int i3 = elemNodeTags[0][i+3];
-                            if (idx > -1) tet.push_back(Tetra::Tet(node, idx, {i0,i1,i2,i3}));
+                            if (idx > -1)
+                                {
+                                tet.push_back(Tetra::Tet(node, idx, {i0,i1,i2,i3}));
+                                }
                             }
                         }
                     else

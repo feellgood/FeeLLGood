@@ -145,7 +145,7 @@ public:
 
             if (fabs(detJ) < Tetra::epsilon)
                 {
-                std::cerr << "Singular jacobian in tetrahedron" << std::endl;
+                std::cerr << "Singular jacobian in tetrahedron: |det(J)|= " << fabs(detJ) << std::endl;
                 element::infos();
                 SYSTEM_ERROR;
                 }

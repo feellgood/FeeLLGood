@@ -116,10 +116,10 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
     /** info: print node indices of the element and the vector index of the associated param */
     void infos() const
         {
-        std::cout << "idxPrm: " << idxPrm << " ind: (";
+        std::cout << "idxPrm: " << idxPrm << " ind: {";
         for(unsigned int i = 0; i < N-1; i++)
-            { std::cout << ind[i] << ", "; }
-        std::cout << ind[N-1] << ")\n";
+            { std::cout << ind[i] << ": " << refNode[ind[i]].p << std::endl; }
+        std::cout << ind[N-1] <<": " << refNode[ind[N-1]].p << "}\n";
         };
     
     /** computes Gauss point of the element, return in result */
