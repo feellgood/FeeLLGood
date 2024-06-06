@@ -13,8 +13,6 @@ void LinAlgebra::base_projection()
 void LinAlgebra::prepareElements(Eigen::Vector3d const &Hext /**< [in] applied field */,
                                  timing const &t_prm /**< [in] */)
     {
-    base_projection();
-
     // it might be more efficient to build calc_Hext inside lambda of the for_each
     std::function<void( Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> H )> calc_Hext =
                   [&Hext](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> H) { H.colwise() = Hext; }; // set all columns of H to Hext
@@ -34,7 +32,6 @@ void LinAlgebra::prepareElements(Eigen::Vector3d const &Hext /**< [in] applied f
 
 void LinAlgebra::prepareElements(double const A_Hext /**< [in] amplitude applied field */, timing const &t_prm /**< [in] */)
     {
-    base_projection();
     std::for_each(EXEC_POL, refMsh->tet.begin(), refMsh->tet.end(),
                   [this, &A_Hext, &t_prm](Tetra::Tet &tet)
                   {

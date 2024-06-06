@@ -61,6 +61,8 @@ public:
     /** when external applied field is of field_type R4toR3 values of field_space are stored in spaceField */
     void setExtSpaceField(Settings &s /**< [in] */);
 
+    /** computes local vector basis {ep,eq} in the tangeant plane for projection on the elements */
+    void base_projection();
 private:
     /** recentering index direction if any */
     Nodes::index idx_dir;
@@ -97,9 +99,6 @@ private:
 
     /** maximum speed of the magnetization in the whole physical object */
     double v_max;
-
-    /** computes local vector basis {ep,eq} in the tangeant plane for projection on the elements */
-    void base_projection();
 
     /** external applied space field, values on gauss points, size is number of tetraedrons */
     std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > extSpaceField;

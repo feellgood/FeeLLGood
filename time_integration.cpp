@@ -191,7 +191,7 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
                 status = 1;
                 goto bailout;
                 }
-
+            linAlg.base_projection();
             if(settings.getFieldType() == RtoR3)
                 {
                 Eigen::Vector3d Hext = settings.getField(t_prm.get_t());
