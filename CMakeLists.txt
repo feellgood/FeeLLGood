@@ -67,7 +67,7 @@ else()
 endif()
 
 if(MKL_FOUND)
-    set(EIGEN_MKL_CFLAGS "-DEIGEN_USE_MKL_ALL -DMKL_DIRECT_CALL")  # -DMKL_DIRECT_CALL : not sure we need it, neither it does something
+    set(EIGEN_MKL_CFLAGS "-DEIGEN_USE_MKL_ALL -DMKL_DIRECT_CALL") # -DEIGEN_MKL_NO_DIRECT_CALL
 else()
     message(STATUS "Not found: MKL")
 endif()

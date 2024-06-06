@@ -27,20 +27,12 @@ class LinAlgebra
 public:
     /** constructor */
     inline LinAlgebra(Settings &s /**< [in] */, Mesh::mesh &my_msh /**< [in] */)
-        : NOD(my_msh.getNbNodes()), MAXITER(s.MAXITER), TOL(s.TOL), verbose(s.verbose),
+        : NOD(my_msh.getNbNodes()), MAXITER(s.MAXITER), TOL(s.TOL), ILU_tol(s.ILU_tol),
+          ILU_fill_factor(s.ILU_fill_factor), verbose(s.verbose),
           prmTetra(s.paramTetra), prmFacette(s.paramFacette), refMsh(&my_msh)
         {
         Eigen::setNbThreads(s.solverNbTh);
         base_projection();
-        K.resize(2*NOD,2*NOD);
-        K.reserve(2*NOD); // initial mem alloc to the size of the diagonal
-        X_guess.resize(2*NOD);
-        L_TH.resize(2*NOD);
-        _solver.setTolerance(s.TOL);
-        _solver.setMaxIterations(s.MAXITER);
-        _solver.preconditioner().setDroptol(s.ILU_tol);
-        _solver.preconditioner().setFillfactor(s.ILU_fill_factor);
-
         if (!s.recenter)
             { idx_dir = Nodes::IDX_UNDEF; }
         else
@@ -56,7 +48,8 @@ public:
     /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors) */
     void prepareElements(double const A_Hext /**< [in] amplitude applied field */, timing const &t_prm /**< [in] */);
 
-    /**  solver, uses bicgstab, sparse matrix and vector are filled with multiThreading */
+    /** solver, uses eigen stabilized biconjugate gradient solver (bicgstab) with ILU preconditionner, sparse matrix and vector are filled    with multiThreading. Sparse matrix is row major.
+    */
     int solver(timing const &t_prm /**< [in] */);
 
     /** setter for DW_dz */
@@ -81,6 +74,12 @@ private:
     /** solver tolerance */
     const double TOL;
 
+    /** ILU preconditionner tolerance */
+    double ILU_tol;
+
+    /** ILU preconditionner filling factor */
+    double ILU_fill_factor;
+
     /** verbosity */
     const int verbose;
 
@@ -98,18 +97,6 @@ private:
 
     /** maximum speed of the magnetization in the whole physical object */
     double v_max;
-
-    /** row major sparse matrix of the system to solve */
-    Eigen::SparseMatrix<double,Eigen::RowMajor> K;
-
-    /** initial guess for the solver */
-    Eigen::VectorXd X_guess;
-
-    /** RHS vector of the system to solve */
-    Eigen::VectorXd L_TH;
-
-    /** eigen stabilized biconjugate gradient solver, for row major sparse matrix and ILU preconditionner. Row major sparse matrix allows some parallelism with multithreading */
-    Eigen::BiCGSTAB<Eigen::SparseMatrix<double,Eigen::RowMajor>,Eigen::IncompleteLUT<double>> _solver;
 
     /** computes local vector basis {ep,eq} in the tangeant plane for projection on the elements */
     void base_projection();
