@@ -49,7 +49,7 @@ int LinAlgebra::solver(timing const &t_prm)
                       [this,&L_TH](Facette::Fac &my_elem) { my_elem.assemblage_vect(NOD,L_TH); } );
 
     Eigen::VectorXd X_guess(2*NOD);
-    refMsh->buildInitGuess(X_guess);// gamma0 division handled by function buildInitGuess
+    buildInitGuess(X_guess);// gamma0 division handled by function buildInitGuess
 
     counter.reset();
 

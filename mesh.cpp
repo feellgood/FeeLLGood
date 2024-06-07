@@ -31,19 +31,6 @@ double mesh::updateNodes(Eigen::Ref<Eigen::VectorXd> X, const double dt)
     return sqrt(v2max);
     }
 
-void mesh::buildInitGuess(Eigen::Ref<Eigen::VectorXd> G) const
-    {
-    const unsigned int NOD = node.size();
-
-    for (unsigned int i = 0; i < NOD; i++)
-        {
-        Eigen::Vector3d const& n_v = getNode_v(i);//node[i].v;
-            
-        G(i) = n_v.dot(node[i].ep) / gamma0;
-        G(NOD + i) = n_v.dot(node[i].eq) / gamma0;
-        }
-    }
-
 double mesh::avg(std::function<double(Nodes::Node, Nodes::index)> getter /**< [in] */,
                  Nodes::index d /**< [in] */) const
     {

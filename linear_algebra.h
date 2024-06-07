@@ -48,6 +48,9 @@ public:
     /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors) */
     void prepareElements(double const A_Hext /**< [in] amplitude applied field */, timing const &t_prm /**< [in] */);
 
+    /** build init guess for bicgstab solver */
+    void buildInitGuess(Eigen::Ref<Eigen::VectorXd> G) const;
+
     /** solver, uses eigen stabilized biconjugate gradient solver (bicgstab) with ILU preconditionner, sparse matrix and vector are filled    with multiThreading. Sparse matrix is row major.
     */
     int solver(timing const &t_prm /**< [in] */);

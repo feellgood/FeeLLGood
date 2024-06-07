@@ -127,10 +127,16 @@ struct Node
         d[NEXT].u.normalize();
         }
 
+    /** speed projection along ep */
+    inline double proj_ep(void) const { return d[NEXT].v.dot(ep); }
+
+    /** speed projection along eq */
+    inline double proj_eq(void) const { return d[NEXT].v.dot(eq); }
+
     /** getter for u at step k */
     inline const Eigen::Vector3d get_u(step k /**< [in] */) const
     { return d[k].u; }
-    
+
     /** getter for v at step k */
     inline const Eigen::Vector3d get_v(step k /**< [in] */) const 
     { return d[k].v; }

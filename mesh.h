@@ -86,6 +86,12 @@ public:
     /** getter : return node.v */
     inline const Eigen::Vector3d getNode_v(const int i) const { return node[i].get_v(Nodes::NEXT); }
 
+    /** return projection of speed at node i along ep */
+    inline double getProj_ep(const int i) const {return node[i].proj_ep();}
+
+    /** return projection of speed at node i along eq */
+    inline double getProj_eq(const int i) const {return node[i].proj_eq();}
+
     /** setter for u0 */
     inline void set_node_u0(const int i, Eigen::Vector3d const &val)
         { node[i].d[Nodes::CURRENT].u = val; }
@@ -105,9 +111,6 @@ public:
 
     /** make_evol on all nodes, and returns v_max */
     double updateNodes(Eigen::Ref<Eigen::VectorXd> X, const double dt);
-
-    /** build init guess for bicgstab */
-    void buildInitGuess(Eigen::Ref<Eigen::VectorXd> G) const;
 
     /** call evolution for all the nodes */
     inline void evolution(void)
