@@ -15,6 +15,19 @@
 BOOST_AUTO_TEST_SUITE(ut_solver)
 
 /*
+check a nested eigen expression to compute v_max in linAlgebra::solver() method
+*/
+BOOST_AUTO_TEST_CASE(vectorManip, *boost::unit_test::tolerance(UT_TOL))
+    {
+    const int N = 4;
+    Eigen::VectorXd x(2*N);
+    x << 1,2,3,-4,5,6,7,8;
+    double x_max = (x.reshaped<Eigen::RowMajor>(2,N).colwise().norm()).maxCoeff();
+    double result = sqrt(4.0*4.0 + 8.0*8.0);
+    std::cout << "x_max= " << x_max << " should be: " << result << std::endl;
+    BOOST_CHECK( x_max == result );
+    }
+/*
 silly_problem_solver tests if eigen::bicgstab solves Ax=b with A = Id and b=(1  1 ... 1) with default diagonal precond in 1 iteration
 */
 BOOST_AUTO_TEST_CASE(silly_problem_solver, *boost::unit_test::tolerance(UT_TOL))

@@ -109,8 +109,8 @@ public:
                       [&r](Nodes::Node &nod) { nod.setBasis(r); });
         }
 
-    /** make_evol on all nodes, and returns v_max */
-    double updateNodes(Eigen::Ref<Eigen::VectorXd> X, const double dt);
+    /** make_evol on all nodes */
+    void updateNodes(Eigen::Ref<Eigen::VectorXd> X, const double dt);
 
     /** call evolution for all the nodes */
     inline void evolution(void)

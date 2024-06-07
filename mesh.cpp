@@ -11,24 +11,12 @@ void mesh::infos(void) const
     std::cout << "  total volume:       " << vol << '\n';
     }
 
-double mesh::updateNodes(Eigen::Ref<Eigen::VectorXd> X, const double dt)
+void mesh::updateNodes(Eigen::Ref<Eigen::VectorXd> X, const double dt)
     {
-    double v2max = 0.0;
     const unsigned int NOD = node.size();
 
     for (unsigned int i = 0; i < NOD; i++)
-        {
-        const double & vp = X(i) * gamma0;
-        const double & vq = X(NOD + i) * gamma0;
-        double v2 = vp*vp + vq*vq;
-        if (v2 > v2max)
-            {
-            v2max = v2;
-            }
-        node[i].make_evol(vp, vq, dt);
-        }
-
-    return sqrt(v2max);
+        { node[i].make_evol(X(i)*gamma0, X(NOD + i)*gamma0, dt); }
     }
 
 double mesh::avg(std::function<double(Nodes::Node, Nodes::index)> getter /**< [in] */,
