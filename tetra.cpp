@@ -138,13 +138,10 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     /*-------------------- INTERPOLATION --------------------*/
     Eigen::Matrix<double,DIM,NPI> U,dUdx,dUdy,dUdz;
     interpolation(Nodes::get_u<CURRENT>, U, dUdx, dUdy, dUdz);
-    Eigen::Matrix<double,DIM,NPI> V,dVdx,dVdy,dVdz;
-    interpolation(Nodes::get_v<CURRENT>, V, dVdx, dVdy, dVdz);
-    /*
-    devNote: we should not compute all dVd(x|y|z).
-    Only one of them is used by add_drift_BE, which is idx_dir dependent
-    */
-
+    Eigen::Matrix<double,Nodes::DIM,N> v_nod;
+    for (int i = 0; i < N; i++)
+        { v_nod.col(i) = Nodes::get_v<CURRENT>(getNode(i)); }
+    Eigen::Matrix<double,DIM,NPI> V = v_nod * eigen_a;
     Eigen::Matrix<double,DIM,NPI> Hd;
     interpolation_field(Nodes::get_phi<CURRENT>, Hd);
     Eigen::Matrix<double,DIM,NPI> Hv;
@@ -189,12 +186,13 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     BE.setZero();
     if (idx_dir != IDX_UNDEF)
         {
+        Eigen::Matrix<double,DIM,NPI>  dVd_dir = v_nod * (da.col(idx_dir)).replicate(1,NPI);
         if (idx_dir == IDX_Z)
-            add_drift_BE(alpha, s_dt, Vdrift, U, V, dUdz, dVdz, BE);
+            add_drift_BE(alpha, s_dt, Vdrift, U, V, dUdz, dVd_dir, BE);
         else if (idx_dir == IDX_Y)
-            add_drift_BE(alpha, s_dt, Vdrift, U, V, dUdy, dVdy, BE);
+            add_drift_BE(alpha, s_dt, Vdrift, U, V, dUdy, dVd_dir, BE);
         else if (idx_dir == IDX_X)
-            add_drift_BE(alpha, s_dt, Vdrift, U, V, dUdx, dVdx, BE);
+            add_drift_BE(alpha, s_dt, Vdrift, U, V, dUdx, dVd_dir, BE);
         }
 
     Eigen::Matrix<double,DIM,NPI> H = Hext + H_aniso + Hd + (s_dt / gamma0) * Hv;
