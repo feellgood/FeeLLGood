@@ -2,7 +2,7 @@
 #define mesh_h
 
 /** \file mesh.h
-\brief class mesh, readMesh is expecting a mesh file in gmsh text format 2.2, with first order tetraedrons and triangular facettes.
+\brief class mesh, readMesh is expecting a mesh file in gmsh format either text or binary, from version 2.2 to the latest 4.1. The mesh has to use only first order tetraedrons and triangular facettes, mixed meshes are not allowed.
 */
 
 #include <algorithm>

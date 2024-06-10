@@ -1,7 +1,7 @@
 #include <gmsh.h>
 
 /**
-convenient template to check elements type while reading a gmsh mesh
+convenient template to check elements type while reading a gmsh mesh file
 */
 template <int TYPE>
 bool all_elems_are(std::vector<int> &container)

@@ -43,7 +43,7 @@ Within the settings, a mesh and all the micromagnetic parameters are provided. T
 
 ## Input and output files
 Input settings should be written in a json or yaml text file, following the online documentation. They feed the class Settings.
-The mesh must be first order tetrahedrons in .msh text format 2.2, the software gmsh or its python API can build such a mesh file. The class Mesh::mesh is handling the reading of the mesh file, and various members fonctions to access inner objects.
+The mesh must be first order tetrahedrons in .msh format, either text or binary, from version 2.2 to the latest 4.1. The software gmsh or its python API can build such a mesh file. The class Mesh::mesh is handling the reading of the mesh file, and various members fonctions to access inner objects.
 An optional initial magnetization configuration might be provided, it must be a .sol file.
 
 ### output files
