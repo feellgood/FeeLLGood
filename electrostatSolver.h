@@ -293,44 +293,7 @@ private:
         prepareData(Kw, Lw);
 
         Eigen::VectorXd Xw(NOD);
-
-        std::for_each(
-                p_stt.boundaryCond.begin(), p_stt.boundaryCond.end(),
-                [this, &Kw, &Lw, &Xw](auto const &it)
-                {
-                    double V = it.second;
-                    std::string name = it.first;
-
-                    auto surf_it = std::find_if(msh.s.begin(), msh.s.end(),
-                                                [name](Mesh::Surf const &_s)
-                                                { return (_s.getName() == name); });
-
-                    if (surf_it != msh.s.end())
-                        {
-                        std::for_each(
-                                surf_it->elem.begin(), surf_it->elem.end(),
-                                [V, &Kw, &Lw, &Xw](Mesh::Triangle const &tri)
-                                {
-                                    for (int ie = 0; ie < Facette::N; ie++)  // should be Triangle::N
-                                        {
-                                        const int i = tri.ind[ie];
-                                        
-                                        // first we suppress all diagonal elements
-                                        Kw.erase(std::remove_if(Kw.begin(),Kw.end(),[i]( Eigen::Triplet<double> &t)
-                                                { return (t.row() == t.col()); } ));
-                                        
-                                        //then remove all the element we want to be zero
-                                        Kw.erase(std::remove_if(Kw.begin(),Kw.end(),[i]( Eigen::Triplet<double> &t)
-                                                { return (t.row() == i); } ));
-                                        
-                                        // then reinsert diagonal with big value
-                                        Kw.push_back(Eigen::Triplet<double>(i, i, 1e9));
-                                        Lw[i] = V * 1e9;
-                                        Xw[i] = V;
-                                        }
-                                });
-                        }
-                });
+        /* do something here with boundary conditions */
 
         if (verbose)
             { std::cout << "line weighting..." << std::endl; }

@@ -127,16 +127,4 @@ void mesh::sortNodes(Nodes::index long_axis)
                       facette.ind[1] = node_index[facette.ind[1]];
                       facette.ind[2] = node_index[facette.ind[2]];
                   });
-    std::for_each(s.begin(), s.end(),
-                  [this](Mesh::Surf &surface)
-                  {
-                      std::vector<Mesh::Triangle> &elements = surface.elem;
-                      std::for_each(elements.begin(), elements.end(),
-                                    [this](Mesh::Triangle &tri)
-                                    {
-                                        tri.ind[0] = node_index[tri.ind[0]];
-                                        tri.ind[1] = node_index[tri.ind[1]];
-                                        tri.ind[2] = node_index[tri.ind[2]];
-                                    });
-                  });
     }

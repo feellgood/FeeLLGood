@@ -10,7 +10,6 @@
 
 #include "facette.h"
 #include "node.h"
-#include "surface.h"
 #include "tetra.h"
 #include "feellgoodSettings.h"
 
@@ -133,9 +132,6 @@ public:
 
     /** tetrahedron container */
     std::vector<Tetra::Tet> tet;
-
-    /** surface container */
-    std::vector<Mesh::Surf> s;
 
     /** read a solution from a file (tsv formated) and initialize fem struct to restart computation
      * from that distribution, return time

@@ -101,8 +101,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
 
 SET(HEADERS config.h node.h expression_parser.h mesh.h electrostatSolver.h
     spinTransferTorque.h time_integration.h feellgoodSettings.h tetra.h
-    facette.h triangle.h surface.h linear_algebra.h log-stats.h tags.h
-    chronometer.h element.h)
+    facette.h linear_algebra.h log-stats.h tags.h chronometer.h element.h)
 
 SET(SOURCES feellgoodSettings.cpp time_integration.cpp solver.cpp
     read.cpp save.cpp linear_algebra.cpp recentering.cpp tetra.cpp
