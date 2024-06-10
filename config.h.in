@@ -28,12 +28,12 @@ const std::string feellgood_version = "@FEELLGOOD_VERSION@"; /**< human readable
             } /**< macro to exit executable on some errors */
 #endif
 
-const double mu0 = 1.25663706212e-6;                /**< T A^-1 m */
-const double gamma0 = 1.76085963023e11 * mu0;       /**< s^-1 A^-1 m */
+const double mu0 = 1.25663706127e-6;                /**< T A^-1 m */
+const double gamma0 = 1.76085962784e11 * mu0;       /**< s^-1 A^-1 m */
 const double PLANCKS_H = 6.62607015e-34;            /**< kg m^2 / s */
 const double PLANCKS_HBAR = PLANCKS_H / (2 * M_PI); /**< kg m^2 / s */
 const double CHARGE_ELECTRON = 1.602176634e-19;     /**< C */
-const double MASS_ELECTRON = 9.1093837015e-31;      /**< kg */
+const double MASS_ELECTRON = 9.1093837139e-31;      /**< kg */
 const double BOHRS_MUB = CHARGE_ELECTRON * PLANCKS_HBAR / (2. * MASS_ELECTRON); /**< C.m^2 */
 
 /** set execution policy */
