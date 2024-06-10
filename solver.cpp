@@ -76,9 +76,9 @@ int LinAlgebra::solver(timing const &t_prm)
         v_max = (sol.reshaped<Eigen::RowMajor>(2,NOD).colwise().norm()).maxCoeff();
     #else
         double v2max(0.0);
-        for (unsigned int i = 0; i < NOD; i++)
+        for (int i = 0; i < NOD; i++)
             {
-            double v2 = sq(sol(i)) + sq(sol(NOD + i));
+            double v2 = Nodes::sq(sol(i)) + Nodes::sq(sol(NOD + i));
             if (v2 > v2max)
                 { v2max = v2; }
             }
