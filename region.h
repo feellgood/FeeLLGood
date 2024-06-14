@@ -46,8 +46,11 @@ class region
         /** parameters associated to T */
         PRM p;
 
-        /** setter for the problem(s) to solve */    
-        //inline void setWhatToSolve(const int pb) { whatToSolve &= pb; }
+        /** getter: returns region name */
+        inline std::string getName(void) { return name; }
+
+        /** getter: returns region index */
+        inline int getIndex(void) { return idx; }
         
     private:
         /** region name */

@@ -13,7 +13,6 @@
 #include "mesh.h"
 #include "time_integration.h"
 #include "electrostatSolver.h"
-#include "region.h"
 
 // Catch some deadly signals in order to save the state before quitting.
 volatile sig_atomic_t received_signal = 0;
@@ -198,9 +197,6 @@ std::string parseOptions(Settings &settings, int argc, char *argv[], unsigned in
 
 int main(int argc, char *argv[])
     {
-    region<Tetra::Tet,Tetra::prm> bob("youpi la région",42,LLG|ELECTROSTAT);
-    bob.infos();
-    
     Settings mySettings;
     chronometer counter;
 
