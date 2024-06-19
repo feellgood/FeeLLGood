@@ -1,7 +1,10 @@
 #ifndef element_h
 #define element_h
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #include <execution>
+#pragma GCC diagnostic pop
 
 #include <eigen3/Eigen/Sparse>
 #include <eigen3/Eigen/Dense>

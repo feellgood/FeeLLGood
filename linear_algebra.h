@@ -7,7 +7,10 @@
 <br> projection and matrix assembly is multithreaded for tetrahedron, monothread for facette
 */
 #include <random>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #include <execution>
+#pragma GCC diagnostic pop
 
 #include "config.h"
 

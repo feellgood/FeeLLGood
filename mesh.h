@@ -6,7 +6,10 @@
 */
 
 #include <algorithm>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #include <execution>
+#pragma GCC diagnostic pop
 
 #include "facette.h"
 #include "node.h"
