@@ -50,12 +50,10 @@ constexpr double a[N][NPI] = {{1. - u[0] - v[0] - w[0], 1. - u[1] - v[1] - w[1],
                               {w[0], w[1], w[2], w[3], w[4]}};
 
 /** eigen constant matrix a */
-static const Eigen::Matrix<double,N,NPI> eigen_a = [] {
-        Eigen::Matrix<double,N,NPI> tmp; tmp << a[0][0], a[0][1], a[0][2], a[0][3], a[0][4],
-                                            a[1][0], a[1][1], a[1][2], a[1][3], a[1][4],
-                                            a[2][0], a[2][1], a[2][2], a[2][3], a[2][4],
-                                            a[3][0], a[3][1], a[3][2], a[3][3], a[3][4];
-                                            return tmp; }();
+const Eigen::Matrix<double,N,NPI> eigen_a = (Eigen::MatrixXd(N,NPI) << a[0][0], a[0][1], a[0][2], a[0][3], a[0][4],
+                                                                       a[1][0], a[1][1], a[1][2], a[1][3], a[1][4],
+                                                                       a[2][0], a[2][1], a[2][2], a[2][3], a[2][4],
+                                                                       a[3][0], a[3][1], a[3][2], a[3][3], a[3][4] ).finished();
 
 /** \class prm
 region number and material constants
