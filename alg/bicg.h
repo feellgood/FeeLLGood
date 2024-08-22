@@ -17,7 +17,6 @@ double generic_bicg( alg::iteration &iter, alg::r_sparseMat& A, std::vector<doub
 
     for(unsigned int i=0;i<diag_precond.size();i++)
         { diag_precond[i] = 1.0/A(i,i); }
-
     if(MASK)
         {
         alg::mult(A, xd, v);

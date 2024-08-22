@@ -93,7 +93,11 @@ void set_rhsnorm(double r) { rhsn = r; }
     
 /** return the monitored algo has converged or not according criteria fixed by right hand side norm rhsn */
 inline bool converged(void)
-	{ return !std::isnan(res) && res <= rhsn * resmax; }
+    {
+    if (std::isnan(res))
+        { std::cout << "residu is NaN, algo cannot converge.\n"; exit(1); }
+    return res <= rhsn * resmax;
+    }
 
 /** monitor the convergence through a number */
 inline bool converged(double nr)
