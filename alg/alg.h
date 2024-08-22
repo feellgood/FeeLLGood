@@ -17,7 +17,6 @@
 #include "coeff.h"
 #include "sparseVect.h"
 #include "sparseMat.h"
-#include "denseMat.h"
 #include "iter.h"
 
 /** \namespace alg
@@ -74,70 +73,6 @@ inline void mult(alg::r_sparseMat & A,std::vector<double> const& X,std::vector<d
     if (A.getDim() == _size)
 	    { for(int i=0;i<_size;i++) Y[i]= A(i).dot(X); }
     }
-
-/** Y = A*X with denseMat A */
-inline void mult(alg::denseMat const& A,std::vector<double> const& X,std::vector<double> &Y)
-{
-const size_t _size = X.size();
-assert(A.ncols() == _size);
-
-Y.resize(_size);
-for (size_t i=0; i<A.nrows(); i++) {
-       double val(0);
-       for (size_t j=0; j<_size; j++) val += A(i,j)*X[j];
-       Y[i]=val;
-       }
-}
-
-/** Y = trans(X)*A */
-inline void transposed_mult(std::vector<double> const& X,alg::denseMat const& A,std::vector<double> &Y)
-{
-const size_t ncolsA = A.ncols();
-Y.resize(ncolsA);
-const size_t _size = X.size();
-
-for (size_t j=0; j<ncolsA; j++) { 
-       double val(0);
-       for (size_t i=0; i<_size; i++) val += X[i]*A(i,j);
-       Y[j]=val;
-       }
-}
-
-/** Y = trans(A)*X with denseMat A */
-inline void transposed_mult(alg::denseMat const& A,std::vector<double> const& X,std::vector<double> &Y)
-{
-const size_t nrowsA = A.nrows();
-assert(nrowsA == X.size());
-
-Y.resize(A.ncols());
-for (size_t i=0; i<A.ncols(); i++) {
-       double val(0);
-       for (size_t j=0; j<nrowsA; j++) val += A(j, i)*X[j];
-       Y[i]=val;
-       }
-}
-
-
-/** C = trans(A)*B */
-inline void transposed_mult(alg::denseMat const& A,alg::denseMat const& B,alg::denseMat & C)
-{
-const size_t nrowsA = A.nrows();
-const size_t ncolsA = A.ncols();
-const size_t ncolsB = B.ncols();
-assert(nrowsA==B.nrows());
-
-C.nrows()=ncolsA;
-C.ncols()=ncolsB;
-C.resize(ncolsA*ncolsB);
-for (size_t i=0; i<ncolsA; i++) { 
-    for (size_t j=0; j<ncolsB; j++) 
-	{
-        double val(0);
-        for (size_t k=0; k<nrowsA; k++) { val += A(k, i)*B(k, j); }
-	C(i, j) = val;      
-	}
-}
-}
 
 inline void applyMask(const std::vector<int>& mask, std::vector<double> & x)
     { std::for_each(mask.begin(),mask.end(),[&x](const int _i){ x[_i] = 0.0; }); }
