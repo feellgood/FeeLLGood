@@ -16,17 +16,19 @@ namespace alg
 {
 
 template<typename T> 
-struct node_t{
+struct node_t
+    {
     T *data;
 	node_t *left;
 	node_t *right;
-};
+    };
 
 template<typename T> 
-class btree{
+class btree
+{
 public:
-	btree();
-	~btree();
+	btree(): root(NULL) {}
+	~btree() { destroy_tree(); }
 
 	void insert(T data);
 	node_t<T> *search(int _i);
@@ -47,143 +49,140 @@ private:
 	node_t<T> *root;
 };
 
-
 template<typename T> 
-btree<T>::btree(){
-	root = NULL;
-}
-
-template<typename T> 
-btree<T>::~btree(){
-	destroy_tree();
-}
-
-template<typename T> 
-void btree<T>::destroy_tree(node_t<T> *leaf){
-	if(leaf != NULL){
+void btree<T>::destroy_tree(node_t<T> *leaf)
+    {
+    if(leaf != NULL)
+	    {
 		destroy_tree(leaf->left);
 		destroy_tree(leaf->right);
         delete leaf->data;
 		delete leaf;
-	}
-}
+        }
+    }
 
 template<typename T> 
-void btree<T>::insert(T data, node_t<T> *leaf){
+void btree<T>::insert(T data, node_t<T> *leaf)
+    {
+	if (data._i == leaf->data->_i)
+	    {
+        leaf->data->add(data.getVal());
+        return;
+	    }
 
-	if (data._i == leaf->data->_i){
-       leaf->data->add(data.getVal());
-       return;
-	   }
+	if (data._i < leaf->data->_i)
+	    {
+	    if (leaf->left != NULL) { insert(data, leaf->left); }
+        else
+            {
+		    leaf->left = new node_t<T>; 
+            if (!leaf->left) exit(1);
+            T* data_ptr = new T(data._i, data.getVal()); 
+            if (!data_ptr) exit(1);
+            leaf->left->data  = data_ptr;
+		    leaf->left->left  = NULL;
+		    leaf->left->right = NULL;
+		    }
+        return;
+	    }
 
-	if (data._i < leaf->data->_i){
-	   if (leaf->left != NULL){
-		  insert(data, leaf->left);
-		}
-       else{
-		  leaf->left = new node_t<T>; 
-          if (!leaf->left) exit(1);
-          T* data_ptr = new T(data._i, data.getVal()); 
-          if (!data_ptr) exit(1);
-          leaf->left->data  = data_ptr;
-		  leaf->left->left  = NULL;
-		  leaf->left->right = NULL;
-		  }
-       return;
-	   }
-
-    if (data._i > leaf->data->_i){
-	   if (leaf->right != NULL){
-		  insert(data, leaf->right);
-		  } 
-       else{
-		  leaf->right = new node_t<T>;
-          if (!leaf->right) exit(1);
-          T* data_ptr = new T(data._i, data.getVal()); 
-          if (!data_ptr) exit(1);
-          leaf->right->data  = data_ptr;
-		  leaf->right->right = NULL;
-		  leaf->right->left  = NULL;
-		  }
-       return;
-	   }
-
-}
+    if (data._i > leaf->data->_i)
+        {
+	    if (leaf->right != NULL) { insert(data, leaf->right); } 
+        else
+            {
+		    leaf->right = new node_t<T>;
+            if (!leaf->right) exit(1);
+            T* data_ptr = new T(data._i, data.getVal()); 
+            if (!data_ptr) exit(1);
+            leaf->right->data  = data_ptr;
+		    leaf->right->right = NULL;
+		    leaf->right->left  = NULL;
+		    }
+        return;
+        }
+    }
 
 template<typename T> 
-void btree<T>::insert(T data){
-	if(root != NULL){
-		insert(data, root);
-	}else{
+void btree<T>::insert(T data)
+    {
+	if(root != NULL)
+	    { insert(data, root); }
+	else
+	    {
 		root = new node_t<T>;
         if (!root) exit(1);
         root->data = new T(data._i, data.getVal());
 		root->left = NULL;
 		root->right = NULL;
-	}
-}
+	    }
+    }
 
 template<typename T> 
-node_t<T> *btree<T>::search(int _i, node_t<T> *leaf){
-	if(leaf != NULL){
-		if(_i == leaf->data->_i){
-			return leaf;
-		}
-		if(_i < leaf->data->_i){
-			return search(_i, leaf->left);
-		}else{
-			return search(_i, leaf->right);
-		}
-	}else{
-		return NULL;
-	}
-}
+node_t<T> *btree<T>::search(int _i, node_t<T> *leaf)
+    {
+	if(leaf != NULL)
+	    {
+		if(_i == leaf->data->_i)
+		    { return leaf; }
+		
+		if(_i < leaf->data->_i)
+		    { return search(_i, leaf->left); }
+		else
+		    { return search(_i, leaf->right); }
+	    }
+	else
+	    { return NULL; }
+    }
 
 template<typename T> 
-node_t<T> *btree<T>::search(int _i){
-	return search(_i, root);
-}
+node_t<T> *btree<T>::search(int _i) { return search(_i, root); }
 
 template<typename T> 
-void btree<T>::destroy_tree(){
-	destroy_tree(root);
-}
+void btree<T>::destroy_tree() { destroy_tree(root); }
 
 template<typename T> 
-void btree<T>::inorder_print(){
+void btree<T>::inorder_print()
+    {
 	inorder_print(root);
-	std::cout << "\n";
-}
+	std::cout << std::endl;
+    }
 
 template<typename T>
-void btree<T>::inorder_print(node_t<T> *leaf){
-	if(leaf != NULL){
+void btree<T>::inorder_print(node_t<T> *leaf)
+    {
+	if(leaf != NULL)
+	    {
 		inorder_print(leaf->left);
 		std::cout << "{" << leaf->data->_i<< ":"<<leaf->data->getVal() << "},";
 		inorder_print(leaf->right);
-	}
-}
+	    }
+    }
 
 template<typename T>
-void btree<T>::postorder_print(){
+void btree<T>::postorder_print()
+    {
 	postorder_print(root);
-	std::cout << "\n";
-}
+	std::cout << std::endl;
+    }
 
 template<typename T>
-void btree<T>::postorder_print(node_t<T> *leaf){
-	if(leaf != NULL){
+void btree<T>::postorder_print(node_t<T> *leaf)
+    {
+	if(leaf != NULL)
+	    {
 		inorder_print(leaf->left);
 		inorder_print(leaf->right);
 		std::cout << "{" << leaf->data->_i<< ":"<<leaf->data->getVal() << "},";
-	}
-}
+	    }
+    }
 
 template<typename T>
-void btree<T>::preorder_print(){
+void btree<T>::preorder_print()
+    {
 	preorder_print(root);
-	std::cout << "\n";
-}
+	std::cout << std::endl;
+    }
 
 template<typename T>
 void btree<T>::preorder_print(node_t<T> *leaf){
@@ -195,19 +194,19 @@ void btree<T>::preorder_print(node_t<T> *leaf){
 }
 
 template<typename T> 
-void btree<T>::inorder_insert(std::vector<T> &v){
-	inorder_insert(root, v);
-}
+void btree<T>::inorder_insert(std::vector<T> &v) { inorder_insert(root, v); }
 
 template<typename T> 
-void btree<T>::inorder_insert(node_t<T> *leaf, std::vector<T> &v){
-	if(leaf != NULL){
+void btree<T>::inorder_insert(node_t<T> *leaf, std::vector<T> &v)
+    {
+	if(leaf != NULL)
+	    {
 		inorder_insert(leaf->left, v);
         alg::v_coeff data{(int)(leaf->data->_i), leaf->data->getVal()}; //CT : cast to int to silent narrowing
         v.push_back(data);
 		inorder_insert(leaf->right, v);
-	}
-}
+	    }
+    }
 
 template<typename T> 
 std::ostream& operator << (std::ostream& os, const std::vector<T>& v)
@@ -220,11 +219,9 @@ std::ostream& operator << (std::ostream& os, const std::vector<T>& v)
     return os;
 }
 
-
-
 /**
 \class w_sparseVect
-binary tree : it is a container for v_coeff
+btree is a container for v_coeff
 */
 class w_sparseVect
 {
@@ -236,14 +233,10 @@ public:
 	/** inserter with a coefficient */
     inline void insert(alg::v_coeff coeff) {tree.insert(coeff);}
 
-/** return true if the coefficient exists */
-	inline bool exist(const int &idx)
-		{ 
-        return (tree.search(idx) != NULL);
-		}
-	
-	/** getter for the value of a coefficient of index idx, if several coeffs have the same index then it returns the value of the first occurence */
-	
+    /** return true if the coefficient exists */
+	inline bool exist(const int &idx) { return (tree.search(idx) != NULL); }
+
+    /** getter for the value of a coefficient of index idx, if several coeffs have the same index then it returns the value of the first occurence */	
 	inline double getVal(const int &idx)
 		{
         node_t< alg::v_coeff > *node=tree.search(idx);
@@ -254,7 +247,6 @@ public:
 private:
 	/** coeffs container */
     btree< alg::v_coeff > tree;
-
 }; // end class w_sparseVect
 
 
@@ -269,12 +261,9 @@ public:
 	inline r_sparseVect() {collected = false;}
 
 	/** constructor */
-	inline r_sparseVect(w_sparseVect &v)
-		{
-		collect(v);
-		}
+	inline r_sparseVect(w_sparseVect &v) { collect(v); }
 
-/** return true if the coefficient exists */
+    /** return true if the coefficient exists */
 	inline bool exist(const int &idx) const
 		{ 
 		auto it = std::find_if(x.begin(),x.end(),[this,&idx](alg::v_coeff coeff){return (coeff._i == idx); } ); 
@@ -289,9 +278,6 @@ public:
 		collected = true;		
 		}
 
-	/** getter for sorted */
-//	inline bool isSorted(void) const {return sorted;}
-	
 	/** getter for emptyness of the container of the coeffs */
 	inline bool isEmpty(void) const {return x.empty();} 
 
@@ -299,7 +285,6 @@ public:
 	inline bool isCollected(void) const {return collected;}
 
 	/** getter for the value of a coefficient of index idx, if several coeffs have the same index then it returns the value of the first occurence */
-	
 	inline double getVal(int idx) const
 		{
 		double val(0);
@@ -325,17 +310,17 @@ public:
 		}
 
 	/** scalar product */
-inline double dot(const std::vector<double> & X) const
-	{
-	double val(0);
-	if (!isCollected()) {std::cout << "warning : cannot dot on an uncollected sparseVect" << std::endl;exit(1);}
-	else
-		{
-		for(auto it=x.begin();it!=x.end();++it)
-			{ if(it->_i < (int)(X.size()) ) { val += it->getVal()*X[it->_i]; } }
-		}	
-	return val;
-	}
+    inline double dot(const std::vector<double> & X) const
+    	{
+    	double val(0);
+    	if (!isCollected()) {std::cout << "warning : cannot dot on an uncollected sparseVect" << std::endl;exit(1);}
+    	else
+    		{
+    		for(auto it=x.begin();it!=x.end();++it)
+    			{ if(it->_i < (int)(X.size()) ) { val += it->getVal()*X[it->_i]; } }
+    		}	
+    	return val;
+    	}
 
 	/** printing function */
 	inline void print(std::ostream & flux) const
@@ -353,13 +338,10 @@ private:
 	/** coeffs container */
     std::vector< alg::v_coeff > x;
 
-/** if true the coeffs have been collected */
-bool collected;
+    /** if true the coeffs have been collected */
+    bool collected;
 }; // end class r_sparseVect
 
-
-/** scalar product of a sparse vector and a dense vector */
-//inline double dot(r_sparseVect const& X,const std::vector<double> & Y) { return X.dot(Y); }
 
 /** operator<< for r_sparseVect */
 inline std::ostream & operator<<(std::ostream & flux, r_sparseVect const& v) {v.print(flux); return flux;}
