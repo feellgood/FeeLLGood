@@ -14,7 +14,7 @@ If several v_coeff have the same index, then they are automatically summed up.
 
 namespace alg
 {
-
+/** elementary node */
 template<typename T> 
 struct node_t
     {
@@ -23,6 +23,7 @@ struct node_t
 	node_t *right;
     };
 
+/** tree to store sparse vector coefficient */
 template<typename T> 
 class btree
 {
@@ -32,7 +33,7 @@ public:
 
 	void insert(T data);
 	node_t<T> *search(int _i);
-	void destroy_tree();
+	inline void destroy_tree() { destroy_tree(root); }
 	void inorder_print();
 	void postorder_print();
 	void preorder_print();
@@ -49,6 +50,7 @@ private:
 	node_t<T> *root;
 };
 
+/** recursive template function to delete the tree */
 template<typename T> 
 void btree<T>::destroy_tree(node_t<T> *leaf)
     {
@@ -61,6 +63,7 @@ void btree<T>::destroy_tree(node_t<T> *leaf)
         }
     }
 
+/** leaf inserter */
 template<typename T> 
 void btree<T>::insert(T data, node_t<T> *leaf)
     {
@@ -103,6 +106,7 @@ void btree<T>::insert(T data, node_t<T> *leaf)
         }
     }
 
+/** coeff inserter */
 template<typename T> 
 void btree<T>::insert(T data)
     {
@@ -118,6 +122,7 @@ void btree<T>::insert(T data)
 	    }
     }
 
+/** search template function for the first occurence of index _i from position leaf */
 template<typename T> 
 node_t<T> *btree<T>::search(int _i, node_t<T> *leaf)
     {
@@ -135,12 +140,11 @@ node_t<T> *btree<T>::search(int _i, node_t<T> *leaf)
 	    { return NULL; }
     }
 
+/** search template function for the first occurence of index _i in the whole tree */
 template<typename T> 
 node_t<T> *btree<T>::search(int _i) { return search(_i, root); }
 
-template<typename T> 
-void btree<T>::destroy_tree() { destroy_tree(root); }
-
+/** printing function */
 template<typename T> 
 void btree<T>::inorder_print()
     {
@@ -148,6 +152,7 @@ void btree<T>::inorder_print()
 	std::cout << std::endl;
     }
 
+/** printing function */
 template<typename T>
 void btree<T>::inorder_print(node_t<T> *leaf)
     {
@@ -159,6 +164,7 @@ void btree<T>::inorder_print(node_t<T> *leaf)
 	    }
     }
 
+/** printing function */
 template<typename T>
 void btree<T>::postorder_print()
     {
@@ -166,6 +172,7 @@ void btree<T>::postorder_print()
 	std::cout << std::endl;
     }
 
+/** printing function */
 template<typename T>
 void btree<T>::postorder_print(node_t<T> *leaf)
     {
@@ -177,6 +184,7 @@ void btree<T>::postorder_print(node_t<T> *leaf)
 	    }
     }
 
+/** printing function */
 template<typename T>
 void btree<T>::preorder_print()
     {
@@ -184,18 +192,23 @@ void btree<T>::preorder_print()
 	std::cout << std::endl;
     }
 
+/** printing function */
 template<typename T>
-void btree<T>::preorder_print(node_t<T> *leaf){
-	if(leaf != NULL){
+void btree<T>::preorder_print(node_t<T> *leaf)
+    {
+	if(leaf != NULL)
+	    {
 		std::cout << "{" << leaf->data->_i<< ":"<< leaf->data->getVal() << "},";
 		inorder_print(leaf->left);
 		inorder_print(leaf->right);
-	}
-}
+	    }
+    }
 
+/** inserter for a bunch of coefficient from position root */
 template<typename T> 
 void btree<T>::inorder_insert(std::vector<T> &v) { inorder_insert(root, v); }
 
+/** inserter for a bunch of coefficient from position leaf */
 template<typename T> 
 void btree<T>::inorder_insert(node_t<T> *leaf, std::vector<T> &v)
     {
@@ -208,16 +221,16 @@ void btree<T>::inorder_insert(node_t<T> *leaf, std::vector<T> &v)
 	    }
     }
 
+/** overloading of << for printing functions */
 template<typename T> 
 std::ostream& operator << (std::ostream& os, const std::vector<T>& v)
-{
+    {
     os << "[";
-    for (auto it = v.begin(); it != v.end(); ++it){
-        os << "{" << it->_i << ":" << it->getVal() << "},";
-    }
+    for (auto it = v.begin(); it != v.end(); ++it)
+        { os << "{" << it->_i << ":" << it->getVal() << "},"; }
     os << "]";
     return os;
-}
+    }
 
 /**
 \class w_sparseVect
@@ -293,6 +306,7 @@ public:
 		return val;		
 		}
 
+    /** getter for a reference to the value of a coefficient */
     inline double & getValRef(int idx)
 		{
 		auto it = std::find_if(x.begin(),x.end(),[this,&idx](alg::v_coeff coeff){return (coeff._i == idx); } ); 
