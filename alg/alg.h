@@ -74,13 +74,15 @@ inline void mult(alg::r_sparseMat & A,std::vector<double> const& X,std::vector<d
 	    { for(int i=0;i<_size;i++) Y[i]= A(i).dot(X); }
     }
 
-inline void applyMask(const std::vector<int>& mask, std::vector<double> & x)
-    { std::for_each(mask.begin(),mask.end(),[&x](const int _i){ x[_i] = 0.0; }); }
+/** apply a mask to vector X : all coefficients in vector mask are zeroed in X */
+inline void applyMask(const std::vector<int>& mask, std::vector<double> & X)
+    { std::for_each(mask.begin(),mask.end(),[&X](const int _i){ X[_i] = 0.0; }); }
 
+/** generic template for gradient conjugate */
 template<bool MASK>
 double generic_cg(alg::iteration &iter, alg::r_sparseMat& A, std::vector<double> & x, const std::vector<double> & rhs, const std::vector<double> & xd, const std::vector<int>& ld);
 
-/** conjugate gradient with diagonal preconditioner, returns residu */
+/** conjugate gradient with diagonal preconditioner, returns residu. Template generic_cg is called with dummy xd and ld */
 inline double cg(alg::r_sparseMat& A, std::vector<double> & x, const std::vector<double> & b, alg::iteration &iter)
     {
     std::vector<double> xd;
@@ -91,14 +93,13 @@ inline double cg(alg::r_sparseMat& A, std::vector<double> & x, const std::vector
 /** conjugate gradient with diagonal preconditioner with Dirichlet conditions, returns residu */
 inline double cg_dir(alg::r_sparseMat& A, std::vector<double> & x, const std::vector<double> & rhs, 
               const std::vector<double> & xd, const std::vector<int>& ld, alg::iteration &iter)
-    {
-    return alg::generic_cg<true>(iter,A,x,rhs,xd,ld);
-    }
+    { return alg::generic_cg<true>(iter,A,x,rhs,xd,ld); }
 
+/** generic template for stabilized bigradient conjugate  */
 template<bool MASK>
 double generic_bicg( alg::iteration &iter, alg::r_sparseMat& A, std::vector<double> & x, const std::vector<double> & rhs, const std::vector<double>& xd, const std::vector<int>& ld);
 
-/** biconjugate gradient and diagonal preconditionner, returns residu */
+/** biconjugate gradient and diagonal preconditionner, returns residu. Template generic_bicg is called with dummy xd and ld  */
 inline double bicg(alg::r_sparseMat& A, std::vector<double> & x, const std::vector<double> & b, alg::iteration &iter)
     {
     std::vector<double> xd;
