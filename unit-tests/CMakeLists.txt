@@ -26,6 +26,8 @@ add_definitions ( -DBOOST_TEST_DYN_LINK -DTBB_SUPPRESS_DEPRECATED_MESSAGES )
 
 add_executable (test_ut_solver ut_solver.cpp)
 
+add_executable (test_ut_alg ut_alg.cpp)
+
 add_executable (test_ut_OMP_solver ut_OMP_solver.cpp)
 
 add_executable(test_ut_dukTapeParser ../expression_parser.cpp ut_dukTapeParser.cpp)
@@ -156,6 +158,13 @@ else()
         )
 endif()
 
+target_link_libraries(test_ut_alg
+        ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
+        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+        TBB::tbb
+        )
+
 #target_compile_options(test_ut_OMP_solver PUBLIC -fsanitize=leak )
 #target_link_options(test_ut_OMP_solver PUBLIC -fsanitize=leak )
 target_link_libraries(test_ut_OMP_solver
@@ -230,6 +239,7 @@ target_link_libraries(test_ut_readMesh
 # setarch --addr-no-randomize ./test_ut_* to disable ASLR to avoid -fsanitize=leak to bug
 add_test (NAME ut_solver COMMAND test_ut_solver)
 add_test (NAME ut_OMP_solver COMMAND test_ut_OMP_solver)
+add_test (NAME ut_alg COMMAND test_ut_alg)
 add_test (NAME ut_dukTapeParser COMMAND test_ut_dukTapeParser)
 add_test (NAME ut_node COMMAND test_ut_node)
 add_test (NAME ut_region COMMAND test_ut_region)
