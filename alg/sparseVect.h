@@ -29,11 +29,10 @@ class Tree
 {
 public:
 	Tree(): root(NULL) {}
-	~Tree() { destroy_tree(); }
+	~Tree() { destroy_tree(root); }
 
 	void insert(T data);
 	node_t<T> *search(int _i);
-	inline void destroy_tree() { destroy_tree(root); }
 	void inorder_print();
 	void postorder_print();
 	void preorder_print();
