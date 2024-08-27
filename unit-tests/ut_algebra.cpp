@@ -59,5 +59,18 @@ BOOST_AUTO_TEST_CASE(test_add, *boost::unit_test::tolerance(UT_TOL))
     BOOST_CHECK( y[3] == (0.5 + sqrt(42)) );
     }
 
+/** test on sub */
+BOOST_AUTO_TEST_CASE(test_sub, *boost::unit_test::tolerance(UT_TOL))
+    {
+    std::vector<double> x {1,4,-2,sqrt(42)};
+    std::vector<double> y {1,-3,2,0.5};
+    sub(x,y); // y -= x
+
+    BOOST_CHECK( y[0] == 0.0 );
+    BOOST_CHECK( y[1] == -7.0 );
+    BOOST_CHECK( y[2] == 4.0 );
+    BOOST_CHECK( y[3] == (0.5 - sqrt(42)) );
+    }
+
 BOOST_AUTO_TEST_SUITE_END()
 
