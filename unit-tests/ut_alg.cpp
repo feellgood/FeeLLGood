@@ -6,6 +6,7 @@
 
 #include "ut_config.h"  // for tolerance UT_TOL macro
 #include "../alg/alg.h"
+#include "../alg/coeff.h"
 
 BOOST_AUTO_TEST_SUITE(ut_alg)
 
@@ -94,6 +95,15 @@ BOOST_AUTO_TEST_CASE(test_applyMask)
     BOOST_TEST( x[1] == 0.0 );
     BOOST_TEST( x[2] == -2.0 );
     BOOST_TEST( x[3] == 0.0 );
+    }
+
+/** test on v_coeff */
+BOOST_AUTO_TEST_CASE(test_v_coeff)
+    {
+    alg::v_coeff bob(2,sqrt(2));
+    
+    BOOST_TEST( bob.getVal() == sqrt(2) );
+    BOOST_TEST( bob._i == 2 );
     }
 
 BOOST_AUTO_TEST_SUITE_END()

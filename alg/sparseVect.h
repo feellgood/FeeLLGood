@@ -25,11 +25,11 @@ struct node_t
 
 /** tree to store sparse vector coefficient */
 template<typename T> 
-class btree
+class Tree
 {
 public:
-	btree(): root(NULL) {}
-	~btree() { destroy_tree(); }
+	Tree(): root(NULL) {}
+	~Tree() { destroy_tree(); }
 
 	void insert(T data);
 	node_t<T> *search(int _i);
@@ -52,7 +52,7 @@ private:
 
 /** recursive template function to delete the tree */
 template<typename T> 
-void btree<T>::destroy_tree(node_t<T> *leaf)
+void Tree<T>::destroy_tree(node_t<T> *leaf)
     {
     if(leaf != NULL)
 	    {
@@ -65,7 +65,7 @@ void btree<T>::destroy_tree(node_t<T> *leaf)
 
 /** leaf inserter */
 template<typename T> 
-void btree<T>::insert(T data, node_t<T> *leaf)
+void Tree<T>::insert(T data, node_t<T> *leaf)
     {
 	if (data._i == leaf->data->_i)
 	    {
@@ -108,7 +108,7 @@ void btree<T>::insert(T data, node_t<T> *leaf)
 
 /** coeff inserter */
 template<typename T> 
-void btree<T>::insert(T data)
+void Tree<T>::insert(T data)
     {
 	if(root != NULL)
 	    { insert(data, root); }
@@ -124,7 +124,7 @@ void btree<T>::insert(T data)
 
 /** search template function for the first occurence of index _i from position leaf */
 template<typename T> 
-node_t<T> *btree<T>::search(int _i, node_t<T> *leaf)
+node_t<T> *Tree<T>::search(int _i, node_t<T> *leaf)
     {
 	if(leaf != NULL)
 	    {
@@ -142,11 +142,11 @@ node_t<T> *btree<T>::search(int _i, node_t<T> *leaf)
 
 /** search template function for the first occurence of index _i in the whole tree */
 template<typename T> 
-node_t<T> *btree<T>::search(int _i) { return search(_i, root); }
+node_t<T> *Tree<T>::search(int _i) { return search(_i, root); }
 
 /** printing function */
 template<typename T> 
-void btree<T>::inorder_print()
+void Tree<T>::inorder_print()
     {
 	inorder_print(root);
 	std::cout << std::endl;
@@ -154,7 +154,7 @@ void btree<T>::inorder_print()
 
 /** printing function */
 template<typename T>
-void btree<T>::inorder_print(node_t<T> *leaf)
+void Tree<T>::inorder_print(node_t<T> *leaf)
     {
 	if(leaf != NULL)
 	    {
@@ -166,7 +166,7 @@ void btree<T>::inorder_print(node_t<T> *leaf)
 
 /** printing function */
 template<typename T>
-void btree<T>::postorder_print()
+void Tree<T>::postorder_print()
     {
 	postorder_print(root);
 	std::cout << std::endl;
@@ -174,7 +174,7 @@ void btree<T>::postorder_print()
 
 /** printing function */
 template<typename T>
-void btree<T>::postorder_print(node_t<T> *leaf)
+void Tree<T>::postorder_print(node_t<T> *leaf)
     {
 	if(leaf != NULL)
 	    {
@@ -186,7 +186,7 @@ void btree<T>::postorder_print(node_t<T> *leaf)
 
 /** printing function */
 template<typename T>
-void btree<T>::preorder_print()
+void Tree<T>::preorder_print()
     {
 	preorder_print(root);
 	std::cout << std::endl;
@@ -194,7 +194,7 @@ void btree<T>::preorder_print()
 
 /** printing function */
 template<typename T>
-void btree<T>::preorder_print(node_t<T> *leaf)
+void Tree<T>::preorder_print(node_t<T> *leaf)
     {
 	if(leaf != NULL)
 	    {
@@ -206,11 +206,11 @@ void btree<T>::preorder_print(node_t<T> *leaf)
 
 /** inserter for a bunch of coefficient from position root */
 template<typename T> 
-void btree<T>::inorder_insert(std::vector<T> &v) { inorder_insert(root, v); }
+void Tree<T>::inorder_insert(std::vector<T> &v) { inorder_insert(root, v); }
 
 /** inserter for a bunch of coefficient from position leaf */
 template<typename T> 
-void btree<T>::inorder_insert(node_t<T> *leaf, std::vector<T> &v)
+void Tree<T>::inorder_insert(node_t<T> *leaf, std::vector<T> &v)
     {
 	if(leaf != NULL)
 	    {
@@ -259,7 +259,7 @@ public:
 
 private:
 	/** coeffs container */
-    btree< alg::v_coeff > tree;
+    Tree< alg::v_coeff > tree;
 }; // end class w_sparseVect
 
 
