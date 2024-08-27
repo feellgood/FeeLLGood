@@ -32,5 +32,19 @@ BOOST_AUTO_TEST_CASE(test_scaled, *boost::unit_test::tolerance(UT_TOL))
     BOOST_CHECK( norm(y) == 0.0 );
     }
 
+/** test on p_direct */
+BOOST_AUTO_TEST_CASE(test_p_direct, *boost::unit_test::tolerance(UT_TOL))
+    {
+    std::vector<double> x {1,4,-2,sqrt(42)};
+    std::vector<double> y {1,-3,2,0.5};
+    std::vector<double> z(4);
+    p_direct(x,y,z);
+
+    BOOST_CHECK( z[0] == 1.0 );
+    BOOST_CHECK( z[1] == -12.0 );
+    BOOST_CHECK( z[2] == -4.0 );
+    BOOST_CHECK( z[3] == sqrt(42)/2.0 );
+    }
+
 BOOST_AUTO_TEST_SUITE_END()
 
