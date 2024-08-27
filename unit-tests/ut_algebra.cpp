@@ -99,5 +99,23 @@ BOOST_AUTO_TEST_CASE(test_applyMask)
     BOOST_TEST( x[3] == 0.0 );
     }
 
+/** test on v_coeff constructor, getVal and operators == < */
+BOOST_AUTO_TEST_CASE(test_v_coeff, *boost::unit_test::tolerance(UT_TOL))
+    {
+    v_coeff bob(2,sqrt(2));
+    
+    BOOST_TEST( bob.getVal() == sqrt(2) );
+    BOOST_TEST( bob._i == 2 );
+
+    bob.add(3.14);
+    BOOST_CHECK( bob.getVal() == (3.14 + sqrt(2)) );
+
+    v_coeff jeff(2,4.56);
+    BOOST_TEST( bob == jeff );
+    BOOST_TEST( (jeff < bob) == false );
+    jeff._i = 1;
+    BOOST_TEST( jeff < bob );
+    }
+
 BOOST_AUTO_TEST_SUITE_END()
 
