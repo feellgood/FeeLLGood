@@ -7,6 +7,7 @@
 #include "ut_config.h"  // for tolerance UT_TOL macro
 #include "../alg/alg.h"
 #include "../alg/coeff.h"
+#include "../alg/sparseVect.h"
 
 BOOST_AUTO_TEST_SUITE(ut_alg)
 
@@ -113,6 +114,19 @@ BOOST_AUTO_TEST_CASE(test_v_coeff, *boost::unit_test::tolerance(UT_TOL))
     BOOST_TEST( (jeff < bob) == false );
     jeff._i = 1;
     BOOST_TEST( jeff < bob );
+    }
+
+/** test on w_sparseVect insert getVal methods */
+BOOST_AUTO_TEST_CASE(test_sparseVect, *boost::unit_test::tolerance(UT_TOL))
+    {
+    alg::w_sparseVect bob;
+    alg::v_coeff jeff(2,4.56);
+    bob.insert(jeff);
+    BOOST_CHECK( bob.exist(2) );
+    BOOST_CHECK( bob.exist(3) == false );
+    double result = bob.getVal(2);
+    BOOST_CHECK( result == 4.56 );
+    BOOST_CHECK( bob.getVal(42) == 0.0 );
     }
 
 BOOST_AUTO_TEST_SUITE_END()
