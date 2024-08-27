@@ -32,7 +32,7 @@ public:
 	~Tree() { destroy_tree(root); }
 
 	void insert(T data);
-	node_t<T> *search(int _i);
+	node_t<T> *search(int _i) const;
 	void inorder_print();
 	void postorder_print();
 	void preorder_print();
@@ -41,7 +41,7 @@ public:
 private:
 	void destroy_tree(node_t<T> *leaf);
 	void insert(T data, node_t<T> *leaf);
-	node_t<T> *search(int _i, node_t<T> *leaf);
+	node_t<T> *search(int _i, node_t<T> *leaf) const;
 	void inorder_print(node_t<T> *leaf);
 	void postorder_print(node_t<T> *leaf);
 	void preorder_print(node_t<T> *leaf);
@@ -123,7 +123,7 @@ void Tree<T>::insert(T data)
 
 /** search template function for the first occurence of index _i from position leaf */
 template<typename T> 
-node_t<T> *Tree<T>::search(int _i, node_t<T> *leaf)
+node_t<T> *Tree<T>::search(int _i, node_t<T> *leaf) const
     {
 	if(leaf != NULL)
 	    {
@@ -141,7 +141,7 @@ node_t<T> *Tree<T>::search(int _i, node_t<T> *leaf)
 
 /** search template function for the first occurence of index _i in the whole tree */
 template<typename T> 
-node_t<T> *Tree<T>::search(int _i) { return search(_i, root); }
+node_t<T> *Tree<T>::search(int _i) const { return search(_i, root); }
 
 /** printing function */
 template<typename T> 
@@ -233,7 +233,7 @@ std::ostream& operator << (std::ostream& os, const std::vector<T>& v)
 
 /**
 \class w_sparseVect
-btree is a container for v_coeff
+tree is a container for v_coeff
 */
 class w_sparseVect
 {
@@ -246,7 +246,7 @@ public:
     inline void insert(alg::v_coeff coeff) {tree.insert(coeff);}
 
     /** return true if the coefficient exists */
-	inline bool exist(const int &idx) { return (tree.search(idx) != NULL); }
+	inline bool exist(const int &idx) const { return (tree.search(idx) != NULL); }
 
     /** getter for the value of a coefficient of index idx, if several coeffs have the same index then it returns the value of the first occurence */	
 	inline double getVal(const int &idx)
