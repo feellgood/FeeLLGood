@@ -72,5 +72,19 @@ BOOST_AUTO_TEST_CASE(test_sub, *boost::unit_test::tolerance(UT_TOL))
     BOOST_CHECK( y[3] == (0.5 - sqrt(42)) );
     }
 
+/** test on scaled_add */
+BOOST_AUTO_TEST_CASE(test_scaled_add, *boost::unit_test::tolerance(UT_TOL))
+    {
+    std::vector<double> x {1,4,-2,sqrt(42)};
+    std::vector<double> y {1,-3,2,0.5};
+    double alpha(2.0);
+    scaled_add(x,alpha,y); // y += alpha*x
+
+    BOOST_CHECK( y[0] == 3.0 );
+    BOOST_CHECK( y[1] == 5.0 );
+    BOOST_CHECK( y[2] == -2.0 );
+    BOOST_CHECK( y[3] == (0.5 + 2.0*sqrt(42)) );
+    }
+
 BOOST_AUTO_TEST_SUITE_END()
 
