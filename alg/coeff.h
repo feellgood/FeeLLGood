@@ -44,10 +44,16 @@ two coeffs are equal when their indices are equals
 	/** index of the coefficient */
 	int _i;
 
+/** printing function */
+	inline void print(std::ostream & flux) const { flux << "(" << _i << ";" << _c << ")"; }
+
 private:
 /** value of the coefficient */	
 	double _c;
 }; //end class v_coeff
+
+/** operator<< for v_coeff */
+inline std::ostream & operator<<(std::ostream & flux, v_coeff const& v) {v.print(flux); return flux;}
 
 
 /**
