@@ -233,15 +233,12 @@ std::ostream& operator << (std::ostream& os, const std::vector<T>& v)
 
 /**
 \class w_sparseVect
-it is a container for v_coeff, in writing mode, using a tree
+it is a container for v_coeff, in writing mode, using template<v_coeff> tree
 */
 class w_sparseVect
 {
 	friend class r_sparseVect;
 public:
-	/** constructor */
-	inline w_sparseVect() {}
-
 	/** inserter with a coefficient */
     inline void insert(alg::v_coeff coeff) {tree.insert(coeff);}
 
