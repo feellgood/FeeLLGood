@@ -130,5 +130,29 @@ BOOST_AUTO_TEST_CASE(test_w_sparseVect, *boost::unit_test::tolerance(UT_TOL))
     BOOST_CHECK( bob.getVal(42) == 0.0 );
     }
 
+/** more tests on w_sparseVect */
+BOOST_AUTO_TEST_CASE(advanced_test_w_sparseVect, *boost::unit_test::tolerance(UT_TOL))
+    {
+    w_sparseVect x;
+    v_coeff bob(2,sqrt(2));
+    x.insert(bob);
+    v_coeff jeff(2,4.56);
+    x.insert(jeff);
+    v_coeff cat(1,1.23);
+    x.insert(cat);
+    BOOST_CHECK( x.getVal(2) == (4.56 + sqrt(2)) );
+    BOOST_TEST ( x.getVal(42) == 0 );
+
+    x.insert(v_coeff(10,7.89));
+    BOOST_TEST( x.exist(10) );
+    BOOST_TEST( !(x.exist(11)) );
+
+    x.insert(v_coeff(15,0));
+    BOOST_TEST( x.exist(15) ); /// this is weird ...
+
+    x.insert(v_coeff(-1,3.14));
+    BOOST_TEST( x.exist(-1) ); /// this might be weird too ...
+    }
+
 BOOST_AUTO_TEST_SUITE_END()
 
