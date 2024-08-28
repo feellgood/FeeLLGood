@@ -116,8 +116,8 @@ BOOST_AUTO_TEST_CASE(test_v_coeff, *boost::unit_test::tolerance(UT_TOL))
     BOOST_TEST( jeff < bob );
     }
 
-/** test on w_sparseVect insert getVal methods */
-BOOST_AUTO_TEST_CASE(test_sparseVect, *boost::unit_test::tolerance(UT_TOL))
+/** test on w_sparseVect constructor, insert, exist, getVal methods */
+BOOST_AUTO_TEST_CASE(test_w_sparseVect, *boost::unit_test::tolerance(UT_TOL))
     {
     alg::w_sparseVect bob;
     alg::v_coeff jeff(2,4.56);

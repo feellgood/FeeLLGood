@@ -233,7 +233,7 @@ std::ostream& operator << (std::ostream& os, const std::vector<T>& v)
 
 /**
 \class w_sparseVect
-tree is a container for v_coeff
+it is a container for v_coeff, in writing mode, using a tree
 */
 class w_sparseVect
 {
@@ -264,7 +264,7 @@ private:
 
 /**
 \class r_sparseVect
-sparse vector : it is a container for v_coeff
+sparse vector : it is a container for v_coeff, in reading mode
 */
 class r_sparseVect
 {
