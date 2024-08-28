@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(test_v_coeff, *boost::unit_test::tolerance(UT_TOL))
     BOOST_TEST( jeff < bob );
     }
 
-/** test on w_sparseVect constructor, insert, exist, getVal methods */
+/** elementary tests on w_sparseVect: constructor, insert, exist, getVal methods */
 BOOST_AUTO_TEST_CASE(test_w_sparseVect, *boost::unit_test::tolerance(UT_TOL))
     {
     alg::w_sparseVect bob;
@@ -127,6 +127,27 @@ BOOST_AUTO_TEST_CASE(test_w_sparseVect, *boost::unit_test::tolerance(UT_TOL))
     double result = bob.getVal(2);
     BOOST_CHECK( result == 4.56 );
     BOOST_CHECK( bob.getVal(42) == 0.0 );
+    }
+
+/** more tests on w_sparseVect */
+BOOST_AUTO_TEST_CASE(advanced_test_w_sparseVect, *boost::unit_test::tolerance(UT_TOL))
+    {
+    alg::w_sparseVect x;
+    alg::v_coeff bob(2,sqrt(2));
+    x.insert(bob);
+    alg::v_coeff jeff(2,4.56);
+    x.insert(jeff);
+    alg::v_coeff cat(1,1.23);
+    x.insert(cat);
+    BOOST_CHECK( x.getVal(2) == (4.56 + sqrt(2)) );
+    BOOST_TEST ( x.getVal(42) == 0 );
+
+    x.insert(alg::v_coeff(10,7.89));
+    BOOST_TEST( x.exist(10) );
+    BOOST_TEST( !(x.exist(11)) );
+
+    x.insert(alg::v_coeff(15,0));
+    BOOST_TEST( x.exist(15) ); /// this is weird ...
     }
 
 BOOST_AUTO_TEST_SUITE_END()
