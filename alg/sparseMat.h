@@ -24,36 +24,32 @@ class w_sparseMat
 	friend class r_sparseMat;
 
 public:
-	/** constructor */
-	inline w_sparseMat(const int _N):N(_N),collected(false) { m.resize(N); }
-	
-	/** inserter for a coefficient */
-	inline void insert(const m_coeff &co) { 
-       assert(co._i<N && co._j<N );
-       m[co._i].insert({co._j, co.getVal()}); }
-		
-	/** getter for the number of lines */
-	inline int getDim(void) const {return N;}
+/** constructor */
+    inline w_sparseMat(const int _N):N(_N) { m.resize(N); }
 
-	/** getter for collected */
-	inline bool isCollected(void) const {return collected;}
+/** inserter for a coefficient */
+    inline void insert(const m_coeff &co)
+        {
+        assert(co._i<N && co._j<N );
+        m[co._i].insert({co._j, co.getVal()});
+        }
+
+/** getter for the number of lines */
+	inline int getDim(void) const {return N;}
 
 private:
 /** dimension of sparse matrix, N is the number of lines */
-	int N;
+    int N;
 
-/** if collected == true, coefficients have been regrouped in lexicographic order,and redundant coeffs summed (if any) */
-	bool collected;
-
-/** container for the write sparse matrix coefficient*/
-	std::vector<w_sparseVect> m;
+/** container for the write sparse matrix coefficients */
+    std::vector<w_sparseVect> m;
 }; // end class w_sparseMat
 
 
-	/** \class r_sparseMat
+/** \class r_sparseMat
 read sparse matrix	 
-	The constructor is buiding from a write sparse matrix the data to access efficiently the coefficients values
-       	*/
+The constructor is buiding from a write sparse matrix the data to access efficiently the coefficients values
+*/
 class r_sparseMat
 {
 public:
