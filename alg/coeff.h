@@ -4,7 +4,8 @@
 /** \file alg_coeff.h 
  * \brief set of class to handle sparse matrix and vector coefficients
  * two dedicated classes vector and matrix coefficients 
- * */
+ it is permissive: indices might be negative. This might be usefull when relative indexation is needed
+ */
 
 namespace alg
 {
