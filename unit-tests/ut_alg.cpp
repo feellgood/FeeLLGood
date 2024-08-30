@@ -6,8 +6,8 @@
 
 #include "ut_config.h"  // for tolerance UT_TOL macro
 #include "../alg/alg.h"
-#include "../alg/coeff.h"
-#include "../alg/sparseVect.h"
+//#include "../alg/coeff.h"
+//#include "../alg/sparseVect.h"
 
 BOOST_AUTO_TEST_SUITE(ut_alg)
 
@@ -189,6 +189,27 @@ BOOST_AUTO_TEST_CASE(test_r_sparseVect_dot, *boost::unit_test::tolerance(UT_TOL)
 
     std::vector<double> z {0,1,0.5};
     BOOST_CHECK( y.dot(z) == (1.23 + 0.5*(4.56 + sqrt(2))) );
+    }
+
+/** tests on (w|r)_sparseMat */
+BOOST_AUTO_TEST_CASE(test_w_sparseMat, *boost::unit_test::tolerance(UT_TOL))
+    {
+    const int N=4;
+    alg::w_sparseMat m(N);
+    BOOST_TEST( m.getDim() == N );
+    m.insert( alg::m_coeff(1,1,3.14) );
+    m.insert( alg::m_coeff(0,0,1.0) );
+    m.insert( alg::m_coeff(2,2,5.0) );
+    m.insert( alg::m_coeff(3,3,42.0) );
+    alg::r_sparseMat bob(m);
+    std::vector<double> x {1.0,1.0,1.0,1.0};
+    std::vector<double> y(N);
+
+    alg::mult(bob,x,y); //y = m*x
+    BOOST_CHECK( y[0] == 1.0 );
+    BOOST_CHECK( y[1] == 3.14 );
+    BOOST_CHECK( y[2] == 5.0 );
+    BOOST_CHECK( y[3] == 42.0 );
     }
 
 BOOST_AUTO_TEST_SUITE_END()
