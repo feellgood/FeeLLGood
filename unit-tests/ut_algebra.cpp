@@ -174,5 +174,23 @@ BOOST_AUTO_TEST_CASE(test_r_sparseVect, *boost::unit_test::tolerance(UT_TOL))
     BOOST_CHECK( y.getVal(2) == (4.56 + sqrt(2)) );
     }
 
+/** tests on r_sparseVect.dot */
+BOOST_AUTO_TEST_CASE(test_r_sparseVect_dot, *boost::unit_test::tolerance(UT_TOL))
+    {
+    w_sparseVect x;
+    v_coeff bob(2,sqrt(2));
+    x.insert(bob);
+    v_coeff jeff(2,4.56);
+    x.insert(jeff);
+    v_coeff cat(1,1.23);
+    x.insert(cat);
+    x.insert(v_coeff(10,7.89));
+    x.insert(v_coeff(15,0));
+    r_sparseVect y(x);
+
+    std::vector<double> z {0,1,0.5};
+    BOOST_CHECK( y.dot(z) == (1.23 + 0.5*(4.56 + sqrt(2))) );
+    }
+
 BOOST_AUTO_TEST_SUITE_END()
 
