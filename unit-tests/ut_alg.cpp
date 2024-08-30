@@ -201,12 +201,15 @@ BOOST_AUTO_TEST_CASE(test_w_sparseMat, *boost::unit_test::tolerance(UT_TOL))
     m.insert( alg::m_coeff(0,0,1.0) );
     m.insert( alg::m_coeff(2,2,5.0) );
     m.insert( alg::m_coeff(3,3,42.0) );
+    m.insert( alg::m_coeff(1,3,-10.0) );
+    m.insert( alg::m_coeff(1,3,10.0) );
+    m.insert( alg::m_coeff(0,3,0.5) );
     alg::r_sparseMat bob(m);
     std::vector<double> x {1.0,1.0,1.0,1.0};
     std::vector<double> y(N);
-
+    m.insert( alg::m_coeff(2,2,5.0) );// m modification must not affect bob
     alg::mult(bob,x,y); //y = m*x
-    BOOST_CHECK( y[0] == 1.0 );
+    BOOST_CHECK( y[0] == 1.5 );
     BOOST_CHECK( y[1] == 3.14 );
     BOOST_CHECK( y[2] == 5.0 );
     BOOST_CHECK( y[3] == 42.0 );
