@@ -80,9 +80,6 @@ public:
 /** getter for a coefficient value */
 	inline double operator() (const int &i, const int &j) const { return m[i].getVal(j); }
 
-/** setter for a coefficient value */
-	inline void setVal (const int &i, const int &j, const double val) { return m[i].setVal(j, val); }
-
 private:
 /** dimension of the sparse matrix (nb of lines) */
 	const int N;
@@ -91,8 +88,7 @@ private:
 	std::vector<r_sparseVect> m;
 }; // end class r_sparseMat
 
-/** operator<< for r_sparseMat */
-inline std::ostream & operator<<(std::ostream & flux, r_sparseMat const& m) {m.print(flux); return flux;}
+
 
 } // end namespace algebra
 

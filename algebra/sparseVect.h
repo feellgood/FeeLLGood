@@ -3,9 +3,10 @@
 
 /** \file sparseVect.h 
  * \brief sparse vector
-a sparse vector is a collection of v_coeff, which is a couple composed of an index and a value
+a write sparse vector is a collection of v_coeff, which is a couple composed of an index and a double value
 to populate with coefficients the sparse vector, use insert method
 If several v_coeff have the same index, then they are automatically summed up.
+a read sparse vector is a std::vector of v_coeff, buit by its constructor
  **/
 
 #include <vector>
@@ -263,60 +264,52 @@ private:
 \class r_sparseVect
 read sparse vector : it is a std::vector container for v_coeff, in reading mode
 */
-class r_sparseVect
+class r_sparseVect: public std::vector<v_coeff>
 {
 public:
 	/** default constructor */
-	r_sparseVect() {}
+	r_sparseVect(): std::vector<v_coeff>() {}
 
-	/** constructor */
-	r_sparseVect(w_sparseVect &v) { collect(v); }
+	/** constructor from a write sparse vector */
+	r_sparseVect(w_sparseVect &v): std::vector<v_coeff>() { collect(v); }
 
     /** return true if the coefficient exists */
 	inline bool exist(const int &idx) const
 		{ 
-		auto it = std::find_if(x.begin(),x.end(),[this,&idx](v_coeff coeff){return (coeff._i == idx); } ); 
-		return (it != x.end());
+		auto it = std::find_if(begin(),end(),[this,&idx](v_coeff coeff){return (coeff._i == idx); } ); 
+		return (it != end());
 		}
 
 	/** collect method is sorting all v_coeffs, eventually with redundant indices, and is summing coeffs with same indices. It removes the coeffs that have been summed. */
 	inline void collect(w_sparseVect &v)
 		{
-        x.clear();
-        v.tree.inorder_insert(x);	
+        clear();
+        v.tree.inorder_insert(*this);	
 		}
-
-	/** getter for emptyness of the container of the coeffs */
-	inline bool isEmpty(void) const {return x.empty();} 
 
     /** getter for the value of a coefficient of index idx, if several coeffs have the same index then it returns the value of the first occurence */
     inline double getVal(int idx) const
 		{
 		double val(0);
-		auto it = std::find_if(x.begin(),x.end(),[this,&idx](v_coeff coeff){return (coeff._i == idx); } ); 
-		if (it != x.end()) val = it->getVal();		
+		auto it = std::find_if(begin(),end(),[this,&idx](v_coeff coeff){return (coeff._i == idx); } ); 
+		if (it != end()) val = it->getVal();		
 		return val;		
 		}
 
     /** getter for a reference to the value of a coefficient */
+/* // carefull might be out of bounds when it == x.end()
     inline double & getValRef(int idx)
 		{
-		auto it = std::find_if(x.begin(),x.end(),[this,&idx](v_coeff coeff){return (coeff._i == idx); } ); 
-		return it->valRef();// carefull might be out of bounds when it == x.end()	
+		auto it = std::find_if(begin(),end(),[this,&idx](v_coeff coeff){return (coeff._i == idx); } ); 
+		return it->valRef();
 		}
-
-	/** setter for the value of a coefficient of index idx, all coeffs must have a unique idx, call collect() method before if needed */
-	inline void setVal(const int idx,const double val)
-		{
-		auto it = std::find_if(x.begin(),x.end(),[this,&idx](v_coeff coeff){return (coeff._i == idx); } );
-		if (it != x.end()) it->setVal(val);
-		}
+*/
 
 	/** scalar product */
     inline double dot(const std::vector<double> & X) const
     	{
     	double val(0);
-        for(auto it=x.begin();it!=x.end();++it)
+        for(auto it=begin();it!=end();++it)
             { if(it->_i < (int)(X.size()) ) { val += it->getVal()*X[it->_i]; } }
         return val;
         }
@@ -325,27 +318,11 @@ public:
 	inline void print(std::ostream & flux) const
         {
 	    flux<<'{';
-        std::for_each(x.begin(),x.end(), [&flux](const v_coeff &c)
+        std::for_each(begin(),end(), [&flux](const v_coeff &c)
             { flux << '{' << c._i << ':' << c.getVal() <<'}';});
         flux<<"}\n";
         }
-
-        /** iterators */
-        std::vector< v_coeff >::iterator begin() { return x.begin(); }
-        std::vector< v_coeff >::iterator end()   { return x.end();   }
-        std::vector< v_coeff >::const_iterator begin() const { return x.begin(); }
-        std::vector< v_coeff >::const_iterator end()   const { return x.end();   }
-        std::vector< v_coeff >::const_iterator cbegin() const { return x.cbegin(); }
-        std::vector< v_coeff >::const_iterator cend()   const { return x.cend();   }
-
-private:
-	/** coeffs container */
-    std::vector< v_coeff > x;
 }; // end class r_sparseVect
-
-
-/** operator<< for r_sparseVect */
-inline std::ostream & operator<<(std::ostream & flux, r_sparseVect const& v) {v.print(flux); return flux;}
 
 } // end namespace algebra
 
