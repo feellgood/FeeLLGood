@@ -261,13 +261,13 @@ private:
 
 /**
 \class r_sparseVect
-sparse vector : it is a container for v_coeff, in reading mode
+read sparse vector : it is a std::vector container for v_coeff, in reading mode
 */
 class r_sparseVect
 {
 public:
 	/** default constructor */
-	r_sparseVect() {collected = false;}
+	r_sparseVect() {}
 
 	/** constructor */
 	r_sparseVect(w_sparseVect &v) { collect(v); }
@@ -284,17 +284,13 @@ public:
 		{
         x.clear();
         v.tree.inorder_insert(x);	
-		collected = true;		
 		}
 
 	/** getter for emptyness of the container of the coeffs */
 	inline bool isEmpty(void) const {return x.empty();} 
 
-	/** getter for collected */
-	inline bool isCollected(void) const {return collected;}
-
-	/** getter for the value of a coefficient of index idx, if several coeffs have the same index then it returns the value of the first occurence */
-	inline double getVal(int idx) const
+    /** getter for the value of a coefficient of index idx, if several coeffs have the same index then it returns the value of the first occurence */
+    inline double getVal(int idx) const
 		{
 		double val(0);
 		auto it = std::find_if(x.begin(),x.end(),[this,&idx](v_coeff coeff){return (coeff._i == idx); } ); 
@@ -312,29 +308,27 @@ public:
 	/** setter for the value of a coefficient of index idx, all coeffs must have a unique idx, call collect() method before if needed */
 	inline void setVal(const int idx,const double val)
 		{
-		if (collected)
-			{
-			auto it = std::find_if(x.begin(),x.end(),[this,&idx](v_coeff coeff){return (coeff._i == idx); } );
-			if (it != x.end()) it->setVal(val);
-			}
+		auto it = std::find_if(x.begin(),x.end(),[this,&idx](v_coeff coeff){return (coeff._i == idx); } );
+		if (it != x.end()) it->setVal(val);
 		}
 
 	/** scalar product */
     inline double dot(const std::vector<double> & X) const
     	{
     	double val(0);
-    	if (!isCollected()) {std::cout << "warning : cannot dot on an uncollected sparseVect" << std::endl;exit(1);}
-    	else
-    		{
-    		for(auto it=x.begin();it!=x.end();++it)
-    			{ if(it->_i < (int)(X.size()) ) { val += it->getVal()*X[it->_i]; } }
-    		}	
-    	return val;
-    	}
+        for(auto it=x.begin();it!=x.end();++it)
+            { if(it->_i < (int)(X.size()) ) { val += it->getVal()*X[it->_i]; } }
+        return val;
+        }
 
 	/** printing function */
 	inline void print(std::ostream & flux) const
-	{ flux<<'{'; std::for_each(x.begin(),x.end(), [&flux](const v_coeff &c){ flux << '{' << c._i << ':' << c.getVal() <<'}';}); flux<<"}\n"; }
+        {
+	    flux<<'{';
+        std::for_each(x.begin(),x.end(), [&flux](const v_coeff &c)
+            { flux << '{' << c._i << ':' << c.getVal() <<'}';});
+        flux<<"}\n";
+        }
 
         /** iterators */
         std::vector< v_coeff >::iterator begin() { return x.begin(); }
@@ -347,9 +341,6 @@ public:
 private:
 	/** coeffs container */
     std::vector< v_coeff > x;
-
-    /** if true the coeffs have been collected */
-    bool collected;
 }; // end class r_sparseVect
 
 
