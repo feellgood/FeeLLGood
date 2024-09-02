@@ -6,6 +6,7 @@
 
 #include "ut_config.h"  // for tolerance UT_TOL macro
 #include "../algebra/algebra.h"
+#include "../algebra/cg.h"
 
 using namespace algebra;
 
@@ -214,6 +215,38 @@ BOOST_AUTO_TEST_CASE(test_w_sparseMat, *boost::unit_test::tolerance(UT_TOL))
     BOOST_CHECK( y[1] == 3.14 );
     BOOST_CHECK( y[2] == 5.0 );
     BOOST_CHECK( y[3] == 42.0 );
+    }
+
+/** test on gradient conjugate algorithm */
+BOOST_AUTO_TEST_CASE(test_cg, *boost::unit_test::tolerance(UT_TOL))
+    {
+    const int N=4;
+    w_sparseMat m(N);
+    BOOST_TEST( m.getDim() == N );
+    m.insert( 1,1,3.14 );
+    m.insert( 0,0,1.0 );
+    m.insert( 2,2,5.0 );
+    m.insert( 3,3,42.0 );
+    m.insert( 1,3,-10.0 );
+    m.insert( 1,3,10.0 );
+    m.insert( 0,3,0.5 );
+    r_sparseMat bob(m);
+    std::vector<double> b {1.0,1.0,1.0,1.0};
+    std::vector<double> x(N);
+    iteration<double> algo_it;
+    double res = cg(algo_it,bob,x,b);
+    std::cout << "CG test:\nresidu= " << res << std::endl;
+    BOOST_CHECK(res < 1e-6);// default iteration tol is 1e-8
+
+    std::vector<double> y(N);
+    mult(bob,x,y);
+    for(int i=0;i<N;i++)
+        {
+        std::cout << y[i] << "; ref val= " << b[i] << std::endl;
+        double result = sq(y[i] - b[i]);
+        std::cout << "result(should be zero)= " << result << std::endl;
+        BOOST_TEST( result == 0.0 );
+        }
     }
 
 BOOST_AUTO_TEST_SUITE_END()
