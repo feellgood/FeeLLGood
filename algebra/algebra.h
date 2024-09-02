@@ -111,6 +111,15 @@ inline double bicg(r_sparseMat& A, std::vector<double> & x, const std::vector<do
 inline double bicg_dir(r_sparseMat& A, std::vector<double> & x, const std::vector<double> & rhs, 
               const std::vector<double> & xd, const std::vector<int>& ld, iteration &iter)
     { return generic_bicg<true>(iter,A,x,rhs,xd,ld); }
+
+/** operator<< for r_sparseVect */
+inline std::ostream & operator<<(std::ostream & flux, r_sparseVect const& v)
+    {v.print(flux); return flux;}
+
+/** operator<< for r_sparseMat */
+inline std::ostream & operator<<(std::ostream & flux, r_sparseMat const& m)
+    {m.print(flux); return flux;}
+
 } // end namespace algebra
 
 #endif
