@@ -267,10 +267,10 @@ class r_sparseVect
 {
 public:
 	/** default constructor */
-	inline r_sparseVect() {collected = false;}
+	r_sparseVect() {collected = false;}
 
 	/** constructor */
-	inline r_sparseVect(w_sparseVect &v) { collect(v); }
+	r_sparseVect(w_sparseVect &v) { collect(v); }
 
     /** return true if the coefficient exists */
 	inline bool exist(const int &idx) const
