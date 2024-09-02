@@ -6,7 +6,7 @@
 a write sparse vector is a collection of v_coeff, which is a couple composed of an index and a double value
 to populate with coefficients the sparse vector, use insert method
 If several v_coeff have the same index, then they are automatically summed up.
-a read sparse vector is a std::vector of v_coeff, buit by its constructor
+a read sparse vector is a std::vector of v_coeff, built by its constructor
  **/
 
 #include <vector>
@@ -274,10 +274,9 @@ public:
 	r_sparseVect(w_sparseVect &v): std::vector<v_coeff>() { collect(v); }
 
     /** return true if the coefficient exists */
-	inline bool exist(const int &idx) const
+	inline bool exist(const int idx) const
 		{ 
-		auto it = std::find_if(begin(),end(),[this,&idx](v_coeff coeff){return (coeff._i == idx); } ); 
-		return (it != end());
+		return ( std::find_if(begin(),end(),[this,&idx](v_coeff coeff){return (coeff._i == idx);}) != end() );
 		}
 
 	/** collect method is sorting all v_coeffs, eventually with redundant indices, and is summing coeffs with same indices. It removes the coeffs that have been summed. */
@@ -287,23 +286,17 @@ public:
         v.tree.inorder_insert(*this);	
 		}
 
-    /** getter for the value of a coefficient of index idx, if several coeffs have the same index then it returns the value of the first occurence */
-    inline double getVal(int idx) const
+    /** getter for the value of a coefficient of index idx
+    if several coeffs have the same index then it returns the value of the first occurence
+    return zero if coeffciet of index idx does not exist
+     */
+    inline double getVal(const int idx) const
 		{
 		double val(0);
 		auto it = std::find_if(begin(),end(),[this,&idx](v_coeff coeff){return (coeff._i == idx); } ); 
 		if (it != end()) val = it->getVal();		
 		return val;		
 		}
-
-    /** getter for a reference to the value of a coefficient */
-/* // carefull might be out of bounds when it == x.end()
-    inline double & getValRef(int idx)
-		{
-		auto it = std::find_if(begin(),end(),[this,&idx](v_coeff coeff){return (coeff._i == idx); } ); 
-		return it->valRef();
-		}
-*/
 
 	/** scalar product */
     inline double dot(const std::vector<double> & X) const
