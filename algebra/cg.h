@@ -1,9 +1,9 @@
-#include "alg.h"
+#include "algebra.h"
 
 #ifndef CG_H
 #define CG_H
 
-namespace alg
+namespace algebra
 {
 template<bool MASK>
 double generic_cg(alg::iteration &iter, alg::r_sparseMat& A, std::vector<double> & x, const std::vector<double> & rhs, const std::vector<double> & xd, const std::vector<int>& ld)
