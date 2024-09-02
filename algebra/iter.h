@@ -1,10 +1,10 @@
-#ifndef ALG_ITER_H
-#define ALG_ITER_H
+#ifndef ITER_H
+#define ITER_H
 
 #include <iomanip>
 #include <vector>
 
-/** \file alg_iter.h
+/** \file iter.h
 \brief iteration class from GMM, with some adaptations and simplifications.
 
 The Iteration object calculates if the solution has reached the desired accuracy,
@@ -14,7 +14,7 @@ The method finished() checks the convergence.
 The first() method is used to determine the first iteration of the loop.
 */
 
-namespace alg
+namespace algebra
 {
 double norm(const std::vector<double> & X);
 

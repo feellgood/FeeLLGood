@@ -1,13 +1,13 @@
-#ifndef ALG_COEFF_H
-#define ALG_COEFF_H
+#ifndef COEFF_H
+#define COEFF_H
 
-/** \file alg_coeff.h 
+/** \file coeff.h 
  * \brief set of class to handle sparse matrix and vector coefficients
  * two dedicated classes vector and matrix coefficients 
  it is permissive: indices might be negative. This might be usefull when relative indexation is needed
  */
 
-namespace alg
+namespace algebra
 {
 /**
 \class v_coeff
@@ -92,7 +92,6 @@ private:
 	double _c;
 }; //end class m_coeff 
 
-} // end namespace alg
+} // end namespace algebra
 
-
-#endif //ALG_COEFF_H
+#endif

@@ -1,12 +1,12 @@
-#ifndef ALG_H
-#define ALG_H
+#ifndef ALGEBRA_H
+#define ALGEBRA_H
 
-/** \file alg.h 
+/** \file algebra.h 
  * \brief set of class to handle sparse matrix operations for gradient conjugate algorithm
  * a sparse vector class
  * a read and a write sparse matrix class
  * various vector operations, scalar and direct products; ...
- * most of the member functions of the classes are using lambdas and C++11 algorithm and numeric
+ * most of the member functions of the classes are using lambdas and C++11/17 algorithm and numeric
  * */
 
 #include <iostream>
@@ -19,11 +19,11 @@
 #include "sparseMat.h"
 #include "iter.h"
 
-/** \namespace alg
+/** \namespace algebra
  * grab altogether sparse matrix, vector and dedicated functions
 */
 
-namespace alg
+namespace algebra
 {
 /** 
 Y = alpha*X 
@@ -63,10 +63,10 @@ inline void scaled_add(const std::vector<double> & X,const double alpha, std::ve
 
 /** euclidian norm of vector X */
 inline double norm(const std::vector<double> & X)
-	{ return sqrt(fabs( alg::dot(X,X) )); }
+	{ return sqrt(fabs( dot(X,X) )); }
 
 /** Y = A*X with sparseMat A */
-inline void mult(alg::r_sparseMat & A,std::vector<double> const& X,std::vector<double> &Y)
+inline void mult(r_sparseMat & A,std::vector<double> const& X,std::vector<double> &Y)
     {
     const int _size = X.size();
     Y.resize(_size);
@@ -80,40 +80,38 @@ inline void applyMask(const std::vector<int>& mask, std::vector<double> & X)
 
 /** generic template for gradient conjugate */
 template<bool MASK>
-double generic_cg(alg::iteration &iter, alg::r_sparseMat& A, std::vector<double> & x, const std::vector<double> & rhs, const std::vector<double> & xd, const std::vector<int>& ld);
+double generic_cg(iteration &iter, r_sparseMat& A, std::vector<double> & x, const std::vector<double> & rhs, const std::vector<double> & xd, const std::vector<int>& ld);
 
 /** conjugate gradient with diagonal preconditioner, returns residu. Template generic_cg is called with dummy xd and ld */
-inline double cg(alg::r_sparseMat& A, std::vector<double> & x, const std::vector<double> & b, alg::iteration &iter)
+inline double cg(r_sparseMat& A, std::vector<double> & x, const std::vector<double> & b, iteration &iter)
     {
     std::vector<double> xd;
     std::vector<int> ld;
-    return alg::generic_cg<false>(iter,A,x,b,xd,ld);
+    return generic_cg<false>(iter,A,x,b,xd,ld);
     }
 
 /** conjugate gradient with diagonal preconditioner with Dirichlet conditions, returns residu */
-inline double cg_dir(alg::r_sparseMat& A, std::vector<double> & x, const std::vector<double> & rhs, 
-              const std::vector<double> & xd, const std::vector<int>& ld, alg::iteration &iter)
-    { return alg::generic_cg<true>(iter,A,x,rhs,xd,ld); }
+inline double cg_dir(r_sparseMat& A, std::vector<double> & x, const std::vector<double> & rhs, 
+              const std::vector<double> & xd, const std::vector<int>& ld, iteration &iter)
+    { return generic_cg<true>(iter,A,x,rhs,xd,ld); }
 
 /** generic template for stabilized bigradient conjugate  */
 template<bool MASK>
-double generic_bicg( alg::iteration &iter, alg::r_sparseMat& A, std::vector<double> & x, const std::vector<double> & rhs, const std::vector<double>& xd, const std::vector<int>& ld);
+double generic_bicg( iteration &iter, r_sparseMat& A, std::vector<double> & x, const std::vector<double> & rhs, const std::vector<double>& xd, const std::vector<int>& ld);
 
 /** biconjugate gradient and diagonal preconditionner, returns residu. Template generic_bicg is called with dummy xd and ld  */
-inline double bicg(alg::r_sparseMat& A, std::vector<double> & x, const std::vector<double> & b, alg::iteration &iter)
+inline double bicg(r_sparseMat& A, std::vector<double> & x, const std::vector<double> & b, iteration &iter)
     {
     std::vector<double> xd;
     std::vector<int> ld;
-    return alg::generic_bicg<false>(iter,A,x,b,xd,ld);
+    return generic_bicg<false>(iter,A,x,b,xd,ld);
     }
 
 /** biconjugate gradient with diagonal preconditioner with Dirichlet conditions, returns residu */
-inline double bicg_dir(alg::r_sparseMat& A, std::vector<double> & x, const std::vector<double> & rhs, 
-              const std::vector<double> & xd, const std::vector<int>& ld, alg::iteration &iter)
-    {
-    return alg::generic_bicg<true>(iter,A,x,rhs,xd,ld);
-    }
-} // end namespace alg
+inline double bicg_dir(r_sparseMat& A, std::vector<double> & x, const std::vector<double> & rhs, 
+              const std::vector<double> & xd, const std::vector<int>& ld, iteration &iter)
+    { return generic_bicg<true>(iter,A,x,rhs,xd,ld); }
+} // end namespace algebra
 
-#endif //ALG_H
+#endif
 

@@ -1,7 +1,7 @@
-#ifndef ALG_SPARSEVECT_H
-#define ALG_SPARSEVECT_H
+#ifndef SPARSEVECT_H
+#define SPARSEVECT_H
 
-/** \file alg_sparseVect.h 
+/** \file sparseVect.h 
  * \brief sparse vector
 a sparse vector is a collection of v_coeff, which is a couple composed of an index and a value
 to populate with coefficients the sparse vector, use insert method
@@ -12,7 +12,7 @@ If several v_coeff have the same index, then they are automatically summed up.
 #include <iostream>
 #include <algorithm>
 
-namespace alg
+namespace algebra
 {
 /** elementary node */
 template<typename T> 
@@ -214,7 +214,7 @@ void Tree<T>::inorder_insert(node_t<T> *leaf, std::vector<T> &v)
 	if(leaf != NULL)
 	    {
 		inorder_insert(leaf->left, v);
-        alg::v_coeff data{(int)(leaf->data->_i), leaf->data->getVal()}; //CT : cast to int to silent narrowing
+        v_coeff data{(int)(leaf->data->_i), leaf->data->getVal()}; //CT : cast to int to silent narrowing
         v.push_back(data);
 		inorder_insert(leaf->right, v);
 	    }
@@ -240,7 +240,7 @@ class w_sparseVect
 	friend class r_sparseVect;
 public:
 	/** inserter with a coefficient */
-    inline void insert(alg::v_coeff coeff) {tree.insert(coeff);}
+    inline void insert(v_coeff coeff) {tree.insert(coeff);}
 
     /** return true if the coefficient exists */
 	inline bool exist(const int &idx) const { return (tree.search(idx) != NULL); }
@@ -248,14 +248,14 @@ public:
     /** getter for the value of a coefficient of index idx, if several coeffs have the same index then it returns the value of the first occurence */	
 	inline double getVal(const int &idx)
 		{
-        node_t< alg::v_coeff > *node=tree.search(idx);
+        node_t< v_coeff > *node=tree.search(idx);
         if (node==NULL) return 0.0;	
 		return node->data->getVal();		
 		}
 
 private:
 	/** coeffs container */
-    Tree< alg::v_coeff > tree;
+    Tree< v_coeff > tree;
 }; // end class w_sparseVect
 
 
@@ -275,7 +275,7 @@ public:
     /** return true if the coefficient exists */
 	inline bool exist(const int &idx) const
 		{ 
-		auto it = std::find_if(x.begin(),x.end(),[this,&idx](alg::v_coeff coeff){return (coeff._i == idx); } ); 
+		auto it = std::find_if(x.begin(),x.end(),[this,&idx](v_coeff coeff){return (coeff._i == idx); } ); 
 		return (it != x.end());
 		}
 
@@ -297,7 +297,7 @@ public:
 	inline double getVal(int idx) const
 		{
 		double val(0);
-		auto it = std::find_if(x.begin(),x.end(),[this,&idx](alg::v_coeff coeff){return (coeff._i == idx); } ); 
+		auto it = std::find_if(x.begin(),x.end(),[this,&idx](v_coeff coeff){return (coeff._i == idx); } ); 
 		if (it != x.end()) val = it->getVal();		
 		return val;		
 		}
@@ -305,7 +305,7 @@ public:
     /** getter for a reference to the value of a coefficient */
     inline double & getValRef(int idx)
 		{
-		auto it = std::find_if(x.begin(),x.end(),[this,&idx](alg::v_coeff coeff){return (coeff._i == idx); } ); 
+		auto it = std::find_if(x.begin(),x.end(),[this,&idx](v_coeff coeff){return (coeff._i == idx); } ); 
 		return it->valRef();// carefull might be out of bounds when it == x.end()	
 		}
 
@@ -314,7 +314,7 @@ public:
 		{
 		if (collected)
 			{
-			auto it = std::find_if(x.begin(),x.end(),[this,&idx](alg::v_coeff coeff){return (coeff._i == idx); } );
+			auto it = std::find_if(x.begin(),x.end(),[this,&idx](v_coeff coeff){return (coeff._i == idx); } );
 			if (it != x.end()) it->setVal(val);
 			}
 		}
@@ -337,16 +337,16 @@ public:
 	{ flux<<'{'; std::for_each(x.begin(),x.end(), [&flux](const v_coeff &c){ flux << '{' << c._i << ':' << c.getVal() <<'}';}); flux<<"}\n"; }
 
         /** iterators */
-        std::vector< alg::v_coeff >::iterator begin() { return x.begin(); }
-        std::vector< alg::v_coeff >::iterator end()   { return x.end();   }
-        std::vector< alg::v_coeff >::const_iterator begin() const { return x.begin(); }
-        std::vector< alg::v_coeff >::const_iterator end()   const { return x.end();   }
-        std::vector< alg::v_coeff >::const_iterator cbegin() const { return x.cbegin(); }
-        std::vector< alg::v_coeff >::const_iterator cend()   const { return x.cend();   }
+        std::vector< v_coeff >::iterator begin() { return x.begin(); }
+        std::vector< v_coeff >::iterator end()   { return x.end();   }
+        std::vector< v_coeff >::const_iterator begin() const { return x.begin(); }
+        std::vector< v_coeff >::const_iterator end()   const { return x.end();   }
+        std::vector< v_coeff >::const_iterator cbegin() const { return x.cbegin(); }
+        std::vector< v_coeff >::const_iterator cend()   const { return x.cend();   }
 
 private:
 	/** coeffs container */
-    std::vector< alg::v_coeff > x;
+    std::vector< v_coeff > x;
 
     /** if true the coeffs have been collected */
     bool collected;
@@ -356,6 +356,6 @@ private:
 /** operator<< for r_sparseVect */
 inline std::ostream & operator<<(std::ostream & flux, r_sparseVect const& v) {v.print(flux); return flux;}
 
-} // end namespace alg
+} // end namespace algebra
 
-#endif //ALG_SPARSEVECT_H
+#endif

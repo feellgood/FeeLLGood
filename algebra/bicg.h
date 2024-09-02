@@ -1,12 +1,12 @@
-#include "alg.h"
+#include "algebra.h"
 
 #ifndef BICG_H
 #define BICG_H
 
-namespace alg
+namespace algebra
 {
 template<bool MASK>
-double generic_bicg( alg::iteration &iter, alg::r_sparseMat& A, std::vector<double> & x, const std::vector<double> & rhs, const std::vector<double>& xd, const std::vector<int>& ld) 
+double generic_bicg( iteration &iter, r_sparseMat& A, std::vector<double> & x, const std::vector<double> & rhs, const std::vector<double>& xd, const std::vector<int>& ld) 
     {
     double rho_1(0.0), rho_2(0.0), alpha(0.0), beta(0.0), omega(0.0);
     const size_t DIM = x.size();
