@@ -9,6 +9,7 @@
 #include "../algebra/cg.h"
 
 using namespace algebra;
+inline double sq(const double x) { return x * x; } // same as Nodes::sq
 
 BOOST_AUTO_TEST_SUITE(ut_algebra)
 
@@ -236,6 +237,16 @@ BOOST_AUTO_TEST_CASE(test_cg, *boost::unit_test::tolerance(UT_TOL))
     double res = cg(bob,x,b,algo_it);
     std::cout << "CG test:\nresidu= " << res << std::endl;
     BOOST_CHECK(res < 1e-6);// default iteration tol is 1e-8
+
+    std::vector<double> y(N);
+    mult(bob,x,y);
+    for(int i=0;i<N;i++)
+        {
+        std::cout << y[i] << "; ref val= " << b[i] << std::endl;
+        double result = sq(y[i] - b[i]);
+        std::cout << "result(should be zero)= " << result << std::endl;
+        BOOST_TEST( result == 0.0 );
+        }
     }
 
 BOOST_AUTO_TEST_SUITE_END()
