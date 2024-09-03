@@ -16,7 +16,7 @@ namespace algebra
 
 /**
 \class w_sparseMat
-write sparse Matrix, it is a container for objects m_coeff. 
+write sparse Matrix, it is a container for coefficients of a 'line' sparse matrix.
 If some m_coeff have the same indices, they will be summed to build the final matrix coefficient
 */
 class w_sparseMat
@@ -27,11 +27,11 @@ public:
 /** constructor */
     inline w_sparseMat(const int _N):N(_N) { m.resize(N); }
 
-/** inserter for a coefficient */
-    inline void insert(const m_coeff &co)
+/** inserter for a coefficient val at line i col j */
+    inline void insert(const int i, const int j, const double val)
         {
-        assert(co._i<N && co._j<N );
-        m[co._i].insert({co._j, co.getVal()});
+        assert(i<N && j<N );
+        m[i].insert({j, val});
         }
 
 /** getter for the number of lines */
@@ -39,7 +39,7 @@ public:
 
 private:
 /** dimension of sparse matrix, N is the number of lines */
-    int N;
+    const int N;
 
 /** container for the write sparse matrix coefficients */
     std::vector<w_sparseVect> m;

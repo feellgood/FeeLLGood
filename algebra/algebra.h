@@ -20,26 +20,20 @@
 #include "iter.h"
 
 /** \namespace algebra
- * grab altogether sparse matrix, vector and dedicated functions
+ * grab altogether sparse matrix, vector and dedicated functions, and cg and bicgstab algorithms
 */
 
 namespace algebra
 {
-/** 
-Y *= alpha 
-*/
+/** Y *= alpha */
 inline void scaled( const double alpha, std::vector<double> & Y) 
 	{ std::for_each(Y.begin(),Y.end(),[alpha](double &_x){ _x *= alpha; }); }
 
-/**
-returns scalar product X.Y
-*/
+/** returns scalar product X.Y */
 inline double dot(const std::vector<double> & X,const std::vector<double> & Y)
 	{ return std::inner_product(X.begin(),X.end(),Y.begin(),0.0); }
 
-/**
-direct product : Z = X⊗Y
-*/
+/** direct product : Z = X⊗Y */
 inline void p_direct(const std::vector<double> & X,const std::vector<double> & Y,std::vector<double> & Z)
 	{ for(unsigned int i=0;i<Z.size();i++) Z[i]=X[i]*Y[i]; }
 
@@ -59,7 +53,7 @@ inline void scaled_add(const std::vector<double> & X,const double alpha, std::ve
 inline double norm(const std::vector<double> & X)
 	{ return sqrt(fabs( dot(X,X) )); }
 
-/** Y = A*X with sparseMat A */
+/** Y = A*X with r_sparseMat A */
 inline void mult(r_sparseMat & A,std::vector<double> const& X,std::vector<double> &Y)
     {
     const int _size = X.size();

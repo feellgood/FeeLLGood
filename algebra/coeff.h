@@ -56,42 +56,6 @@ private:
 /** operator<< for v_coeff */
 inline std::ostream & operator<<(std::ostream & flux, v_coeff const& v) {v.print(flux); return flux;}
 
-
-/**
-\class m_coeff
-container for a couple of indices and a double value to represent a coefficient of a sparse matrix
-*/
-class m_coeff
-{
-public:
-	/** constructor */
-	inline m_coeff(const int i,const int j,const double c):_i(i),_j(j),_c(c) {}
-	
-	/** getter for the value of the coefficient */
-	inline double getVal(void) const {return _c;} 
-/**
-lexicographic order
-*/
-	inline bool operator< (const m_coeff &c) const 
-	{ return ( (this->_i < c._i)||( (this->_i == c._i)&& (this->_j < c._j) ) ); }
-
-/**
-two coeffs are equal when their indices are equals
-*/
-	inline bool operator== (const m_coeff &c) const
-	{ return ((this->_i == c._i)&&(this->_j == c._j)); }
-
-	/** first index */
-	int _i;
-
-	/** second index */
-	int _j;
-
-private:
-	/** value of the coefficient */	
-	double _c;
-}; //end class m_coeff 
-
 } // end namespace algebra
 
 #endif
