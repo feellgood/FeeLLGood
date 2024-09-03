@@ -19,69 +19,69 @@ double generic_bicg( iteration &iter, r_sparseMat& A, std::vector<double> & x, c
         { diag_precond[i] = 1.0/A(i,i); }
     if(MASK)
         {
-        alg::mult(A, xd, v);
-        alg::sub(v, b);      // b = b - A xd
-        alg::applyMask(ld,b);
-        alg::applyMask(ld,diag_precond);
+        mult(A, xd, v);
+        sub(v, b);      // b -= A xd
+        applyMask(ld,b);
+        applyMask(ld,diag_precond);
         }
-    iter.set_rhsnorm(alg::norm(b));
+    iter.set_rhsnorm(norm(b));
 	
     r.assign(b.begin(),b.end());// r = b;
-    alg::mult(A, x, v);         // v = A x;
-    alg::sub(v, r);             // r -= v; donc r = b - A x;
+    mult(A, x, v);         // v = A x;
+    sub(v, r);             // r -= v; donc r = b - A x;
 
     if(MASK)
-        { alg::applyMask(ld,r); }
+        { applyMask(ld,r); }
 
     rt.assign(r.begin(),r.end()); // copy(r, rt);
     p.assign(r.begin(),r.end()); // copy(r, p );
 
     while (!iter.finished_vect(r))
         {
-        rho_1 = alg::dot(rt,r);// rho_1 = vect_sp(rt, r);
+        rho_1 = dot(rt,r);
         if (!iter.first())
             {
             beta = (rho_1 / rho_2) * (alpha / omega);
-    	    alg::scaled(omega, v); // v *= omega
-    		alg::sub(v, p);        // p -= v	; donc  p = p - omega v  
+            scaled(omega, v);           // v *= omega
+            sub(v, p);                  // p -= v; so  p = p - omega v
 
-    	    alg::scaled(beta, p);  // p *= beta
-    	    alg::add(r, p);        // p += r	; donc  p = r + beta p       
-	    	}
+            scaled(beta, p);            // p *= beta
+            add(r, p);                  // p += r; so  p = r + beta p
+            }
 
-        alg::p_direct(diag_precond, p, phat); // phat = M p;
-        alg::mult(A, phat, v);                //  v = A phat;
+        p_direct(diag_precond, p, phat);// phat = M p;
+        mult(A, phat, v);               //  v = A phat;
         if (MASK)
-            { alg::applyMask(ld,v); }
+            { applyMask(ld,v); }
      
-	    alpha=rho_1/dot(v, rt); // alpha = rho_1 /(v'*rtilde);
+	    alpha=rho_1/dot(v, rt);         // alpha = rho_1 /(v'*rtilde);
         s.assign(r.begin(), r.end());   // s = r
-	    alg::scaled_add(v, -alpha, s);  // s = s -alpha v; donc s = r -alpha v
+	    scaled_add(v, -alpha, s);       // s += -alpha v; so s = r -alpha v
 
         if (iter.finished_vect(s))
             {
-            alg::scaled_add(phat, alpha, x); // x = x + alpha phat
+            scaled_add(phat, alpha, x); // x += alpha * phat
             break;
             }
 
-        alg::p_direct(diag_precond, s, shat);// shat = M s;
-        alg::mult(A, shat, t);               //  t = A shat;
+        p_direct(diag_precond, s, shat);// shat = M s;
+        mult(A, shat, t);               //  t = A shat;
         if(MASK)
-            { alg::applyMask(ld,t); }
+            { applyMask(ld,t); }
 
-        omega = alg::dot(t, s)/alg::dot(t,t); // omega = (t'* s) / (t'*t);
-        alg::scaled_add(phat, alpha, x); // x = x + alpha phat;
-        alg::scaled_add(shat, omega, x); // x = x + omega shat;
+        omega = dot(t, s)/dot(t,t);    // omega = (t'* s) / (t'*t);
+        scaled_add(phat, alpha, x);    // x += alpha * phat;
+        scaled_add(shat, omega, x);    // x += omega * shat;
 
-        alg::scaled(omega, t); // t *= omega
+        scaled(omega, t);              // t *= omega
         r.assign(s.begin(), s.end());  // r = s
-        alg::sub(t, r);                // r -= t	; donc  r = s - omega t
+        sub(t, r);                     // r -= t; so r = s - omega t
 
         rho_2 = rho_1;
         ++iter;
         }
     if(MASK)
-        { alg::add(xd, x); }// x = x + xd
+        { add(xd, x); }                // x += xd
     return iter.get_res()/iter.get_rhsnorm();
     }
 } // end namespace alg
