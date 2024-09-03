@@ -26,12 +26,6 @@
 namespace algebra
 {
 /** 
-Y = alpha*X 
-*/
-inline void scaled(const std::vector<double> & X, const double alpha, std::vector<double> & Y) 
-	{ std::transform(X.begin(),X.end(),Y.begin(),[alpha](const double _x){ return alpha*_x; }); }
-
-/** 
 Y *= alpha 
 */
 inline void scaled( const double alpha, std::vector<double> & Y) 

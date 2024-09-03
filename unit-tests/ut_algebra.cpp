@@ -22,7 +22,8 @@ BOOST_AUTO_TEST_CASE(test_scaled, *boost::unit_test::tolerance(UT_TOL))
     std::vector<double> x {1,4,-2,sqrt(42)};
     double alpha(2.0);
     std::vector<double> y(4);
-    scaled(x,alpha,y); // y = alpha*x
+    y.assign(x.begin(),x.end()); // y <- x
+    scaled(alpha,y); // y *= alpha
     
     double result = dot(y,y); // result = scalar product y with himself
     std::cout << "dot(y,y)= " << result << std::endl;
