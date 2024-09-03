@@ -7,6 +7,7 @@
 #include "ut_config.h"  // for tolerance UT_TOL macro
 #include "../algebra/algebra.h"
 #include "../algebra/cg.h"
+#include "../algebra/bicg.h"
 
 using namespace algebra;
 inline double sq(const double x) { return x * x; } // same as Nodes::sq
@@ -235,6 +236,38 @@ BOOST_AUTO_TEST_CASE(test_cg, *boost::unit_test::tolerance(UT_TOL))
     std::vector<double> x(N);
     iteration algo_it;
     double res = cg(bob,x,b,algo_it);
+    std::cout << "CG test:\nresidu= " << res << std::endl;
+    BOOST_CHECK(res < 1e-6);// default iteration tol is 1e-8
+
+    std::vector<double> y(N);
+    mult(bob,x,y);
+    for(int i=0;i<N;i++)
+        {
+        std::cout << y[i] << "; ref val= " << b[i] << std::endl;
+        double result = sq(y[i] - b[i]);
+        std::cout << "result(should be zero)= " << result << std::endl;
+        BOOST_TEST( result == 0.0 );
+        }
+    }
+
+/** test on stabilized bi-gradient conjugate algorithm */
+BOOST_AUTO_TEST_CASE(test_bicg, *boost::unit_test::tolerance(UT_TOL))
+    {
+    const int N=4;
+    w_sparseMat m(N);
+    BOOST_TEST( m.getDim() == N );
+    m.insert( m_coeff(1,1,3.14) );
+    m.insert( m_coeff(0,0,1.0) );
+    m.insert( m_coeff(2,2,5.0) );
+    m.insert( m_coeff(3,3,42.0) );
+    m.insert( m_coeff(1,3,-10.0) );
+    m.insert( m_coeff(1,3,10.0) );
+    m.insert( m_coeff(0,3,0.5) );
+    r_sparseMat bob(m);
+    std::vector<double> b {1.0,1.0,1.0,1.0};
+    std::vector<double> x(N);
+    iteration algo_it;
+    double res = bicg(bob,x,b,algo_it);
     std::cout << "CG test:\nresidu= " << res << std::endl;
     BOOST_CHECK(res < 1e-6);// default iteration tol is 1e-8
 
