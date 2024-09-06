@@ -185,9 +185,14 @@ class Ellipsoid(object):
 
     def make(self,meshFileName):
         """ write ellipsoid mesh file """
-
-        sph = gmsh.model.occ.addSphere(0,0,0,self.r1)
-        gmsh.model.occ.dilate([(3,sph)],0,0,0,1,1,self.r2)
+        x = 0.0
+        y = 0.0
+        z = 0.0
+        a = 1.0
+        b = 1.0
+        c = self.r2/self.r1
+        sph = gmsh.model.occ.addSphere(x,y,z,self.r1)
+        gmsh.model.occ.dilate([(3,sph)],x,y,z,a,b,c)
         gmsh.model.occ.synchronize() # we have to sync before calling addPhysicalGroup
 
         surfaces = gmsh.model.getEntities(dim=2)
@@ -201,15 +206,14 @@ class Ellipsoid(object):
         gmsh.model.setPhysicalName(3,volume_tag,self.volName)
 
         gmsh.model.occ.synchronize() # we have to synchronize before the 'generate' call to build the mesh
-        
         eps = 1e-3
-        xmin = -self.r1 - eps
-        ymin = -self.r1 - eps
-        zmin = -self.r2 - eps
-        xmax = self.r1 + eps
-        ymax = self.r1 + eps
-        zmax = self.r2 + eps
-        
+        rescaler = 1.0 + eps
+        xmin = -rescaler*self.r1
+        ymin = -rescaler*self.r1
+        zmin = -rescaler*self.r2
+        xmax = rescaler*self.r1
+        ymax = rescaler*self.r1
+        zmax = rescaler*self.r2
         objects = gmsh.model.getEntitiesInBoundingBox(xmin,ymin,zmin,xmax,ymax,zmax, dim = 0)
         gmsh.model.mesh.setSize(objects,self.msh_s)
         gmsh.model.mesh.generate(dim = 3)
