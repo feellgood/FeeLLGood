@@ -3,6 +3,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <iostream>
+#include <chrono>
 
 #include "ut_config.h"  // for tolerance UT_TOL macro
 #include "../algebra/algebra.h"
@@ -193,6 +194,58 @@ BOOST_AUTO_TEST_CASE(test_cg, *boost::unit_test::tolerance(10.0*UT_TOL))
         double result = sq(y[i] - b[i]);
         std::cout << "result(should be zero)= " << result << std::endl;
         BOOST_TEST( result == 0.0 );
+        }
+    }
+
+/** test on directional gradient conjugate algorithm */
+BOOST_AUTO_TEST_CASE(test_cg_dir, *boost::unit_test::tolerance(UT_TOL))
+    {
+    std::cout << "unit test on algebra::cg_dir, find the linear solution of a Laplacian problem, with no source and Dirichlet boundary conditions \n";
+    auto t1 = std::chrono::high_resolution_clock::now();
+
+    const int VERBOSE = 0;
+    const int MAXITER = 5000;
+    const int NOD=1001;
+    const double cg_dir_tol = 1e-6;
+
+    std::vector<int> ld;
+    std::vector<double> Vd(NOD, 0.0);
+
+    w_sparseMat Kw(NOD);
+    Kw.insert(0,0,1.0);
+    Kw.insert(0,1,-1.0);
+    Kw.insert(NOD-1,NOD-2,-1.0);
+    Kw.insert(NOD-1,NOD-1,1.0);
+
+    for (int n=1; n<NOD-1; ++n)
+        {
+        Kw.insert(n,n-1,-1.0);
+        Kw.insert(n,n,2.0);
+        Kw.insert(n,n+1,-1.0);
+        }
+    ld.push_back(0);
+    Vd[0]=0.0;
+
+    ld.push_back(NOD-1);
+    Vd[NOD-1]=1.0;
+
+    r_sparseMat Kr(Kw);
+    std::vector<double> Lr(NOD,0.0);
+
+    iteration iter("cg_dir",cg_dir_tol,VERBOSE,MAXITER);
+    std::vector<double> Xw(NOD,0.0);
+    cg_dir(iter,Kr,Xw,Lr,Vd,ld);
+    double res = iter.get_res();
+    auto t2 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double,std::micro> micros = t2-t1;
+    std::cout << "residu= " << res << "\tfinished in " << iter.get_iteration() << " iterations, " << micros.count() << " μs\n";
+
+    for (int i=0; i<NOD; i+=50)
+        {
+        double val = Xw[i];
+        double val_ref = (double) (i/((double) (NOD-1)));
+        //std::cout << i << " : val = " << val << "\tval_ref = " << val_ref << std::endl;
+        BOOST_TEST( fabs(val - val_ref) < cg_dir_tol );
         }
     }
 
