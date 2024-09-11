@@ -36,7 +36,7 @@ double generic_bicg( iteration &iter, r_sparseMat& A, std::vector<double> & x, c
     rt.assign(r.begin(),r.end()); // copy(r, rt);
     p.assign(r.begin(),r.end()); // copy(r, p );
 
-    while (!iter.finished_vect(r))
+    while (!iter.finished(norm(r)))
         {
         rho_1 = dot(rt,r);
         if (!iter.first())
@@ -58,7 +58,7 @@ double generic_bicg( iteration &iter, r_sparseMat& A, std::vector<double> & x, c
         s.assign(r.begin(), r.end());   // s = r
 	    scaled_add(v, -alpha, s);       // s += -alpha v; so s = r -alpha v
 
-        if (iter.finished_vect(s))
+        if (iter.finished(norm(s)))
             {
             scaled_add(phat, alpha, x); // x += alpha * phat
             break;
