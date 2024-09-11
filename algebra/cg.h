@@ -20,7 +20,7 @@ double generic_cg(iteration &iter, r_sparseMat& A, std::vector<double> & x, cons
     if(MASK)
         {
         mult(A, xd, z);
-        sub(z, b);                        // b = b - A xd
+        sub(z, b);                        // b -= A xd
         applyMask(ld,b);
         applyMask(ld,diag_precond);
         }
@@ -38,7 +38,7 @@ double generic_cg(iteration &iter, r_sparseMat& A, std::vector<double> & x, cons
     rho = dot(z,r);                       //rho = vect_sp(z, r);
     p.assign(z.begin(),z.end());          //copy(z, p);
 
-    while (!iter.finished_vect(r))
+    while (!iter.finished(norm(r)))
         {
         if (!iter.first())
             { 
@@ -51,7 +51,9 @@ double generic_cg(iteration &iter, r_sparseMat& A, std::vector<double> & x, cons
 
         if(MASK)
             { applyMask(ld,q); }
-        double a=rho/dot(q,p);            // a = rho / vect_sp(q, p);
+        double q_dot_p = dot(q,p);
+        if (q_dot_p == 0.0) { std::cout<< "cg cannot converge: q orthogonal to p."; exit(1); }
+        double a=rho/q_dot_p;
         scaled_add(p, +a, x);             // add(scaled(p, +a), x);
         scaled_add(q, -a, r);             // add(scaled(q, -a), r);
         rho_1 = rho;

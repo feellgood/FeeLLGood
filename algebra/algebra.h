@@ -25,6 +25,9 @@
 
 namespace algebra
 {
+/** returns x² */
+inline double sq(const double x) { return x * x; }
+
 /** Y *= alpha */
 inline void scaled( const double alpha, std::vector<double> & Y) 
 	{ std::for_each(Y.begin(),Y.end(),[alpha](double &_x){ _x *= alpha; }); }
