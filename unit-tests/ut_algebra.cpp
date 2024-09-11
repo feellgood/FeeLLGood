@@ -281,5 +281,57 @@ BOOST_AUTO_TEST_CASE(test_bicg, *boost::unit_test::tolerance(UT_TOL))
         }
     }
 
+/** test on directional bi-gradient conjugate algorithm */
+BOOST_AUTO_TEST_CASE(test_bicg_dir, *boost::unit_test::tolerance(UT_TOL))
+    {
+    std::cout << "unit test on algebra::bicg_dir, find the linear solution of a Laplacian problem, with no source and Dirichlet boundary conditions \n";
+    auto t1 = std::chrono::high_resolution_clock::now();
+
+    const int VERBOSE = 0;
+    const int MAXITER = 5000;
+    const int NOD=1001;
+    const double bicg_dir_tol = 1e-6;
+
+    std::vector<int> ld;
+    std::vector<double> Vd(NOD, 0.0);
+
+    w_sparseMat Kw(NOD);
+    Kw.insert(0,0,1.0);
+    Kw.insert(0,1,-1.0);
+    Kw.insert(NOD-1,NOD-2,-1.0);
+    Kw.insert(NOD-1,NOD-1,1.0);
+
+    for (int n=1; n<NOD-1; ++n)
+        {
+        Kw.insert(n,n-1,-1.0);
+        Kw.insert(n,n,2.0);
+        Kw.insert(n,n+1,-1.0);
+        }
+    ld.push_back(0);
+    Vd[0]=0.0;
+
+    ld.push_back(NOD-1);
+    Vd[NOD-1]=1.0;
+
+    r_sparseMat Kr(Kw);
+    std::vector<double> Lr(NOD,0.0);
+
+    iteration iter("bicg_dir",bicg_dir_tol,VERBOSE,MAXITER);
+    std::vector<double> Xw(NOD,0.0);
+    bicg_dir(iter,Kr,Xw,Lr,Vd,ld);
+    double res = iter.get_res();
+    auto t2 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double,std::micro> micros = t2-t1;
+    std::cout << "residu= " << res << "\tfinished in " << iter.get_iteration() << " iterations, " << micros.count() << " μs\n";
+
+    for (int i=0; i<NOD; i+=50)
+        {
+        double val = Xw[i];
+        double val_ref = (double) (i/((double) (NOD-1)));
+        //std::cout << i << " : val = " << val << "\tval_ref = " << val_ref << std::endl;
+        BOOST_TEST( sq(val - val_ref) < 10.0*bicg_dir_tol ); // CT: convergence is slower than cg algo, not the same norm to pass the test
+        }
+    }
+
 BOOST_AUTO_TEST_SUITE_END()
 
