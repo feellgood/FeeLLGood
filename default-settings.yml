@@ -140,6 +140,12 @@ mesh:
 #   coordinates (x, y, z); the expression may be constants.
 initial_magnetization: [0, 0, 1]
 
+# Initial time of the simulation. Default is:
+# - the time recorded in the ‘.sol’ file providing the initial
+#   magnetization, if the initial magnetization was defined this way
+# - zero otherwise
+initial_time:
+
 # “Recentering” is the process by which feeLLGood tries to artificially
 # keep a domain wall in the center of the simulated volume by
 # translating the magnetization vector field.

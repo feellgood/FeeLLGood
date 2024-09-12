@@ -158,6 +158,9 @@ public:
     /** input file name for continuing a calculation (sol.in) */
     std::string restoreFileName;
 
+    /** initial time for the simulation, if defined in the settings file, NAN otherwise */
+    double initial_time = NAN;
+
     /** maximum value for du step */
     double DUMAX;  // 0.1 for magnetostatic simulations; 0.02 for the dynamics
 

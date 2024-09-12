@@ -112,6 +112,12 @@ public:
             t_prm.set_t(msh.readSol(mySets.verbose, mySets.restoreFileName));
             }
 
+        /* This potentially overrides the initial time set above by msh.readSol(). */
+        if (!isnan(mySets.initial_time))
+            {
+            t_prm.set_t(mySets.initial_time);
+            }
+
         if (mySets.recenter)
             {
             direction(Nodes::IDX_Z);

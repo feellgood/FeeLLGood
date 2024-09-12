@@ -173,6 +173,11 @@ void Settings::infos()
         std::cout << "[\"" << sMx << "\", \"" << sMy << "\", \"" << sMz << "\"]\n";
     else
         std::cout << restoreFileName << "\n";
+    std::cout << "initial_time:";
+    if (isnan(initial_time))
+        std::cout << '\n';
+    else
+        std::cout << ' ' << initial_time << '\n';
     std::cout << "recentering:\n";
     std::cout << "  enable: " << str(recenter) << "\n";
     if (recenter)
@@ -399,6 +404,8 @@ void Settings::read(YAML::Node yaml)
             error("initial_magnetization should be a file name or a vector of expressions.");
             }
         }  // initial_magnetization
+
+    assign(initial_time, yaml["initial_time"]);
 
     YAML::Node recentering = yaml["recentering"];
     if (recentering)
