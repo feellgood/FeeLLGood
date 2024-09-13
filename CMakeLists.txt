@@ -103,7 +103,7 @@ SET(HEADERS config.h node.h expression_parser.h mesh.h electrostatSolver.h
     spinTransferTorque.h time_integration.h feellgoodSettings.h tetra.h
     facette.h linear_algebra.h log-stats.h tags.h chronometer.h element.h)
 
-SET(SOURCES feellgoodSettings.cpp time_integration.cpp solver.cpp
+SET(SOURCES feellgoodSettings.cpp time_integration.cpp solver.cpp electrostatSolver.cpp
     read.cpp save.cpp linear_algebra.cpp recentering.cpp tetra.cpp
     energy.cpp facette.cpp expression_parser.cpp chronometer.cpp
     tags.cpp mesh.cpp)
