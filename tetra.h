@@ -8,7 +8,7 @@
 
 #include <set>
 
-#include "spinTransferTorque.h"
+//#include "spinTransferTorque.h"
 #include "facette.h"
 #include "node.h"
 #include "time_integration.h"
@@ -71,7 +71,12 @@ struct prm
     Eigen::Vector3d ex; /**< unit vector1 (for cubic anisotropy) */
     Eigen::Vector3d ey; /**< unit vector2 (for cubic anisotropy) */
     Eigen::Vector3d ez; /**< unit vector3 (for cubic anisotropy) */
-    STT p_STT;   /**< spin transfert torque (thiaville STT) parameters */
+    
+    double beta;  /**< spin transfert torque parameters : beta Thiaville */
+    double N0;    /**< density of states */
+    double sigma; /**< conductivity */
+    double lJ;    /**< diffusion length */
+    double lsf;   /**< spin diffusion length */
 
     /** print the struct parameters */
     inline void infos()
