@@ -12,7 +12,8 @@
 #include "linear_algebra.h"
 #include "mesh.h"
 #include "time_integration.h"
-#include "electrostatSolver.h"
+#include "spinTransferTorque.h"
+//#include "electrostatSolver.h"
 
 // Catch some deadly signals in order to save the state before quitting.
 volatile sig_atomic_t received_signal = 0;
@@ -243,7 +244,8 @@ int main(int argc, char *argv[])
         {
         std::string fileName(mySettings.getSimName());
         fileName += "_V.sol";
-        electrostatSolver pot_solver = electrostatSolver(fem.msh, mySettings.p_stt, 1e-8,
+        double sigma = 3.456;
+        electrostatSolver pot_solver = electrostatSolver(fem.msh, sigma, 1e-8,
                                                          mySettings.verbose, 5000, fileName);
         }
 
