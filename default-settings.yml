@@ -122,6 +122,21 @@ mesh:
       # Dimensionless damping parameter.
       alpha_LLG: 0.5
 
+      # conductivity
+      sigma: 1.0
+
+      # density of states
+      dens_state: 1.0
+
+      # STT beta parameter from Thiaville model (to check)
+      beta: 0
+
+      # diffusion length
+      l_J: 1.0
+
+      # spin diffusion length
+      l_sf: 1.0
+
   # Material parameters of the surface regions defined by the mesh.
   surface_regions:
 
@@ -175,11 +190,6 @@ Bext: [0, 0, 0]
 # progress, not ready for general use.
 spin_transfer_torque:
   enable: false
-  sigma: 1.0
-  dens_state: 1.0
-  beta: 0
-  l_J: 1.0
-  l_sf: 1.0
   V_file: false
 
 # Parameters for the computation of the demagnetizing field.

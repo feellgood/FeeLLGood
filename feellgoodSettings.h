@@ -16,7 +16,6 @@ output file format wanted by the user. This is done mainly with the class Settin
 
 #include "expression_parser.h"
 #include "facette.h"
-#include "spinTransferTorque.h"
 #include "tetra.h"
 #include "time_integration.h"
 
@@ -142,8 +141,11 @@ public:
     /** nb of threads for the computation of the demag field with scalfmm */
     int scalfmmNbTh;
 
-    /** spin transfert torque parameters */
-    STT p_stt;
+    /** spin transfer torque boundary conditions */
+    std::vector<std::pair<std::string, double>> sttBoundaryCond;
+
+    /** if true creates an output file of the solution of the electrostatic problem  */
+    bool V_file;
 
     /** if spin transfer torque p_stt is fully initialized and boundary conditions ok, stt_flag is set to true */
     bool stt_flag;
