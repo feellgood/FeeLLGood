@@ -152,8 +152,11 @@ public:
     /** nb of threads for the computation of the demag field with scalfmm */
     int scalfmmNbTh;
 
-    /** spin accumulation boundary conditions */
-    std::vector<std::pair<std::string, double>> sttBoundaryCond;
+    /** spin accumulation sub-problem electrostatic boundary conditions: constant potential on surface */
+    std::vector<std::pair<std::string, double>> spAccBoundaryCond_V;
+
+    /** spin accumulation sub-problem electrostatic boundary conditions: constant normal current density on surface */
+    std::vector<std::pair<std::string, double>> spAccBoundaryCond_J;
 
     /** if true creates an output file of the solution of the electrostatic problem  */
     bool V_file;

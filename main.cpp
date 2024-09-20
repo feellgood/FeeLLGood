@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
         fileName += "_V.sol";
         double sigma = 3.456;
         electrostatSolver pot_solver = electrostatSolver(fem.msh, sigma, 1e-8,
-                                                         mySettings.verbose, 5000, fileName);
+                                                         mySettings.verbose, 5000, false, fileName);
         }
 
     chronometer fmm_counter(2);
