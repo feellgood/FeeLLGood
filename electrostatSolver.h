@@ -26,8 +26,9 @@ public:
             const double _tol /**< [in] tolerance for solvers */,
             const bool v /**< [in] verbose bool */,
             const int max_iter /**< [in] maximum number of iteration */,
+            const bool _V_file /**< [in] if true an output tsv file containing potential V is written */,
             const std::string _fileName /**< [in] output .sol file name for electrostatic potential */)
-        : msh(_msh), sigma(_sigma), verbose(v), MAXITER(max_iter), fileName(_fileName)
+        : msh(_msh), sigma(_sigma), verbose(v), MAXITER(max_iter), V_file(_V_file), fileName(_fileName)
         {
         if (verbose)
             { infos(); }
@@ -53,7 +54,6 @@ public:
                           calc_Hm(tet, _gradV, _Hm);
                           Hm.push_back(_Hm);
                           });
-            //prepareExtras(); // (STT)
             }
         else
             {
@@ -69,9 +69,7 @@ public:
             {
             Eigen::Vector3d v(0,0,0);
             for (int i = 0; i < Tetra::N; i++)
-                {
-                v += V[tet.ind[i]] * tet.da.row(i);
-                }
+                { v += V[tet.ind[i]] * tet.da.row(i); }
             _gradV.col(npi) = v;
             }
         }
@@ -86,8 +84,6 @@ public:
         for (int npi = 0; npi < Tetra::NPI; npi++)
             { _Hm.col(npi) = -sigma * _gradV.col(npi).cross(p_g.col(npi)); }
         }
-
-
 
     /** electrostatic potential values for boundary conditions, V.size() is the size of the vector
      * of nodes */
@@ -138,7 +134,7 @@ private:
 
     /** if true a text file V.sol is generated. It contains the solution of the
                      electrostatic problem on the nodes of the mesh */
-    const bool V_file = false;
+    const bool V_file;
 
     /** output .sol file name for electrostatic problem */
     const std::string fileName;
