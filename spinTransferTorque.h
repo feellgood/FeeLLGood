@@ -15,12 +15,12 @@
 class STT
     {
     STT(Mesh::mesh &_msh, double beta, double N0, double _sigma, double lJ, double lsf):
-        msh(_msh), elec(_msh,_sigma,1e-6,false,5000,"")
+        msh(_msh), elec(_msh,_sigma,1e-6,false,5000,false,"")
         {
-        //msh = _msh;
         ksi = Nodes::sq(lJ / lsf);
-        D0 = 2.0 * sigma / (Nodes::sq(CHARGE_ELECTRON) * N0);
+        D0 = 2.0 * _sigma / (Nodes::sq(CHARGE_ELECTRON) * N0);
         pf = Nodes::sq(lJ) / (D0 * (1. + ksi * ksi)) * BOHRS_MUB * beta / CHARGE_ELECTRON;
+        //prepareExtras();
         }
 
     /** mesh */
@@ -42,7 +42,7 @@ class STT
     double lsf;
 
     /** solve electrostatic side problem */
-    electrostatSolver elec;//(msh,sigma,tol,false,5000,"");
+    electrostatSolver elec;
 
     inline double calc_prefactor(double Js) { return D0 / Nodes::sq(lJ) / (gamma0*Js/mu0); }
     
