@@ -26,8 +26,9 @@ public:
             const double _tol /**< [in] tolerance for solvers */,
             const bool v /**< [in] verbose bool */,
             const int max_iter /**< [in] maximum number of iteration */,
+            const bool _V_file /**< [in] if true an output tsv file containing potential V is written */,
             const std::string _fileName /**< [in] output .sol file name for electrostatic potential */)
-        : msh(_msh), sigma(_sigma), verbose(v), MAXITER(max_iter), fileName(_fileName)
+        : msh(_msh), sigma(_sigma), verbose(v), MAXITER(max_iter), V_file(_V_file), fileName(_fileName)
         {
         if (verbose)
             { infos(); }
@@ -138,7 +139,7 @@ private:
 
     /** if true a text file V.sol is generated. It contains the solution of the
                      electrostatic problem on the nodes of the mesh */
-    const bool V_file = false;
+    const bool V_file;
 
     /** output .sol file name for electrostatic problem */
     const std::string fileName;
