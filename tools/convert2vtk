@@ -97,13 +97,13 @@ def main():
     #the vectors are fixed on each nodes, so we have to associate them to ugrid as Points, not to the cells = tetrahedrons
     if len(indices) == 3:
         print( newFileName ,"saved as 3D vectors, using ", indices ," columns")
+        my_data.Mag.SetName("Magnetization")
         ugrid.GetPointData().SetVectors(my_data.Mag)
     else:
         print(newFileName ,"saved as " + str(len(indices)) + "D scalars, using ", indices ," column(s)")
         ugrid.GetPointData().SetScalars(my_data.Mag)
 
     writer = vtk.vtkXMLUnstructuredGridWriter()
-    
     writer.SetFileName(newFileName)
     writer.SetInputData(ugrid)
     writer.SetDataModeToBinary() #writer.SetDataModeToAscii() #available only if XML
