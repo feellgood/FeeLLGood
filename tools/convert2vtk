@@ -106,9 +106,9 @@ def main():
     
     writer.SetFileName(newFileName)
     writer.SetInputData(ugrid)
-    #writer.SetDataModeToAscii() #available only if XML
+    writer.SetDataModeToBinary() #writer.SetDataModeToAscii() #available only if XML
     writer.Write()
 
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 if __name__ == "__main__":
     main()
