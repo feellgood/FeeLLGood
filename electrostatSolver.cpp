@@ -32,6 +32,7 @@ void electrostatSolver::assembling_vect(Facette::Fac const &fac, std::vector<dou
         { L(fac.ind[ie]) += Le[ie]; }
     }
 
+// same formula as sp_acc_llg
 void electrostatSolver::integrales(Tetra::Tet const &tet, double sigma, double AE[Tetra::N][Tetra::N])
     {
     for (int npi = 0; npi < Tetra::NPI; npi++)
@@ -55,6 +56,7 @@ void electrostatSolver::integrales(Tetra::Tet const &tet, double sigma, double A
         }
     }
 
+// same formula as sp_acc_llg
 void electrostatSolver::integrales(Facette::Fac const &fac, double pot_val, std::vector<double> &BE)
     {
     for (int npi = 0; npi < Facette::NPI; npi++)
