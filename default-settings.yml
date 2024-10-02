@@ -186,9 +186,25 @@ recentering:
 Bext: [0, 0, 0]
 
 # Parameters for simulating a spin transfer torque. This is a work in
-# progress, not ready for general use.
+# progress.
+# boundary conditions are defining the electrostatic problem through:
+# a constant potential value on a surface, and a normal current density on another one
+# material parameters are defined in mesh/volume_regions
 spin_transfer_torque:
+  # Whether to enable computation of spin transfer torque contribution.
   enable: false
+
+  # description of the electrostatic boundary conditions, a potential
+  # and a current density values (at least) and their corresponding surface names must be provided
+  potentials:
+    # surface_region_name, potential scalar value
+    __default__: 0
+
+  current_densities:
+    # surface_region_name, current density scalar value
+    __default__: 0
+
+  # output .tsv file of the electric potentials
   V_file: false
 
 # Parameters for the computation of the demagnetizing field.
