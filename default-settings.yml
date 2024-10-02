@@ -154,6 +154,12 @@ mesh:
       # Unit vector along the surface anisotropy axis.
       uk: [0, 0, 1]
 
+      # fixed current density value (J.n) for the boundary conditions of the electrostatic problem
+      J:
+
+      # fixed potential value for the boundary conditions of the electrostatic problem
+      V:
+
 # The initial magnetization can be provided as either:
 # - the name of a file in feeLLGood’s format (‘.sol’ file)
 # - an array of three expression depending on the Cartesian spatial
@@ -187,9 +193,15 @@ recentering:
 Bext: [0, 0, 0]
 
 # Parameters for simulating a spin transfer torque. This is a work in
-# progress, not ready for general use.
+# progress.
+# boundary conditions are defining the electrostatic problem through:
+# a constant potential value on a surface, and a normal current density on another one
+# material parameters are defined in mesh/volume_regions
 spin_transfer_torque:
+  # Whether to enable computation of spin transfer torque contribution.
   enable: false
+
+  # output .tsv file of the electric potentials
   V_file: false
 
 # Parameters for the computation of the demagnetizing field.
