@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <cmath>
 #include <unistd.h>  // for sysconf(), gethostname()
 
 #include "tags.h"
@@ -191,6 +192,16 @@ void Settings::toYaml()
         std::cout << "      suppress_charges: " << str(it->suppress_charges) << "\n";
         std::cout << "      Ks: " << it->Ks << "\n";
         if (it->Ks != 0) std::cout << "      uk: " << str(it->uk) << "\n";
+        std::cout <<  "      J:";
+        if (isnan(it->J))
+            std::cout << "\n";
+        else
+            std::cout << ' ' << it->J << '\n';
+        std::cout <<  "      V:";
+        if (isnan(it->V))
+            std::cout << "\n";
+        else
+            std::cout << ' ' << it->V << '\n';
         }
     std::cout << "initial_magnetization: ";
     if (!sM.empty())
@@ -228,24 +239,7 @@ void Settings::toYaml()
     std::cout << "spin_transfer_torque:\n";
     std::cout << "  enable: " << str(stt_flag) << "\n";
     if (stt_flag)
-        {
-        
-        std::cout << "  V_file: " << str(V_file) << "\n";
-        std::cout << "  boundary_conditions:";
-        if (sttBoundaryCond.size() == 0)
-            {
-            std::cout << " {}\n"; /* empty map*/
-            }
-        else
-            {
-            std::cout << "\n";
-            for (unsigned int i = 0; i < sttBoundaryCond.size(); i++)
-                {
-                std::cout << "    \"" << sttBoundaryCond[i].first
-                          << "\": " << sttBoundaryCond[i].second << "\n";
-                }
-            }
-        }
+        { std::cout << "  V_file: " << str(V_file) << "\n"; }
 
     std::cout << "demagnetizing_field_solver:\n";
     std::cout << "  nb_threads: " << scalfmmNbTh << "\n";
@@ -418,6 +412,15 @@ void Settings::read(YAML::Node yaml)
                 assign(p.suppress_charges, surface["suppress_charges"]);
                 assign(p.Ks, surface["Ks"]);
                 assign(p.uk, surface["uk"]);
+
+                // J and V may be null, which we map to NAN.
+                if (!assign(p.J, surface["J"]))
+                    p.J = NAN;
+                if (!assign(p.V, surface["V"]))
+                    p.V = NAN;
+                if (!isnan(p.J) && !isnan(p.V))
+                    error("A surface region cannot have both no-null J and V.");
+
                 paramFacette.push_back(p);
                 }
             }  // mesh.surface_regions
@@ -519,22 +522,6 @@ void Settings::read(YAML::Node yaml)
         assign(stt_flag, stt["enable"]);
         
         assign(V_file, stt["V_file"]);
-
-        YAML::Node bound_cond = stt["boundary_conditions"];
-        if (bound_cond && !bound_cond.IsNull())
-            {
-            if (!bound_cond.IsMap())
-                error("stt.boundary_conditions should be a map.");
-            else
-                {
-                for (auto it = bound_cond.begin(); it != bound_cond.end(); ++it)
-                    {
-                    std::string name = it->first.as<std::string>();
-                    double V = it->second.as<double>();
-                    sttBoundaryCond.push_back(std::make_pair(name, V));
-                    }
-                }
-            }
         }  // spin_transfer_torque
 
     // The number of available processors (actually, hardware threads) is the default for the number
