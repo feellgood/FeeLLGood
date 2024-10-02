@@ -229,21 +229,20 @@ void Settings::toYaml()
     std::cout << "  enable: " << str(stt_flag) << "\n";
     if (stt_flag)
         {
-        
         std::cout << "  V_file: " << str(V_file) << "\n";
-        std::cout << "  boundary_conditions:";
-        if (sttBoundaryCond.size() == 0)
+        std::cout << "  potentials:\n";
+        for (auto it = sttBoundaryCond_V.begin(); it != sttBoundaryCond_V.end(); ++it)
             {
-            std::cout << " {}\n"; /* empty map*/
+            if (it->first == "__default__")  // skip
+                continue;
+            std::cout << "    \"" << it->first << "\": " << it->second << "\n";
             }
-        else
+        std::cout << "  current_densities:\n";
+        for (auto it = sttBoundaryCond_J.begin(); it != sttBoundaryCond_J.end(); ++it)
             {
-            std::cout << "\n";
-            for (unsigned int i = 0; i < sttBoundaryCond.size(); i++)
-                {
-                std::cout << "    \"" << sttBoundaryCond[i].first
-                          << "\": " << sttBoundaryCond[i].second << "\n";
-                }
+            if (it->first == "__default__")  // skip
+                continue;
+            std::cout << "    \"" << it->first << "\": " << it->second << "\n";
             }
         }
 
@@ -520,18 +519,34 @@ void Settings::read(YAML::Node yaml)
         
         assign(V_file, stt["V_file"]);
 
-        YAML::Node bound_cond = stt["boundary_conditions"];
-        if (bound_cond && !bound_cond.IsNull())
+        YAML::Node pot = stt["potentials"];
+        if (pot && !pot.IsNull())
             {
-            if (!bound_cond.IsMap())
-                error("stt.boundary_conditions should be a map.");
+            if (!pot.IsMap())
+                error("stt.potentials should be a map.");
             else
                 {
-                for (auto it = bound_cond.begin(); it != bound_cond.end(); ++it)
+                for (auto it = pot.begin(); it != pot.end(); ++it)
                     {
                     std::string name = it->first.as<std::string>();
                     double V = it->second.as<double>();
-                    sttBoundaryCond.push_back(std::make_pair(name, V));
+                    sttBoundaryCond_V.push_back(std::make_pair(name, V));
+                    }
+                }
+            }
+
+        YAML::Node current = stt["current_densities"];
+        if (current && !current.IsNull())
+            {
+            if (!current.IsMap())
+                error("stt.current_densities should be a map.");
+            else
+                {
+                for (auto it = current.begin(); it != current.end(); ++it)
+                    {
+                    std::string name = it->first.as<std::string>();
+                    double J = it->second.as<double>();
+                    sttBoundaryCond_J.push_back(std::make_pair(name, J));
                     }
                 }
             }
