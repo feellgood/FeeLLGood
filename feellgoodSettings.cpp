@@ -51,7 +51,7 @@ static bool assign(T &var, const YAML::Node &node)
 // Overload of the previous template for a unit vector.
 static bool assign(Eigen::Vector3d &var, const YAML::Node &node)
     {
-    if (node)
+    if (node && !node.IsNull())
         {
         if (!node.IsSequence()) error("vectors should be YAML sequences.");
         if (node.size() != 3) error("vectors should have three components.");
@@ -268,7 +268,7 @@ std::string Settings::solMetadata(double t, std::string columnsTitle) const
 void Settings::read(YAML::Node yaml)
     {
     YAML::Node outputs = yaml["outputs"];
-    if (outputs)
+    if (outputs && !outputs.IsNull())
         {
         if (!outputs.IsMap()) error("outputs should be a map.");
         if (assign(r_path_output_dir, outputs["directory"]))
@@ -303,7 +303,7 @@ void Settings::read(YAML::Node yaml)
                 }
             }
         YAML::Node columns = outputs["evol_columns"];
-        if (columns)
+        if (columns && !columns.IsNull())
             {
             if (!columns.IsSequence()) error("outputs.evol_columns should be a sequence.");
             evol_columns.clear();
@@ -313,14 +313,14 @@ void Settings::read(YAML::Node yaml)
         }  // outputs
 
     YAML::Node mesh = yaml["mesh"];
-    if (mesh)
+    if (mesh && !mesh.IsNull())
         {
         if (!mesh.IsMap()) error("mesh should be a map.");
         assign(pbName, mesh["filename"]);
         if (assign(_scale, mesh["length_unit"]) && _scale <= 0)
             error("mesh.length_unit should be positive.");
         YAML::Node volumes = mesh["volume_regions"];
-        if (volumes)
+        if (volumes && !volumes.IsNull())
             {
             if (!volumes.IsMap()) error("mesh.volume_regions should be a map.");
             int default_idx = findTetraRegionIdx("__default__");
@@ -355,7 +355,7 @@ void Settings::read(YAML::Node yaml)
                 }
             }  // mesh.volume_regions
         YAML::Node surfaces = mesh["surface_regions"];
-        if (surfaces)
+        if (surfaces && !surfaces.IsNull())
             {
             if (!surfaces.IsMap()) error("mesh.surface_regions should be a map.");
             int default_idx = findFacetteRegionIdx("__default__");
@@ -375,7 +375,7 @@ void Settings::read(YAML::Node yaml)
         }      // mesh
 
     YAML::Node magnetization = yaml["initial_magnetization"];
-    if (magnetization)
+    if (magnetization && !magnetization.IsNull())
         {
         if (magnetization.IsScalar())
             {
@@ -408,7 +408,7 @@ void Settings::read(YAML::Node yaml)
     assign(initial_time, yaml["initial_time"]);
 
     YAML::Node recentering = yaml["recentering"];
-    if (recentering)
+    if (recentering && !recentering.IsNull())
         {
         assign(recenter, recentering["enable"]);
         std::string direction = recentering["direction"].as<std::string>("Z");
@@ -424,7 +424,7 @@ void Settings::read(YAML::Node yaml)
         }  // recentering
 
     YAML::Node field = yaml["Bext"];
-    if (field)
+    if (field && !field.IsNull())
         {
         if (field.IsScalar())
             {
@@ -465,7 +465,7 @@ void Settings::read(YAML::Node yaml)
         }  // Bext
 
     YAML::Node stt = yaml["spin_transfer_torque"];
-    if (stt)
+    if (stt && !stt.IsNull())
         {
         assign(stt_flag, stt["enable"]);
         assign(p_stt.sigma, stt["sigma"]);
@@ -476,7 +476,7 @@ void Settings::read(YAML::Node yaml)
         assign(p_stt.V_file, stt["V_file"]);
 
         YAML::Node bound_cond = stt["boundary_conditions"];
-        if (bound_cond)
+        if (bound_cond && !bound_cond.IsNull())
             {
             if (!bound_cond.IsMap())
                 error("stt.boundary_conditions should be a map.");
@@ -497,14 +497,14 @@ void Settings::read(YAML::Node yaml)
     int available_cpu_count = sysconf(_SC_NPROCESSORS_ONLN);
 
     YAML::Node solver = yaml["demagnetizing_field_solver"];
-    if (solver)
+    if (solver && !solver.IsNull())
         {
         assign(scalfmmNbTh, solver["nb_threads"]);
         if (scalfmmNbTh <= 0) scalfmmNbTh = available_cpu_count;
         }  // demagnetizing_field_solver
 
     solver = yaml["finite_element_solver"];
-    if (solver)
+    if (solver && !solver.IsNull())
         {
         assign(solverNbTh, solver["nb_threads"]);
         if (solverNbTh <= 0) solverNbTh = available_cpu_count;
@@ -515,7 +515,7 @@ void Settings::read(YAML::Node yaml)
         }  // finite_element_solver
 
     YAML::Node time_integration = yaml["time_integration"];
-    if (time_integration)
+    if (time_integration && !time_integration.IsNull())
         {
         assign(DUMAX, time_integration["max(du)"]);
         assign(dt_min, time_integration["min(dt)"]);
