@@ -235,14 +235,14 @@ void Settings::toYaml()
             {
             if (it->first == "__default__")  // skip
                 continue;
-            std::cout << "    \"" << it->first << "\": " << it->second << "\n";
+            std::cout << "    " << it->first << ": " << it->second << "\n";
             }
         std::cout << "  current_densities:\n";
         for (auto it = sttBoundaryCond_J.begin(); it != sttBoundaryCond_J.end(); ++it)
             {
             if (it->first == "__default__")  // skip
                 continue;
-            std::cout << "    \"" << it->first << "\": " << it->second << "\n";
+            std::cout << "    " << it->first << ": " << it->second << "\n";
             }
         }
 
@@ -529,6 +529,7 @@ void Settings::read(YAML::Node yaml)
                 for (auto it = pot.begin(); it != pot.end(); ++it)
                     {
                     std::string name = it->first.as<std::string>();
+                    if (it->second.IsNull()) continue;
                     double V = it->second.as<double>();
                     sttBoundaryCond_V.push_back(std::make_pair(name, V));
                     }
@@ -545,6 +546,7 @@ void Settings::read(YAML::Node yaml)
                 for (auto it = current.begin(); it != current.end(); ++it)
                     {
                     std::string name = it->first.as<std::string>();
+                    if (it->second.IsNull()) continue;
                     double J = it->second.as<double>();
                     sttBoundaryCond_J.push_back(std::make_pair(name, J));
                     }

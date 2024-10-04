@@ -199,11 +199,11 @@ spin_transfer_torque:
   # and a current density values (at least) and their corresponding surface names must be provided
   potentials:
     # surface_region_name, potential scalar value
-    __default__: 0
+    __default__: null
 
   current_densities:
     # surface_region_name, current density scalar value
-    __default__: 0
+    __default__: null
 
   # output .tsv file of the electric potentials
   V_file: false
