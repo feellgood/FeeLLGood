@@ -74,11 +74,15 @@ static const std::string str(Eigen::Vector3d v)
 
 // Stringify a string: if it contains a newline, convert it to a multiline string in "literal style"
 // (introduced by '|'). Otherwise leave it alone.
-// Warning: this function assumes this is the value of a property at indentation level zero.
-static const std::string str(std::string s)
+// `level` is the indentation level of the property whose value is being stringified.
+static const std::string str(std::string s, int level = 0)
     {
-    // If it doesn't ave an eol, leave it alone.
+    // If it doesn't have an eol, leave it alone.
     if (s.find('\n') == std::string::npos) return s;
+
+    // Indentation to be added to each line.
+    int indent_size = (level + 1) * 2;  // the value is indented one level more than the property
+    std::string indent(indent_size, ' ');
 
     // Prepend "|\n".
     s.insert(0, "|\n");
@@ -90,8 +94,8 @@ static const std::string str(std::string s)
     size_t pos = 0;
     while ((pos = s.find('\n', pos)) != std::string::npos)
         {
-        s.replace(pos + 1, 0, "  ");
-        pos += 3;
+        s.replace(pos + 1, 0, indent);
+        pos += 1 + indent_size;  // "\n" + indent
         }
 
     return s;
@@ -193,7 +197,9 @@ void Settings::infos()
         std::cout << "  threshold: " << threshold << "\n";
         }
     std::cout << "Bext: ";
-    if (!sB.empty())
+    if (field_type == R4toR3)
+        std::cout << "\n  space: " << str(sB_space, 1) << "\n  time: " << str(sB_time, 1) << '\n';
+    else if (!sB.empty())
         std::cout << str(sB) << "\n";
     else
         std::cout << "[\"" << sBx << "\", \"" << sBy << "\", \"" << sBz << "\"]\n";
