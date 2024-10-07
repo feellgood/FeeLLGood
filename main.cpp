@@ -165,7 +165,7 @@ std::string parseOptions(Settings &settings, int argc, char *argv[], unsigned in
     if (verify)
         {
         settings.read(filename);
-        settings.infos();
+        settings.toYaml();
         exit(0);
         }
     if (!use_fixed_seed)
@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
     if (mySettings.verbose)
         {
         std::cout << "-- settings: -----------------------------------\n";
-        mySettings.infos();
+        mySettings.toYaml();
         std::cout << "-- end of settings -----------------------------\n";
         std::cout << "simulation:\n";
         std::cout << "  final time:         " << t_prm.tf << '\n';

@@ -125,7 +125,7 @@ Settings::Settings()
 
 void Settings::dumpDefaults() { std::cout << get_default_yaml(); }
 
-void Settings::infos()
+void Settings::toYaml()
     {
     std::cout << "outputs:\n";
     std::cout << "  directory: " << r_path_output_dir << "\n";

@@ -47,8 +47,8 @@ public:
     /** print out the YAML document defining the default settings */
     static void dumpDefaults();
 
-    /** some prints sent to terminal */
-    void infos(void);
+    /** settings yaml serializer */
+    void toYaml(void);
 
     /** build a metadata string for .evol file */
     std::string evolMetadata(std::string realWorldTime) const;
