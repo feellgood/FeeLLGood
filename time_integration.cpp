@@ -1,4 +1,5 @@
 #include <cfloat>
+#include <cmath>
 #include <ctime>
 #include <signal.h>
 
@@ -159,14 +160,18 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
     int flag(0);
     int nt_output(0);  // visible iteration count
     int status(0);     // exit status
+    double t_initial = t_prm.get_t();
     double t_step = settings.time_step;
+    int step_count = std::round((t_prm.tf - t_initial) / t_step);
     TimeStepper stepper(t_prm.get_dt(), t_prm.DTMIN, t_prm.DTMAX);
     Stats stats;
 
     // Loop over the visible time steps, i.e. those that will appear on the output file.
     nt = 0;
-    for (double t_target = t_prm.get_t(); t_target < t_prm.tf + t_step / 2; t_target += t_step)
+    for (int step_nb = 0; step_nb <= step_count; step_nb++)
         {
+        double t_target = t_initial + step_nb * t_step;
+
         // Loop over the integration time steps within a visible step.
         while (t_prm.get_t() < t_target)
             {
