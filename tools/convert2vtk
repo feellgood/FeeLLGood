@@ -31,7 +31,7 @@ class data(object):
                 
     def filter(self,line):# the separator is either a '\t' or spaces, because s.sol files may be post-treated
         if not line.startswith('#'): # to ignore comments
-            filtered_line = re.sub('\s+','\t',line)
+            filtered_line = re.sub('\\s+','\t',line)
             return filtered_line.strip().split('\t')
         else:
             return []
