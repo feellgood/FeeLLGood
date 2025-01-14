@@ -43,14 +43,14 @@ def writeYaml(fileName,metadata):
     return message
 
 try:
-    from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QGridLayout, QLineEdit, QComboBox, QSpinBox, QMessageBox
+    from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QGridLayout, QLineEdit, QComboBox, QSpinBox, QMessageBox
     from PyQt5.QtCore import Qt
 
     class MainWindow(QWidget):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
 
-            self.resize(400,160)
+            self.resize(400,200)
             self.setWindowTitle("feeLLGood config")
 
             layout = QGridLayout()
@@ -60,13 +60,13 @@ try:
             layout.addWidget(QLabel('Username:'), 0, 0)
             self.userNameLineEdit = QLineEdit()
             self.userNameLineEdit.textChanged.connect(self.updateWindowTitle)
-            layout.addWidget(self.userNameLineEdit, 0, 1)
+            layout.addWidget(self.userNameLineEdit,0,1,1,2)
             
             # affiliation
             layout.addWidget(QLabel('Affiliation:'), 1, 0)
             self.affiliationLineEdit = QLineEdit()
             self.affiliationLineEdit.textChanged.connect(self.updateWindowTitle)
-            layout.addWidget(self.affiliationLineEdit, 1, 1)
+            layout.addWidget(self.affiliationLineEdit,1,1,1,2)
 
             # licence
             layout.addWidget(QLabel("Licence:"),2,0)
@@ -74,7 +74,7 @@ try:
             self.licenceComboBox.setToolTip("Licence of the output file(s).")
             self.licenceComboBox.addItems(licences)
             self.licenceComboBox.currentTextChanged.connect(self.updateWindowTitle)
-            layout.addWidget(self.licenceComboBox,2,1)
+            layout.addWidget(self.licenceComboBox,2,1,1,2)
             
             #nb threads
             layout.addWidget(QLabel("Nb threads:"),3,0)
@@ -83,10 +83,10 @@ try:
             self.nbThreadsSpinBox.setMinimum(0)
             self.nbThreadsSpinBox.setMaximum(32)
             self.nbThreadsSpinBox.setValue(4)
-            layout.addWidget(self.nbThreadsSpinBox, 3, 1)
+            layout.addWidget(self.nbThreadsSpinBox,3,1,1,2)
             self.nbThreadsSpinBox.valueChanged.connect(self.updateWindowTitle)
-            self.echoText = QLabel()
-            layout.addWidget(self.echoText,5,0,5,2)
+            self.echoText = QLabel("")
+            layout.addWidget(self.echoText,5,0,1,3)
             
             # buttons
             self.cancelBtn = QPushButton('Cancel')
@@ -95,9 +95,15 @@ try:
             self.saveBtn.clicked.connect(self.writeConfig)
             self.okBtn = QPushButton('Ok')
             self.okBtn.clicked.connect(self.saveAndClose)
-            layout.addWidget(self.cancelBtn, 4, 0)
-            layout.addWidget(self.saveBtn, 4, 1)# , alignment=Qt.AlignmentFlag.AlignRight)
-            layout.addWidget(self.okBtn, 4, 2)
+            self.hLayout = QHBoxLayout()
+            self.hLayout.addWidget(self.cancelBtn)
+            self.hLayout.addWidget(self.saveBtn)
+            self.hLayout.addWidget(self.okBtn)
+            layout.addLayout(self.hLayout,4,0,1,3)
+            
+#            layout.addWidget(self.cancelBtn, 4, 0, alignment=Qt.AlignmentFlag.AlignLeft)
+#            layout.addWidget(self.saveBtn, 4, 1, alignment=Qt.AlignmentFlag.AlignRight)
+#            layout.addWidget(self.okBtn, 4, 2)
 
             self.show()
 
