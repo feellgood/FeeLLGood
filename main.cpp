@@ -1,6 +1,7 @@
 #include <iostream>
 #include <signal.h>
 #include <stdio.h>      // for perror()
+#include <stdlib.h>     // for getenv()
 #include <sys/stat.h>   // for mkdir(), stat()
 #include <sys/types.h>  // for mkdir(), stat()
 #include <unistd.h>     // for getpid(), stat()
@@ -17,6 +18,22 @@
 volatile sig_atomic_t received_signal = 0;
 
 static void signal_handler(int signal_number) { received_signal = signal_number; }
+
+// Get an environment variable.
+// Returns an empty string if the variable is unset or empty.
+static std::string get_env_var(const char *var_name)
+    {
+    const char *s = getenv(var_name);  // this returns nullptr if the variable is unset
+    return s ? s : "";
+    }
+
+// Get the name of the user's personal feeLLGood defaults file.
+static std::string get_user_defaults_filename()
+    {
+    std::string config_home = get_env_var("XDG_CONFIG_HOME");
+    if (config_home.empty()) config_home = get_env_var("HOME") + "/.config";
+    return config_home + "/feellgood/default.yml";
+    }
 
 // Create the output directory if it does not exist yet.
 static void create_dir_if_needed(std::string dirname)
@@ -164,6 +181,7 @@ std::string parseOptions(Settings &settings, int argc, char *argv[], unsigned in
     std::string filename = argv[optind];
     if (verify)
         {
+        settings.read(get_user_defaults_filename());
         settings.read(filename);
         settings.toYaml();
         exit(0);
@@ -194,6 +212,7 @@ int main(int argc, char *argv[])
     std::cout << "random seed:       " << random_seed << '\n';
     mySettings.setFileDisplayName(filename == "-" ? "standard input" : filename);
     std::cout << "settings file:     " << mySettings.getFileDisplayName() << '\n';
+    mySettings.read(get_user_defaults_filename());
     if (!mySettings.read(filename))
         {
         std::cerr << "Error: no settings found.\n";

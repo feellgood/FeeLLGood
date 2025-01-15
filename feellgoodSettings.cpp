@@ -549,7 +549,16 @@ bool Settings::read(std::string filename)
     if (filename == "-")
         config = YAML::Load(std::cin);
     else
-        config = YAML::LoadFile(filename);
+        {
+        try
+            {
+            config = YAML::LoadFile(filename);
+            }
+        catch (const YAML::BadFile &)
+            {
+            return false;
+            }
+        }
     if (config.IsNull()) return false;
     read(config);
     return true;
