@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <algorithm>
 #include <unistd.h>  // for sysconf(), gethostname()
 
 #include "tags.h"
@@ -148,6 +149,11 @@ void Settings::toYaml()
         std::cout << "    - " << *it << "\n";
         }
     std::cout << "  mag_config_every: " << save_period << "\n";
+    std::cout << "  metadata:\n";
+    for (auto it = userMetadata.begin(); it != userMetadata.end(); ++it)
+        {
+        std::cout << "    " << it->first << ": " << str(it->second, 2) << '\n';
+        }
     std::cout << "mesh:\n";
     std::cout << "  filename: " << pbName << "\n";
     std::cout << "  length_unit: " << _scale << "\n";
@@ -264,6 +270,13 @@ std::ostringstream Settings::commonMetadata() const
         }
     ss << tags::evol::rw_time << ' ' << date() << std::endl;
     ss << tags::evol::settings_file << ' ' << getFileDisplayName() << std::endl;
+    for (auto it = userMetadata.begin(); it != userMetadata.end(); ++it)
+        {
+        std::string value = it->second;
+        if (value.back() == '\n') value.resize(value.size() - 1);  // remove trailing newline
+        replace(value, "\n", "\n##  ");  // escape and indent continuation lines
+        ss << "## " << it->first << ": " << value << '\n';
+        }
     return ss;
     }
 
@@ -331,6 +344,23 @@ void Settings::read(YAML::Node yaml)
             evol_columns.clear();
             for (auto it = columns.begin(); it != columns.end(); ++it)
                 evol_columns.push_back(it->as<std::string>());
+            }
+        YAML::Node metadata = outputs["metadata"];
+        if (metadata && !metadata.IsNull())
+            {
+            if (!metadata.IsMap()) error("outputs.metadata should be a map.");
+            for (auto it = metadata.begin(); it != metadata.end(); ++it)
+                {
+                // Search the key within the already known user metadata.
+                std::string key = it->first.as<std::string>();
+                auto pos = std::find_if(userMetadata.begin(), userMetadata.end(),
+                        [key](const MetadataItem &item){ return item.first == key; });
+                MetadataItem item = {key, it->second.as<std::string>()};
+                if (pos != userMetadata.end())  // if found, replace
+                    *pos = item;
+                else  // otherwise, append to the list
+                    userMetadata.push_back(item);
+                }
             }
         }  // outputs
 

@@ -306,6 +306,9 @@ public:
         { return (field_time_parser.get_scalar(t_val))/mu0; }
 
 private:
+    using MetadataItem = std::pair<std::string, std::string>;  /**< type of userMetadata items */
+
+    std::vector<MetadataItem> userMetadata;  /**< user-provided metadata for the output files */
     int precision;               /**< numeric precision for .sol output text files */
     std::string fileDisplayName; /**< parameters file name : either a yaml file or standard input */
     double _scale;               /**< scaling factor from gmsh files to feellgood */
