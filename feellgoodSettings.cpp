@@ -73,12 +73,23 @@ static const std::string str(Eigen::Vector3d v)
     }
 
 // Stringify a string: if it contains a newline, convert it to a multiline string in "literal style"
-// (introduced by '|'). Otherwise leave it alone.
+// (introduced by '|'). Otherwise enclose it in quotes, and escape embedded quotes.
 // `level` is the indentation level of the property whose value is being stringified.
 static const std::string str(std::string s, int level = 0)
     {
-    // If it doesn't have an eol, leave it alone.
-    if (s.find('\n') == std::string::npos) return s;
+    // If it doesn't have a newline, quote it.
+    if (s.find('\n') == s.npos)
+        {
+        // Escape embedded quotes.
+        for (size_t pos = 0;;)
+            {
+            pos = s.find('"', pos);
+            if (pos == s.npos) break;
+            s.insert(pos, 1, '\\');
+            pos += 2;  // skip \"
+            }
+        return '"' + s + '"';
+        }
 
     // Indentation to be added to each line.
     int indent_size = (level + 1) * 2;  // the value is indented one level more than the property
