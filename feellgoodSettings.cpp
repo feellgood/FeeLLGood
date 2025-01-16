@@ -63,6 +63,16 @@ static bool assign(Eigen::Vector3d &var, const YAML::Node &node)
     return false;
     }
 
+// Replace, within `s', all occurrences of `search' by `replacement'.
+static void replace(std::string &s, const std::string &search, const std::string &replacement)
+    {
+    for (size_t pos = 0; (pos = s.find(search, pos)) != s.npos;)
+        {
+        s.replace(pos, search.size(), replacement);
+        pos += replacement.size();
+        }
+    }
+
 // Stringify a boolean
 static const char *str(bool x) { return x ? "true" : "false"; }
 
@@ -81,14 +91,7 @@ static const std::string str(std::string s, int level = 0)
     // If it doesn't have a newline, quote it.
     if (s.find('\n') == s.npos)
         {
-        // Escape embedded quotes.
-        for (size_t pos = 0;;)
-            {
-            pos = s.find('"', pos);
-            if (pos == s.npos) break;
-            s.insert(pos, 1, '\\');
-            pos += 2;  // skip \"
-            }
+        replace(s, "\"", "\\\"");  // escape embedded quotes
         return '"' + s + '"';
         }
 
@@ -102,13 +105,8 @@ static const std::string str(std::string s, int level = 0)
     // Remove trailing eol.
     if (s.back() == '\n') s.resize(s.size() - 1);
 
-    // Add indentation: replace "\n" with "\n  ".
-    size_t pos = 0;
-    while ((pos = s.find('\n', pos)) != std::string::npos)
-        {
-        s.replace(pos + 1, 0, indent);
-        pos += 1 + indent_size;  // "\n" + indent
-        }
+    // Add indentation.
+    replace(s, "\n", "\n" + indent);
 
     return s;
     }
