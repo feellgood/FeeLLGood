@@ -134,8 +134,7 @@ void Mesh::mesh::savesol(const int precision, const std::string fileName,
         SYSTEM_ERROR;
         }
 
-    fout << tags::sol::rw_time << ' ' <<  date() << '\n' << metadata << std::scientific
-         << std::setprecision(precision);
+    fout << metadata << std::scientific << std::setprecision(precision);
 
     Eigen::IOFormat outputSolFmt(precision, Eigen::DontAlignCols, "\t", "\t", "", "", "", "");
     for (unsigned int i = 0; i < node.size(); i++)
@@ -157,8 +156,7 @@ bool Mesh::mesh::savesol(const int precision, const std::string fileName,
         SYSTEM_ERROR;
         }
 
-    fout << tags::sol::rw_time << ' ' << date() << '\n' << metadata << std::scientific 
-         << std::setprecision(precision);
+    fout << metadata << std::scientific << std::setprecision(precision);
 
     if (node.size() == val.size())
         {

@@ -77,7 +77,7 @@ public:
     void toYaml(void);
 
     /** build a metadata string for .evol file */
-    std::string evolMetadata(std::string realWorldTime) const;
+    std::string evolMetadata() const;
 
     /** build a metadata string for .sol text files */
     std::string solMetadata(double t, std::string columnsTitle) const;
@@ -328,6 +328,9 @@ private:
 
     /** parser for the field space dependant vector expressions */
     ExpressionParser field_space_parser;
+
+    /** Metadata common to .evol and .sol files */
+    std::ostringstream commonMetadata() const;
     };
 
 #endif /* feellgoodSettings_h */

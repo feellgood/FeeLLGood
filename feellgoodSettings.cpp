@@ -3,6 +3,7 @@
 #include <unistd.h>  // for sysconf(), gethostname()
 
 #include "tags.h"
+#include "chronometer.h"
 #include "feellgoodSettings.h"
 
 using namespace Nodes;
@@ -254,7 +255,7 @@ void Settings::toYaml()
     std::cout << "  max(dt): " << dt_max << "\n";
     }
 
-std::string Settings::evolMetadata(std::string realWorldTime) const
+std::ostringstream Settings::commonMetadata() const
     {
     std::ostringstream ss;
     ss << tags::evol::version << ' ' << feellgood_version << std::endl;
@@ -263,8 +264,14 @@ std::string Settings::evolMetadata(std::string realWorldTime) const
         {
         ss << tags::evol::hostname << ' ' << name << std::endl;
         }
-    ss << tags::evol::rw_time << ' ' << realWorldTime << std::endl;
+    ss << tags::evol::rw_time << ' ' << date() << std::endl;
     ss << tags::evol::settings_file << ' ' << getFileDisplayName() << std::endl;
+    return ss;
+    }
+
+std::string Settings::evolMetadata() const
+    {
+    std::ostringstream ss = commonMetadata();
     ss << tags::evol::columns << ' ';
     for (unsigned int i = 0; i < (evol_columns.size() - 1); i++)
         {
@@ -276,7 +283,7 @@ std::string Settings::evolMetadata(std::string realWorldTime) const
 
 std::string Settings::solMetadata(double t, std::string columnsTitle) const
     {
-    std::ostringstream ss;
+    std::ostringstream ss = commonMetadata();
     ss << tags::sol::time << ' ' << std::scientific << t << std::endl;
     ss << tags::sol::columns << ' ' << columnsTitle << std::endl;
     return ss.str();

@@ -154,7 +154,7 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
         SYSTEM_ERROR;
         }
 
-    fout << settings.evolMetadata(date());
+    fout << settings.evolMetadata();
     fout.precision(16);  // extra precision needed to monitor relaxation towards equilibrium
 
     int flag(0);
