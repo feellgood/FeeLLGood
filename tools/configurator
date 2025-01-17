@@ -166,11 +166,16 @@ def dialog(args):
     metadata = {}
     metadata["Author"] = input("Author: ")
     metadata["Affiliation"] = input("Affiliation: ")
-    licenceName = input("What licence among" + str(licences) + " do you want? ")
-    if licenceName in licences:
-        metadata["Licence"] = licenceName
-    else:
-        metadata["Licence"] = "undefined"
+    print("Licence:")
+    for i, name in enumerate(licences):
+        print(f" {i} - {name}")
+    try:
+        licence_idx = int(input(f"Licence choice (0-{len(licences)-1}): "))
+    except ValueError:
+        licence_idx = 0
+    if licence_idx < 0 or licence_idx >= len(licences):
+        licence_idx = 0
+    metadata["Licence"] = licences[licence_idx]
         
     try:
         nb_th = int(input("Nb threads: "))
