@@ -19,6 +19,8 @@
 import sys
 import os
 
+from multiprocessing import cpu_count
+maxNbThreads = cpu_count()
 licences = ['None','CC BY','CC BY-SA'] # check
 
 def writeYaml(fileName,metadata):
@@ -93,8 +95,8 @@ try:
             self.nbThreadsSpinBox = QSpinBox()
             self.nbThreadsSpinBox.setToolTip("Equation solver number of threads to use.\n 0 means to match the number of available processors.")
             self.nbThreadsSpinBox.setMinimum(0)
-            self.nbThreadsSpinBox.setMaximum(32)
-            self.nbThreadsSpinBox.setValue(4)
+            self.nbThreadsSpinBox.setMaximum(maxNbThreads)
+            self.nbThreadsSpinBox.setValue(int(maxNbThreads/2))
             layout.addWidget(self.nbThreadsSpinBox,3,1,1,2)
             self.nbThreadsSpinBox.valueChanged.connect(self.updateWindowTitle)
             self.echoText = QLabel("")
@@ -178,11 +180,13 @@ def dialog(args):
     metadata["Licence"] = licences[licence_idx]
         
     try:
-        nb_th = int(input("Nb threads: "))
+        nb_th = int(input( "Nb threads(maximum "+ str(maxNbThreads) +"): " ))
     except ValueError:
         print("Error: nb threads must be integer")
         sys.exit()
-        
+    if nb_th > maxNbThreads:
+        print("Warning: nbThreads forced to", maxNbThreads, "in config.yml")
+        nb_th = maxNbThreads
     metadata["nbThreads"] = nb_th
     fileName = "default.yml"
     message = writeYaml(fileName,metadata)
