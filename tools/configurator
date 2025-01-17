@@ -22,6 +22,7 @@ import os
 from multiprocessing import cpu_count
 maxNbThreads = cpu_count()
 licences = ['None','CC BY','CC BY-SA'] # check
+fileName = "default.yml" # output file name
 
 def writeYaml(fileName,metadata):
     config_dir = os.environ.get('XDG_CONFIG_HOME', os.path.join(os.path.expanduser("~"), '.config'))
@@ -131,7 +132,6 @@ try:
             metadata["Affiliation"] = self.affiliationLineEdit.text()
             metadata["Licence"] = self.licenceComboBox.currentText()
             metadata["nbThreads"] = int(self.nbThreadsSpinBox.value())
-            fileName = "default.yml"
             message = writeYaml(fileName,metadata)
             self.setWindowTitle(" feeLLGood config")
             self.echoText.setText(message)
@@ -188,10 +188,9 @@ def dialog(args):
         print("Error: nb threads must be integer")
         sys.exit()
     if nb_th > maxNbThreads:
-        print("Warning: nbThreads forced to", maxNbThreads, "in config.yml")
+        print("Warning: nbThreads forced to", maxNbThreads, "in", fileName)
         nb_th = maxNbThreads
     metadata["nbThreads"] = nb_th
-    fileName = "default.yml"
     message = writeYaml(fileName,metadata)
     if args.verbose:
         print("config=", metadata, '\n', message)
