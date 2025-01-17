@@ -104,10 +104,13 @@ try:
             
             # buttons
             self.cancelBtn = QPushButton('Cancel')
+            self.cancelBtn.setToolTip("Quit without saving.")
             self.cancelBtn.clicked.connect(self.closeEvent)
             self.saveBtn = QPushButton('Save')
+            self.saveBtn.setToolTip("Save config to a yaml file.\nIf a config file already exists it is overwritten.")
             self.saveBtn.clicked.connect(self.writeConfig)
             self.okBtn = QPushButton('Ok')
+            self.okBtn.setToolTip("Save and Quit")
             self.okBtn.clicked.connect(self.saveAndClose)
             self.hLayout = QHBoxLayout()
             self.hLayout.addWidget(self.cancelBtn)
