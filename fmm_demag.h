@@ -6,8 +6,6 @@
 the fast multipole algorithm, and to compute the demag field.
 */
 
-#include "Utils/FParameters.hpp"
-
 #include "Components/FParticleType.hpp"
 #include "Components/FTypedLeaf.hpp"
 
