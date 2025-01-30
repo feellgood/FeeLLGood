@@ -132,9 +132,9 @@ if (MKL_FOUND)
     #option --no-as-needed for mkl, see https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-link-line-advisor.html
     target_link_options(feellgood PUBLIC "-Wl,--no-as-needed" )
     # not sure we really need it since --no-as-needed is default value, though there might be a --as-needed before
-    TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm duktape ANN OpenMP::OpenMP_CXX ${TBB_LINK} Eigen3::Eigen ${MKL_TARGET} ${GMSH_LIB})
+    TARGET_LINK_LIBRARIES(feellgood yaml-cpp duktape ANN OpenMP::OpenMP_CXX ${TBB_LINK} Eigen3::Eigen ${MKL_TARGET} ${GMSH_LIB})
 else()
-    TARGET_LINK_LIBRARIES(feellgood yaml-cpp scalfmm duktape ANN OpenMP::OpenMP_CXX ${TBB_LINK} Eigen3::Eigen ${GMSH_LIB})
+    TARGET_LINK_LIBRARIES(feellgood yaml-cpp duktape ANN OpenMP::OpenMP_CXX ${TBB_LINK} Eigen3::Eigen ${GMSH_LIB})
 endif()
 
 #===========================================================================
