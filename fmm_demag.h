@@ -50,8 +50,8 @@ typedef FFmmAlgorithmThreadTsm<OctreeClass, CellClass, ContainerClass, KernelCla
         FmmClass; /**< convenient typedef for handling altogether the differents scalfmm object
                      templates used in feellgood  */
 
-const int NbLevels = 8;                    /**< number of levels in the tree */
-const int SizeSubLevels = 6;               /**< size of the sub levels  */
+const int NbLevels = 6;                    /**< number of levels in the tree */
+const int SizeSubLevels = 3;               /**< size of the sub levels  */
 const double boxWidth = 2.01;              /**< bounding box max dimension */
 const FPoint<FReal> boxCenter(0., 0., 0.); /**< center of the bounding box */
 
@@ -72,7 +72,7 @@ public:
           tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels(NbLevels, boxWidth, boxCenter)
         {
         omp_set_num_threads(ScalfmmNbThreads);
-        norm = 1. / (2. * msh.l.maxCoeff());
+        norm = 2. / msh.l.maxCoeff();
 
         FSize idxPart = 0;
         for (idxPart = 0; idxPart < NOD; ++idxPart)
