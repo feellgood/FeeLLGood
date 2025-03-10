@@ -8,12 +8,8 @@ the fast multipole algorithm, and to compute the demag field.
 
 #include "Components/FParticleType.hpp"
 #include "Components/FTypedLeaf.hpp"
-
 #include "Containers/FOctree.hpp"
-#include "Containers/FVector.hpp"
-
 #include "Core/FFmmAlgorithmThreadTsm.hpp"
-
 #include "Kernels/P2P/FP2PParticleContainerIndexed.hpp"
 #include "Kernels/Rotation/FRotationCell.hpp"
 #include "Kernels/Rotation/FRotationKernel.hpp"
@@ -26,8 +22,9 @@ to grab altogether the templates and functions using scalfmm for the computation
 
 namespace scal_fmm
     {
-
-const int P = 9; /**< constant parameter for some scalfmm templates */
+const int P = 9;              /**< truncation of the spherical harmonics series */
+const int NbLevels = 6;       /**< number of levels in the tree */
+const int SizeSubLevels = 3;  /**< size of the sub levels  */
 
 typedef double FReal; /**< parameter of scalfmm templates, all computations are made in double precision */
 
@@ -50,8 +47,6 @@ typedef FFmmAlgorithmThreadTsm<OctreeClass, CellClass, ContainerClass, KernelCla
         FmmClass; /**< convenient typedef for handling altogether the differents scalfmm object
                      templates used in feellgood  */
 
-const int NbLevels = 6;                    /**< number of levels in the tree */
-const int SizeSubLevels = 3;               /**< size of the sub levels  */
 const double boxWidth = 2.01;              /**< bounding box max dimension */
 const FPoint<FReal> boxCenter(0., 0., 0.); /**< center of the bounding box */
 
@@ -114,6 +109,7 @@ private:
     const int NOD; /**< number of nodes */
 
     OctreeClass tree;    /**< tree initialized by constructor */
+
     KernelClass kernels; /**< kernel initialized by constructor */
 
     double norm; /**< normalization coefficient */
@@ -172,7 +168,7 @@ private:
                 [this](LeafClass *leaf)
                 {
                     const int nbParticlesInLeaf = leaf->getSrc()->getNbParticles();
-                    const FVector<long long> &indexes = leaf->getSrc()->getIndexes();
+                    const auto &indexes = leaf->getSrc()->getIndexes();
                     FReal *const physicalValues = leaf->getSrc()->getPhysicalValues();
                     for (int idxPart = 0; idxPart < nbParticlesInLeaf; ++idxPart)
                         {
@@ -192,8 +188,7 @@ private:
                 {
                     const FReal *const potentials = leaf->getTargets()->getPotentials();
                     const int nbParticlesInLeaf = leaf->getTargets()->getNbParticles();
-                    const FVector<long long> &indexes = leaf->getTargets()->getIndexes();
-
+                    const auto &indexes = leaf->getTargets()->getIndexes();
                     for (int idxPart = 0; idxPart < nbParticlesInLeaf; ++idxPart)
                         {
                         const int indexPartOrig = indexes[idxPart];
