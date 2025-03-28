@@ -4,6 +4,7 @@ FEELLGOOD is a micromagnetic solver using finite element technique to integrate 
 
 It is developped by JC Toussaint & al.
 The code is being modified without any warranty it works. A dedicated website can be found [here][]  
+We recommand to use branch master, other branches are experimental or work in progress.
 
 ### Dependencies
 
