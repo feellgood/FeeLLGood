@@ -43,6 +43,8 @@ struct prm
     bool suppress_charges; /**< suppress charges if true */
     double Ks;             /**< uniaxial surface anisotropy constant */
     Eigen::Vector3d uk;    /**< anisotropy axis */
+    double V;              /**< fixed potential (boundary condition for spin accumulation) */
+    double J;              /**< current density (boundary condition for spin accumulation) */
 
     /** print the struct parameters */
     inline void infos()
