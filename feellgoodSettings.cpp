@@ -191,6 +191,13 @@ void Settings::toYaml()
         std::cout << "      suppress_charges: " << str(it->suppress_charges) << "\n";
         std::cout << "      Ks: " << it->Ks << "\n";
         if (it->Ks != 0) std::cout << "      uk: " << str(it->uk) << "\n";
+        if ( !std::isnan(it->V) || !std::isnan(it->J) )
+            {
+            if ( std::isnan(it->V) && !std::isnan(it->J) )
+                { std::cout <<  "      J: " << it->J << "\n"; }
+            else if ( !std::isnan(it->V) && std::isnan(it->J) )
+                { std::cout <<  "      V: " << it->V << "\n"; }
+            }
         }
     std::cout << "initial_magnetization: ";
     if (!sM.empty())
@@ -228,23 +235,7 @@ void Settings::toYaml()
     std::cout << "spin_transfer_torque:\n";
     std::cout << "  enable: " << str(stt_flag) << "\n";
     if (stt_flag)
-        {
-        std::cout << "  V_file: " << str(V_file) << "\n";
-        std::cout << "  potentials:\n";
-        for (auto it = sttBoundaryCond_V.begin(); it != sttBoundaryCond_V.end(); ++it)
-            {
-            if (it->first == "__default__")  // skip
-                continue;
-            std::cout << "    " << it->first << ": " << it->second << "\n";
-            }
-        std::cout << "  current_densities:\n";
-        for (auto it = sttBoundaryCond_J.begin(); it != sttBoundaryCond_J.end(); ++it)
-            {
-            if (it->first == "__default__")  // skip
-                continue;
-            std::cout << "    " << it->first << ": " << it->second << "\n";
-            }
-        }
+        { std::cout << "  V_file: " << str(V_file) << "\n"; }
 
     std::cout << "demagnetizing_field_solver:\n";
     std::cout << "  nb_threads: " << scalfmmNbTh << "\n";
@@ -420,6 +411,15 @@ void Settings::read(YAML::Node yaml)
                 assign(p.suppress_charges, surface["suppress_charges"]);
                 assign(p.Ks, surface["Ks"]);
                 assign(p.uk, surface["uk"]);
+                if (assign(p.V,surface["V"]))
+                    {
+                    p.J = std::numeric_limits<double>::quiet_NaN();
+                    }
+                else
+                    {
+                    assign(p.J,surface["J"]);
+                    p.V = std::numeric_limits<double>::quiet_NaN();
+                    }
                 paramFacette.push_back(p);
                 }
             }  // mesh.surface_regions
@@ -521,40 +521,6 @@ void Settings::read(YAML::Node yaml)
         assign(stt_flag, stt["enable"]);
         
         assign(V_file, stt["V_file"]);
-
-        YAML::Node pot = stt["potentials"];
-        if (pot && !pot.IsNull())
-            {
-            if (!pot.IsMap())
-                error("stt.potentials should be a map.");
-            else
-                {
-                for (auto it = pot.begin(); it != pot.end(); ++it)
-                    {
-                    std::string name = it->first.as<std::string>();
-                    if (it->second.IsNull()) continue;
-                    double V = it->second.as<double>();
-                    sttBoundaryCond_V.push_back(std::make_pair(name, V));
-                    }
-                }
-            }
-
-        YAML::Node current = stt["current_densities"];
-        if (current && !current.IsNull())
-            {
-            if (!current.IsMap())
-                error("stt.current_densities should be a map.");
-            else
-                {
-                for (auto it = current.begin(); it != current.end(); ++it)
-                    {
-                    std::string name = it->first.as<std::string>();
-                    if (it->second.IsNull()) continue;
-                    double J = it->second.as<double>();
-                    sttBoundaryCond_J.push_back(std::make_pair(name, J));
-                    }
-                }
-            }
         }  // spin_transfer_torque
 
     // The number of available processors (actually, hardware threads) is the default for the number

@@ -38,7 +38,7 @@ settings = {
         "filename": meshFileName,
         "length_unit": 1e-9,
         "volume_regions": { vol_regName: { "Ae": 1e-11, "Js": 1, "alpha_LLG" : 0.05 } },
-        "surface_regions": { surf_regName: {}, surface_base_name:{"V":0}, surface_top_name:{"J":1} }
+        "surface_regions": { surf_regName: {}, surface_base_name:{"V":0.0}, surface_top_name:{"J":1.1} }
     },
     "initial_magnetization": [1, 0, 1],
     "Bext": [0, 0, 0],
