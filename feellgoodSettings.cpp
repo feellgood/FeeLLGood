@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <cmath>
 #include <unistd.h>  // for sysconf(), gethostname()
 
 #include "tags.h"
@@ -191,13 +192,16 @@ void Settings::toYaml()
         std::cout << "      suppress_charges: " << str(it->suppress_charges) << "\n";
         std::cout << "      Ks: " << it->Ks << "\n";
         if (it->Ks != 0) std::cout << "      uk: " << str(it->uk) << "\n";
-        if ( !std::isnan(it->V) || !std::isnan(it->J) )
-            {
-            if ( std::isnan(it->V) && !std::isnan(it->J) )
-                { std::cout <<  "      J: " << it->J << "\n"; }
-            else if ( !std::isnan(it->V) && std::isnan(it->J) )
-                { std::cout <<  "      V: " << it->V << "\n"; }
-            }
+        std::cout <<  "      J:";
+        if (isnan(it->J))
+            std::cout << "\n";
+        else
+            std::cout << ' ' << it->J << '\n';
+        std::cout <<  "      V:";
+        if (isnan(it->V))
+            std::cout << "\n";
+        else
+            std::cout << ' ' << it->V << '\n';
         }
     std::cout << "initial_magnetization: ";
     if (!sM.empty())
@@ -408,15 +412,15 @@ void Settings::read(YAML::Node yaml)
                 assign(p.suppress_charges, surface["suppress_charges"]);
                 assign(p.Ks, surface["Ks"]);
                 assign(p.uk, surface["uk"]);
-                if (assign(p.V,surface["V"]))
-                    {
-                    p.J = std::numeric_limits<double>::quiet_NaN();
-                    }
-                else
-                    {
-                    assign(p.J,surface["J"]);
-                    p.V = std::numeric_limits<double>::quiet_NaN();
-                    }
+
+                // J and V may be null, which we map to NAN.
+                if (!assign(p.J, surface["J"]))
+                    p.J = NAN;
+                if (!assign(p.V, surface["V"]))
+                    p.V = NAN;
+                if (!isnan(p.J) && !isnan(p.V))
+                    error("A surface region cannot have both no-null J and V.");
+
                 paramFacette.push_back(p);
                 }
             }  // mesh.surface_regions
