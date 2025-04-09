@@ -153,9 +153,9 @@ mesh:
       # Unit vector along the surface anisotropy axis.
       uk: [0, 0, 1]
 
-      J: .nan
+      J:
 
-      V: .nan
+      V:
 
 # The initial magnetization can be provided as either:
 # - the name of a file in feeLLGood’s format (‘.sol’ file)
