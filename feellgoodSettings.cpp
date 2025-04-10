@@ -180,7 +180,7 @@ void Settings::toYaml()
         std::cout << "      sigma: " << it->sigma << "\n";
         std::cout << "      dens_state: " << it->N0 << "\n";
         std::cout << "      beta: " << it->beta << "\n";
-        std::cout << "      l_J: " << it->lJ << "\n";
+        std::cout << "      l_sd: " << it->lsd << "\n";
         std::cout << "      l_sf: " << it->lsf << "\n";
         }
     std::cout << "  surface_regions:\n";
@@ -394,7 +394,7 @@ void Settings::read(YAML::Node yaml)
                 assign(p.sigma, volume["sigma"]);
                 assign(p.N0, volume["dens_state"]);
                 assign(p.beta, volume["beta"]);
-                assign(p.lJ, volume["l_J"]);
+                assign(p.lsd, volume["l_sd"]); // usefull for spin accumulation computations, exists only for magnetic material, as Js
                 assign(p.lsf, volume["l_sf"]);
 
                 paramTetra.push_back(p);

@@ -75,8 +75,8 @@ struct prm
     double beta;  /**< spin transfert torque parameters : beta Thiaville */
     double N0;    /**< density of states */
     double sigma; /**< conductivity */
-    double lJ;    /**< diffusion length */
-    double lsf;   /**< spin diffusion length */
+    double lsd;   /**< diffusion length related to s-d coupling in a magnetic material */
+    double lsf;   /**< spin diffusion length in a metal (magnetic or not) */
 
     double volume = 0;  /**< total volume of the region */
 
