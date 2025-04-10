@@ -128,13 +128,13 @@ mesh:
       # density of states
       dens_state: 1.0
 
-      # STT beta parameter from Thiaville model (to check)
+      # STT beta parameter: polarization rate
       beta: 0
 
-      # diffusion length
-      l_J: 1.0
+      # diffusion length related to s-d coupling in a magnetic material
+      l_sd: 1.0
 
-      # spin diffusion length
+      # spin diffusion length in a metal, magnetic or not
       l_sf: 1.0
 
   # Material parameters of the surface regions defined by the mesh.
