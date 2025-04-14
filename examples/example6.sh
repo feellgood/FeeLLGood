@@ -48,8 +48,8 @@ mesh:
     ellipsoid_surface:  # use defaults
 initial_magnetization: [0, 0, 1]
 Bext: [
-    $amplitude * cos(2 * pi * {FREQUENCY}e9 * (t - $duration)),
-    $amplitude * sin(2 * pi * {FREQUENCY}e9 * (t - $duration)),
+    $amplitude * cos(2 * PI * {FREQUENCY}e9 * (t - $duration)),
+    $amplitude * sin(2 * PI * {FREQUENCY}e9 * (t - $duration)),
     0
 ]
 time_integration:
