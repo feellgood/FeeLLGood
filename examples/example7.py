@@ -53,41 +53,30 @@ print(f"Generated {meshFileName}: two icosaedrons")
 
 mySettings = Settings(meshFileName)
 
-mySettings["outputs"]["file_basename"] = "twin_ico"
+mySettings["outputs"]["file_basename"] = "twinIco"
 
-mySettings["outputs"]["evol_time_step"] = 1e-17
-mySettings["outputs"]["final_time"] = 5e-14
+mySettings["outputs"]["evol_time_step"] = 1e-11
+mySettings["outputs"]["final_time"] = 5e-9
 mySettings["outputs"]["evol_columns"] = [ "t", "<Mx>", "<My>", "<Mz>", "E_tot" ]
 
-mySettings["outputs"]["mag_config_every"] = 1000
+mySettings["outputs"]["mag_config_every"] = False
 
 mySettings.createVolRegion( volRegionName )
 mySettings.createSurfRegion( surfRegionName )
-
-#magnetization at saturation (SI unit = A/m)
-mySettings["mesh"]["volume_regions"][volRegionName]["Js"] = 800e3
-
-# exchange constant (unit = J/m)
+mySettings["mesh"]["volume_regions"][volRegionName]["Js"] = 1.0
 mySettings["mesh"]["volume_regions"][volRegionName]["Ae"] = 10e-12
-
-mySettings["mesh"]["volume_regions"][volRegionName]["alpha_LLG"] = 0.05
+mySettings["mesh"]["volume_regions"][volRegionName]["alpha_LLG"] = 0.1
 
 mySettings.createVolRegion( volRegionName2 )
 mySettings.createSurfRegion( surfRegionName2 )
-#magnetization at saturation (SI unit = A/m)
-mySettings["mesh"]["volume_regions"][volRegionName2]["Js"] = 400e3
-
-# exchange constant (unit = J/m)
+mySettings["mesh"]["volume_regions"][volRegionName2]["Js"] = 0.5
 mySettings["mesh"]["volume_regions"][volRegionName2]["Ae"] = 10e-12
-
-mySettings["mesh"]["volume_regions"][volRegionName2]["alpha_LLG"] = 0.05
+mySettings["mesh"]["volume_regions"][volRegionName2]["alpha_LLG"] = 0.1
 
 mySettings["time_integration"]["min(dt)"] = 5e-18
-mySettings["time_integration"]["max(dt)"] = 5e-16
-
-mySettings["time_integration"]["max(du)"] = 40
+mySettings["time_integration"]["max(dt)"] = 5e-10
 
 mySettings["initial_magnetization"] = [1, 0, 1]
 
-mySettings.write('twinIco_test.json')
+mySettings.write('twinIco.json')
 
