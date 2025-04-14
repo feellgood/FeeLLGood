@@ -59,24 +59,23 @@ void mesh::checkMeshFile(Settings const &mySets)
 
 void mesh::readNodes(Settings const &mySets /**< [in] */)
     {
-    using namespace tags::msh;
     double scale = mySets.getScale();
-    std::vector<std::pair<int, int> > physGroups;
-    gmsh::model::getPhysicalGroups(physGroups,DIM_OBJ_3D);
-    int i(0);
-    std::for_each(physGroups.begin(),physGroups.end(),[this,scale,&i](std::pair<int, int> &pGroup)
+    std::vector<std::size_t> nodeTags;
+    std::vector<double> nodeCoordinates;
+    std::vector<double> nodeParametricCoordinates;  // unused
+    gmsh::model::mesh::getNodes(nodeTags, nodeCoordinates, nodeParametricCoordinates);
+    node.resize(nodeTags.size());
+    for (size_t i = 0; i < nodeTags.size(); ++i)
         {
-        std::vector<std::size_t> nodeT;
-        std::vector<double> nodeC;
-        gmsh::model::mesh::getNodesForPhysicalGroup(DIM_OBJ_3D,pGroup.second,nodeT,nodeC);
-        node.resize( node.size() + nodeT.size() );// ouch...
-        std::for_each(nodeT.begin(),nodeT.end(),[this,&i,scale,&nodeC](std::size_t &loc_idx)
+        size_t j = nodeTags[i] - 1;  // index in the node[] array
+        if (j >= node.size())
             {
-            long j = loc_idx-1;
-            node[i].p = Eigen::Vector3d(nodeC[3*j], nodeC[3*j + 1], nodeC[3*j + 2]) * scale;
-            i++;
-            });
-        });
+            std::cerr << "error: node tag too large: " << nodeTags[i] << '\n';
+            SYSTEM_ERROR;
+            }
+        node[j].p = Eigen::Vector3d(nodeCoordinates[3*i],
+                nodeCoordinates[3*i + 1], nodeCoordinates[3*i + 2]) * scale;
+        }
     }
 
 void mesh::readTetraedrons(Settings const &mySets /**< [in] */)
