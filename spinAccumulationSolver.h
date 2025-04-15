@@ -32,9 +32,6 @@ class spinAcc
     /** density of states at Fermi level, units : J^-1 nm^-3  */
     double N0;
 
-    /** Conductivity Ohm^-1 nm^-1 */
-    double sigma;
-
     /** length */
     double lJ;
 
