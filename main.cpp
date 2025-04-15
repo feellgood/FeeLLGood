@@ -243,9 +243,7 @@ int main(int argc, char *argv[])
         {
         std::string fileName(mySettings.getSimName());
         fileName += "_V.sol";
-        double sigma = 3.456;
-        electrostatSolver pot_solver = electrostatSolver(fem.msh, sigma, 1e-8,
-                                                         mySettings.verbose, 5000, false, fileName);
+        electrostatSolver pot_solver = electrostatSolver(fem.msh,mySettings.paramTetra, 1e-8, mySettings.verbose, 5000, false, fileName);
         }
 
     chronometer fmm_counter(2);
