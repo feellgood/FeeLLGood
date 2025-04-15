@@ -4,9 +4,30 @@
 #include "tags.h"
 #include "electrostatSolver.h"
 
+void electrostatSolver::calc_gradV(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV)
+    {
+    for (int npi = 0; npi < Tetra::NPI; npi++)
+        {
+        Eigen::Vector3d v(0,0,0);
+        for (int i = 0; i < Tetra::N; i++)
+            { v += V[tet.ind[i]] * tet.da.row(i); }
+        _gradV.col(npi) = v;
+        }
+    }
+
+void electrostatSolver::calc_Hm(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV,
+                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _Hm)
+    {
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> p_g;
+    tet.getPtGauss(p_g);
+    const double sigma = getSigma(tet);
+    for (int npi = 0; npi < Tetra::NPI; npi++)
+        { _Hm.col(npi) = -sigma * _gradV.col(npi).cross(p_g.col(npi)); }
+    }
+
 void electrostatSolver::infos(void)
     {
-    std::cout << "Dirichlet boundary conditions...\nsigma: " << sigma << std::endl;
+    std::cout << "Dirichlet boundary conditions:\n" << std::endl;
 
     std::for_each(boundaryCond.begin(), boundaryCond.end(),
                   [](std::pair<std::string, double> const &p)
@@ -33,8 +54,9 @@ void electrostatSolver::assembling_vect(Facette::Fac const &fac, std::vector<dou
     }
 
 // same formula as sp_acc_llg
-void electrostatSolver::integrales(Tetra::Tet const &tet, double sigma, double AE[Tetra::N][Tetra::N])
+void electrostatSolver::integrales(Tetra::Tet const &tet, double AE[Tetra::N][Tetra::N])
     {
+    const double sigma = getSigma(tet);
     for (int npi = 0; npi < Tetra::NPI; npi++)
         {
         double w = tet.weight[npi];
@@ -71,7 +93,7 @@ void electrostatSolver::prepareData(std::vector<Eigen::Triplet<double>> &Kw, Eig
     std::for_each(msh.tet.begin(), msh.tet.end(), [this, &Kw](Tetra::Tet const &tet)
                   {
                   double K[Tetra::N][Tetra::N] = {{0}};
-                  integrales(tet, sigma, K);
+                  integrales(tet, K);
                   assembling_mat(tet, K, Kw);
                   });
 
