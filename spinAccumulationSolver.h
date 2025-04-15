@@ -16,7 +16,7 @@ class spinAcc
     {
     /** constructor */
     spinAcc(Mesh::mesh &_msh, double beta, double N0, double _sigma, double lJ, double lsf):
-        msh(_msh), elec(_msh,_sigma,1e-6,false,5000,false,"")
+        msh(_msh) //, elec(_msh,1e-6,false,5000,false,"")
         {
         ksi = Nodes::sq(lJ / lsf);
         D0 = 2.0 * _sigma / (Nodes::sq(CHARGE_ELECTRON) * N0);
@@ -42,7 +42,7 @@ class spinAcc
     double lsf;
 
     /** solve electrostatic side problem */
-    electrostatSolver elec;
+    //electrostatSolver elec;
 
     inline double calc_prefactor(double Js) { return D0 / Nodes::sq(lJ) / (gamma0*Js/mu0); }
 
@@ -56,7 +56,7 @@ class spinAcc
     double pf;
 
     /** affect extraField function and extraCoeffs_BE function for all the tetrahedrons */
-    void prepareExtras(std::vector<Tetra::Tet> &v_tet);
+    void prepareExtras(std::vector<Tetra::Tet> &v_tet, electrostatSolver &elec);
     };
 
 #endif

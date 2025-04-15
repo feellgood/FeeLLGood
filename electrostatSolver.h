@@ -22,13 +22,13 @@ public:
     /** constructor */
     electrostatSolver(
             Mesh::mesh & _msh /**< [in] reference to the mesh */,
-            const double _sigma /**< [in] conductivity */,
+            std::vector<Tetra::prm> _pTetra /**< [in] ref to vector of param tetra (volume region parameters) */,
             const double _tol /**< [in] tolerance for solvers */,
             const bool v /**< [in] verbose bool */,
             const int max_iter /**< [in] maximum number of iteration */,
             const bool _V_file /**< [in] if true an output tsv file containing potential V is written */,
             const std::string _fileName /**< [in] output .sol file name for electrostatic potential */)
-        : msh(_msh), sigma(_sigma), verbose(v), MAXITER(max_iter), V_file(_V_file), fileName(_fileName)
+        : msh(_msh), paramTetra(_pTetra), verbose(v), MAXITER(max_iter), V_file(_V_file), fileName(_fileName)
         {
         if (verbose)
             { infos(); }
@@ -63,31 +63,11 @@ public:
         }
 
     /** computes the gradient(V) for tetra tet */
-    inline void calc_gradV(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV)
-        {
-        for (int npi = 0; npi < Tetra::NPI; npi++)
-            {
-            Eigen::Vector3d v(0,0,0);
-            for (int i = 0; i < Tetra::N; i++)
-                {
-                v += V[tet.ind[i]] * tet.da.row(i);
-                }
-            _gradV.col(npi) = v;
-            }
-        }
+    void calc_gradV(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV);
 
     /** computes Hm contributions for each npi for tetrahedron tet */
-    inline void calc_Hm(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV,
-                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _Hm)
-        {
-        Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> p_g;
-        tet.getPtGauss(p_g);
-
-        for (int npi = 0; npi < Tetra::NPI; npi++)
-            { _Hm.col(npi) = -sigma * _gradV.col(npi).cross(p_g.col(npi)); }
-        }
-
-
+    void calc_Hm(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV,
+                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _Hm);
 
     /** electrostatic potential values for boundary conditions, V.size() is the size of the vector
      * of nodes */
@@ -110,8 +90,8 @@ public:
     void assembling_vect(Facette::Fac const &fac, std::vector<double> const &Le, Eigen::Ref<Eigen::VectorXd> L);
 
     /** compute side problem (electrostatic potential on the nodes) integrales for matrix
-     * coefficients,input from tet ; sigma is the region conductivity */
-    void integrales(Tetra::Tet const &tet, double sigma, double AE[Tetra::N][Tetra::N]);
+     * coefficients,inputs from tet */
+    void integrales(Tetra::Tet const &tet, double AE[Tetra::N][Tetra::N]);
 
     /** compute integrales for vector coefficients, input from facette */
     void integrales(Facette::Fac const &fac, double pot_val, std::vector<double> &BE);
@@ -125,8 +105,8 @@ private:
      * const ref ) */
     Mesh::mesh msh;
 
-    /** Conductivity Ohm^-1 nm^-1 */
-    double sigma;
+    /** this vector contains the material parameters for all regions for all the tetrahedrons */
+    std::vector<Tetra::prm> paramTetra;
 
     /** if verbose set to true, some printing are sent to terminal */
     const bool verbose;
@@ -143,6 +123,10 @@ private:
 
     /** output .sol file name for electrostatic problem */
     const std::string fileName;
+
+    /** returns sigma, (conductivity in (Ohm.m)^-1 */
+    double getSigma(Tetra::Tet const &tet) const
+        { return paramTetra[tet.idxPrm].sigma; }
 
     /** boundary conditions, stored as a vector of pairs.
     First element of the pair is the surface region name given in the mesh by its physical name;
