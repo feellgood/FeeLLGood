@@ -100,6 +100,9 @@ public:
      * node indices are zero based */
     bool save(std::string const &metadata /**< [in] */) const;
 
+    /** returns sigma of the tetraedron, (conductivity in (Ohm.m)^-1 */
+    inline double getSigma(Tetra::Tet const &tet) const { return paramTetra[tet.idxPrm].sigma; }
+
 private:
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh (
      * const ref ) */
@@ -123,10 +126,6 @@ private:
 
     /** output .sol file name for electrostatic problem */
     const std::string fileName;
-
-    /** returns sigma, (conductivity in (Ohm.m)^-1 */
-    double getSigma(Tetra::Tet const &tet) const
-        { return paramTetra[tet.idxPrm].sigma; }
 
     /** boundary conditions, stored as a vector of pairs.
     First element of the pair is the surface region name given in the mesh by its physical name;
