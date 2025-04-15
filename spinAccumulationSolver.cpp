@@ -7,10 +7,11 @@ void spinAcc::prepareExtras(std::vector<Tetra::Tet> &v_tet, electrostatSolver &e
     std::for_each( v_tet.begin(), v_tet.end(), [this, &elec](Tet &tet)
         {
         const int _idx = tet.idx;
-        tet.extraField = [this, &elec, _idx](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)
+        const double sigma = elec.getSigma(tet);
+        tet.extraField = [this, &elec, sigma, _idx](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)
                          { for(int npi = 0; npi<Tetra::NPI; npi++) { H.col(npi) += elec.Hm[_idx].col(npi); } };
 
-        tet.extraCoeffs_BE = [this, &elec, &tet](double Js, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
+        tet.extraCoeffs_BE = [this, &elec, sigma, &tet](double Js, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
                                           Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdx,
                                           Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdy,
                                           Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdz,
