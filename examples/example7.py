@@ -1,82 +1,135 @@
+# Prepare a simulation for a pair on interacting nanoparticles:
+#  - each nanoparticle is a tiny icosahedron (13-node mesh)
+#  - the nanoparticles interact via their stray fields.
+
 from math import sqrt
 import numpy as np
-
 from feellgood.settingsMaker import Settings
+import json
 
-phi = (1+sqrt(5))/2
-pts = np.array([[phi,1,0], [phi,-1,0], [-phi,1,0], [-phi,-1,0],[1,0,phi], [1,0,-phi], [-1,0,phi], [-1,0,-phi],[0,phi,1], [0,phi,-1], [0,-phi,1], [0,-phi,-1], [0,0,0]] )
+# Names of generated files.
+file_basename = "twinIco"
+mesh_filename = file_basename + ".msh"
+json_filename = file_basename + ".json"
 
-f_idx = [ [0,8,4], [0,4,1], [0,1,5], [0,5,9], [0,9,8], [8,9,2], [8,2,6], [8,6,4], [6,10,4], [6,3,10], [6,2,3], [10,3,11], [10,11,1], [10,1,4], [1,11,5], [11,3,7], [11,7,5], [3,2,7], [7,9,2],  [5,7,9] ]
+# Single icosahedron mesh: nodes and faces.
+phi = (1 + sqrt(5)) / 2
+ico_nodes = np.array([
+    [phi, 1, 0], [phi, -1, 0], [-phi, 1, 0], [-phi, -1, 0],
+    [1, 0, phi], [1, 0, -phi], [-1, 0, phi], [-1, 0, -phi],
+    [0, phi, 1], [0, phi, -1], [0, -phi, 1], [0, -phi, -1], [0, 0, 0]
+])
+ico_faces = np.array([
+    [0, 8, 4], [0, 4, 1], [0, 1, 5], [0, 5, 9], [0, 9, 8],
+    [8, 9, 2], [8, 2, 6], [8, 6, 4], [6, 10, 4], [6, 3, 10],
+    [6, 2, 3], [10, 3, 11], [10, 11, 1], [10, 1, 4], [1, 11, 5],
+    [11, 3, 7], [11, 7, 5], [3, 2, 7], [7, 9, 2], [5, 7, 9]
+])
 
-pts2 = pts + np.array([4.0,0,0])
+# Meshed pair of nanoparticles.
+particles = [
+    {
+        "center": [0, 0, 0],
+        "volume": { "name": "bulk", "tag": 300 },
+        "surface":{ "name": "frontier(bulk)", "tag": 200 }
+    },
+    {
+        "center": [4, 0, 0],
+        "volume": { "name": "bulk2", "tag": 301 },
+        "surface":{ "name": "frontier(bulk2)", "tag": 201 }
+    }
+]
 
-meshFileName = "twinIco.msh"
-volRegionName = "bulk"
-surfRegionName = "frontier(bulk)"
-volRegionName2 = "bulk2"
-surfRegionName2 = "frontier(bulk2)"
+# Return a list of mesh elements as a 2D array of numbers.
+# Arguments:
+#  - first_tag: tag of first element in the list
+#  - extra_cols: extra constant columns as a 1D array of numbers
+#  - offset_idx: offset to add to the node indices from ico_faces
+def elements(first_tag, extra_cols, offset_idx):
+    column_shape = (len(ico_faces), 1)
+    tags = np.arange(len(ico_faces)).reshape(column_shape) + first_tag
+    cst_cols = np.ones(column_shape, dtype=int) * extra_cols
+    return np.hstack((tags, cst_cols, ico_faces + offset_idx))
 
-meshFile = open(meshFileName,'w')
-meshFile.write("$MeshFormat\n2.2\t0\t8\n$EndMeshFormat\n")
-meshFile.write("$PhysicalNames\n4\n")
-surfRegionTag = 200
-surfRegionTag2 = 201
-volRegionTag = 300
-volRegionTag2 = 301
-meshFile.write("2 " + str(surfRegionTag) + ' \"' + surfRegionName + '\"\n')
-meshFile.write("2 " + str(surfRegionTag2) + ' \"' + surfRegionName2 + '\"\n')
-meshFile.write("3 " + str(volRegionTag) + ' \"' + volRegionName + '\"\n')
-meshFile.write("3 " + str(volRegionTag2) + ' \"' + volRegionName2 + '\"\n')
-meshFile.write("$EndPhysicalNames\n")
-meshFile.write("$Nodes\n" + str(len(pts) + len(pts2))+"\n")
-for i in range(0,len(pts)):
-    meshFile.write( str(i+1)+"\t"+str(pts[i][0])+"\t"+str(pts[i][1])+"\t"+str(pts[i][2]) + "\n" )
-for i in range(0,len(pts2)):
-    meshFile.write( str(i+14)+"\t"+str(pts2[i][0])+"\t"+str(pts2[i][1])+"\t"+str(pts2[i][2]) + "\n" )
-meshFile.write("$EndNodes\n$Elements\n")
-meshFile.write(str(4*len(f_idx))+"\n")
-for i in range(0,len(f_idx)):
-     meshFile.write( str(i+1)+"\t4\t2\t" + str(volRegionTag) + "\t1\t13\t"+str(1+f_idx[i][0])+"\t"+str(1+f_idx[i][1])+"\t"+str(1+f_idx[i][2]) + "\n" )
-offset = len(f_idx)
-for i in range(0,len(f_idx)):
-     meshFile.write( str(offset+i+1)+"\t4\t2\t" + str(volRegionTag2) + "\t2\t26\t"+str(14+f_idx[i][0])+"\t"+str(14+f_idx[i][1])+"\t"+str(14+f_idx[i][2]) + "\n" )
-offset += len(f_idx)
-for i in range(0,len(f_idx)):
-     meshFile.write( str(offset+i+1)+"\t2\t2\t" + str(surfRegionTag) + "\t1\t"+str(1+f_idx[i][0])+"\t"+str(1+f_idx[i][1])+"\t"+str(1+f_idx[i][2]) + "\n" )
-offset += len(f_idx)
-for i in range(0,len(f_idx)):
-     meshFile.write( str(offset+i+1)+"\t2\t2\t" + str(surfRegionTag2) + "\t2\t"+str(14+f_idx[i][0])+"\t"+str(14+f_idx[i][1])+"\t"+str(14+f_idx[i][2]) + "\n" )
+# Prepare the mesh data.
+nodes = np.vstack((
+    ico_nodes + particles[0]["center"],
+    ico_nodes + particles[1]["center"]
+))
+tetrahedrons = np.vstack((
+    elements( 1, [4, 2, particles[0]["volume"]["tag"], 1, 13], 1),
+    elements(21, [4, 2, particles[1]["volume"]["tag"], 2, 26], 14)
+))
+triangles = np.vstack((
+    elements(41, [2, 2, particles[0]["surface"]["tag"], 1], 1),
+    elements(61, [2, 2, particles[1]["surface"]["tag"], 2], 14)
+))
 
+# Write out the mesh.
+meshFile = open(mesh_filename, "w")
+meshFile.write(f"""$MeshFormat
+2.2\t0\t8
+$EndMeshFormat
+$PhysicalNames
+4
+2 {particles[0]["surface"]["tag"]} "{particles[0]["surface"]["name"]}"
+2 {particles[1]["surface"]["tag"]} "{particles[1]["surface"]["name"]}"
+3 {particles[0]["volume"]["tag"]} "{particles[0]["volume"]["name"]}"
+3 {particles[1]["volume"]["tag"]} "{particles[1]["volume"]["name"]}"
+$EndPhysicalNames
+$Nodes
+{len(nodes)}
+""")
+for i in range(0, len(nodes)):
+    meshFile.write("\t".join(map(str, [i+1]+list(nodes[i]))) + "\n")
+meshFile.write(f"""$EndNodes
+$Elements
+{4*len(ico_faces)}
+""")
+for tetrahedron in tetrahedrons:
+    meshFile.write("\t".join(map(str, tetrahedron)) + "\n")
+for triangle in triangles:
+    meshFile.write("\t".join(map(str, triangle)) + "\n")
 meshFile.write("$EndElements\n")
 meshFile.close()
-print(f"Generated {meshFileName}: two icosaedrons")
 
-mySettings = Settings(meshFileName)
+# Simulation settings.
+settings = {
+    "outputs": {
+        "evol_time_step": 1e-11,
+        "final_time": 5e-09,
+        "evol_columns": ["t", "<Mx>", "<My>", "<Mz>", "E_tot"],
+        "mag_config_every": False
+    },
+    "mesh": {
+        "filename": mesh_filename,
+        "volume_regions": {
+            particles[0]["volume"]["name"]: {
+                "Js": 1.0,
+                "Ae": 1e-11,
+                "alpha_LLG": 0.1
+            },
+            particles[1]["volume"]["name"]: {
+                "Js": 0.5,
+                "Ae": 1e-11,
+                "alpha_LLG": 0.1
+            }
+        },
+        "surface_regions": {
+            particles[0]["surface"]["name"]: {},
+            particles[1]["surface"]["name"]: {}
+        }
+    },
+    "initial_magnetization": [1, 0, 1],
+    "time_integration": {
+        "min(dt)": 1e-13,
+        "max(dt)": 1e-11
+    }
+}
+with open(json_filename, "w") as outfile:
+    json.dump(settings, outfile, indent=4)
+    outfile.write("\n")
 
-mySettings["outputs"]["file_basename"] = "twinIco"
-
-mySettings["outputs"]["evol_time_step"] = 1e-11
-mySettings["outputs"]["final_time"] = 5e-9
-mySettings["outputs"]["evol_columns"] = [ "t", "<Mx>", "<My>", "<Mz>", "E_tot" ]
-
-mySettings["outputs"]["mag_config_every"] = False
-
-mySettings.createVolRegion( volRegionName )
-mySettings.createSurfRegion( surfRegionName )
-mySettings["mesh"]["volume_regions"][volRegionName]["Js"] = 1.0
-mySettings["mesh"]["volume_regions"][volRegionName]["Ae"] = 10e-12
-mySettings["mesh"]["volume_regions"][volRegionName]["alpha_LLG"] = 0.1
-
-mySettings.createVolRegion( volRegionName2 )
-mySettings.createSurfRegion( surfRegionName2 )
-mySettings["mesh"]["volume_regions"][volRegionName2]["Js"] = 0.5
-mySettings["mesh"]["volume_regions"][volRegionName2]["Ae"] = 10e-12
-mySettings["mesh"]["volume_regions"][volRegionName2]["alpha_LLG"] = 0.1
-
-mySettings["time_integration"]["min(dt)"] = 5e-18
-mySettings["time_integration"]["max(dt)"] = 5e-10
-
-mySettings["initial_magnetization"] = [1, 0, 1]
-
-mySettings.write('twinIco.json')
-
+print("Prepared simulation of two icosahedrons: "
+        f"{mesh_filename} and {json_filename}")
+print(f"Simulate with: feellgood {json_filename}")
