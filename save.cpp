@@ -33,73 +33,78 @@ void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const i
             {
             fout << nt << sep;
             }
-        if (keyVal == "t")
+        else if (keyVal == "t")
             {
             fout << t_prm.get_t() << sep;
             }
-        if (keyVal == "dt")
+        else if (keyVal == "dt")
             {
             fout << t_prm.get_dt() << sep;
             }
-        if (keyVal == "max_dm")
+        else if (keyVal == "max_dm")
             {
             fout << vmax * t_prm.get_dt() << sep;
             }
-        if (keyVal == "<Mx>")
+        else if (keyVal == "<Mx>")
             {
             fout << msh.avg(Nodes::get_u_comp, IDX_X) << sep;
             }
-        if (keyVal == "<My>")
+        else if (keyVal == "<My>")
             {
             fout << msh.avg(Nodes::get_u_comp, IDX_Y) << sep;
             }
-        if (keyVal == "<Mz>")
+        else if (keyVal == "<Mz>")
             {
             fout << msh.avg(Nodes::get_u_comp, IDX_Z) << sep;
             }
-        if (keyVal == "<dMx/dt>")
+        else if (keyVal == "<dMx/dt>")
             {
             fout << msh.avg(Nodes::get_v_comp, IDX_X) << sep;
             }
-        if (keyVal == "<dMy/dt>")
+        else if (keyVal == "<dMy/dt>")
             {
             fout << msh.avg(Nodes::get_v_comp, IDX_Y) << sep;
             }
-        if (keyVal == "<dMz/dt>")
+        else if (keyVal == "<dMz/dt>")
             {
             fout << msh.avg(Nodes::get_v_comp, IDX_Z) << sep;
             }
-        if (keyVal == "E_ex")
+        else if (keyVal == "E_ex")
             {
             fout << E[EXCHANGE] << sep;
             }
-        if (keyVal == "E_aniso")
+        else if (keyVal == "E_aniso")
             {
             fout << E[ANISOTROPY] << sep;
             }
-        if (keyVal == "E_demag")
+        else if (keyVal == "E_demag")
             {
             fout << E[DEMAG] << sep;
             }
-        if (keyVal == "E_zeeman")
+        else if (keyVal == "E_zeeman")
             {
             fout << E[ZEEMAN] << sep;
             }
-        if (keyVal == "E_tot")
+        else if (keyVal == "E_tot")
             {
             fout << Etot << sep;
             }
-        if (keyVal == "Hx")
+        else if (keyVal == "Hx")
             {
             fout << settings.getField(t_prm.get_t()).x() << sep;
             }
-        if (keyVal == "Hy")
+        else if (keyVal == "Hy")
             {
             fout << settings.getField(t_prm.get_t()).y() << sep;
             }
-        if (keyVal == "Hz")
+        else if (keyVal == "Hz")
             {
             fout << settings.getField(t_prm.get_t()).z() << sep;
+            }
+        else
+            {
+            std::cerr << "Error: invalid column name '" << keyVal << "'\n";
+            SYSTEM_ERROR
             }
         }
     fout << std::flush;
