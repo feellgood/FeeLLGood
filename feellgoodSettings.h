@@ -210,7 +210,7 @@ public:
     std::vector<Tetra::prm> paramTetra;
 
     /** \return index of the region in volume region container  */
-    inline int findTetraRegionIdx(const std::string name /**< [in] */) const
+    inline int findTetraRegionIdx(const std::string &name /**< [in] */) const
         {
         std::vector<Tetra::prm>::const_iterator result =
                 std::find_if(paramTetra.begin(), paramTetra.end(),
