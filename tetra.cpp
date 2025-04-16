@@ -203,7 +203,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
             BE.col(i) += w*a[i][npi]*H.col(npi);
             }
         }
-    extraCoeffs_BE(Js, U, dUdx, dUdy, dUdz, BE);  // spinAcc
+    extraCoeffs_BE(U, dUdx, dUdy, dUdz, BE);  // spinAcc
 
     /*--------------------   PROJECTION: BE->Lp   --------------------*/
     Lp = P * BE.reshaped<Eigen::RowMajor>();

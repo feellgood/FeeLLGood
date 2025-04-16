@@ -8,49 +8,37 @@
 #include "electrostatSolver.h"
 
 /** \class spinAcc
- container for Spin Accumulation constants, diffusive accumulation spin model, Dirichlet boundary conditions
- (potential fixed value on two or more surfaces)
+ container for Spin Accumulation constants, diffusive accumulation spin model, Boundary conditions
+ (potential fixed value on one surface, current density on another surface)
  */
 
 class spinAcc
     {
     /** constructor */
-    spinAcc(Mesh::mesh &_msh, double beta, double N0, double _sigma, double lJ, double lsf):
-        msh(_msh) //, elec(_msh,1e-6,false,5000,false,"")
+    spinAcc(Mesh::mesh &_msh /**< [in] ref to the mesh */,
+    std::vector<Tetra::prm> _pTetra /**< [in] ref to vector of param tetra (volume region parameters) */):
+        msh(_msh), paramTetra(_pTetra)
         {
-        ksi = Nodes::sq(lJ / lsf);
-        D0 = 2.0 * _sigma / (Nodes::sq(CHARGE_ELECTRON) * N0);
-        pf = Nodes::sq(lJ) / (D0 * (1. + ksi * ksi)) * BOHRS_MUB * beta / CHARGE_ELECTRON;
         }
 
     /** mesh */
     Mesh::mesh msh;
 
+    private:
+    /** this vector contains the material parameters for all regions for all the tetrahedrons */
+    std::vector<Tetra::prm> paramTetra;
+
     /** \f$ \beta \f$ is polarization rate of the current */
-    double beta;
+    double getBeta(Tetra::Tet &tet) const;
 
     /** density of states at Fermi level, units : J^-1 nm^-3  */
-    double N0;
+    double getN0(Tetra::Tet &tet) const;
 
     /** length */
-    double lJ;
+    double getLsd(Tetra::Tet &tet) const;
 
     /** spin flip length */
-    double lsf;
-
-    /** solve electrostatic side problem */
-    //electrostatSolver elec;
-
-    inline double calc_prefactor(double Js) { return D0 / Nodes::sq(lJ) / (gamma0*Js/mu0); }
-
-    /** ksi is in Thiaville notations beta_DW */
-    double ksi;
-
-    /** density of states */
-    double D0;
-
-    /** a prefactor for BE coefficient coefficients*/
-    double pf;
+    double getLsf(Tetra::Tet &tet) const;
 
     /** affect extraField function and extraCoeffs_BE function for all the tetrahedrons */
     void prepareExtras(std::vector<Tetra::Tet> &v_tet, electrostatSolver &elec);
