@@ -18,8 +18,25 @@ void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const i
 
     for (unsigned int i = 0; i < settings.evol_columns.size(); i++)
         {
+        const std::string &col_name = settings.evol_columns[i];
+
+        // Split the column name as region_name:keyVal.
+        int region = -1;
+        std::string::size_type colon_pos = col_name.rfind(':');
+        if (colon_pos != std::string::npos)
+            {
+            std::string region_name = col_name.substr(0, colon_pos);
+            region = settings.findTetraRegionIdx(region_name);
+            if (region == -1)
+                {
+                std::cerr << "Error: no region named '" << region_name << "'\n";
+                SYSTEM_ERROR
+                }
+            }
+        const std::string &keyVal = (region == -1) ? col_name : col_name.substr(colon_pos + 1);
+
+        // Separator to add after this data field.
         std::string sep;
-        const std::string &keyVal = settings.evol_columns[i];
         if (i == settings.evol_columns.size() - 1)
             {
             sep = "\n";
@@ -47,27 +64,27 @@ void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const i
             }
         else if (keyVal == "<Mx>")
             {
-            fout << msh.avg(Nodes::get_u_comp, IDX_X) << sep;
+            fout << msh.avg(Nodes::get_u_comp, IDX_X, region) << sep;
             }
         else if (keyVal == "<My>")
             {
-            fout << msh.avg(Nodes::get_u_comp, IDX_Y) << sep;
+            fout << msh.avg(Nodes::get_u_comp, IDX_Y, region) << sep;
             }
         else if (keyVal == "<Mz>")
             {
-            fout << msh.avg(Nodes::get_u_comp, IDX_Z) << sep;
+            fout << msh.avg(Nodes::get_u_comp, IDX_Z, region) << sep;
             }
         else if (keyVal == "<dMx/dt>")
             {
-            fout << msh.avg(Nodes::get_v_comp, IDX_X) << sep;
+            fout << msh.avg(Nodes::get_v_comp, IDX_X, region) << sep;
             }
         else if (keyVal == "<dMy/dt>")
             {
-            fout << msh.avg(Nodes::get_v_comp, IDX_Y) << sep;
+            fout << msh.avg(Nodes::get_v_comp, IDX_Y, region) << sep;
             }
         else if (keyVal == "<dMz/dt>")
             {
-            fout << msh.avg(Nodes::get_v_comp, IDX_Z) << sep;
+            fout << msh.avg(Nodes::get_v_comp, IDX_Z, region) << sep;
             }
         else if (keyVal == "E_ex")
             {

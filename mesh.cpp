@@ -1,4 +1,5 @@
 #include "mesh.h"
+#include <utility>
 
 using namespace Mesh;
 
@@ -20,16 +21,25 @@ void mesh::updateNodes(Eigen::Ref<Eigen::VectorXd> X, const double dt)
     }
 
 double mesh::avg(std::function<double(Nodes::Node, Nodes::index)> getter /**< [in] */,
-                 Nodes::index d /**< [in] */) const
+                 Nodes::index d /**< [in] */,
+                 int region /**< region index, or -1 for all regions */) const
     {
-    double sum = std::transform_reduce(EXEC_POL, tet.begin(), tet.end(), 0.0, std::plus{},
-                                       [getter, &d](Tetra::Tet const &te)
+    std::pair<double, double> sum_vol =
+            std::transform_reduce(EXEC_POL, tet.begin(), tet.end(), std::make_pair(0.0, 0.0),
+                                       [](std::pair<double, double> a, std::pair<double, double> b)
                                        {
+                                           return std::make_pair(a.first + b.first,
+                                                   a.second + b.second);
+                                       },
+                                       [getter, &d, region](Tetra::Tet const &te)
+                                       {
+                                       if (te.idxPrm != region && region != -1)
+                                           return std::make_pair(0.0, 0.0);
                                        Eigen::Matrix<double,Tetra::NPI,1> val;
                                        te.interpolation(getter, d, val);
-                                       return te.weight.dot(val);
+                                       return std::make_pair(te.weight.dot(val), te.calc_vol());
                                        });
-    return sum / vol;
+    return sum_vol.first / sum_vol.second;
     }
 
 double mesh::doOnNodes(const double init_val, const Nodes::index coord,

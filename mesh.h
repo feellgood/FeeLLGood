@@ -159,7 +159,8 @@ public:
     average component of either u or v through getter on the whole set of tetetrahedron
     */
     double avg(std::function<double(Nodes::Node, Nodes::index)> getter /**< [in] */,
-               Nodes::index d /**< [in] */) const;
+               Nodes::index d /**< [in] */,
+               int region = -1 /**< region index, or -1 for all regions */) const;
 
     /** text file (tsv) writing function for a solution */
     void savesol(const int precision /**< [in] numeric precision in .sol output text file */,
