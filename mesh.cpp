@@ -24,22 +24,18 @@ double mesh::avg(std::function<double(Nodes::Node, Nodes::index)> getter /**< [i
                  Nodes::index d /**< [in] */,
                  int region /**< region index, or -1 for all regions */) const
     {
-    std::pair<double, double> sum_vol =
-            std::transform_reduce(EXEC_POL, tet.begin(), tet.end(), std::make_pair(0.0, 0.0),
-                                       [](std::pair<double, double> a, std::pair<double, double> b)
-                                       {
-                                           return std::make_pair(a.first + b.first,
-                                                   a.second + b.second);
-                                       },
+    double sum = std::transform_reduce(EXEC_POL, tet.begin(), tet.end(), 0.0,
+                                       std::plus<>(),
                                        [getter, &d, region](Tetra::Tet const &te)
                                        {
                                        if (te.idxPrm != region && region != -1)
-                                           return std::make_pair(0.0, 0.0);
+                                           return 0.0;
                                        Eigen::Matrix<double,Tetra::NPI,1> val;
                                        te.interpolation(getter, d, val);
-                                       return std::make_pair(te.weight.dot(val), te.calc_vol());
+                                       return te.weight.dot(val);
                                        });
-    return sum_vol.first / sum_vol.second;
+    double volume = (region == -1) ? vol : paramTetra[region].volume;
+    return sum / volume;
     }
 
 double mesh::doOnNodes(const double init_val, const Nodes::index coord,
