@@ -55,7 +55,7 @@ double mesh::doOnNodes(const double init_val, const Nodes::index coord,
     return result;
     }
 
-void mesh::indexReorder(std::vector<Tetra::prm> const &prmTetra)
+void mesh::indexReorder()
     {
     std::set<Facette::Fac> sf;  // implicit use of operator< redefined in class Fac
 
@@ -72,7 +72,7 @@ void mesh::indexReorder(std::vector<Tetra::prm> const &prmTetra)
                   sf.insert(Facette::Fac(node, 0, te.idxPrm, {ia, ib, id} ));
                   });  // end for_each
 
-    std::for_each(fac.begin(), fac.end(), [this, &prmTetra, &sf](Facette::Fac &fa)
+    std::for_each(fac.begin(), fac.end(), [this, &sf](Facette::Fac &fa)
                   {
                   int i0 = fa.ind[0], i1 = fa.ind[1], i2 = fa.ind[2];
                   std::set<Facette::Fac>::iterator it = sf.end();
@@ -94,7 +94,7 @@ void mesh::indexReorder(std::vector<Tetra::prm> const &prmTetra)
                           Eigen::Vector3d p0p2 = node[it->ind[2]].p - node[it->ind[0]].p;
                                 
                           // fa.Ms will have the magnitude of first arg of copysign, with second arg sign
-                          fa.dMs = std::copysign( prmTetra[it->idxPrm].J/mu0,
+                          fa.dMs = std::copysign( paramTetra[it->idxPrm].J/mu0,
                                p0p1.dot(p0p2.cross(fa.calc_norm())) );  // carefull, calc_norm computes the normal to the face before idx swap
                           }
                       std::swap(i1, i2);  // it seems from ref archive we do not want to swap

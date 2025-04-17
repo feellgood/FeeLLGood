@@ -29,9 +29,10 @@ public:
     /** constructor : read mesh file, reorder indices and computes some values related to the mesh :
      center and length along coordinates,full volume */
     inline mesh(Settings const &mySets /**< [in] */)
+        : paramTetra(mySets.paramTetra)
         {
         readMesh(mySets);
-        indexReorder(mySets.paramTetra);
+        indexReorder();
 
         if (mySets.verbose)
             { std::cout << "  reindexed\n"; }
@@ -135,6 +136,9 @@ public:
 
     /** tetrahedron container */
     std::vector<Tetra::Tet> tet;
+
+    /** Reference to the volume regions in Settings. */
+    const std::vector<Tetra::prm> &paramTetra;
 
     /** read a solution from a file (tsv formated) and initialize fem struct to restart computation
      * from that distribution, return time
@@ -248,7 +252,7 @@ private:
                      `\.
                         ` w
     */
-    void indexReorder(std::vector<Tetra::prm> const &prmTetra);
+    void indexReorder();
 
     /** Sort the nodes along the longest axis of the sample. This should reduce the bandwidth of
      * the matrix we will have to solve for. */
