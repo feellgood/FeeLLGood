@@ -11,6 +11,10 @@
 #include "config.h"
 #include "fem.h"
 #include "mesh.h"
+#include "algebra/algebra.h"
+
+/** dimensionnality of the problem to solve, here electrostatic problem to solve computes scalar potential V on the nodes */
+const int DIM_PROBLEM = 1;
 
 /** \class electrostatSolver
 this class is containing both data and a solver to compute potential from dirichlet boundary
@@ -29,11 +33,29 @@ public:
             const int max_iter /**< [in] maximum number of iteration */,
             const bool _V_file /**< [in] if true an output tsv file containing potential V is written */,
             const std::string _fileName /**< [in] output .sol file name for electrostatic potential */)
-        : msh(_msh), paramTetra(_pTetra), paramFacette(_pFac), verbose(v), MAXITER(max_iter), V_file(_V_file), fileName(_fileName)
+        : msh(_msh), paramTetra(_pTetra), paramFacette(_pFac), verbose(v), MAXITER(max_iter), V_file(_V_file), fileName(_fileName), NOD(_msh.getNbNodes())
         {
         if (verbose)
             { infos(); }
         V.resize(_msh.getNbNodes());
+        Vd.resize(_msh.getNbNodes());
+        
+        std::for_each(msh.fac.begin(),msh.fac.end(),[this](Facette::Fac &fac)
+            {
+            double _V = paramFacette[fac.idxPrm].V;
+            if (!std::isnan(_V))
+                {
+                for(int ie=0; ie<Facette::N; ie++)
+                    {
+                    int i= fac.ind[ie];
+                    Vd[i]= _V;
+                    ld.push_back(i);
+                    }
+                }
+            });
+        
+        suppress_copies<int>(ld);
+        
         bool has_converged = solve(_tol);
         if (has_converged)
             {
@@ -84,18 +106,12 @@ public:
     /** basic informations on boundary conditions */
     void infos(void);
 
-    /** assemble the matrix K from tet and Ke inputs */
-    void assembling_mat(Tetra::Tet const &tet, double Ke[Tetra::N][Tetra::N], std::vector<Eigen::Triplet<double>> &K);
-
-    /** assemble the vector L from fac and Le inputs */
-    void assembling_vect(Facette::Fac const &fac, std::vector<double> const &Le, Eigen::Ref<Eigen::VectorXd> L);
-
     /** compute side problem (electrostatic potential on the nodes) integrales for matrix
      * coefficients,inputs from tet */
-    void integrales(Tetra::Tet const &tet, double AE[Tetra::N][Tetra::N]);
+    void integrales(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Tetra::N,Tetra::N> > AE);
 
     /** compute integrales for vector coefficients, input from facette */
-    void integrales(Facette::Fac const &fac, std::vector<double> &BE);
+    void integrales(Facette::Fac const &fac, Eigen::Ref<Eigen::Matrix<double,Facette::N,1> > BE);
 
     /** text file (tsv) writing function for the solution V over all volume regions of the mesh,
      * node indices are zero based */
@@ -134,16 +150,50 @@ private:
     /** output .sol file name for electrostatic problem */
     const std::string fileName;
 
-    /** boundary conditions, stored as a vector of pairs.
-    First element of the pair is the surface region name given in the mesh by its physical name;
-    Second element is the electrostatic potential associated value  */
-    //std::vector<std::pair<std::string, double>> boundaryCond;
+    /** number of Nodes (needed for templates) */
+    const int NOD;
 
-    /** fill matrix and vector to solve potential values on each node */
-    void prepareData(std::vector<Eigen::Triplet<double>> &Kw, Eigen::Ref<Eigen::VectorXd> Lw);
+/** assemble the matrix K from Ke inputs, assemble the vector L from Le inputs */
+template <int N>
+    void assembling(std::vector<int> &ind,
+                    Eigen::Matrix<double,DIM_PROBLEM*N,DIM_PROBLEM*N> &Ke,
+                    Eigen::Matrix<double,DIM_PROBLEM*N,1> &Le,
+                    algebra::w_sparseMat &K, std::vector <double> &L)
+        {
+        for (int ie=0; ie<N; ie++)
+            {
+            int i= ind[ie];
+            for (int je=0; je<N; je++)
+                {
+                int j= ind[je];
+                for (int di=0; di<DIM_PROBLEM; di++)
+                    for (int dj=0; dj<DIM_PROBLEM; dj++)
+                        K.insert(di*NOD+i, dj*NOD+j, Ke(di*N+ie,dj*N+je));
+	            }
+            for (int di=0; di<DIM_PROBLEM; di++) { L[di*NOD+i] += Le[di*N+ie]; }
+            }
+        }
+
+/**
+ suppress twins in the indices Dirichlet list v_idx
+*/
+template <typename T>
+void suppress_copies(std::vector<T> &v_idx)
+    {
+    std::sort (v_idx.begin(), v_idx.begin()+v_idx.size());
+    auto it = std::unique (v_idx.begin(), v_idx.end() );
+    v_idx.resize( std::distance(v_idx.begin(),it) );
+    v_idx.shrink_to_fit();
+    }
 
     /** solver, using biconjugate stabilized gradient, with diagonal preconditionner and Dirichlet
      * boundary conditions */
     int solve(const double _tol);
+
+    /** vector of the Dirichlet Nodes */
+    std::vector<int> ld;
+    
+    /**  potential values on Dirichlet nodes, zero on the others */
+    std::vector<double> Vd;
 
     };  // end class electrostatSolver
