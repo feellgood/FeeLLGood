@@ -23,12 +23,13 @@ public:
     electrostatSolver(
             Mesh::mesh & _msh /**< [in] reference to the mesh */,
             std::vector<Tetra::prm> _pTetra /**< [in] ref to vector of param tetra (volume region parameters) */,
+            std::vector<Facette::prm> _pFac /**< [in] ref to vector of param facette (surface region parameters) */,
             const double _tol /**< [in] tolerance for solvers */,
             const bool v /**< [in] verbose bool */,
             const int max_iter /**< [in] maximum number of iteration */,
             const bool _V_file /**< [in] if true an output tsv file containing potential V is written */,
             const std::string _fileName /**< [in] output .sol file name for electrostatic potential */)
-        : msh(_msh), paramTetra(_pTetra), verbose(v), MAXITER(max_iter), V_file(_V_file), fileName(_fileName)
+        : msh(_msh), paramTetra(_pTetra), paramFacette(_pFac), verbose(v), MAXITER(max_iter), V_file(_V_file), fileName(_fileName)
         {
         if (verbose)
             { infos(); }
@@ -94,7 +95,7 @@ public:
     void integrales(Tetra::Tet const &tet, double AE[Tetra::N][Tetra::N]);
 
     /** compute integrales for vector coefficients, input from facette */
-    void integrales(Facette::Fac const &fac, double pot_val, std::vector<double> &BE);
+    void integrales(Facette::Fac const &fac, std::vector<double> &BE);
 
     /** text file (tsv) writing function for the solution V over all volume regions of the mesh,
      * node indices are zero based */
@@ -103,13 +104,19 @@ public:
     /** returns sigma of the tetraedron, (conductivity in (Ohm.m)^-1 */
     inline double getSigma(Tetra::Tet const &tet) const { return paramTetra[tet.idxPrm].sigma; }
 
+    /** returns current density of the facette */
+    inline double getCurrentDensity(Facette::Fac const &fac) const {return paramFacette[fac.idxPrm].J; }
+
 private:
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh (
      * const ref ) */
     Mesh::mesh msh;
 
-    /** this vector contains the material parameters for all regions for all the tetrahedrons */
+    /** this vector contains the material parameters for all volume regions for all the tetrahedrons */
     std::vector<Tetra::prm> paramTetra;
+
+    /** this vector contains the material parameters for all surface regions for all the triangular facettes */
+    std::vector<Facette::prm> paramFacette;
 
     /** if verbose set to true, some printing are sent to terminal */
     const bool verbose;
@@ -130,7 +137,7 @@ private:
     /** boundary conditions, stored as a vector of pairs.
     First element of the pair is the surface region name given in the mesh by its physical name;
     Second element is the electrostatic potential associated value  */
-    std::vector<std::pair<std::string, double>> boundaryCond;
+    //std::vector<std::pair<std::string, double>> boundaryCond;
 
     /** fill matrix and vector to solve potential values on each node */
     void prepareData(std::vector<Eigen::Triplet<double>> &Kw, Eigen::Ref<Eigen::VectorXd> Lw);
