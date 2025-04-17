@@ -75,6 +75,8 @@ struct prm
     Eigen::Vector3d ez; /**< unit vector3 (for cubic anisotropy) */
     STT p_STT;   /**< spin transfert torque (thiaville STT) parameters */
 
+    double volume = 0;  /**< total volume of the region */
+
     /** print the struct parameters */
     inline void infos()
         {

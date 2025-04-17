@@ -48,7 +48,7 @@ class Fem
     {
 public:
     /** constructor: call mesh constructor, initialize pts,kdtree and many inner variables */
-    inline Fem(Settings const &mySets, timing &t_prm) : msh(mySets)
+    inline Fem(Settings &mySets, timing &t_prm) : msh(mySets)
         {
         vmax = 0.0;
         std::fill(E.begin(),E.end(),0);

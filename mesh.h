@@ -28,7 +28,7 @@ class mesh
 public:
     /** constructor : read mesh file, reorder indices and computes some values related to the mesh :
      center and length along coordinates,full volume */
-    inline mesh(Settings const &mySets /**< [in] */)
+    inline mesh(Settings &mySets /**< [in] */)
         : paramTetra(mySets.paramTetra)
         {
         readMesh(mySets);
@@ -67,8 +67,14 @@ public:
             }
         sortNodes(long_axis);
 
-        vol = std::transform_reduce(EXEC_POL, tet.begin(), tet.end(), 0.0, std::plus{},
-                                    [](Tetra::Tet const &te) { return te.calc_vol(); });
+        // Compute the per-region volumes and the total volume.
+        std::for_each(EXEC_POL, tet.begin(), tet.end(),
+                [this](Tetra::Tet const &te)
+                    {
+                    paramTetra[te.idxPrm].volume += te.calc_vol();
+                    });
+        vol = std::transform_reduce(paramTetra.begin(), paramTetra.end(), 0.0,
+                std::plus<>(), [](const Tetra::prm &region){ return region.volume; });
         }
 
     /** return number of nodes  */
@@ -138,7 +144,7 @@ public:
     std::vector<Tetra::Tet> tet;
 
     /** Reference to the volume regions in Settings. */
-    const std::vector<Tetra::prm> &paramTetra;
+    std::vector<Tetra::prm> &paramTetra;
 
     /** read a solution from a file (tsv formated) and initialize fem struct to restart computation
      * from that distribution, return time
