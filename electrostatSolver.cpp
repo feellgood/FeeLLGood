@@ -27,11 +27,12 @@ void electrostatSolver::calc_Hm(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<
 
 void electrostatSolver::infos(void)
     {
-    std::cout << "Dirichlet boundary conditions:\n" << std::endl;
-
-    std::for_each(boundaryCond.begin(), boundaryCond.end(),
-                  [](std::pair<std::string, double> const &p)
-                  { std::cout << "regName: " << p.first << "\tV :" << p.second << std::endl; });
+    std::cout << "Boundary conditions:\n";
+    std::for_each(paramFacette.begin(),paramFacette.end(),[](Facette::prm &p)
+        {
+        if (!std::isnan(p.J)) { std::cout << "\tJ= " << p.J << std::endl; }
+        if (!std::isnan(p.V)) { std::cout << "\tV= " << p.V << std::endl; }
+        } );
     }
 
 void electrostatSolver::assembling_mat(Tetra::Tet const &tet, double Ke[Tetra::N][Tetra::N], std::vector<Eigen::Triplet<double>> &K)
@@ -59,7 +60,7 @@ void electrostatSolver::integrales(Tetra::Tet const &tet, double AE[Tetra::N][Te
     const double sigma = getSigma(tet);
     for (int npi = 0; npi < Tetra::NPI; npi++)
         {
-        double w = tet.weight[npi];
+        double sigma_w = sigma * tet.weight[npi];
 
         for (int ie = 0; ie < Tetra::N; ie++)
             {
@@ -72,20 +73,22 @@ void electrostatSolver::integrales(Tetra::Tet const &tet, double AE[Tetra::N][Te
                 double daj_dx = tet.da(je,Nodes::IDX_X);
                 double daj_dy = tet.da(je,Nodes::IDX_Y);
                 double daj_dz = tet.da(je,Nodes::IDX_Z);
-                AE[ie][je] += sigma * (dai_dx * daj_dx + dai_dy * daj_dy + dai_dz * daj_dz) * w;
+                AE[ie][je] += sigma_w*(dai_dx*daj_dx + dai_dy*daj_dy + dai_dz*daj_dz);
                 }
             }
         }
     }
 
 // same formula as sp_acc_llg
-void electrostatSolver::integrales(Facette::Fac const &fac, double pot_val, std::vector<double> &BE)
+void electrostatSolver::integrales(Facette::Fac const &fac, std::vector<double> &BE)
     {
+    double J_bc = getCurrentDensity(fac);// _bc for Boundary Condition
     for (int npi = 0; npi < Facette::NPI; npi++)
+        {
+        double J_w = J_bc *fac.weight[npi];
         for (int ie = 0; ie < Facette::N; ie++)
-            {
-            BE[ie] -= Facette::a[ie][npi] * pot_val * fac.weight[npi];
-            }
+            { BE[ie] -= Facette::a[ie][npi] * J_w; }
+        }
     }
 
 void electrostatSolver::prepareData(std::vector<Eigen::Triplet<double>> &Kw, Eigen::Ref<Eigen::VectorXd> Lw)
@@ -97,17 +100,10 @@ void electrostatSolver::prepareData(std::vector<Eigen::Triplet<double>> &Kw, Eig
                   assembling_mat(tet, K, Kw);
                   });
 
-    double pot_val = 0;  // we initialize pot_val to the average of the potentials set by the
-                             // boundary conditions (does not seem to change convergence speed
-                             // whatever value it is ..)
-    std::for_each(boundaryCond.begin(), boundaryCond.end(),
-                  [&pot_val](auto const &it) { pot_val += it.second; });
-    pot_val /= boundaryCond.size();
-
-    std::for_each(msh.fac.begin(), msh.fac.end(), [this, pot_val, &Lw](Facette::Fac const &fac)
+    std::for_each(msh.fac.begin(), msh.fac.end(), [this, &Lw](Facette::Fac const &fac)
                   {
                   std::vector<double> L(Facette::N);
-                  integrales(fac, pot_val, L);
+                  integrales(fac, L);
                   assembling_vect(fac, L, Lw);
                   });
     }
