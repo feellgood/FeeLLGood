@@ -11,11 +11,10 @@
 #include "config.h"
 #include "fem.h"
 #include "mesh.h"
-
 #include "algebra/algebra.h"
 
+/** dimensionnality of the problem to solve, here electrostatic problem to solve computes scalar potential V on the nodes */
 const int DIM_PROBLEM = 1;
-
 
 /** \class electrostatSolver
 this class is containing both data and a solver to compute potential from dirichlet boundary

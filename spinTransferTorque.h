@@ -14,6 +14,7 @@
 
 class STT
     {
+    /** constructor */
     STT(Mesh::mesh &_msh /**< [in] ref to the mesh */,
     std::vector<Tetra::prm> _pTetra /**< [in] ref to vector of param tetra (volume region parameters) */):
         msh(_msh), paramTetra(_pTetra)
