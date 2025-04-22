@@ -153,9 +153,14 @@ mesh:
       # Unit vector along the surface anisotropy axis.
       uk: [0, 0, 1]
 
+      # fixed current density value (J.n) for the boundary conditions of the electrostatic problem
       J:
 
+      # fixed potential value for the boundary conditions of the electrostatic problem
       V:
+
+      # boundary condition for spin accumulation diffusion problem
+      Qs: [0, 0, 0]
 
 # The initial magnetization can be provided as either:
 # - the name of a file in feeLLGood’s format (‘.sol’ file)
