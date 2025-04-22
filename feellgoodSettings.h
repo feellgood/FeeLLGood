@@ -358,6 +358,9 @@ private:
 
     /** Metadata common to .evol and .sol files */
     std::ostringstream commonMetadata() const;
+
+    /** to normalize input vector */
+    const bool NORMALIZE = true;
     };
 
 #endif /* feellgoodSettings_h */
