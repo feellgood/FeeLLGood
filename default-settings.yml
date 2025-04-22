@@ -163,6 +163,9 @@ mesh:
       # electrostatic problem.
       V:
 
+      # Boundary condition for spin accumulation diffusion problem.
+      Qs: [0, 0, 0]
+
 # The initial magnetization can be provided as either:
 # - the name of a file in feeLLGood’s format (‘.sol’ file)
 # - an array of three expression depending on the Cartesian spatial

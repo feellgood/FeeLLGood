@@ -51,15 +51,15 @@ static bool assign(T &var, const YAML::Node &node)
     return false;
     }
 
-// Overload of the previous template for a unit vector.
-static bool assign(Eigen::Vector3d &var, const YAML::Node &node)
+// Overload of the previous template for a 3D vector, with optional normalization.
+static bool assign(const bool _NORMALIZE, Eigen::Vector3d &var, const YAML::Node &node)
     {
     if (node && !node.IsNull())
         {
         if (!node.IsSequence()) error("vectors should be YAML sequences.");
         if (node.size() != 3) error("vectors should have three components.");
         var = { node[0].as<double>(), node[1].as<double>(), node[2].as<double>() };
-        var.normalize();
+        if(_NORMALIZE) var.normalize();
         return true;
         }
     return false;
@@ -201,6 +201,7 @@ void Settings::toYaml()
             std::cout << "\n";
         else
             std::cout << ' ' << it->V << '\n';
+        if (spin_acc_flag) std::cout << "      Qs: " << str(it->Qs) << "\n";
         }
     std::cout << "initial_magnetization: ";
     if (!sM.empty())
@@ -377,11 +378,11 @@ void Settings::read(YAML::Node yaml)
                 assign(p.A, volume["Ae"]);
                 assign(p.J, volume["Js"]);
                 assign(p.K, volume["K"]);
-                assign(p.uk, volume["uk"]);
+                assign(NORMALIZE, p.uk, volume["uk"]);
                 assign(p.K3, volume["K3"]);
-                assign(p.ex, volume["ex"]);
-                assign(p.ey, volume["ey"]);
-                assign(p.ez, volume["ez"]);
+                assign(NORMALIZE, p.ex, volume["ex"]);
+                assign(NORMALIZE, p.ey, volume["ey"]);
+                assign(NORMALIZE, p.ez, volume["ez"]);
                 if (!isOrthogonal(p.ex, p.ey, p.ez, USER_TOL))
                     std::cout << "Warning: (ex, ey, ez) is not orthogonal.\n";
                 assign(p.alpha_LLG, volume["alpha_LLG"]);
@@ -409,7 +410,7 @@ void Settings::read(YAML::Node yaml)
                 p.regName = name;
                 assign(p.suppress_charges, surface["suppress_charges"]);
                 assign(p.Ks, surface["Ks"]);
-                assign(p.uk, surface["uk"]);
+                assign(NORMALIZE, p.uk, surface["uk"]);
 
                 // J and V may be null, which we map to NAN.
                 if (!assign(p.J, surface["J"]))
@@ -418,7 +419,7 @@ void Settings::read(YAML::Node yaml)
                     p.V = NAN;
                 if (!isnan(p.J) && !isnan(p.V))
                     error("A surface region cannot have both no-null J and V.");
-
+                assign(!NORMALIZE, p.Qs, surface["Qs"]);
                 paramFacette.push_back(p);
                 }
             }  // mesh.surface_regions
