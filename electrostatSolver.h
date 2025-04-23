@@ -13,7 +13,8 @@
 #include "mesh.h"
 #include "algebra/algebra.h"
 
-/** dimensionnality of the problem to solve, here electrostatic problem to solve computes scalar potential V on the nodes */
+/** dimensionnality of the problem to solve.
+ * here electrostatic problem to solve computes scalar potential V on the nodes */
 const int DIM_PROBLEM = 1;
 
 /** \class electrostatSolver
@@ -37,28 +38,11 @@ public:
         {
         if (verbose)
             { infos(); }
-        V.resize(_msh.getNbNodes());
-        Vd.resize(_msh.getNbNodes());
-        
-        std::for_each(msh.fac.begin(),msh.fac.end(),[this](Facette::Fac &fac)
-            {
-            double _V = paramFacette[fac.idxPrm].V;
-            if (!std::isnan(_V))
-                {
-                for(int ie=0; ie<Facette::N; ie++)
-                    {
-                    int i= fac.ind[ie];
-                    Vd[i]= _V;
-                    ld.push_back(i);
-                    }
-                }
-            });
-        
-        suppress_copies<int>(ld);
-        
+        V.resize(NOD);
         bool has_converged = solve(_tol);
         if (has_converged)
             {
+            std::cout << "Solver (ElectroStatic) has converged.\n";
             if (V_file)
                 {
                 if (verbose)
@@ -80,7 +64,7 @@ public:
             }
         else
             {
-            std::cerr << "Solver (ElectroStatic) has not converged" << std::endl;
+            std::cerr << "Solver (ElectroStatic) has not converged.\n";
             exit(1);
             }
         }
@@ -118,10 +102,10 @@ public:
     bool save(std::string const &metadata /**< [in] */) const;
 
     /** returns sigma of the tetraedron, (conductivity in (Ohm.m)^-1 */
-    inline double getSigma(Tetra::Tet const &tet) const { return paramTetra[tet.idxPrm].sigma; }
+    double getSigma(Tetra::Tet const &tet) const;
 
-    /** returns current density of the facette */
-    inline double getCurrentDensity(Facette::Fac const &fac) const {return paramFacette[fac.idxPrm].J; }
+    /** returns current density of the facette if it is defined in the boundary conditions, else zero */
+    double getCurrentDensity(Facette::Fac const &fac) const;
 
 private:
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh (
@@ -189,11 +173,4 @@ void suppress_copies(std::vector<T> &v_idx)
     /** solver, using biconjugate stabilized gradient, with diagonal preconditionner and Dirichlet
      * boundary conditions */
     int solve(const double _tol);
-
-    /** vector of the Dirichlet Nodes */
-    std::vector<int> ld;
-    
-    /**  potential values on Dirichlet nodes, zero on the others */
-    std::vector<double> Vd;
-
     };  // end class electrostatSolver
