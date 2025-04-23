@@ -123,8 +123,8 @@ settings = {
             },
         "surface_regions": {
             surf_regName: {},
-            surface_top_name2:{ "J": 0.1 },
-            surface_top_name:{ "V": 3.0 }
+            surface_top_name2:{"J":1.258},
+            surface_top_name:{"V":0.456}
             }
     },
     "initial_magnetization": [1, 0, 1],
