@@ -32,7 +32,8 @@ BOOST_AUTO_TEST_CASE(test_scaled, *boost::unit_test::tolerance(UT_TOL))
     scaled(1.0/alpha,y); // y *= 1.0/alpha
     
     sub(x,y); // y -= x 
-    BOOST_CHECK( norm(y) == 0.0 );
+    result = norm<double>(y); 
+    BOOST_CHECK( result == 0.0 );
     }
 
 /** test on p_direct */
@@ -236,7 +237,7 @@ BOOST_AUTO_TEST_CASE(test_cg, *boost::unit_test::tolerance(UT_TOL))
     std::vector<double> b {1.0,1.0,1.0,1.0};
     std::vector<double> x(N);
     iteration algo_it;
-    double res = cg(bob,x,b,algo_it);
+    double res = cg(algo_it,bob,x,b);
     std::cout << "CG test:\nresidu= " << res << std::endl;
     BOOST_CHECK(res < 1e-6);// default iteration tol is 1e-8
 
@@ -288,7 +289,7 @@ BOOST_AUTO_TEST_CASE(test_cg_dir, *boost::unit_test::tolerance(UT_TOL))
 
     iteration iter(cg_dir_tol,VERBOSE,MAXITER);
     std::vector<double> Xw(NOD,0.0);
-    double res = cg_dir(Kr,Xw,Lr,Vd,ld,iter);
+    double res = cg_dir(iter,Kr,Xw,Lr,Vd,ld);
 
     auto t2 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double,std::micro> micros = t2-t1;
@@ -320,7 +321,7 @@ BOOST_AUTO_TEST_CASE(test_bicg, *boost::unit_test::tolerance(UT_TOL))
     std::vector<double> b {1.0,1.0,1.0,1.0};
     std::vector<double> x(N);
     iteration algo_it;
-    double res = bicg(bob,x,b,algo_it);
+    double res = bicg(algo_it,bob,x,b);
     std::cout << "BICG test:\nresidu= " << res << std::endl;
     BOOST_CHECK(res < 1e-6);// default iteration tol is 1e-8
 
@@ -372,7 +373,7 @@ BOOST_AUTO_TEST_CASE(test_bicg_dir, *boost::unit_test::tolerance(UT_TOL))
 
     iteration iter(bicg_dir_tol,VERBOSE,MAXITER);
     std::vector<double> Xw(NOD,0.0);
-    double res = bicg_dir(Kr,Xw,Lr,Vd,ld,iter);
+    double res = bicg_dir(iter,Kr,Xw,Lr,Vd,ld);
 
     auto t2 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double,std::micro> micros = t2-t1;
