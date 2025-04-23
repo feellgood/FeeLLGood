@@ -26,38 +26,50 @@
 namespace algebra
 {
 /** returns x² */
-inline double sq(const double x) { return x * x; }
+template <typename T>
+T sq(const T x) { return x * x; }
 
 /** Y *= alpha */
-inline void scaled( const double alpha, std::vector<double> & Y) 
-	{ std::for_each(Y.begin(),Y.end(),[alpha](double &_x){ _x *= alpha; }); }
+template <typename T>
+void scaled( const T alpha, std::vector<T> & Y)
+	{ std::for_each(Y.begin(),Y.end(),[alpha](T &_x){ _x *= alpha; }); }
 
 /** returns scalar product X.Y */
-inline double dot(const std::vector<double> & X,const std::vector<double> & Y)
-	{ return std::inner_product(X.begin(),X.end(),Y.begin(),0.0); }
+template <typename T>
+auto dot(const std::vector<T,std::allocator<T>> & X,const std::vector<T,std::allocator<T>> & Y)
+	{
+	auto val = std::inner_product(X.begin(),X.end(),Y.begin(),(T)(0));
+	if(!std::isfinite(val)) {std::cout <<"dot:Warning: NaN or inf value.\n"; exit(1);}
+	return val;
+	}
 
 /** direct product : Z = X⊗Y */
-inline void p_direct(const std::vector<double> & X,const std::vector<double> & Y,std::vector<double> & Z)
+template <typename T>
+void p_direct(const std::vector<T> & X,const std::vector<T> & Y,std::vector<T> & Z)
 	{ for(unsigned int i=0;i<Z.size();i++) Z[i]=X[i]*Y[i]; }
 
-/** Y += X       */
-inline void add(const std::vector<double> & X, std::vector<double> & Y)
-	{ std::transform(Y.begin(),Y.end(),X.begin(),Y.begin(),std::plus<double>()  ); }
+/** Y += X */
+template <typename T>
+void add(const std::vector<T> & X, std::vector<T> & Y)
+	{ std::transform(Y.begin(),Y.end(),X.begin(),Y.begin(),std::plus<T>()  ); }
 
-/** Y -= X       */
-inline void sub(const std::vector<double> & X, std::vector<double> & Y)
-	{ std::transform(Y.begin(),Y.end(),X.begin(),Y.begin(),std::minus<double>()  ); }
+/** Y -= X */
+template <typename T>
+void sub(const std::vector<T> & X, std::vector<T> & Y)
+	{ std::transform(Y.begin(),Y.end(),X.begin(),Y.begin(),std::minus<T>()  ); }
 
 /** Y += alpha*X       */
-inline void scaled_add(const std::vector<double> & X,const double alpha, std::vector<double> & Y)
-	{ std::transform(Y.begin(),Y.end(),X.begin(),Y.begin(),[alpha] (const double _x,double _y) { return _x+(alpha*_y); }   ); }
+template <typename T>
+void scaled_add(const std::vector<T> & X,const T alpha, std::vector<T> & Y)
+	{ std::transform(Y.begin(),Y.end(),X.begin(),Y.begin(),[alpha] (const T _x,T _y) { return _x+(alpha*_y); }   ); }
 
 /** euclidian norm of vector X */
-inline double norm(const std::vector<double> & X)
-	{ return sqrt(fabs( dot(X,X) )); }
+template <typename T>
+auto norm(std::vector<T,std::allocator<T>> & X) { return sqrt(fabs( dot<T>(X,X) )); }
 
 /** Y = A*X with r_sparseMat A */
-inline void mult(r_sparseMat & A,std::vector<double> const& X,std::vector<double> &Y)
+template <typename T>
+void mult(r_sparseMat & A,std::vector<T> const& X,std::vector<T> &Y)
     {
     const int _size = X.size();
     Y.resize(_size);
@@ -66,42 +78,48 @@ inline void mult(r_sparseMat & A,std::vector<double> const& X,std::vector<double
     }
 
 /** apply a mask to vector X : all coefficients in vector mask are zeroed in X */
-inline void applyMask(const std::vector<int>& mask, std::vector<double> & X)
-    { std::for_each(mask.begin(),mask.end(),[&X](const int _i){ X[_i] = 0.0; }); }
+template <typename T>
+void applyMask(const std::vector<int>& mask, std::vector<T> & X)
+    { std::for_each(mask.begin(),mask.end(),[&X](const int _i){ X[_i] = (T)(0); }); }
 
 /** generic template for gradient conjugate */
-template<bool MASK>
-double generic_cg(iteration &iter, r_sparseMat& A, std::vector<double> & x, const std::vector<double> & rhs, const std::vector<double> & xd, const std::vector<int>& ld);
+template<bool MASK,typename T>
+T generic_cg(iteration &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T> & rhs, const std::vector<T> & xd, const std::vector<int>& ld);
 
 /** conjugate gradient with diagonal preconditioner, returns residu. Template generic_cg is called with dummy xd and ld */
-inline double cg(r_sparseMat& A, std::vector<double> & x, const std::vector<double> & b, iteration &iter)
+template <typename T>
+T cg(iteration &iter, r_sparseMat& A, std::vector<T> & x, std::vector<T> & b)
     {
-    std::vector<double> xd;
+    std::vector<T> xd;
     std::vector<int> ld;
-    return generic_cg<false>(iter,A,x,b,xd,ld);
+    return generic_cg<false,T>(iter,A,x,b,xd,ld);
     }
 
 /** conjugate gradient with diagonal preconditioner with Dirichlet conditions, returns residu */
-inline double cg_dir(r_sparseMat& A, std::vector<double> & x, const std::vector<double> & rhs, 
-              const std::vector<double> & xd, const std::vector<int>& ld, iteration &iter)
-    { return generic_cg<true>(iter,A,x,rhs,xd,ld); }
+template <typename T>
+T cg_dir(iteration &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T> & rhs,
+         const std::vector<T> & xd, const std::vector<int>& ld)
+    { return generic_cg<true,T>(iter,A,x,rhs,xd,ld); }
 
 /** generic template for stabilized bigradient conjugate  */
-template<bool MASK>
-double generic_bicg( iteration &iter, r_sparseMat& A, std::vector<double> & x, const std::vector<double> & rhs, const std::vector<double>& xd, const std::vector<int>& ld);
+template <bool MASK,typename T>
+T generic_bicg(iteration &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T> & rhs,
+               const std::vector<T>& xd, const std::vector<int>& ld);
 
 /** biconjugate gradient and diagonal preconditionner, returns residu. Template generic_bicg is called with dummy xd and ld  */
-inline double bicg(r_sparseMat& A, std::vector<double> & x, const std::vector<double> & b, iteration &iter)
+template <typename T>
+T bicg(iteration &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T> & b)
     {
-    std::vector<double> xd;
+    std::vector<T> xd;
     std::vector<int> ld;
-    return generic_bicg<false>(iter,A,x,b,xd,ld);
+    return generic_bicg<false,T>(iter,A,x,b,xd,ld);
     }
 
 /** biconjugate gradient with diagonal preconditioner with Dirichlet conditions, returns residu */
-inline double bicg_dir(r_sparseMat& A, std::vector<double> & x, const std::vector<double> & rhs, 
-              const std::vector<double> & xd, const std::vector<int>& ld, iteration &iter)
-    { return generic_bicg<true>(iter,A,x,rhs,xd,ld); }
+template <typename T>
+T bicg_dir(iteration &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T> & rhs,
+           const std::vector<T> & xd, const std::vector<int>& ld)
+    { return generic_bicg<true,T>(iter,A,x,rhs,xd,ld); }
 
 /** operator<< for r_sparseVect */
 inline std::ostream & operator<<(std::ostream & flux, r_sparseVect const& v)

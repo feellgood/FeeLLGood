@@ -50,7 +50,7 @@ class iteration
     public :
 	/** constructor */
 inline iteration(double r = 1.0E-8, int noi = 0, size_t mit = (size_t)(-1))
-      : rhsn(1.0), maxiter(mit), noise(noi), resmax(r), nit(0), res(0.0), written(false) {}
+      : rhsn(1.0), maxiter(mit), noise(noi), resmax(r), nit(0), res(std::numeric_limits<double>::max()), written(false) {}
 
 /** increment of the number of iterations */    
 inline void operator ++(int) { nit++; written = false; }

@@ -5,14 +5,15 @@
 
 namespace algebra
 {
-template<bool MASK>
-double generic_bicg( iteration &iter, r_sparseMat& A, std::vector<double> & x, const std::vector<double> & rhs, const std::vector<double>& xd, const std::vector<int>& ld) 
+template<bool MASK, typename T>
+T generic_bicg(iteration &iter, r_sparseMat& A, std::vector<T> & x,
+               const std::vector<T> & rhs, const std::vector<T>& xd, const std::vector<int>& ld)
     {
-    double rho_1(0.0), rho_2(0.0), alpha(0.0), beta(0.0), omega(0.0);
+    T rho_1(0.0), rho_2(0.0), alpha(0.0), beta(0.0), omega(0.0);
     const size_t DIM = x.size();
     if (rhs.size()!=DIM){std::cout << "rhs size mismatch" << std::endl; exit(1);}
 
-    std::vector<double> p(DIM), phat(DIM), shat(DIM), r(DIM), rt(DIM), s(DIM), t(DIM), v(DIM), diag_precond(DIM), b(DIM);    
+    std::vector<T> p(DIM), phat(DIM), shat(DIM), r(DIM), rt(DIM), s(DIM), t(DIM), v(DIM), diag_precond(DIM), b(DIM);
     b.assign(rhs.begin(),rhs.end());// b = rhs;
 
     for(unsigned int i=0;i<diag_precond.size();i++)
