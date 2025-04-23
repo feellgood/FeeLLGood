@@ -76,8 +76,6 @@ void electrostatSolver::integrales(Facette::Fac const &fac, Eigen::Ref<Eigen::Ma
 int electrostatSolver::solve(const double _tol)
     {
     const int DIM_1D = 1;
-    const int NOD = msh.getNbNodes();
-
     algebra::w_sparseMat Kw(NOD);
     std::vector<double> Lw(NOD, 0.0);
     std::vector<double> Xw(NOD, 0.0);//Eigen::VectorXd Xw(NOD);
@@ -94,7 +92,7 @@ int electrostatSolver::solve(const double _tol)
         integrales(elem,K);
         assembling<Tetra::N>(elem.ind,K,L,Kw,Lw);
         } );
-    
+
     std::for_each( msh.fac.begin(), msh.fac.end(),[this,&Kw,&Lw](Facette::Fac &elem)
         {
         Eigen::Matrix<double,DIM_1D*Facette::N,DIM_1D*Facette::N> K;
@@ -110,7 +108,24 @@ int electrostatSolver::solve(const double _tol)
 
     algebra::r_sparseMat Kr(Kw);
     algebra::iteration iter("cg_dir",_tol,verbose,MAXITER);
-    algebra::cg_dir(iter, Kr, Xw, Lw, Vd, ld);
+    std::vector<int> ld; // vector of the Dirichlet Nodes
+    std::vector<double> Vd(NOD); // potential values on Dirichlet nodes, zero on the others
+
+    std::for_each(msh.fac.begin(),msh.fac.end(),[this,&Vd,&ld](Facette::Fac &fac)
+        {
+        double _V = paramFacette[fac.idxPrm].V;
+        if (!std::isnan(_V))
+            {
+            for(int ie=0; ie<Facette::N; ie++)
+                {
+                int i= fac.ind[ie];
+                Vd[i]= _V;
+                ld.push_back(i);
+                }
+            }
+        });
+    suppress_copies<int>(ld);
+    algebra::cg_dir<double>(iter, Kr, Xw, Lw, Vd, ld);
 
     if (verbose)
         std::cout << "solved in " << iter.get_iteration() <<" ; residu= " << iter.get_res();
@@ -140,4 +155,14 @@ bool electrostatSolver::save(std::string const &metadata) const
         }
     fout.close();
     return !(fout.good());
+    }
+
+double electrostatSolver::getSigma(Tetra::Tet const &tet) const
+    { return paramTetra[tet.idxPrm].sigma; }
+
+double electrostatSolver::getCurrentDensity(Facette::Fac const &fac) const
+    {
+    double val = paramFacette[fac.idxPrm].J;
+    if (!std::isfinite(val)) val = 0.0;
+    return val;
     }

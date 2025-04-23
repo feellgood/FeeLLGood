@@ -32,7 +32,8 @@ BOOST_AUTO_TEST_CASE(test_scaled, *boost::unit_test::tolerance(UT_TOL))
     scaled(1.0/alpha,y); // y *= 1.0/alpha
     
     sub(x,y); // y -= x 
-    BOOST_CHECK( norm(y) == 0.0 );
+    result = norm<double>(y); 
+    BOOST_CHECK( result == 0.0 );
     }
 
 /** test on p_direct */
