@@ -146,8 +146,6 @@ bool electrostatSolver::save(std::string const &metadata) const
     fout << tags::sol::rw_time << ' ' << date() << '\n' << metadata << std::scientific
          << std::setprecision(precision);
 
-    const int NOD = msh.getNbNodes();
-
     for (int i = 0; i < NOD; i++)
         {
         int _i = msh.getNodeIndex(i);
