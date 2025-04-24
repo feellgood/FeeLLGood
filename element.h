@@ -86,7 +86,7 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
         }
 
     /** assemble the big sparse matrix K from tetra or facette inner matrix Kp */
-    void assemblage_mat(algebra::r_sparseMat &K /**< [out] COO matrix */ ) const
+    void assemble_mat(algebra::r_sparseMat &K /**< [out] COO matrix */ ) const
         {
         for (int i = 0; i < N; i++)
             {
@@ -104,7 +104,7 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
         }
 
     /** assemble the big vector L from tetra or facette inner vector Lp */
-    void assemblage_vect(std::vector<double> &L /**< [out] vector */) const
+    void assemble_vect(std::vector<double> &L /**< [out] vector */) const
         {
         for (int i = 0; i < N; i++)
             {

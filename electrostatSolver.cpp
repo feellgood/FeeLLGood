@@ -86,20 +86,16 @@ int electrostatSolver::solve(const double _tol)
         {
         Eigen::Matrix<double,DIM_1D*Tetra::N,DIM_1D*Tetra::N> K;
         K.setZero();
-        Eigen::Matrix<double,DIM_1D*Tetra::N,1> L;
-        L.setZero();
         integrales(elem,K);
-        assembling<Tetra::N>(elem.ind,K,L,Kw,Lw);
+        assemble_mat<Tetra::N>(elem.ind,K,Kw);
         } );
 
     std::for_each( msh.fac.begin(), msh.fac.end(),[this,&Kw,&Lw](Facette::Fac &elem)
         {
-        Eigen::Matrix<double,DIM_1D*Facette::N,DIM_1D*Facette::N> K;
-        K.setZero();
         Eigen::Matrix<double,DIM_1D*Facette::N,1> L;
         L.setZero();
         integrales(elem,L);
-        assembling<Facette::N>(elem.ind,K,L,Kw,Lw);
+        assemble_vect<Facette::N>(elem.ind,L,Lw);
         } );
 
     algebra::r_sparseMat Kr(Kw);
