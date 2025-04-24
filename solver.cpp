@@ -10,7 +10,7 @@ int LinAlgebra::solver(timing const &t_prm)
 
     algebra::w_sparseMat Kw(2*NOD);
     std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
-                      [this,&Kw](Tetra::Tet &my_elem) { my_elem.assemblage_mat(NOD,Kw); } );
+                      [this,&Kw](Tetra::Tet &my_elem) { my_elem.assemble_mat(NOD,Kw); } );
 
     algebra::r_sparseMat Kr(Kw);
     if (verbose)
@@ -25,9 +25,9 @@ int LinAlgebra::solver(timing const &t_prm)
     
     std::fill(L_rhs.begin(),L_rhs.end(),0);
     std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
-                      [this](Tetra::Tet &my_elem) { my_elem.assemblage_vect(NOD,L_rhs); } );
+                      [this](Tetra::Tet &my_elem) { my_elem.assemble_vect(NOD,L_rhs); } );
     std::for_each(refMsh->fac.begin(), refMsh->fac.end(),
-                      [this](Facette::Fac &my_elem) { my_elem.assemblage_vect(NOD,L_rhs); } );
+                      [this](Facette::Fac &my_elem) { my_elem.assemble_vect(NOD,L_rhs); } );
 
     if (verbose)
         {
