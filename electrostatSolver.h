@@ -137,12 +137,10 @@ private:
     /** number of Nodes (needed for templates) */
     const int NOD;
 
-/** assemble the matrix K from Ke inputs, assemble the vector L from Le inputs */
+/** assemble the matrix K from Ke input */
 template <int N>
-    void assembling(std::vector<int> &ind,
-                    Eigen::Matrix<double,DIM_PROBLEM*N,DIM_PROBLEM*N> &Ke,
-                    Eigen::Matrix<double,DIM_PROBLEM*N,1> &Le,
-                    algebra::w_sparseMat &K, std::vector <double> &L)
+    void assemble_mat(std::vector<int> &ind,
+                      Eigen::Matrix<double,DIM_PROBLEM*N,DIM_PROBLEM*N> &Ke, algebra::w_sparseMat &K)
         {
         for (int ie=0; ie<N; ie++)
             {
@@ -154,6 +152,17 @@ template <int N>
                     for (int dj=0; dj<DIM_PROBLEM; dj++)
                         K.insert(di*NOD+i, dj*NOD+j, Ke(di*N+ie,dj*N+je));
 	            }
+            }
+        }
+
+/** assemble the vector L from Le input */
+template <int N>
+    void assemble_vect(std::vector<int> &ind,
+                       Eigen::Matrix<double,DIM_PROBLEM*N,1> &Le, std::vector <double> &L)
+        {
+        for (int ie=0; ie<N; ie++)
+            {
+            int i= ind[ie];
             for (int di=0; di<DIM_PROBLEM; di++) { L[di*NOD+i] += Le[di*N+ie]; }
             }
         }
