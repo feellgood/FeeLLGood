@@ -126,10 +126,10 @@ int electrostatSolver::solve(const double _tol)
 
 bool electrostatSolver::save(std::string const &metadata) const
     {
-    std::ofstream fout(fileName, std::ios::out);
+    std::ofstream fout(V_fileName, std::ios::out);
     if (fout.fail())
         {
-        std::cout << "cannot open file " << fileName << std::endl;
+        std::cout << "cannot open file " << V_fileName << std::endl;
         SYSTEM_ERROR;
         }
 

@@ -32,9 +32,8 @@ public:
             const double _tol /**< [in] tolerance for solvers */,
             const bool v /**< [in] verbose bool */,
             const int max_iter /**< [in] maximum number of iteration */,
-            const bool _V_file /**< [in] if true an output tsv file containing potential V is written */,
-            const std::string _fileName /**< [in] output .sol file name for electrostatic potential */)
-        : msh(_msh), paramTetra(_pTetra), paramFacette(_pFac), verbose(v), MAXITER(max_iter), V_file(_V_file), fileName(_fileName), NOD(_msh.getNbNodes())
+            const std::string _V_fileName /**< [in] output file name for electrostatic potential */)
+        : msh(_msh), paramTetra(_pTetra), paramFacette(_pFac), verbose(v), MAXITER(max_iter), V_fileName(_V_fileName), NOD(_msh.getNbNodes())
         {
         if (verbose)
             { infos(); }
@@ -43,13 +42,13 @@ public:
         if (has_converged)
             {
             std::cout << "Solver (ElectroStatic) has converged.\n";
-            if (V_file)
+            if (!V_fileName.empty())
                 {
                 if (verbose)
-                    { std::cout << "writing electrostatic potential to file " << fileName << std::endl; }
+                    { std::cout << "writing electrostatic potential to file " << V_fileName << std::endl; }
                 bool iznogood = save("## columns: index\tV\n");
                 if (verbose && iznogood)
-                    { std::cout << "file " << fileName << " written.\n"; }
+                    { std::cout << "file " << V_fileName << " written.\n"; }
                 }
             std::for_each(msh.tet.begin(), msh.tet.end(), [this](Tetra::Tet const &tet)
                           {
@@ -127,12 +126,8 @@ private:
     /** number of digits in the optional output file */
     const int precision = 8;
 
-    /** if true a text file V.sol is generated. It contains the solution of the
-                     electrostatic problem on the nodes of the mesh */
-    const bool V_file;
-
-    /** output .sol file name for electrostatic problem */
-    const std::string fileName;
+    /** output file name for electrostatic problem */
+    const std::string V_fileName;
 
     /** number of Nodes (needed for templates) */
     const int NOD;

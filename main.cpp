@@ -241,11 +241,15 @@ int main(int argc, char *argv[])
 
     if (mySettings.spin_acc_flag)
         {
-        std::string fileName(mySettings.getSimName());
-        fileName += "_V.sol";
+        std::string fileName;
+        if(mySettings.V_file)
+            fileName = mySettings.getSimName() + "_V.sol";
+        else
+            fileName = "";
+
         electrostatSolver pot_solver = electrostatSolver(fem.msh, mySettings.paramTetra,
                                                          mySettings.paramFacette, 1e-8,
-                                                         mySettings.verbose, 5000, false, fileName);
+                                                         mySettings.verbose, 5000, fileName);
         }
 
     chronometer fmm_counter(2);
