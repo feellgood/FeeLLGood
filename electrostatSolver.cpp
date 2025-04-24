@@ -78,10 +78,9 @@ int electrostatSolver::solve(const double _tol)
     const int DIM_1D = 1;
     algebra::w_sparseMat Kw(NOD);
     std::vector<double> Lw(NOD, 0.0);
-    std::vector<double> Xw(NOD, 0.0);//Eigen::VectorXd Xw(NOD);
-    
+
     if (verbose)
-        { std::cout << "line weighting..." << std::endl; }
+        { std::cout << "assembling and solving ..." << std::endl; }
 
     std::for_each( msh.tet.begin(),msh.tet.end(),[this,&Kw,&Lw](Tetra::Tet &elem)
         {
@@ -102,9 +101,6 @@ int electrostatSolver::solve(const double _tol)
         integrales(elem,L);
         assembling<Facette::N>(elem.ind,K,L,Kw,Lw);
         } );
-
-    if (verbose)
-        { std::cout << "solving ..." << std::endl; }
 
     algebra::r_sparseMat Kr(Kw);
     algebra::iteration iter(_tol);
@@ -127,12 +123,10 @@ int electrostatSolver::solve(const double _tol)
             }
         });
     suppress_copies<int>(ld);
-    double residu =algebra::cg_dir<double>(iter, Kr, Xw, Lw, Vd, ld);
+    double residu =algebra::cg_dir<double>(iter, Kr, V, Lw, Vd, ld);
 
     if (verbose)
         std::cout << "solved in " << iter.get_iteration() <<" ; residu= " << residu << "; " << iter.get_res();
-    for (int i=0;i<NOD;i++)
-        { V[i]= Xw[i]; }
     return ( iter.get_iteration() < MAXITER);
     }
 
