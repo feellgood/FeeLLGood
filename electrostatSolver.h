@@ -161,7 +161,6 @@ template <int N>
             }
         }
 
-
 /**
  suppress twins in the indices Dirichlet list v_idx
 */

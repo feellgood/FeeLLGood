@@ -8,7 +8,7 @@ import gmsh
 verboseGmsh = False
 
 #all dimensions are in nm
-mesh_size = 4
+mesh_size = 5
 
 class cylinder:
     def __init__(self,h,r):
@@ -22,14 +22,14 @@ e = cylinder(40,20)
 
 # cross section of the mesh (xOz) plane:
 #
-#      ---  z= nw.height
+#      ---  z= nw.height (#202) boundary condition V = 3.0
 #     |   |
 #     |   |
 #     |   |    magnet (z>0)
 #     |   |
 #     |---|  z=0
 #     |   |    electrode (z<0)
-#      ---   z= -e.height
+#      ---   z= -e.height (#212)  boundary condition J = 0.1
 
 meshFileName = "nanowire.msh"
 vol_regName = "magnet"
@@ -118,13 +118,13 @@ settings = {
         "filename": meshFileName,
         "length_unit": 1e-9,
         "volume_regions": {
-            vol_regName: { "Ae": 1e-11, "Js": 1, "alpha_LLG": 0.05, "beta": 0.7, "sigma": 9.87654 },
-            vol_regName2: { "Ae": 0, "Js": 0, "beta": 0.7, "sigma": 1.234 }
+            vol_regName: { "Ae": 1e-11, "Js": 1, "alpha_LLG": 0.05, "beta": 0.7, "sigma": 2.0 },
+            vol_regName2: { "Ae": 0, "Js": 0, "beta": 0.7, "sigma": 1.0 }
             },
         "surface_regions": {
             surf_regName: {},
-            surface_top_name2:{"J":1.258},
-            surface_top_name:{"V":0.456}
+            surface_top_name2:{ "J": 0.1 },
+            surface_top_name:{ "V": 3.0 }
             }
     },
     "initial_magnetization": [1, 0, 1],
@@ -135,7 +135,7 @@ settings = {
         "min(dt)": 0.5e-16,
         "max(dt)": 1e-11
     },
-    "spin_transfer_torque": { "enable": True, "V_file": False }
+    "spin_transfer_torque": { "enable": True, "V_file": True }
 }
 
 jsonFileName = "nanowire_stt.json"
