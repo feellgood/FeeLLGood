@@ -10,7 +10,7 @@ int LinAlgebra::solver(timing const &t_prm)
     std::vector<Eigen::Triplet<double>> w_K_TH;
 
     std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
-                      [this,&w_K_TH](Tetra::Tet &my_elem) { my_elem.assemblage_mat(NOD,w_K_TH); } );
+                      [this,&w_K_TH](Tetra::Tet &my_elem) { my_elem.assemble_mat(NOD,w_K_TH); } );
     
     Eigen::BiCGSTAB<Eigen::SparseMatrix<double,Eigen::RowMajor>,Eigen::IncompleteLUT<double>> _solver;
     _solver.setTolerance(TOL);
@@ -44,9 +44,9 @@ int LinAlgebra::solver(timing const &t_prm)
     Eigen::VectorXd L_TH(2*NOD);// RHS vector of the system to solve
     L_TH.setZero(2*NOD);
     std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
-                      [this,&L_TH](Tetra::Tet &my_elem) { my_elem.assemblage_vect(NOD,L_TH); } );
+                      [this,&L_TH](Tetra::Tet &my_elem) { my_elem.assemble_vect(NOD,L_TH); } );
     std::for_each(refMsh->fac.begin(), refMsh->fac.end(),
-                      [this,&L_TH](Facette::Fac &my_elem) { my_elem.assemblage_vect(NOD,L_TH); } );
+                      [this,&L_TH](Facette::Fac &my_elem) { my_elem.assemble_vect(NOD,L_TH); } );
 
     Eigen::VectorXd X_guess(2*NOD);
     buildInitGuess(X_guess);// gamma0 division handled by function buildInitGuess
