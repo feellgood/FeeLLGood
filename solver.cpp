@@ -10,7 +10,7 @@ int LinAlgebra::solver(timing const &t_prm)
 
     K.clear();
     std::for_each(EXEC_POL, refMsh->tet.begin(), refMsh->tet.end(),
-                      [this](Tetra::Tet &my_elem) { my_elem.assemblage_mat(K); } );
+                      [this](Tetra::Tet &my_elem) { my_elem.assemble_mat(K); } );
 
     if (verbose)
         {
@@ -20,9 +20,9 @@ int LinAlgebra::solver(timing const &t_prm)
 
     std::fill(L_rhs.begin(),L_rhs.end(),0);
     std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
-                      [this](Tetra::Tet &my_elem) { my_elem.assemblage_vect(L_rhs); } );
+                      [this](Tetra::Tet &my_elem) { my_elem.assemble_vect(L_rhs); } );
     std::for_each(refMsh->fac.begin(), refMsh->fac.end(),
-                      [this](Facette::Fac &my_elem) { my_elem.assemblage_vect(L_rhs); } );
+                      [this](Facette::Fac &my_elem) { my_elem.assemble_vect(L_rhs); } );
 
     if (verbose)
         {
