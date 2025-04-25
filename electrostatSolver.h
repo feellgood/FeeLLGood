@@ -96,7 +96,8 @@ public:
     /** compute integrales for vector coefficients, input from facette */
     void integrales(Facette::Fac const &fac, Eigen::Ref<Eigen::Matrix<double,Facette::N,1> > BE);
 
-    /** text file (tsv) writing function for the solution V */
+    /** text file (tsv) writing function for the solution V over all volume regions of the mesh,
+     * node indices are zero based */
     bool save(std::string const &metadata /**< [in] */) const;
 
     /** returns sigma of the tetraedron, (conductivity in (Ohm.m)^-1 */
