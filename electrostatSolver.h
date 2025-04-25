@@ -120,7 +120,7 @@ private:
     /** if verbose set to true, some printing are sent to terminal */
     const bool verbose;
 
-    /** maximum number of iteration for biconjugate stabilized gradient */
+    /** maximum number of iteration for conjugate gradient */
     const unsigned int MAXITER;  // fixed to 5000 in ref code
 
     /** number of digits in the optional output file */
@@ -174,7 +174,7 @@ void suppress_copies(std::vector<T> &v_idx)
     v_idx.shrink_to_fit();
     }
 
-    /** solver, using biconjugate stabilized gradient, with diagonal preconditionner and Dirichlet
+    /** solver, using conjugate gradient with masking, with diagonal preconditionner and Dirichlet
      * boundary conditions */
     int solve(const double _tol);
     };  // end class electrostatSolver
