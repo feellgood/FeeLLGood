@@ -8,7 +8,7 @@
 
 #include <set>
 
-#include "spinTransferTorque.h"
+#include "spinAccumulationSolver.h"
 #include "facette.h"
 #include "node.h"
 #include "time_integration.h"
