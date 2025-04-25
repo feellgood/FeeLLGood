@@ -29,7 +29,7 @@ class mesh
 public:
     /** constructor : read mesh file, reorder indices and computes some values related to the mesh :
      center and length along coordinates,full volume */
-    inline mesh(Settings &mySets /**< [in] */)
+    mesh(Settings &mySets /**< [in] */)
         : paramTetra(mySets.paramTetra), volumeRegions(mySets.paramTetra.size())
         {
         readMesh(mySets);
@@ -254,19 +254,15 @@ public:
                  const std::string fileName /**< [in] */,
                  std::string const &metadata /**< [in] */) const;
 
-    /** text file (tsv) writing function for a solution of a side problem, used by electrostatSolver
-     */
-    bool savesol(const int precision /**< [in] */,
-                 const std::string fileName /**< [in] */,
-                 std::string const &metadata /**< [in] */,
-                 std::vector<double> const &val /**< [in] */) const;
-
     /** setter for node[i]; what_to_set will fix what is the part of the node struct to set (usefull
      * for fmm_demag.h) */
     inline void set(const int i /**< [in] */,
                     std::function<void(Nodes::Node &, const double)> what_to_set /**< [in] */,
                     const double val /**< [in] */)
         { what_to_set(node[i], val); }
+
+    /** getter for the node_index value at position i */
+    inline int getNodeIndex(const int i) const { return node_index[i]; }
 
     /** Edges of all the tetrahedrons, i.e. all the unique pairs of adjacent node indices.
      * Each pair is sorted: first < second.

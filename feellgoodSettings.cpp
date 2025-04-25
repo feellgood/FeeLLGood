@@ -175,6 +175,11 @@ void Settings::toYaml()
             std::cout << "      ez: " << str(it->ez) << "\n";
             }
         std::cout << "      alpha_LLG: " << it->alpha_LLG << "\n";
+        std::cout << "      sigma: " << it->sigma << "\n";
+        std::cout << "      dens_state: " << it->N0 << "\n";
+        std::cout << "      beta: " << it->beta << "\n";
+        std::cout << "      l_sd: " << it->lsd << "\n";
+        std::cout << "      l_sf: " << it->lsf << "\n";
         }
     std::cout << "  surface_regions:\n";
     for (auto it = paramFacette.begin(); it != paramFacette.end(); ++it)
@@ -219,28 +224,23 @@ void Settings::toYaml()
         std::cout << str(sB) << "\n";
     else
         std::cout << "[\"" << sBx << "\", \"" << sBy << "\", \"" << sBz << "\"]\n";
-    std::cout << "spin_transfer_torque:\n";
-    std::cout << "  enable: " << str(stt_flag) << "\n";
-    if (stt_flag)
+    std::cout << "spin_accumulation:\n";
+    std::cout << "  enable: " << str(spin_acc_flag) << "\n";
+    if (spin_acc_flag)
         {
-        std::cout << "  sigma: " << p_stt.sigma << "\n";
-        std::cout << "  dens_state: " << p_stt.N0 << "\n";
-        std::cout << "  beta: " << p_stt.beta << "\n";
-        std::cout << "  l_J: " << p_stt.lJ << "\n";
-        std::cout << "  l_sf: " << p_stt.lsf << "\n";
-        std::cout << "  V_file: " << str(p_stt.V_file) << "\n";
+        std::cout << "  V_file: " << str(V_file) << "\n";
         std::cout << "  boundary_conditions:";
-        if (p_stt.boundaryCond.size() == 0)
+        if (sttBoundaryCond.size() == 0)
             {
             std::cout << " {}\n"; /* empty map*/
             }
         else
             {
             std::cout << "\n";
-            for (unsigned int i = 0; i < p_stt.boundaryCond.size(); i++)
+            for (unsigned int i = 0; i < sttBoundaryCond.size(); i++)
                 {
-                std::cout << "    \"" << p_stt.boundaryCond[i].first
-                          << "\": " << p_stt.boundaryCond[i].second << "\n";
+                std::cout << "    \"" << sttBoundaryCond[i].first
+                          << "\": " << sttBoundaryCond[i].second << "\n";
                 }
             }
         }
@@ -392,13 +392,11 @@ void Settings::read(YAML::Node yaml)
                     std::cout << "Warning: (ex, ey, ez) is not orthogonal.\n";
                 assign(p.alpha_LLG, volume["alpha_LLG"]);
 
-                // XXX: These should come from the configuration file.
-                p.p_STT.beta = 0.0;
-                p.p_STT.N0 = 1.0;
-                p.p_STT.sigma = 1.0;
-                p.p_STT.lJ = 1.0;
-                p.p_STT.lsf = 1.0;
-                p.p_STT.V_file = false;
+                assign(p.sigma, volume["sigma"]);
+                assign(p.N0, volume["dens_state"]);
+                assign(p.beta, volume["beta"]);
+                assign(p.lsd, volume["l_sd"]); // usefull for spin accumulation computations, exists only for magnetic material, as Js
+                assign(p.lsf, volume["l_sf"]);
 
                 paramTetra.push_back(p);
                 }
@@ -513,33 +511,27 @@ void Settings::read(YAML::Node yaml)
             }
         }  // Bext
 
-    YAML::Node stt = yaml["spin_transfer_torque"];
-    if (stt && !stt.IsNull())
+    YAML::Node spAcc = yaml["spin_accumulation"];
+    if (spAcc && !spAcc.IsNull())
         {
-        assign(stt_flag, stt["enable"]);
-        assign(p_stt.sigma, stt["sigma"]);
-        assign(p_stt.N0, stt["dens_state"]);
-        assign(p_stt.beta, stt["beta"]);
-        assign(p_stt.lJ, stt["l_J"]);
-        assign(p_stt.lsf, stt["l_sf"]);
-        assign(p_stt.V_file, stt["V_file"]);
-
-        YAML::Node bound_cond = stt["boundary_conditions"];
+        assign(spin_acc_flag, spAcc["enable"]);
+        assign(V_file, spAcc["V_file"]);
+        YAML::Node bound_cond = spAcc["boundary_conditions"];
         if (bound_cond && !bound_cond.IsNull())
             {
             if (!bound_cond.IsMap())
-                error("stt.boundary_conditions should be a map.");
+                error("spAcc.boundary_conditions should be a map.");
             else
                 {
                 for (auto it = bound_cond.begin(); it != bound_cond.end(); ++it)
                     {
                     std::string name = it->first.as<std::string>();
                     double V = it->second.as<double>();
-                    p_stt.boundaryCond.push_back(std::make_pair(name, V));
+                    sttBoundaryCond.push_back(std::make_pair(name, V));
                     }
                 }
             }
-        }  // spin_transfer_torque
+        }  // spin_accumulation
 
     // The number of available processors (actually, hardware threads) is the default for the number
     // of threads to spin.

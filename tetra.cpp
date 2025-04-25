@@ -164,7 +164,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
 
     Eigen::Matrix<double,DIM,NPI> Heff = Hd + calc_Hext();
     Eigen::Matrix<double,DIM,NPI> H = Heff; // we need Hd+Hext for future computations
-    extraField(Heff);// extraField do a +=like for STT contrib on Heff
+    extraField(Heff);// extraField do a +=like for spinAcc contrib on Heff
     uHeff += (U.cwiseProduct(Heff)).colwise().sum();//dot product on each col of U and Heff
 
     Eigen::Matrix<double,NPI,1> a_eff = calc_alpha_eff(dt, alpha, uHeff);
@@ -203,7 +203,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
             BE.col(i) += w*a[i][npi]*H.col(npi);
             }
         }
-    extraCoeffs_BE(Js, U, dUdx, dUdy, dUdz, BE);  // STT
+    extraCoeffs_BE(Js, U, dUdx, dUdy, dUdz, BE);  // spinAcc
 
     /*--------------------   PROJECTION: BE->Lp   --------------------*/
     Lp = P * BE.reshaped<Eigen::RowMajor>();
