@@ -61,8 +61,4 @@ const double BOHRS_MUB = CHARGE_ELECTRON * PLANCKS_HBAR / (2. * MASS_ELECTRON); 
  * unit vector */
 #define USER_TOL 1e-4
 
-/** PRECISION_STT is the number of digits in the output text file for electrostatic potential V.sol
- */
-#define PRECISION_STT 7
-
 #endif  // CONFIG_H

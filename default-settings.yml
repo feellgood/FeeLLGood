@@ -123,6 +123,21 @@ mesh:
       # Dimensionless damping parameter.
       alpha_LLG: 0.5
 
+      # Conductivity.
+      sigma: 1.0
+
+      # Density of states.
+      dens_state: 1.0
+
+      # STT beta parameter: polarization rate.
+      beta: 0
+
+      # Diffusion length related to s-d coupling in a magnetic material.
+      l_sd: 1.0
+
+      # Spin diffusion length in a metal, magnetic or not.
+      l_sf: 1.0
+
   # Material parameters of the surface regions defined by the mesh.
   surface_regions:
 
@@ -139,6 +154,14 @@ mesh:
 
       # Unit vector along the surface anisotropy axis.
       uk: [0, 0, 1]
+
+      # Fixed current density value (J.n) for the boundary conditions of
+      # the electrostatic problem.
+      J:
+
+      # Fixed potential value for the boundary conditions of the
+      # electrostatic problem.
+      V:
 
 # The initial magnetization can be provided as either:
 # - the name of a file in feeLLGood’s format (‘.sol’ file)
@@ -172,15 +195,16 @@ recentering:
 # seconds. May be constants.
 Bext: [0, 0, 0]
 
-# Parameters for simulating a spin transfer torque. This is a work in
-# progress, not ready for general use.
-spin_transfer_torque:
+# Parameters for simulating a coupling to spin accumulation. The
+# boundary conditions of the electrostatic problem are a constant
+# potential on one surface, and a normal current density on another
+# surface. The material parameters are defined in mesh.volume_regions.
+spin_accumulation:
+
+  # Whether to enable computation of spin accumulation contribution.
   enable: false
-  sigma: 1.0
-  dens_state: 1.0
-  beta: 0
-  l_J: 1.0
-  l_sf: 1.0
+
+  # Output a .tsv file of the electric potentials.
   V_file: false
 
 # Parameters for the computation of the demagnetizing field.

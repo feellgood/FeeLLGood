@@ -172,30 +172,3 @@ void Mesh::mesh::savesol(const int precision, const std::string fileName,
     fout.close();
     }
 
-bool Mesh::mesh::savesol(const int precision, const std::string fileName,
-                         std::string const &metadata, std::vector<double> const &val) const
-    {
-    ofstream fout(fileName, ios::out);
-    if (fout.fail())
-        {
-        std::cout << "cannot open file " << fileName << std::endl;
-        SYSTEM_ERROR;
-        }
-
-    fout << metadata << std::scientific << std::setprecision(precision);
-
-    if (node.size() == val.size())
-        {
-        for (unsigned int i = 0; i < node.size(); i++)
-            {
-            fout << i << '\t' << val[node_index[i]] << endl;
-            }
-        }
-    else
-        {
-        std::cout << "error: size mismatch while saving " << fileName << std::endl;
-        exit(1);
-        }
-    fout.close();
-    return !(fout.good());
-    }
