@@ -194,13 +194,12 @@ recentering:
 # seconds. May be constants.
 Bext: [0, 0, 0]
 
-# Parameters for simulating a spin transfer torque. This is a work in
-# progress.
+# Parameters for simulating a coupling to spin accumulation.
 # boundary conditions are defining the electrostatic problem through:
 # a constant potential value on a surface, and a normal current density on another one
 # material parameters are defined in mesh/volume_regions
-spin_transfer_torque:
-  # Whether to enable computation of spin transfer torque contribution.
+spin_accumulation:
+  # Whether to enable computation of spin accumulation contribution.
   enable: false
 
   # output .tsv file of the electric potentials

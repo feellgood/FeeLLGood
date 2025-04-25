@@ -202,7 +202,7 @@ void Settings::toYaml()
             std::cout << "\n";
         else
             std::cout << ' ' << it->V << '\n';
-        if (stt_flag) std::cout << "      Qs: " << str(it->Qs) << "\n";
+        if (spin_acc_flag) std::cout << "      Qs: " << str(it->Qs) << "\n";
         }
     std::cout << "initial_magnetization: ";
     if (!sM.empty())
@@ -237,9 +237,9 @@ void Settings::toYaml()
         std::cout << str(sB) << "\n";
     else
         std::cout << "[\"" << sBx << "\", \"" << sBy << "\", \"" << sBz << "\"]\n";
-    std::cout << "spin_transfer_torque:\n";
-    std::cout << "  enable: " << str(stt_flag) << "\n";
-    if (stt_flag)
+    std::cout << "spin_accumulation:\n";
+    std::cout << "  enable: " << str(spin_acc_flag) << "\n";
+    if (spin_acc_flag)
         { std::cout << "  V_file: " << str(V_file) << "\n"; }
 
     std::cout << "demagnetizing_field_solver:\n";
@@ -520,13 +520,13 @@ void Settings::read(YAML::Node yaml)
             }
         }  // Bext
 
-    YAML::Node stt = yaml["spin_transfer_torque"];
-    if (stt && !stt.IsNull())
+    YAML::Node spAcc = yaml["spin_accumulation"];
+    if (spAcc && !spAcc.IsNull())
         {
-        assign(stt_flag, stt["enable"]);
+        assign(spin_acc_flag, spAcc["enable"]);
         
-        assign(V_file, stt["V_file"]);
-        }  // spin_transfer_torque
+        assign(V_file, spAcc["V_file"]);
+        }  // spin_accumulation
 
     // The number of available processors (actually, hardware threads) is the default for the number
     // of threads to spin.
