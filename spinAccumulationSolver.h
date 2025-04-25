@@ -1,5 +1,5 @@
-#ifndef spinTransferTorque_h
-#define spinTransferTorque_h
+#ifndef spinAccumulationSolver_h
+#define spinAccumulationSolver_h
 
 #include <vector>
 #include "config.h"

@@ -16,7 +16,7 @@ output file format wanted by the user. This is done mainly with the class Settin
 
 #include "expression_parser.h"
 #include "facette.h"
-#include "spinTransferTorque.h"
+#include "spinAccumulationSolver.h"
 #include "tetra.h"
 #include "time_integration.h"
 
