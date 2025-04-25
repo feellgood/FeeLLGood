@@ -141,17 +141,17 @@ public:
     /** nb of threads for the computation of the demag field with scalfmm */
     int scalfmmNbTh;
 
-    /** spin transfer torque boundary conditions: constant potential on surface */
-    std::vector<std::pair<std::string, double>> sttBoundaryCond_V;
+    /** spin accumulation sub-problem electrostatic boundary conditions: constant potential on surface */
+    std::vector<std::pair<std::string, double>> spAccBoundaryCond_V;
 
-    /** spin transfer torque boundary conditions: constant normal current density on surface */
-    std::vector<std::pair<std::string, double>> sttBoundaryCond_J;
+    /** spin accumulation sub-problem electrostatic boundary conditions: constant normal current density on surface */
+    std::vector<std::pair<std::string, double>> spAccBoundaryCond_J;
 
     /** if true creates an output file of the solution of the electrostatic problem  */
     bool V_file;
 
-    /** if spin transfer torque p_stt is fully initialized and boundary conditions ok, stt_flag is set to true */
-    bool stt_flag;
+    /** if spin_acc_flag is true then spin accumulation contributions are computed */
+    bool spin_acc_flag;
 
     /** string for analytical definition of Mx */
     std::string sMx;
