@@ -172,7 +172,7 @@ public:
                Nodes::index d /**< [in] */,
                int region = -1 /**< region index, or -1 for all regions */) const;
 
-    /** text file (tsv) writing function for a solution */
+    /** text file (tsv) writing function for a solution, node indices are zero based */
     void savesol(const int precision /**< [in] numeric precision in .sol output text file */,
                  const std::string fileName /**< [in] */,
                  std::string const &metadata /**< [in] */) const;
