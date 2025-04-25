@@ -12,8 +12,7 @@
 #include "linear_algebra.h"
 #include "mesh.h"
 #include "time_integration.h"
-#include "spinTransferTorque.h"
-//#include "electrostatSolver.h"
+#include "spinAccumulationSolver.h"
 
 // Catch some deadly signals in order to save the state before quitting.
 volatile sig_atomic_t received_signal = 0;
