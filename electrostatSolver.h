@@ -15,7 +15,7 @@
 #include "facette.h"
 #include "tetra.h"
 
-#include "spinTransferTorque.h"
+#include "spinAccumulationSolver.h"
 
 /** assemble the matrix K from tet and Ke inputs */
 inline void assembling_mat(Tetra::Tet const &tet, double Ke[Tetra::N][Tetra::N], std::vector<Eigen::Triplet<double>> &K)
