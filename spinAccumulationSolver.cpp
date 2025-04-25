@@ -1,3 +1,4 @@
+#include "algebra/bicg.h"
 #include "spinAccumulationSolver.h"
 
 double spinAcc::getN0(Tetra::Tet &tet) const
@@ -57,4 +58,51 @@ void spinAcc::prepareExtras(std::vector<Tetra::Tet> &v_tet, electrostatSolver &e
                     } // end loop on npi
                 }; //end lambda
         });//end for_each
+    }
+
+int spinAcc::solve(const double _tol /**< [in] tolerance */ )
+    {
+    const int DIM_3D = 3;
+    algebra::w_sparseMat Kw(DIM_3D*NOD);
+    std::vector<double> Lw(DIM_3D*NOD);
+
+    std::for_each( msh.tet.begin(), msh.tet.end(),[this,&Kw,&Lw](Tetra::Tet &elem)
+        {
+        Eigen::Matrix<double,DIM_3D*Tetra::N,DIM_3D*Tetra::N> K;
+        K.setZero();
+        Eigen::Matrix<double,DIM_3D*Tetra::N,1> L;
+        L.setZero();
+        //integrales(msh,elem,K,L);
+        assembling<Tetra::N>(elem.ind,K,L,Kw,Lw);
+        } );
+
+    std::for_each( msh.fac.begin(), msh.fac.end(),[this,&Kw,&Lw](Facette::Fac &elem)
+        {
+        Eigen::Matrix<double,DIM_3D*Facette::N,DIM_3D*Facette::N> K;
+        K.setZero();
+        Eigen::Matrix<double,DIM_3D*Facette::N,1> L;
+        L.setZero();
+        //integrales(msh,elem,K,L);
+        assembling<Facette::N>(elem.ind,K,L,Kw,Lw);
+        } );
+
+    algebra::iteration iter("bicg",_tol,verbose,MAXITER);
+
+    std::cout << "bicg...\n";
+    algebra::r_sparseMat Kr(Kw);
+    std::vector<double> Xw(DIM_3D*NOD);
+    algebra::bicg(iter, Kr, Xw, Lw);
+
+    if (!(iter.converged()))
+        {
+        std::cout << "\t bicg FAILED in " << iter.get_iteration() << "; residu= " << iter.get_res() << '\t';
+        }
+
+    for (int i=0; i<NOD; i++)
+        {
+        for (int d=0; d<DIM_3D; d++)
+            { Qs[i][d] = Xw[d*NOD+i]; }
+        }
+
+    return iter.converged();
     }
