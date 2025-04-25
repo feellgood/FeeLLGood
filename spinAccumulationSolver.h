@@ -7,15 +7,15 @@
 #include "tetra.h"
 #include "electrostatSolver.h"
 
-/** \struct STT
- container for Spin Transfert Torque constants, Thiaville model, Boundary conditions
+/** \class spinAcc
+ container for Spin Accumulation constants, diffusive accumulation spin model, Boundary conditions
  (potential fixed value on one surface, current density on another surface)
  */
 
-class STT
+class spinAcc
     {
     /** constructor */
-    STT(Mesh::mesh &_msh /**< [in] ref to the mesh */,
+    spinAcc(Mesh::mesh &_msh /**< [in] ref to the mesh */,
     std::vector<Tetra::prm> _pTetra /**< [in] ref to vector of param tetra (volume region parameters) */):
         msh(_msh), paramTetra(_pTetra)
         {

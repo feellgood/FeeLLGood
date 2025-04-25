@@ -134,10 +134,10 @@ settings = {
         "min(dt)": 0.5e-16,
         "max(dt)": 1e-11
     },
-    "spin_transfer_torque": { "enable": True, "V_file": True }
+    "spin_accumulation": { "enable": True, "V_file": True }
 }
 
-jsonFileName = "nanowire_stt.json"
+jsonFileName = "nanowire_spinAcc.json"
 with open(jsonFileName,'w') as outfile:
     json.dump(settings,outfile,indent = 4)
 

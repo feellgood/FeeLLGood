@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
     std::cout << "starting on:       " << date() << std::endl;
     LinAlgebra linAlg(mySettings, fem.msh);
 
-    if (mySettings.stt_flag)
+    if (mySettings.spin_acc_flag)
         {
         std::string fileName;
         if(mySettings.V_file)
