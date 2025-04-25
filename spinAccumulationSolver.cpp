@@ -1,18 +1,18 @@
 #include "spinAccumulationSolver.h"
 
-double STT::getN0(Tetra::Tet &tet) const
+double spinAcc::getN0(Tetra::Tet &tet) const
     { return paramTetra[tet.idxPrm].N0; }
 
-double STT::getBeta(Tetra::Tet &tet) const
+double spinAcc::getBeta(Tetra::Tet &tet) const
     { return paramTetra[tet.idxPrm].beta; }
 
-double STT::getLsd(Tetra::Tet &tet) const
+double spinAcc::getLsd(Tetra::Tet &tet) const
     { return paramTetra[tet.idxPrm].lsd; }
 
-double STT::getLsf(Tetra::Tet &tet) const
+double spinAcc::getLsf(Tetra::Tet &tet) const
     { return paramTetra[tet.idxPrm].lsf; }
 
-void STT::prepareExtras(std::vector<Tetra::Tet> &v_tet, electrostatSolver &elec)
+void spinAcc::prepareExtras(std::vector<Tetra::Tet> &v_tet, electrostatSolver &elec)
     {
     using namespace Nodes;
     using namespace Tetra;
