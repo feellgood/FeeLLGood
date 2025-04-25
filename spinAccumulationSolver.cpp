@@ -1,4 +1,4 @@
-#include "spinTransferTorque.h"
+#include "spinAccumulationSolver.h"
 
 double STT::getN0(Tetra::Tet &tet) const
     { return paramTetra[tet.idxPrm].N0; }
