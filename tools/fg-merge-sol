@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 description = '''
-Combine a mesh file (which has the node coordinates) with a
-magnetization configuration in feeLLGood’s ‘.sol’ format (which has the
-node reduced magnetizations). Output the reduced magnetization as a
-function of position, in a tab-separated-values file with six columns:
-(x, y, z, m_x, m_y, m_z).
+Combine a mesh file (which has the node coordinates) with a feeLLGood’s
+‘.sol’ file (which has the node's reduced magnetizations or electric
+potentials). Output the .sol physical quantities (magnetization or
+potential) as a function of position, in a tab-separated-values file:
+(x, y, z, physical_quantity...).
 '''
 
 import sys
@@ -28,14 +28,17 @@ nodes = mesh(args.mesh_file).Nodes
 # Get the magnetizations from the sol file.
 sol = open(args.sol_file, 'r')
 comments = []  # comments and metadata
-mags = []  # magnetizations on the nodes
+phys = []  # physical quantities associated to the nodes
 for line in sol:
     if line.startswith("## columns:"):  # column labels
-        comments.append("## columns: x\ty\tz\tmx\tmy\tmz\n")
+        line = line.partition('\t')[2]  # remove "## columns: index\t"
+        comments.append("## columns: x\ty\tz\t" + line)
     elif line.startswith('#'):  # other comments and metadata
             comments.append(line)
     else:  # magnetization data
-        mags.append(list(map(float, line.split())))
+        fields = line.split()
+        fields.pop(0)  # remove `index' field
+        phys.append(list(map(float, fields)))
 
 # Open the output file.
 if args.output:
@@ -47,9 +50,7 @@ else:
 for line in comments:
     output.write(line)
 for i in range(0, len(nodes)):
-    node = nodes[i]
-    mag = mags[i]
-    fields = [node[0], node[1], node[2], mag[1], mag[2], mag[3]]
+    fields = list(nodes[i]) + phys[i]
     print('\t'.join(map(str, fields)), file=output)
 
 # Make sure the output file is flushed to disk.
