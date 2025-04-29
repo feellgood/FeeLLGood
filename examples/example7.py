@@ -30,13 +30,13 @@ ico_faces = np.array([
 particles = [
     {
         "center": [0, 0, 0],
-        "volume": { "name": "bulk", "tag": 300 },
-        "surface":{ "name": "frontier(bulk)", "tag": 200 }
+        "volume": { "name": "particle1", "tag": 300 },
+        "surface":{ "name": "surface(particle1)", "tag": 200 }
     },
     {
         "center": [4, 0, 0],
-        "volume": { "name": "bulk2", "tag": 301 },
-        "surface":{ "name": "frontier(bulk2)", "tag": 201 }
+        "volume": { "name": "particle2", "tag": 301 },
+        "surface":{ "name": "surface(particle2)", "tag": 201 }
     }
 ]
 
@@ -98,7 +98,12 @@ settings = {
     "outputs": {
         "evol_time_step": 1e-11,
         "final_time": 5e-09,
-        "evol_columns": ["t", "<Mx>", "<My>", "<Mz>", "E_tot"],
+        "evol_columns": [
+            "t",
+            "particle1:<Mx>", "particle1:<My>", "particle1:<Mz>",
+            "particle2:<Mx>", "particle2:<My>", "particle2:<Mz>",
+            "E_tot"
+        ],
         "mag_config_every": False
     },
     "mesh": {
