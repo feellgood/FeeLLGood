@@ -17,11 +17,13 @@ class spinAcc
     {
     /** constructor */
     spinAcc(Mesh::mesh &_msh /**< [in] ref to the mesh */,
+    electrostatSolver &_elec /**< [in] ref to the the electrostatic sub_problem */,
     std::vector<Tetra::prm> _pTetra /**< [in] ref to vector of param tetra (volume region parameters) */,
+    std::vector<Facette::prm> _pFac /**< [in] ref to vector of param facette (surface region parameters) */,
     const double _tol /**< [in] tolerance for solvers */,
     const bool v /**< [in] verbose bool */,
     const int max_iter /**< [in] maximum number of iteration */):
-        msh(_msh), paramTetra(_pTetra), verbose(v), MAXITER(max_iter), NOD(_msh.getNbNodes())
+        msh(_msh), elec(_elec), paramTetra(_pTetra),  paramFacette(_pFac), verbose(v), MAXITER(max_iter), NOD(_msh.getNbNodes())
         {
         Qs.resize(NOD);
         bool has_converged = solve(_tol);
@@ -33,8 +35,14 @@ class spinAcc
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh */
     Mesh::mesh msh;
 
+    /** electrostatic sub-problem */
+    electrostatSolver elec;
+
     /** this vector contains the material parameters for all regions for all the tetrahedrons */
     std::vector<Tetra::prm> paramTetra;
+
+    /** this vector contains the material parameters for all surface regions for all the triangular facettes */
+    std::vector<Facette::prm> paramFacette;
 
     /** if verbose set to true, some printing are sent to terminal */
     const bool verbose;
@@ -45,18 +53,27 @@ class spinAcc
     /** number of Nodes (needed for templates) */
     const int NOD;
 
+    /** returns Js = Ms/nu_0 */
+    double getJs(Tetra::Tet const &tet) const;
+
+    /** returns sigma of the tetraedron, (conductivity in (Ohm.m)^-1 */
+    double getSigma(Tetra::Tet const &tet) const;
+    
     /** \f$ \beta \f$ is polarization rate of the current */
     double getBeta(Tetra::Tet &tet) const;
 
     /** density of states at Fermi level, units : J^-1 nm^-3  */
     double getN0(Tetra::Tet &tet) const;
 
-    /** length */
+    /** length s-d */
     double getLsd(Tetra::Tet &tet) const;
 
     /** spin flip length */
     double getLsf(Tetra::Tet &tet) const;
 
+    /** getter */
+    Eigen::Vector3d get_Qn(Facette::Fac const &fac) const;
+    
     /** affect extraField function and extraCoeffs_BE function for all the tetrahedrons */
     void prepareExtras(std::vector<Tetra::Tet> &v_tet, electrostatSolver &elec);
 
@@ -87,6 +104,13 @@ class spinAcc
             for (int di=0; di<DIM_PROBLEM; di++) { L[di*NOD+i] += Le[di*N+ie]; }
             }
         }
+    
+    void integrales(Tetra::Tet &tet,
+                    Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,DIM_PROBLEM*Tetra::N> &AE,
+                    Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,1> &BE);
+    
+    void integrales(Facette::Fac &fac,
+                    Eigen::Matrix<double,DIM_PROBLEM*Facette::N,1> &BE);
     };
 
 #endif

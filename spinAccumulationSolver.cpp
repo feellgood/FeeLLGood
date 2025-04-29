@@ -1,6 +1,12 @@
 #include "algebra/bicg.h"
 #include "spinAccumulationSolver.h"
 
+double spinAcc::getJs(Tetra::Tet const &tet) const
+    { return paramTetra[tet.idxPrm].J; }
+
+double spinAcc::getSigma(Tetra::Tet const &tet) const
+    { return paramTetra[tet.idxPrm].sigma; }
+
 double spinAcc::getN0(Tetra::Tet &tet) const
     { return paramTetra[tet.idxPrm].N0; }
 
@@ -12,6 +18,13 @@ double spinAcc::getLsd(Tetra::Tet &tet) const
 
 double spinAcc::getLsf(Tetra::Tet &tet) const
     { return paramTetra[tet.idxPrm].lsf; }
+
+Eigen::Vector3d spinAcc::get_Qn(Facette::Fac const &fac) const
+    {
+    Eigen::Vector3d Pu = paramFacette[fac.idxPrm].Pu;
+    double J  = paramFacette[fac.idxPrm].J;
+    return J*(BOHRS_MUB/CHARGE_ELECTRON)*Pu;
+    }
 
 void spinAcc::prepareExtras(std::vector<Tetra::Tet> &v_tet, electrostatSolver &elec)
     {
@@ -28,7 +41,7 @@ void spinAcc::prepareExtras(std::vector<Tetra::Tet> &v_tet, electrostatSolver &e
         const double lsd = getLsd(tet);
         const double lsf = getLsf(tet);
         const double ksi = sq(lsd/lsf); /**< ksi is in Thiaville notations beta_DW */
-        const double Js = 42;// for calc_prefactor(Js); what is that Js ?
+        const double Js = getJs(tet);// Js = Ms/nu_0
         double prefactor = D0 / sq(lsd) / (gamma0*Js/mu0);
         prefactor *= sq(lsd) / (D0 * (1. + sq(ksi))) * BOHRS_MUB * beta / CHARGE_ELECTRON; // the composition of the two formulas simplifies, and is independant from D0, is this correct ?? to check
 
@@ -72,7 +85,7 @@ int spinAcc::solve(const double _tol /**< [in] tolerance */ )
         K.setZero();
         Eigen::Matrix<double,DIM_3D*Tetra::N,1> L;
         L.setZero();
-        //integrales(msh,elem,K,L);
+        integrales(elem,K,L);
         assembling<Tetra::N>(elem.ind,K,L,Kw,Lw);
         } );
 
@@ -82,7 +95,7 @@ int spinAcc::solve(const double _tol /**< [in] tolerance */ )
         K.setZero();
         Eigen::Matrix<double,DIM_3D*Facette::N,1> L;
         L.setZero();
-        //integrales(msh,elem,K,L);
+        integrales(elem,L);
         assembling<Facette::N>(elem.ind,K,L,Kw,Lw);
         } );
 
@@ -105,4 +118,116 @@ int spinAcc::solve(const double _tol /**< [in] tolerance */ )
         }
 
     return iter.converged();
+    }
+
+void spinAcc::integrales(Tetra::Tet &tet,
+                         Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,DIM_PROBLEM*Tetra::N> &AE,
+                         Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,1> &BE)
+    {
+    using algebra::sq;
+    using namespace Nodes;
+    using namespace Tetra;
+    double Js = getJs(tet);//find_param("Js",reg);
+    double sigma = getSigma(tet);//double C0 = msh.find_param("C0",reg);
+    //double CSH = msh.find_param("CSH",reg);
+    double N0 = getN0(tet);//find_param("N0",reg);
+    double beta = getBeta(tet);//find_param("beta",reg);
+    double lsd = getLsd(tet);//lJ = find_param("lJ",reg);
+    double lsf = getLsf(tet);//find_param("lsf",reg);
+    // enlevé l'ajout de EPSILON à lJ et ls, EPSILON est rajouté directement dans les formules qui utilisent lJ ou ls
+
+/*-------------------- INTERPOLATION --------------------*/
+    double u_nod[3][N] {{0}};
+    Eigen::Matrix<double,N,1> V_nod;//double V_nod[N];
+    Eigen::Matrix<double,Nodes::DIM,NPI> gradV;//double dVdx[NPI],  dVdy[NPI],  dVdz[NPI];
+
+    for (size_t ie=0; ie<N; ie++)
+        {
+        size_t i= tet.ind[ie];
+        if (Js>0.0) // interpoler u seulement dans le FM
+            for (size_t d=0; d<3; d++)
+                {
+                u_nod[d][ie] = msh.getNode_u(i)(d);//msh.node[i].u[d]; // carefull here do we need u comp of Node(NEXT) or Node(CURRENT) ?
+                }
+        //else  for (size_t d=0; d<3; d++){ u_nod[d][ie] = 0.0; } // dans le HM u est strictement nul car pas d'aimantation
+        V_nod[ie] = elec.V[i];
+        }
+
+    //tiny::mult<double, 3, N, NPI> (u_nod, Tetra::a, u);
+    //tiny::transposed_mult<double, N, NPI> (V_nod, tet.dadx, dVdx);
+    //tiny::transposed_mult<double, N, NPI> (V_nod, tet.dady, dVdy);
+    //tiny::transposed_mult<double, N, NPI> (V_nod, tet.dadz, dVdz);
+    
+    //gradV = V_nod * tet.da;// this is wrong correct this formula (should be some sort of tensor product)
+
+    double D0=2.0*sigma/(sq(CHARGE_ELECTRON)*N0);
+    for (size_t npi=0; npi<NPI; npi++)
+        {
+        double dai_dx, dai_dy, dai_dz, daj_dx, daj_dy, daj_dz, Dai_DV;
+        double w = tet.weight[npi];
+
+        for (size_t ie=0; ie<N; ie++)
+            {
+            dai_dx= tet.da(ie,IDX_X);//tet.dadx[ie][npi];
+            dai_dy= tet.da(ie,IDX_Y);//tet.dady[ie][npi];
+            dai_dz= tet.da(ie,IDX_Z);//tet.dadz[ie][npi];
+            Dai_DV = dai_dx*gradV(IDX_X,npi) + dai_dy*gradV(IDX_Y,npi) + dai_dz*gradV(IDX_Z,npi);//dai_dx * dVdx[npi] + dai_dy * dVdy[npi] + dai_dz * dVdz[npi];
+
+/* Changement de convention de signe pour le courant dans l'expression du ST tel que j = -C0 grad V :: de quelle convention on parle là ???   */
+            double tmp = BOHRS_MUB*beta*sigma/CHARGE_ELECTRON* Dai_DV *w;
+            BE[    ie] += tmp*u_nod[0][ie]; // A. de Riz 2019 moins -> plus  :: to check : c'est quoi ce bazar de signes qui changent ???
+            BE[  N+ie] += tmp*u_nod[1][ie];
+            BE[2*N+ie] += tmp*u_nod[2][ie];
+/*          if (CSH != 0)  // SOT : spin orbit torque CSH is constant Spin Hall
+                {
+                tmp = CSH*CHARGE_ELECTRON/MASS_ELECTRON *w;
+                BE[    ie] -= tmp*(dai_dz*dVdy[npi]-dai_dy*dVdz[npi]);
+                BE[  N+ie] -= tmp*(dai_dx*dVdz[npi]-dai_dz*dVdx[npi]);
+                BE[2*N+ie] -= tmp*(dai_dy*dVdx[npi]-dai_dx*dVdy[npi]);
+                } */
+            tmp = Tetra::a[ie][npi]*D0*w/sq(lsf + EPSILON);
+            AE(    ie,     ie) +=  tmp;  // lumping
+            AE(  N+ie,   N+ie) +=  tmp;
+            AE(2*N+ie, 2*N+ie) +=  tmp;
+
+            tmp = Tetra::a[ie][npi]*D0*w/sq(EPSILON + lsd); // lsd is lJ  //D0*pow(ilJ, 2.)*ai*w; with ilJ = 1/lJ;
+            AE(    ie,   N+ie) +=  tmp*u_nod[2][ie]; // lumping
+            AE(    ie, 2*N+ie) += -tmp*u_nod[1][ie];
+
+            AE(  N+ie,     ie) += -tmp*u_nod[2][ie];
+            AE(  N+ie, 2*N+ie) +=  tmp*u_nod[0][ie];
+
+            AE(2*N+ie,     ie) +=  tmp*u_nod[1][ie];
+            AE(2*N+ie,   N+ie) += -tmp*u_nod[0][ie];
+
+            for (size_t je=0; je<N; je++)
+                {
+                daj_dx= tet.da(je,IDX_X);//tet.dadx[je][npi];
+                daj_dy= tet.da(je,IDX_Y);//tet.dady[je][npi];
+                daj_dz= tet.da(je,IDX_Z);//tet.dadz[je][npi];
+                tmp = D0*(dai_dx*daj_dx + dai_dy*daj_dy + dai_dz*daj_dz)*w;
+
+                AE(    ie,     je) += tmp;
+                AE(  N+ie,   N+je) += tmp;
+                AE(2*N+ie, 2*N+je) += tmp;
+                }
+	        }
+        }
+    }
+
+void spinAcc::integrales(Facette::Fac &fac, Eigen::Matrix<double,DIM_PROBLEM*Facette::N,1> &BE)
+    {
+    using namespace Nodes;
+    Eigen::Vector3d Qn = get_Qn(fac);
+    for (int npi=0; npi<Facette::NPI; npi++)
+        {
+        double w = fac.weight[npi];
+        for (int ie=0; ie<Facette::N; ie++)
+            {
+            double ai_w = w*Facette::a[ie][npi];
+            BE[      ie]        -= Qn[IDX_X]* ai_w;
+            BE[  Facette::N+ie] -= Qn[IDX_Y]* ai_w;
+            BE[2*Facette::N+ie] -= Qn[IDX_Z]* ai_w;
+            }
+        }
     }
