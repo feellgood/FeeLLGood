@@ -150,12 +150,16 @@ void spinAcc::integrales(Tetra::Tet &tet,
         V_nod[ie] = elec.V[i];
         }
 
-    //tiny::mult<double, 3, N, NPI> (u_nod, Tetra::a, u);
-    //tiny::transposed_mult<double, N, NPI> (V_nod, tet.dadx, dVdx);
-    //tiny::transposed_mult<double, N, NPI> (V_nod, tet.dady, dVdy);
-    //tiny::transposed_mult<double, N, NPI> (V_nod, tet.dadz, dVdz);
-    
-    //gradV = V_nod * tet.da;// this is wrong correct this formula (should be some sort of tensor product)
+    Eigen::Matrix<double,N,NPI> dadx;
+    dadx.colwise() = tet.da.col(IDX_X); // colwise() means da.col(IDX_X) is repeated to build dadx 
+    Eigen::Matrix<double,N,NPI> dady;
+    dady.colwise() = tet.da.col(IDX_Y);
+    Eigen::Matrix<double,N,NPI> dadz;
+    dadz.colwise() = tet.da.col(IDX_Z);
+    // building explicitely dad(x|y|z) migth be avoided rewritting the following multiplications
+    gradV.row(IDX_X) = V_nod.transpose() * dadx;// V_nod^T * dadx
+    gradV.row(IDX_Y) = V_nod.transpose() * dady;// V_nod^T * dady
+    gradV.row(IDX_Z) = V_nod.transpose() * dadz;// V_nod^T * dadz
 
     double D0=2.0*sigma/(sq(CHARGE_ELECTRON)*N0);
     for (size_t npi=0; npi<NPI; npi++)
@@ -166,14 +170,13 @@ void spinAcc::integrales(Tetra::Tet &tet,
             {
             Eigen::Vector3d grad_ai = tet.da.row(ie);
             double Dai_DV = grad_ai.dot( gradV.col(npi) );
-/* Changement de convention de signe pour le courant dans l'expression du ST tel que j = -C0 grad V : de quelle convention on parle là ???   */
             double tmp = BOHRS_MUB*beta*sigma/CHARGE_ELECTRON* Dai_DV *w;
             BE[    ie] += tmp*u_nod[0][ie]; // A. de Riz 2019 moins -> plus : to check : c'est quoi ce bazar de signes qui changent ???
             BE[  N+ie] += tmp*u_nod[1][ie];
             BE[2*N+ie] += tmp*u_nod[2][ie];
 /*          if (CSH != 0)  // SOT : spin orbit torque CSH is constant Spin Hall
                 {
-                tmp = CSH*CHARGE_ELECTRON/MASS_ELECTRON *w;
+                tmp = CSH*CHARGE_ELECTRON/MASS_ELECTRON *w; // obviously SOT contribution to BE is a cross product, should be rewritten
                 BE[    ie] -= tmp*(dai_dz*dVdy[npi]-dai_dy*dVdz[npi]);
                 BE[  N+ie] -= tmp*(dai_dx*dVdz[npi]-dai_dz*dVdx[npi]);
                 BE[2*N+ie] -= tmp*(dai_dy*dVdx[npi]-dai_dx*dVdy[npi]);
