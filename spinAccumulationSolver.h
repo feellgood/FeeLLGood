@@ -29,6 +29,7 @@ class spinAcc
         bool has_converged = solve(_tol);
         if (!has_converged)
             { std::cout << "spin accumulation solver has not converged." << std::endl; exit(1); }
+        prepareExtras();
         }
 
     private:
@@ -74,8 +75,8 @@ class spinAcc
     /** getter */
     Eigen::Vector3d get_Qn(Facette::Fac const &fac) const;
     
-    /** affect extraField function and extraCoeffs_BE function for all the tetrahedrons */
-    void prepareExtras(std::vector<Tetra::Tet> &v_tet, electrostatSolver &elec);
+    /** affect extraField function and extraCoeffs_BE function using lambdas for all the tetrahedrons (functor) */
+    void prepareExtras(void);
 
     /** solver, using biconjugate stabilized gradient, with diagonal preconditionner and Dirichlet
      * boundary conditions */
