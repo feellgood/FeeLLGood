@@ -35,17 +35,14 @@ void spinAcc::prepareExtras(void)
         {
         const int _idx = t.idx;
         const double sigma = elec.getSigma(t);
-        const double N0 = getN0(t);
-        const double D0 = 2.0*sigma / (sq(CHARGE_ELECTRON) * N0);
         const double beta = getBeta(t);
         const double lsd = getLsd(t);
         const double lsf = getLsf(t);
-        const double ksi = sq(lsd/lsf); /**< ksi is in Thiaville notations beta_DW */
+        const double ksi = sq(lsd/lsf);
         const double Js = getJs(t);// Js = Ms/nu_0
-        double prefactor = D0 / sq(lsd) / (gamma0*Js/mu0);
-        prefactor *= sq(lsd) / (D0 * (1. + sq(ksi))) * BOHRS_MUB * beta / CHARGE_ELECTRON; // the composition of the two formulas simplifies, and is independant from D0, is this correct ?? to check
+        double prefactor = mu0*BOHRS_MUB*beta/(gamma0*Js*CHARGE_ELECTRON*(1.0 + sq(ksi)));
 
-        t.extraField = [this, sigma, _idx](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)
+        t.extraField = [this, _idx](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)
                          { for(int npi = 0; npi<Tetra::NPI; npi++) { H.col(npi) += elec.Hm[_idx].col(npi); } };
 
         t.extraCoeffs_BE = [this, sigma, ksi, prefactor, &t](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
@@ -169,8 +166,7 @@ void spinAcc::integrales(Tetra::Tet &tet,
         for (size_t ie=0; ie<N; ie++)
             {
             Eigen::Vector3d grad_ai = tet.da.row(ie);
-            double Dai_DV = grad_ai.dot( gradV.col(npi) );
-            double tmp = BOHRS_MUB*beta*sigma/CHARGE_ELECTRON* Dai_DV *w;
+            double tmp = BOHRS_MUB*beta*sigma/CHARGE_ELECTRON*w*grad_ai.dot( gradV.col(npi) );
             BE[    ie] += tmp*u_nod[0][ie]; // A. de Riz 2019 moins -> plus : to check : c'est quoi ce bazar de signes qui changent ???
             BE[  N+ie] += tmp*u_nod[1][ie];
             BE[2*N+ie] += tmp*u_nod[2][ie];
@@ -208,16 +204,17 @@ void spinAcc::integrales(Tetra::Tet &tet,
 void spinAcc::integrales(Facette::Fac &fac, Eigen::Matrix<double,DIM_PROBLEM*Facette::N,1> &BE)
     {
     using namespace Nodes;
+    using namespace Facette;
     Eigen::Vector3d Qn = get_Qn(fac);
-    for (int npi=0; npi<Facette::NPI; npi++)
+    for (int npi=0; npi<NPI; npi++)
         {
         double w = fac.weight[npi];
-        for (int ie=0; ie<Facette::N; ie++)
+        for (int ie=0; ie<N; ie++)
             {
-            double ai_w = w*Facette::a[ie][npi];
-            BE[      ie]        -= Qn[IDX_X]* ai_w;
-            BE[  Facette::N+ie] -= Qn[IDX_Y]* ai_w;
-            BE[2*Facette::N+ie] -= Qn[IDX_Z]* ai_w;
+            double ai_w = w*a[ie][npi];
+            BE[    ie] -= Qn[IDX_X]* ai_w;
+            BE[  N+ie] -= Qn[IDX_Y]* ai_w;
+            BE[2*N+ie] -= Qn[IDX_Z]* ai_w;
             }
         }
     }
