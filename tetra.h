@@ -66,38 +66,20 @@ struct prm
     double K;            /**< uniaxial anisotropy constant */
     Eigen::Vector3d uk;  /**< uniaxial anisotropy axis */
 
-    double K3;          /**< cubic anisotropy constant */
-    Eigen::Vector3d ex; /**< unit vector1 (for cubic anisotropy) */
-    Eigen::Vector3d ey; /**< unit vector2 (for cubic anisotropy) */
-    Eigen::Vector3d ez; /**< unit vector3 (for cubic anisotropy) */
+    double K3;           /**< cubic anisotropy constant */
+    Eigen::Vector3d ex;  /**< unit vector1 (for cubic anisotropy) */
+    Eigen::Vector3d ey;  /**< unit vector2 (for cubic anisotropy) */
+    Eigen::Vector3d ez;  /**< unit vector3 (for cubic anisotropy) */
 
-    double beta;  /**< spin transfert torque parameters : beta Thiaville */
-    double N0;    /**< density of states */
-    double sigma; /**< conductivity */
-    double lsd;   /**< diffusion length related to s-d coupling in a magnetic material */
-    double lsf;   /**< spin diffusion length in a metal (magnetic or not) */
+    double beta;         /**< spin accumulation polarization rate */
+    double N0;           /**< density of states */
+    double sigma;        /**< conductivity */
+    double lsd;          /**< diffusion length related to s-d coupling in a magnetic material */
+    double lsf;          /**< spin diffusion length in a metal (magnetic or not) */
 
-    double volume = 0;  /**< total volume of the region */
+    double volume = 0; /**< total volume of the region */
 
-    /** print the struct parameters */
-    inline void infos()
-        {
-        std::cout << "volume region name = " << regName << std::endl;
-        std::cout << "alpha_LLG = " << alpha_LLG << std::endl;
-        std::cout << "A = " << A << std::endl;
-        std::cout << "J = " << J << std::endl;
-
-        if (K != 0)
-            {
-            std::cout << "K*uk =" << K << "*[ " << uk << "]" << std::endl;
-            }
-
-        if (K3 != 0)
-            {
-            std::cout << "K3 = " << K3 << "; ex=[ " << ex << "], ey=[" << ey << "], ez=[" << ez
-                      << "]\n";
-            }
-        };
+    void infos(void);  /**< print the struct parameters */
     };
 
 /** \class Tet
