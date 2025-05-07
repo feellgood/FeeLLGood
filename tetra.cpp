@@ -12,6 +12,39 @@
 using namespace Tetra;
 using namespace Nodes;
 
+void prm::infos(void)
+    {
+    using std::cout;
+    cout << "volume region name = " << regName;
+    if(J > 0)
+        {
+        cout << ", magnetic.\n";
+        cout << "alpha_LLG = " << alpha_LLG << std::endl;
+        cout << "A = " << A << std::endl;
+        cout << "J = " << J << std::endl;
+
+        if (K != 0)
+            {
+            cout << "K*uk =" << K << "*[ " << uk << "]\n";
+            }
+
+        if (K3 != 0)
+            {
+            cout << "K3 = " << K3 << "; ex=[ " << ex << "], ey=[" << ey << "], ez=[" << ez << "]\n";
+            }
+        cout << "l_sd = " << lsd << std::endl;
+        }
+    else
+        {
+        cout << ", non magnetic metal.\n";
+        cout << "l_sd = " << lsd << std::endl;
+        cout << "l_sf = " << lsf << std::endl;
+        cout << "beta = " << beta << std::endl;
+        cout << "density of states N0 = " << N0 << std::endl;
+        cout << "sigma = " << sigma << std::endl;
+        }
+    }
+
 Eigen::Matrix<double,NPI,1> Tetra::calc_alpha_eff(const double dt, const double alpha,
                                                       Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff)
     {
