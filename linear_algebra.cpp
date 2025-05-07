@@ -83,3 +83,20 @@ void LinAlgebra::setExtSpaceField(Settings &s /**< [in] */)
         k++;
         });
     }
+
+void LinAlgebra::updateVmax(Eigen::VectorXd &sol)
+    {
+    #if EIGEN_VERSION_AT_LEAST(3,4,0)
+        v_max = (sol.reshaped<Eigen::RowMajor>(2,NOD).colwise().norm()).maxCoeff();
+    #else
+        double v2max(0.0);
+        for (int i = 0; i < NOD; i++)
+            {
+            double v2 = Nodes::sq(sol(i)) + Nodes::sq(sol(NOD + i));
+            if (v2 > v2max)
+                { v2max = v2; }
+            }
+        v_max = sqrt(v2max);
+    #endif
+    v_max *= gamma0;
+    }
