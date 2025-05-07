@@ -75,6 +75,22 @@ public:
                     });
         vol = std::transform_reduce(paramTetra.begin(), paramTetra.end(), 0.0,
                 std::plus<>(), [](const Tetra::prm &region){ return region.volume; });
+
+        // Build the list of all the mesh edges.
+        edges.reserve(tet.size() * 6);  // 6 (non unique) edges per tetrahedron
+        std::for_each(tet.begin(), tet.end(),
+                [this](Tetra::Tet const &te)
+                    {
+                    for (int i = 0; i < 3; ++i)
+                        {
+                        for (int j = i + 1; j < 4; ++j)
+                            { edges.push_back(std::minmax(te.ind[i], te.ind[j])); }
+                        }
+                    });
+        std::sort(EXEC_POL, edges.begin(), edges.end());
+        auto last = std::unique(EXEC_POL, edges.begin(), edges.end());
+        edges.erase(last, edges.end());
+        edges.shrink_to_fit();  // save memory, as this could be quite big
         }
 
     /** return number of nodes  */
@@ -195,6 +211,11 @@ private:
     /** node container: not initialized by constructor, but later while reading the mesh by member
      * function init_node */
     std::vector<Nodes::Node> node;
+
+    /** Edges of all the tetrahedrons, i.e. all the unique pairs of adjacent node indices.
+     * Each pair is sorted: first < second.
+     * The list is sorted lexicographically, as per std::pair::operator<(). */
+    std::vector<std::pair<int, int>> edges;
 
     /** Index of a node in the `node` vector. This vector is itself indexed by the node position in
      * the *.msh and *.sol files. In other words, the node found at `file_idx` in a file is stored
