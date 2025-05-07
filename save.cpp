@@ -62,6 +62,10 @@ void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const i
             {
             fout << vmax * t_prm.get_dt() << sep;
             }
+        else if (keyVal == "max_angle")
+            {
+            fout << msh.max_angle() << sep;
+            }
         else if (keyVal == "<Mx>")
             {
             fout << msh.avg(Nodes::get_u_comp, IDX_X, region) << sep;

@@ -51,6 +51,7 @@ outputs:
   # - iter: iteration number
   # - dt: time step
   # - max_dm: maximum variation of the magnetization
+  # - max_angle: maximum magnetization angle between adjacent nodes
   # - <dMx/dt>: average change rate of Mx
   # - <dMy/dt>: average change rate of My
   # - <dMz/dt>: average change rate of Mz

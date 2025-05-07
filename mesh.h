@@ -5,6 +5,7 @@
 \brief class mesh, readMesh is expecting a mesh file in gmsh format either text or binary, from version 2.2 to the latest 4.1. The mesh has to use only first order tetraedrons and triangular facettes, mixed meshes are not allowed.
 */
 
+#include <cmath>
 #include <algorithm>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
@@ -187,6 +188,20 @@ public:
     double avg(std::function<double(Nodes::Node, Nodes::index)> getter /**< [in] */,
                Nodes::index d /**< [in] */,
                int region = -1 /**< region index, or -1 for all regions */) const;
+
+    /** Compute the maximum angle of the magnetization between two adjacent nodes. */
+    double max_angle() const
+        {
+        double min_dot_product = std::transform_reduce(EXEC_POL, edges.begin(), edges.end(), 1.0,
+                [](double a, double b){ return std::min(a, b); },
+                [this](const std::pair<int, int> edge)
+                    {
+                    Eigen::Vector3d m1 = getNode_u(edge.first);
+                    Eigen::Vector3d m2 = getNode_u(edge.second);
+                    return m1.dot(m2);
+                    });
+        return std::acos(min_dot_product);
+        }
 
     /** text file (tsv) writing function for a solution */
     void savesol(const int precision /**< [in] numeric precision in .sol output text file */,
