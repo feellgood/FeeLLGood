@@ -29,7 +29,7 @@ class LinAlgebra
     {
 public:
     /** constructor */
-    inline LinAlgebra(Settings &s /**< [in] */, Mesh::mesh &my_msh /**< [in] */)
+    LinAlgebra(Settings &s /**< [in] */, Mesh::mesh &my_msh /**< [in] */)
         : NOD(my_msh.getNbNodes()), MAXITER(s.MAXITER), TOL(s.TOL), ILU_tol(s.ILU_tol),
           ILU_fill_factor(s.ILU_fill_factor), verbose(s.verbose),
           prmTetra(s.paramTetra), prmFacette(s.paramFacette), refMsh(&my_msh)
@@ -43,6 +43,7 @@ public:
 
         if(s.getFieldType() == R4toR3)
             { setExtSpaceField(s); }
+        v_max = 0;
         }
 
     /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors) */
@@ -108,5 +109,8 @@ private:
 
     /** external applied space field, values on gauss points, size is number of tetraedrons */
     std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > extSpaceField;
+
+    /** compute v_max, the maximum of the magnetization velocity of all the magnetic regions */
+    void updateVmax(Eigen::VectorXd &sol);
     };// end class linAlgebra
 #endif
