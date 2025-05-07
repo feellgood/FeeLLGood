@@ -44,6 +44,7 @@ public:
 
         if(s.getFieldType() == R4toR3)
             { setExtSpaceField(s); }
+        v_max = 0;
         }
 
     /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors) */
@@ -109,5 +110,8 @@ private:
 
     /** external applied space field, values on gauss points, size is number of tetraedrons */
     std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > extSpaceField;
+
+    /** compute v_max, the maximum of the magnetization velocity of all the magnetic regions */
+    void updateVmax(Eigen::VectorXd &sol);
     };// end class linAlgebra
 #endif
