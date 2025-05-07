@@ -62,11 +62,11 @@ struct prm
     std::string regName; /**< region name */
     double alpha_LLG;    /**< \f$ \alpha \f$ damping parameter */
     double A;            /**< exchange constant stiffness */
-    double J;            /**< \f$ M_s = \nu_0 J \f$ */
+    double J = 0;        /**< \f$ M_s = \nu_0 J \f$ if J<=0 then the region is non magnetic */
     double K;            /**< uniaxial anisotropy constant */
-    Eigen::Vector3d uk;         /**< uniaxial anisotropy axis */
+    Eigen::Vector3d uk;  /**< uniaxial anisotropy axis */
 
-    double K3;   /**< cubic anisotropy constant */
+    double K3;          /**< cubic anisotropy constant */
     Eigen::Vector3d ex; /**< unit vector1 (for cubic anisotropy) */
     Eigen::Vector3d ey; /**< unit vector2 (for cubic anisotropy) */
     Eigen::Vector3d ez; /**< unit vector3 (for cubic anisotropy) */
