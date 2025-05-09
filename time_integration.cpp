@@ -40,12 +40,13 @@ public:
         }
     };
 
-/** Summary statistics on the time steps. */
+/** Summary statistics on the time steps and magnetization angles. */
 struct Stats
     {
     LogStats good_dt;    /**< dt of successful steps */
     LogStats good_dumax; /**< dumax of successful steps */
     LogStats bad_dt;     /**< dt of failed steps */
+    double max_angle;    /**< max magnetization angle between adjacent nodes */
     };
 
 static void print_stats(const Stats &s)
@@ -65,6 +66,8 @@ static void print_stats(const Stats &s)
     else
         puts("\n");
     puts("    [*] ranges given as (geometric mean) ± (relative stddev)");
+    putchar('\n');
+    printf("Maximum magnetization angle: %.3g°\n", s.max_angle * 180 / M_PI);
     }
 
 /** Periodically show the percentage of work done, together with an
@@ -165,6 +168,7 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
     int step_count = std::round((t_prm.tf - t_initial) / t_step);
     TimeStepper stepper(t_prm.get_dt(), t_prm.DTMIN, t_prm.DTMAX);
     Stats stats;
+    stats.max_angle = fem.msh.max_angle();
 
     // Loop over the visible time steps, i.e. those that will appear on the output file.
     nt = 0;
@@ -246,6 +250,8 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
 
             if (settings.recenter) fem.recenter(settings.threshold, settings.recentering_direction);
             if (!settings.verbose) show_progress(t_prm.get_t() / t_prm.tf);
+
+            stats.max_angle = std::max(stats.max_angle, fem.msh.max_angle());
             }  // endwhile
         fem.saver(settings, t_prm, fout, nt_output++);
         }                                       // end for
