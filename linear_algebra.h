@@ -53,8 +53,6 @@ public:
     /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors) */
     void prepareElements(double const A_Hext /**< [in] amplitude applied field */, timing const &t_prm /**< [in] */);
 
-    void buildInitGuess(Eigen::Ref<Eigen::VectorXd> G) const;
-
     /** build init guess for bicg solver */
     void buildInitGuess(algebra::Vector<double> &G/**< [out] */) const;
 

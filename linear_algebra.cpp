@@ -10,15 +10,6 @@ void LinAlgebra::base_projection()
     refMsh->setBasis(M_2_PI * r);
     }
 
-void LinAlgebra::buildInitGuess(Eigen::Ref<Eigen::VectorXd> G) const
-    {
-    for (int i = 0; i < NOD; i++)
-        {
-        G(i) = refMsh->getProj_ep(i)/gamma0;
-        G(NOD + i) = refMsh->getProj_eq(i)/gamma0;
-        }
-    }
-
 void LinAlgebra::buildInitGuess(algebra::Vector<double> &G) const
     {
     for (int i = 0; i < NOD; i++)

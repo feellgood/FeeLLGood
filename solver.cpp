@@ -23,11 +23,11 @@ int LinAlgebra::solver(timing const &t_prm)
         std::cout << "matrix assembly done in " << counter.millis() << std::endl;
         counter.reset();
         }
-    
+*/    
     algebra::iteration iter(TOL);
     iter.set_maxiter(MAXITER);
     iter.set_noisy(verbose);
-*/    
+    
     std::fill(L_rhs.begin(),L_rhs.end(),0);
     
     std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
@@ -68,22 +68,21 @@ int LinAlgebra::solver(timing const &t_prm)
     else if (verbose)
         { std::cout << "sparse matrix factorization done in " << counter.millis() << std::endl; }
 
+    buildInitGuess(Xw);// gamma0 division handled by function buildInitGuess    
+
     Eigen::VectorXd L_TH(2*NOD);// RHS vector of the system to solve
-    L_TH.setZero(2*NOD);
-    std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
-                      [this,&L_TH](Tetra::Tet &my_elem) { my_elem.assemblage_vect(NOD,L_TH); } );
-    std::for_each(refMsh->fac.begin(), refMsh->fac.end(),
-                      [this,&L_TH](Facette::Fac &my_elem) { my_elem.assemblage_vect(NOD,L_TH); } );
-
     Eigen::VectorXd X_guess(2*NOD);
-    buildInitGuess(X_guess);// gamma0 division handled by function buildInitGuess
-
+    for(int i=0;i<(2*NOD);i++)
+        {
+        L_TH(i) = L_rhs[i];
+        X_guess(i) = Xw[i];
+        }
     counter.reset();
 
     Eigen::VectorXd sol = _solver.solveWithGuess(L_TH,X_guess);
 // end ref code
     
-//    buildInitGuess(Xw);// gamma0 division handled by function buildInitGuess    
+
 //    double residu = algebra::bicg<double>(iter, Kr, Xw, L_rhs);
 //    if(verbose) {std::cout << "residu= " << residu << std::endl;}
 

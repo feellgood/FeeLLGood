@@ -104,21 +104,6 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
             }
         }
 
-    /** assemble the big vector L from tetra or facette inner vector Lp */
-    void assemblage_vect(const int NOD /**< [in] nb nodes */,
-                        Eigen::Ref<Eigen::VectorXd> L /**< [out] vector */) const
-        {
-        for (int i = 0; i < N; i++)
-            {
-            const int i_ = ind[i];
-            if(Lp[i] != 0)
-                { L(NOD + i_) += Lp[i]; }
-            if(Lp[N+i] != 0)
-                { L(i_) += Lp[N + i]; }
-            }
-        }
-
-
     /** assemble the big sparse matrix K from tetra or facette inner matrix Kp */
     void assemblage_mat(const int NOD /**< [in] nb nodes */,
                         algebra::w_sparseMat &K /**< [out] COO matrix */ ) const
