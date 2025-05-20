@@ -81,7 +81,7 @@ int LinAlgebra::solver(timing const &t_prm)
 
     Eigen::VectorXd sol = _solver.solveWithGuess(L_TH,X_guess);
 // end ref code
-    
+    for(int i=0;i<(2*NOD);i++) { Xw[i] = sol(i); }
 
 //    double residu = algebra::bicg<double>(iter, Kr, Xw, L_rhs);
 //    if(verbose) {std::cout << "residu= " << residu << std::endl;}
@@ -109,8 +109,8 @@ int LinAlgebra::solver(timing const &t_prm)
     const double dt = t_prm.get_dt();
     for (int i = 0; i < NOD; i++)
         {
-        double vp = sol[i];//Xw[i];
-        double vq = sol[NOD + i];//Xw[NOD + i];
+        double vp = Xw[i];
+        double vq = Xw[NOD + i];
         double v2 = Nodes::sq(vp) + Nodes::sq(vq);
         if (v2 > v2max)
             { v2max = v2; }

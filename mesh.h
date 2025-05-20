@@ -135,9 +135,7 @@ public:
                       [&r](Nodes::Node &nod) { nod.setBasis(r); });
         }
 
-    /** make_evol on all nodes */
-    void updateNodes(algebra::Vector<double> &X, const double dt);
-    
+    /** make_evol on i^th node */
     inline void updateNode(int i, double vp, double vq, const double dt)
         { node[i].make_evol(vp*gamma0, vq*gamma0, dt); }
 
