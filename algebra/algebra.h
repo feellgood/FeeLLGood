@@ -39,8 +39,7 @@ void scaled( const T alpha, Vector<T> & Y)
 /** direct product : Z = X⊗Y */
 template <typename T>
 void p_direct(const Vector<T> & X,const Vector<T> & Y, Vector<T> & Z)
-    { for(unsigned int i=0;i<Z.size();i++) Z[i]=X[i]*Y[i]; } // should be replaced by transform
-//    { std::transform(X.begin(),X.end(),Y.begin(),Z.begin(), std::multiplies<T>() ); }
+    { std::transform(X.begin(),X.end(),Y.begin(),Z.begin(), std::multiplies<T>() ); }
 
 /** Y += X */
 template <typename T>
