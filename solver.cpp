@@ -1,24 +1,53 @@
 #include "chronometer.h"
 #include "linear_algebra.h"
 
+#include "algebra/algebra.h"
+#include "algebra/bicg.h"
+
 #include <eigen3/Eigen/Sparse>
 #include <eigen3/Eigen/Dense>
 
 int LinAlgebra::solver(timing const &t_prm)
     {
     chronometer counter(2);
+    /*
+    algebra::w_sparseMat Kw(2*NOD);
+    
+    std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
+                      [this,&Kw](Tetra::Tet &my_elem) { my_elem.assemblage_mat(NOD,Kw); } );
+    
+    algebra::r_sparseMat Kr(Kw);
+
+    if (verbose)
+        {
+        std::cout << "matrix assembly done in " << counter.millis() << std::endl;
+        counter.reset();
+        }
+    
+    algebra::iteration iter(TOL);
+    iter.set_maxiter(MAXITER);
+    iter.set_noisy(verbose);
+*/    
+    std::fill(L_rhs.begin(),L_rhs.end(),0);
+    
+    std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
+                      [this](Tetra::Tet &my_elem) { my_elem.assemblage_vect(NOD,L_rhs); } );
+    std::for_each(refMsh->fac.begin(), refMsh->fac.end(),
+                      [this](Facette::Fac &my_elem) { my_elem.assemblage_vect(NOD,L_rhs); } );
+
+// ref code    
     std::vector<Eigen::Triplet<double>> w_K_TH;
 
     std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
                       [this,&w_K_TH](Tetra::Tet &my_elem) { my_elem.assemblage_mat(NOD,w_K_TH); } );
-    
+
     Eigen::BiCGSTAB<Eigen::SparseMatrix<double,Eigen::RowMajor>,Eigen::IncompleteLUT<double>> _solver;
     _solver.setTolerance(TOL);
     _solver.setMaxIterations(MAXITER);
 
     Eigen::SparseMatrix<double,Eigen::RowMajor> K(2*NOD,2*NOD);
     K.setFromTriplets(w_K_TH.begin(),w_K_TH.end());
-    if (verbose)
+        if (verbose)
         {
         std::cout << "matrix assembly done in " << counter.millis() << std::endl;
         counter.reset();
@@ -29,9 +58,7 @@ int LinAlgebra::solver(timing const &t_prm)
     _solver.factorize(K);
 
     if(verbose)
-        {
-        std::cout << "ILU preconditionner (tolerance;filling factor) = ("<< ILU_tol <<";"<< ILU_fill_factor << ")\n";
-        }
+        { std::cout << "ILU preconditionner (tolerance;filling factor) = ("<< ILU_tol <<";"<< ILU_fill_factor << ")\n"; }
 
     if(_solver.info() != Eigen::Success)
         {
@@ -54,10 +81,16 @@ int LinAlgebra::solver(timing const &t_prm)
     counter.reset();
 
     Eigen::VectorXd sol = _solver.solveWithGuess(L_TH,X_guess);
-    int nb_iter = _solver.iterations();
-    double solver_error= _solver.error();
+// end ref code
+    
+//    buildInitGuess(Xw);// gamma0 division handled by function buildInitGuess    
+//    double residu = algebra::bicg<double>(iter, Kr, Xw, L_rhs);
+//    if(verbose) {std::cout << "residu= " << residu << std::endl;}
 
-    if( (nb_iter > MAXITER) || (solver_error > TOL) )
+    int nb_iter = _solver.iterations();//iter.get_iteration();
+    double _solver_error= _solver.error();//iter.get_res();
+
+    if( (nb_iter > MAXITER) || (_solver_error > TOL) )
         {
         if (verbose)
             {
@@ -67,24 +100,26 @@ int LinAlgebra::solver(timing const &t_prm)
         return 1;
         }
 
-        if (verbose)
-            {
-            std::cout << "solver: bicgstab converged in " << nb_iter
-            << " iterations, " << counter.millis() << std::endl;
-            }
-    #if EIGEN_VERSION_AT_LEAST(3,4,0)
-        v_max = (sol.reshaped<Eigen::RowMajor>(2,NOD).colwise().norm()).maxCoeff();
-    #else
-        double v2max(0.0);
-        for (int i = 0; i < NOD; i++)
-            {
-            double v2 = Nodes::sq(sol(i)) + Nodes::sq(sol(NOD + i));
-            if (v2 > v2max)
-                { v2max = v2; }
-            }
-        v_max = sqrt(v2max);
-    #endif
+    if (verbose)
+        {
+        std::cout << "solver: bicgstab converged in " << nb_iter
+        << " iterations, " << counter.millis() << ", residu= "<< _solver_error << std::endl;
+        }
+    
+    double v2max(0.0);
+    const double dt = t_prm.get_dt();
+    for (int i = 0; i < NOD; i++)
+        {
+        double vp = sol[i];//Xw[i];
+        double vq = sol[NOD + i];//Xw[NOD + i];
+        double v2 = Nodes::sq(vp) + Nodes::sq(vq);
+        if (v2 > v2max)
+            { v2max = v2; }
+        
+        refMsh->updateNode(i, vp, vq, dt);//gamma0 multiplication handled in updateNode
+        }
+    v_max = sqrt(v2max);
     v_max *= gamma0;
-    refMsh->updateNodes(sol, t_prm.get_dt());//gamma0 multiplication handled by updateNodes
+    
     return 0;
     }

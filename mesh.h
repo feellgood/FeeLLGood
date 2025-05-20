@@ -136,7 +136,10 @@ public:
         }
 
     /** make_evol on all nodes */
-    void updateNodes(Eigen::Ref<Eigen::VectorXd> X, const double dt);
+    void updateNodes(algebra::Vector<double> &X, const double dt);
+    
+    inline void updateNode(int i, double vp, double vq, const double dt)
+        { node[i].make_evol(vp*gamma0, vq*gamma0, dt); }
 
     /** call evolution for all the nodes */
     inline void evolution(void)
