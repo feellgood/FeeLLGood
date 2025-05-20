@@ -10,6 +10,7 @@
 #include <eigen3/Eigen/Dense>
 
 #include "node.h"
+#include "algebra/algebra.h"
 
 /** \class element
 \brief Template abstract class, mother class for tetraedrons and facettes.
@@ -35,6 +36,7 @@ class element
             {
             std::cout<<"Warning: element constructor is given an init list with size() != N\n";
             }
+        Kp.setZero();
         Lp.setZero();
         }
 
@@ -83,7 +85,7 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
         P.template block<N,N>(N,2*N).diagonal() = tempo.row(Nodes::IDX_Z);
         }
 
-    /** assemble the big sparse matrix K from tetra or facette inner matrix Kp */
+/** assemble the big sparse matrix K from tetra or facette inner matrix Kp */
     void assemblage_mat(const int NOD /**< [in] nb nodes */,
                         std::vector<Eigen::Triplet<double>> &K /**< [out] COO matrix */ ) const
         {
@@ -113,6 +115,40 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
                 { L(NOD + i_) += Lp[i]; }
             if(Lp[N+i] != 0)
                 { L(i_) += Lp[N + i]; }
+            }
+        }
+
+
+    /** assemble the big sparse matrix K from tetra or facette inner matrix Kp */
+    void assemblage_mat(const int NOD /**< [in] nb nodes */,
+                        algebra::w_sparseMat &K /**< [out] COO matrix */ ) const
+        {
+        for (int i = 0; i < N; i++)
+            {
+            int i_ = ind[i];
+
+            for (int j = 0; j < N; j++)
+                {
+                int j_ = ind[j];
+                if(Kp(i,j) != 0) K.insert( NOD + i_, j_, Kp(i,j) );
+                if (Kp(i,N + j) != 0) K.insert( NOD + i_, NOD + j_, Kp(i,N + j) );
+                if (Kp(N + i,j) != 0) K.insert( i_, j_, Kp(N + i,j) );
+                if (Kp(N + i,N + j) != 0) K.insert( i_, NOD + j_, Kp(N + i,N + j) );
+                }
+            }
+        }
+
+    /** assemble the big vector L from tetra or facette inner vector Lp */
+    void assemblage_vect(const int NOD /**< [in] nb nodes */,
+                         algebra::Vector<double> &L /**< [out] vector */) const
+        {
+        for (int i = 0; i < N; i++)
+            {
+            const int i_ = ind[i];
+            if(Lp[i] != 0)
+                { L[NOD + i_] += Lp[i]; }
+            if(Lp[N+i] != 0)
+                { L[i_] += Lp[N + i]; }
             }
         }
 

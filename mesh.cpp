@@ -12,12 +12,12 @@ void mesh::infos(void) const
     std::cout << "  total volume:       " << vol << '\n';
     }
 
-void mesh::updateNodes(Eigen::Ref<Eigen::VectorXd> X, const double dt)
+void mesh::updateNodes(algebra::Vector<double> &X, const double dt)
     {
     const unsigned int NOD = node.size();
 
     for (unsigned int i = 0; i < NOD; i++)
-        { node[i].make_evol(X(i)*gamma0, X(NOD + i)*gamma0, dt); }
+        { node[i].make_evol(X[i]*gamma0, X[NOD + i]*gamma0, dt); }
     }
 
 double mesh::avg(std::function<double(Nodes::Node, Nodes::index)> getter /**< [in] */,

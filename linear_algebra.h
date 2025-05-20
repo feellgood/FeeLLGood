@@ -31,9 +31,11 @@ public:
     /** constructor */
     inline LinAlgebra(Settings &s /**< [in] */, Mesh::mesh &my_msh /**< [in] */)
         : NOD(my_msh.getNbNodes()), MAXITER(s.MAXITER), TOL(s.TOL), ILU_tol(s.ILU_tol),
-          ILU_fill_factor(s.ILU_fill_factor), verbose(s.verbose),
+          ILU_fill_factor(s.ILU_fill_factor), verbose(s.verbose),//verbose(true),
           prmTetra(s.paramTetra), prmFacette(s.paramFacette), refMsh(&my_msh)
         {
+        L_rhs.resize(2*NOD);
+        Xw.resize(2*NOD);
         Eigen::setNbThreads(s.solverNbTh);
         base_projection();
         if (!s.recenter)
@@ -51,10 +53,12 @@ public:
     /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors) */
     void prepareElements(double const A_Hext /**< [in] amplitude applied field */, timing const &t_prm /**< [in] */);
 
-    /** build init guess for bicgstab solver */
     void buildInitGuess(Eigen::Ref<Eigen::VectorXd> G) const;
 
-    /** solver, uses eigen stabilized biconjugate gradient solver (bicgstab) with ILU preconditionner, sparse matrix and vector are filled    with multiThreading. Sparse matrix is row major.
+    /** build init guess for bicg solver */
+    void buildInitGuess(algebra::Vector<double> &G/**< [out] */) const;
+
+    /** solver, uses stabilized biconjugate gradient solver (bicg) with diagonal preconditionner, sparse matrix and vector are filled with multiThreading. Sparse matrix is row major.
     */
     int solver(timing const &t_prm /**< [in] */);
 
@@ -75,6 +79,12 @@ private:
 
     /** number of nodes, also an offset for filling sparseMatrix, initialized by constructor */
     const int NOD;
+
+    /** RHS vector of the system to solve */
+    algebra::Vector<double> L_rhs;
+
+    /** solution of the system to solve */
+    algebra::Vector<double> Xw;
 
     /** maximum number of iteration for bicgstab */
     const int MAXITER;
