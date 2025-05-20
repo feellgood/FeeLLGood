@@ -10,20 +10,19 @@
 int LinAlgebra::solver(timing const &t_prm)
     {
     chronometer counter(2);
-    /*
+
     algebra::w_sparseMat Kw(2*NOD);
     
     std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
                       [this,&Kw](Tetra::Tet &my_elem) { my_elem.assemblage_mat(NOD,Kw); } );
-    
-    algebra::r_sparseMat Kr(Kw);
 
+//    algebra::r_sparseMat Kr(Kw);
     if (verbose)
         {
         std::cout << "matrix assembly done in " << counter.millis() << std::endl;
         counter.reset();
         }
-*/    
+
     algebra::iteration iter(TOL);
     iter.set_maxiter(MAXITER);
     iter.set_noisy(verbose);
@@ -35,12 +34,14 @@ int LinAlgebra::solver(timing const &t_prm)
     std::for_each(refMsh->fac.begin(), refMsh->fac.end(),
                       [this](Facette::Fac &my_elem) { my_elem.assemblage_vect(NOD,L_rhs); } );
 
-// ref code    
     std::vector<Eigen::Triplet<double>> w_K_TH;
-
-    std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
-                      [this,&w_K_TH](Tetra::Tet &my_elem) { my_elem.assemblage_mat(NOD,w_K_TH); } );
-
+    for(int i=0;i<(2*NOD);i++)
+        for(int j=0;j<(2*NOD);j++)
+            {
+            double val = Kw(i,j);
+            if (val!=0) w_K_TH.push_back(Eigen::Triplet<double>(i,j,val));
+            }
+//ref code
     Eigen::BiCGSTAB<Eigen::SparseMatrix<double,Eigen::RowMajor>,Eigen::IncompleteLUT<double>> _solver;
     _solver.setTolerance(TOL);
     _solver.setMaxIterations(MAXITER);

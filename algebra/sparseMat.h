@@ -37,6 +37,9 @@ public:
 /** getter for the number of lines */
     inline int getDim(void) const {return N;}
 
+/** getter for a coefficient value (you should not use that function, debug purpose only) */
+	inline double operator() (const int i,const int j) const { return m[i].getVal(j); }
+
 private:
 /** dimension of sparse matrix, N is the number of lines */
     const int N;

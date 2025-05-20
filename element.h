@@ -85,25 +85,6 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
         P.template block<N,N>(N,2*N).diagonal() = tempo.row(Nodes::IDX_Z);
         }
 
-/** assemble the big sparse matrix K from tetra or facette inner matrix Kp */
-    void assemblage_mat(const int NOD /**< [in] nb nodes */,
-                        std::vector<Eigen::Triplet<double>> &K /**< [out] COO matrix */ ) const
-        {
-        for (int i = 0; i < N; i++)
-            {
-            int i_ = ind[i];
-
-            for (int j = 0; j < N; j++)
-                {
-                int j_ = ind[j];
-                if(Kp(i,j) != 0) K.emplace_back( NOD + i_, j_, Kp(i,j) );
-                if (Kp(i,N + j) != 0) K.emplace_back( NOD + i_, NOD + j_, Kp(i,N + j) );
-                if (Kp(N + i,j) != 0) K.emplace_back( i_, j_, Kp(N + i,j) );
-                if (Kp(N + i,N + j) != 0) K.emplace_back( i_, NOD + j_, Kp(N + i,N + j) );
-                }
-            }
-        }
-
     /** assemble the big sparse matrix K from tetra or facette inner matrix Kp */
     void assemblage_mat(const int NOD /**< [in] nb nodes */,
                         algebra::w_sparseMat &K /**< [out] COO matrix */ ) const

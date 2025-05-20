@@ -247,7 +247,7 @@ public:
     inline bool exist(const int &idx) const { return (tree.search(idx) != NULL); }
 
     /** getter for the value of a coefficient of index idx, if several coeffs have the same index then it returns the value of the first occurence */
-    inline double getVal(const int &idx)
+    inline double getVal(const int idx) const
         {
         node_t< v_coeff > *node=tree.search(idx);
         if (node==NULL) return 0.0;
