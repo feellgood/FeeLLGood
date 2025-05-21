@@ -47,14 +47,11 @@ int LinAlgebra::solver(timing const &t_prm)
         std::cout << "matrix assembly done in " << counter.millis() << std::endl;
         counter.reset();
         }
-//ref code
-    Eigen::BiCGSTAB<Eigen::SparseMatrix<double,Eigen::RowMajor>,Eigen::IncompleteLUT<double>> _solver;
+
+    Eigen::BiCGSTAB<Eigen::SparseMatrix<double,Eigen::RowMajor>,Eigen::DiagonalPreconditioner<double>> _solver;
     _solver.setTolerance(TOL);
     _solver.setMaxIterations(MAXITER);
-    _solver.preconditioner().setDroptol(ILU_tol);
-    _solver.preconditioner().setFillfactor(ILU_fill_factor);
-    _solver.analyzePattern(K);// numerical values in K are not used
-    _solver.factorize(K);
+    _solver.compute(K);
 
     if(verbose)
         { std::cout << "ILU preconditionner (tolerance;filling factor) = ("<< ILU_tol <<";"<< ILU_fill_factor << ")\n"; }
@@ -80,10 +77,13 @@ int LinAlgebra::solver(timing const &t_prm)
 
     Eigen::VectorXd sol = _solver.solveWithGuess(L_TH,X_guess);
 // end ref code
+/*
+    double residu = algebra::bicg<double>(iter, Kr, Xw, L_rhs);
+    int dummy_nb_iter = iter.get_iteration();
+    double dummy_solver_error= iter.get_res();
+std::cout << "residu= " << residu <<"; nb_iter= " << dummy_nb_iter<< "; error= " << dummy_solver_error << std::endl;
+*/
     for(int i=0;i<(2*NOD);i++) { Xw[i] = sol(i); }
-
-//    double residu = algebra::bicg<double>(iter, Kr, Xw, L_rhs);
-//    if(verbose) std::cout << "residu= " << residu << std::endl;
 
     int nb_iter = _solver.iterations();//iter.get_iteration();
     double _solver_error= _solver.error();//iter.get_res();
