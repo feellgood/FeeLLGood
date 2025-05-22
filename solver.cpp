@@ -4,8 +4,8 @@
 #include "algebra/algebra.h"
 #include "algebra/bicg.h"
 
-#include <eigen3/Eigen/Sparse>
-#include <eigen3/Eigen/Dense>
+//#include <eigen3/Eigen/Sparse>
+//#include <eigen3/Eigen/Dense>
 
 int LinAlgebra::solver(timing const &t_prm)
     {
@@ -32,68 +32,24 @@ int LinAlgebra::solver(timing const &t_prm)
     std::for_each(refMsh->fac.begin(), refMsh->fac.end(),
                       [this](Facette::Fac &my_elem) { my_elem.assemblage_vect(NOD,L_rhs); } );
 
-    Eigen::SparseMatrix<double,Eigen::RowMajor> K(2*NOD,2*NOD);
-    for(int i=0;i<(2*NOD);i++)
-        {
-        for(int j=0;j<(2*NOD);j++)
-            {
-            double val = Kr(i,j);
-            if (val!=0) { K.insert(i,j) = val; }
-            }
-        }
-
     if (verbose)
         {
         std::cout << "matrix assembly done in " << counter.millis() << std::endl;
         counter.reset();
         }
 
-    Eigen::BiCGSTAB<Eigen::SparseMatrix<double,Eigen::RowMajor>,Eigen::DiagonalPreconditioner<double>> _solver;
-    _solver.setTolerance(TOL);
-    _solver.setMaxIterations(MAXITER);
-    _solver.compute(K);
-
-    if(verbose)
-        { std::cout << "ILU preconditionner (tolerance;filling factor) = ("<< ILU_tol <<";"<< ILU_fill_factor << ")\n"; }
-
-    if(_solver.info() != Eigen::Success)
-        {
-        std::cout <<"sparse matrix decomposition failed" << std::endl;
-        exit(1);
-        }
-    else if (verbose)
-        { std::cout << "sparse matrix factorization done in " << counter.millis() << std::endl; }
-
-    buildInitGuess(Xw);// gamma0 division handled by function buildInitGuess    
-
-    Eigen::VectorXd L_TH(2*NOD);// RHS vector of the system to solve
-    Eigen::VectorXd X_guess(2*NOD);
-    for(int i=0;i<(2*NOD);i++)
-        {
-        L_TH(i) = L_rhs[i];
-        X_guess(i) = Xw[i];
-        }
-    counter.reset();
-
-    Eigen::VectorXd sol = _solver.solveWithGuess(L_TH,X_guess);
-// end ref code
-/*
+    buildInitGuess(Xw);// gamma0 division handled by function buildInitGuess
     double residu = algebra::bicg<double>(iter, Kr, Xw, L_rhs);
-    int dummy_nb_iter = iter.get_iteration();
-    double dummy_solver_error= iter.get_res();
-std::cout << "residu= " << residu <<"; nb_iter= " << dummy_nb_iter<< "; error= " << dummy_solver_error << std::endl;
-*/
-    for(int i=0;i<(2*NOD);i++) { Xw[i] = sol(i); }
 
-    int nb_iter = _solver.iterations();//iter.get_iteration();
-    double _solver_error= _solver.error();//iter.get_res();
+    int nb_iter = iter.get_iteration();
+    double _solver_error= iter.get_res();
 
     if( (nb_iter > MAXITER) || (_solver_error > TOL) )
         {
         if (verbose)
             {
             std::cout << "solver: bicgstab FAILED after " << nb_iter
-            << " iterations, in " << counter.millis() << std::endl;
+            << " iterations, in " << counter.millis()<< "; residu= " << residu << std::endl;
             }
         return 1;
         }
@@ -116,8 +72,7 @@ std::cout << "residu= " << residu <<"; nb_iter= " << dummy_nb_iter<< "; error= "
         
         refMsh->updateNode(i, vp, vq, dt);//gamma0 multiplication handled in updateNode
         }
-    v_max = sqrt(v2max);
-    v_max *= gamma0;
+    v_max = gamma0*sqrt(v2max);
     
     return 0;
     }
