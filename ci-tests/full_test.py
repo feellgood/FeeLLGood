@@ -8,11 +8,12 @@ from math import sqrt
 
 # Move to the script's directory.
 os.chdir(sys.path[0])
+sys.path.insert(0, '../python-modules')
 
 MaxNbThreads = int(subprocess.check_output(["getconf","_NPROCESSORS_ONLN"]))
 nbThreads = (MaxNbThreads + 4) // 3 # ellipsoid.msh is small, maxnbthreads is counterproductive
 
-from feellgood.meshMaker import Ellipsoid
+from meshMaker import Ellipsoid
 radius1 = 4 #nanometers
 radius2 = 20
 mesh_size = 1.5
