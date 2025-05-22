@@ -21,17 +21,17 @@
 #include "tetra.h"
 
 /** \class LinAlgebra
-convenient class to grab altogether some part of the calculations involved using eigen BiCGSTAB solver at each
-timestep. The solver is handled by solver method, and is using Eigen::SparseMatrix, Row major matrix. This matrix
-is prepared in 'batch mode', using a vector of triplets (also called COO write sparse matrix).
+convenient class to grab altogether some part of the calculations involved using algebra::bicg solver at each
+timestep. The solver is handled by solver method, and is using algebra sparse matrices(Row major). The write sparse matrix
+is prepared in 'batch mode', to add all non zero coefficients with a '+=' logic. Then it is turned into a read sparse matrix before being used by bicg algo.
+Be aware of time units: when entering solver method, division by gamma0 and multiplication by gamma0 when ending are mandatory.
 */
 class LinAlgebra
     {
 public:
     /** constructor */
-    inline LinAlgebra(Settings &s /**< [in] */, Mesh::mesh &my_msh /**< [in] */)
-        : NOD(my_msh.getNbNodes()), MAXITER(s.MAXITER), TOL(s.TOL), ILU_tol(s.ILU_tol),
-          ILU_fill_factor(s.ILU_fill_factor), verbose(s.verbose),//verbose(true),
+    LinAlgebra(Settings &s /**< [in] */, Mesh::mesh &my_msh /**< [in] */)
+        : NOD(my_msh.getNbNodes()), MAXITER(s.MAXITER), TOL(s.TOL), verbose(s.verbose),
           prmTetra(s.paramTetra), prmFacette(s.paramFacette), refMsh(&my_msh)
         {
         L_rhs.resize(2*NOD);
@@ -89,12 +89,6 @@ private:
 
     /** solver tolerance */
     const double TOL;
-
-    /** ILU preconditionner tolerance */
-    double ILU_tol;
-
-    /** ILU preconditionner filling factor */
-    double ILU_fill_factor;
 
     /** verbosity */
     const int verbose;

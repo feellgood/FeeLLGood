@@ -196,16 +196,6 @@ public:
     /** maximum number of iteration for biconjugate gradient algorithm */
     int MAXITER;
 
-    /** ILU preconditioner dropping tolerance
-    https://eigen.tuxfamily.org/dox/classEigen_1_1IncompleteLUT.html
-    */
-    double ILU_tol;
-
-    /** ILU preconditioner filling factor
-    https://eigen.tuxfamily.org/dox/classEigen_1_1IncompleteLUT.html
-    */
-    int ILU_fill_factor;
-
     /** this vector contains the material parameters for all regions for all the tetrahedrons */
     std::vector<Tetra::prm> paramTetra;
 
