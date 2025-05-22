@@ -4,9 +4,6 @@
 #include "algebra/algebra.h"
 #include "algebra/bicg.h"
 
-//#include <eigen3/Eigen/Sparse>
-//#include <eigen3/Eigen/Dense>
-
 int LinAlgebra::solver(timing const &t_prm)
     {
     chronometer counter(2);
