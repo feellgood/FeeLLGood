@@ -61,7 +61,7 @@ else  # Debian-like OS
         sudo apt-add-repository -y non-free
     fi
     packages="$packages wget g++ libeigen3-dev libmkl-dev libtbb-dev libyaml-cpp-dev duktape-dev"
-    packages="$packages libgmsh-dev"
+    packages="$packages libgmsh-dev python3-gmsh python3-numpy"
     sudo apt-get update -q
     if [ "$unit_tests" = "true" ]; then
         packages="$packages libboost-system-dev libboost-filesystem-dev libboost-test-dev"
