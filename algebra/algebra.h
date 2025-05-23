@@ -44,17 +44,26 @@ void p_direct(const Vector<T> & X,const Vector<T> & Y, Vector<T> & Z)
 /** Y += X */
 template <typename T>
 void add(const Vector<T> & X, Vector<T> & Y)
-    { std::transform(Y.begin(),Y.end(),X.begin(),Y.begin(),std::plus<T>()  ); }
+    {
+    for (size_t i = 0; i < Y.size(); ++i)
+        Y[i] += X[i];
+    }
 
 /** Y -= X */
 template <typename T>
 void sub(const Vector<T> & X, Vector<T> & Y)
-    { std::transform(Y.begin(),Y.end(),X.begin(),Y.begin(),std::minus<T>()  ); }
+    {
+    for (size_t i = 0; i < Y.size(); ++i)
+        Y[i] -= X[i];
+    }
 
 /** Y += alpha*X       */
 template <typename T>
 void scaled_add(const Vector<T> & X,const T alpha, Vector<T> & Y)
-    { std::transform(Y.begin(),Y.end(),X.begin(),Y.begin(),[alpha] (const T _x,T _y) { return _x+(alpha*_y); }   ); }
+    {
+    for (size_t i = 0; i < Y.size(); ++i)
+        Y[i] += alpha * X[i];
+    }
 
 /** Y = A*X with r_sparseMat A */
 template <typename T>
