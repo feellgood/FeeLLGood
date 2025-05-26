@@ -139,9 +139,6 @@ public:
     /** threshold value to recenter or not versus avg(M_recentering_direction) */
     double threshold;
 
-    /** nb of threads for the finite element solver */
-    int solverNbTh;
-
     /** nb of threads for the computation of the demag field with scalfmm */
     int scalfmmNbTh;
 

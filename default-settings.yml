@@ -193,10 +193,6 @@ demagnetizing_field_solver:
 # Parameters of the solver.
 finite_element_solver:
 
-  # Number of threads to use. The value 0 means to match the number of
-  # available processors.
-  nb_threads: 0
-
   # Maximum number of iteration for the biconjugate gradient algorithm.
   max(iter): 500
 

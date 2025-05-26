@@ -248,7 +248,6 @@ void Settings::toYaml()
     std::cout << "demagnetizing_field_solver:\n";
     std::cout << "  nb_threads: " << scalfmmNbTh << "\n";
     std::cout << "finite_element_solver:\n";
-    std::cout << "  nb_threads: " << solverNbTh << "\n";
     std::cout << "  max(iter): " << MAXITER << "\n";
     std::cout << "  tolerance: " << TOL << "\n";
     std::cout << "time_integration:\n";
@@ -556,8 +555,6 @@ void Settings::read(YAML::Node yaml)
     solver = yaml["finite_element_solver"];
     if (solver && !solver.IsNull())
         {
-        assign(solverNbTh, solver["nb_threads"]);
-        if (solverNbTh <= 0) solverNbTh = available_cpu_count;
         assign(MAXITER, solver["max(iter)"]);
         assign(TOL,solver["tolerance"]);
         }  // finite_element_solver

@@ -36,7 +36,6 @@ public:
         {
         L_rhs.resize(2*NOD);
         Xw.resize(2*NOD);
-        Eigen::setNbThreads(s.solverNbTh);
         base_projection();
         if (!s.recenter)
             { idx_dir = Nodes::IDX_UNDEF; }
