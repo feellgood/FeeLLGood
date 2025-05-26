@@ -62,36 +62,46 @@ add_executable (test_ut_log-stats ut_log-stats.cpp)
 
 add_executable(test_ut_readMesh ut_readMesh.cpp)
 
+target_link_libraries(test_ut_solver
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+    Eigen3::Eigen
+    )
+
+target_link_libraries(test_ut_element
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+    TBB::tbb
+    )
+
+target_link_libraries(test_ut_tetra
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+    TBB::tbb
+    )
+
+target_link_libraries(test_ut_anisotropy
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+    TBB::tbb
+    )
+
 if (MKL_FOUND)
     #target_compile_options(test_ut_solver PUBLIC -fsanitize=leak )
     #target_link_options(test_ut_solver PUBLIC -fsanitize=leak )
-    target_link_libraries(test_ut_solver
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
-        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-        Eigen3::Eigen
-        PkgConfig::MKL
-        )
+    target_link_libraries(test_ut_solver PkgConfig::MKL)
 
     #target_compile_options(test_ut_element PUBLIC -fsanitize=leak )
     #target_link_options(test_ut_element PUBLIC -fsanitize=leak ) # -> SEGFAULT
-    target_link_libraries(test_ut_element
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
-        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-        TBB::tbb
-        PkgConfig::MKL
-        )
+    target_link_libraries(test_ut_element PkgConfig::MKL)
 
     #target_compile_options(test_ut_tetra PUBLIC -fsanitize=leak )
     #target_link_options(test_ut_tetra PUBLIC -fsanitize=leak )
-    target_link_libraries(test_ut_tetra
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
-        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-        TBB::tbb
-        PkgConfig::MKL
-        )
+    target_link_libraries(test_ut_tetra PkgConfig::MKL)
 
     target_link_libraries(test_ut_tet_lumping
         ${Boost_FILESYSTEM_LIBRARY}
@@ -117,41 +127,7 @@ if (MKL_FOUND)
         PkgConfig::MKL
         )
 
-    target_link_libraries(test_ut_anisotropy
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
-        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-        TBB::tbb
-        PkgConfig::MKL
-        )
-else()
-    target_link_libraries(test_ut_solver
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
-        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-        Eigen3::Eigen
-        )
-
-    target_link_libraries(test_ut_element
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
-        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-        TBB::tbb
-        )
-
-    target_link_libraries(test_ut_tetra
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
-        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-        TBB::tbb
-        )
-
-    target_link_libraries(test_ut_anisotropy
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
-        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-        TBB::tbb
-        )
+    target_link_libraries(test_ut_anisotropy PkgConfig::MKL)
 endif()
 
 #target_compile_options(test_ut_OMP_solver PUBLIC -fsanitize=leak )
