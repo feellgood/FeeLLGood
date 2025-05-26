@@ -69,7 +69,7 @@ public:
         sortNodes(long_axis);
 
         // Compute the per-region volumes and the total volume.
-        std::for_each(EXEC_POL, tet.begin(), tet.end(),
+        std::for_each(tet.begin(), tet.end(),
                 [this](Tetra::Tet const &te)
                     {
                     paramTetra[te.idxPrm].volume += te.calc_vol();
