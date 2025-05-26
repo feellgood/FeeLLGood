@@ -56,11 +56,7 @@ if [ "$ID" = "rocky" ]; then
     fi
     sudo dnf install -y $packages
 else  # Debian-like OS
-    if [ "$ID" = "debian" ]; then  # needed for libmkl-dev on Debian
-        sudo apt-get install -y software-properties-common
-        sudo apt-add-repository -y non-free
-    fi
-    packages="$packages wget g++ libeigen3-dev libmkl-dev libtbb-dev libyaml-cpp-dev duktape-dev"
+    packages="$packages wget g++ libeigen3-dev libtbb-dev libyaml-cpp-dev duktape-dev"
     packages="$packages libgmsh-dev"
     sudo apt-get update -q
     if [ "$unit_tests" = "true" ]; then
