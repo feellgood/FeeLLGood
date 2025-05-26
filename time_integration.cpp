@@ -127,6 +127,12 @@ static void exit_if_signal_received(const Fem &fem, const Settings &settings, co
     std::cout << "Terminating.\n";
 
     print_stats(stats);
+
+    // Re-send ourselves the signal we caught in order to return the correct status.
+    signal(received_signal, SIG_DFL);
+    raise(received_signal);
+
+    // Fallback, just in case.
     exit(1);
     }
 
