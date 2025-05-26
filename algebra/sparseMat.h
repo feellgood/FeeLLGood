@@ -10,6 +10,9 @@ w_sparseMat : write sparse matrix : a std::vector of m_coeff = triplet of two in
 #include <iostream>
 #include <vector>
 #include <cassert>
+#include <execution>
+
+#include "algebraCore.h"
 
 namespace algebra
 {
@@ -82,6 +85,14 @@ public:
 
 /** getter for a coefficient value */
     inline double operator() (const int &i, const int &j) const { return m[i].getVal(j); }
+
+/** Y = this*X */
+template <typename T>
+void mult(Vector<T> const& X, Vector<T> &Y)
+    {
+    std::transform(std::execution::par,m.begin(),m.end(),Y.begin(),
+                   [&X](r_sparseVect &_v){ return _v.dot(X); });
+    }
 
 private:
 /** dimension of the sparse matrix (nb of lines) */

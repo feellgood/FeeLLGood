@@ -69,10 +69,7 @@ void scaled_add(const Vector<T> & X,const T alpha, Vector<T> & Y)
 template <typename T>
 void mult(r_sparseMat & A, Vector<T> const& X, Vector<T> &Y)
     {
-    const int _size = X.size();
-    Y.resize(_size);
-    if (A.getDim() == _size)
-        { for(int i=0;i<_size;i++) Y[i]= A(i).dot(X); }
+    A.mult(X,Y); // Y = A*X
     }
 
 /** apply a mask to vector X : all coefficients in vector mask are zeroed in X */
