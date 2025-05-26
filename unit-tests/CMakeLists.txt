@@ -90,6 +90,27 @@ target_link_libraries(test_ut_anisotropy
     TBB::tbb
     )
 
+target_link_libraries(test_ut_tet_lumping
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+    TBB::tbb
+    )
+
+target_link_libraries(test_ut_tet_charges
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+    TBB::tbb
+    )
+
+target_link_libraries(test_ut_energy
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+    TBB::tbb
+    )
+
 if (MKL_FOUND)
     #target_compile_options(test_ut_solver PUBLIC -fsanitize=leak )
     #target_link_options(test_ut_solver PUBLIC -fsanitize=leak )
@@ -103,29 +124,11 @@ if (MKL_FOUND)
     #target_link_options(test_ut_tetra PUBLIC -fsanitize=leak )
     target_link_libraries(test_ut_tetra PkgConfig::MKL)
 
-    target_link_libraries(test_ut_tet_lumping
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
-        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-        TBB::tbb
-        PkgConfig::MKL
-        )
+    target_link_libraries(test_ut_tet_lumping PkgConfig::MKL)
 
-    target_link_libraries(test_ut_tet_charges
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
-        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-        TBB::tbb
-        PkgConfig::MKL
-        )
+    target_link_libraries(test_ut_tet_charges PkgConfig::MKL)
 
-    target_link_libraries(test_ut_energy
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
-        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-        TBB::tbb
-        PkgConfig::MKL
-        )
+    target_link_libraries(test_ut_energy PkgConfig::MKL)
 
     target_link_libraries(test_ut_anisotropy PkgConfig::MKL)
 endif()
