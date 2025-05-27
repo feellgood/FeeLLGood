@@ -12,25 +12,35 @@ os.chdir(sys.path[0])
 MaxNbThreads = int(subprocess.check_output(["getconf","_NPROCESSORS_ONLN"]))
 nbThreads = (MaxNbThreads + 4) // 3 # ellipsoid.msh is small, maxnbthreads is counterproductive
 
+from feellgood.meshMaker import Ellipsoid
+radius1 = 4 #nanometers
+radius2 = 20
+mesh_size = 1.5
+surface_name = "surf"
+volume_name = "vol"
+mesh = Ellipsoid(radius1,radius2,mesh_size,surface_name,volume_name)
+mesh_file_name = "ellipsoid.msh"
+mesh.make(mesh_file_name)
+
 settings = {
     "outputs": {
         "file_basename": "full_test",
         "evol_time_step": 1e-12,
-        "final_time": 2e-11,
+        "final_time": 1e-11,
         "mag_config_every": False
     },
     "mesh": {
-        "filename": "../examples/ellipsoid.msh",
-        "length_unit": 1e-10,
-        "volume_regions": { "ellipsoid_volume": {} },
-        "surface_regions": { "ellipsoid_surface": {} }
+        "filename": mesh_file_name,
+        "length_unit": 1e-9, #scaling factor for nanometers
+        "volume_regions": { volume_name: {} },
+        "surface_regions": { surface_name: {} }
     },
     "initial_magnetization": [0, 0, 1],
     "Bext": [1, 0, -1],
     "finite_element_solver": { "nb_threads": nbThreads },
     "demagnetizing_field_solver": { "nb_threads": nbThreads },
     "time_integration": {
-        "min(dt)": 5e-14,
+        "min(dt)": 0.5e-14,
         "max(dt)": 3.5e-13,
         "max(du)": 0.1
     }
@@ -51,9 +61,9 @@ if(val.returncode==0):
     mx = float(data[1])
     my = float(data[2])
     mz = float(data[3])
-    X = 0.323478
-    Y = 0.377806
-    Z = -0.867539
+    X = -0.046863
+    Y = -0.952148
+    Z = -0.302021
     distance = sqrt((X-mx)**2+(Y-my)**2+(Z-mz)**2)
     threshold = 1e-5
     success = distance < threshold
