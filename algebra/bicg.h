@@ -16,15 +16,8 @@ T bicg(iteration<T> &iter, r_sparseMat& A, Vector<T> & x, const Vector<T> & rhs)
     Vector<T> p(DIM), phat(DIM,0), shat(DIM), r(DIM), rt(DIM), s(DIM), t(DIM), v(DIM), diag_precond(DIM), b(DIM);
     b.assign(rhs.begin(),rhs.end());// b = rhs;
 
-    for(unsigned int i=0;i<diag_precond.size();i++)
-        {
-        if(A(i,i) != 0)
-            { diag_precond[i] = 1.0/A(i,i); }
-        else
-            { std::cout <<"Error: zero on sparse matrix diagonal.\n"; exit(1); }
-        }
+    A.build_diag_precond<T>(diag_precond);
     iter.set_rhsnorm(norm(b));
-
     r.assign(b.begin(),b.end());// r = b;
     mult(A, x, v);         // v = A x;
     sub(v, r);             // r -= v; donc r = b - A x;
@@ -85,14 +78,7 @@ T bicg_dir(iteration<T> &iter, r_sparseMat& A, Vector<T> & x, const Vector<T> & 
     Vector<T> p(DIM), phat(DIM), shat(DIM), r(DIM), rt(DIM), s(DIM), t(DIM), v(DIM), diag_precond(DIM), b(DIM);
     b.assign(rhs.begin(),rhs.end());// b = rhs;
 
-    for(unsigned int i=0;i<diag_precond.size();i++)
-        {
-        if(A(i,i) != 0)
-            { diag_precond[i] = 1.0/A(i,i); }
-        else
-            { std::cout <<"Error: zero on sparse matrix diagonal.\n"; exit(1); }
-        }
-
+    A.build_diag_precond<T>(diag_precond);
     mult(A, xd, v);
     sub(v, b);      // b -= A xd
     applyMask(ld,b);

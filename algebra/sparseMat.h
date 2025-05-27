@@ -94,6 +94,20 @@ void mult(Vector<T> const& X, Vector<T> &Y)
                    [&X](r_sparseVect &_v){ return _v.dot(X); });
     }
 
+/** build diagonal preconditioner D from input matrix(this) */
+template <typename T>
+void build_diag_precond(Vector<T> &D)
+    {
+    for(unsigned int i=0;i<D.size();i++)
+        {
+        const double c = (*this)(i,i);
+        if(c != 0)
+            { D[i] = 1.0/c; }
+        else
+            { std::cout <<"Error: zero on sparse matrix diagonal.\n"; exit(1); }
+        }
+    }
+
 private:
 /** dimension of the sparse matrix (nb of lines) */
     const int N;

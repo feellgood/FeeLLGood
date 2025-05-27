@@ -16,13 +16,7 @@ T cg(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T
     std::vector<T> p(DIM),q(DIM),r(DIM),z(DIM),diag_precond(DIM), b(DIM);
     b.assign(rhs.begin(),rhs.end());// b = rhs;
 
-    for(unsigned int i=0;i<diag_precond.size();i++)
-        {
-        diag_precond[i] = 1.0/A(i,i);
-        if (!std::isfinite(diag_precond[i]))
-            { std::cout<<"problem computing the diagonal preconditioner(NaN or inf found).\n"; exit(1); }
-        }
-
+    A.build_diag_precond<T>(diag_precond);
     iter.set_rhsnorm(norm(b));
     r.assign(b.begin(),b.end());          // r = b;
     std::vector<T> v_temp(x.size());
@@ -65,13 +59,7 @@ T cg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vect
     std::vector<T> p(DIM),q(DIM),r(DIM),z(DIM),diag_precond(DIM), b(DIM);
     b.assign(rhs.begin(),rhs.end());// b = rhs;
 
-    for(unsigned int i=0;i<diag_precond.size();i++)
-        {
-        diag_precond[i] = 1.0/A(i,i);
-        if (!std::isfinite(diag_precond[i]))
-            { std::cout<<"problem computing the diagonal preconditioner(NaN or inf found).\n"; exit(1); }
-        }
-
+    A.build_diag_precond<T>(diag_precond);
     mult(A, xd, z);
     sub(z, b);                        // b -= A xd
     applyMask(ld,b);
