@@ -9,6 +9,7 @@ If several v_coeff have the same index, then they are automatically summed up.
 a read sparse vector is a std::vector of v_coeff, built by its constructor
  **/
 
+#include <map>
 #include <vector>
 #include <iostream>
 #include <algorithm>
