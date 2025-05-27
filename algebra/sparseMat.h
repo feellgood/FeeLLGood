@@ -4,7 +4,7 @@
 /** \file sparseMat.h
  \brief read and write sparse matrix
 r_sparseMat : read sparse matrix : it is buit calling the constructor with a w_sparseMat as argument
-w_sparseMat : write sparse matrix : a std::vector of m_coeff = triplet of two indices and a value (i,j,value)
+w_sparseMat : write sparse matrix : a std::vector of w_sparse_vector of coefficients (i,value)
  */
 
 #include <iostream>
@@ -54,7 +54,7 @@ private:
 
 /** \class r_sparseMat
 read sparse matrix
-The constructor is buiding from a write sparse matrix the data to access efficiently the coefficients values
+The constructor is building the data from a write sparse matrix to access efficiently the coefficients values
 */
 class r_sparseMat
 {

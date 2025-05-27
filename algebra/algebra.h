@@ -36,7 +36,7 @@ template <typename T>
 void scaled( const T alpha, Vector<T> & Y)
     { std::for_each(Y.begin(),Y.end(),[alpha](T &_x){ _x *= alpha; }); }
 
-/** direct product : Z = X⊗Y */
+/** direct product (component to component): Z = X⊗Y */
 template <typename T>
 void p_direct(const Vector<T> & X,const Vector<T> & Y, Vector<T> & Z)
     { std::transform(X.begin(),X.end(),Y.begin(),Z.begin(), std::multiplies<T>() ); }
@@ -57,7 +57,7 @@ void sub(const Vector<T> & X, Vector<T> & Y)
         Y[i] -= X[i];
     }
 
-/** Y += alpha*X       */
+/** Y += alpha*X */
 template <typename T>
 void scaled_add(const Vector<T> & X,const T alpha, Vector<T> & Y)
     {

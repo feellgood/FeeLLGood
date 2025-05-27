@@ -5,7 +5,7 @@
 
 namespace algebra
 {
-/** solve A x = rhs. Algo is stabilized biconjugate gradient with diagonal preconditionner, returns residu. */
+/** solve A x = rhs. Algo is stabilized biconjugate gradient with diagonal preconditioner, returns residu. */
 template <typename T>
 T bicg(iteration<T> &iter, r_sparseMat& A, Vector<T> & x, const Vector<T> & rhs)
     {
@@ -106,7 +106,7 @@ T bicg_dir(iteration<T> &iter, r_sparseMat& A, Vector<T> & x, const Vector<T> & 
             add(r, p);                  // p += r; so  p = r + beta p
             }
 
-        p_direct(diag_precond, p, phat);// phat = M p;
+        p_direct(diag_precond, p, phat);// phat = direct_product(diag_precond, p);
         mult(A, phat, v);               //  v = A phat;
         applyMask(ld,v);
         alpha=rho_1/dot(v, rt);         // alpha = rho_1 /(v'*rtilde);
@@ -119,7 +119,7 @@ T bicg_dir(iteration<T> &iter, r_sparseMat& A, Vector<T> & x, const Vector<T> & 
             break;
             }
 
-        p_direct(diag_precond, s, shat);// shat = M s;
+        p_direct(diag_precond, s, shat);// shat = direct_product(diag_precond, s);
         mult(A, shat, t);               //  t = A shat;
         applyMask(ld,t);
         omega = dot(t, s)/dot(t,t);    // omega = (t'* s) / (t'*t);

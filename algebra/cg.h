@@ -73,14 +73,14 @@ T cg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vect
 
     applyMask(ld,r);
 
-    p_direct(diag_precond,r,z);           //mult(P, r, z);
+    p_direct(diag_precond,r,z);           // z = direct_product(diag_precond, r);
     rho = dot(z,r);                       //rho = vect_sp(z, r);
     p.assign(z.begin(),z.end());          //copy(z, p);
     while (!iter.finished(norm(r)))
         {
         if (!iter.first())
             {
-            p_direct(diag_precond,r,z);   //mult(P, r, z);
+            p_direct(diag_precond,r,z);   // z = direct_product(diag_precond, r);
             rho = dot(z,r);
             scaled(rho/rho_1,p);          // p *= (rho/rho1)
             add(z,p);                     // p += z, so p = z + (rho/rho_1)*p
