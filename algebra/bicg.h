@@ -5,9 +5,9 @@
 
 namespace algebra
 {
-/** solve A x = rhs. Algo is biconjugate gradient with diagonal preconditionner, returns residu. */
+/** solve A x = rhs. Algo is stabilized biconjugate gradient with diagonal preconditionner, returns residu. */
 template <typename T>
-double bicg(iteration<T> &iter, r_sparseMat& A, Vector<T> & x, const Vector<T> & rhs)
+T bicg(iteration<T> &iter, r_sparseMat& A, Vector<T> & x, const Vector<T> & rhs)
     {
     T rho_1(0.0), rho_2(0.0), alpha(0.0), beta(0.0), omega(0.0);
     const size_t DIM = x.size();
@@ -73,7 +73,7 @@ double bicg(iteration<T> &iter, r_sparseMat& A, Vector<T> & x, const Vector<T> &
     return iter.get_res()/iter.get_rhsnorm();
     }
 
-/** directional biconjugate gradient (mask) with diagonal preconditioner with Dirichlet conditions, returns residu */
+/** directional stabilized biconjugate gradient (mask) with diagonal preconditioner with Dirichlet conditions, returns residu */
 template<typename T>
 T bicg_dir(iteration<T> &iter, r_sparseMat& A, Vector<T> & x, const Vector<T> & rhs,
            const Vector<T>& xd, const std::vector<int>& ld)

@@ -2,7 +2,7 @@
 #define ALGEBRA_H
 
 /** \file algebra.h
- * \brief set of class to handle sparse matrix operations for gradient conjugate algorithm
+ * \brief set of class to handle sparse matrix operations for gradient conjugate algorithms
  * a sparse vector class
  * a read and a write sparse matrix class
  * various vector operations, scalar and direct products; ...
@@ -22,7 +22,7 @@
 #include "iter.h"
 
 /** \namespace algebra
- * grab altogether sparse matrix, vector and dedicated functions, and cg and bicgstab algorithms
+ * grab altogether sparse matrix, vector and dedicated functions, and various gradient conjugate algorithms
 */
 
 namespace algebra
@@ -76,25 +76,6 @@ void mult(r_sparseMat & A, Vector<T> const& X, Vector<T> &Y)
 template <typename T>
 void applyMask(const Vector<int>& mask, Vector<T> & X)
     { std::for_each(mask.begin(),mask.end(),[&X](const int _i){ X[_i] = (T)(0); }); }
-
-/** generic template for gradient conjugate */
-template<bool MASK,typename T>
-T generic_cg(iteration<T> &iter, r_sparseMat& A, Vector<T> & x, const Vector<T> & rhs, const Vector<T> & xd, const std::vector<int>& ld);
-
-/** conjugate gradient with diagonal preconditioner, returns residu. Template generic_cg is called with dummy xd and ld */
-template <typename T>
-T cg(iteration<T> &iter, r_sparseMat& A, Vector<T> & x, Vector<T> & b)
-    {
-    Vector<T> xd;
-    std::vector<int> ld;
-    return generic_cg<false,T>(iter,A,x,b,xd,ld);
-    }
-
-/** conjugate gradient with diagonal preconditioner with Dirichlet conditions, returns residu */
-template <typename T>
-T cg_dir(iteration<T> &iter, r_sparseMat& A, Vector<T> & x, const Vector<T> & rhs,
-         const Vector<T> & xd, const std::vector<int>& ld)
-    { return generic_cg<true,T>(iter,A,x,rhs,xd,ld); }
 
 /** operator<< for r_sparseVect */
 inline std::ostream & operator<<(std::ostream & flux, r_sparseVect const& v)
