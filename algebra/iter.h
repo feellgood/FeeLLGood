@@ -74,9 +74,6 @@ T get_res() const { return res; }
 /** getter for number of iterations */
 size_t get_iteration(void) const { return nit; }
 
-/** setter for the number of iterations */
-void set_iteration(size_t i) { nit = i; }
-
 /** getter for the maximum number of iterations */
 size_t get_maxiter(void) const { return maxiter; }
 
