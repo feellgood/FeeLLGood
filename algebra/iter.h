@@ -135,11 +135,11 @@ class iteration
     /** setter for the right hand side norm */
     void set_rhsnorm(T r) { rhsn = r; }
 
-    /** monitor the convergence through a number (the norm of a vector) */
-    bool converged(T nr)
+    /** return the monitored algo has converged or not
+        according to criteria fixed by right hand side norm rhsn */
+    bool converged()
         {
         bool cv(false);
-        res = std::fabs(nr);// fabs should be useless
         if (std::isnan(res))
             { status = CANNOT_CONVERGE; }
         else
@@ -149,6 +149,13 @@ class iteration
                 { status = CONVERGED; }
             }
         return cv;
+        }
+
+    /** monitor the convergence through a number (the norm of a vector) */
+    bool converged(T nr)
+        {
+        res = std::fabs(nr);
+        return converged();
         }
 
     /** returns true if the algo has converged according the convergence criterias through a norm value nr */
