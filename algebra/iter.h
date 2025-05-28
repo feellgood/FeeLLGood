@@ -86,13 +86,20 @@ T get_rhsnorm(void) const { return rhsn; }
 /** setter for the right hand side norm */
 void set_rhsnorm(T r) { rhsn = r; }
 
+/** return the monitored algo has converged or not
+    according to criteria fixed by right hand side norm rhsn */
+bool converged()
+    {
+    if (std::isnan(res))
+        { std::cout << "residu is NaN, algo cannot converge.\n"; exit(1); }
+    return (res <= rhsn * resmax);
+    }
+
 /** monitor the convergence through a number */
 bool converged(T nr)
     {
     res = std::fabs(nr);
-    if (std::isnan(res))
-        { std::cout << "residu is NaN, algo cannot converge.\n"; exit(1); }
-    return (res <= rhsn * resmax);
+    return converged();
     }
 
 /** returns true if the algo has converged according the convergence criterias through a norm value nr */
