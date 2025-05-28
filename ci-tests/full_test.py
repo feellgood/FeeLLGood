@@ -38,7 +38,6 @@ settings = {
     },
     "initial_magnetization": [0, 0, 1],
     "Bext": [1, 0, -1],
-    "finite_element_solver": { "nb_threads": nbThreads },
     "demagnetizing_field_solver": { "nb_threads": nbThreads },
     "time_integration": {
         "min(dt)": 0.5e-14,
