@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(test_cg, *boost::unit_test::tolerance(UT_TOL))
     r_sparseMat bob(m);
     std::vector<double> b {1.0,1.0,1.0,1.0};
     std::vector<double> x(N);
-    iteration algo_it;
+    iteration<double> algo_it;
     double res = cg(algo_it,bob,x,b);
     std::cout << "CG test:\nresidu= " << res << std::endl;
     BOOST_CHECK(res < 1e-6);// default iteration tol is 1e-8
@@ -320,7 +320,7 @@ BOOST_AUTO_TEST_CASE(test_bicg, *boost::unit_test::tolerance(UT_TOL))
     r_sparseMat bob(m);
     std::vector<double> b {1.0,1.0,1.0,1.0};
     std::vector<double> x(N);
-    iteration algo_it;
+    iteration<double> algo_it;
     double res = bicg(algo_it,bob,x,b);
     std::cout << "BICG test:\nresidu= " << res << std::endl;
     BOOST_CHECK(res < 1e-6);// default iteration tol is 1e-8

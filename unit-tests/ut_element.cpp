@@ -46,10 +46,10 @@ BOOST_AUTO_TEST_CASE(Fac_assemblage_vect, *boost::unit_test::tolerance(UT_TOL))
     std::cout << "fac.assemblage_vect test: test the norm of the output vector built\n";
     
     algebra::Vector<double> L(2*nbNod,1.0);
-    f.assemblage_vect(nbNod,L);// init val of f.Lp is zero
+    f.assemble_vect(nbNod,L);// init val of f.Lp is zero
     BOOST_TEST(algebra::norm(L) == sqrt(6.0));
     f.Lp[2*Facette::N - 1] -= 1.0;
-    f.assemblage_vect(nbNod,L);
+    f.assemble_vect(nbNod,L);
     BOOST_TEST(algebra::norm(L) == sqrt(5.0));
     }
 
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(Fac_assemblage_mat, *boost::unit_test::tolerance(UT_TOL))
     std::cout << "fac.assemblage_mat test: test the output matrix built\n";
     
     algebra::w_sparseMat Kw(2*nbNod);
-    f.assemblage_mat(nbNod,Kw);// init val of f.Kp is zero
+    f.assemble_mat(nbNod,Kw);// init val of f.Kp is zero
     algebra::r_sparseMat Kr(Kw);
     
     for(unsigned int i=0;i<2*nbNod;i++)
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(Fac_assemblage_mat, *boost::unit_test::tolerance(UT_TOL))
             }
     
     f.Kp(2*Facette::N - 1,2*Facette::N - 1) += 1.0;
-    f.assemblage_mat(nbNod,Kw);
+    f.assemble_mat(nbNod,Kw);
     algebra::r_sparseMat Kr2(Kw);
     int i = Facette::N - 1;
     BOOST_CHECK(Kr2(f.ind[i],nbNod + f.ind[i]) == 1.0);
@@ -120,10 +120,10 @@ BOOST_AUTO_TEST_CASE(Tet_assemblage_vect, *boost::unit_test::tolerance(UT_TOL))
     std::cout << "Tet.assemblage_vect test: test the norm of the output vector built\n";
     
     algebra::Vector<double> L(2*nbNod,1.0);
-    t.assemblage_vect(nbNod,L);// init val of t.Lp is zero
+    t.assemble_vect(nbNod,L);// init val of t.Lp is zero
     BOOST_TEST(algebra::norm(L) == sqrt(8.0));
     t.Lp[2*Tetra::N - 1] -= 1.0;
-    t.assemblage_vect(nbNod,L);
+    t.assemble_vect(nbNod,L);
     BOOST_TEST(algebra::norm(L) == sqrt(7.0));
     }
 
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE(Tet_assemblage_mat, *boost::unit_test::tolerance(UT_TOL))
     std::cout << "Tet.assemblage_mat test: test the output matrix built\n";
     
     algebra::w_sparseMat Kw(2*nbNod);
-    t.assemblage_mat(nbNod,Kw);// init val of t.Kp is zero
+    t.assemble_mat(nbNod,Kw);// init val of t.Kp is zero
     algebra::r_sparseMat Kr(Kw);
     
     for(unsigned int i=0;i<2*nbNod;i++)
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(Tet_assemblage_mat, *boost::unit_test::tolerance(UT_TOL))
             }
     
     t.Kp(2*Tetra::N - 1,2*Tetra::N - 1) += 1.0;
-    t.assemblage_mat(nbNod,Kw);
+    t.assemble_mat(nbNod,Kw);
     algebra::r_sparseMat Kr2(Kw);
     int i = Tetra::N - 1;
     BOOST_CHECK(Kr2(t.ind[i],nbNod + t.ind[i]) == 1.0);
