@@ -166,6 +166,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     calc_Hext(Hext);// Hext is defined on gauss points, calc_Hext do a = on Hext
 
     Eigen::Matrix<double,DIM,NPI> Heff = Hd + Hext;
+    Eigen::Matrix<double,DIM,NPI> H = Heff; // we need Hd+Hext for future computations
     extraField(Heff);// extraField do a +=like for STT contrib on Heff
     uHeff += (U.cwiseProduct(Heff)).colwise().sum();//dot product on each col of U and Heff
 
@@ -194,8 +195,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
         else if (idx_dir == IDX_X)
             add_drift_BE(alpha, s_dt, Vdrift, U, V, dUdx, dVd_dir, BE);
         }
-
-    Eigen::Matrix<double,DIM,NPI> H = Hext + H_aniso + Hd + (s_dt / gamma0) * Hv;
+    H += H_aniso + (s_dt / gamma0) * Hv;
     
     for (int npi = 0; npi < NPI; npi++)
         {
