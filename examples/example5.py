@@ -118,8 +118,8 @@ settings = {
         "filename": meshFileName,
         "length_unit": 1e-9,
         "volume_regions": {
-            vol_regName: { "Ae": 1e-11, "Js": 1, "alpha_LLG": 0.05, "beta": 0.7, "sigma": 2.0 },
-            vol_regName2: { "Ae": 0, "Js": 0, "beta": 0.7, "sigma": 1.0 }
+            vol_regName: { "Ae": 1e-11, "Js": 1, "alpha_LLG": 0.05, "beta": 0.7, "sigma": 1.7e7 }, #Co
+            vol_regName2: { "Ae": 0, "Js": 0, "beta": 0.7, "sigma": 5.8e7 } #Cu
             },
         "surface_regions": {
             surf_regName: {},
@@ -129,7 +129,6 @@ settings = {
     },
     "initial_magnetization": [1, 0, 1],
     "Bext": [0, 0, 0],
-    "finite_element_solver": { "nb_threads": 32 },
     "demagnetizing_field_solver": { "nb_threads": 32 },
     "time_integration": {
         "min(dt)": 0.5e-16,
