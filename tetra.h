@@ -268,9 +268,10 @@ public:
                                                Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H_aniso) const;
 
     /** computes the integral contribution of the tetrahedron to the evolution of the magnetization
+     * calc_Hext is a function that returns external H field defined on gauss points
      */
     void integrales( Tetra::prm const &param, timing const &prm_t,
-                    std::function<void( Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> Hext )> calc_Hext,
+                    std::function< Eigen::Matrix<double,Nodes::DIM,NPI> (void)> calc_Hext,
                     Nodes::index idx_dir, double Vdrift);
 
     /** exchange energy of the tetrahedron */

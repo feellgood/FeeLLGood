@@ -126,7 +126,7 @@ Eigen::Matrix<double,NPI,1> Tet::calc_aniso_cub(Eigen::Ref<const Eigen::Vector3d
     }
 
 void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
-                     std::function<void( Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> Hext )> calc_Hext,//Eigen::Vector3d const &Hext,
+                     std::function< Eigen::Matrix<double,DIM,NPI> (void)> calc_Hext,
                      Nodes::index idx_dir, double Vdrift)
     {
     const double alpha = param.alpha_LLG;
@@ -162,10 +162,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
         uHeff += calc_aniso_cub(param.ex, param.ey, param.ez, K3bis, s_dt, U, V, H_aniso);
         }
 
-    Eigen::Matrix<double,DIM,NPI> Hext;
-    calc_Hext(Hext);// Hext is defined on gauss points, calc_Hext do a = on Hext
-
-    Eigen::Matrix<double,DIM,NPI> Heff = Hd + Hext;
+    Eigen::Matrix<double,DIM,NPI> Heff = Hd + calc_Hext();
     Eigen::Matrix<double,DIM,NPI> H = Heff; // we need Hd+Hext for future computations
     extraField(Heff);// extraField do a +=like for STT contrib on Heff
     uHeff += (U.cwiseProduct(Heff)).colwise().sum();//dot product on each col of U and Heff

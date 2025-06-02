@@ -46,11 +46,15 @@ public:
             { setExtSpaceField(s); }
         }
 
-    /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors) */
+    /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors)
+    this member function is overloaded to fit to two different situations, either if std::function passed to element = tetra is corresponding to the simple case of constant external field applied to the magnetic region or space dependant. Here is the constant space applied field.
+    */
     void prepareElements(Eigen::Vector3d const &Hext /**< [in] applied field */, timing const &t_prm /**< [in] */);
 
-    /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors) */
-    void prepareElements(double const A_Hext /**< [in] amplitude applied field */, timing const &t_prm /**< [in] */);
+    /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors) 
+    this member function is overloaded to fit to two different situations, either if std::function passed to element = tetra is corresponding to the simple case of constant external field applied to the magnetic region or space dependant. Here is the variable space applied field.
+    */
+    void prepareElements(double const A_Hext /**< [in] amplitude applied field (might be time dependant)*/, timing const &t_prm /**< [in] */);
 
     /** build init guess for bicg solver */
     void buildInitGuess(algebra::Vector<double> &G/**< [out] */) const;
