@@ -28,7 +28,12 @@ class w_sparseMat
 
 public:
 /** constructor */
-    w_sparseMat(const int _N):N(_N) { m.resize(N); }
+    w_sparseMat(const int _N) : N(_N)
+        {
+        m.reserve(N);
+        for (int i = 0; i < N; ++i)
+            m.emplace_back(N);
+        }
 
 /** inserter for a coefficient val at line i col j */
     void insert(const int i, const int j, const double val)

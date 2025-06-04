@@ -41,8 +41,16 @@ it is a class for sparse vector in writing mode, using std::map<int,double> as c
 class w_sparseVect
 {
 public:
+    /** Constructor. */
+    w_sparseVect(int dimension) : N(dimension) {}
+
     /** inserter with a coefficient */
-    void insert(int i, double val) { coefs[i] += val; }
+    void insert(int i, double val)
+        {
+        if (i < 0 || i >= N)
+            { std::cerr << "Error: out-of-range index in sparse vector.\n"; exit(1); }
+        coefs[i] += val;
+        }
 
     /** Insert the coefficients into vector v */
     void inorder_insert(std::vector<v_coeff> &v) const
@@ -53,6 +61,9 @@ public:
 
     /** Return the number of elements */
     size_t size() const { return coefs.size(); }
+
+    /** Dimension of the vector. All indices lie within [0, N). */
+    const int N;
 
 private:
     /** coeffs container */
