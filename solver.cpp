@@ -12,12 +12,6 @@ int LinAlgebra::solver(timing const &t_prm)
     std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
                       [this](Tetra::Tet &my_elem) { my_elem.assemble_mat(NOD,K); } );
 
-    if (verbose)
-        {
-        std::cout << "matrix assembly done in " << counter.millis() << std::endl;
-        counter.reset();
-        }
-
     algebra::iteration iter(TOL);
     iter.set_maxiter(MAXITER);
     iter.set_noisy(verbose);
@@ -28,6 +22,12 @@ int LinAlgebra::solver(timing const &t_prm)
     std::for_each(refMsh->fac.begin(), refMsh->fac.end(),
                       [this](Facette::Fac &my_elem) { my_elem.assemble_vect(NOD,L_rhs); } );
 
+    /* RHS forced to zero outside mag material */
+    std::for_each(lvd.begin(),lvd.end(),[this](int i){ L_rhs[i]=0.0; });
+
+    /* to force v=0 on nodes outside magnetic material, diagonal coefficients are forced to 1 */
+    std::for_each(lvd.begin(),lvd.end(),[this](int i){ K.add(i,i,1.0); }); // adding triplet (i,i,1.0) while diag coeff already exists ???? really ???
+    // TODO: we should overload sparseMat constructor to do something like Kr(Kw,lvd);
     if (verbose)
         {
         std::cout << "matrix assembly done in " << counter.millis() << std::endl;
@@ -35,7 +35,8 @@ int LinAlgebra::solver(timing const &t_prm)
         }
 
     buildInitGuess(Xw);// gamma0 division handled by function buildInitGuess
-    double residu = algebra::bicg<double>(iter, K, Xw, L_rhs);
+    std::vector<double> Xvd(2*NOD,0); // wtf? in bicg_dir algo it is used as an input to compute K*Xvd, this should NOT be zero
+    double residu = algebra::bicg_dir<double>(iter, K, Xw, L_rhs, Xvd, lvd);
 
     int nb_iter = iter.get_iteration();
     double _solver_error= iter.get_res();
