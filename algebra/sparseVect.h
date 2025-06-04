@@ -39,7 +39,7 @@ public:
     inline void insert(v_coeff coeff) { coefs[coeff._i] += coeff.getVal(); }
 
     /** Insert the coefficients into vector v */
-    void inorder_insert(std::vector<v_coeff> &v)
+    void inorder_insert(std::vector<v_coeff> &v) const
         {
         for (auto it = coefs.begin(); it != coefs.end(); ++it)
             v.push_back(v_coeff{it->first, it->second});
@@ -62,7 +62,7 @@ class r_sparseVect: public std::vector<v_coeff>
 {
 public:
     /** constructor from a write sparse vector */
-    r_sparseVect(w_sparseVect &v): std::vector<v_coeff>()
+    r_sparseVect(const w_sparseVect &v): std::vector<v_coeff>()
         {
         reserve(v.size());
         v.inorder_insert(*this);

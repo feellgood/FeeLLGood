@@ -57,7 +57,7 @@ class r_sparseMat
 {
 public:
     /** constructor */
-    inline r_sparseMat(w_sparseMat &A):N(A.getDim())
+    inline r_sparseMat(const w_sparseMat &A):N(A.getDim())
         {
         m.reserve(N);  // N is the number of lines
         if (!A.m.empty())
@@ -65,7 +65,8 @@ public:
         }
 
 /** printing function */
-    inline void print(void) { std::for_each(m.begin(),m.end(),[](r_sparseVect const& _v) {std::cout << _v;} ); }
+    inline void print(void) const
+    { std::for_each(m.begin(),m.end(),[](r_sparseVect const& _v) {std::cout << _v;} ); }
 
 /** printing function */
     inline void print(std::ostream & flux) const
@@ -75,7 +76,7 @@ public:
     inline int getDim(void) const {return N;}
 
 /** getter for an innner sparse vector */
-    inline r_sparseVect & operator() (const int & i) {return m[i];}
+    inline const r_sparseVect & operator() (const int & i) const {return m[i];}
 
 /** getter for a coefficient value */
     inline double operator() (const int &i, const int &j) const { return m[i].getVal(j); }
@@ -85,12 +86,12 @@ template <typename T>
 void mult(Vector<T> const& X, Vector<T> &Y)
     {
     std::transform(std::execution::par,m.begin(),m.end(),Y.begin(),
-                   [&X](r_sparseVect &_v){ return _v.dot(X); });
+                   [&X](const r_sparseVect &_v){ return _v.dot(X); });
     }
 
 /** build diagonal preconditioner D from input matrix(this) */
 template <typename T>
-void build_diag_precond(Vector<T> &D)
+void build_diag_precond(Vector<T> &D) const
     {
     for(unsigned int i=0;i<D.size();i++)
         {
