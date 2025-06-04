@@ -52,6 +52,7 @@ public:
         if(s.getFieldType() == R4toR3)
             { setExtSpaceField(s); }
         v_max = 0;
+        my_msh.build_lvd(lvd);
         }
 
     /** build a matrix shape suitable for our mesh */
@@ -145,5 +146,8 @@ private:
 
     /** compute v_max, the maximum of the magnetization velocity of all the magnetic regions */
     void updateVmax(Eigen::VectorXd &sol);
+
+    /** list of the Dirichlet indices where (vp,vq) are zero */
+    std::vector<int> lvd;
     };// end class linAlgebra
 #endif

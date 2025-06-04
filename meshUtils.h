@@ -39,3 +39,12 @@ bool checkNamedObjects(std::vector<T> const &v_prm, const int dim_obj)
     return existRegions;
     }
 
+/** order and suppress copies in the input list */
+template<typename T>
+void suppress_copies(std::vector<T> &v_idx)
+    {
+    std::sort(v_idx.begin(), v_idx.begin()+v_idx.size());
+    auto it = std::unique(v_idx.begin(), v_idx.end() );
+    v_idx.resize( std::distance(v_idx.begin(),it) );
+    v_idx.shrink_to_fit();
+    }

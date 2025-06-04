@@ -264,6 +264,12 @@ public:
     /** getter for the node_index value at position i */
     inline int getNodeIndex(const int i) const { return node_index[i]; }
 
+    /** build the list of the Dirichlet indices from input mesh, output in lvd */
+    void build_lvd(std::vector<int> &lvd);
+
+    /** return true if this tetraedron is magnetic */
+    inline bool isMagnetic(Tetra::Tet &t) { return (paramTetra[t.idxPrm].J > 0); }
+
     /** Edges of all the tetrahedrons, i.e. all the unique pairs of adjacent node indices.
      * Each pair is sorted: first < second.
      * The list is sorted lexicographically, as per std::pair::operator<(). */
