@@ -58,9 +58,6 @@ read sparse vector : it is a std::vector container for v_coeff, in reading mode
 class r_sparseVect: public std::vector<v_coeff>
 {
 public:
-    /** default constructor */
-    r_sparseVect(): std::vector<v_coeff>() {}
-
     /** constructor from a write sparse vector */
     r_sparseVect(w_sparseVect &v): std::vector<v_coeff>()
         {
