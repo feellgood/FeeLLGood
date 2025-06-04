@@ -79,7 +79,7 @@ class r_sparseVect: public std::vector<v_coeff>
 {
 public:
     /** constructor from a write sparse vector */
-    r_sparseVect(const w_sparseVect &v): std::vector<v_coeff>()
+    r_sparseVect(const w_sparseVect &v) : std::vector<v_coeff>(), N(v.N)
         {
         reserve(v.size());
         v.inorder_insert(*this);
@@ -91,6 +91,8 @@ public:
      */
     double getVal(const int idx) const
         {
+        if (idx < 0 || idx >= N)
+            { std::cerr << "Error: out-of-range index in getVal().\n"; exit(1); }
         double val(0);
         auto it = std::find_if(begin(),end(),
                 [this,&idx](v_coeff coeff){return (coeff.first == idx); } );
@@ -102,6 +104,8 @@ public:
     double dot(const std::vector<double> & X) const
         {
         double val(0);
+        if (int(X.size()) != N)
+            { std::cerr << "Error: wrong vector dimensions in dot product.\n"; exit(1); }
         for(auto it=begin();it!=end();++it)
             { if(it->first < (int)(X.size()) ) { val += it->second * X[it->first]; } }
         return val;
@@ -115,6 +119,9 @@ public:
             { flux << '{' << c.first << ':' << c.second <<'}';});
         flux<<"}\n";
         }
+
+    /** Dimension of the vector. All indices lie within [0, N). */
+    const int N;
 }; // end class r_sparseVect
 
 } // end namespace algebra
