@@ -38,17 +38,6 @@ public:
     /** inserter with a coefficient */
     inline void insert(v_coeff coeff) { coefs[coeff._i] += coeff.getVal(); }
 
-    /** return true if the coefficient exists */
-    inline bool exist(const int &idx) const { return coefs.find(idx) != coefs.end(); }
-
-    /** getter for the value of a coefficient of index idx, if several coeffs have the same index then it returns the value of the first occurence */
-    inline double getVal(const int idx) const
-        {
-        auto it = coefs.find(idx);
-        if (it == coefs.end()) return 0;
-        return it->second;
-        }
-
     /** Insert the coefficients into vector v */
     void inorder_insert(std::vector<v_coeff> &v)
         {
