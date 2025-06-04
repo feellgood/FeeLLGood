@@ -1,4 +1,5 @@
 #include "mesh.h"
+#include "meshUtils.h"
 #include <utility>
 
 using namespace Mesh;
@@ -125,4 +126,35 @@ void mesh::sortNodes(Nodes::index long_axis)
                       facette.ind[1] = node_index[facette.ind[1]];
                       facette.ind[2] = node_index[facette.ind[2]];
                   });
+    }
+
+void mesh::build_lvd(std::vector<int> &lvd)
+    {
+    const int NOD = node.size();
+    std::vector<int> ld(NOD);// list of Dirichlet nodes where to solve LLG
+    std::vector<int> all(NOD);
+    std::vector<int> dofs; // list of the nodes where LLG does apply
+    std::iota(all.begin(),all.end(),0); // all = { 0,1,...,NOD-1}
+    std::for_each(tet.begin(),tet.end(),[this,&dofs](Tetra::Tet &t)
+                  {
+                  if (isMagnetic(t))
+                      {
+                      dofs.push_back(t.ind[0]);
+                      dofs.push_back(t.ind[1]);
+                      dofs.push_back(t.ind[2]);
+                      dofs.push_back(t.ind[3]);
+                      }
+                  });
+
+    suppress_copies<int>(dofs);
+    auto it = std::set_difference(all.begin(),all.end(),dofs.begin(),dofs.end(),ld.begin());
+    ld.resize(it - ld.begin());
+    ld.shrink_to_fit();
+    int nb_coeffs = ld.size();
+    lvd.resize(2*nb_coeffs);
+    for(int i=0;i<nb_coeffs;i++)
+        {
+        lvd[i] = ld[i];
+        lvd[i+nb_coeffs] = ld[i] + NOD;
+        }
     }
