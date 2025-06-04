@@ -34,7 +34,6 @@ it is a class for sparse vector in writing mode, using std::map<int,double> as c
 */
 class w_sparseVect
 {
-    friend class r_sparseVect;
 public:
     /** inserter with a coefficient */
     inline void insert(v_coeff coeff) { coefs[coeff._i] += coeff.getVal(); }
