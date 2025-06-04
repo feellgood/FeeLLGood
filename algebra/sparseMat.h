@@ -76,10 +76,10 @@ public:
     int getDim() const {return N;}
 
 /** getter for an innner sparse vector */
-    const r_sparseVect & operator() (const int & i) const {return m[i];}
+    const r_sparseVect & operator() (const int i) const {return m[i];}
 
 /** getter for a coefficient value */
-    double operator() (const int &i, const int &j) const { return m[i].getVal(j); }
+    double operator() (const int i, const int j) const { return m[i].getVal(j); }
 
 /** Y = this*X */
 template <typename T>

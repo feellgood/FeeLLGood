@@ -87,7 +87,7 @@ inline std::ostream & operator<<(std::ostream & flux, r_sparseMat const& m)
 
 template <typename T>
 bool check(Vector<T> &v)
-    { return std::none_of(v.begin(),v.end(), [](T &x){ return std::isnan(x);} );  }
+    { return std::none_of(v.begin(),v.end(), [](T x){ return std::isnan(x);} );  }
 } // end namespace algebra
 
 #endif
