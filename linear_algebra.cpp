@@ -69,7 +69,6 @@ void LinAlgebra::prepareElements(double const A_Hext /**< [in] amplitude applied
                   });
     }
 
-
 void LinAlgebra::setExtSpaceField(Settings &s /**< [in] */)
     { // see here for ref code /data/jc/st_feellgood_2024/src_Tube_scalfmm_zhang_ec_mu_oersted_spinHall_thiele_dyn20240320_dev
     extSpaceField.resize(refMsh->tet.size());
@@ -100,3 +99,4 @@ void LinAlgebra::updateVmax(Eigen::VectorXd &sol)
     #endif
     v_max *= gamma0;
     }
+
