@@ -14,7 +14,6 @@
 #include <algorithm>
 
 
-#include "coeff.h"
 #include "sparseVect.h"
 #include "sparseMat.h"
 

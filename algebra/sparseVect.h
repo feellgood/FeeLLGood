@@ -23,10 +23,16 @@ std::ostream& operator << (std::ostream& os, const std::vector<T>& v)
     {
     os << "[";
     for (auto it = v.begin(); it != v.end(); ++it)
-        { os << "{" << it->_i << ":" << it->getVal() << "},"; }
+        { os << "{" << it->first << ":" << it->second << "},"; }
     os << "]";
     return os;
     }
+
+/**
+\class v_coeff
+A coefficient of a sparse vector is an (index, value) pair.
+*/
+using v_coeff = std::pair<int, double>;
 
 /**
 \class w_sparseVect
@@ -36,7 +42,7 @@ class w_sparseVect
 {
 public:
     /** inserter with a coefficient */
-    void insert(v_coeff coeff) { coefs[coeff._i] += coeff.getVal(); }
+    void insert(v_coeff coeff) { coefs[coeff.first] += coeff.second; }
 
     /** Insert the coefficients into vector v */
     void inorder_insert(std::vector<v_coeff> &v) const
@@ -75,8 +81,9 @@ public:
     double getVal(const int idx) const
         {
         double val(0);
-        auto it = std::find_if(begin(),end(),[this,&idx](v_coeff coeff){return (coeff._i == idx); } );
-        if (it != end()) val = it->getVal();
+        auto it = std::find_if(begin(),end(),
+                [this,&idx](v_coeff coeff){return (coeff.first == idx); } );
+        if (it != end()) val = it->second;
         return val;
         }
 
@@ -85,7 +92,7 @@ public:
         {
         double val(0);
         for(auto it=begin();it!=end();++it)
-            { if(it->_i < (int)(X.size()) ) { val += it->getVal()*X[it->_i]; } }
+            { if(it->first < (int)(X.size()) ) { val += it->second * X[it->first]; } }
         return val;
         }
 
@@ -94,7 +101,7 @@ public:
         {
         flux<<'{';
         std::for_each(begin(),end(), [&flux](const v_coeff &c)
-            { flux << '{' << c._i << ':' << c.getVal() <<'}';});
+            { flux << '{' << c.first << ':' << c.second <<'}';});
         flux<<"}\n";
         }
 }; // end class r_sparseVect
