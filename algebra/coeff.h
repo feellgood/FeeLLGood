@@ -22,26 +22,6 @@ public:
     /** getter for the value of the coefficient */
     double getVal() const {return _c;}
 
-    /** setter for the value of the coefficient */
-    void setVal(const double val) {_c = val;}
-
-    /** ref to coeff value */
-    double & valRef() {return _c;}
-
-    /** increment value with val */
-    void add(const double val) { _c += val;}
-/**
-lexicographic order
-*/
-    bool operator< (const v_coeff &c) const
-    { return (this->_i < c._i); }
-
-/**
-two coeffs are equal when their indices are equals
-*/
-    bool operator== (const v_coeff &c) const
-    { return (this->_i == c._i); }
-
     /** index of the coefficient */
     int _i;
 
@@ -52,9 +32,6 @@ private:
 /** value of the coefficient */
     double _c;
 }; //end class v_coeff
-
-/** operator<< for v_coeff */
-inline std::ostream & operator<<(std::ostream & flux, v_coeff const& v) {v.print(flux); return flux;}
 
 } // end namespace algebra
 
