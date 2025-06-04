@@ -64,7 +64,6 @@ public:
     /** constructor from a write sparse vector */
     r_sparseVect(w_sparseVect &v): std::vector<v_coeff>()
         {
-        clear();
         v.inorder_insert(*this);
         }
 
