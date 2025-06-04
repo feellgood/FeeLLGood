@@ -34,7 +34,7 @@ public:
     void insert(const int i, const int j, const double val)
         {
         assert(i<N && j<N );
-        m[i].insert({j, val});
+        m[i].insert(j, val);
         }
 
 /** getter for the number of lines */

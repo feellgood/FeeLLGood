@@ -42,7 +42,7 @@ class w_sparseVect
 {
 public:
     /** inserter with a coefficient */
-    void insert(v_coeff coeff) { coefs[coeff.first] += coeff.second; }
+    void insert(int i, double val) { coefs[i] += val; }
 
     /** Insert the coefficients into vector v */
     void inorder_insert(std::vector<v_coeff> &v) const
