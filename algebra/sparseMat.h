@@ -59,9 +59,9 @@ public:
     /** constructor */
     inline r_sparseMat(w_sparseMat &A):N(A.getDim())
         {
-        m.resize(N);// N is the number of lines
+        m.reserve(N);  // N is the number of lines
         if (!A.m.empty())
-            { for(int i=0; i<N; ++i){ m[i].collect(A.m[i]); } }
+            { for(int i=0; i<N; ++i){ m.emplace_back(A.m[i]); } }
         }
 
 /** printing function */
