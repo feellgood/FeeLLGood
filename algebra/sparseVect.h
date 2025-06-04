@@ -45,6 +45,9 @@ public:
             v.push_back(v_coeff{it->first, it->second});
         }
 
+    /** Return the number of elements */
+    size_t size() const { return coefs.size(); }
+
 private:
     /** coeffs container */
     std::map<int, double> coefs;
@@ -61,6 +64,7 @@ public:
     /** constructor from a write sparse vector */
     r_sparseVect(w_sparseVect &v): std::vector<v_coeff>()
         {
+        reserve(v.size());
         v.inorder_insert(*this);
         }
 
