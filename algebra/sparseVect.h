@@ -64,12 +64,6 @@ public:
         v.inorder_insert(*this);
         }
 
-    /** return true if the coefficient exists */
-    inline bool exist(const int idx) const
-        {
-        return ( std::find_if(begin(),end(),[this,&idx](v_coeff coeff){return (coeff._i == idx);}) != end() );
-        }
-
     /** getter for the value of a coefficient of index idx
     if several coeffs have the same index then it returns the value of the first occurence
     return zero if coefficient of index idx does not exist
