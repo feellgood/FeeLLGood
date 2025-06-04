@@ -28,17 +28,17 @@ class w_sparseMat
 
 public:
 /** constructor */
-    inline w_sparseMat(const int _N):N(_N) { m.resize(N); }
+    w_sparseMat(const int _N):N(_N) { m.resize(N); }
 
 /** inserter for a coefficient val at line i col j */
-    inline void insert(const int i, const int j, const double val)
+    void insert(const int i, const int j, const double val)
         {
         assert(i<N && j<N );
         m[i].insert({j, val});
         }
 
 /** getter for the number of lines */
-    inline int getDim(void) const {return N;}
+    int getDim() const {return N;}
 
 private:
 /** dimension of sparse matrix, N is the number of lines */
@@ -57,7 +57,7 @@ class r_sparseMat
 {
 public:
     /** constructor */
-    inline r_sparseMat(const w_sparseMat &A):N(A.getDim())
+    r_sparseMat(const w_sparseMat &A):N(A.getDim())
         {
         m.reserve(N);  // N is the number of lines
         if (!A.m.empty())
@@ -65,21 +65,21 @@ public:
         }
 
 /** printing function */
-    inline void print(void) const
+    void print() const
     { std::for_each(m.begin(),m.end(),[](r_sparseVect const& _v) {std::cout << _v;} ); }
 
 /** printing function */
-    inline void print(std::ostream & flux) const
+    void print(std::ostream & flux) const
     { std::for_each(m.begin(),m.end(),[&flux](r_sparseVect const& _v) {_v.print(flux);} ); }
 
     /** getter for the number of lines */
-    inline int getDim(void) const {return N;}
+    int getDim() const {return N;}
 
 /** getter for an innner sparse vector */
-    inline const r_sparseVect & operator() (const int & i) const {return m[i];}
+    const r_sparseVect & operator() (const int & i) const {return m[i];}
 
 /** getter for a coefficient value */
-    inline double operator() (const int &i, const int &j) const { return m[i].getVal(j); }
+    double operator() (const int &i, const int &j) const { return m[i].getVal(j); }
 
 /** Y = this*X */
 template <typename T>

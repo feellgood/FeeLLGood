@@ -36,7 +36,7 @@ class w_sparseVect
 {
 public:
     /** inserter with a coefficient */
-    inline void insert(v_coeff coeff) { coefs[coeff._i] += coeff.getVal(); }
+    void insert(v_coeff coeff) { coefs[coeff._i] += coeff.getVal(); }
 
     /** Insert the coefficients into vector v */
     void inorder_insert(std::vector<v_coeff> &v) const
@@ -72,7 +72,7 @@ public:
     if several coeffs have the same index then it returns the value of the first occurence
     return zero if coefficient of index idx does not exist
      */
-    inline double getVal(const int idx) const
+    double getVal(const int idx) const
         {
         double val(0);
         auto it = std::find_if(begin(),end(),[this,&idx](v_coeff coeff){return (coeff._i == idx); } );
@@ -81,7 +81,7 @@ public:
         }
 
     /** scalar product */
-    inline double dot(const std::vector<double> & X) const
+    double dot(const std::vector<double> & X) const
         {
         double val(0);
         for(auto it=begin();it!=end();++it)
@@ -90,7 +90,7 @@ public:
         }
 
     /** printing function */
-    inline void print(std::ostream & flux) const
+    void print(std::ostream & flux) const
         {
         flux<<'{';
         std::for_each(begin(),end(), [&flux](const v_coeff &c)

@@ -57,13 +57,13 @@ void operator ++(int) { nit++; written = false; }
 void operator ++() { (*this)++; }
 
 /** true if iterations are starting */
-bool first(void) { return nit == 0; }
+bool first() { return nit == 0; }
 
 /** set the "noisyness" (verbosity) of the solvers */
 void set_noisy(int n) { noise = n; }
 
 /** getter for resmax */
-T get_resmax(void) const { return resmax; }
+T get_resmax() const { return resmax; }
 
 /** setter for resmax */
 void set_resmax(T r) { resmax = r; }
@@ -72,16 +72,16 @@ void set_resmax(T r) { resmax = r; }
 T get_res() const { return res; }
 
 /** getter for number of iterations */
-size_t get_iteration(void) const { return nit; }
+size_t get_iteration() const { return nit; }
 
 /** getter for the maximum number of iterations */
-size_t get_maxiter(void) const { return maxiter; }
+size_t get_maxiter() const { return maxiter; }
 
 /** setter for the maximum number of iterations */
 void set_maxiter(size_t i) { maxiter = i; }
 
 /** getter for the right hand side norm value */
-T get_rhsnorm(void) const { return rhsn; }
+T get_rhsnorm() const { return rhsn; }
 
 /** setter for the right hand side norm */
 void set_rhsnorm(T r) { rhsn = r; }
