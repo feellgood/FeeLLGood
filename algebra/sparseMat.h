@@ -90,6 +90,8 @@ public:
 template <typename T>
 void mult(Vector<T> const& X, Vector<T> &Y)
     {
+    if (int(X.size()) != N)
+        { std::cerr << "Error: wrong dimensions in matrix-vector product.\n"; exit(1); }
     std::transform(std::execution::par,m.begin(),m.end(),Y.begin(),
                    [&X](const r_sparseVect &_v){ return _v.dot(X); });
     }

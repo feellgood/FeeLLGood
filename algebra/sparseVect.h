@@ -100,12 +100,10 @@ public:
         return val;
         }
 
-    /** scalar product */
+    /** Scalar product. The caller must ensure the vector dimensions match. */
     double dot(const std::vector<double> & X) const
         {
         double val(0);
-        if (int(X.size()) != N)
-            { std::cerr << "Error: wrong vector dimensions in dot product.\n"; exit(1); }
         for(auto it=begin();it!=end();++it)
             { val += it->second * X[it->first]; }
         return val;
