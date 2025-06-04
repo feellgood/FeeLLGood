@@ -74,9 +74,6 @@ public:
     /** getter for the number of lines */
     inline int getDim(void) const {return N;}
 
-/** return true if the coefficient exists */
-    inline bool exist(const int &i, const int &j) const { return ( (i<N)&&(m[i].exist(j)) ); }
-
 /** getter for an innner sparse vector */
     inline r_sparseVect & operator() (const int & i) {return m[i];}
 
