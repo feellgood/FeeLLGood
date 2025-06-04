@@ -62,19 +62,16 @@ public:
     r_sparseVect(): std::vector<v_coeff>() {}
 
     /** constructor from a write sparse vector */
-    r_sparseVect(w_sparseVect &v): std::vector<v_coeff>() { collect(v); }
+    r_sparseVect(w_sparseVect &v): std::vector<v_coeff>()
+        {
+        clear();
+        v.inorder_insert(*this);
+        }
 
     /** return true if the coefficient exists */
     inline bool exist(const int idx) const
         {
         return ( std::find_if(begin(),end(),[this,&idx](v_coeff coeff){return (coeff._i == idx);}) != end() );
-        }
-
-    /** collect method is sorting all v_coeffs, eventually with redundant indices, and is summing coeffs with same indices. It removes the coeffs that have been summed. */
-    inline void collect(w_sparseVect &v)
-        {
-        clear();
-        v.inorder_insert(*this);
         }
 
     /** getter for the value of a coefficient of index idx
