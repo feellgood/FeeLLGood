@@ -107,7 +107,7 @@ public:
         if (int(X.size()) != N)
             { std::cerr << "Error: wrong vector dimensions in dot product.\n"; exit(1); }
         for(auto it=begin();it!=end();++it)
-            { if(it->first < (int)(X.size()) ) { val += it->second * X[it->first]; } }
+            { val += it->second * X[it->first]; }
         return val;
         }
 
