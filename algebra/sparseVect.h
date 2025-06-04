@@ -48,7 +48,7 @@ public:
     void inorder_insert(std::vector<v_coeff> &v) const
         {
         for (auto it = coefs.begin(); it != coefs.end(); ++it)
-            v.push_back(v_coeff{it->first, it->second});
+            v.push_back(*it);
         }
 
     /** Return the number of elements */
