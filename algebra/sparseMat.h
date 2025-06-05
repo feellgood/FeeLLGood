@@ -70,11 +70,7 @@ public:
         }
 
 /** printing function */
-    void print() const
-    { std::for_each(m.begin(),m.end(),[](r_sparseVect const& _v) {std::cout << _v;} ); }
-
-/** printing function */
-    void print(std::ostream & flux) const
+    void print(std::ostream & flux = std::cout) const
     { std::for_each(m.begin(),m.end(),[&flux](r_sparseVect const& _v) {_v.print(flux);} ); }
 
     /** getter for the number of lines */
