@@ -37,8 +37,7 @@ int LinAlgebra::solver(timing const &t_prm)
         }
 
     buildInitGuess(Xw);// gamma0 division handled by function buildInitGuess
-    std::vector<double> Xvd(2*NOD,0); // wtf? in bicg_dir algo it is used as an input to compute K*Xvd, this should NOT be zero
-    algebra::bicg_dir<double>(iter, K, Xw, L_rhs, Xvd, lvd);
+    algebra::bicg_dir<double>(iter, K, Xw, L_rhs, lvd);
 
     if( (iter.status == algebra::ITER_OVERFLOW) || (iter.status == algebra::CANNOT_CONVERGE) || (iter.get_res() > iter.resmax) )
         {
