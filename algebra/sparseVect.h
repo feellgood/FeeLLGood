@@ -53,10 +53,13 @@ public:
         }
 
     /** Insert the coefficients into vector v */
-    void inorder_insert(std::vector<v_coeff> &v) const
+    void inorder_insert(std::vector<int> &indices, std::vector<double> &values) const
         {
         for (auto it = coefs.begin(); it != coefs.end(); ++it)
-            v.push_back(*it);
+            {
+            indices.push_back(it->first);
+            values.push_back(it->second);
+            }
         }
 
     /** Return the number of elements */
@@ -75,14 +78,15 @@ private:
 \class r_sparseVect
 read sparse vector : it is a std::vector container for v_coeff, in reading mode
 */
-class r_sparseVect: public std::vector<v_coeff>
+class r_sparseVect
 {
 public:
     /** constructor from a write sparse vector */
-    r_sparseVect(const w_sparseVect &v) : std::vector<v_coeff>(), N(v.N)
+    r_sparseVect(const w_sparseVect &v) : N(v.N)
         {
-        reserve(v.size());
-        v.inorder_insert(*this);
+        indices.reserve(v.size());
+        values.reserve(v.size());
+        v.inorder_insert(indices, values);
         }
 
     /** getter for the value of a coefficient of index idx
@@ -93,19 +97,18 @@ public:
         {
         if (idx < 0 || idx >= N)
             { std::cerr << "Error: out-of-range index in getVal().\n"; exit(1); }
-        double val(0);
-        auto it = std::find_if(begin(),end(),
-                [this,&idx](v_coeff coeff){return (coeff.first == idx); } );
-        if (it != end()) val = it->second;
-        return val;
+        for (size_t i = 0; i < indices.size(); ++i)
+            if (indices[i] == idx)
+                { return values[i]; }
+        return 0;
         }
 
     /** Scalar product. The caller must ensure the vector dimensions match. */
     double dot(const std::vector<double> & X) const
         {
         double val(0);
-        for(auto it=begin();it!=end();++it)
-            { val += it->second * X[it->first]; }
+        for (size_t i = 0; i < indices.size(); ++i)
+            { val += values[i] * X[indices[i]]; }
         return val;
         }
 
@@ -113,13 +116,17 @@ public:
     void print(std::ostream & flux) const
         {
         flux<<'{';
-        std::for_each(begin(),end(), [&flux](const v_coeff &c)
-            { flux << '{' << c.first << ':' << c.second <<'}';});
+        for (size_t i = 0; i < indices.size(); ++i)
+            { flux << '{' << indices[i] << ':' << values[i] << '}'; }
         flux<<"}\n";
         }
 
     /** Dimension of the vector. All indices lie within [0, N). */
     const int N;
+
+private:
+    std::vector<int> indices;  /**< array of vector indices. */
+    std::vector<double> values;  /**< array of vector values matching the indices */
 }; // end class r_sparseVect
 
 } // end namespace algebra
