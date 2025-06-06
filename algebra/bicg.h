@@ -21,10 +21,10 @@ void bicg(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vec
     iter.set_rhsnorm(norm(b));
     r.assign(b.begin(),b.end());// r = b;
     mult(A, x, v);         // v = A x;
-    sub(v, r);             // r -= v; donc r = b - A x;
+    sub(v, r);             // r -= v; so r = b - A x;
 
-    rt.assign(r.begin(),r.end()); // copy(r, rt);
-    p.assign(r.begin(),r.end()); // copy(r, p );
+    rt.assign(r.begin(),r.end()); // rt = r;
+    p.assign(r.begin(),r.end()); // p = r;
     while (!iter.finished(norm(r)))
         {
         rho_1 = dot(rt,r);
@@ -71,10 +71,12 @@ void bicg(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vec
         }
     }
 
-/** solve A x = rhs. Algo is directional stabilized biconjugate gradient (mask) with diagonal preconditioner with Dirichlet conditions,
-vectors x and rhs must have the same size. ld is a vector of indices where to apply zeros, xd the corresponding values.
-The status of the convergence is returned in iter.status as well as total number of iterations and error
-*/
+/** directional stabilized biconjugate gradient (mask) with diagonal preconditioner with Dirichlet conditions, returns residu
+ * iter is an iteration object
+ * the linear system to solve is A x = rhs
+ * ld is a mask: a list of indices that will be zeroed when using applyMask(ld, vector)
+ * xd is a vector containing some values on the nodes where Dirichlet applies (to check)
+ */
 template<typename T>
 void bicg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T> & rhs,
            const std::vector<T>& xd, const std::vector<int>& ld)
@@ -86,7 +88,7 @@ void bicg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std:
 
     A.build_diag_precond<T>(diag_precond);
     mult(A, xd, v);
-    sub(v, b);      // b -= A xd
+    sub(v, b);      // b -= A xd; so b = rhs - A xd
     applyMask(ld,b);
     applyMask(ld,diag_precond);
 
@@ -94,10 +96,10 @@ void bicg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std:
 
     r.assign(b.begin(),b.end());// r = b;
     mult(A, x, v);         // v = A x;
-    sub(v, r);             // r -= v; donc r = b - A x;
+    sub(v, r);             // r -= v; so r = b - A x;
     applyMask(ld,r);
-    rt.assign(r.begin(),r.end()); // copy(r, rt);
-    p.assign(r.begin(),r.end()); // copy(r, p );
+    rt.assign(r.begin(),r.end()); // rt = r;
+    p.assign(r.begin(),r.end()); // p = r;
     while (!iter.finished(norm(r)))
         {
         rho_1 = dot(rt,r);
@@ -149,7 +151,11 @@ void bicg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std:
     add(xd, x);                // x += xd
     }
 
-/** directional stabilized biconjugate gradient (mask is ld) with diagonal preconditioner, returns residu */
+/** directional stabilized biconjugate gradient (mask is ld) with diagonal preconditioner, returns residu
+ * iter is an iteration object
+ * the linear system to solve is A x = rhs
+ * ld is a mask: a list of indices that will be zeroed when using applyMask(ld, vector)
+ */
 template<typename T>
 T bicg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T> & rhs, const std::vector<int>& ld)
     {
@@ -170,8 +176,8 @@ T bicg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::ve
     mult(A, x, v);         // v = A x;
     sub(v, r);             // r -= v; donc r = b - A x;
     applyMask(ld,r);
-    rt.assign(r.begin(),r.end()); // copy(r, rt);
-    p.assign(r.begin(),r.end()); // copy(r, p );
+    rt.assign(r.begin(),r.end()); // rt = r;
+    p.assign(r.begin(),r.end()); // p = r;
     while (!iter.finished(norm(r)))
         {
         rho_1 = dot(rt,r);
