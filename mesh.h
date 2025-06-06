@@ -223,15 +223,15 @@ public:
                     const double val /**< [in] */)
         { what_to_set(node[i], val); }
 
-private:
-    /** node container: not initialized by constructor, but later while reading the mesh by member
-     * function init_node */
-    std::vector<Nodes::Node> node;
-
     /** Edges of all the tetrahedrons, i.e. all the unique pairs of adjacent node indices.
      * Each pair is sorted: first < second.
      * The list is sorted lexicographically, as per std::pair::operator<(). */
     std::vector<std::pair<int, int>> edges;
+
+private:
+    /** node container: not initialized by constructor, but later while reading the mesh by member
+     * function init_node */
+    std::vector<Nodes::Node> node;
 
     /** Index of a node in the `node` vector. This vector is itself indexed by the node position in
      * the *.msh and *.sol files. In other words, the node found at `file_idx` in a file is stored
