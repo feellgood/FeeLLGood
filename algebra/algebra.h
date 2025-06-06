@@ -34,7 +34,7 @@ template <typename T>
 void scaled( const T alpha, std::vector<T> & Y)
     { std::for_each(Y.begin(),Y.end(),[alpha](T &_x){ _x *= alpha; }); }
 
-/** direct product (component to component): Z = X⊗Y */
+/** direct product (component to component or Hadamard product) */
 template <typename T>
 void p_direct(const std::vector<T> & X,const std::vector<T> & Y, std::vector<T> & Z)
     { std::transform(X.begin(),X.end(),Y.begin(),Z.begin(), std::multiplies<T>() ); }
