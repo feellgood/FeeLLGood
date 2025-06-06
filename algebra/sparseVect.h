@@ -89,6 +89,26 @@ public:
         v.inorder_insert(indices, values);
         }
 
+    /** zero all elements, while preserving the shape */
+    void clear()
+        {
+        for (double& value: values)
+            value = 0;
+        }
+
+    /** add the value at position i, which must belog to the shape */
+    void add(int i, double val)
+        {
+        for (size_t k = 0; k < indices.size(); ++k)
+            if (indices[k] == i)
+                {
+                values[k] += val;
+                return;
+                }
+        std::cerr << "Error: invalid index in add().\n";
+        exit(1);
+        }
+
     /** getter for the value of a coefficient of index idx
     if several coeffs have the same index then it returns the value of the first occurence
     return zero if coefficient of index idx does not exist
