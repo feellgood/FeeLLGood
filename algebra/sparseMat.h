@@ -8,6 +8,7 @@ w_sparseMat : write sparse matrix : a std::vector of w_sparse_vector of coeffici
  */
 
 #include <iostream>
+#include <set>
 #include <vector>
 #include <cassert>
 #include <execution>
@@ -16,6 +17,11 @@ w_sparseMat : write sparse matrix : a std::vector of w_sparse_vector of coeffici
 
 namespace algebra
 {
+
+/**
+The shape of a sparse matrix is the set of valid indices.
+ */
+using MatrixShape = std::vector<std::set<int>>;
 
 /**
 \class w_sparseMat
@@ -61,12 +67,36 @@ The constructor is building the data from a write sparse matrix to access effici
 class r_sparseMat
 {
 public:
-    /** constructor */
+    /** construct a sparse matrix from a "read mode" matrix */
     r_sparseMat(const w_sparseMat &A):N(A.getDim())
         {
         m.reserve(N);  // N is the number of lines
         if (!A.m.empty())
             { for(int i=0; i<N; ++i){ m.emplace_back(A.m[i]); } }
+        }
+
+    /** construct an empty sparse matrix */
+    r_sparseMat(int size) : N(size)
+        {
+        for (int i = 0; i < N; ++i)
+            m.emplace_back(w_sparseVect(N));
+        }
+
+    /** rebuild this matrix with the provided shape, all values being zero */
+    void reshape(const MatrixShape &shape)
+        {
+        assert(shape.size() == N);
+        m.clear();
+        for (int i = 0; i < N; ++i)
+            {
+            w_sparseVect line(N);
+            for (auto it = shape[i].begin(); it != shape[i].end(); ++it)
+                {
+                int j = *it;
+                line.insert(j, 0);
+                }
+            m.emplace_back(line);
+            }
         }
 
     /** zero all elements, while preserving the shape */
