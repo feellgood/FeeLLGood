@@ -31,9 +31,27 @@ class LinAlgebra
 public:
     /** constructor */
     LinAlgebra(Settings &s /**< [in] */, Mesh::mesh &my_msh /**< [in] */)
-        : NOD(my_msh.getNbNodes()), MAXITER(s.MAXITER), TOL(s.TOL), verbose(s.verbose),
+        : NOD(my_msh.getNbNodes()), K(2*NOD), MAXITER(s.MAXITER), TOL(s.TOL), verbose(s.verbose),
           prmTetra(s.paramTetra), prmFacette(s.paramFacette), refMsh(&my_msh)
         {
+        // Shape the matrix K.
+        algebra::MatrixShape shape(2 * NOD);
+        auto insert_pair = [this, &shape](int i, int j)
+            {
+            shape[      i].insert(      j);
+            shape[      i].insert(NOD + j);
+            shape[NOD + i].insert(      j);
+            shape[NOD + i].insert(NOD + j);
+            };
+        for (int i = 0; i < NOD; ++i)
+            { insert_pair(i, i); }
+        for (auto edge: my_msh.edges)
+            {
+            insert_pair(edge.first, edge.second);
+            insert_pair(edge.second, edge.first);
+            }
+        K.reshape(shape);
+
         L_rhs.resize(2*NOD);
         Xw.resize(2*NOD);
         base_projection();
@@ -80,6 +98,9 @@ private:
 
     /** number of nodes, also an offset for filling sparseMatrix, initialized by constructor */
     const int NOD;
+
+    /** matrix of the system to solve */
+    algebra::r_sparseMat K;
 
     /** RHS vector of the system to solve */
     algebra::Vector<double> L_rhs;

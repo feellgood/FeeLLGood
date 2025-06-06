@@ -8,11 +8,10 @@ int LinAlgebra::solver(timing const &t_prm)
     {
     chronometer counter(2);
 
-    algebra::w_sparseMat Kw(2*NOD);
+    K.clear();
     std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
-                      [this,&Kw](Tetra::Tet &my_elem) { my_elem.assemblage_mat(NOD,Kw); } );
+                      [this](Tetra::Tet &my_elem) { my_elem.assemblage_mat(NOD,K); } );
 
-    algebra::r_sparseMat Kr(Kw);
     if (verbose)
         {
         std::cout << "matrix assembly done in " << counter.millis() << std::endl;
@@ -36,7 +35,7 @@ int LinAlgebra::solver(timing const &t_prm)
         }
 
     buildInitGuess(Xw);// gamma0 division handled by function buildInitGuess
-    double residu = algebra::bicg<double>(iter, Kr, Xw, L_rhs);
+    double residu = algebra::bicg<double>(iter, K, Xw, L_rhs);
 
     int nb_iter = iter.get_iteration();
     double _solver_error= iter.get_res();

@@ -87,7 +87,7 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
 
     /** assemble the big sparse matrix K from tetra or facette inner matrix Kp */
     void assemblage_mat(const int NOD /**< [in] nb nodes */,
-                        algebra::w_sparseMat &K /**< [out] COO matrix */ ) const
+                        algebra::r_sparseMat &K /**< [out] COO matrix */ ) const
         {
         for (int i = 0; i < N; i++)
             {
@@ -96,10 +96,10 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
             for (int j = 0; j < N; j++)
                 {
                 int j_ = ind[j];
-                if(Kp(i,j) != 0) K.insert( NOD + i_, j_, Kp(i,j) );
-                if (Kp(i,N + j) != 0) K.insert( NOD + i_, NOD + j_, Kp(i,N + j) );
-                if (Kp(N + i,j) != 0) K.insert( i_, j_, Kp(N + i,j) );
-                if (Kp(N + i,N + j) != 0) K.insert( i_, NOD + j_, Kp(N + i,N + j) );
+                if(Kp(i,j) != 0) K.add( NOD + i_, j_, Kp(i,j) );
+                if (Kp(i,N + j) != 0) K.add( NOD + i_, NOD + j_, Kp(i,N + j) );
+                if (Kp(N + i,j) != 0) K.add( i_, j_, Kp(N + i,j) );
+                if (Kp(N + i,N + j) != 0) K.add( i_, NOD + j_, Kp(N + i,N + j) );
                 }
             }
         }
