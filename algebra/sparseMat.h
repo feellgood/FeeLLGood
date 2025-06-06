@@ -69,6 +69,19 @@ public:
             { for(int i=0; i<N; ++i){ m.emplace_back(A.m[i]); } }
         }
 
+    /** zero all elements, while preserving the shape */
+    void clear()
+        {
+        for (r_sparseVect& line: m)
+            line.clear();
+        }
+
+    /** add the value at position (i, j), which must belog to the shape */
+    void add(int i, int j, double val)
+        {
+        m[i].add(j, val);
+        }
+
 /** printing function */
     void print(std::ostream & flux = std::cout) const
     { std::for_each(m.begin(),m.end(),[&flux](r_sparseVect const& _v) {_v.print(flux);} ); }
