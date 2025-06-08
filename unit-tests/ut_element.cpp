@@ -62,12 +62,11 @@ BOOST_AUTO_TEST_CASE(Fac_assemblage_mat, *boost::unit_test::tolerance(UT_TOL))
     Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
     std::cout << "fac.assemblage_mat test: test the output matrix built\n";
     
-    algebra::r_sparseMat Kr(2*nbNod);
     algebra::MatrixShape shape(2*nbNod);
     for(unsigned int i=0;i<2*nbNod;i++)
         for(unsigned int j=0;j<2*nbNod;j++)
             shape[i].insert(j);
-    Kr.reshape(shape);
+    algebra::r_sparseMat Kr(shape);
     f.assemblage_mat(nbNod,Kr);// init val of f.Kp is zero
     
     for(unsigned int i=0;i<2*nbNod;i++)
@@ -139,12 +138,11 @@ BOOST_AUTO_TEST_CASE(Tet_assemblage_mat, *boost::unit_test::tolerance(UT_TOL))
     Tetra::Tet t(node, 0, {1, 2, 3, 4});  // carefull with the index shift
     std::cout << "Tet.assemblage_mat test: test the output matrix built\n";
     
-    algebra::r_sparseMat Kr(2*nbNod);
     algebra::MatrixShape shape(2*nbNod);
     for(unsigned int i=0;i<2*nbNod;i++)
         for(unsigned int j=0;j<2*nbNod;j++)
             shape[i].insert(j);
-    Kr.reshape(shape);
+    algebra::r_sparseMat Kr(shape);
     t.assemblage_mat(nbNod,Kr);// init val of t.Kp is zero
     
     for(unsigned int i=0;i<2*nbNod;i++)

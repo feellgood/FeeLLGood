@@ -75,28 +75,11 @@ public:
             { for(int i=0; i<N; ++i){ m.emplace_back(A.m[i]); } }
         }
 
-    /** construct an empty sparse matrix */
-    r_sparseMat(int size) : N(size)
+    /** construct a sparse matrix from its shape */
+    r_sparseMat(const MatrixShape &shape) : N(shape.size())
         {
         for (int i = 0; i < N; ++i)
-            m.emplace_back(w_sparseVect(N));
-        }
-
-    /** rebuild this matrix with the provided shape, all values being zero */
-    void reshape(const MatrixShape &shape)
-        {
-        assert(shape.size() == N);
-        m.clear();
-        for (int i = 0; i < N; ++i)
-            {
-            w_sparseVect line(N);
-            for (auto it = shape[i].begin(); it != shape[i].end(); ++it)
-                {
-                int j = *it;
-                line.insert(j, 0);
-                }
-            m.emplace_back(line);
-            }
+            { m.emplace_back(N, shape[i]); }
         }
 
     /** zero all elements, while preserving the shape */

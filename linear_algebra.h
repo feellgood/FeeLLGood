@@ -31,12 +31,9 @@ class LinAlgebra
 public:
     /** constructor */
     LinAlgebra(Settings &s /**< [in] */, Mesh::mesh &my_msh /**< [in] */)
-        : NOD(my_msh.getNbNodes()), K(2*NOD), MAXITER(s.MAXITER), TOL(s.TOL), verbose(s.verbose),
-          prmTetra(s.paramTetra), prmFacette(s.paramFacette), refMsh(&my_msh)
+        : NOD(my_msh.getNbNodes()), refMsh(&my_msh), K(build_shape()), MAXITER(s.MAXITER),
+          TOL(s.TOL), verbose(s.verbose), prmTetra(s.paramTetra), prmFacette(s.paramFacette)
         {
-        // Shape the matrix K.
-        K.reshape(build_shape());
-
         L_rhs.resize(2*NOD);
         Xw.resize(2*NOD);
         base_projection();
@@ -105,6 +102,9 @@ private:
     /** number of nodes, also an offset for filling sparseMatrix, initialized by constructor */
     const int NOD;
 
+    /** direct access to the mesh */
+    Mesh::mesh *refMsh;
+
     /** matrix of the system to solve */
     algebra::r_sparseMat K;
 
@@ -128,9 +128,6 @@ private:
 
     /** material parameters of the facettes */
     const std::vector<Facette::prm> &prmFacette;
-
-    /** direct access to the mesh */
-    Mesh::mesh *refMsh;
 
     /** speed of the domain wall */
     double DW_vz;
