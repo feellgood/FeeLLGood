@@ -92,6 +92,8 @@ public:
     /** add the value at position (i, j), which must belog to the shape */
     void add(int i, int j, double val)
         {
+        assert(i >= 0 && i < m.size());
+        assert(j >= 0 && j < m.size());
         m[i].add(j, val);
         }
 
@@ -111,8 +113,8 @@ public:
     template <typename T>
     void mult(Vector<T> const& X, Vector<T> &Y)
         {
-        if (size_t(X.size()) != m.size())
-            { std::cerr << "Error: wrong dimensions in matrix-vector product.\n"; exit(1); }
+        assert(X.size() == m.size());
+        assert(Y.size() == m.size());
         std::transform(std::execution::par,m.begin(),m.end(),Y.begin(),
                        [&X](const r_sparseVect &_v){ return _v.dot(X); });
         }
@@ -121,13 +123,12 @@ public:
     template <typename T>
     void build_diag_precond(Vector<T> &D) const
         {
-        for(unsigned int i=0;i<D.size();i++)
+        assert(D.size() == m.size());
+        for (size_t i = 0; i < m.size(); ++i)
             {
             const double c = (*this)(i,i);
-            if(c != 0)
-                { D[i] = 1.0/c; }
-            else
-                { std::cout <<"Error: zero on sparse matrix diagonal.\n"; exit(1); }
+            assert(c != 0);
+            D[i] = 1.0 / c;
             }
         }
 

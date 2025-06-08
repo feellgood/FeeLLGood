@@ -37,8 +37,7 @@ public:
     /** inserter with a coefficient */
     void insert(int i, double val)
         {
-        if (i < 0 || i >= N)
-            { std::cerr << "Error: out-of-range index in sparse vector.\n"; exit(1); }
+        assert(i >= 0 && i < N);
         coefs[i] += val;
         }
 
@@ -98,14 +97,12 @@ public:
     /** add the value at position i, which must belog to the shape */
     void add(int i, double val)
         {
-        for (size_t k = 0; k < indices.size(); ++k)
+        size_t k = 0;
+        for (; k < indices.size(); ++k)
             if (indices[k] == i)
-                {
-                values[k] += val;
-                return;
-                }
-        std::cerr << "Error: invalid index in add().\n";
-        exit(1);
+                break;
+        assert(k < indices.size());
+        values[k] += val;
         }
 
     /** getter for the value of a coefficient of index idx
