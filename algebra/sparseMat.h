@@ -68,17 +68,17 @@ class r_sparseMat
 {
 public:
     /** construct a sparse matrix from a "read mode" matrix */
-    r_sparseMat(const w_sparseMat &A):N(A.getDim())
+    r_sparseMat(const w_sparseMat &A)
         {
-        m.reserve(N);  // N is the number of lines
+        m.reserve(A.getDim());  // A.getDim() is the number of lines
         if (!A.m.empty())
-            { for(int i=0; i<N; ++i){ m.emplace_back(A.m[i]); } }
+            { for(int i=0; i<A.getDim(); ++i){ m.emplace_back(A.m[i]); } }
         }
 
     /** construct a sparse matrix from its shape */
-    r_sparseMat(const MatrixShape &shape) : N(shape.size())
+    r_sparseMat(const MatrixShape &shape)
         {
-        for (int i = 0; i < N; ++i)
+        for (size_t i = 0; i < shape.size(); ++i)
             { m.emplace_back(shape[i]); }
         }
 
@@ -102,8 +102,8 @@ public:
     /** getter for a coefficient value */
     double operator() (const int i, const int j) const
         {
-        assert(i >= 0 && i < N);
-        assert(j >= 0 && j < N);
+        assert(i >= 0 && i < m.size());
+        assert(j >= 0 && j < m.size());
         return m[i].getVal(j);
         }
 
@@ -111,7 +111,7 @@ public:
     template <typename T>
     void mult(Vector<T> const& X, Vector<T> &Y)
         {
-        if (int(X.size()) != N)
+        if (size_t(X.size()) != m.size())
             { std::cerr << "Error: wrong dimensions in matrix-vector product.\n"; exit(1); }
         std::transform(std::execution::par,m.begin(),m.end(),Y.begin(),
                        [&X](const r_sparseVect &_v){ return _v.dot(X); });
@@ -132,9 +132,6 @@ public:
         }
 
 private:
-    /** dimension of the sparse matrix (nb of lines) */
-    const int N;
-
     /** coefficient container */
     std::vector<r_sparseVect> m;
 }; // end class r_sparseMat
