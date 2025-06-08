@@ -99,9 +99,6 @@ public:
     void print(std::ostream & flux = std::cout) const
         { std::for_each(m.begin(),m.end(),[&flux](r_sparseVect const& _v) {_v.print(flux);} ); }
 
-    /** getter for the number of lines */
-    int getDim() const {return N;}
-
     /** getter for a coefficient value */
     double operator() (const int i, const int j) const { return m[i].getVal(j); }
 
