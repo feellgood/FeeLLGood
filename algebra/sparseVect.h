@@ -125,8 +125,6 @@ public:
      */
     double getVal(const int idx) const
         {
-        if (idx < 0 || idx >= N)
-            { std::cerr << "Error: out-of-range index in getVal().\n"; exit(1); }
         for (size_t i = 0; i < indices.size(); ++i)
             if (indices[i] == idx)
                 { return values[i]; }

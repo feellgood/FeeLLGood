@@ -100,7 +100,12 @@ public:
         { std::for_each(m.begin(),m.end(),[&flux](r_sparseVect const& _v) {_v.print(flux);} ); }
 
     /** getter for a coefficient value */
-    double operator() (const int i, const int j) const { return m[i].getVal(j); }
+    double operator() (const int i, const int j) const
+        {
+        assert(i >= 0 && i < N);
+        assert(j >= 0 && j < N);
+        return m[i].getVal(j);
+        }
 
     /** Y = this*X */
     template <typename T>
