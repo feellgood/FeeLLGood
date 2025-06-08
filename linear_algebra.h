@@ -35,22 +35,7 @@ public:
           prmTetra(s.paramTetra), prmFacette(s.paramFacette), refMsh(&my_msh)
         {
         // Shape the matrix K.
-        algebra::MatrixShape shape(2 * NOD);
-        auto insert_pair = [this, &shape](int i, int j)
-            {
-            shape[      i].insert(      j);
-            shape[      i].insert(NOD + j);
-            shape[NOD + i].insert(      j);
-            shape[NOD + i].insert(NOD + j);
-            };
-        for (int i = 0; i < NOD; ++i)
-            { insert_pair(i, i); }
-        for (auto edge: my_msh.edges)
-            {
-            insert_pair(edge.first, edge.second);
-            insert_pair(edge.second, edge.first);
-            }
-        K.reshape(shape);
+        K.reshape(build_shape());
 
         L_rhs.resize(2*NOD);
         Xw.resize(2*NOD);
@@ -62,6 +47,27 @@ public:
 
         if(s.getFieldType() == R4toR3)
             { setExtSpaceField(s); }
+        }
+
+    /** build a matrix shape suitable for our mesh */
+    algebra::MatrixShape build_shape()
+        {
+        algebra::MatrixShape shape(2 * NOD);
+        auto insert_pair = [this, &shape](int i, int j)
+            {
+            shape[      i].insert(      j);
+            shape[      i].insert(NOD + j);
+            shape[NOD + i].insert(      j);
+            shape[NOD + i].insert(NOD + j);
+            };
+        for (int i = 0; i < NOD; ++i)
+            { insert_pair(i, i); }
+        for (auto edge: refMsh->edges)
+            {
+            insert_pair(edge.first, edge.second);
+            insert_pair(edge.second, edge.first);
+            }
+        return shape;
         }
 
     /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors)
