@@ -83,7 +83,7 @@ class r_sparseVect
 {
 public:
     /** constructor from a write sparse vector */
-    r_sparseVect(const w_sparseVect &v) : N(v.N)
+    r_sparseVect(const w_sparseVect &v)
         {
         indices.reserve(v.size());
         values.reserve(v.size());
@@ -91,7 +91,7 @@ public:
         }
 
     /** constructor from size and shape */
-    r_sparseVect(int size, const std::set<int>& shape) : N(size)
+    r_sparseVect(const std::set<int>& shape)
         {
         values.resize(shape.size());
         indices.reserve(shape.size());
@@ -148,9 +148,6 @@ public:
             { flux << '{' << indices[i] << ':' << values[i] << '}'; }
         flux<<"}\n";
         }
-
-    /** Dimension of the vector. All indices lie within [0, N). */
-    const int N;
 
 private:
     std::vector<int> indices;  /**< array of vector indices. */

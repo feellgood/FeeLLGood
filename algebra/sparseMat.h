@@ -79,7 +79,7 @@ public:
     r_sparseMat(const MatrixShape &shape) : N(shape.size())
         {
         for (int i = 0; i < N; ++i)
-            { m.emplace_back(N, shape[i]); }
+            { m.emplace_back(shape[i]); }
         }
 
     /** zero all elements, while preserving the shape */
