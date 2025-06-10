@@ -33,7 +33,7 @@ class w_sparseMat
     friend class r_sparseMat;
 
 public:
-/** constructor */
+    /** constructor */
     w_sparseMat(const int _N) : N(_N)
         {
         m.reserve(N);
@@ -41,21 +41,21 @@ public:
             m.emplace_back(N);
         }
 
-/** inserter for a coefficient val at line i col j */
+    /** inserter for a coefficient val at line i col j */
     void insert(const int i, const int j, const double val)
         {
         assert(i<N && j<N );
         m[i].insert(j, val);
         }
 
-/** getter for the number of lines */
+    /** getter for the number of lines */
     int getDim() const {return N;}
 
 private:
-/** dimension of sparse matrix, N is the number of lines */
+    /** dimension of sparse matrix, N is the number of lines */
     const int N;
 
-/** container for the write sparse matrix coefficients */
+    /** container for the write sparse matrix coefficients */
     std::vector<w_sparseVect> m;
 }; // end class w_sparseMat
 
@@ -95,45 +95,45 @@ public:
         m[i].add(j, val);
         }
 
-/** printing function */
+    /** printing function */
     void print(std::ostream & flux = std::cout) const
-    { std::for_each(m.begin(),m.end(),[&flux](r_sparseVect const& _v) {_v.print(flux);} ); }
+        { std::for_each(m.begin(),m.end(),[&flux](r_sparseVect const& _v) {_v.print(flux);} ); }
 
     /** getter for the number of lines */
     int getDim() const {return N;}
 
-/** getter for a coefficient value */
+    /** getter for a coefficient value */
     double operator() (const int i, const int j) const { return m[i].getVal(j); }
 
-/** Y = this*X */
-template <typename T>
-void mult(Vector<T> const& X, Vector<T> &Y)
-    {
-    if (int(X.size()) != N)
-        { std::cerr << "Error: wrong dimensions in matrix-vector product.\n"; exit(1); }
-    std::transform(std::execution::par,m.begin(),m.end(),Y.begin(),
-                   [&X](const r_sparseVect &_v){ return _v.dot(X); });
-    }
-
-/** build diagonal preconditioner D from input matrix(this) */
-template <typename T>
-void build_diag_precond(Vector<T> &D) const
-    {
-    for(unsigned int i=0;i<D.size();i++)
+    /** Y = this*X */
+    template <typename T>
+    void mult(Vector<T> const& X, Vector<T> &Y)
         {
-        const double c = (*this)(i,i);
-        if(c != 0)
-            { D[i] = 1.0/c; }
-        else
-            { std::cout <<"Error: zero on sparse matrix diagonal.\n"; exit(1); }
+        if (int(X.size()) != N)
+            { std::cerr << "Error: wrong dimensions in matrix-vector product.\n"; exit(1); }
+        std::transform(std::execution::par,m.begin(),m.end(),Y.begin(),
+                       [&X](const r_sparseVect &_v){ return _v.dot(X); });
         }
-    }
+
+    /** build diagonal preconditioner D from input matrix(this) */
+    template <typename T>
+    void build_diag_precond(Vector<T> &D) const
+        {
+        for(unsigned int i=0;i<D.size();i++)
+            {
+            const double c = (*this)(i,i);
+            if(c != 0)
+                { D[i] = 1.0/c; }
+            else
+                { std::cout <<"Error: zero on sparse matrix diagonal.\n"; exit(1); }
+            }
+        }
 
 private:
-/** dimension of the sparse matrix (nb of lines) */
+    /** dimension of the sparse matrix (nb of lines) */
     const int N;
 
-/** coefficient container */
+    /** coefficient container */
     std::vector<r_sparseVect> m;
 }; // end class r_sparseMat
 
