@@ -14,7 +14,6 @@
 #include <algorithm>
 
 
-#include "sparseVect.h"
 #include "sparseMat.h"
 
 #include "algebraCore.h"

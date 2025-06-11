@@ -7,16 +7,34 @@ r_sparseMat : read sparse matrix : it is buit calling the constructor with a w_s
 w_sparseMat : write sparse matrix : a std::vector of w_sparse_vector of coefficients (i,value)
  */
 
-#include <iostream>
 #include <set>
+#include <map>
 #include <vector>
+#include <iostream>
 #include <cassert>
+#include <algorithm>
 #include <execution>
 
 #include "algebraCore.h"
 
 namespace algebra
 {
+
+/**
+\class w_sparseVect
+A sparse vector in writing mode is an (index -> value) map.
+*/
+using w_sparseVect = std::map<int, double>;
+
+/**
+\class r_sparseVect
+read sparse vector: holds a list of sorted indices, and a list of matching values.
+*/
+struct r_sparseVect
+{
+    std::vector<int> indices;  /**< array of vector indices. */
+    std::vector<double> values;  /**< array of vector values matching the indices */
+}; // end class r_sparseVect
 
 /**
 The shape of a sparse matrix is the set of valid indices.
