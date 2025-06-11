@@ -61,9 +61,8 @@ public:
     r_sparseMat(const w_sparseMat &A)
         {
         m.reserve(A.m.size());  // A.m.size() is the number of lines
-        if (!A.m.empty())
-            for (size_t i = 0; i < A.m.size(); ++i)
-                m.emplace_back(A.m[i]);
+        for (const w_sparseVect& line: A.m)
+            m.emplace_back(line);
         }
 
     /** construct a sparse matrix from its shape */
