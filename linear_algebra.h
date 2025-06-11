@@ -3,7 +3,7 @@
 
 /** \file linear_algebra.h
 \brief secondary header, it grabs altogether the linear algebra by the solver to apply fem method
-<br> It encapsulates the calls to eigen BiCGSTAB solver, the assemblage and projection of the matrix for all elements
+<br> It encapsulates the calls to algebra BiCGSTAB solver, the assemblage and projection of the matrix for all elements
 <br> projection and matrix assembly is multithreaded for tetrahedron, monothread for facette
 */
 #include <random>
@@ -147,7 +147,7 @@ private:
     /** compute v_max, the maximum of the magnetization velocity of all the magnetic regions */
     void updateVmax(Eigen::VectorXd &sol);
 
-    /** list of the Dirichlet indices where (vp,vq) are zero */
+    /** list of the Dirichlet indices where (vp,vq) are zero, built by constructor */
     std::vector<int> lvd;
     };// end class linAlgebra
 #endif

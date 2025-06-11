@@ -13,10 +13,6 @@
 #include "mesh.h"
 #include "algebra/algebra.h"
 
-/** dimensionnality of the problem to solve.
- * here electrostatic problem to solve computes scalar potential V on the nodes */
-const int DIM_PROBLEM = 1;
-
 /** \class electrostatSolver
 this class is containing both data and a solver to compute potential from dirichlet boundary
 conditions problem for the current density flowing in the sample.
@@ -94,7 +90,7 @@ public:
     void integrales(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Tetra::N,Tetra::N> > AE);
 
     /** compute integrales for vector coefficients, input from facette */
-    void integrales(Facette::Fac const &fac, Eigen::Ref<Eigen::Matrix<double,Facette::N,1> > BE);
+    void integrales(Facette::Fac const &fac, std::vector<double> &BE);
 
     /** text file (tsv) writing function for the solution V over all volume regions of the mesh,
      * node indices are zero based */
@@ -132,47 +128,14 @@ private:
     /** number of Nodes (needed for templates) */
     const int NOD;
 
-/** assemble the matrix K from Ke input */
-template <int N>
-    void assemble_mat(std::vector<int> &ind,
-                      Eigen::Matrix<double,DIM_PROBLEM*N,DIM_PROBLEM*N> &Ke, algebra::w_sparseMat &K)
-        {
-        for (int ie=0; ie<N; ie++)
-            {
-            int i= ind[ie];
-            for (int je=0; je<N; je++)
-                {
-                int j= ind[je];
-                for (int di=0; di<DIM_PROBLEM; di++)
-                    for (int dj=0; dj<DIM_PROBLEM; dj++)
-                        K.insert(di*NOD+i, dj*NOD+j, Ke(di*N+ie,dj*N+je));
-	            }
-            }
-        }
-
-/** assemble the vector L from Le input */
-template <int N>
-    void assemble_vect(std::vector<int> &ind,
-                       Eigen::Matrix<double,DIM_PROBLEM*N,1> &Le, std::vector <double> &L)
-        {
-        for (int ie=0; ie<N; ie++)
-            {
-            int i= ind[ie];
-            for (int di=0; di<DIM_PROBLEM; di++) { L[di*NOD+i] += Le[di*N+ie]; }
-            }
-        }
-
-/**
- suppress twins in the indices Dirichlet list v_idx
-*/
+    /** suppress twins in the indices Dirichlet list v_idx */
 template <typename T>
-void suppress_copies(std::vector<T> &v_idx)
-    {
-    std::sort (v_idx.begin(), v_idx.begin()+v_idx.size());
-    auto it = std::unique (v_idx.begin(), v_idx.end() );
-    v_idx.resize( std::distance(v_idx.begin(),it) );
-    v_idx.shrink_to_fit();
-    }
+    void suppress_copies(std::vector<T> &v_idx)
+        {
+        std::sort(v_idx.begin(), v_idx.end());
+        v_idx.resize( std::distance( v_idx.begin(), std::unique(v_idx.begin(), v_idx.end()) ) );
+        v_idx.shrink_to_fit();
+        }
 
     /** solver, using conjugate gradient with masking, with diagonal preconditionner and Dirichlet
      * boundary conditions */

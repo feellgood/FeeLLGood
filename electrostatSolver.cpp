@@ -4,7 +4,7 @@
 #include "tags.h"
 #include "electrostatSolver.h"
 #include "algebra/cg.h"
-
+#include "solverUtils.h"  // build(Mat|Vect)
 void electrostatSolver::calc_gradV(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV)
     {
     for (int npi = 0; npi < Tetra::NPI; npi++)
@@ -36,7 +36,6 @@ void electrostatSolver::infos(void)
         } );
     }
 
-// same formula as sp_acc_llg
 void electrostatSolver::integrales(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Tetra::N,Tetra::N> > AE)
     {
     const double sigma = getSigma(tet);
@@ -61,15 +60,14 @@ void electrostatSolver::integrales(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matr
         }
     }
 
-// same formula as sp_acc_llg
-void electrostatSolver::integrales(Facette::Fac const &fac, Eigen::Ref<Eigen::Matrix<double,Facette::N,1> > BE)
+void electrostatSolver::integrales(Facette::Fac const &fac, std::vector<double> &BE)
     {
     double J_bc = getCurrentDensity(fac);// _bc for Boundary Condition
     for (int npi = 0; npi < Facette::NPI; npi++)
         {
         double J_w = J_bc *fac.weight[npi];
         for (int ie = 0; ie < Facette::N; ie++)
-            { BE(ie) -= Facette::a[ie][npi] * J_w; }
+            { BE[ie] -= Facette::a[ie][npi] * J_w; }
         }
     }
 
@@ -82,20 +80,19 @@ int electrostatSolver::solve(const double _tol)
     if (verbose)
         { std::cout << "assembling and solving ..." << std::endl; }
 
-    std::for_each( msh.tet.begin(),msh.tet.end(),[this,&Kw,&Lw](Tetra::Tet &elem)
+    std::for_each( msh.tet.begin(),msh.tet.end(),[this,&Kw](Tetra::Tet &elem)
         {
         Eigen::Matrix<double,DIM_1D*Tetra::N,DIM_1D*Tetra::N> K;
         K.setZero();
         integrales(elem,K);
-        assemble_mat<Tetra::N>(elem.ind,K,Kw);
+        buildMat<Tetra::N,DIM_1D>(NOD,elem.ind,K,Kw);
         } );
 
-    std::for_each( msh.fac.begin(), msh.fac.end(),[this,&Kw,&Lw](Facette::Fac &elem)
+    std::for_each( msh.fac.begin(), msh.fac.end(),[this,&Lw](Facette::Fac &elem)
         {
-        Eigen::Matrix<double,DIM_1D*Facette::N,1> L;
-        L.setZero();
+        std::vector<double> L(DIM_1D*Facette::N,0.0);
         integrales(elem,L);
-        assemble_vect<Facette::N>(elem.ind,L,Lw);
+        buildVect<Facette::N,DIM_1D>(NOD,elem.ind,L,Lw);
         } );
 
     algebra::r_sparseMat Kr(Kw);
