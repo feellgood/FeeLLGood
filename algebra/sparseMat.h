@@ -2,9 +2,22 @@
 #define SPARSEMAT_H
 
 /** \file sparseMat.h
- \brief read and write sparse matrix
-r_sparseMat : read sparse matrix : it is buit calling the constructor with a w_sparseMat as argument
-w_sparseMat : write sparse matrix : a std::vector of w_sparse_vector of coefficients (i,value)
+ \brief Sparse matrices
+
+The main class provided here is `r_sparseMat`, a "read-mode" square sparse matrix. It is meant to
+efficiently compute matrix-vector products, where the vectors are full (not sparse), represented as
+std::vector<double>. Such a matrix can be constructed in two ways:
+
+- If the set of valid index pairs (locations that can have non-zero values) is **not** known in
+  advance, one can construct a `w_sparseMat` (write-mode sparse matrix), populate it with its
+  `insert()` method, then use it to construct the read-mode sparse matrix.
+
+- If the set of valid index pairs is known, one can store it in a `MatrixShape`, then use this shape
+  to construct the read-mode sparse matrix with all values initialized to zero.
+
+Once constructed, the set of valid index pairs is immutable. However, the associated values can be
+modified with `clear()` and `add()`. Rewriting the values this way is way more efficient than
+reconstructing the matrix from scratch.
  */
 
 #include <set>
@@ -21,61 +34,72 @@ namespace algebra
 {
 
 /**
-\class w_sparseVect
-A sparse vector in writing mode is an (index -> value) map.
+Write-mode sparse vector. This is an (index -> value) map.
 */
 using w_sparseVect = std::map<int, double>;
 
 /**
-\class r_sparseVect
-read sparse vector: holds a list of sorted indices, and a list of matching values.
+Read-mode sparse vector.
+
+This holds a list of indices, and a list of matching values.
+ - both lists have the same size
+ - the indices are unique and sorted
+ - the values match the indices in the sense that `values[k]` is the vector element at index
+   `indices[k]`.
 */
 struct r_sparseVect
 {
     std::vector<int> indices;  /**< array of vector indices. */
     std::vector<double> values;  /**< array of vector values matching the indices */
-}; // end class r_sparseVect
+};
 
 /**
-The shape of a sparse matrix is the set of valid indices.
+The shape of a sparse matrix is the set of valid indices. Specifically, the shape element at index i
+is the set of j indices such that (i, j) is a valid index pair for the matrix.
  */
 using MatrixShape = std::vector<std::set<int>>;
 
 /**
 \class w_sparseMat
-write sparse Matrix, it is a container for coefficients of a 'line' sparse matrix.
-If some m_coeff have the same indices, they will be summed to build the final matrix coefficient
+\brief Write-mode sparse matrix.
+
+This is a list of write-mode sparse vectors.
 */
 class w_sparseMat : private std::vector<w_sparseVect>
 {
     friend class r_sparseMat;
 
 public:
-    /** constructor */
+    /** Constructor. N is the matrix size: this is a square N×N matrix. */
     w_sparseMat(int N) : std::vector<w_sparseVect>(N) {}
 
-    /** inserter for a coefficient val at line i col j */
+    /**
+    Insert a matrix element with value val, at line i, column j. If an element already exists at
+    this position, add `val` to its value.
+
+    The caller must ensure both indices lie within [0, N).
+    */
     void insert(const int i, const int j, const double val)
         {
         assert(i >= 0 && i < size());
         assert(j >= 0 && j < size());
         (*this)[i][j] += val;
         }
-
-}; // end class w_sparseMat
+};
 
 
 /** \class r_sparseMat
-read sparse matrix
-The constructor is building the data from a write sparse matrix to access efficiently the coefficients values
+\brief Read-mode square sparse matrix.
+
+This is the main sparse matrix class, meant for efficiently computing matrix-vector products.
 */
 class r_sparseMat
 {
 public:
-    /** construct a sparse matrix from a "read mode" matrix */
+    /** Construct from a read-mode sparse matrix. */
     r_sparseMat(const w_sparseMat &A)
         {
-        m.reserve(A.size());  // A.size() is the number of lines
+        m.reserve(A.size());
         for (const w_sparseVect& line_in: A)
             {
             r_sparseVect line;
@@ -90,7 +114,7 @@ public:
             }
         }
 
-    /** construct a sparse matrix from its shape */
+    /** Construct from a matrix shape. Initialize all stored values to zero. */
     r_sparseMat(const MatrixShape &shape)
         {
         m.reserve(shape.size());
@@ -105,7 +129,7 @@ public:
             }
         }
 
-    /** zero all elements, while preserving the shape */
+    /** Zero-out all elements, while preserving the shape. */
     void clear()
         {
         for (r_sparseVect& line: m)
@@ -113,7 +137,7 @@ public:
                 value = 0;
         }
 
-    /** add the value at position (i, j), which must belog to the shape */
+    /** Add the given value at position (i, j), which must belong to the shape. */
     void add(int i, int j, double val)
         {
         assert(i >= 0 && i < m.size());
@@ -127,7 +151,7 @@ public:
         line.values[k] += val;
         }
 
-    /** printing function */
+    /** Print to the provided stream. */
     void print(std::ostream & flux = std::cout) const
         {
         flux << "[\n";
@@ -144,7 +168,7 @@ public:
         flux << ']';
         }
 
-    /** getter for a coefficient value */
+    /** Return the value at position (i, j). */
     double operator() (const int i, const int j) const
         {
         assert(i >= 0 && i < m.size());
@@ -172,7 +196,7 @@ public:
             });
         }
 
-    /** build diagonal preconditioner D from input matrix(this) */
+    /** Build a diagonal preconditioner D from this matrix. */
     template <typename T>
     void build_diag_precond(Vector<T> &D) const
         {
@@ -189,8 +213,6 @@ private:
     /** coefficient container */
     std::vector<r_sparseVect> m;
 }; // end class r_sparseMat
-
-
 
 } // end namespace algebra
 
