@@ -28,25 +28,22 @@ using MatrixShape = std::vector<std::set<int>>;
 write sparse Matrix, it is a container for coefficients of a 'line' sparse matrix.
 If some m_coeff have the same indices, they will be summed to build the final matrix coefficient
 */
-class w_sparseMat
+class w_sparseMat : private std::vector<w_sparseVect>
 {
     friend class r_sparseMat;
 
 public:
     /** constructor */
-    w_sparseMat(int N) : m(N) {}
+    w_sparseMat(int N) : std::vector<w_sparseVect>(N) {}
 
     /** inserter for a coefficient val at line i col j */
     void insert(const int i, const int j, const double val)
         {
-        assert(i >= 0 && i < m.size());
-        assert(j >= 0 && j < m.size());
-        m[i][j] += val;
+        assert(i >= 0 && i < size());
+        assert(j >= 0 && j < size());
+        (*this)[i][j] += val;
         }
 
-private:
-    /** container for the write sparse matrix coefficients */
-    std::vector<w_sparseVect> m;
 }; // end class w_sparseMat
 
 
@@ -60,8 +57,8 @@ public:
     /** construct a sparse matrix from a "read mode" matrix */
     r_sparseMat(const w_sparseMat &A)
         {
-        m.reserve(A.m.size());  // A.m.size() is the number of lines
-        for (const w_sparseVect& line: A.m)
+        m.reserve(A.size());  // A.size() is the number of lines
+        for (const w_sparseVect& line: A)
             m.emplace_back(line);
         }
 
