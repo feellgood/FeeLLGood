@@ -58,22 +58,41 @@ public:
     r_sparseMat(const w_sparseMat &A)
         {
         m.reserve(A.size());  // A.size() is the number of lines
-        for (const w_sparseVect& line: A)
-            m.emplace_back(line);
+        for (const w_sparseVect& line_in: A)
+            {
+            r_sparseVect line;
+            line.indices.reserve(line_in.size());
+            line.values.reserve(line_in.size());
+            for (auto it = line_in.begin(); it != line_in.end(); ++it)
+                {
+                line.indices.push_back(it->first);
+                line.values.push_back(it->second);
+                }
+            m.push_back(line);
+            }
         }
 
     /** construct a sparse matrix from its shape */
     r_sparseMat(const MatrixShape &shape)
         {
-        for (size_t i = 0; i < shape.size(); ++i)
-            { m.emplace_back(shape[i]); }
+        m.reserve(shape.size());
+        for (const std::set<int>& line_shape: shape)
+            {
+            r_sparseVect line;
+            line.indices.reserve(line_shape.size());
+            for (auto it = line_shape.begin(); it != line_shape.end(); ++it)
+                line.indices.push_back(*it);
+            line.values.resize(line_shape.size());
+            m.push_back(line);
+            }
         }
 
     /** zero all elements, while preserving the shape */
     void clear()
         {
         for (r_sparseVect& line: m)
-            line.clear();
+            for (double& value: line.values)
+                value = 0;
         }
 
     /** add the value at position (i, j), which must belog to the shape */
@@ -81,19 +100,42 @@ public:
         {
         assert(i >= 0 && i < m.size());
         assert(j >= 0 && j < m.size());
-        m[i].add(j, val);
+        r_sparseVect& line = m[i];
+        size_t k = 0;
+        for (; k < line.indices.size(); ++k)
+            if (line.indices[k] == j)
+                break;
+        assert(k < line.indices.size());
+        line.values[k] += val;
         }
 
     /** printing function */
     void print(std::ostream & flux = std::cout) const
-        { std::for_each(m.begin(),m.end(),[&flux](r_sparseVect const& _v) {_v.print(flux);} ); }
+        {
+        flux << "[\n";
+        for (const r_sparseVect& line: m)
+            {
+            flux << "  {";
+            for (size_t k = 0; k < line.indices.size(); ++k)
+                {
+                flux << line.indices[k] << ": " << line.values[k];
+                flux << (k < line.indices.size()-1 ? ", " : "\n");
+                }
+            flux << "}\n";
+            }
+        flux << ']';
+        }
 
     /** getter for a coefficient value */
     double operator() (const int i, const int j) const
         {
         assert(i >= 0 && i < m.size());
         assert(j >= 0 && j < m.size());
-        return m[i].getVal(j);
+        const r_sparseVect& line = m[i];
+        for (size_t k = 0; k < line.indices.size(); ++k)
+            if (line.indices[k] == j)
+                return line.values[k];
+        return 0;
         }
 
     /** Y = this*X */
@@ -102,8 +144,14 @@ public:
         {
         assert(X.size() == m.size());
         assert(Y.size() == m.size());
-        std::transform(std::execution::par,m.begin(),m.end(),Y.begin(),
-                       [&X](const r_sparseVect &_v){ return _v.dot(X); });
+        std::transform(std::execution::par, m.begin(), m.end(), Y.begin(),
+            [&X](const r_sparseVect &line)
+            {
+            double val = 0;
+            for (size_t k = 0; k < line.indices.size(); ++k)
+                val += line.values[k] * X[line.indices[k]];
+            return val;
+            });
         }
 
     /** build diagonal preconditioner D from input matrix(this) */
