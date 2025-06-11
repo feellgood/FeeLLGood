@@ -36,15 +36,14 @@ public:
     /** constructor */
     w_sparseMat(const int _N) : N(_N)
         {
-        m.reserve(N);
-        for (int i = 0; i < N; ++i)
-            m.emplace_back(N);
+        m.resize(N);
         }
 
     /** inserter for a coefficient val at line i col j */
     void insert(const int i, const int j, const double val)
         {
-        assert(i<N && j<N );
+        assert(i >= 0 && i < N);
+        assert(j >= 0 && j < N);
         m[i].insert(j, val);
         }
 
