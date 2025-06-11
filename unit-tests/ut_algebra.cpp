@@ -122,5 +122,45 @@ BOOST_AUTO_TEST_CASE(test_w_sparseMat, *boost::unit_test::tolerance(UT_TOL))
     BOOST_CHECK( y[3] == 42.0 );
     }
 
+/** tests on r_sparseMat built from MatrixShape */
+BOOST_AUTO_TEST_CASE(test_matrix_shape, *boost::unit_test::tolerance(UT_TOL))
+    {
+    const int N=4;
+    MatrixShape shape(N);
+    shape[1].insert(1);
+    shape[0].insert(0);
+    shape[2].insert(2);
+    shape[3].insert(3);
+    shape[1].insert(3);
+    shape[0].insert(3);
+    r_sparseMat m(shape);
+    m.add(1, 1, 3.14);
+    m.add(0, 0, 1);
+    m.add(2, 2, 5);
+    m.add(3, 3, 42);
+    m.add(1, 3, -10);
+    m.add(1, 3, 10);
+    m.add(0, 3, 0.5);
+    std::vector<double> x {1, 1, 1, 1};
+    std::vector<double> y(N);
+    mult(m,x,y); //y = m*x
+    BOOST_CHECK( y[0] == 1.5 );
+    BOOST_CHECK( y[1] == 3.14 );
+    BOOST_CHECK( y[2] == 5.0 );
+    BOOST_CHECK( y[3] == 42.0 );
+
+    m.clear();
+    m.add(0, 3, 1);
+    m.add(1, 1, 2);
+    m.add(1, 3, 3);
+    m.add(2, 2, 4);
+    m.add(3, 3, 6);
+    mult(m, x, y);
+    BOOST_CHECK( y[0] == 1 );
+    BOOST_CHECK( y[1] == 5 );
+    BOOST_CHECK( y[2] == 4 );
+    BOOST_CHECK( y[3] == 6 );
+    }
+
 BOOST_AUTO_TEST_SUITE_END()
 
