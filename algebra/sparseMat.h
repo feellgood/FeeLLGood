@@ -44,7 +44,7 @@ public:
         {
         assert(i >= 0 && i < N);
         assert(j >= 0 && j < N);
-        m[i].insert(j, val);
+        m[i][j] += val;
         }
 
     /** getter for the number of lines */

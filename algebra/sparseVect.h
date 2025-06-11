@@ -3,10 +3,10 @@
 
 /** \file sparseVect.h
  * \brief sparse vector
-a write sparse vector is a collection of v_coeff, which is a couple composed of an index and a double value
-to populate with coefficients the sparse vector, use insert method
-If several v_coeff have the same index, then they are automatically summed up.
-a read sparse vector is a std::vector of v_coeff, built by its constructor
+A write-mode sparse vector is an (index -> value) map.
+
+A read-mode sparse vector holds a list of sorted indices, and a list of matching values. The list
+of indices is immutable once the vector has been constructed, but the values can later be changed.
  **/
 
 #include <set>
@@ -26,35 +26,9 @@ using v_coeff = std::pair<int, double>;
 
 /**
 \class w_sparseVect
-it is a class for sparse vector in writing mode, using std::map<int,double> as coefficient container
+A sparse vector in writing mode is an (index -> value) map.
 */
-class w_sparseVect
-{
-public:
-    /** inserter with a coefficient */
-    void insert(int i, double val)
-        {
-        coefs[i] += val;
-        }
-
-    /** Insert the coefficients into vector v */
-    void inorder_insert(std::vector<int> &indices, std::vector<double> &values) const
-        {
-        for (auto it = coefs.begin(); it != coefs.end(); ++it)
-            {
-            indices.push_back(it->first);
-            values.push_back(it->second);
-            }
-        }
-
-    /** Return the number of elements */
-    size_t size() const { return coefs.size(); }
-
-private:
-    /** coeffs container */
-    std::map<int, double> coefs;
-}; // end class w_sparseVect
-
+using w_sparseVect = std::map<int, double>;
 
 /**
 \class r_sparseVect
@@ -68,7 +42,11 @@ public:
         {
         indices.reserve(v.size());
         values.reserve(v.size());
-        v.inorder_insert(indices, values);
+        for (auto it = v.begin(); it != v.end(); ++it)
+            {
+            indices.push_back(it->first);
+            values.push_back(it->second);
+            }
         }
 
     /** constructor from size and shape */
