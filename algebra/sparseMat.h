@@ -44,9 +44,6 @@ public:
         m[i][j] += val;
         }
 
-    /** getter for the number of lines */
-    int getDim() const { return m.size(); }
-
 private:
     /** container for the write sparse matrix coefficients */
     std::vector<w_sparseVect> m;
@@ -63,9 +60,10 @@ public:
     /** construct a sparse matrix from a "read mode" matrix */
     r_sparseMat(const w_sparseMat &A)
         {
-        m.reserve(A.getDim());  // A.getDim() is the number of lines
+        m.reserve(A.m.size());  // A.m.size() is the number of lines
         if (!A.m.empty())
-            { for(int i=0; i<A.getDim(); ++i){ m.emplace_back(A.m[i]); } }
+            for (size_t i = 0; i < A.m.size(); ++i)
+                m.emplace_back(A.m[i]);
         }
 
     /** construct a sparse matrix from its shape */
