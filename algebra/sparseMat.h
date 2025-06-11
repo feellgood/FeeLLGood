@@ -34,26 +34,20 @@ class w_sparseMat
 
 public:
     /** constructor */
-    w_sparseMat(const int _N) : N(_N)
-        {
-        m.resize(N);
-        }
+    w_sparseMat(int N) : m(N) {}
 
     /** inserter for a coefficient val at line i col j */
     void insert(const int i, const int j, const double val)
         {
-        assert(i >= 0 && i < N);
-        assert(j >= 0 && j < N);
+        assert(i >= 0 && i < m.size());
+        assert(j >= 0 && j < m.size());
         m[i][j] += val;
         }
 
     /** getter for the number of lines */
-    int getDim() const {return N;}
+    int getDim() const { return m.size(); }
 
 private:
-    /** dimension of sparse matrix, N is the number of lines */
-    const int N;
-
     /** container for the write sparse matrix coefficients */
     std::vector<w_sparseVect> m;
 }; // end class w_sparseMat
