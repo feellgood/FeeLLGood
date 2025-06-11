@@ -76,10 +76,6 @@ template <typename T>
 void applyMask(const Vector<int>& mask, Vector<T> & X)
     { std::for_each(mask.begin(),mask.end(),[&X](const int _i){ X[_i] = (T)(0); }); }
 
-/** operator<< for r_sparseVect */
-inline std::ostream & operator<<(std::ostream & flux, r_sparseVect const& v)
-    {v.print(flux); return flux;}
-
 /** operator<< for r_sparseMat */
 inline std::ostream & operator<<(std::ostream & flux, r_sparseMat const& m)
     {m.print(flux); return flux;}
