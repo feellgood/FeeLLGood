@@ -18,17 +18,6 @@ a read sparse vector is a std::vector of v_coeff, built by its constructor
 namespace algebra
 {
 
-/** overloading of << for printing functions */
-template<typename T>
-std::ostream& operator << (std::ostream& os, const std::vector<T>& v)
-    {
-    os << "[";
-    for (auto it = v.begin(); it != v.end(); ++it)
-        { os << "{" << it->first << ":" << it->second << "},"; }
-    os << "]";
-    return os;
-    }
-
 /**
 \class v_coeff
 A coefficient of a sparse vector is an (index, value) pair.
