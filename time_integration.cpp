@@ -151,7 +151,6 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
                      scal_fmm::fmm &myFMM /**< [in] */, timing &t_prm, int &nt)
     {
     compute_all(fem, settings, myFMM, t_prm.get_t());
-
     std::string baseName = settings.r_path_output_dir + '/' + settings.getSimName();
     std::string str = baseName + ".evol";
 

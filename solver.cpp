@@ -36,7 +36,6 @@ int LinAlgebra::solver(timing const &t_prm)
 
     buildInitGuess(Xw);// gamma0 division handled by function buildInitGuess
     double residu = algebra::bicg_dir<double>(iter, K, Xw, L_rhs, lvd);
-
     int nb_iter = iter.get_iteration();
     double _solver_error= iter.get_res();
 
