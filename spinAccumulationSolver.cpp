@@ -1,6 +1,8 @@
 #include "algebra/bicg.h"
 #include "spinAccumulationSolver.h"
 
+#include "solverUtils.h"
+
 double spinAcc::getJs(Tetra::Tet const &tet) const
     { return paramTetra[tet.idxPrm].J; }
 
@@ -80,20 +82,17 @@ int spinAcc::solve(const double _tol /**< [in] tolerance */ )
         {
         Eigen::Matrix<double,DIM_3D*Tetra::N,DIM_3D*Tetra::N> K;
         K.setZero();
-        Eigen::Matrix<double,DIM_3D*Tetra::N,1> L;
-        L.setZero();
+        std::vector<double> L(DIM_3D*Tetra::N,0.0);
         integrales(elem,K,L);
-        assembling<Tetra::N>(elem.ind,K,L,Kw,Lw);
+        buildMat<Tetra::N,DIM_3D>(NOD, elem.ind, K, Kw);
+        buildVect<Tetra::N,DIM_3D>(NOD, elem.ind, L, Lw);
         } );
 
-    std::for_each( msh.fac.begin(), msh.fac.end(),[this,&Kw,&Lw](Facette::Fac &elem)
+    std::for_each( msh.fac.begin(), msh.fac.end(),[this,&Lw](Facette::Fac &elem)
         {
-        Eigen::Matrix<double,DIM_3D*Facette::N,DIM_3D*Facette::N> K;
-        K.setZero();
-        Eigen::Matrix<double,DIM_3D*Facette::N,1> L;
-        L.setZero();
+        std::vector<double> L(DIM_3D*Facette::N,0.0);
         integrales(elem,L);
-        assembling<Facette::N>(elem.ind,K,L,Kw,Lw);
+        buildVect<Facette::N,DIM_3D>(NOD, elem.ind, L, Lw);
         } );
 
     algebra::iteration iter("bicg",_tol,verbose,MAXITER);
@@ -104,22 +103,17 @@ int spinAcc::solve(const double _tol /**< [in] tolerance */ )
     algebra::bicg(iter, Kr, Xw, Lw);
 
     if (!(iter.converged()))
-        {
-        std::cout << "\t bicg FAILED in " << iter.get_iteration() << "; residu= " << iter.get_res() << '\t';
-        }
+        { std::cout << "\t bicg FAILED in " << iter.get_iteration() << "; residu= " << iter.get_res() << '\t'; }
 
     for (int i=0; i<NOD; i++)
-        {
-        for (int d=0; d<DIM_3D; d++)
-            { Qs[i][d] = Xw[d*NOD+i]; }
-        }
+        { for(int d=0; d<DIM_3D; d++) { Qs[i][d] = Xw[d*NOD+i]; } }
 
     return iter.converged();
     }
 
 void spinAcc::integrales(Tetra::Tet &tet,
                          Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,DIM_PROBLEM*Tetra::N> &AE,
-                         Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,1> &BE)
+                         std::vector<double> &BE)
     {
     using algebra::sq;
     using namespace Nodes;
@@ -201,7 +195,7 @@ void spinAcc::integrales(Tetra::Tet &tet,
         }
     }
 
-void spinAcc::integrales(Facette::Fac &fac, Eigen::Matrix<double,DIM_PROBLEM*Facette::N,1> &BE)
+void spinAcc::integrales(Facette::Fac &fac, std::vector<double> &BE)
     {
     using namespace Nodes;
     using namespace Facette;

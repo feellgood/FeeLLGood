@@ -85,33 +85,12 @@ class spinAcc
     std::vector<Eigen::Vector3d> Qs;
 
     static const int DIM_PROBLEM = 3;
-
-    template <int N>
-    void assembling(std::vector<int> &ind,//int ind[NBN],
-                    Eigen::Matrix<double,DIM_PROBLEM*N,DIM_PROBLEM*N> &Ke,
-                    Eigen::Matrix<double,DIM_PROBLEM*N,1> &Le,
-                    algebra::w_sparseMat &K, std::vector <double> &L)
-        {
-        for (int ie=0; ie<N; ie++)
-            {
-            int i= ind[ie];
-            for (int je=0; je<N; je++)
-                {
-                int j= ind[je];
-                for (int di=0; di<DIM_PROBLEM; di++)
-                    for (int dj=0; dj<DIM_PROBLEM; dj++)
-                        K.insert(di*NOD+i, dj*NOD+j, Ke(di*N+ie,dj*N+je));
-	            }
-            for (int di=0; di<DIM_PROBLEM; di++) { L[di*NOD+i] += Le[di*N+ie]; }
-            }
-        }
     
     void integrales(Tetra::Tet &tet,
                     Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,DIM_PROBLEM*Tetra::N> &AE,
-                    Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,1> &BE);
+                    std::vector<double> &BE);
     
-    void integrales(Facette::Fac &fac,
-                    Eigen::Matrix<double,DIM_PROBLEM*Facette::N,1> &BE);
+    void integrales(Facette::Fac &fac, std::vector<double> &BE);
     };
 
 #endif
