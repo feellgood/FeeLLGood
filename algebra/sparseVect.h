@@ -19,12 +19,6 @@ namespace algebra
 {
 
 /**
-\class v_coeff
-A coefficient of a sparse vector is an (index, value) pair.
-*/
-using v_coeff = std::pair<int, double>;
-
-/**
 \class w_sparseVect
 A sparse vector in writing mode is an (index -> value) map.
 */
@@ -32,7 +26,7 @@ using w_sparseVect = std::map<int, double>;
 
 /**
 \class r_sparseVect
-read sparse vector : it is a std::vector container for v_coeff, in reading mode
+read sparse vector: holds a list of sorted indices, and a list of matching values.
 */
 class r_sparseVect
 {
