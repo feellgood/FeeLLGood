@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE(silly_problem_solver, *boost::unit_test::tolerance(UT_TOL))
     iter.set_maxiter(MAX_ITER);
     iter.set_noisy(false);
 
-    algebra::Vector<double> x(N,0.0), b(N,1.0);
+    std::vector<double> x(N,0.0), b(N,1.0);
     algebra::w_sparseMat Aw(N);
     for(int i=0;i<N;i++) { Aw.insert(i,i,1.0); }
     algebra::r_sparseMat Ar(Aw);
@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(silly_problem_solver, *boost::unit_test::tolerance(UT_TOL))
     std::cout << "#iterations:     " << iter.get_iteration() << std::endl;
     std::cout << "estimated error: " << iter.get_res()      << std::endl;
     BOOST_CHECK( iter.get_iteration() == 0);
-    algebra::Vector<double> y(N);
+    std::vector<double> y(N);
     algebra::mult(Ar,x,y);// y = Ar * x
     algebra::sub(b,y); // y -= b;
     BOOST_CHECK( algebra::norm<double>(y) == 0.0 );
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(rand_sp_mat_problem_solver, *boost::unit_test::tolerance(UT
     algebra::iteration iter(_TOL);
     iter.set_maxiter(MAX_ITER);
     iter.set_noisy(false);
-    algebra::Vector<double> x(N,2.0), b(N,1.0);
+    std::vector<double> x(N,2.0), b(N,1.0);
     algebra::w_sparseMat Aw(N);
     for(int i=0;i<N;i++) { Aw.insert(i,i,1.0); }
 
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(rand_sp_mat_problem_solver, *boost::unit_test::tolerance(UT
     std::cout << "#iterations:     " << iter.get_iteration() << std::endl;
     std::cout << "estimated error: " << iter.get_res()      << std::endl;
     BOOST_CHECK( iter.get_iteration() > 1);
-    algebra::Vector<double> y(N);
+    std::vector<double> y(N);
     algebra::mult(Ar,x,y);// y = Ar * x
     algebra::sub(b,y); // y -= b;
     double err_result = algebra::norm<double>(y);
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(rand_asym_sp_mat_problem_solver, *boost::unit_test::toleran
     iter.set_maxiter(MAX_ITER);
     iter.set_noisy(false);
 
-    algebra::Vector<double> x(N,2.0), b(N,1.0);
+    std::vector<double> x(N,2.0), b(N,1.0);
     algebra::w_sparseMat Aw(N);
     for(int i=0;i<N;i++) { Aw.insert(i,i,1.0); }
     std::mt19937 gen(my_seed());
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(rand_asym_sp_mat_problem_solver, *boost::unit_test::toleran
     std::cout << "#iterations:     " << iter.get_iteration() << std::endl;
     std::cout << "estimated error: " << iter.get_res()      << std::endl;
     BOOST_CHECK( iter.get_iteration() > 1);
-    algebra::Vector<double> y(N);
+    std::vector<double> y(N);
     algebra::mult(Ar,x,y);// y = Ar * x
     algebra::sub(b,y); // y -= b;
     double err_result = algebra::norm<double>(y);

@@ -5,18 +5,16 @@
 
 namespace algebra
 {
-template<typename T> using Vector = std::vector<T,std::allocator<T>>;
-
 /** returns scalar product X.Y */
 template <typename T>
-T dot(const Vector<T> & X,const Vector<T> & Y)
+T dot(const std::vector<T> & X,const std::vector<T> & Y)
 	{
 	return std::inner_product(X.begin(),X.end(),Y.begin(),(T)0);
 	}
 
 /** euclidian norm of vector X */
 template <typename T>
-T norm(Vector<T> & X) { return sqrt(fabs( dot<T>(X,X) )); }
+T norm(std::vector<T> & X) { return sqrt(fabs( dot<T>(X,X) )); }
 }
 
 #endif

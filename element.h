@@ -106,7 +106,7 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
 
     /** assemble the big vector L from tetra or facette inner vector Lp */
     void assemblage_vect(const int NOD /**< [in] nb nodes */,
-                         algebra::Vector<double> &L /**< [out] vector */) const
+                         std::vector<double> &L /**< [out] vector */) const
         {
         for (int i = 0; i < N; i++)
             {

@@ -10,7 +10,7 @@ void LinAlgebra::base_projection()
     refMsh->setBasis(M_2_PI * r);
     }
 
-void LinAlgebra::buildInitGuess(algebra::Vector<double> &G) const
+void LinAlgebra::buildInitGuess(std::vector<double> &G) const
     {
     for (int i = 0; i < NOD; i++)
         {

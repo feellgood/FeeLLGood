@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(Fac_assemblage_vect, *boost::unit_test::tolerance(UT_TOL))
     Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
     std::cout << "fac.assemblage_vect test: test the norm of the output vector built\n";
     
-    algebra::Vector<double> L(2*nbNod,1.0);
+    std::vector<double> L(2*nbNod,1.0);
     f.assemblage_vect(nbNod,L);// init val of f.Lp is zero
     BOOST_TEST(algebra::norm(L) == sqrt(6.0));
     f.Lp[2*Facette::N - 1] -= 1.0;
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(Tet_assemblage_vect, *boost::unit_test::tolerance(UT_TOL))
     Tetra::Tet t(node, 0, {1, 2, 3, 4});
     std::cout << "Tet.assemblage_vect test: test the norm of the output vector built\n";
     
-    algebra::Vector<double> L(2*nbNod,1.0);
+    std::vector<double> L(2*nbNod,1.0);
     t.assemblage_vect(nbNod,L);// init val of t.Lp is zero
     BOOST_TEST(algebra::norm(L) == sqrt(8.0));
     t.Lp[2*Tetra::N - 1] -= 1.0;

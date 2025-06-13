@@ -31,17 +31,17 @@ T sq(const T x) { return x * x; }
 
 /** Y *= alpha */
 template <typename T>
-void scaled( const T alpha, Vector<T> & Y)
+void scaled( const T alpha, std::vector<T> & Y)
     { std::for_each(Y.begin(),Y.end(),[alpha](T &_x){ _x *= alpha; }); }
 
 /** direct product (component to component): Z = X⊗Y */
 template <typename T>
-void p_direct(const Vector<T> & X,const Vector<T> & Y, Vector<T> & Z)
+void p_direct(const std::vector<T> & X,const std::vector<T> & Y, std::vector<T> & Z)
     { std::transform(X.begin(),X.end(),Y.begin(),Z.begin(), std::multiplies<T>() ); }
 
 /** Y += X */
 template <typename T>
-void add(const Vector<T> & X, Vector<T> & Y)
+void add(const std::vector<T> & X, std::vector<T> & Y)
     {
     for (size_t i = 0; i < Y.size(); ++i)
         Y[i] += X[i];
@@ -49,7 +49,7 @@ void add(const Vector<T> & X, Vector<T> & Y)
 
 /** Y -= X */
 template <typename T>
-void sub(const Vector<T> & X, Vector<T> & Y)
+void sub(const std::vector<T> & X, std::vector<T> & Y)
     {
     for (size_t i = 0; i < Y.size(); ++i)
         Y[i] -= X[i];
@@ -57,7 +57,7 @@ void sub(const Vector<T> & X, Vector<T> & Y)
 
 /** Y += alpha*X */
 template <typename T>
-void scaled_add(const Vector<T> & X,const T alpha, Vector<T> & Y)
+void scaled_add(const std::vector<T> & X,const T alpha, std::vector<T> & Y)
     {
     for (size_t i = 0; i < Y.size(); ++i)
         Y[i] += alpha * X[i];
@@ -65,14 +65,14 @@ void scaled_add(const Vector<T> & X,const T alpha, Vector<T> & Y)
 
 /** Y = A*X with r_sparseMat A */
 template <typename T>
-void mult(r_sparseMat & A, Vector<T> const& X, Vector<T> &Y)
+void mult(r_sparseMat & A, std::vector<T> const& X, std::vector<T> &Y)
     {
     A.mult(X,Y); // Y = A*X
     }
 
 /** apply a mask to vector X : all coefficients in vector mask are zeroed in X */
 template <typename T>
-void applyMask(const Vector<int>& mask, Vector<T> & X)
+void applyMask(const std::vector<int>& mask, std::vector<T> & X)
     { std::for_each(mask.begin(),mask.end(),[&X](const int _i){ X[_i] = (T)(0); }); }
 
 /** operator<< for r_sparseMat */
@@ -80,7 +80,7 @@ inline std::ostream & operator<<(std::ostream & flux, r_sparseMat const& m)
     {m.print(flux); return flux;}
 
 template <typename T>
-bool check(Vector<T> &v)
+bool check(std::vector<T> &v)
     { return std::none_of(v.begin(),v.end(), [](T x){ return std::isnan(x);} );  }
 } // end namespace algebra
 

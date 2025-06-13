@@ -182,7 +182,7 @@ public:
 
     /** Y = this*X */
     template <typename T>
-    void mult(Vector<T> const& X, Vector<T> &Y)
+    void mult(std::vector<T> const& X, std::vector<T> &Y)
         {
         assert(X.size() == m.size());
         assert(Y.size() == m.size());
@@ -198,7 +198,7 @@ public:
 
     /** Build a diagonal preconditioner D from this matrix. */
     template <typename T>
-    void build_diag_precond(Vector<T> &D) const
+    void build_diag_precond(std::vector<T> &D) const
         {
         assert(D.size() == m.size());
         for (size_t i = 0; i < m.size(); ++i)

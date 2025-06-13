@@ -78,7 +78,7 @@ public:
     void prepareElements(double const A_Hext /**< [in] amplitude applied field (might be time dependant)*/, timing const &t_prm /**< [in] */);
 
     /** build init guess for bicg solver */
-    void buildInitGuess(algebra::Vector<double> &G/**< [out] */) const;
+    void buildInitGuess(std::vector<double> &G/**< [out] */) const;
 
     /** solver, uses stabilized biconjugate gradient solver (bicg) with diagonal preconditionner, sparse matrix and vector are filled with multiThreading. Sparse matrix is row major.
     */
@@ -109,10 +109,10 @@ private:
     algebra::r_sparseMat K;
 
     /** RHS vector of the system to solve */
-    algebra::Vector<double> L_rhs;
+    std::vector<double> L_rhs;
 
     /** solution of the system to solve */
-    algebra::Vector<double> Xw;
+    std::vector<double> Xw;
 
     /** maximum number of iteration for bicgstab */
     const int MAXITER;
