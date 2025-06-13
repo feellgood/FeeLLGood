@@ -79,6 +79,7 @@ void applyMask(const std::vector<int>& mask, std::vector<T> & X)
 inline std::ostream & operator<<(std::ostream & flux, r_sparseMat const& m)
     {m.print(flux); return flux;}
 
+/** return true if the given vector is free of NaNs */
 template <typename T>
 bool check(std::vector<T> &v)
     { return std::none_of(v.begin(),v.end(), [](T x){ return std::isnan(x);} );  }
