@@ -143,11 +143,9 @@ public:
         assert(i >= 0 && i < m.size());
         assert(j >= 0 && j < m.size());
         r_sparseVect& line = m[i];
-        size_t k = 0;
-        for (; k < line.indices.size(); ++k)
-            if (line.indices[k] == j)
-                break;
-        assert(k < line.indices.size());
+        auto it = std::lower_bound(line.indices.begin(), line.indices.end(), j);
+        assert(it != line.indices.end() && *it == j);
+        int k = it - line.indices.begin();
         line.values[k] += val;
         }
 
@@ -174,10 +172,11 @@ public:
         assert(i >= 0 && i < m.size());
         assert(j >= 0 && j < m.size());
         const r_sparseVect& line = m[i];
-        for (size_t k = 0; k < line.indices.size(); ++k)
-            if (line.indices[k] == j)
-                return line.values[k];
-        return 0;
+        auto it = std::lower_bound(line.indices.begin(), line.indices.end(), j);
+        if (it == line.indices.end() || *it != j)
+            return 0;
+        int k = it - line.indices.begin();
+        return line.values[k];
         }
 
     /** Y = this*X */
