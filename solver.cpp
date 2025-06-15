@@ -9,7 +9,7 @@ int LinAlgebra::solver(timing const &t_prm)
     chronometer counter(2);
 
     K.clear();
-    std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
+    std::for_each(std::execution::par, refMsh->tet.begin(), refMsh->tet.end(),
                       [this](Tetra::Tet &my_elem) { my_elem.assemblage_mat(NOD,K); } );
 
     if (verbose)
