@@ -34,26 +34,6 @@ namespace algebra
 {
 
 /**
-Write-mode sparse vector. This is an (index -> value) map.
-*/
-using w_sparseVect = std::map<int, double>;
-
-/**
-Read-mode sparse vector.
-
-This holds a list of indices, and a list of matching values.
- - both lists have the same size
- - the indices are unique and sorted
- - the values match the indices in the sense that `values[k]` is the vector element at index
-   `indices[k]`.
-*/
-struct r_sparseVect
-{
-    std::vector<int> indices;  /**< array of vector indices. */
-    std::vector<double> values;  /**< array of vector values matching the indices */
-};
-
-/**
 The shape of a sparse matrix is the set of valid indices. Specifically, the shape element at index i
 is the set of j indices such that (i, j) is a valid index pair for the matrix.
  */
@@ -63,15 +43,21 @@ using MatrixShape = std::vector<std::set<int>>;
 \class w_sparseMat
 \brief Write-mode sparse matrix.
 
-This is a list of write-mode sparse vectors.
+This is a container for matrix elements that can be modified by inserting elements at arbitrary
+locations.
 */
-class w_sparseMat : private std::vector<w_sparseVect>
+class w_sparseMat
 {
     friend class r_sparseMat;
 
+    /**
+    Write-mode sparse vector. This is an (index -> value) map.
+    */
+    using w_sparseVect = std::map<int, double>;
+
 public:
     /** Constructor. N is the matrix size: this is a square N×N matrix. */
-    w_sparseMat(int N) : std::vector<w_sparseVect>(N) {}
+    w_sparseMat(int N) : m(N) {}
 
     /**
     Insert a matrix element with value val, at line i, column j. If an element already exists at
@@ -81,10 +67,13 @@ public:
     */
     void insert(const int i, const int j, const double val)
         {
-        assert(i >= 0 && i < size());
-        assert(j >= 0 && j < size());
-        (*this)[i][j] += val;
+        assert(i >= 0 && i < m.size());
+        assert(j >= 0 && j < m.size());
+        m[i][j] += val;
         }
+
+private:
+    std::vector<w_sparseVect> m;
 };
 
 
@@ -95,12 +84,27 @@ This is the main sparse matrix class, meant for efficiently computing matrix-vec
 */
 class r_sparseMat
 {
+    /**
+    Read-mode sparse vector.
+
+    This holds a list of indices, and a list of matching values.
+     - both lists have the same size
+     - the indices are unique and sorted
+     - the values match the indices in the sense that `values[k]` is the vector element at index
+       `indices[k]`.
+    */
+    struct r_sparseVect
+    {
+        std::vector<int> indices;  /**< array of vector indices. */
+        std::vector<double> values;  /**< array of vector values matching the indices */
+    };
+
 public:
     /** Construct from a read-mode sparse matrix. */
     r_sparseMat(const w_sparseMat &A)
         {
-        m.reserve(A.size());
-        for (const w_sparseVect& line_in: A)
+        m.reserve(A.m.size());
+        for (const w_sparseMat::w_sparseVect& line_in: A.m)
             {
             r_sparseVect line;
             line.indices.reserve(line_in.size());
