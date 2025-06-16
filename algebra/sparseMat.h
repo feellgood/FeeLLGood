@@ -53,27 +53,27 @@ class w_sparseMat
     /**
     Write-mode sparse vector. This is an (index -> value) map.
     */
-    using w_sparseVect = std::map<int, double>;
+    using SparseVector = std::map<int, double>;
 
 public:
     /** Constructor. N is the matrix size: this is a square N×N matrix. */
-    w_sparseMat(int N) : m(N) {}
+    w_sparseMat(int N) : rows(N) {}
 
     /**
-    Insert a matrix element with value val, at line i, column j. If an element already exists at
-    this position, add `val` to its value.
+    Insert a matrix element with value val, at row i, column j. If an element already exists at this
+    position, add `val` to its value.
 
     The caller must ensure both indices lie within [0, N).
     */
     void insert(const int i, const int j, const double val)
         {
-        assert(i >= 0 && i < m.size());
-        assert(j >= 0 && j < m.size());
-        m[i][j] += val;
+        assert(i >= 0 && i < rows.size());
+        assert(j >= 0 && j < rows.size());
+        rows[i][j] += val;
         }
 
 private:
-    std::vector<w_sparseVect> m;
+    std::vector<SparseVector> rows;
 };
 
 
@@ -93,7 +93,7 @@ class r_sparseMat
      - the values match the indices in the sense that `values[k]` is the vector element at index
        `indices[k]`.
     */
-    struct r_sparseVect
+    struct SparseVector
     {
         std::vector<int> indices;  /**< array of vector indices. */
         std::vector<double> values;  /**< array of vector values matching the indices */
@@ -101,69 +101,69 @@ class r_sparseMat
 
 public:
     /** Construct from a read-mode sparse matrix. */
-    r_sparseMat(const w_sparseMat &A)
+    r_sparseMat(const w_sparseMat &source)
         {
-        m.reserve(A.m.size());
-        for (const w_sparseMat::w_sparseVect& line_in: A.m)
+        rows.reserve(source.rows.size());
+        for (const w_sparseMat::SparseVector& source_row: source.rows)
             {
-            r_sparseVect line;
-            line.indices.reserve(line_in.size());
-            line.values.reserve(line_in.size());
-            for (auto it = line_in.begin(); it != line_in.end(); ++it)
+            SparseVector row;
+            row.indices.reserve(source_row.size());
+            row.values.reserve(source_row.size());
+            for (auto it = source_row.begin(); it != source_row.end(); ++it)
                 {
-                line.indices.push_back(it->first);
-                line.values.push_back(it->second);
+                row.indices.push_back(it->first);
+                row.values.push_back(it->second);
                 }
-            m.push_back(line);
+            rows.push_back(row);
             }
         }
 
     /** Construct from a matrix shape. Initialize all stored values to zero. */
     r_sparseMat(const MatrixShape &shape)
         {
-        m.reserve(shape.size());
-        for (const std::set<int>& line_shape: shape)
+        rows.reserve(shape.size());
+        for (const std::set<int>& row_shape: shape)
             {
-            r_sparseVect line;
-            line.indices.reserve(line_shape.size());
-            for (auto it = line_shape.begin(); it != line_shape.end(); ++it)
-                line.indices.push_back(*it);
-            line.values.resize(line_shape.size());
-            m.push_back(line);
+            SparseVector row;
+            row.indices.reserve(row_shape.size());
+            for (auto it = row_shape.begin(); it != row_shape.end(); ++it)
+                row.indices.push_back(*it);
+            row.values.resize(row_shape.size());
+            rows.push_back(row);
             }
         }
 
     /** Zero-out all elements, while preserving the shape. */
     void clear()
         {
-        for (r_sparseVect& line: m)
-            for (double& value: line.values)
+        for (SparseVector& row: rows)
+            for (double& value: row.values)
                 value = 0;
         }
 
     /** Add the given value at position (i, j), which must belong to the shape. */
     void add(int i, int j, double val)
         {
-        assert(i >= 0 && i < m.size());
-        assert(j >= 0 && j < m.size());
-        r_sparseVect& line = m[i];
-        auto it = std::lower_bound(line.indices.begin(), line.indices.end(), j);
-        assert(it != line.indices.end() && *it == j);
-        int k = it - line.indices.begin();
-        line.values[k] += val;
+        assert(i >= 0 && i < rows.size());
+        assert(j >= 0 && j < rows.size());
+        SparseVector& row = rows[i];
+        auto it = std::lower_bound(row.indices.begin(), row.indices.end(), j);
+        assert(it != row.indices.end() && *it == j);
+        int k = it - row.indices.begin();
+        row.values[k] += val;
         }
 
     /** Print to the provided stream. */
     void print(std::ostream & flux = std::cout) const
         {
         flux << "[\n";
-        for (const r_sparseVect& line: m)
+        for (const SparseVector& row: rows)
             {
             flux << "  {";
-            for (size_t k = 0; k < line.indices.size(); ++k)
+            for (size_t k = 0; k < row.indices.size(); ++k)
                 {
-                flux << line.indices[k] << ": " << line.values[k];
-                flux << (k < line.indices.size()-1 ? ", " : "\n");
+                flux << row.indices[k] << ": " << row.values[k];
+                flux << (k < row.indices.size()-1 ? ", " : "\n");
                 }
             flux << "}\n";
             }
@@ -173,28 +173,28 @@ public:
     /** Return the value at position (i, j). */
     double operator() (const int i, const int j) const
         {
-        assert(i >= 0 && i < m.size());
-        assert(j >= 0 && j < m.size());
-        const r_sparseVect& line = m[i];
-        auto it = std::lower_bound(line.indices.begin(), line.indices.end(), j);
-        if (it == line.indices.end() || *it != j)
+        assert(i >= 0 && i < rows.size());
+        assert(j >= 0 && j < rows.size());
+        const SparseVector& row = rows[i];
+        auto it = std::lower_bound(row.indices.begin(), row.indices.end(), j);
+        if (it == row.indices.end() || *it != j)
             return 0;
-        int k = it - line.indices.begin();
-        return line.values[k];
+        int k = it - row.indices.begin();
+        return row.values[k];
         }
 
     /** Y = this*X */
     template <typename T>
     void mult(std::vector<T> const& X, std::vector<T> &Y)
         {
-        assert(X.size() == m.size());
-        assert(Y.size() == m.size());
-        std::transform(std::execution::par, m.begin(), m.end(), Y.begin(),
-            [&X](const r_sparseVect &line)
+        assert(X.size() == rows.size());
+        assert(Y.size() == rows.size());
+        std::transform(std::execution::par, rows.begin(), rows.end(), Y.begin(),
+            [&X](const SparseVector &row)
             {
             double val = 0;
-            for (size_t k = 0; k < line.indices.size(); ++k)
-                val += line.values[k] * X[line.indices[k]];
+            for (size_t k = 0; k < row.indices.size(); ++k)
+                val += row.values[k] * X[row.indices[k]];
             return val;
             });
         }
@@ -203,8 +203,8 @@ public:
     template <typename T>
     void build_diag_precond(std::vector<T> &D) const
         {
-        assert(D.size() == m.size());
-        for (size_t i = 0; i < m.size(); ++i)
+        assert(D.size() == rows.size());
+        for (size_t i = 0; i < rows.size(); ++i)
             {
             const double c = (*this)(i,i);
             assert(c != 0);
@@ -214,7 +214,7 @@ public:
 
 private:
     /** coefficient container */
-    std::vector<r_sparseVect> m;
+    std::vector<SparseVector> rows;
 }; // end class r_sparseMat
 
 } // end namespace algebra
