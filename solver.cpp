@@ -10,7 +10,7 @@ int LinAlgebra::solver(timing const &t_prm)
 
     K.clear();
     std::for_each(std::execution::par, refMsh->tet.begin(), refMsh->tet.end(),
-                      [this](Tetra::Tet &my_elem) { my_elem.assemblage_mat(NOD,K); } );
+                      [this](Tetra::Tet &my_elem) { my_elem.assemblage_mat(K); } );
 
     if (verbose)
         {
@@ -24,9 +24,9 @@ int LinAlgebra::solver(timing const &t_prm)
     
     std::fill(L_rhs.begin(),L_rhs.end(),0);
     std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
-                      [this](Tetra::Tet &my_elem) { my_elem.assemblage_vect(NOD,L_rhs); } );
+                      [this](Tetra::Tet &my_elem) { my_elem.assemblage_vect(L_rhs); } );
     std::for_each(refMsh->fac.begin(), refMsh->fac.end(),
-                      [this](Facette::Fac &my_elem) { my_elem.assemblage_vect(NOD,L_rhs); } );
+                      [this](Facette::Fac &my_elem) { my_elem.assemblage_vect(L_rhs); } );
 
     if (verbose)
         {
@@ -60,8 +60,8 @@ int LinAlgebra::solver(timing const &t_prm)
     const double dt = t_prm.get_dt();
     for (int i = 0; i < NOD; i++)
         {
-        double vp = Xw[i];
-        double vq = Xw[NOD + i];
+        double vp = Xw[2*i];
+        double vq = Xw[2*i+1];
         double v2 = Nodes::sq(vp) + Nodes::sq(vq);
         if (v2 > v2max)
             { v2max = v2; }

@@ -14,8 +14,8 @@ void LinAlgebra::buildInitGuess(std::vector<double> &G) const
     {
     for (int i = 0; i < NOD; i++)
         {
-        G[i] = refMsh->getProj_ep(i)/gamma0;
-        G[NOD + i] = refMsh->getProj_eq(i)/gamma0;
+        G[2*i] = refMsh->getProj_ep(i)/gamma0;
+        G[2*i+1] = refMsh->getProj_eq(i)/gamma0;
         }
     }
 

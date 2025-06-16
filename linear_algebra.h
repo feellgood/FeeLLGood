@@ -52,10 +52,10 @@ public:
         algebra::MatrixShape shape(2 * NOD);
         auto insert_pair = [this, &shape](int i, int j)
             {
-            shape[      i].insert(      j);
-            shape[      i].insert(NOD + j);
-            shape[NOD + i].insert(      j);
-            shape[NOD + i].insert(NOD + j);
+            shape[2*i].insert(2*j);
+            shape[2*i].insert(2*j+1);
+            shape[2*i+1].insert(2*j);
+            shape[2*i+1].insert(2*j+1);
             };
         for (int i = 0; i < NOD; ++i)
             { insert_pair(i, i); }
