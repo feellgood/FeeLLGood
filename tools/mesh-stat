@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+
+# this program requires python3-gmsh module
+# it is adapted from https://gitlab.onelab.info/gmsh/gmsh/blob/gmsh_4_9_5/tutorials/python/x1.py
+
+import sys
+import os
+# sudo apt install python3-termcolor
+from termcolor import colored
+
+def gmsh_init(verbose=True):
+    """
+    initializations of gmsh.
+    """
+    import gmsh
+    global gmsh
+    gmsh.initialize()
+    gmsh.option.setNumber("General.Terminal",verbose) # to silent(or not) gmsh
+
+def get_params():
+    import argparse
+    description = 'mesh statistics'
+    epilogue = '''
+    list all surface and volume regions of a gmsh mesh. Give their name and indices, their surface or volume, and some global statistics 
+    '''
+    parser = argparse.ArgumentParser(description=description, epilog=epilogue, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('-v','--verbose', help='verbose mode, print all inputs', action="store_true")
+    parser.add_argument('--version',action='version',version= __version__,help='show the version number')
+    parser.add_argument("meshFileName", help='input mesh file (gmsh format)')
+    args = parser.parse_args()
+    return args
+
+def entity_str_info(dim,tag):
+    my_str = ""
+    type = gmsh.model.getType(dim, tag)
+    name = gmsh.model.getEntityName(dim, tag)
+    if len(name):
+        my_str += "\t" + type + "named " + name + ", indexed #" +  str(tag)
+    else:
+        my_str += "\t" + type + " unnamed, indexed #" +  str(tag)
+    physicalTags = gmsh.model.getPhysicalGroupsForEntity(dim, tag)
+    if len(physicalTags):
+        for p in physicalTags:
+            n = gmsh.model.getPhysicalName(dim, p)
+            my_str += ", belongs to physical group named " + colored(n,'cyan') + ', indexed ' + colored(str(p),'yellow')
+    return my_str
+
+def main():
+    args = get_params()
+    gmsh_init(args.verbose)
+    gmsh.open(args.meshFileName)
+    if gmsh.model.getDimension() != 3:
+        print("Warning:",args.meshFileName,"is not a 3D mesh.")
+        exit()
+    if not args.verbose:
+        print("Input 3D mesh file", colored(args.meshFileName,'green'), "opened, model name:",gmsh.model.getCurrent())
+    else:
+        print("Model name:",gmsh.model.getCurrent())
+    entities = gmsh.model.getEntities()
+    nb_2D_entities = 0
+    nb_3D_entities = 0
+    for e in entities:
+        if e[0] == 2:
+            nb_2D_entities += 1
+        if e[0] == 3:
+            nb_3D_entities += 1
+    print(len(entities),"entities, including",nb_2D_entities,"2D entities and",nb_3D_entities,"3D entities")
+    
+    str_2D_entities = ""
+    str_3D_entities = ""
+    
+    for e in entities:
+        dim = e[0]
+        tag = e[1]
+
+        if dim <= 1:
+            continue
+        elif dim == 2:
+            str_2D_entities += entity_str_info(dim,tag)
+                    # Get the mesh nodes for the entity (dim, tag):
+            nodeTags, nodeCoords, nodeParams = gmsh.model.mesh.getNodes(dim, tag)
+            # Get the mesh elements for the entity (dim, tag):
+            elemTypes, elemTags, elemNodeTags = gmsh.model.mesh.getElements(dim, tag)
+            # * Number of mesh nodes and elements:
+            if(args.verbose):
+                numElem = sum(len(i) for i in elemTags)
+                str_2D_entities += ", has " + str(len(nodeTags)) + " nodes and " + str(numElem) + " elements "
+            # * List all types of elements making up the mesh of the entity:
+                for t in elemTypes:
+                    name, dim, order, numv, parv, _ = gmsh.model.mesh.getElementProperties(t)
+                    str_2D_entities += "(" + name + ", order " + str(order) + ')\n'
+        elif dim == 3:
+            str_3D_entities += entity_str_info(dim,tag)
+                    # Get the mesh nodes for the entity (dim, tag):
+            nodeTags, nodeCoords, nodeParams = gmsh.model.mesh.getNodes(dim, tag)
+            # Get the mesh elements for the entity (dim, tag):
+            elemTypes, elemTags, elemNodeTags = gmsh.model.mesh.getElements(dim, tag)
+            # * Number of mesh nodes and elements:
+            if(args.verbose):
+                numElem = sum(len(i) for i in elemTags)
+                str_3D_entities += ", has " + str(len(nodeTags)) + " nodes and " + str(numElem) + " elements "
+            # * List all types of elements making up the mesh of the entity:
+                for t in elemTypes:
+                    name, dim, order, numv, parv, _ = gmsh.model.mesh.getElementProperties(t)
+                    str_3D_entities += "(" + name + ", order " + str(order) + ')\n'
+    
+    print(colored("2D entities:\n",'green'),str_2D_entities)
+    print(colored("3D entities:\n",'green'),str_3D_entities)
+    gmsh.finalize()
+
+__version__ = "0.0.0"
+if __name__ == "__main__":
+    main()
