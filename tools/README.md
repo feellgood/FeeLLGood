@@ -7,7 +7,6 @@ working with feeLLGood:
 * **h5extract**: to extract from a hdf5 archive some .sol back
 * **fg-merge-sol**: .sol tool
 * **fg-plot**:plot tool
-* **rev\_CMK**: to reduce the graph bandwidth of a mesh
 
 These tools are documented in the [tools section][] of the feeLLGood Web
 site.

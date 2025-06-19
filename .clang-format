@@ -3,7 +3,7 @@
 # Keep this file compatible with clang-format version 10.0 and above.
 #
 # Usage:
-#   clang-format -i *.h* *.cpp unit-tests/*.cpp tools/rev_CMK/rev_CMK.*
+#   clang-format -i *.h* *.cpp unit-tests/*.cpp
 
 # Parse the code as C++17.
 Standard: c++17
