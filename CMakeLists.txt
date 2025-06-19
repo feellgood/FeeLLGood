@@ -174,9 +174,9 @@ endif()
 #===========================================================================
 
 install(TARGETS feellgood RUNTIME DESTINATION bin)
-install(PROGRAMS ./tools/convert2vtk DESTINATION bin)
-install(PROGRAMS ./tools/convert2hdf5 DESTINATION bin)
-install(PROGRAMS ./tools/h5extract DESTINATION bin)
+install(PROGRAMS ./tools/fg-sol2vtk DESTINATION bin)
+install(PROGRAMS ./tools/fg-sol2hdf5 DESTINATION bin)
+install(PROGRAMS ./tools/fg-h5extract DESTINATION bin)
 install(PROGRAMS ./tools/fg-merge-sol DESTINATION bin)
 
 #===========================================================================

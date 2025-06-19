@@ -1,10 +1,10 @@
 This directory contains a collection of tools that can be useful when
 working with feeLLGood:
 
-* **configurator.py**: to configure some inputs
-* **convert2hdf5.py**: to convert some simulations outputs into a hdf5 file
-* **convert2vtk**: to convert FeeLLGood's output .sol files to paraview format
-* **h5extract**: to extract from a hdf5 archive some .sol back
+* **fg-configurator**: to configure some inputs
+* **fg-sol2hdf5**: to convert some simulations outputs into a hdf5 file
+* **fg-sol2vtk**: to convert FeeLLGood's output .sol files to paraview format
+* **fg-h5extract**: to extract from a hdf5 archive some .sol back
 * **fg-merge-sol**: .sol tool
 * **fg-plot**:plot tool
 
