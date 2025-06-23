@@ -46,6 +46,7 @@ settings = {
     }
 }
 
+sys.stdout.flush()
 val = subprocess.run(["../feellgood", "--seed", "2", "-"], input=json.dumps(settings), text=True)
 
 #(devNote) to avoid -fsanitize=leak ASLR bug, we turn off address randomizer

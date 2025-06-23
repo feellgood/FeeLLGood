@@ -57,6 +57,7 @@ for i in range(0,nbStepsFrequency) :
     mySettings["Bext"] = [f"{A}*cos({omega}*t)", f"{A}*sin({omega}*t)", "0"]
 
     mySettings.write('mySettings.json')
+    sys.stdout.flush()
     val = subprocess.run(["../feellgood","-v","mySettings.json"])
 
     amplitudeX = 0
