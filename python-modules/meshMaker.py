@@ -183,7 +183,7 @@ class Ellipsoid(object):
         self.volName = volName
         gmsh_init("ellipsoid",4.1,0,verbose)
 
-    def make(self,meshFileName):
+    def make(self,meshFileName,_optimize=False):
         """ write ellipsoid mesh file """
         x = 0.0
         y = 0.0
@@ -217,6 +217,8 @@ class Ellipsoid(object):
         objects = gmsh.model.getEntitiesInBoundingBox(xmin,ymin,zmin,xmax,ymax,zmax, dim = 0)
         gmsh.model.mesh.setSize(objects,self.msh_s)
         gmsh.model.mesh.generate(dim = 3)
+        if _optimize:
+            gmsh.model.mesh.optimize(method = "Relocate3D", force = True)
         gmsh.write(meshFileName)
 
         # uncomment next line to see a graphic rendering of the mesh
