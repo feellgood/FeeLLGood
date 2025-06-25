@@ -17,17 +17,14 @@ def gmsh_init(objName,fileFormat,binary,verbose=True):
     gmsh.option.setNumber("Mesh.Binary",binary)
     gmsh.model.add(objName)
 
-def gmsh_mesh_build(name,_optimize):
+def gmsh_mesh_build(name):
     """
-    optional refinement of the mesh
+    remove duplicate nodes of the mesh (seems to be useless in most situations)
     """
     gmsh.model.setCurrent(name)
     gmsh.model.mesh.removeDuplicateNodes()
     gmsh.model.geo.synchronize() # we have to synchronize before the call to 'generate' to build the mesh
     gmsh.model.mesh.generate(3) # 3 is the dimension of the mesh
-    if _optimize:
-        #gmsh.model.mesh.refine()  # add a lot of nodes
-        gmsh.model.mesh.optimize(method = "Relocate3D", force = True)
 
 def infos(g_opt,name):
     """
@@ -47,7 +44,7 @@ def infos(g_opt,name):
     return f"{nbNodes} nodes, {nbTetra} tetrahedra, {nbTriangles} triangles"
 
 class Hexahedron(object):
-    def __init__ (self,pt_min,pt_max,mesh_size,surfName,volName,optimize,verbose=False):
+    def __init__ (self,pt_min,pt_max,mesh_size,surfName,volName,verbose=False):
         """
         hexahedron defined by pt_min and pt_max, mesh_size average tetrahedron size
         bool optimize is optional optimization of the mesh by relocating of the nodes.
@@ -56,7 +53,6 @@ class Hexahedron(object):
         self.msh_s = mesh_size
         self.surfName = surfName
         self.volName = volName
-        self.optimize = optimize
         self.p_min = pt_min
         self.p_max = pt_max
         gmsh_init("hex",4.1,0,verbose) # text 4.1 output format
@@ -90,7 +86,7 @@ class Hexahedron(object):
         gmsh.model.addPhysicalGroup(3,[out[1][1]],volume_tag)
         gmsh.model.setPhysicalName(3,volume_tag,self.volName)
         
-        gmsh_mesh_build("hex",self.optimize)
+        gmsh_mesh_build("hex")
         
         gmsh.write(meshFileName)
         print(f"Generated {meshFileName}: {infos(gmsh.option,'hex')}")
@@ -183,7 +179,7 @@ class Ellipsoid(object):
         self.volName = volName
         gmsh_init("ellipsoid",4.1,0,verbose)
 
-    def make(self,meshFileName,_optimize=False):
+    def make(self,meshFileName):
         """ write ellipsoid mesh file """
         x = 0.0
         y = 0.0
@@ -217,8 +213,6 @@ class Ellipsoid(object):
         objects = gmsh.model.getEntitiesInBoundingBox(xmin,ymin,zmin,xmax,ymax,zmax, dim = 0)
         gmsh.model.mesh.setSize(objects,self.msh_s)
         gmsh.model.mesh.generate(dim = 3)
-        if _optimize:
-            gmsh.model.mesh.optimize(method = "Relocate3D", force = True)
         gmsh.write(meshFileName)
 
         # uncomment next line to see a graphic rendering of the mesh
