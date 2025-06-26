@@ -18,9 +18,7 @@ int LinAlgebra::solver(timing const &t_prm)
         counter.reset();
         }
 
-    algebra::iteration iter(TOL);
-    iter.set_maxiter(MAXITER);
-    iter.set_noisy(verbose);
+    algebra::iteration iter(TOL,verbose,MAXITER);
     
     std::fill(L_rhs.begin(),L_rhs.end(),0);
     std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
@@ -35,24 +33,22 @@ int LinAlgebra::solver(timing const &t_prm)
         }
 
     buildInitGuess(Xw);// gamma0 division handled by function buildInitGuess
-    double residu = algebra::bicg<double>(iter, K, Xw, L_rhs);
+    algebra::bicg<double>(iter, K, Xw, L_rhs);
+    double _solver_error = iter.get_res();
 
-    int nb_iter = iter.get_iteration();
-    double _solver_error= iter.get_res();
-
-    if( (nb_iter > MAXITER) || (_solver_error > TOL) )
+    if( (iter.get_iteration() > MAXITER) || (_solver_error > TOL) )
         {
         if (verbose)
             {
-            std::cout << "solver: bicgstab FAILED after " << nb_iter
-            << " iterations, in " << counter.millis()<< "; residu= " << residu << std::endl;
+            std::cout << "solver: bicgstab FAILED after " << iter.get_iteration()
+            << " iterations, residu= " << _solver_error << std::endl;
             }
         return 1;
         }
 
     if (verbose)
         {
-        std::cout << "solver: bicgstab converged in " << nb_iter
+        std::cout << "solver: bicgstab converged in " << iter.get_iteration()
         << " iterations, " << counter.millis() << ", residu= "<< _solver_error << std::endl;
         }
     

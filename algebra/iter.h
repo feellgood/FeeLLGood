@@ -10,11 +10,22 @@ The Iteration object calculates if the solution has reached the desired accuracy
  or if the maximum number of iterations has been reached.
 
 The method finished() checks the convergence.
-The first() method is used to determine the first iteration of the loop.
 */
 
 namespace algebra
 {
+/** status of iterative algorithm
+UNDEFINED means no iteration done
+CONVERGED means algo succeeded after some iterations < MAXITER to achieve residu<TOL
+CANNOT_CONVERGE means some operation leads to nan (might happen while computing beta in bicg inner loop)
+*/
+enum algoStatus
+    {
+    UNDEFINED = -1,
+    CONVERGED = 0,
+    CANNOT_CONVERGE = 2
+    };
+
 /**
  \class iteration
  monitor over the successive iterations if a value is converging or not
@@ -28,16 +39,16 @@ class iteration
     T rhsn;
 
 /** Max. number of iterations. */
-    size_t maxiter;
+    int maxiter;
 
-/** if noise > 0 iterations are printed. */
-    int noise;
+/** if true iterations are printed. */
+    bool noise;
 
 /** maximum residu. */
     T resmax;
 
 /** iteration number. */
-    size_t nit;
+    int nit;
 
 /** last computed residu. */
     T res;
@@ -47,8 +58,12 @@ class iteration
 
     public :
     /** constructor */
-    iteration(T r = 1.0E-8, int noi = 0, size_t mit = (size_t)(-1)): rhsn(1.0), maxiter(mit),
-        noise(noi), resmax(r), nit(0), res(std::numeric_limits<T>::max()), written(false) {}
+    iteration(T r, bool _noise, int _maxiter): rhsn(1.0), maxiter(_maxiter),
+        noise(_noise), resmax(r), nit(0), res(std::numeric_limits<T>::max()), written(false)
+        { status = UNDEFINED; }
+
+/** status of the monitored algorithm */
+algebra::algoStatus status;
 
 /** increment of the number of iterations */
 void operator ++(int) { nit++; written = false; }
@@ -56,29 +71,11 @@ void operator ++(int) { nit++; written = false; }
 /** operator increment */
 void operator ++() { (*this)++; }
 
-/** true if iterations are starting */
-bool first() { return nit == 0; }
-
-/** set the "noisyness" (verbosity) of the solvers */
-void set_noisy(int n) { noise = n; }
-
-/** getter for resmax */
-T get_resmax() const { return resmax; }
-
-/** setter for resmax */
-void set_resmax(T r) { resmax = r; }
-
 /** getter for residu res */
 T get_res() const { return res; }
 
 /** getter for number of iterations */
-size_t get_iteration() const { return nit; }
-
-/** getter for the maximum number of iterations */
-size_t get_maxiter() const { return maxiter; }
-
-/** setter for the maximum number of iterations */
-void set_maxiter(size_t i) { maxiter = i; }
+int get_iteration() const { return nit; }
 
 /** getter for the right hand side norm value */
 T get_rhsnorm() const { return rhsn; }
@@ -86,19 +83,26 @@ T get_rhsnorm() const { return rhsn; }
 /** setter for the right hand side norm */
 void set_rhsnorm(T r) { rhsn = r; }
 
-/** monitor the convergence through a number */
+/** monitor the convergence through a number (the norm of a vector) */
 bool converged(T nr)
     {
-    res = std::fabs(nr);
+    bool cv(false);
+    res = std::fabs(nr);// fabs should be useless
     if (std::isnan(res))
-        { std::cout << "residu is NaN, algo cannot converge.\n"; exit(1); }
-    return (res <= rhsn * resmax);
+        { status = CANNOT_CONVERGE; }
+    else
+        {
+        cv = (res <= rhsn * resmax);
+        if(cv)
+            { status = CONVERGED; }
+        }
+    return cv;
     }
 
 /** returns true if the algo has converged according the convergence criterias through a norm value nr */
 bool finished(T nr)
     {
-    if (noise > 0 && !written)
+    if (noise && !written)
         {
         T a = (rhsn == 0) ? 1.0 : rhsn;
         converged(nr);

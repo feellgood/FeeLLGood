@@ -5,14 +5,14 @@
 
 namespace algebra
 {
-/** solve A x = rhs. Algo is stabilized biconjugate gradient with diagonal preconditioner, returns residu. */
+/** solve A x = rhs. Algo is stabilized biconjugate gradient with diagonal preconditioner,
+ status of the convergence is returned in iter.status as well as total number of iterations and error
+ */
 template <typename T>
-T bicg(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T> & rhs)
+void bicg(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T> & rhs)
     {
-    T rho_1(0.0), rho_2(0.0), alpha(0.0), beta(0.0), omega(0.0);
     const size_t DIM = x.size();
-    if (rhs.size()!=DIM){std::cout << "rhs size mismatch" << std::endl; exit(1);}
-
+    T rho_1(0.0), rho_2(0.0), alpha(0.0), beta(0.0), omega(0.0);
     std::vector<T> p(DIM), phat(DIM,0), shat(DIM), r(DIM), rt(DIM), s(DIM), t(DIM), v(DIM), diag_precond(DIM), b(DIM);
     b.assign(rhs.begin(),rhs.end());// b = rhs;
 
@@ -28,10 +28,13 @@ T bicg(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector
         {
         rho_1 = dot(rt,r);
 
-        if (!iter.first())
+        if (iter.get_iteration() > 0)
             {
             if((rho_2 == 0)||(omega == 0))
-                { std::cout << "Warning: bicg cannot converge.\n"; exit(1); }
+                {
+                iter.status = CANNOT_CONVERGE;
+                break;
+                }
             beta = rho_1 / rho_2;
             beta *=  alpha / omega;
             scaled(omega, v);           // v *= omega
@@ -48,6 +51,7 @@ T bicg(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector
 
         if (iter.finished(norm(s)))
             {
+            iter.status = CONVERGED;
             scaled_add(phat, alpha, x); // x += alpha * phat
             break;
             }
@@ -63,7 +67,6 @@ T bicg(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector
         rho_2 = rho_1;
         ++iter;
         }
-    return iter.get_res()/iter.get_rhsnorm();
     }
 
 /** directional stabilized biconjugate gradient (mask) with diagonal preconditioner with Dirichlet conditions, returns residu */
