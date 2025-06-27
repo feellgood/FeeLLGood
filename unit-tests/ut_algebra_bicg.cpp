@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_CASE(silly_problem_solver, *boost::unit_test::tolerance(UT_TOL))
     const int MAX_ITER = 100;
     const double _TOL = 1e-8;
     int N = 10000;
-    algebra::iteration iter(_TOL,false,MAX_ITER);
+    algebra::iteration iter("bicg",_TOL,false,MAX_ITER);
 
     std::vector<double> x(N,0.0), b(N,1.0);
     algebra::w_sparseMat Aw(N);
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(rand_sp_mat_problem_solver, *boost::unit_test::tolerance(UT
     const int MAX_ITER = 2000;
     const double _TOL = 1e-8;
     int N = 10000;
-    algebra::iteration iter(_TOL,false,MAX_ITER);
+    algebra::iteration iter("bicg",_TOL,false,MAX_ITER);
     std::vector<double> x(N,2.0), b(N,1.0);
     algebra::w_sparseMat Aw(N);
     for(int i=0;i<N;i++) { Aw.insert(i,i,1.0); }
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(rand_asym_sp_mat_problem_solver, *boost::unit_test::toleran
     const int MAX_ITER = 2000;
     const double _TOL = 1e-8;
     const int N = 10000;
-    algebra::iteration iter(_TOL,false,MAX_ITER);
+    algebra::iteration iter("bicg",_TOL,false,MAX_ITER);
     std::vector<double> x(N,2.0), b(N,1.0);
     algebra::w_sparseMat Aw(N);
     for(int i=0;i<N;i++) { Aw.insert(i,i,1.0); }

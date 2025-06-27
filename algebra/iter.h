@@ -58,14 +58,48 @@ class iteration
     /** true : info was written */
     bool written;
 
+    private:
+    /** monitored solver name */
+    const std::string solver_name;
+
+    /** string version of the status */
+    std::string str_status(void) const
+        {
+        std::string s;
+        switch(status)
+            {
+            case UNDEFINED:
+                s="UNDEFINED";
+            break;
+            case CONVERGED:
+                s="CONVERGED";
+            break;
+            case ITER_OVERFLOW:
+                s="ITER_OVERFLOW";
+            break;
+            case CANNOT_CONVERGE:
+                s="CANNOT_CONVERGE";
+            break;
+            }
+        return s;
+        }
+
     public :
     /** constructor */
-    iteration(T r, bool _noise, int _maxiter): rhsn(1.0), maxiter(_maxiter),
-        noise(_noise), resmax(r), nit(0), res(std::numeric_limits<T>::max()), written(false)
+    iteration(std::string name, T r, bool _noise, int _maxiter): rhsn(1.0), maxiter(_maxiter),
+        noise(_noise), resmax(r), nit(0), res(std::numeric_limits<T>::max()), written(false), solver_name(name)
         { status = UNDEFINED; }
 
     /** status of the monitored algorithm */
     algebra::algoStatus status;
+
+    /** return a string aggregating the status of the monitored algorithm, the number of iterations and the residu */
+    std::string infos(void) const
+        {
+        std::stringstream sstr;
+        sstr << solver_name << " status " << str_status() << " after " << nit << " iterations, residu= " << res;
+        return sstr.str();
+        }
 
     /** increment of the number of iterations */
     void operator ++(int)

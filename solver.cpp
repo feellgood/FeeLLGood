@@ -18,7 +18,7 @@ int LinAlgebra::solver(timing const &t_prm)
         counter.reset();
         }
 
-    algebra::iteration iter(TOL,verbose,MAXITER);
+    algebra::iteration iter("bicg",TOL,verbose,MAXITER);
     
     std::fill(L_rhs.begin(),L_rhs.end(),0);
     std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
@@ -39,18 +39,12 @@ int LinAlgebra::solver(timing const &t_prm)
     if( (iter.status == algebra::ITER_OVERFLOW) || (iter.status == algebra::CANNOT_CONVERGE) || (iter.get_iteration() > MAXITER) || (_solver_error > TOL) )
         {
         if (verbose)
-            {
-            std::cout << "solver: bicgstab FAILED after " << iter.get_iteration()
-            << " iterations, residu= " << _solver_error << std::endl;
-            }
+            { std::cout << "solver: " << iter.infos() << std::endl; }
         return 1;
         }
 
     if (verbose)
-        {
-        std::cout << "solver: bicgstab converged in " << iter.get_iteration()
-        << " iterations, " << counter.millis() << ", residu= "<< _solver_error << std::endl;
-        }
+        { std::cout << "solver: " << iter.infos() <<  " in " << counter.millis() << std::endl; }
     
     double v2max(0.0);
     const double dt = t_prm.get_dt();
