@@ -51,10 +51,11 @@ void bicg(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vec
 
         if (iter.finished(norm(s)))
             {
-            iter.status = CONVERGED;
             scaled_add(phat, alpha, x); // x += alpha * phat
             break;
             }
+        else if ((iter.status == ITER_OVERFLOW)||(iter.status == CANNOT_CONVERGE))
+            {break;}
 
         p_direct(diag_precond, s, shat);// shat = M s;
         mult(A, shat, t);               //  t = A shat;

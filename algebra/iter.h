@@ -23,6 +23,7 @@ enum algoStatus
     {
     UNDEFINED = -1,
     CONVERGED = 0,
+    ITER_OVERFLOW = 1,
     CANNOT_CONVERGE = 2
     };
 
@@ -66,7 +67,13 @@ class iteration
 algebra::algoStatus status;
 
 /** increment of the number of iterations */
-void operator ++(int) { nit++; written = false; }
+void operator ++(int)
+    {
+    nit++;
+    written = false;
+    if (nit >= maxiter)
+        { status = ITER_OVERFLOW; } 
+    }
 
 /** operator increment */
 void operator ++() { (*this)++; }

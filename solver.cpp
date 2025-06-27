@@ -36,7 +36,7 @@ int LinAlgebra::solver(timing const &t_prm)
     algebra::bicg<double>(iter, K, Xw, L_rhs);
     double _solver_error = iter.get_res();
 
-    if( (iter.status == algebra::CANNOT_CONVERGE) || (iter.get_iteration() > MAXITER) || (_solver_error > TOL) )
+    if( (iter.status == algebra::ITER_OVERFLOW) || (iter.status == algebra::CANNOT_CONVERGE) || (iter.get_iteration() > MAXITER) || (_solver_error > TOL) )
         {
         if (verbose)
             {
