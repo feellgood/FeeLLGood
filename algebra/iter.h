@@ -17,7 +17,8 @@ namespace algebra
 /** status of iterative algorithm
 UNDEFINED means no iteration done
 CONVERGED means algo succeeded after some iterations < MAXITER to achieve residu<TOL
-CANNOT_CONVERGE means some operation leads to nan (might happen while computing beta in bicg inner loop)
+ITER_OVERFLOW means number of iterations has exceeded MAXITER
+CANNOT_CONVERGE means an algebric operation leads to nan (might happen while computing beta in bicg inner loop)
 */
 enum algoStatus
     {
@@ -39,22 +40,22 @@ class iteration
     /** Right hand side norm. */
     T rhsn;
 
-/** Max. number of iterations. */
+    /** Max. number of iterations. */
     int maxiter;
 
-/** if true iterations are printed. */
+    /** if true iterations are printed. */
     bool noise;
 
-/** maximum residu. */
+    /** maximum residu. */
     T resmax;
 
-/** iteration number. */
+    /** iteration number. */
     int nit;
 
-/** last computed residu. */
+    /** last computed residu. */
     T res;
 
-/** true : info was written */
+    /** true : info was written */
     bool written;
 
     public :
@@ -63,62 +64,61 @@ class iteration
         noise(_noise), resmax(r), nit(0), res(std::numeric_limits<T>::max()), written(false)
         { status = UNDEFINED; }
 
-/** status of the monitored algorithm */
-algebra::algoStatus status;
+    /** status of the monitored algorithm */
+    algebra::algoStatus status;
 
-/** increment of the number of iterations */
-void operator ++(int)
-    {
-    nit++;
-    written = false;
-    if (nit >= maxiter)
-        { status = ITER_OVERFLOW; } 
-    }
-
-/** operator increment */
-void operator ++() { (*this)++; }
-
-/** getter for residu res */
-T get_res() const { return res; }
-
-/** getter for number of iterations */
-int get_iteration() const { return nit; }
-
-/** getter for the right hand side norm value */
-T get_rhsnorm() const { return rhsn; }
-
-/** setter for the right hand side norm */
-void set_rhsnorm(T r) { rhsn = r; }
-
-/** monitor the convergence through a number (the norm of a vector) */
-bool converged(T nr)
-    {
-    bool cv(false);
-    res = std::fabs(nr);// fabs should be useless
-    if (std::isnan(res))
-        { status = CANNOT_CONVERGE; }
-    else
+    /** increment of the number of iterations */
+    void operator ++(int)
         {
-        cv = (res <= rhsn * resmax);
-        if(cv)
-            { status = CONVERGED; }
+        nit++;
+        written = false;
+        if (nit >= maxiter)
+            { status = ITER_OVERFLOW; }
         }
-    return cv;
-    }
 
-/** returns true if the algo has converged according the convergence criterias through a norm value nr */
-bool finished(T nr)
-    {
-    if (noise && !written)
+    /** operator increment */
+    void operator ++() { (*this)++; }
+
+    /** getter for residu res */
+    T get_res() const { return res; }
+
+    /** getter for number of iterations */
+    int get_iteration() const { return nit; }
+
+    /** getter for the right hand side norm value */
+    T get_rhsnorm() const { return rhsn; }
+
+    /** setter for the right hand side norm */
+    void set_rhsnorm(T r) { rhsn = r; }
+
+    /** monitor the convergence through a number (the norm of a vector) */
+    bool converged(T nr)
         {
-        T a = (rhsn == 0) ? 1.0 : rhsn;
-        converged(nr);
-        std::cout << " iter " << std::setw(3) << nit << " residual " << std::setw(12) << std::fabs(nr) / a << std::endl;
-        written = true;
+        bool cv(false);
+        res = std::fabs(nr);// fabs should be useless
+        if (std::isnan(res))
+            { status = CANNOT_CONVERGE; }
+        else
+            {
+            cv = (res <= rhsn * resmax);
+            if(cv)
+                { status = CONVERGED; }
+            }
+        return cv;
         }
-    return converged(nr);
-    }
-  };
-}
 
+    /** returns true if the algo has converged according the convergence criterias through a norm value nr */
+    bool finished(T nr)
+        {
+        if (noise && !written)
+            {
+            T a = (rhsn == 0) ? 1.0 : rhsn;
+            converged(nr);
+            std::cout << " iter " << std::setw(3) << nit << " residual " << std::setw(12) << std::fabs(nr) / a << std::endl;
+            written = true;
+            }
+        return converged(nr);
+        }
+    };// end class
+}//end namespace
 #endif
