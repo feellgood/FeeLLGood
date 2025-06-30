@@ -2,7 +2,7 @@
 
 # This example shows how multiple feeLLGood simulations can be run from
 # a shell script. The goal is to simulate ferromagnetic resonance on an
-# elongated nanoparticle. The sample is a prolate ellipsoid of 8×40 nm,
+# elongated nanoparticle. The sample is a prolate ellipsoid of 8×16 nm,
 # with a 1 T/µ₀ magnetization initially along the long (Z) axis. There
 # is no DC field. A 4 mT rotating field is applied on the XY plane. The
 # frequency of the field is varied in order to find the resonance.
@@ -14,10 +14,10 @@ full_script_path="$_"
 # Main simulation parameters.
 amplitude=0.004    # magnitude of the rotating field [T]
 duration=1e-9      # duration of the excitation [s]
-f_start=9.3        # start frequency [GHz]
-f_step=0.2         # frequency step [GHz]
-f_stop=13.3        # stop frequency [GHz]
-f_format='%04.1f'  # format for the frequency in file names
+f_start=5.3        # start frequency [GHz]
+f_step=0.1         # frequency step [GHz]
+f_stop=7.3         # stop frequency [GHz]
+f_format='%.1f'    # format for the frequency in file names
 
 # Create a directory named "resonance.d" under the directory holding
 # this script, and use it as a working directory.
@@ -95,6 +95,7 @@ set title "Ferromagnetic resonance (4 mT rotating field)"
 set xlabel "f (GHz)"
 set ylabel "response (reduced magnetization)"
 set xrange [$f_start:$f_stop]
+set key top left Left reverse
 set grid
 set style data linespoints
 plot 'resonance.tsv' using 1:(sqrt(\$2**2+\$3**2)) title "amplitude", \
