@@ -6,7 +6,8 @@
 namespace algebra
 {
 /** solve A x = rhs. Algo is stabilized biconjugate gradient with diagonal preconditioner,
- status of the convergence is returned in iter.status as well as total number of iterations and error
+vectors x and rhs must have the same size.
+The status of the convergence is returned in iter.status as well as total number of iterations and error
  */
 template <typename T>
 void bicg(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T> & rhs)
@@ -28,7 +29,7 @@ void bicg(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vec
         {
         rho_1 = dot(rt,r);
 
-        if (iter.get_iteration() > 0)
+        if(iter.get_iteration() > 0)
             {
             if((rho_2 == 0)||(omega == 0))
                 {
@@ -70,15 +71,16 @@ void bicg(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vec
         }
     }
 
-/** directional stabilized biconjugate gradient (mask) with diagonal preconditioner with Dirichlet conditions, returns residu */
+/** solve A x = rhs. Algo is directional stabilized biconjugate gradient (mask) with diagonal preconditioner with Dirichlet conditions,
+vectors x and rhs must have the same size. ld is a vector of indices where to apply zeros, xd the corresponding values.
+The status of the convergence is returned in iter.status as well as total number of iterations and error
+*/
 template<typename T>
-T bicg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T> & rhs,
+void bicg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T> & rhs,
            const std::vector<T>& xd, const std::vector<int>& ld)
     {
     T rho_1(0.0), rho_2(0.0), alpha(0.0), beta(0.0), omega(0.0);
     const size_t DIM = x.size();
-    if (rhs.size()!=DIM){std::cout << "rhs size mismatch" << std::endl; exit(1);}
-
     std::vector<T> p(DIM), phat(DIM), shat(DIM), r(DIM), rt(DIM), s(DIM), t(DIM), v(DIM), diag_precond(DIM), b(DIM);
     b.assign(rhs.begin(),rhs.end());// b = rhs;
 
@@ -100,8 +102,13 @@ T bicg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::ve
         {
         rho_1 = dot(rt,r);
 
-        if (!iter.first())
+        if(iter.get_iteration() > 0)
             {
+            if((rho_2 == 0)||(omega == 0))
+                {
+                iter.status = CANNOT_CONVERGE;
+                break;
+                }
             beta = (rho_1 / rho_2) * (alpha / omega);
             scaled(omega, v);           // v *= omega
             sub(v, p);                  // p -= v; so  p = p - omega v
@@ -122,6 +129,8 @@ T bicg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::ve
             scaled_add(phat, alpha, x); // x += alpha * phat
             break;
             }
+        else if ((iter.status == ITER_OVERFLOW)||(iter.status == CANNOT_CONVERGE))
+            {break;}
 
         p_direct(diag_precond, s, shat);// shat = direct_product(diag_precond, s);
         mult(A, shat, t);               //  t = A shat;
@@ -138,7 +147,6 @@ T bicg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::ve
         ++iter;
         }
     add(xd, x);                // x += xd
-    return iter.get_res()/iter.get_rhsnorm();
     }
 } // end namespace alg
 #endif
