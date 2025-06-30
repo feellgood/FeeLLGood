@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(readMesh)
     std::vector<std::size_t> nodeT;
     std::vector<double> nodeC, nodeP;
     gmsh::model::mesh::getNodes(nodeT, nodeC, nodeP, -1,-1); // all nodes of the mesh
-    BOOST_CHECK(nodeT.size() == 163);
+    BOOST_CHECK(nodeT.size() == 167);
 
     std::vector<int> elemTypes;
     gmsh::model::mesh::getElementTypes(elemTypes, DIM_OBJ_3D, -1);
@@ -56,8 +56,8 @@ BOOST_AUTO_TEST_CASE(readMesh)
             gmsh::model::mesh::getElementsByType(TYP_ELEM_TETRAEDRON,elemTags, nodeTags );
             std::cout << "3D:\n\telemTags.size= " << elemTags.size() << std::endl;
             std::cout << "\tnodeTags.size= " << nodeTags.size() << std::endl;
-            BOOST_CHECK(elemTags.size() == 320);
-            BOOST_CHECK(nodeTags.size() == 1280);
+            BOOST_CHECK(elemTags.size() == 499);
+            BOOST_CHECK(nodeTags.size() == 1996);
             }
         else if (pGroup.first == DIM_OBJ_2D)
             {
@@ -65,8 +65,8 @@ BOOST_AUTO_TEST_CASE(readMesh)
             gmsh::model::mesh::getElementsByType(TYP_ELEM_TRIANGLE,elemTags, nodeTags );
             std::cout << "2D:\n\telemTags.size= " << elemTags.size() << std::endl;
             std::cout << "\tnodeTags.size= " << nodeTags.size() << std::endl;
-            BOOST_CHECK(elemTags.size() == 320);
-            BOOST_CHECK(nodeTags.size() == 960);
+            BOOST_CHECK(elemTags.size() == 274);
+            BOOST_CHECK(nodeTags.size() == 822);
             }
         } );
     gmsh::clear();
