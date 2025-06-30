@@ -20,19 +20,26 @@
 #include "node.h"
 #include "tetra.h"
 
+#include "algebra/algebra.h"
+
 /** \class LinAlgebra
 convenient class to grab altogether some part of the calculations involved using algebra::bicg solver at each
 timestep. The solver is handled by solver method, and is using algebra sparse matrices(Row major). The write sparse matrix
 is prepared in 'batch mode', to add all non zero coefficients with a '+=' logic. Then it is turned into a read sparse matrix before being used by bicg algo.
 Be aware of time units: when entering solver method, division by gamma0 and multiplication by gamma0 when ending are mandatory.
+The bicg algorithm is monitored by iter object.
+When debugging it might be usefull to set iter verbosity differently from LinAlgebra Solver (see constructor list initialization)
 */
 class LinAlgebra
     {
 public:
-    /** constructor */
+    /** constructor
+    When debugging it might be usefull to set iter verbosity differently
+    */
     LinAlgebra(Settings &s /**< [in] */, Mesh::mesh &my_msh /**< [in] */)
-        : NOD(my_msh.getNbNodes()), refMsh(&my_msh), K(build_shape()), MAXITER(s.MAXITER),
-          TOL(s.TOL), verbose(s.verbose), prmTetra(s.paramTetra), prmFacette(s.paramFacette)
+        : NOD(my_msh.getNbNodes()), refMsh(&my_msh), iter("bicg",s.TOL,s.verbose,s.MAXITER),
+          K(build_shape()), verbose(s.verbose),
+          prmTetra(s.paramTetra), prmFacette(s.paramFacette)
         {
         L_rhs.resize(2*NOD);
         Xw.resize(2*NOD);
@@ -105,6 +112,9 @@ private:
     /** direct access to the mesh */
     Mesh::mesh *refMsh;
 
+    /** monitor the solver */
+    algebra::iteration<double> iter;
+
     /** matrix of the system to solve */
     algebra::r_sparseMat K;
 
@@ -113,12 +123,6 @@ private:
 
     /** solution of the system to solve */
     std::vector<double> Xw;
-
-    /** maximum number of iteration for bicgstab */
-    const int MAXITER;
-
-    /** solver tolerance */
-    const double TOL;
 
     /** verbosity */
     const int verbose;

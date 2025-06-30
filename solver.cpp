@@ -1,12 +1,12 @@
 #include "chronometer.h"
 #include "linear_algebra.h"
 
-#include "algebra/algebra.h"
 #include "algebra/bicg.h"
 
 int LinAlgebra::solver(timing const &t_prm)
     {
     chronometer counter(2);
+    iter.reset();
 
     K.clear();
     std::for_each(std::execution::par, refMsh->tet.begin(), refMsh->tet.end(),
@@ -18,8 +18,6 @@ int LinAlgebra::solver(timing const &t_prm)
         counter.reset();
         }
 
-    algebra::iteration iter("bicg",TOL,verbose,MAXITER);
-    
     std::fill(L_rhs.begin(),L_rhs.end(),0);
     std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
                       [this](Tetra::Tet &my_elem) { my_elem.assemblage_vect(L_rhs); } );
@@ -34,9 +32,8 @@ int LinAlgebra::solver(timing const &t_prm)
 
     buildInitGuess(Xw);// gamma0 division handled by function buildInitGuess
     algebra::bicg<double>(iter, K, Xw, L_rhs);
-    double _solver_error = iter.get_res();
 
-    if( (iter.status == algebra::ITER_OVERFLOW) || (iter.status == algebra::CANNOT_CONVERGE) || (iter.get_iteration() > MAXITER) || (_solver_error > TOL) )
+    if( (iter.status == algebra::ITER_OVERFLOW) || (iter.status == algebra::CANNOT_CONVERGE) || (iter.get_res() > iter.resmax) )
         {
         if (verbose)
             { std::cout << "solver: " << iter.infos() << std::endl; }

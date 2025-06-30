@@ -41,13 +41,10 @@ class iteration
     T rhsn;
 
     /** Max. number of iterations. */
-    int maxiter;
+    const int maxiter;
 
     /** if true iterations are printed. */
-    bool noise;
-
-    /** maximum residu. */
-    T resmax;
+    const bool noise;
 
     /** iteration number. */
     int nit;
@@ -86,12 +83,25 @@ class iteration
 
     public :
     /** constructor */
-    iteration(std::string name, T r, bool _noise, int _maxiter): rhsn(1.0), maxiter(_maxiter),
-        noise(_noise), resmax(r), nit(0), res(std::numeric_limits<T>::max()), written(false), solver_name(name)
+    iteration(const std::string name, T r, bool _noise, int _maxiter): rhsn(1.0), maxiter(_maxiter),
+        noise(_noise), nit(0), res(std::numeric_limits<T>::max()), written(false), solver_name(name), resmax(r)
         { status = UNDEFINED; }
 
     /** status of the monitored algorithm */
     algebra::algoStatus status;
+
+    /** maximum tolerated residu. */
+    const T resmax;
+
+    /** reset all values to monitor a new algorithm exectution */
+    void reset(void)
+        {
+        rhsn=1.0;
+        nit = 0;
+        res = std::numeric_limits<T>::max();
+        written = false;
+        status = UNDEFINED;
+        }
 
     /** return a string aggregating the status of the monitored algorithm, the number of iterations and the residu */
     std::string infos(void) const
