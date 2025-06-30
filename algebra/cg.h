@@ -5,14 +5,16 @@
 
 namespace algebra
 {
-/** conjugate gradient with diagonal preconditioner, returns residu. */
+/** solver for A x = rhs.
+Algo is conjugate gradient with diagonal preconditioner.
+vectors x and rhs must have the same size.
+The status of the convergence is returned in iter.status as well as total number of iterations and error
+*/
 template<typename T>
-T cg(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T> & rhs)
+void cg(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T> & rhs)
     {
     T rho, rho_1(0.0);
     const size_t DIM = x.size();
-    if (rhs.size()!=DIM){std::cout << "rhs size mismatch" << std::endl; exit(1);}
-
     std::vector<T> p(DIM),q(DIM),r(DIM),z(DIM),diag_precond(DIM), b(DIM);
     b.assign(rhs.begin(),rhs.end());// b = rhs;
 
@@ -21,14 +23,14 @@ T cg(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T
     r.assign(b.begin(),b.end());          // r = b;
     std::vector<T> v_temp(x.size());
     mult(A,x,v_temp);                     // v_temp = A x;
-    sub(v_temp,r);                        // r -= v_temp; donc r = b - A x;
+    sub(v_temp,r);                        // r -= v_temp; so r = b - A x;
 
     p_direct(diag_precond,r,z);           //mult(P, r, z);
     rho = dot(z,r);                       //rho = vect_sp(z, r);
     p.assign(z.begin(),z.end());          //copy(z, p);
-    while (!iter.finished(norm(r)))
+    while (!iter.finished(norm(r)) && (iter.status != ITER_OVERFLOW) && (iter.status != CANNOT_CONVERGE))
         {
-        if (!iter.first())
+        if(iter.get_iteration() > 0)
             {
             p_direct(diag_precond,r,z);   //mult(P, r, z);
             rho = dot(z,r);
@@ -38,24 +40,30 @@ T cg(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T
         mult(A, p, q);
 
         T q_dot_p = dot(q,p);
-        if (q_dot_p == 0.0) { std::cout<< "cg cannot converge: q orthogonal to p."; exit(1); }
+        if (q_dot_p == 0.0)
+            {
+            iter.status = CANNOT_CONVERGE;
+            break;
+            }
         T a=rho/q_dot_p;
         scaled_add(p, +a, x);             // add(scaled(p, +a), x);
         scaled_add(q, -a, r);             // add(scaled(q, -a), r);
         rho_1 = rho;
         ++iter;
         }
-    return norm(r)/norm(b);
+    //return norm(r)/norm(b);
     }
 
-/** conjugate gradient with diagonal preconditioner with Dirichlet conditions (through masking technique), returns residu */
+/** solver for A x = rhs.
+Algo is conjugate gradient with diagonal preconditioner with Dirichlet conditions (through masking technique)
+vectors x and rhs must have the same size. ld is a vector of indices where to apply zeros, xd the corresponding values.
+The status of the convergence is returned in iter.status as well as total number of iterations and error
+ */
 template<typename T>
-T cg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T> & rhs, const std::vector<T> & xd, const std::vector<int>& ld)
+void cg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T> & rhs, const std::vector<T> & xd, const std::vector<int>& ld)
     {
     T rho, rho_1(0.0);
     const size_t DIM = x.size();
-    if (rhs.size()!=DIM){std::cout << "rhs size mismatch" << std::endl; exit(1);}
-
     std::vector<T> p(DIM),q(DIM),r(DIM),z(DIM),diag_precond(DIM), b(DIM);
     b.assign(rhs.begin(),rhs.end());// b = rhs;
 
@@ -69,16 +77,16 @@ T cg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vect
     r.assign(b.begin(),b.end());          // r = b;
     std::vector<T> v_temp(x.size());
     mult(A,x,v_temp);                     // v_temp = A x;
-    sub(v_temp,r);                        // r -= v_temp; donc r = b - A x;
+    sub(v_temp,r);                        // r -= v_temp; so r = b - A x;
 
     applyMask(ld,r);
 
     p_direct(diag_precond,r,z);           // z = direct_product(diag_precond, r);
-    rho = dot(z,r);                       //rho = vect_sp(z, r);
+    rho = dot(z,r);                       //rho = z . r;
     p.assign(z.begin(),z.end());          //copy(z, p);
-    while (!iter.finished(norm(r)))
+    while (!iter.finished(norm(r)) && (iter.status != ITER_OVERFLOW) && (iter.status != CANNOT_CONVERGE))
         {
-        if (!iter.first())
+        if(iter.get_iteration() > 0)
             {
             p_direct(diag_precond,r,z);   // z = direct_product(diag_precond, r);
             rho = dot(z,r);
@@ -90,7 +98,11 @@ T cg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vect
         applyMask(ld,q);
 
         T q_dot_p = dot(q,p);
-        if (q_dot_p == 0.0) { std::cout<< "cg cannot converge: q orthogonal to p."; exit(1); }
+        if (q_dot_p == 0.0)
+            {
+            iter.status = CANNOT_CONVERGE;
+            break;
+            }
         T a=rho/q_dot_p;
         scaled_add(p, +a, x);             // add(scaled(p, +a), x);
         scaled_add(q, -a, r);             // add(scaled(q, -a), r);
@@ -98,7 +110,7 @@ T cg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vect
         ++iter;
         }
     add(xd, x);                   // x += xd
-    return norm(r)/norm(b);
+    //return norm(r)/norm(b);
     }
 
 } // end namespace alg
