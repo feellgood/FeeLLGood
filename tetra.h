@@ -65,6 +65,7 @@ struct prm
     std::string regName; /**< region name */
     double alpha_LLG;    /**< \f$ \alpha \f$ damping parameter */
     double A;            /**< exchange constant stiffness */
+    double D;            /**< DMI bulk */
     double J;            /**< \f$ M_s = \nu_0 J \f$ */
     double K;            /**< uniaxial anisotropy constant */
     Eigen::Vector3d uk;         /**< uniaxial anisotropy axis */
@@ -83,6 +84,7 @@ struct prm
         std::cout << "volume region name = " << regName << std::endl;
         std::cout << "alpha_LLG = " << alpha_LLG << std::endl;
         std::cout << "A = " << A << std::endl;
+        std::cout << "D = " << D << std::endl;
         std::cout << "J = " << J << std::endl;
 
         if (K != 0)

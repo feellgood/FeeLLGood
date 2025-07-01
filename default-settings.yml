@@ -101,6 +101,9 @@ mesh:
       # Exchange constant.
       Ae: 1e-11
 
+      # Dzyaloshinsky Moriya Interaction (DMI bulk) constant.
+      D: 0
+
       # Saturation magnetization times µ₀, in tesla.
       Js: 1
 

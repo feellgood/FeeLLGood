@@ -164,6 +164,7 @@ void Settings::toYaml()
             continue;
         std::cout << "    " << it->regName << ":\n";
         std::cout << "      Ae: " << it->A << "\n";
+        std::cout << "      D: " << it->D << "\n";
         std::cout << "      Js: " << it->J << "\n";
         std::cout << "      K: " << it->K << "\n";
         if (it->K != 0) std::cout << "      uk: " << str(it->uk) << "\n";
@@ -381,6 +382,7 @@ void Settings::read(YAML::Node yaml)
                 if (default_idx >= 0) p = paramTetra[default_idx];
                 p.regName = name;
                 assign(p.A, volume["Ae"]);
+                assign(p.D, volume["D"]);
                 assign(p.J, volume["Js"]);
                 assign(p.K, volume["K"]);
                 assign(p.uk, volume["uk"]);
