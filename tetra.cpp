@@ -131,7 +131,8 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     {
     const double alpha = param.alpha_LLG;
     const double Js = param.J;
-    const double Abis = 2.0 * param.A / Js;
+    const double Abis = 2.0 * param.A / Js; // exchange
+    const double Dbis = 2.0 * param.D / Js; // DMI bulk
     const double dt = prm_t.get_dt();
     const double s_dt = THETA * dt * gamma0;  // theta from theta scheme in config.h.in
 
@@ -199,8 +200,13 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
         const double w = weight[npi];
         for (int i = 0; i < N; i++)
             {
-            BE.col(i) -= w*Abis*(da(i,0)*dUdx.col(npi) + da(i,1)*dUdy.col(npi) + da(i,2)*dUdz.col(npi));
+            Eigen::Vector3d nabla(da(i,IDX_X),da(i,IDX_Y),da(i,IDX_Z));
+            BE.col(i) -= w*Abis*(nabla(IDX_X)*dUdx.col(npi) + nabla(IDX_Y)*dUdy.col(npi) + nabla(IDX_Z)*dUdz.col(npi));
             BE.col(i) += w*a[i][npi]*H.col(npi);
+            if(Dbis != 0.0) // DMI bulk
+                {
+                BE.col(i) += w*Dbis*( a[i][npi]*Eigen::Vector3d(dUdy(IDX_Z,npi)-dUdz(IDX_Y,npi),dUdz(IDX_X,npi)-dUdx(IDX_Z,npi),dUdx(IDX_Y,npi)-dUdy(IDX_X,npi)) + nabla.cross(U.col(npi)) );
+                }
             }
         }
     extraCoeffs_BE(Js, U, dUdx, dUdy, dUdz, BE);  // STT
