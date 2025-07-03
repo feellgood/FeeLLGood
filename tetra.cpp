@@ -42,7 +42,7 @@ Eigen::Matrix<double,NPI,1> Tetra::calc_alpha_eff(const double dt, const double 
     return a_eff;
     }
 
-void Tet::lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double prefactor,
+void Tet::lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double prefactor, double D,
                   Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const
     {
     Eigen::Matrix<double,N,N> exch_block = da*da.transpose();
@@ -67,6 +67,26 @@ void Tet::lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double pref
         AE(N + i, 2*N + i) -= ai_w_u0(IDX_X);
         AE(2*N + i, N + i) += ai_w_u0(IDX_X);
         AE(2*N + i, i) -= ai_w_u0(IDX_Y);
+        if (D!=0.0)
+            {
+            double pref_DMI = D; // WARNING: formula incomplete here missing at least Js and theta*dt plus second order correction
+            for (int j=0; j<N; j++)
+                {
+                AE(    i,   N + j) -= pref_DMI;
+                AE(    i, 2*N + j) -= pref_DMI;
+                AE(N + i, 2*N + j) -= pref_DMI;
+                AE(N + i,  j) -= pref_DMI;
+                AE(2*N+i,  j) -= pref_DMI;
+                AE(2*N+i,N+j) -= pref_DMI;
+                // same block structure(symetric relatively to AE diagonal)
+                AE(N+i,  j) -= pref_DMI;
+                AE(2*N+i,j) -= pref_DMI;
+                AE(2*N+i,N+j) -= pref_DMI;
+                AE(i,N+j) -= pref_DMI;
+                AE(i,2*N+j) -= pref_DMI;
+                AE(i,2*N+j) -= pref_DMI;
+                }
+            }
         }
     }
 
@@ -172,7 +192,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     
     Eigen::Matrix<double,3*N,3*N> AE;
     AE.setZero();
-    lumping(a_eff, prm_t.prefactor * s_dt * Abis, AE);
+    lumping(a_eff, prm_t.prefactor * s_dt * Abis,param.D, AE); // devNote: might be better to replace param.D by Dbis and adapt the formula
 
     Eigen::Matrix<double,2*N,3*N> P;
     buildMatP(P);

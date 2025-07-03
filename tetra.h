@@ -237,8 +237,9 @@ public:
     E X Y Z are N*N matrices
     E is the sum of the exchange contribution and modified alpha (scheme stabilizer) on its diagonal 
     X Y Z are diagonal matrices with magnetization component contributions
+    constant D stands for DMI bulk contribution
      */
-    void lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double prefactor,
+    void lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double prefactor, double D,
                   Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const;
 
     /** add drift contribution due to eventual recentering to vectors BE */

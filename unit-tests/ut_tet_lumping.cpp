@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE(tet_lumping, *boost::unit_test::tolerance(UT_TOL))
     // end ref code
 
     // code to check
-    t.lumping(alfa, prm_t.prefactor * s_dt * Abis, AE_to_check);
+    t.lumping(alfa, prm_t.prefactor * s_dt * Abis,0.0, AE_to_check); //todo: check DMI bulk contribution independantly from exchange
     // end code to check
 
     for (int i = 0; i < 3*Tetra::N; i++)
