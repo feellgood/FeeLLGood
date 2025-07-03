@@ -9,7 +9,7 @@ int LinAlgebra::solver(timing const &t_prm)
     iter.reset();
 
     K.clear();
-    std::for_each(std::execution::par, refMsh->tet.begin(), refMsh->tet.end(),
+    std::for_each(EXEC_POL, refMsh->tet.begin(), refMsh->tet.end(),
                       [this](Tetra::Tet &my_elem) { my_elem.assemblage_mat(K); } );
 
     if (verbose)

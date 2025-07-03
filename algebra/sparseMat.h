@@ -199,7 +199,7 @@ public:
         {
         assert(X.size() == rows.size());
         assert(Y.size() == rows.size());
-        std::transform(std::execution::par, rows.begin(), rows.end(), Y.begin(),
+        std::transform(EXEC_POL, rows.begin(), rows.end(), Y.begin(),
             [&X](const SparseVector &row)
             {
             double val = 0;
