@@ -29,6 +29,7 @@ reconstructing the matrix from scratch.
 #include <execution>
 #include <mutex>
 
+#include "config.h"
 #include "algebraCore.h"
 
 namespace algebra
