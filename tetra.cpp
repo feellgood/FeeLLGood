@@ -67,24 +67,34 @@ void Tet::lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double pref
         AE(N + i, 2*N + i) -= ai_w_u0(IDX_X);
         AE(2*N + i, N + i) += ai_w_u0(IDX_X);
         AE(2*N + i, i) -= ai_w_u0(IDX_Y);
-        if (D!=0.0)
+        }
+
+    if (D!=0.0)
+        {
+        //devNote: maybe dad should be a public method in class tetra
+        std::function<double(const int, const int,const int)> dad = [this](const int coord,const int k,const int npi){ return 0.0; };
+        for(int npi=0;npi<NPI;npi++)
             {
-            double pref_DMI = D; // WARNING: formula incomplete here missing at least Js and theta*dt plus second order correction
-            for (int j=0; j<N; j++)
+            double pref_DMI = D*weight[npi];// WARNING: formula incomplete here missing at least Js and theta*dt
+            for (int i = 0; i < N; i++)
                 {
-                AE(    i,   N + j) -= pref_DMI;
-                AE(    i, 2*N + j) -= pref_DMI;
-                AE(N + i, 2*N + j) -= pref_DMI;
-                AE(N + i,  j) -= pref_DMI;
-                AE(2*N+i,  j) -= pref_DMI;
-                AE(2*N+i,N+j) -= pref_DMI;
-                // same block structure(symetric relatively to AE diagonal)
-                AE(N+i,  j) -= pref_DMI;
-                AE(2*N+i,j) -= pref_DMI;
-                AE(2*N+i,N+j) -= pref_DMI;
-                AE(i,N+j) -= pref_DMI;
-                AE(i,2*N+j) -= pref_DMI;
-                AE(i,2*N+j) -= pref_DMI;
+                double ai = a[i][npi];
+                double dai_dx=dad(IDX_X,i,npi);
+                double dai_dy=dad(IDX_Y,i,npi);
+                double dai_dz=dad(IDX_Z,i,npi);
+                for (int j=0; j<N; j++)
+                    {
+                    double aj = a[j][npi];
+                    double daj_dx=dad(IDX_X,j,npi);
+                    double daj_dy=dad(IDX_Y,j,npi);
+                    double daj_dz=dad(IDX_Z,j,npi);
+                    AE(    i,   N + j) -= pref_DMI*(dai_dz*aj - daj_dz*ai);
+                    AE(    i, 2*N + j) -= pref_DMI*(-dai_dy*aj + daj_dy*ai);
+                    AE(N + i, 2*N + j) -= pref_DMI*(dai_dx*aj - daj_dx*ai);
+                    AE(N + i,  j)      -= pref_DMI*(-dai_dz*aj + daj_dz*ai);
+                    AE(2*N+i,  j)      -= pref_DMI*(dai_dy*aj - daj_dy*ai);
+                    AE(2*N+i,N+j)      -= pref_DMI*(-dai_dx*aj + daj_dx*ai);
+                    }
                 }
             }
         }
@@ -169,6 +179,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     interpolation_field(Nodes::get_phiv<CURRENT>, Hv);
     /*-------------------- END INTERPOLATION ----------------*/
     Eigen::Matrix<double,NPI,1> uHeff = -Abis *( dUdx.colwise().squaredNorm() + dUdy.colwise().squaredNorm() + dUdz.colwise().squaredNorm());
+    // we have to add here DMI bulk contribution to uHeff = m dot Heff, it should be  Dbis*(U dot nabla.cross(U))
     Eigen::Matrix<double,DIM,NPI> H_aniso;
     H_aniso.setZero();
 
