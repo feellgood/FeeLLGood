@@ -194,7 +194,7 @@ demagnetizing_field_solver:
 finite_element_solver:
 
   # Maximum number of iteration for the biconjugate gradient algorithm.
-  max(iter): 500
+  max(iter): 700
 
   # solver tolerance.
   tolerance: 1e-6
