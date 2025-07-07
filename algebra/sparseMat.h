@@ -75,6 +75,7 @@ public:
         }
 
 private:
+    /** Matrix data: each row is a sparse vector. */
     std::vector<SparseVector> rows;
 };
 
