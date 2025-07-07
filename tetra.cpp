@@ -42,7 +42,7 @@ Eigen::Matrix<double,NPI,1> Tetra::calc_alpha_eff(const double dt, const double 
     return a_eff;
     }
 
-void Tet::lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double prefactor, double D,
+void Tet::lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double prefactor, double Dbis,
                   Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const
     {
     Eigen::Matrix<double,N,N> exch_block = da*da.transpose();
@@ -69,13 +69,13 @@ void Tet::lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double pref
         AE(2*N + i, i) -= ai_w_u0(IDX_Y);
         }
 
-    if (D!=0.0)
+    if (Dbis!=0.0)
         {
         //devNote: maybe dad should be a public method in class tetra
         std::function<double(const int, const int,const int)> dad = [this](const int coord,const int k,const int npi){ return 0.0; };
         for(int npi=0;npi<NPI;npi++)
             {
-            double pref_DMI = D*weight[npi];// WARNING: formula incomplete here missing at least Js and theta*dt
+            double pref_DMI = Dbis*weight[npi];// WARNING: formula incomplete here missing theta*dt*(1+r)
             for (int i = 0; i < N; i++)
                 {
                 double ai = a[i][npi];
@@ -162,7 +162,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     const double alpha = param.alpha_LLG;
     const double Js = param.J;
     const double Abis = 2.0 * param.A / Js; // exchange
-    const double Dbis = 2.0 * param.D / Js; // DMI bulk
+    const double Dbis = param.D / Js; // DMI bulk
     const double dt = prm_t.get_dt();
     const double s_dt = THETA * dt * gamma0;  // theta from theta scheme in config.h.in
 
@@ -203,7 +203,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     
     Eigen::Matrix<double,3*N,3*N> AE;
     AE.setZero();
-    lumping(a_eff, prm_t.prefactor * s_dt * Abis,param.D, AE); // devNote: might be better to replace param.D by Dbis and adapt the formula
+    lumping(a_eff, prm_t.prefactor * s_dt * Abis,Dbis, AE);
 
     Eigen::Matrix<double,2*N,3*N> P;
     buildMatP(P);
@@ -236,7 +236,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
             BE.col(i) += w*a[i][npi]*H.col(npi);
             if(Dbis != 0.0) // DMI bulk
                 {
-                BE.col(i) += w*Dbis*( a[i][npi]*Eigen::Vector3d(dUdy(IDX_Z,npi)-dUdz(IDX_Y,npi),dUdz(IDX_X,npi)-dUdx(IDX_Z,npi),dUdx(IDX_Y,npi)-dUdy(IDX_X,npi)) + nabla.cross(U.col(npi)) );
+                BE.col(i) += w*2.0*Dbis*( a[i][npi]*Eigen::Vector3d(dUdy(IDX_Z,npi)-dUdz(IDX_Y,npi),dUdz(IDX_X,npi)-dUdx(IDX_Z,npi),dUdx(IDX_Y,npi)-dUdy(IDX_X,npi)) + nabla.cross(U.col(npi)) );
                 }
             }
         }
