@@ -25,10 +25,10 @@ int LinAlgebra::solver(timing const &t_prm)
                       [this](Facette::Fac &my_elem) { my_elem.assemble_vect(L_rhs); } );
 
     /* RHS forced to zero outside mag material */
-    std::for_each(lvd.begin(),lvd.end(),[this](int i){ L_rhs[i]=0.0; });
+    //std::for_each(lvd.begin(),lvd.end(),[this](int i){ L_rhs[i]=0.0; });
 
     /* to force v=0 on nodes outside magnetic material, diagonal coefficients are forced to 1 */
-    std::for_each(lvd.begin(),lvd.end(),[this](int i){ K.add(i,i,1.0); }); // adding triplet (i,i,1.0) while diag coeff already exists ???? really ???
+    //std::for_each(lvd.begin(),lvd.end(),[this](int i){ K.add(i,i,1.0); }); // adding triplet (i,i,1.0) while diag coeff already exists ???? really ???
     // TODO: we should overload sparseMat constructor to do something like Kr(Kw,lvd);
     if (verbose)
         {
