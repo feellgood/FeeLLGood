@@ -71,7 +71,7 @@ void electrostatSolver::integrales(Facette::Fac const &fac, std::vector<double> 
         }
     }
 
-int electrostatSolver::solve(const double _tol)
+bool electrostatSolver::solve(void)
     {
     const int DIM_1D = 1;
     algebra::w_sparseMat Kw(NOD);
@@ -96,7 +96,6 @@ int electrostatSolver::solve(const double _tol)
         } );
 
     algebra::r_sparseMat Kr(Kw);
-    algebra::iteration iter("cg_dir",_tol,verbose,MAXITER);
     std::vector<int> ld; // vector of the Dirichlet Nodes
     std::vector<double> Vd(NOD); // potential values on Dirichlet nodes, zero on the others
 
@@ -114,11 +113,12 @@ int electrostatSolver::solve(const double _tol)
             }
         });
     suppress_copies<int>(ld);
+    iter.reset();
     algebra::cg_dir<double>(iter, Kr, V, Lw, Vd, ld);
 
     if (verbose)
         std::cout << "solved in " << iter.get_iteration() <<" ; residu= " << iter.get_res();
-    return ( iter.get_iteration() < (int)MAXITER);
+    return ( iter.status == algebra::CONVERGED);
     }
 
 bool electrostatSolver::save(std::string const &metadata) const
