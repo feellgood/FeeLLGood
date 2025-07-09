@@ -29,15 +29,17 @@ public:
             const bool v /**< [in] verbose bool */,
             const int max_iter /**< [in] maximum number of iteration */,
             const std::string _V_fileName /**< [in] output file name for electrostatic potential */)
-        : msh(_msh), paramTetra(_pTetra), paramFacette(_pFac), verbose(v), MAXITER(max_iter), V_fileName(_V_fileName), NOD(_msh.getNbNodes())
+        : msh(_msh), paramTetra(_pTetra), paramFacette(_pFac),
+        iter("cg_dir",_tol,v,max_iter), verbose(v), V_fileName(_V_fileName), NOD(_msh.getNbNodes())
         {
         if (verbose)
             { infos(); }
         V.resize(NOD);
-        bool has_converged = solve(_tol);
+        bool has_converged = solve();
+        if (verbose)
+            { std::cout << "electrostatic solver: " << iter.infos() << std::endl; }
         if (has_converged)
             {
-            std::cout << "Solver (ElectroStatic) has converged.\n";
             if (!V_fileName.empty())
                 {
                 if (verbose)
@@ -58,10 +60,7 @@ public:
                           });
             }
         else
-            {
-            std::cerr << "Solver (ElectroStatic) has not converged.\n";
-            exit(1);
-            }
+            { exit(1); }
         }
 
     /** computes the gradient(V) for tetra tet */
@@ -113,11 +112,11 @@ private:
     /** this vector contains the material parameters for all surface regions for all the triangular facettes */
     std::vector<Facette::prm> paramFacette;
 
+    /** monitor the solver called in method solve() */
+    algebra::iteration<double> iter;
+
     /** if verbose set to true, some printing are sent to terminal */
     const bool verbose;
-
-    /** maximum number of iteration for conjugate gradient */
-    const unsigned int MAXITER;  // fixed to 5000 in ref code
 
     /** number of digits in the optional output file */
     const int precision = 8;
@@ -138,6 +137,6 @@ template <typename T>
         }
 
     /** solver, using conjugate gradient with masking, with diagonal preconditionner and Dirichlet
-     * boundary conditions */
-    int solve(const double _tol);
+     * boundary conditions, returns true if has converged */
+    bool solve(void);
     };  // end class electrostatSolver
