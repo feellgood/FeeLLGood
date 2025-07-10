@@ -45,6 +45,9 @@ Eigen::Matrix<double,NPI,1> Tetra::calc_alpha_eff(const double dt, const double 
 void Tet::lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double prefactor, double Dbis,
                   Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const
     {
+    // carefull with prefactor, it is time dependant and its value is:
+    // prefactor = prm_t.prefactor * s_dt * Abis
+    //           = (1. + (dt/TAUR) * abs(log(dt/TAUR))) * s_dt * Abis
     Eigen::Matrix<double,N,N> exch_block = da*da.transpose();
     exch_block *= prefactor*weight.sum();
     // contrib is alpha contribution to the diagonal of AE; to help stabilizing the scheme, alpha is modified
@@ -71,8 +74,8 @@ void Tet::lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double pref
 
     if (Dbis!=0.0)
         {
-        //devNote: maybe dad should be a public method in class tetra
-        std::function<double(const int, const int,const int)> dad = [this](const int coord,const int k,const int npi){ return 0.0; };
+        //devNote: maybe dad should be a public method in class tetra (weird: dad(x|y|z) are independant from npi)
+        std::function<double(const int, const int,const int)> dad = [this](const int coord,const int k,const int){ return da(k,coord); };
         for(int npi=0;npi<NPI;npi++)
             {
             double pref_DMI = Dbis*weight[npi];// WARNING: formula incomplete here missing theta*dt*(1+r)
