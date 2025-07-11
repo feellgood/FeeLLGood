@@ -84,15 +84,15 @@ int spinAcc::solve(const double _tol /**< [in] tolerance */ )
         K.setZero();
         std::vector<double> L(DIM_3D*Tetra::N,0.0);
         integrales(elem,K,L);
-        buildMat<Tetra::N,DIM_3D>(NOD, elem.ind, K, Kw);
-        buildVect<Tetra::N,DIM_3D>(NOD, elem.ind, L, Lw);
+        buildMat<Tetra::N,DIM_3D>(elem.ind, K, Kw);
+        buildVect<Tetra::N,DIM_3D>(elem.ind, L, Lw);
         } );
 
     std::for_each( msh.fac.begin(), msh.fac.end(),[this,&Lw](Facette::Fac &elem)
         {
         std::vector<double> L(DIM_3D*Facette::N,0.0);
         integrales(elem,L);
-        buildVect<Facette::N,DIM_3D>(NOD, elem.ind, L, Lw);
+        buildVect<Facette::N,DIM_3D>(elem.ind, L, Lw);
         } );
 
     algebra::iteration iter("bicg",_tol,verbose,MAXITER);
