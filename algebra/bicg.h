@@ -209,6 +209,8 @@ T bicg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::ve
             scaled_add(phat, alpha, x); // x += alpha * phat
             break;
             }
+        else if ((iter.status == ITER_OVERFLOW)||(iter.status == CANNOT_CONVERGE))
+            {break;}
 
         p_direct(diag_precond, s, shat);// shat = direct_product(diag_precond, s);
         mult(A, shat, t);               //  t = A shat;
