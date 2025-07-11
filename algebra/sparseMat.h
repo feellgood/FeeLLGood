@@ -147,6 +147,20 @@ public:
         }
 
     /**
+    Set the value at position (i, j), which must belong to the shape.
+    */
+    void set(int i, int j, double val)
+        {
+        assert(i >= 0 && i < rows.size());
+        assert(j >= 0 && j < rows.size());
+        SparseVector& row = rows[i];
+        auto it = std::lower_bound(row.indices.begin(), row.indices.end(), j);
+        assert(it != row.indices.end() && *it == j);
+        int k = it - row.indices.begin();
+        row.values[k] = val;
+        }
+
+    /**
     Add the provided value at position (i, j), which must belong to the shape. This method is
     thread-safe.
     */
