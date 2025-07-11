@@ -144,9 +144,6 @@ private:
     /** external applied space field, values on gauss points, size is number of tetraedrons */
     std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > extSpaceField;
 
-    /** compute v_max, the maximum of the magnetization velocity of all the magnetic regions */
-    void updateVmax(Eigen::VectorXd &sol);
-
     /** list of the Dirichlet indices where (vp,vq) are zero, built by constructor */
     std::vector<int> lvd;
     };// end class linAlgebra
