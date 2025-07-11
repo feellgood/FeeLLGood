@@ -85,14 +85,14 @@ bool electrostatSolver::solve(void)
         Eigen::Matrix<double,DIM_1D*Tetra::N,DIM_1D*Tetra::N> K;
         K.setZero();
         integrales(elem,K);
-        buildMat<Tetra::N,DIM_1D>(NOD,elem.ind,K,Kw);
+        buildMat<Tetra::N,DIM_1D>(elem.ind,K,Kw);
         } );
 
     std::for_each( msh.fac.begin(), msh.fac.end(),[this,&Lw](Facette::Fac &elem)
         {
         std::vector<double> L(DIM_1D*Facette::N,0.0);
         integrales(elem,L);
-        buildVect<Facette::N,DIM_1D>(NOD,elem.ind,L,Lw);
+        buildVect<Facette::N,DIM_1D>(elem.ind,L,Lw);
         } );
 
     algebra::r_sparseMat Kr(Kw);
