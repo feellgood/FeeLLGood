@@ -104,6 +104,17 @@ class r_sparseMat
         std::mutex mutex;   /**< mutex guarding the values during calls to add() */
         std::vector<int> indices;  /**< array of vector indices. */
         std::vector<double> values;  /**< array of vector values matching the indices */
+
+        /**
+        Return a reference to the coefficient at index j, which must be a valid index.
+        */
+        double& operator[](int j)
+            {
+            auto it = std::lower_bound(indices.begin(), indices.end(), j);
+            assert(it != indices.end() && *it == j);
+            int k = it - indices.begin();
+            return values[k];
+            }
     };
 
 public:
@@ -153,11 +164,7 @@ public:
         {
         assert(i >= 0 && i < rows.size());
         assert(j >= 0 && j < rows.size());
-        SparseVector& row = rows[i];
-        auto it = std::lower_bound(row.indices.begin(), row.indices.end(), j);
-        assert(it != row.indices.end() && *it == j);
-        int k = it - row.indices.begin();
-        row.values[k] = val;
+        rows[i][j] = val;
         }
 
     /**
@@ -169,11 +176,8 @@ public:
         assert(i >= 0 && i < rows.size());
         assert(j >= 0 && j < rows.size());
         SparseVector& row = rows[i];
-        auto it = std::lower_bound(row.indices.begin(), row.indices.end(), j);
-        assert(it != row.indices.end() && *it == j);
-        int k = it - row.indices.begin();
         std::mutex& mutex = row.mutex;
-        double& value = row.values[k];
+        double& value = row[j];
         mutex.lock();
         value += val;
         mutex.unlock();
