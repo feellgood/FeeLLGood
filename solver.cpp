@@ -37,7 +37,7 @@ int LinAlgebra::solver(timing const &t_prm)
         }
 
     buildInitGuess(Xw);// gamma0 division handled by function buildInitGuess
-    algebra::bicg_dir<double>(iter, K, Xw, L_rhs, lvd);
+    algebra::bicg<double>(iter, K, Xw, L_rhs);//algebra::bicg_dir<double>(iter, K, Xw, L_rhs, lvd);
 
     if( (iter.status == algebra::ITER_OVERFLOW) || (iter.status == algebra::CANNOT_CONVERGE) || (iter.get_res() > iter.resmax) )
         {
