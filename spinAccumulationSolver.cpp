@@ -102,13 +102,17 @@ int spinAcc::solve(const double _tol /**< [in] tolerance */ )
     std::vector<double> Xw(DIM_3D*NOD);
     algebra::bicg(iter, Kr, Xw, Lw);
 
-    if (!(iter.converged()))
-        { std::cout << "\t bicg FAILED in " << iter.get_iteration() << "; residu= " << iter.get_res() << '\t'; }
+    if ( (iter.status  == algebra::ITER_OVERFLOW) || (iter.status == algebra::CANNOT_CONVERGE) || (iter.get_res() > iter.resmax) )
+        {
+        if (verbose)
+            { std::cout << "solver: " << iter.infos() << std::endl; }
+        return 1;
+        }
 
     for (int i=0; i<NOD; i++)
-        { for(int d=0; d<DIM_3D; d++) { Qs[i][d] = Xw[d*NOD+i]; } }
+        { for(int d=0; d<DIM_3D; d++) { Qs[i][d] = Xw[d*NOD+i]; } }  // wrong indexation
 
-    return iter.converged();
+    return 0;
     }
 
 void spinAcc::integrales(Tetra::Tet &tet,

@@ -51,8 +51,7 @@ public:
 
         if(s.getFieldType() == R4toR3)
             { setExtSpaceField(s); }
-        v_max = 0;
-        my_msh.build_lvd(lvd);
+        //my_msh.build_lvd(lvd); // cannot work: uses the old indexation
         }
 
     /** build a matrix shape suitable for our mesh */
@@ -145,6 +144,6 @@ private:
     std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > extSpaceField;
 
     /** list of the Dirichlet indices where (vp,vq) are zero, built by constructor */
-    std::vector<int> lvd;
+    std::vector<int> lvd; //devNote : must use the new indexation
     };// end class linAlgebra
 #endif
