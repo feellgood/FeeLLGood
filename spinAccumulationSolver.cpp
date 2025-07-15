@@ -72,7 +72,7 @@ void spinAcc::prepareExtras(void)
         });//end for_each
     }
 
-int spinAcc::solve(const double _tol /**< [in] tolerance */ )
+int spinAcc::solve(void)
     {
     const int DIM_3D = 3;
     algebra::w_sparseMat Kw(DIM_3D*NOD);
@@ -94,8 +94,6 @@ int spinAcc::solve(const double _tol /**< [in] tolerance */ )
         integrales(elem,L);
         buildVect<Facette::N,DIM_3D>(elem.ind, L, Lw);
         } );
-
-    algebra::iteration iter("bicg",_tol,verbose,MAXITER);
 
     std::cout << "bicg...\n";
     algebra::r_sparseMat Kr(Kw);
