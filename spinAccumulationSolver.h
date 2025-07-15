@@ -23,12 +23,13 @@ class spinAcc
     const double _tol /**< [in] tolerance for solvers */,
     const bool v /**< [in] verbose bool */,
     const int max_iter /**< [in] maximum number of iteration */):
-        msh(_msh), elec(_elec), paramTetra(_pTetra),  paramFacette(_pFac), verbose(v), MAXITER(max_iter), NOD(_msh.getNbNodes())
+        msh(_msh), elec(_elec), paramTetra(_pTetra),  paramFacette(_pFac),
+        iter("bicg_dir",_tol,v,max_iter), verbose(v), NOD(_msh.getNbNodes())
         {
         Qs.resize(NOD);
-        bool has_converged = solve(_tol);
+        bool has_converged = solve();
         if (!has_converged)
-            { std::cout << "spin accumulation solver has not converged." << std::endl; exit(1); }
+            { std::cout << "spin accumulation solver: " << iter.infos() << std::endl; exit(1); }
         prepareExtras();
         }
 
@@ -45,11 +46,11 @@ class spinAcc
     /** this vector contains the material parameters for all surface regions for all the triangular facettes */
     std::vector<Facette::prm> paramFacette;
 
+    /** monitor the solver called in method solve() */
+    algebra::iteration<double> iter;
+
     /** if verbose set to true, some printing are sent to terminal */
     const bool verbose;
-
-    /** maximum number of iteration for biconjugate stabilized gradient */
-    const unsigned int MAXITER;
 
     /** number of Nodes (needed for templates) */
     const int NOD;
@@ -80,7 +81,7 @@ class spinAcc
 
     /** solver, using biconjugate stabilized gradient, with diagonal preconditionner and Dirichlet
      * boundary conditions */
-    int solve(const double _tol /**< [in] tolerance */ );
+    int solve(void);
 
     std::vector<Eigen::Vector3d> Qs;
 
