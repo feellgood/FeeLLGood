@@ -71,9 +71,6 @@ class spinAcc
 
     /** spin flip length */
     double getLsf(Tetra::Tet &tet) const;
-
-    /** getter */
-    Eigen::Vector3d get_Qn(Facette::Fac const &fac) const;
     
     /** affect extraField function and extraCoeffs_BE function using lambdas for all the tetrahedrons (functor) */
     void prepareExtras(void);
@@ -82,14 +79,18 @@ class spinAcc
      * boundary conditions */
     int solve(void);
 
+    /** solution of the accumulation spin diffusion problem (3D vector field) */
     std::vector<Eigen::Vector3d> Qs;
 
+    /** dimensionnality of the spin accumulation problem */
     static const int DIM_PROBLEM = 3;
-    
+
+    /** computes contributions to matrix AE and vector BE from tetrahedron tet */
     void integrales(Tetra::Tet &tet,
                     Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,DIM_PROBLEM*Tetra::N> &AE,
                     std::vector<double> &BE);
-    
+
+    /** computes contributions to vector BE from facette fac */
     void integrales(Facette::Fac &fac, std::vector<double> &BE);
     };
 
