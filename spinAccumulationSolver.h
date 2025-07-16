@@ -12,7 +12,6 @@
  (potential fixed value on one surface, current density on another surface)
  */
 
-// _tol could be 1e-6
 class spinAcc
     {
     /** constructor */
@@ -20,7 +19,7 @@ class spinAcc
     electrostatSolver &_elec /**< [in] ref to the the electrostatic sub_problem */,
     std::vector<Tetra::prm> _pTetra /**< [in] ref to vector of param tetra (volume region parameters) */,
     std::vector<Facette::prm> _pFac /**< [in] ref to vector of param facette (surface region parameters) */,
-    const double _tol /**< [in] tolerance for solvers */,
+    const double _tol /**< [in] tolerance for solvers */,  // _tol could be 1e-6
     const bool v /**< [in] verbose bool */,
     const int max_iter /**< [in] maximum number of iteration */):
         msh(_msh), elec(_elec), paramTetra(_pTetra),  paramFacette(_pFac),

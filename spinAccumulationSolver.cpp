@@ -74,30 +74,31 @@ void spinAcc::prepareExtras(void)
 
 int spinAcc::solve(void)
     {
-    const int DIM_3D = 3;
-    algebra::w_sparseMat Kw(DIM_3D*NOD);
-    std::vector<double> Lw(DIM_3D*NOD);
+    using namespace Nodes;
+
+    iter.reset();
+    algebra::w_sparseMat Kw(DIM_PROBLEM*NOD);
+    std::vector<double> Lw(DIM_PROBLEM*NOD);
 
     std::for_each( msh.tet.begin(), msh.tet.end(),[this,&Kw,&Lw](Tetra::Tet &elem)
         {
-        Eigen::Matrix<double,DIM_3D*Tetra::N,DIM_3D*Tetra::N> K;
+        Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,DIM_PROBLEM*Tetra::N> K;
         K.setZero();
-        std::vector<double> L(DIM_3D*Tetra::N,0.0);
+        std::vector<double> L(DIM_PROBLEM*Tetra::N,0.0);
         integrales(elem,K,L);
-        buildMat<Tetra::N,DIM_3D>(elem.ind, K, Kw);
-        buildVect<Tetra::N,DIM_3D>(elem.ind, L, Lw);
+        buildMat<Tetra::N,DIM_PROBLEM>(elem.ind, K, Kw);
+        buildVect<Tetra::N,DIM_PROBLEM>(elem.ind, L, Lw);
         } );
 
     std::for_each( msh.fac.begin(), msh.fac.end(),[this,&Lw](Facette::Fac &elem)
         {
-        std::vector<double> L(DIM_3D*Facette::N,0.0);
+        std::vector<double> L(DIM_PROBLEM*Facette::N,0.0);
         integrales(elem,L);
-        buildVect<Facette::N,DIM_3D>(elem.ind, L, Lw);
+        buildVect<Facette::N,DIM_PROBLEM>(elem.ind, L, Lw);
         } );
 
-    std::cout << "bicg...\n";
     algebra::r_sparseMat Kr(Kw);
-    std::vector<double> Xw(DIM_3D*NOD);
+    std::vector<double> Xw(DIM_PROBLEM*NOD);
     algebra::bicg(iter, Kr, Xw, Lw);
 
     if ( (iter.status  == algebra::ITER_OVERFLOW) || (iter.status == algebra::CANNOT_CONVERGE) || (iter.get_res() > iter.resmax) )
@@ -108,8 +109,11 @@ int spinAcc::solve(void)
         }
 
     for (int i=0; i<NOD; i++)
-        { for(int d=0; d<DIM_3D; d++) { Qs[i][d] = Xw[d*NOD+i]; } }  // wrong indexation
-
+        {
+        Qs[i][IDX_X] = Xw[DIM_PROBLEM*i];
+        Qs[i][IDX_Y] = Xw[DIM_PROBLEM*i + 1];
+        Qs[i][IDX_Z] = Xw[DIM_PROBLEM*i + 2];
+        }
     return 0;
     }
 
