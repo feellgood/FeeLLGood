@@ -116,8 +116,6 @@ bool electrostatSolver::solve(void)
     iter.reset();
     algebra::cg_dir<double>(iter, Kr, V, Lw, Vd, ld);
 
-    if (verbose)
-        std::cout << "solved in " << iter.get_iteration() <<" ; residu= " << iter.get_res();
     return ( iter.status == algebra::CONVERGED);
     }
 
