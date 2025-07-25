@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
 
         electrostatSolver pot_solver = electrostatSolver(fem.msh, mySettings.paramTetra,
                                                          mySettings.paramFacette, 1e-8,
-                                                         mySettings.verbose, 5000, fileName);
+                                                         mySettings.verbose, 1000, fileName);
         }
 
     chronometer fmm_counter(2);

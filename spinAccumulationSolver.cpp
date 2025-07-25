@@ -97,7 +97,7 @@ int spinAcc::solve(void)
     if ( (iter.status  == algebra::ITER_OVERFLOW) || (iter.status == algebra::CANNOT_CONVERGE) || (iter.get_res() > iter.resmax) )
         {
         if (verbose)
-            { std::cout << "solver: " << iter.infos() << std::endl; }
+            { std::cout << "spin accumulation solver: " << iter.infos() << std::endl; }
         return 1;
         }
 
@@ -198,7 +198,9 @@ void spinAcc::integrales(Facette::Fac &fac, std::vector<double> &BE)
     {
     using namespace Nodes;
     using namespace Facette;
+// J in the following equation is a normal current density to the facette 
     Eigen::Vector3d Qn = paramFacette[fac.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFacette[fac.idxPrm].Pu;
+    if(!std::isfinite(paramFacette[fac.idxPrm].J)) {std::cout << "ouch J not finite\n";exit(1); }
 
     for (int npi=0; npi<NPI; npi++)
         {

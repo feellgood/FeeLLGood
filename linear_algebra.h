@@ -51,7 +51,7 @@ public:
 
         if(s.getFieldType() == R4toR3)
             { setExtSpaceField(s); }
-        //my_msh.build_lvd(lvd); // cannot work: uses the old indexation
+        my_msh.build_lvd(lvd);
         }
 
     /** build a matrix shape suitable for our mesh */

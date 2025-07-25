@@ -14,6 +14,7 @@
 
 class spinAcc
     {
+    public:
     /** constructor */
     spinAcc(Mesh::mesh &_msh /**< [in] ref to the mesh */,
     electrostatSolver &_elec /**< [in] ref to the the electrostatic sub_problem */,
