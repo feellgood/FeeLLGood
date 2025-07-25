@@ -135,7 +135,7 @@ void mesh::build_lvd(std::vector<int> &lvd)
     std::vector<int> all(NOD);
     std::vector<int> dofs; // list of the nodes where LLG does apply
     std::iota(all.begin(),all.end(),0); // all = { 0,1,...,NOD-1}
-    std::for_each(tet.begin(),tet.end(),[this,&dofs](Tetra::Tet &t)
+    std::for_each(tet.begin(),tet.end(),[this,&dofs](const Tetra::Tet &t)
                   {
                   if (isMagnetic(t))
                       {
@@ -148,13 +148,11 @@ void mesh::build_lvd(std::vector<int> &lvd)
 
     suppress_copies<int>(dofs);
     auto it = std::set_difference(all.begin(),all.end(),dofs.begin(),dofs.end(),ld.begin());
-    ld.resize(it - ld.begin());
-    ld.shrink_to_fit();
-    int nb_coeffs = ld.size();
+    auto nb_coeffs = it - ld.begin();
     lvd.resize(2*nb_coeffs);
     for(int i=0;i<nb_coeffs;i++)
         {
-        lvd[i] = ld[i];
-        lvd[i+nb_coeffs] = ld[i] + NOD;
+        lvd[2*i] = ld[i];
+        lvd[2*i+1] = ld[i] + NOD;
         }
     }
