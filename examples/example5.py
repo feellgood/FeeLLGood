@@ -8,28 +8,50 @@ import gmsh
 verboseGmsh = False
 
 #all dimensions are in nm
-mesh_size = 5
+mesh_size = 10
 
 class cylinder:
     def __init__(self,h,r):
         self.height = h
         self.radius = r
+
+def buildDisk(c):
+    p_origin = gmsh.model.geo.addPoint(0,0,0,mesh_size)
+    start_pt = gmsh.model.geo.addPoint(c.radius,0,0,mesh_size)
+    interim_pt = gmsh.model.geo.addPoint(0,c.radius,0,mesh_size)
+    interim1_pt = gmsh.model.geo.addPoint(-c.radius,0,0,mesh_size)
+    interim2_pt = gmsh.model.geo.addPoint(0,-c.radius,0,mesh_size)
+    circle = gmsh.model.geo.addCircleArc(start_pt,p_origin,interim_pt)
+    circle1 = gmsh.model.geo.addCircleArc(interim_pt,p_origin,interim1_pt)
+    circle2 = gmsh.model.geo.addCircleArc(interim1_pt,p_origin,interim2_pt)
+    circle3 = gmsh.model.geo.addCircleArc(interim2_pt,p_origin,start_pt)
+
+    gmsh.model.geo.remove([(p_origin,0)])
+
+    curvedLoop = gmsh.model.geo.addCurveLoop([circle,circle1,circle2,circle3]) # curvedLoop is an index (integer)
+    surf = gmsh.model.geo.addPlaneSurface([curvedLoop]) # surf is an index (integer)
+    return surf
+
+# radius of the whole nanopillar
+r_n = 20
+r_e = 30
+
 #nanowire
-nw = cylinder(100,20)
+nw = cylinder(100,r_n)
 
 #electrode
-e = cylinder(40,20)
+e = cylinder(40,r_e)
 
 # cross section of the mesh (xOz) plane:
 #
 #      ---  z= nw.height (#202) boundary condition V = 3.0
 #     |   |
 #     |   |
-#     |   |    magnet (z>0)
+#     |   |    magnet (z>0) radius = r_n
 #     |   |
 #     |---|  z=0
-#     |   |    electrode (z<0)
-#      ---   z= -e.height (#212)  boundary condition J = 0.1
+#     |   |    electrode (z<0) radius = r_e
+#      ---   z= -e.height (#212)  boundary condition V = 0.1
 
 meshFileName = "nanowire.msh"
 vol_regName = "magnet"
@@ -47,22 +69,7 @@ gmsh.option.setNumber("General.Terminal",verboseGmsh)
 gmsh.option.setNumber("Mesh.MshFileVersion", 4.1)
 gmsh.model.add("nanowireWithElectrode")
 
-p_origin = gmsh.model.geo.addPoint(0,0,0,mesh_size)
-
-start_pt = gmsh.model.geo.addPoint(nw.radius,0,0,mesh_size)
-interim_pt = gmsh.model.geo.addPoint(0,nw.radius,0,mesh_size)
-interim1_pt = gmsh.model.geo.addPoint(-nw.radius,0,0,mesh_size)
-interim2_pt = gmsh.model.geo.addPoint(0,-nw.radius,0,mesh_size)
-        
-big_circle = gmsh.model.geo.addCircleArc(start_pt,p_origin,interim_pt)
-big_circle1 = gmsh.model.geo.addCircleArc(interim_pt,p_origin,interim1_pt)
-big_circle2 = gmsh.model.geo.addCircleArc(interim1_pt,p_origin,interim2_pt)
-big_circle3 = gmsh.model.geo.addCircleArc(interim2_pt,p_origin,start_pt)
-
-gmsh.model.geo.remove([(p_origin,0)])
-
-curvedLoop = gmsh.model.geo.addCurveLoop([big_circle,big_circle1,big_circle2,big_circle3]) # curvedLoop is an index (integer)
-surf = gmsh.model.geo.addPlaneSurface([curvedLoop]) # surf is an index (integer)
+surf = buildDisk(nw)
 out = gmsh.model.geo.extrude([(2,surf)],0,0,nw.height) # 2 is the dimension of the object refered by index surf
 gmsh.model.geo.synchronize() # we have to sync before calling addPhysicalGroup
 
@@ -83,9 +90,14 @@ volume_tag = 300 # magnetic volume
 gmsh.model.addPhysicalGroup(3,[out[1][1]],volume_tag)
 gmsh.model.setPhysicalName(3,volume_tag,vol_regName)
 
-out2 = gmsh.model.geo.extrude([(2,surf)],0,0,-e.height) # 2 is the dimension of the object refered by index surf
+surf2 = buildDisk(e)
+out2 = gmsh.model.geo.extrude([(2,surf2)],0,0,-e.height) # 2 is the dimension of the object refered by index surf
 
+#gmsh.model.mesh.removeDuplicateNodes() # to remove duplicate nodes in z=0 plane. do nothing ??
 gmsh.model.geo.synchronize() # we have to sync before calling addPhysicalGroup
+
+#gmsh.model.geo.removeAllDuplicates() #remove nothing ?
+#gmsh.model.geo.synchronize()
 
 surface_tag = 212 # should be disk in z= -e.height plane
 gmsh.model.addPhysicalGroup(2,[ out2[0][1] ],surface_tag)
@@ -99,9 +111,6 @@ gmsh.model.geo.synchronize() # we have to synchronize before the call to 'genera
 gmsh.model.mesh.generate(3) # 3 is the dimension of the mesh
         
 gmsh.write(meshFileName)
-
-# uncomment next line to see a graphic rendering of the mesh
-#gmsh.fltk.run()
 
 print(f"Generated {meshFileName}")
 gmsh.finalize()
@@ -127,7 +136,7 @@ settings = {
             surface_top_name:{ "V": 3.0 }
             }
     },
-    "initial_magnetization": [1, 0, 1],
+    "initial_magnetization": [0.01, 0, 1],
     "Bext": [0, 0, 0],
     "demagnetizing_field_solver": { "nb_threads": 32 },
     "time_integration": {
@@ -142,5 +151,4 @@ with open(jsonFileName,'w') as outfile:
     json.dump(settings,outfile,indent = 4)
 
 print(f"Generated {jsonFileName}")
-#val = subprocess.run(["../feellgood","-v", "-"], input=json.dumps(settings), text=True)
 
