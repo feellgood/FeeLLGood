@@ -39,8 +39,8 @@ def infos(g_opt,name):
             nodeTags = gmsh.model.mesh.getNodesForPhysicalGroup(3,p)
             nbNodes += int(len(nodeTags[1])/3)
     
-    nbTriangles = int(g_opt.get_number("Mesh.NbTriangles"))
-    nbTetra = int(g_opt.get_number("Mesh.NbTetrahedra"))
+    nbTriangles = int(g_opt.getNumber("Mesh.NbTriangles"))
+    nbTetra = int(g_opt.getNumber("Mesh.NbTetrahedra"))
     return f"{nbNodes} nodes, {nbTetra} tetrahedra, {nbTriangles} triangles"
 
 class Hexahedron(object):
