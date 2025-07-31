@@ -23,6 +23,10 @@ if(NOT GMSH_INC)
   message(FATAL_ERROR "Could not find gmsh.h")
 endif()
 
+# On Rocky Linux, an RPATH is needed for finding libgmsh.so in /usr/local.
+# Preserve it during installation.
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)
+
 #===========================================================================
 # cmake . -DENABLE_SEQ=OFF
 # execution policy, by default it is parallel, sequential is for debug purpose.
