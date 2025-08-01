@@ -8,7 +8,7 @@ import gmsh
 verboseGmsh = False
 
 #all dimensions are in nm
-mesh_size = 10
+mesh_size = 3
 
 class cylinder:
     def __init__(self,n,h,r):
@@ -67,14 +67,6 @@ e = cylinder("metal",l_e,r_e) #electrode
 #     |   |    electrode (z<0) radius = r_e
 #      ---   z= -e.height (#212)  boundary condition V = 0.1
 
-surf_regName = "frontier(magnet)"
-
-surf_regName2 = "frontier(metal)"
-
-surface_top_name = "top_ground"
-
-surface_top_name2 = "metal_top"
-
 gmsh.initialize()
 gmsh.option.setNumber("General.Terminal",verboseGmsh)
 gmsh.option.setNumber("Mesh.MshFileVersion", 4.1)
@@ -82,21 +74,17 @@ gmsh.model.add("nanowireWithElectrode")
 
 z0=0
 circle0 = buildCircle(nw.radius,z0)
-print("circle0=",circle0)
 surf = buildDisk(circle0)
 out = gmsh.model.geo.extrude([(2,surf)],0,0,nw.height) # 2 is the dimension of the object refered by index surf
 gmsh.model.geo.synchronize() # we have to sync before calling addPhysicalGroup
 
 surface_tag = 200 # this surface is frontier(magnetic volume)
+surf_regName = "frontier(magnet)"
 gmsh.model.addPhysicalGroup(2,[surf, out[0][1], out[2][1], out[3][1], out[4][1], out[5][1]],surface_tag)
 gmsh.model.setPhysicalName(2,surface_tag,surf_regName)
 
-#create cylinder edge surfaces as 2D geometric entities in the mesh, to define boundary conditions
-#surface_tag_left = 201
-#gmsh.model.addPhysicalGroup(2,[surf],surface_tag_left)
-#gmsh.model.setPhysicalName(2,surface_tag_left,surface_base_name)
-
-surface_tag = 202 # should be disk in z=nw.height plane
+surface_tag = 202 # should be disk in z=nw.height plane : boundary condition for electrostatic problem
+surface_top_name = "top_mag_pillar"
 gmsh.model.addPhysicalGroup(2,[ out[0][1] ],surface_tag)
 gmsh.model.setPhysicalName(2,surface_tag,surface_top_name)
 
@@ -104,34 +92,32 @@ volume_tag = 300 # magnetic volume
 gmsh.model.addPhysicalGroup(3,[out[1][1]],volume_tag)
 gmsh.model.setPhysicalName(3,volume_tag,nw.name)
 
-circle1 = buildCircle(nw.radius,z0,False) #should be constructed from circle0
+circle1 = list(map(lambda x: -x,circle0))  # change all sign of circle0 to define the hole
 circle2 = buildCircle(e.radius,z0)
 curvedLoop = gmsh.model.geo.addCurveLoop(circle2)
 hole = gmsh.model.geo.addCurveLoop(circle1)
 surf2 = gmsh.model.geo.addPlaneSurface([curvedLoop,hole])
-print("circle2=",circle2)
-print("curvedLoop=",curvedLoop)
 out2 = gmsh.model.geo.extrude([(1,circle2[0]),(1,circle2[1]),(1,circle2[2]),(1,circle2[3])],0,0,-e.height)
 gmsh.model.geo.synchronize()
-print("out2=",out2)
 circle4 = buildCircle(e.radius,z0-e.height)
 surf3 = buildDisk(circle4)
 
-# voir tuto 5 pour sl = addSurfaceLoop([...]) et addVolume([sl])
-
-#gmsh.model.mesh.removeDuplicateNodes() # to remove duplicate nodes in z=0 plane. do nothing ??
 gmsh.model.geo.synchronize() # we have to sync before calling addPhysicalGroup
 
-#gmsh.model.geo.removeAllDuplicates() #remove nothing ?
-#gmsh.model.geo.synchronize()
+frontier_metal = [surf,surf2,out2[1][1],out2[5][1],out2[9][1],out2[13][1],surf3]
+surf_loop = gmsh.model.geo.addSurfaceLoop(frontier_metal)
+gmsh.model.geo.removeAllDuplicates() # we have to, otherwise some error occurs while 3D meshing, because of "intersection of line and point", weird...
+metal_vol = gmsh.model.geo.addVolume([surf_loop])
+gmsh.model.geo.synchronize()
 
-surface_tag = 212 # should be disk in z= -e.height plane
-gmsh.model.addPhysicalGroup(2,[out2[1][1],out2[5][1],out2[9][1],out2[13][1],surf2,surf3],surface_tag)
+surface_tag = 212 # should be disk in z= -e.height plane : boundary condition for electrostatic problem
+surface_top_name2 = "metal_electrode"
+gmsh.model.addPhysicalGroup(2,[surf3],surface_tag)
 gmsh.model.setPhysicalName(2,surface_tag,surface_top_name2)
 
-#volume_tag = 310 # normal metal volume
-#gmsh.model.addPhysicalGroup(3,[out2[1][1]],volume_tag)
-#gmsh.model.setPhysicalName(3,volume_tag,vol_regName2)
+volume_tag = 310 # normal metal volume
+gmsh.model.addPhysicalGroup(3,[metal_vol],volume_tag)
+gmsh.model.setPhysicalName(3,volume_tag,e.name)
 
 gmsh.model.geo.synchronize() # we have to synchronize before the call to 'generate' to build the mesh
 gmsh.model.mesh.generate(3) # 3 is the dimension of the mesh
@@ -158,8 +144,8 @@ settings = {
             },
         "surface_regions": {
             surf_regName: {},
-            surface_top_name2:{ "V": 0.1 },
-            surface_top_name:{ "V": 3.0 }
+            surface_top_name2:{ "J": 0.1 },
+            surface_top_name:{ "V": 0.0 }
             }
     },
     "initial_magnetization": [0.01, 0, 1],
