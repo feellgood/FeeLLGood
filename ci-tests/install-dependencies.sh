@@ -57,7 +57,7 @@ if [ "$ID" = "rocky" ]; then
     sudo dnf install -y $packages
 else  # Debian-like OS
     packages="$packages wget g++ libeigen3-dev libtbb-dev libyaml-cpp-dev duktape-dev"
-    packages="$packages libgmsh-dev python3-gmsh python3-numpy"
+    packages="$packages libgmsh-dev"
     sudo apt-get update -q
     if [ "$unit_tests" = "true" ]; then
         packages="$packages libboost-system-dev libboost-filesystem-dev libboost-test-dev"
