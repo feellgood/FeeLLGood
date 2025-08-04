@@ -55,6 +55,9 @@ nw = cylinder("magnet",l_n,r_n) #nanowire
 l_e = 40
 r_e = 30
 e = cylinder("metal",l_e,r_e) #electrode
+if r_n > r_e:
+    print("Error: diameter of the magnetic nanopillar exceed diameter of the electrode.")
+    exit(1)
 
 # cross section of the mesh (xOz) plane:
 #
@@ -92,25 +95,30 @@ volume_tag = 300 # magnetic volume
 gmsh.model.addPhysicalGroup(3,[out[1][1]],volume_tag)
 gmsh.model.setPhysicalName(3,volume_tag,nw.name)
 
-circle1 = list(map(lambda x: -x,circle0))  # change all sign of circle0 to define the hole
-circle2 = buildCircle(e.radius,z0)
-curvedLoop = gmsh.model.geo.addCurveLoop(circle2)
-hole = gmsh.model.geo.addCurveLoop(circle1)
-surf2 = gmsh.model.geo.addPlaneSurface([curvedLoop,hole])
-out2 = gmsh.model.geo.extrude([(1,circle2[0]),(1,circle2[1]),(1,circle2[2]),(1,circle2[3])],0,0,-e.height)
-gmsh.model.geo.synchronize()
-circle4 = buildCircle(e.radius,z0-e.height)
-surf3 = buildDisk(circle4)
+if r_n < r_e:
+    circle1 = list(map(lambda x: -x,circle0))  # change all sign of circle0 to define the hole
+    circle2 = buildCircle(e.radius,z0)
+    curvedLoop = gmsh.model.geo.addCurveLoop(circle2)
+    hole = gmsh.model.geo.addCurveLoop(circle1)
+    surf2 = gmsh.model.geo.addPlaneSurface([curvedLoop,hole])
+    out2 = gmsh.model.geo.extrude([(1,circle2[0]),(1,circle2[1]),(1,circle2[2]),(1,circle2[3])],0,0,-e.height)
+    gmsh.model.geo.synchronize()
+    circle4 = buildCircle(e.radius,z0-e.height)
+    surf3 = buildDisk(circle4)
+    gmsh.model.geo.synchronize() # we have to sync before calling addPhysicalGroup
 
-gmsh.model.geo.synchronize() # we have to sync before calling addPhysicalGroup
+    frontier_metal = [surf,surf2,out2[1][1],out2[5][1],out2[9][1],out2[13][1],surf3]
+    surf_loop = gmsh.model.geo.addSurfaceLoop(frontier_metal)
+    gmsh.model.geo.removeAllDuplicates() # we have to, otherwise some error occurs while 3D meshing, because of "intersection of line and point", weird...
+    metal_vol = gmsh.model.geo.addVolume([surf_loop])
+    gmsh.model.geo.synchronize()
+elif r_n == r_e:
+    out2 = gmsh.model.geo.extrude([(2,surf)],0,0,-e.height) # 2 is the dimension of the object refered by index surf
+    gmsh.model.geo.synchronize() # we have to sync before calling addPhysicalGroup
+    metal_vol = out2[1][1]
+    surf3 = out2[0][1]
 
-frontier_metal = [surf,surf2,out2[1][1],out2[5][1],out2[9][1],out2[13][1],surf3]
-surf_loop = gmsh.model.geo.addSurfaceLoop(frontier_metal)
-gmsh.model.geo.removeAllDuplicates() # we have to, otherwise some error occurs while 3D meshing, because of "intersection of line and point", weird...
-metal_vol = gmsh.model.geo.addVolume([surf_loop])
-gmsh.model.geo.synchronize()
-
-surface_tag = 212 # should be disk in z= -e.height plane : boundary condition for electrostatic problem
+surface_tag = 212 # disk in z= z0-e.height plane : boundary condition for electrostatic problem
 surface_top_name2 = "metal_electrode"
 gmsh.model.addPhysicalGroup(2,[surf3],surface_tag)
 gmsh.model.setPhysicalName(2,surface_tag,surface_top_name2)
@@ -144,7 +152,7 @@ settings = {
             },
         "surface_regions": {
             surf_regName: {},
-            surface_top_name2:{ "J": 0.1 },
+            surface_top_name2:{ "J": 1.0 },
             surface_top_name:{ "V": 0.0 }
             }
     },
