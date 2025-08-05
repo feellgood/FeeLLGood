@@ -161,6 +161,9 @@ public:
     /** if true creates an output file of the solution of the electrostatic problem  */
     bool V_file;
 
+     /** if true creates an output file of the solution of the spin accumulation problem  */
+    bool Q_file;
+
     /** if spin_acc_flag is true then spin accumulation contributions are computed */
     bool spin_acc_flag;
 
