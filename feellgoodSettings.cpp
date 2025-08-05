@@ -243,7 +243,10 @@ void Settings::toYaml()
     std::cout << "spin_accumulation:\n";
     std::cout << "  enable: " << str(spin_acc_flag) << "\n";
     if (spin_acc_flag)
-        { std::cout << "  V_file: " << str(V_file) << "\n"; }
+        {
+	std::cout << "  V_file: " << str(V_file) << "\n";
+	std::cout << "  Q_file: " << str(Q_file) << "\n";
+	}
     std::cout << "demagnetizing_field_solver:\n";
     std::cout << "  nb_threads: " << scalfmmNbTh << "\n";
     std::cout << "finite_element_solver:\n";
@@ -525,7 +528,8 @@ void Settings::read(YAML::Node yaml)
         {
         assign(spin_acc_flag, spAcc["enable"]);
         assign(V_file, spAcc["V_file"]);
-        }  // spin_accumulation
+        assign(Q_file, spAcc["Q_file"]);
+	}  // spin_accumulation
 
     // The number of available processors (actually, hardware threads) is the default for the number
     // of threads to spin.

@@ -22,9 +22,10 @@ class spinAcc
     std::vector<Facette::prm> _pFac /**< [in] ref to vector of param facette (surface region parameters) */,
     const double _tol /**< [in] tolerance for solvers */,  // _tol could be 1e-6
     const bool v /**< [in] verbose bool */,
-    const int max_iter /**< [in] maximum number of iteration */):
+    const int max_iter /**< [in] maximum number of iteration */,
+    const std::string _Q_fileName /**< [in] output file name for spin accumulation vector field */):
         msh(_msh), elec(_elec), paramTetra(_pTetra),  paramFacette(_pFac),
-        iter("bicg_dir",_tol,v,max_iter), verbose(v), NOD(_msh.getNbNodes())
+        iter("bicg_dir",_tol,v,max_iter), verbose(v), Q_fileName(_Q_fileName), NOD(_msh.getNbNodes())
         {
         Qs.resize(NOD);
         bool has_converged = solve();
