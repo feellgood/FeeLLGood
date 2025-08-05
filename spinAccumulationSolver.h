@@ -30,8 +30,20 @@ class spinAcc
         bool has_converged = solve();
         if (!has_converged)
             { std::cout << "spin accumulation solver: " << iter.infos() << std::endl; exit(1); }
-        prepareExtras();
+	else if (!Q_fileName.empty())
+            {
+	    if (verbose)
+                { std::cout << "writing spin accumulation vector to file " << Q_fileName << std::endl; }
+	    bool iznogood = save("## columns: index\tQx\tQy\tQz\n");
+	    if (verbose && iznogood)
+                { std::cout << "file " << Q_fileName << " written.\n"; }
+	    }
+	prepareExtras();
         }
+
+    /** text file (tsv) writing function for the solution of spin accumulation vector field Q over all volume regions of the mesh,
+     * node indices are zero based */
+    bool save(std::string const &metadata) const;
 
     private:
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh */
@@ -51,6 +63,12 @@ class spinAcc
 
     /** if verbose set to true, some printing are sent to terminal */
     const bool verbose;
+
+    /** number of digits in the optional output file */
+    const int precision = 8;
+
+    /** output file name for spin accumulation problem */
+    const std::string Q_fileName;
 
     /** number of Nodes (needed for templates) */
     const int NOD;
