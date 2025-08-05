@@ -203,7 +203,6 @@ void Settings::toYaml()
             std::cout << ' ' << it->V << '\n';
         if (spin_acc_flag)
             {
-            std::cout << "      Qs: " << str(it->Qs) << "\n";
             std::cout << "      Pu: " << str(it->Pu) << "\n";
             }
         }
@@ -426,7 +425,6 @@ void Settings::read(YAML::Node yaml)
                     p.V = NAN;
                 if (!isnan(p.J) && !isnan(p.V))
                     error("A surface region cannot have both no-null J and V.");
-                assign(!NORMALIZE, p.Qs, surface["Qs"]);
                 assign(!NORMALIZE, p.Pu, surface["Pu"]);
                 paramFacette.push_back(p);
                 }

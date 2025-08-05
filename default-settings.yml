@@ -163,9 +163,6 @@ mesh:
       # electrostatic problem.
       V:
 
-      # Boundary condition for spin accumulation diffusion problem.
-      Qs: [0, 0, 0]
-
       # polarization vector for spin accumulation
       Pu: [0, 0, 0]
 
