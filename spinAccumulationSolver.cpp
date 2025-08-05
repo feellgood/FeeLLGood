@@ -1,6 +1,7 @@
 #include "algebra/bicg.h"
 #include "spinAccumulationSolver.h"
-
+#include "chronometer.h" //date()
+#include "tags.h"
 #include "solverUtils.h"
 
 double spinAcc::getJs(Tetra::Tet const &tet) const
@@ -213,4 +214,26 @@ void spinAcc::integrales(Facette::Fac &fac, std::vector<double> &BE)
             BE[2*N+ie] -= Qn[IDX_Z]* ai_w;
             }
         }
+    }
+
+bool spinAcc::save(std::string const &metadata) const
+    {
+    using namespace Nodes;
+    std::ofstream fout(Q_fileName, std::ios::out);
+    if (fout.fail())
+        {
+        std::cout << "cannot open file " << Q_fileName << std::endl;
+        SYSTEM_ERROR;
+        }
+
+    fout << tags::sol::rw_time << ' ' << date() << '\n' << metadata << std::scientific
+         << std::setprecision(precision);
+
+    for (int i = 0; i < NOD; i++)
+        {
+        int _i = msh.getNodeIndex(i);
+        fout << i << '\t' << Qs[_i][IDX_X] << Qs[_i][IDX_Y] << Qs[_i][IDX_Z] << std::endl;
+        }
+    fout.close();
+    return !(fout.good());
     }
