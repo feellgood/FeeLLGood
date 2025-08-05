@@ -46,7 +46,6 @@ struct prm
     Eigen::Vector3d uk;    /**< anisotropy axis */
     double V;              /**< fixed potential (boundary condition for electrostatic sub-problem) */
     double J;              /**< current density (boundary condition for electrostatic sub-problem) */
-    Eigen::Vector3d Qs;    /**< spin accumulation (boundary condition for spin accumulation problem) */
     Eigen::Vector3d Pu;    /**< Polarization spin accumulation (for spin accumulation problem) */
 
     /** print the struct parameters */
