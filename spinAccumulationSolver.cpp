@@ -201,7 +201,7 @@ void spinAcc::integrales(Facette::Fac &fac, std::vector<double> &BE)
     using namespace Facette;
 // J in the following equation is a normal current density to the facette 
     Eigen::Vector3d Qn = paramFacette[fac.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFacette[fac.idxPrm].Pu;
-    if(!std::isfinite(paramFacette[fac.idxPrm].J)) {std::cout << "ouch J not finite\n";exit(1); }
+//if(!std::isfinite(paramFacette[fac.idxPrm].J)) {std::cout << "ouch J not finite\n";exit(1); }
 
     for (int npi=0; npi<NPI; npi++)
         {
@@ -232,7 +232,7 @@ bool spinAcc::save(std::string const &metadata) const
     for (int i = 0; i < NOD; i++)
         {
         int _i = msh.getNodeIndex(i);
-        fout << i << '\t' << Qs[_i][IDX_X] << Qs[_i][IDX_Y] << Qs[_i][IDX_Z] << std::endl;
+        fout << i << '\t' << Qs[_i][IDX_X] << '\t' << Qs[_i][IDX_Y] << '\t' << Qs[_i][IDX_Z] << std::endl;
         }
     fout.close();
     return !(fout.good());
