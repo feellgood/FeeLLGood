@@ -161,7 +161,7 @@ void spinAcc::integrales(Tetra::Tet &tet,
             {
             Eigen::Vector3d grad_ai = tet.da.row(ie);
             double tmp = BOHRS_MUB*beta*sigma/CHARGE_ELECTRON*w*grad_ai.dot( gradV.col(npi) );
-            BE[    ie] += tmp*u_nod[0][ie]; // A. de Riz 2019 moins -> plus : to check : c'est quoi ce bazar de signes qui changent ???
+            BE[    ie] += tmp*u_nod[0][ie];
             BE[  N+ie] += tmp*u_nod[1][ie];
             BE[2*N+ie] += tmp*u_nod[2][ie];
 /*          if (CSH != 0)  // SOT : spin orbit torque CSH is constant Spin Hall
@@ -172,12 +172,12 @@ void spinAcc::integrales(Tetra::Tet &tet,
                 BE[2*N+ie] -= tmp*(dai_dy*dVdx[npi]-dai_dx*dVdy[npi]);
                 } */
             tmp = Tetra::a[ie][npi]*D0*w/sq(lsf + EPSILON);
-            AE(    ie,     ie) += tmp;  // lumping
+            AE(    ie,     ie) += tmp;
             AE(  N+ie,   N+ie) += tmp;
             AE(2*N+ie, 2*N+ie) += tmp;
 
-            tmp = Tetra::a[ie][npi]*D0*w/sq(EPSILON + lsd); // lsd is lJ  //D0*pow(ilJ, 2.)*ai*w; with ilJ = 1/lJ;
-            AE(    ie,   N+ie) += tmp*u_nod[2][ie]; // lumping
+            tmp = Tetra::a[ie][npi]*D0*w/sq(EPSILON + lsd);
+            AE(    ie,   N+ie) += tmp*u_nod[2][ie];
             AE(    ie, 2*N+ie) -= tmp*u_nod[1][ie];
             AE(  N+ie,     ie) -= tmp*u_nod[2][ie];
             AE(  N+ie, 2*N+ie) += tmp*u_nod[0][ie];
@@ -191,7 +191,7 @@ void spinAcc::integrales(Tetra::Tet &tet,
                 AE(  N+ie,   N+je) += tmp;
                 AE(2*N+ie, 2*N+je) += tmp;
                 }
-	        }
+	    }
         }
     }
 
@@ -200,7 +200,7 @@ void spinAcc::integrales(Facette::Fac &fac, std::vector<double> &BE)
     using namespace Nodes;
     using namespace Facette;
 // J in the following equation is a normal current density to the facette 
-    Eigen::Vector3d Qn = paramFacette[fac.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFacette[fac.idxPrm].Pu;
+    Eigen::Vector3d Qn = -paramFacette[fac.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFacette[fac.idxPrm].Pu;
 //if(!std::isfinite(paramFacette[fac.idxPrm].J)) {std::cout << "ouch J not finite\n";exit(1); }
 
     for (int npi=0; npi<NPI; npi++)
