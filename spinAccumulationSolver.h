@@ -91,7 +91,10 @@ class spinAcc
 
     /** spin flip length */
     double getLsf(Tetra::Tet &tet) const;
-    
+
+    /** spin Hall constant */
+    double getSpinHall(Tetra::Tet &tet) const;
+
     /** affect extraField function and extraCoeffs_BE function using lambdas for all the tetrahedrons (functor) */
     void prepareExtras(void);
 
