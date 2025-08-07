@@ -22,6 +22,9 @@ double spinAcc::getLsd(Tetra::Tet &tet) const
 double spinAcc::getLsf(Tetra::Tet &tet) const
     { return paramTetra[tet.idxPrm].lsf; }
 
+double spinAcc::getSpinHall(Tetra::Tet &tet) const
+    { return paramTetra[tet.idxPrm].spinHall; }
+
 void spinAcc::prepareExtras(void)
     {
     using namespace Nodes;
@@ -121,7 +124,7 @@ void spinAcc::integrales(Tetra::Tet &tet,
 
     double Js = getJs(tet);
     double sigma = getSigma(tet);
-    //double CSH = msh.find_param("CSH",reg); // to take into account Spin Hall effects
+    double spinHall = getSpinHall(tet);
     double N0 = getN0(tet);
     double beta = getBeta(tet);
     double lsd = getLsd(tet);
@@ -156,21 +159,17 @@ void spinAcc::integrales(Tetra::Tet &tet,
     for (size_t npi=0; npi<NPI; npi++)
         {
         double w = tet.weight[npi];
+        double tmp2 = spinHall*CHARGE_ELECTRON/MASS_ELECTRON *w;
 
         for (size_t ie=0; ie<N; ie++)
             {
             Eigen::Vector3d grad_ai = tet.da.row(ie);
+            Eigen::Vector3d v = grad_ai.cross(gradV.col(npi));
             double tmp = BOHRS_MUB*beta*sigma/CHARGE_ELECTRON*w*grad_ai.dot( gradV.col(npi) );
-            BE[    ie] += tmp*u_nod[0][ie];
-            BE[  N+ie] += tmp*u_nod[1][ie];
-            BE[2*N+ie] += tmp*u_nod[2][ie];
-/*          if (CSH != 0)  // SOT : spin orbit torque CSH is constant Spin Hall
-                {
-                tmp = CSH*CHARGE_ELECTRON/MASS_ELECTRON *w; // obviously SOT contribution to BE is a cross product, should be rewritten
-                BE[    ie] -= tmp*(dai_dz*dVdy[npi]-dai_dy*dVdz[npi]);
-                BE[  N+ie] -= tmp*(dai_dx*dVdz[npi]-dai_dz*dVdx[npi]);
-                BE[2*N+ie] -= tmp*(dai_dy*dVdx[npi]-dai_dx*dVdy[npi]);
-                } */
+            BE[    ie] += tmp*u_nod[0][ie] + tmp2*v[IDX_X];
+            BE[  N+ie] += tmp*u_nod[1][ie] + tmp2*v[IDX_Y];
+            BE[2*N+ie] += tmp*u_nod[2][ie] + tmp2*v[IDX_Z];
+
             tmp = Tetra::a[ie][npi]*D0*w/sq(lsf + EPSILON);
             AE(    ie,     ie) += tmp;
             AE(  N+ie,   N+ie) += tmp;
@@ -191,7 +190,7 @@ void spinAcc::integrales(Tetra::Tet &tet,
                 AE(  N+ie,   N+je) += tmp;
                 AE(2*N+ie, 2*N+je) += tmp;
                 }
-	    }
+            }
         }
     }
 

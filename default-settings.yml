@@ -138,6 +138,10 @@ mesh:
       # Spin diffusion length in a metal, magnetic or not.
       l_sf: 1.0
 
+      # Spin Hall constant (for Spin Orbit Torque contribution to spin
+      # accumulation effect).
+      spin_hall: 0
+
   # Material parameters of the surface regions defined by the mesh.
   surface_regions:
 
