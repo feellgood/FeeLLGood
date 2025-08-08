@@ -6,6 +6,7 @@
 #include "node.h"
 #include "tetra.h"
 #include "electrostatSolver.h"
+#include "solverUtils.h"
 
 /** \class spinAcc
  container for Spin Accumulation constants, diffusive accumulation spin model, Boundary conditions
@@ -45,6 +46,9 @@ class spinAcc
     /** text file (tsv) writing function for the solution of spin accumulation vector field Q over all volume regions of the mesh,
      * node indices are zero based */
     bool save(std::string const &metadata) const;
+
+    /** boundary conditions on different surfaces. They must not share any triangle nor nodes. */
+    std::vector<boundaryCondition<Eigen::Vector3d>> surf;
 
     private:
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh */
@@ -100,7 +104,7 @@ class spinAcc
 
     /** solver, using biconjugate stabilized gradient, with diagonal preconditionner and Dirichlet
      * boundary conditions */
-    int solve(void);
+    bool solve(void);
 
     /** solution of the accumulation spin diffusion problem (3D vector field) */
     std::vector<Eigen::Vector3d> Qs;
@@ -114,7 +118,7 @@ class spinAcc
                     std::vector<double> &BE);
 
     /** computes contributions to vector BE from facette fac */
-    void integrales(Facette::Fac &fac, std::vector<double> &BE);
+    void integrales(Facette::Fac &fac, Eigen::Vector3d &Q, std::vector<double> &BE);
     };
 
 #endif
