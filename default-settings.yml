@@ -74,8 +74,9 @@ outputs:
   # or the keyword ‘false’ which disables the feature.
   mag_config_every: 100
 
-  # Arbitrary set of metadata items, in the form of "key: value" pairs, that will be added to the
-  # header of every output file. Typical keys are "Author", "Affiliation", "Licence".
+  # Arbitrary set of metadata items, in the form of "key: value" pairs,
+  # that will be added to the header of every output file. Typical keys
+  # are "Author", "Affiliation", "Licence".
   metadata:
 
 # Description of the meshed object.
