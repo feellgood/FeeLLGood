@@ -122,25 +122,18 @@ void spinAcc::integrales(Tetra::Tet &tet,
     using namespace Nodes;
     using namespace Tetra;
 
-    double Js = getJs(tet);
     double sigma = getSigma(tet);
     double spinHall = getSpinHall(tet);
     double N0 = getN0(tet);
     double beta = getBeta(tet);
-    double lsd = getLsd(tet);
     double lsf = getLsf(tet);
-    double u_nod[DIM][N] {{0}};
+    double D0=2.0*sigma/(sq(CHARGE_ELECTRON)*N0);
     Eigen::Matrix<double,N,1> V_nod;
     Eigen::Matrix<double,Nodes::DIM,NPI> gradV;
 
     for (size_t ie=0; ie<N; ie++)
         {
         size_t i= tet.ind[ie];
-        if (Js>0.0) // if Js <=0 then it is a non magnetic material, u_nod is zero
-            for (size_t d=0; d<DIM; d++)
-                {
-                u_nod[d][ie] = msh.getNode_u(i)(d);//msh.node[i].u[d]; // carefull here do we need u comp of Node(NEXT) or Node(CURRENT) ?
-                }
         V_nod[ie] = elec.V[i];
         }
 
@@ -155,7 +148,43 @@ void spinAcc::integrales(Tetra::Tet &tet,
     gradV.row(IDX_Y) = V_nod.transpose() * dady;// V_nod^T * dady
     gradV.row(IDX_Z) = V_nod.transpose() * dadz;// V_nod^T * dadz
 
-    double D0=2.0*sigma/(sq(CHARGE_ELECTRON)*N0);
+    if(msh.isMagnetic(tet))
+        {
+        double lsd = getLsd(tet);
+        double u_nod[DIM][N];
+
+        for (size_t ie=0; ie<N; ie++)
+            {
+            size_t i= tet.ind[ie];
+            for (size_t d=0; d<DIM; d++)
+                {
+                u_nod[d][ie] = msh.getNode_u(i)(d);//msh.node[i].u[d]; // carefull here do we need u comp of Node(NEXT) or Node(CURRENT) ?
+                }
+            }
+
+        for (size_t npi=0; npi<NPI; npi++)
+            {
+            double w = tet.weight[npi];
+
+            for (size_t ie=0; ie<N; ie++)
+                {
+                Eigen::Vector3d grad_ai = tet.da.row(ie);
+                double tmp = BOHRS_MUB*beta*sigma/CHARGE_ELECTRON*w*grad_ai.dot( gradV.col(npi) );
+                BE[    ie] += tmp*u_nod[0][ie];
+                BE[  N+ie] += tmp*u_nod[1][ie];
+                BE[2*N+ie] += tmp*u_nod[2][ie];
+
+                tmp = Tetra::a[ie][npi]*D0*w/sq(lsd);
+                AE(    ie,   N+ie) += tmp*u_nod[2][ie];
+                AE(    ie, 2*N+ie) -= tmp*u_nod[1][ie];
+                AE(  N+ie,     ie) -= tmp*u_nod[2][ie];
+                AE(  N+ie, 2*N+ie) += tmp*u_nod[0][ie];
+                AE(2*N+ie,     ie) += tmp*u_nod[1][ie];
+                AE(2*N+ie,   N+ie) -= tmp*u_nod[0][ie];
+                }
+            }
+        }
+
     for (size_t npi=0; npi<NPI; npi++)
         {
         double w = tet.weight[npi];
@@ -165,23 +194,14 @@ void spinAcc::integrales(Tetra::Tet &tet,
             {
             Eigen::Vector3d grad_ai = tet.da.row(ie);
             Eigen::Vector3d v = grad_ai.cross(gradV.col(npi));
-            double tmp = BOHRS_MUB*beta*sigma/CHARGE_ELECTRON*w*grad_ai.dot( gradV.col(npi) );
-            BE[    ie] += tmp*u_nod[0][ie] + tmp2*v[IDX_X];
-            BE[  N+ie] += tmp*u_nod[1][ie] + tmp2*v[IDX_Y];
-            BE[2*N+ie] += tmp*u_nod[2][ie] + tmp2*v[IDX_Z];
+            BE[    ie] += tmp2*v[IDX_X];
+            BE[  N+ie] += tmp2*v[IDX_Y];
+            BE[2*N+ie] += tmp2*v[IDX_Z];
 
-            tmp = Tetra::a[ie][npi]*D0*w/sq(lsf + EPSILON);
+            double tmp = Tetra::a[ie][npi]*D0*w/sq(lsf);
             AE(    ie,     ie) += tmp;
             AE(  N+ie,   N+ie) += tmp;
             AE(2*N+ie, 2*N+ie) += tmp;
-
-            tmp = Tetra::a[ie][npi]*D0*w/sq(EPSILON + lsd);
-            AE(    ie,   N+ie) += tmp*u_nod[2][ie];
-            AE(    ie, 2*N+ie) -= tmp*u_nod[1][ie];
-            AE(  N+ie,     ie) -= tmp*u_nod[2][ie];
-            AE(  N+ie, 2*N+ie) += tmp*u_nod[0][ie];
-            AE(2*N+ie,     ie) += tmp*u_nod[1][ie];
-            AE(2*N+ie,   N+ie) -= tmp*u_nod[0][ie];
 
             for (size_t je=0; je<N; je++)
                 {
