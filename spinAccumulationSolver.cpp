@@ -69,7 +69,7 @@ void spinAcc::prepareExtras(void)
         });//end for_each
     }
 
-int spinAcc::solve(void)
+bool spinAcc::solve(void)
     {
     using namespace Nodes;
 
@@ -87,12 +87,16 @@ int spinAcc::solve(void)
         buildVect<Tetra::N,DIM_PROBLEM>(elem.ind, L, Lw);
         } );
 
-    std::for_each( msh.fac.begin(), msh.fac.end(),[this,&Lw](Facette::Fac &elem)
+    std::for_each(surf.begin(),surf.end(),[this,&Lw](boundaryCondition<Eigen::Vector3d> &s)
         {
-        std::vector<double> L(DIM_PROBLEM*Facette::N,0.0);
-        integrales(elem,L);
-        buildVect<Facette::N,DIM_PROBLEM>(elem.ind, L, Lw);
-        } );
+        std::for_each(s.facIdx.begin(),s.facIdx.end(),[this,&s,&Lw](int i)
+                {
+                std::vector<double> L(DIM_PROBLEM*Facette::N,0.0);
+                // s.value should be Eigen::Vector3d Q = -paramFacette[fac.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFacette[fac.idxPrm].Pu;
+                integrales(msh.fac[i],s.value,L);
+                buildVect<Facette::N,DIM_PROBLEM>(msh.fac[i].ind, L, Lw);
+                });
+        });
 
     algebra::r_sparseMat Kr(Kw);
     std::vector<double> Xw(DIM_PROBLEM*NOD);
@@ -102,7 +106,6 @@ int spinAcc::solve(void)
         {
         if (verbose)
             { std::cout << "spin accumulation solver: " << iter.infos() << std::endl; }
-        return 1;
         }
 
     for (int i=0; i<NOD; i++)
@@ -111,7 +114,7 @@ int spinAcc::solve(void)
         Qs[i][IDX_Y] = Xw[DIM_PROBLEM*i + 1];
         Qs[i][IDX_Z] = Xw[DIM_PROBLEM*i + 2];
         }
-    return 0;
+    return (iter.status == algebra::CONVERGED);
     }
 
 void spinAcc::integrales(Tetra::Tet &tet,
@@ -214,13 +217,10 @@ void spinAcc::integrales(Tetra::Tet &tet,
         }
     }
 
-void spinAcc::integrales(Facette::Fac &fac, std::vector<double> &BE)
+void spinAcc::integrales(Facette::Fac &fac, Eigen::Vector3d &Q, std::vector<double> &BE)
     {
     using namespace Nodes;
     using namespace Facette;
-// J in the following equation is a normal current density to the facette 
-    Eigen::Vector3d Qn = -paramFacette[fac.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFacette[fac.idxPrm].Pu;
-//if(!std::isfinite(paramFacette[fac.idxPrm].J)) {std::cout << "ouch J not finite\n";exit(1); }
 
     for (int npi=0; npi<NPI; npi++)
         {
@@ -228,9 +228,9 @@ void spinAcc::integrales(Facette::Fac &fac, std::vector<double> &BE)
         for (int ie=0; ie<N; ie++)
             {
             double ai_w = w*a[ie][npi];
-            BE[    ie] -= Qn[IDX_X]* ai_w;
-            BE[  N+ie] -= Qn[IDX_Y]* ai_w;
-            BE[2*N+ie] -= Qn[IDX_Z]* ai_w;
+            BE[    ie] -= Q[IDX_X]* ai_w;
+            BE[  N+ie] -= Q[IDX_Y]* ai_w;
+            BE[2*N+ie] -= Q[IDX_Z]* ai_w;
             }
         }
     }
