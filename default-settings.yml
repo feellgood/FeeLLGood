@@ -167,8 +167,8 @@ mesh:
       # electrostatic problem.
       V:
 
-      # polarization vector for spin accumulation
-      Pu: [0, 0, 0]
+      # polarization vector for spin accumulation diffusion problem, example value [0,0,1]
+      Pu:
 
 # The initial magnetization can be provided as either:
 # - the name of a file in feeLLGood’s format (‘.sol’ file)

@@ -156,3 +156,34 @@ void mesh::build_lvd(std::vector<int> &lvd)
         lvd[2*i+1] = ld[i] + NOD;
         }
     }
+
+void mesh::buildBoundaryConditions(std::vector<Facette::prm> &paramFacette)
+    {
+    std::for_each(fac.begin(),fac.end(),[&paramFacette](const Facette::Fac &f)
+                {
+                if (!std::isfinite(paramFacette[f.idxPrm].Pu.norm()))
+                    {// Pu is undefined, f is not part of a surface boundary condition for spin acc
+                    if (std::isfinite(paramFacette[f.idxPrm].V))
+                        {
+                        //this should be a potential V for boundary condition for electrostat
+                        }
+                    }
+                else
+                    {// Pu is finite, this facette belongs to a boundary condition for spin acc
+                    if (std::isfinite(paramFacette[f.idxPrm].J))
+                        {
+                        // we have both J and Pu on the same facette, we can compute Q fo boundary
+                        // condition of spin accumulation
+                        }
+                    else if (std::isfinite(paramFacette[f.idxPrm].V))
+                        {
+                        // we have Pu and V, we have to compute J = current density normal to f
+                        // to define Q for boundary conditions
+                        }
+                        else
+                            {
+                            // f belongs to the frontier of magnetic volume
+                            }
+                    }
+                });
+    }

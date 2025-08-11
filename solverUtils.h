@@ -52,8 +52,9 @@ template <class T>
 class boundaryCondition
     {
     public:
-    std::vector<int> facIdx; /**< list of the facette indices defining a surface stored in mesh */
-    T value; /**< value on the surface defined by the list facIdx */
+        std::string name;        /**< name of the corresponding region */
+        std::vector<int> facIdx; /**< list of the facette indices defining a surface stored in mesh */
+        T value;                 /**< value on the surface defined by the list facIdx */
     };
 
 #endif
