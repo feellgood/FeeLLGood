@@ -351,6 +351,9 @@ private:
      * the matrix we will have to solve for. */
     void sortNodes(Nodes::index long_axis /**< [in] */);
 
+    /** prepare boundary conditions surfaces for spin accumulation problem (electrostatic + spin
+     * diffusion ) */
+    void buildBoundaryConditions(std::vector<Facette::prm> &paramFacette);
     }; // end class mesh
 
     }  // end namespace Mesh
