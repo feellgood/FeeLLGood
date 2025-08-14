@@ -351,6 +351,11 @@ private:
      * the matrix we will have to solve for. */
     void sortNodes(Nodes::index long_axis /**< [in] */);
 
+    /** returns the surface defined by the set of facets of indices in facIndices
+     * each elementary surface triangle defined by points p0,p1,p2 is computed using norm(cross(p0p1,p0p2))/2, it is always
+     * positive  */
+    double surface(std::vector<int> &facIndices);
+
     /** prepare boundary conditions surfaces for spin accumulation problem (electrostatic + spin
      * diffusion ) */
     void buildBoundaryConditions(std::vector<Facette::prm> &paramFacette);
