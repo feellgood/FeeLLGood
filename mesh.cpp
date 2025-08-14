@@ -157,6 +157,14 @@ void mesh::build_lvd(std::vector<int> &lvd)
         }
     }
 
+double mesh::surface(std::vector<int> &facIndices)
+    {
+    double S(0);
+    std::for_each(facIndices.begin(),facIndices.end(),[this,&S](int idx)
+                  { S += fac[idx].calc_surf(); });
+    return S;
+    }
+
 void mesh::buildBoundaryConditions(std::vector<Facette::prm> &paramFacette)
     {
     std::for_each(fac.begin(),fac.end(),[&paramFacette](const Facette::Fac &f)

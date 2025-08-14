@@ -175,11 +175,12 @@ public:
         result = vec_nod * eigen_a;
         }
 
-private:
-    void orientate(void) {}// orientation is done in mesh::indexReorder
-
     /** computes surface of the face */
     inline double calc_surf(void) const { return 0.5 * normal_vect().norm(); }
+
+private:
+    /** do nothing function: orientation is done in mesh::indexReorder */
+    void orientate(void) {}
 
     /** return normal to the triangular face, not normalized */
     inline Eigen::Vector3d normal_vect() const
