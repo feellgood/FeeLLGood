@@ -165,33 +165,49 @@ double mesh::surface(std::vector<int> &facIndices)
     return S;
     }
 
-void mesh::buildBoundaryConditions(std::vector<Facette::prm> &paramFacette)
+void mesh::buildBoundaryConditions(std::vector<Facette::prm> &paramFacette,
+                                   Mesh::boundaryCondition<Eigen::Vector3d> &BC_spin)
     {
-    std::for_each(fac.begin(),fac.end(),[&paramFacette](const Facette::Fac &f)
-                {
-                if (!std::isfinite(paramFacette[f.idxPrm].Pu.norm()))
-                    {// Pu is undefined, f is not part of a surface boundary condition for spin acc
-                    if (std::isfinite(paramFacette[f.idxPrm].V))
-                        {
-                        //this should be a potential V for boundary condition for electrostat
-                        }
-                    }
-                else
-                    {// Pu is finite, this facette belongs to a boundary condition for spin acc
-                    if (std::isfinite(paramFacette[f.idxPrm].J))
-                        {
-                        // we have both J and Pu on the same facette, we can compute Q fo boundary
-                        // condition of spin accumulation
-                        }
-                    else if (std::isfinite(paramFacette[f.idxPrm].V))
-                        {
-                        // we have Pu and V, we have to compute J = current density normal to f
-                        // to define Q for boundary conditions
-                        }
-                        else
-                            {
-                            // f belongs to the frontier of magnetic volume
-                            }
-                    }
-                });
+    for(unsigned int i=0;i<fac.size();i++)
+        {
+        Eigen::Vector3d Pu = paramFacette[fac[i].idxPrm].Pu;
+        bool Pu_finite = std::isfinite(Pu.norm());
+        double V = paramFacette[fac[i].idxPrm].V;
+        bool V_finite = std::isfinite(V);
+        double J = paramFacette[fac[i].idxPrm].J;
+        bool J_finite = std::isfinite(J);
+        if (!Pu_finite && !V_finite && !J_finite)
+            { /* magnetic surface */ }
+        else if (!Pu_finite && V_finite && !J_finite)
+            {
+            // Pu is undefined, f is not part of a surface boundary condition for spin acc
+            //this is an isopotential V for boundary condition for electrostat
+            
+            }
+        else if (!Pu_finite && !V_finite && J_finite)
+            {
+            // Pu is undefined, f is not part of a surface boundary condition for spin acc
+            //this is an isopotential J for boundary condition for electrostat
+
+            }
+        else if (Pu_finite && !V_finite && J_finite)
+            {
+            // we have both J and Pu on the same facette, we can compute Q for boundary
+            // condition of spin accumulation
+            // warning: we mix the the two(or more) surfaces where to define Q for spin acc BC's
+            BC_spin.facIdx.push_back(i);
+            BC_spin.value = J*Pu;
+            }
+        else if (Pu_finite && V_finite && !J_finite)
+            {
+            // Pu and V are finite, we have to compute J = current density normal to f
+            // to define Q for boundary conditions
+
+            }
+        else if (V_finite && J_finite)
+            {
+            std::cout << "Fatal Error: Boundary conditions overdefined: J and V set on the same surface.\n";
+            exit(1);
+            }
+        }
     }
