@@ -19,6 +19,19 @@
 
 namespace Mesh
     {
+    /** template class to describe boundary conditions
+     * T should be either a 3D vector or a double
+     * indices stored in facIdx are the indices defining a surface in mesh facette list where the
+     * boundary condition does apply
+     * */
+template <class T>
+class boundaryCondition
+    {
+    public:
+        std::string name;        /**< name of the corresponding region */
+        std::vector<int> facIdx; /**< list of the facette indices defining a surface stored in mesh */
+        T value;                 /**< value on the surface defined by the list facIdx */
+    };
 
 /** \class mesh
 class for storing the mesh, including mesh geometry values, containers for the nodes, triangular
@@ -358,7 +371,8 @@ private:
 
     /** prepare boundary conditions surfaces for spin accumulation problem (electrostatic + spin
      * diffusion ) */
-    void buildBoundaryConditions(std::vector<Facette::prm> &paramFacette);
+    void buildBoundaryConditions(std::vector<Facette::prm> &paramFacette,
+            Mesh::boundaryCondition<Eigen::Vector3d> &BC_spin);
     }; // end class mesh
 
     }  // end namespace Mesh

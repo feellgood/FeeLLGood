@@ -43,18 +43,4 @@ void buildVect(std::vector<int> &ind, std::vector<double> &Le, std::vector<doubl
         }
     }
 
-/** template class to describe boundary conditions
- * T should be either a 3D vector or a double
- * indices stored in facIdx are the indices defining a surface in mesh facette list where the
- * boundary condition does apply
- * */
-template <class T>
-class boundaryCondition
-    {
-    public:
-        std::string name;        /**< name of the corresponding region */
-        std::vector<int> facIdx; /**< list of the facette indices defining a surface stored in mesh */
-        T value;                 /**< value on the surface defined by the list facIdx */
-    };
-
 #endif
