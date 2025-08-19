@@ -28,9 +28,37 @@ template <class T>
 class boundaryCondition
     {
     public:
+        boundaryCondition(const std::string &n, const int idx, T &v): name(n), value(v)
+            { facIdx.push_back(idx); }
         std::string name;        /**< name of the corresponding region */
         std::vector<int> facIdx; /**< list of the facette indices defining a surface stored in mesh */
         T value;                 /**< value on the surface defined by the list facIdx */
+    };
+
+/** template class to regroup altogether the boundary conditions of a problem to solve
+ * the vector of boundaryCondition<T> stores the various surfaces where to apply the boundary
+ * condition value (type T should be double or EigenVector3d)
+ * Nota Bene: values stored in each boundaryCondition<T> have all the same type, for example are
+ * double, but might have different physical nature, for example a potential V and a normal current
+ * density Jn. The name in each boundary condition is there to discriminate such a situation
+ * */
+template <class T>
+class allBoundCond
+    {
+    public:
+        std::vector<boundaryCondition<T> > BC;
+        void push_back(const std::string name, const int idx, T &v)
+            {
+            auto it = std::find_if(BC.begin(),BC.end(),[&name](boundaryCondition<T> & bc)
+                    { return (bc.name == name); });
+            if (it !=BC.end())
+                it->facIdx.pusk_back(idx);
+            else
+                { // create a new bound cond to add to BC
+                boundaryCondition<T> bc(name,idx,v);
+                BC.push_back(bc); // emplace_back?
+                }
+            }
     };
 
 /** \class mesh
