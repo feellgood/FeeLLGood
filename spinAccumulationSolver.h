@@ -48,7 +48,7 @@ class spinAcc
     bool save(std::string const &metadata) const;
 
     /** boundary conditions on different surfaces. They must not share any triangle nor nodes. */
-    std::vector<Mesh::boundaryCondition<Eigen::Vector3d>> surf;
+    Mesh::allBoundCond<Eigen::Vector3d> all_bc;
 
     private:
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh */
