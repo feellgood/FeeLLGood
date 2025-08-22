@@ -87,7 +87,7 @@ bool spinAcc::solve(void)
         buildVect<Tetra::N,DIM_PROBLEM>(elem.ind, L, Lw);
         } );
 
-    std::for_each(surf.begin(),surf.end(),[this,&Lw](Mesh::boundaryCondition<Eigen::Vector3d> &s)
+    std::for_each(all_bc.BC.begin(),all_bc.BC.end(),[this,&Lw](Mesh::boundaryCondition<Eigen::Vector3d> &s)
         {
         std::for_each(s.facIdx.begin(),s.facIdx.end(),[this,&s,&Lw](int i)
                 {

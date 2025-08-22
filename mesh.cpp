@@ -166,10 +166,11 @@ double mesh::surface(std::vector<int> &facIndices)
     }
 
 void mesh::buildBoundaryConditions(std::vector<Facette::prm> &paramFacette,
-                                   Mesh::boundaryCondition<Eigen::Vector3d> &BC_spin)
+                                   Mesh::allBoundCond<Eigen::Vector3d> &BC_spin)
     {
     for(unsigned int i=0;i<fac.size();i++)
         {
+        std::string name = paramFacette[fac[i].idxPrm].regName;
         Eigen::Vector3d Pu = paramFacette[fac[i].idxPrm].Pu;
         bool Pu_finite = std::isfinite(Pu.norm());
         double V = paramFacette[fac[i].idxPrm].V;
@@ -194,9 +195,8 @@ void mesh::buildBoundaryConditions(std::vector<Facette::prm> &paramFacette,
             {
             // we have both J and Pu on the same facette, we can compute Q for boundary
             // condition of spin accumulation
-            // warning: we mix the the two(or more) surfaces where to define Q for spin acc BC's
-            BC_spin.facIdx.push_back(i);
-            BC_spin.value = J*Pu;
+            Eigen::Vector3d Q_value = -J*(BOHRS_MUB/CHARGE_ELECTRON)*Pu;
+            BC_spin.push_back(name,i,Q_value);
             }
         else if (Pu_finite && V_finite && !J_finite)
             {

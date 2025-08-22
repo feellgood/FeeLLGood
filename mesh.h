@@ -52,7 +52,7 @@ class allBoundCond
             auto it = std::find_if(BC.begin(),BC.end(),[&name](boundaryCondition<T> & bc)
                     { return (bc.name == name); });
             if (it !=BC.end())
-                it->facIdx.pusk_back(idx);
+                it->facIdx.push_back(idx);
             else
                 { // create a new bound cond to add to BC
                 boundaryCondition<T> bc(name,idx,v);
@@ -316,6 +316,12 @@ public:
      * The list is sorted lexicographically, as per std::pair::operator<(). */
     std::vector<std::pair<int, int>> edges;
 
+    /** prepare boundary conditions surfaces for spin accumulation problem (electrostatic + spin
+     * diffusion )
+     * */
+    void buildBoundaryConditions(std::vector<Facette::prm> &paramFacette,
+            Mesh::allBoundCond<Eigen::Vector3d> &BC_spin);
+
 private:
     /** node container: not initialized by constructor, but later while reading the mesh by member
      * function init_node */
@@ -397,11 +403,6 @@ private:
      * positive  */
     double surface(std::vector<int> &facIndices);
 
-    /** prepare boundary conditions surfaces for spin accumulation problem (electrostatic + spin
-     * diffusion ) */
-    void buildBoundaryConditions(std::vector<Facette::prm> &paramFacette,
-            Mesh::boundaryCondition<Eigen::Vector3d> &BC_spin);
     }; // end class mesh
-
     }  // end namespace Mesh
 #endif
