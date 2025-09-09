@@ -44,8 +44,9 @@ job_count=$(getconf _NPROCESSORS_ONLN)
 # Install required packages.
 packages="unzip make cmake git"
 if [ "$ID" = "rocky" ]; then
-    packages="$packages wget gcc-c++ eigen3-devel tbb-devel yaml-cpp-devel"
+    packages="$packages tar wget gcc-c++ eigen3-devel tbb-devel yaml-cpp-devel duktape-devel"
     sudo dnf check-update -q || true
+    sudo dnf install -y 'dnf-command(config-manager)'
     sudo dnf config-manager --set-enabled devel crb
     sudo dnf install -y epel-release
     if [ "$unit_tests" = "true" ]; then
@@ -85,20 +86,9 @@ sudo cp lib/libANN.a /usr/local/lib/
 sudo cp include/ANN/ANN.h /usr/local/include/
 cd ..
 
-# On Rocky Linux, download and install Duktape and GMSH.
+# On Rocky Linux, download and install GMSH.
 # On Debian and Ubuntu, it has already been installed with apt.
 if [ "$ID" = "rocky" ]; then
-    if [ ! -f "duktape-2.7.0.tar.xz" ]; then
-        wget -nv https://duktape.org/duktape-2.7.0.tar.xz
-    fi
-    tar -xJf duktape-2.7.0.tar.xz
-    cd duktape-2.7.0/src
-    gcc -O2 -c duktape.c
-    ar rcs libduktape.a duktape.o
-    sudo cp libduktape.a /usr/local/lib/
-    sudo cp duktape.h duk_config.h /usr/local/include/
-    cd ../..
-
     if [ ! -f "gmsh-4.8.4-source.tgz" ]; then
         wget -nv https://gmsh.info/src/gmsh-4.8.4-source.tgz
     fi
