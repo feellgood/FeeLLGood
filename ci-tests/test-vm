@@ -1,0 +1,136 @@
+#!/bin/bash
+
+set -e  # exit on errors
+
+# Help message.
+help="\
+Description:
+  Manage virtual machines for testing feeLLGood on multiple Linux
+  distributions. This is a thin wrapper over the incus command.
+
+Usage:
+  $0 <command>
+
+Available commands:
+  help             Print this message
+  list             List supported VMs, with their status
+  start <machine>  Start the VM, creating it if needed
+  shell <machine>  Open a non-root shell on the VM, which must be running
+  stop <machine>   Stop the VM
+"
+
+# Supported VMs: name, image, description.
+supported_machines="\
+bookworm debian/12/cloud Debian 12 \"bookworm\"
+trixie debian/13/cloud Debian 13 \"trixie\"
+forky debian/14/cloud Debian 14 \"forky\" (testing)
+jammy ubuntu/jammy/cloud Ubuntu 22.04 LTS \"jammy\"
+noble ubuntu/noble/cloud Ubuntu 24.04 LTS \"noble\"
+plucky ubuntu/plucky/cloud Ubuntu 25.04 \"plucky\"
+quartz rockylinux/10/cloud Rocky Linux 10 \"red quartz\"
+"
+all_machines=$(cut -d' ' -f1 <<<"$supported_machines" | tr '\n' ' ')
+
+# Incus configuration for all VMs we create.
+base_config="\
+config:
+  limits.cpu: '2'
+  limits.memory: 4GiB
+  cloud-init.user-data: |
+    #cloud-config
+    packages:
+      - less
+      - bash-completion
+    user:
+      name: user
+      gecos: Default user
+devices:
+  root:
+    path: /
+    pool: default
+    type: disk
+    size: 10GiB
+"
+
+# Extra device needed by Rocky Linux.
+rocky_config="$base_config\
+  agent:
+    source: agent:config
+    type: disk
+"
+
+# Assign $image, $description and $config matching $machine.
+get_vm_data() {
+    local line=$(grep "^$machine " <<<"$supported_machines")
+    image=$(cut -d' ' -f2 <<<"$line")
+    description=$(cut -d' ' -f3- <<<"$line")
+    if [ "$machine" = "quartz" ]; then
+        config="$rocky_config"
+    else
+        config="$base_config"
+    fi
+}
+
+# List the supported VMs with their status.
+list() {
+    filter="^($(sed 's/ /|/g' <<<"$all_machines"))$"
+    list=$(incus list -c ns -f compact type=virtual-machine "$filter")
+    echo "  NAME      STATE        DESCRIPTION"
+    echo "  ──────────────────────────────────────────────────"
+    for machine in $all_machines; do
+        get_vm_data  # set $description
+        local line=$(grep "\<$machine\>" <<<"$list" || true)
+        local status=$(sed -E 's/ *\w+ +(\w+) */\1/' <<<"$line")
+        [ -n "$status" ] || status="NOT CREATED"
+        printf "  %-8s  %-11s  %s\n" "$machine" "$status" "$description"
+    done
+}
+
+# Print the status ("NOT CREATED", "STOPPED" or "RUNNING") of $machine.
+status() {
+    local info=$(incus info $machine 2>/dev/null)
+    local status=$(grep '^Status:' <<<"$info" | cut -d' ' -f2)
+    echo "${status:-NOT CREATED}"
+}
+
+# Create the VM if it does not exist, then start it.
+start() {
+    case "$(status)" in
+        "NOT CREATED")
+            get_vm_data  # set $image and $config
+            incus launch images:$image $machine --vm <<<"$config"
+            ;;
+        "STOPPED")
+            incus start $machine
+            ;;
+        "RUNNING")
+            echo "$machine is already running"
+            ;;
+    esac
+}
+
+# Get the command-line parameters.
+cmd="$1"
+machine="$2"
+
+# Run the command.
+case "$cmd" in
+    "help" | "--help")
+        echo -n "$help"
+        ;;
+    "list")
+        list
+        ;;
+    "start")
+        start
+        ;;
+    "shell")
+        incus exec $machine -- su -l user
+        ;;
+    "stop")
+        incus stop $machine
+        ;;
+    *)
+        echo "Unknown command: $cmd"
+        exit 1;;
+esac

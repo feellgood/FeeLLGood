@@ -26,7 +26,8 @@ Summary of tested items:
 
 ## Files
 
-* `Vagrantfile`: used to spin up virtual machines for manual testing
+* `test-vm`: shell script for managing the virtual machines used for
+  manual testing
 * `install-dependencies.sh`: install the dependencies needed to build
   feeLLGood. This script accepts two options:
   * `-u`: install any extra dependencies needed to build the unit tests
@@ -40,48 +41,57 @@ and 773&nbsp;elements), which is expected to be in the directory
 
 ## Manual testing
 
-Install [Vagrant][] and [VirtualBox][]:
+Manual tests are done on VMs (virtual machines). In order to run these
+VMs, install [Incus][], [QEMU][] and genisoimage:
 
 ```shell
-curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-sudo apt install vagrant virtualbox
+sudo apt install incus qemu-system-x86 genisoimage
 ```
 
 Then, in this directory, run
 
 ```shell
-vagrant status
+./test-vm list
 ```
 
-to see the list of supported virtual machine images. These are named
-after the installed Linux distributions, e.g. `ubuntu_jammy` or
-`rockylinux_9`. Next,
+to see the list of supported VMs. These are named after the installed
+Linux distributions, e.g. “noble” for Ubuntu 24.04 LTS (Noble Numbat).
+Each machine has a state that can be either “NOT CREATED”, “STOPPED” or
+“RUNNING”. A machine that is not “RUNNING” can be started with:
 
 ```shell
-vagrant up machine
+machine=...
+./test-vm start $machine
 ```
 
-where ”machine” is one of the supported images. This will spin up a
-virtual machine running the selected image, and provision it by running
-`install-dependencies.sh -d` on it. Then
+with `...` replaced by the machine name. If the machine was “NOT
+CREATED”, this will download a machine image and create the VM from it,
+which may take a few minutes.
+
+Now, the feeLLGood dependencies can be installed by running
 
 ```shell
-vagrant ssh machine
+incus file push install-dependencies.sh $machine/tmp/
+incus exec $machine -- su -l user -c "/tmp/install-dependencies.sh -d"
 ```
 
-to open a shell on the VM.
+These commands may fail if the incus agent inside the VM had no time to
+start, in which case they should be retried a few moments later.
 
-If the image supports it, the parent of this directory is available
-read-only within the VM as `host-FeeLLGood`. It can be copied in order
-to test the working copy of the code, or cloned as a repository in order
-to test a committed version. If `host-FeeLLGood` is not available, the
-public repository should be cloned instead:
+Finally,
 
 ```shell
-cp -a host-FeeLLGood FeeLLGood  # to test the working copy, or
-git clone host-FeeLLGood FeeLLGood  # to test a commit, or
-git clone https://github.com/feellgood/FeeLLGood.git  # if there is no host-FeeLLGood
+./test-vm shell $machine
+```
+
+will open a shell on the VM. This, again, can only work once the incus
+agent has started.
+
+On this machine, you can clone the feeLLGood repository:
+
+```shell
+cd src
+git clone https://github.com/feellgood/FeeLLGood.git
 ```
 
 The tests to run are:
@@ -90,16 +100,22 @@ The tests to run are:
 cd FeeLLGood/
 cmake .
 make -j 2
-sudo make install
-doxygen
 ci-tests/full_test.py
+sudo make install
+doxygen > /dev/null
 ```
 
-The VM can then be stopped by logging out of the ssh session and typing:
+The VM can then be stopped by logging out of the shell session and typing:
 
 ```shell
-vagrant halt machine
+./test-vm stop $machine
 ```
 
-[Vagrant]: https://www.vagrantup.com/
-[VirtualBox]: https://www.virtualbox.org/
+A short usage summary of the `test-vm` script can be displayed with:
+
+```shell
+./test-vm help
+```
+
+[Incus]: https://linuxcontainers.org/incus/
+[QEMU]: https://www.qemu.org/
