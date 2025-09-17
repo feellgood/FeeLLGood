@@ -15,7 +15,8 @@ Available commands:
   help             Print this message
   list             List supported VMs, with their status
   start <machine>  Start the VM, creating it if needed
-  shell <machine>  Open a non-root shell on the VM, which must be running
+  provision <machine>  Install feeLLGood's dependencies
+  shell <machine>  Open a non-root shell
   stop <machine>   Stop the VM
 "
 
@@ -109,6 +110,13 @@ start() {
     esac
 }
 
+# Install feeLLGood's dependencies.
+provision() {
+    incus file push install-dependencies.sh $machine/tmp/
+    incus exec $machine -- \
+        su -l user -c "/tmp/install-dependencies.sh -d"
+}
+
 # Get the command-line parameters.
 cmd="$1"
 machine="$2"
@@ -123,6 +131,9 @@ case "$cmd" in
         ;;
     "start")
         start
+        ;;
+    "provision")
+        provision
         ;;
     "shell")
         incus exec $machine -- su -l user

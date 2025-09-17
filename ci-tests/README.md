@@ -71,12 +71,11 @@ which may take a few minutes.
 Now, the feeLLGood dependencies can be installed by running
 
 ```shell
-incus file push install-dependencies.sh $machine/tmp/
-incus exec $machine -- su -l user -c "/tmp/install-dependencies.sh -d"
+./test-vm provision $machine
 ```
 
-These commands may fail if the incus agent inside the VM had no time to
-start, in which case they should be retried a few moments later.
+This command may fail if the incus agent inside the VM had no time to
+start, in which case it should be retried a few moments later.
 
 Finally,
 
