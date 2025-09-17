@@ -74,6 +74,12 @@ Now, the feeLLGood dependencies can be installed by running
 ./test-vm provision $machine
 ```
 
+If a directory named “dl” exists as a sibling of the test-vm script, it
+will be used as a download cache: its content will be copied to
+`/home/user/src` on the VM. Putting there the tarballs of ANN and
+ScalFMM will prevent them from being downloaded by
+install-dependencies.sh running inside the VM.
+
 Finally,
 
 ```shell

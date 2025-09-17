@@ -145,6 +145,9 @@ wait_for_vm() {
 # Install feeLLGood's dependencies.
 provision() {
     incus file push install-dependencies.sh $machine/tmp/
+    if [ -n "$(ls dl/* 2>/dev/null)" ]; then
+        incus file push dl/* $machine/home/user/src/ -p
+    fi
     incus exec $machine -- \
         su -l user -c "/tmp/install-dependencies.sh -d"
 }
