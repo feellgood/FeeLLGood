@@ -110,6 +110,38 @@ start() {
     esac
 }
 
+# Wait for the VM to be ready:
+#  - the incus agent must be running
+#  - on first boot, cloud-init must have finished
+wait_for_vm() {
+    if [ "$(status)" != "RUNNING" ]; then
+        echo "Error: $machine is not running"
+        exit 1
+    fi
+
+    local is_agent_running="incus exec $machine -- true"
+    if ! $is_agent_running 2>/dev/null; then
+        echo -n "Waiting for the incus agent"
+        sleep 1
+        while true; do
+            if $is_agent_running 2>/dev/null; then
+                echo
+                break
+            else
+                echo -n "."
+                sleep 0.5
+            fi
+        done
+    fi
+
+    local is_cloud_init_done="incus exec $machine -- cloud-init status"
+    if [ "$($is_cloud_init_done)" != "status: done" ]; then
+        echo -n "Waiting for cloud-init to be done."
+        sleep 1
+        $is_cloud_init_done --wait
+    fi
+}
+
 # Install feeLLGood's dependencies.
 provision() {
     incus file push install-dependencies.sh $machine/tmp/
@@ -133,9 +165,11 @@ case "$cmd" in
         start
         ;;
     "provision")
+        wait_for_vm
         provision
         ;;
     "shell")
+        wait_for_vm
         incus exec $machine -- su -l user
         ;;
     "stop")

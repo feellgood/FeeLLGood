@@ -74,17 +74,13 @@ Now, the feeLLGood dependencies can be installed by running
 ./test-vm provision $machine
 ```
 
-This command may fail if the incus agent inside the VM had no time to
-start, in which case it should be retried a few moments later.
-
 Finally,
 
 ```shell
 ./test-vm shell $machine
 ```
 
-will open a shell on the VM. This, again, can only work once the incus
-agent has started.
+will open a shell on the VM.
 
 On this machine, you can clone the feeLLGood repository:
 
