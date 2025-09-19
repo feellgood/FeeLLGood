@@ -67,7 +67,7 @@ else:
     success = False
 
 # Use ANSI colors if printing to a terminal.
-if sys.stdout.isatty():
+if sys.stdout.isatty() and not os.getenv("NO_COLOR"):
     green  = "\x1b[1;32m"
     red    = "\x1b[1;31m"
     normal = "\x1b[m"
