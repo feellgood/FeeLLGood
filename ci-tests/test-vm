@@ -100,6 +100,12 @@ start() {
         "NOT CREATED")
             get_vm_data  # set $image and $config
             incus launch images:$image $machine --vm <<<"$config"
+            wait_for_vm
+            echo "Making 'clean' snapshot"
+            incus stop $machine
+            incus snapshot create $machine clean
+            incus start $machine
+            echo "$machine is ready and running"
             ;;
         "STOPPED")
             incus start $machine
@@ -150,6 +156,10 @@ provision() {
     fi
     incus exec $machine -- \
         su -l user -c "/tmp/install-dependencies.sh -d"
+    echo "Making 'provisioned' snapshot"
+    incus stop $machine
+    incus snapshot create $machine provisioned
+    incus start $machine
 }
 
 # Get the command-line parameters.

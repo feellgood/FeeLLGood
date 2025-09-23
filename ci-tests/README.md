@@ -118,5 +118,13 @@ A short usage summary of the `test-vm` script can be displayed with:
 ./test-vm help
 ```
 
+VM snapshots are automatically created on first `start` and by the
+`provision` command. The corresponding VM states can be restored with:
+
+```shell
+incus snapshot restore $machine clean  # or
+incus snapshot restore $machine provisioned
+```
+
 [Incus]: https://linuxcontainers.org/incus/
 [QEMU]: https://www.qemu.org/
