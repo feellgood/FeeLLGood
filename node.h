@@ -75,13 +75,7 @@ struct Node
         // Choose for an initial ep the direction, among (X, Y, Z), which is further away from u0.
         Eigen::Index minIdx;
         d[CURRENT].u.cwiseAbs().minCoeff(&minIdx);
-        #if EIGEN_VERSION_AT_LEAST(3,4,0)
-            ep.setUnit(minIdx);
-        #else
-            if (minIdx == IDX_X) { ep = Eigen::Vector3d::UnitX(); }
-            else if (minIdx == IDX_Y) { ep = Eigen::Vector3d::UnitY(); }
-            else { ep = Eigen::Vector3d::UnitZ(); }
-        #endif
+        ep.setUnit(minIdx);
         // Gram-Schmidt orthonormalization of (u0, ep).
         ep -= ep.dot(d[CURRENT].u) * d[CURRENT].u;
         ep.normalize();

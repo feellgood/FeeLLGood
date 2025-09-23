@@ -28,15 +28,7 @@ void Fac::integrales(Facette::prm const &params)
     buildMatP(P);
     
     /*-------------------- PROJECTION --------------------*/
-    #if EIGEN_VERSION_AT_LEAST(3,4,0)
-        Lp = P * BE.reshaped<Eigen::RowMajor>();
-    #else
-        Eigen::Matrix<double,DIM*N,1> tmp;
-        for(int k=0;k<DIM;k++)
-            for(int i=0;i<N;i++)
-                tmp(k*N+i) = BE(k,i);
-        Lp = P*tmp;
-    #endif
+    Lp = P * BE.reshaped<Eigen::RowMajor>();
     }
 
 double Fac::anisotropyEnergy(Facette::prm const &param,

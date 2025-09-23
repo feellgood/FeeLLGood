@@ -206,15 +206,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     extraCoeffs_BE(Js, U, dUdx, dUdy, dUdz, BE);  // STT
 
     /*--------------------   PROJECTION: BE->Lp   --------------------*/
-    #if EIGEN_VERSION_AT_LEAST(3,4,0)
-        Lp = P * BE.reshaped<Eigen::RowMajor>();
-    #else
-        Eigen::Matrix<double,DIM*N,1> tmp;
-        for(int k=0;k<DIM;k++)
-            for(int i=0;i<N;i++)
-                tmp(k*N+i) = BE(k,i);
-        Lp = P*tmp;
-    #endif
+    Lp = P * BE.reshaped<Eigen::RowMajor>();
     }
 
 double Tet::exchangeEnergy(Tetra::prm const &param,
