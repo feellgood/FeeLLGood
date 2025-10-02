@@ -214,9 +214,6 @@ spin_accumulation:
   # Output a .tsv file of the electric potentials.
   V_file: false
 
-  # output .tsv file of the spin accumulation field
-  Q_file: false
-
 # Parameters for the computation of the demagnetizing field.
 demagnetizing_field_solver:
 

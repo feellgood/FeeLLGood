@@ -131,6 +131,7 @@ Settings::Settings()
                     // to residual errors
     verbose = 0;
     withTsv = true;
+    spin_acc = false;
     field_type = UNDEF;
     read(YAML::Load(get_default_yaml()));  // load defaults
     }
@@ -202,7 +203,7 @@ void Settings::toYaml()
             std::cout << "\n";
         else
             std::cout << ' ' << it->V << '\n';
-        if (spin_acc_flag)
+        if (spin_acc)
             {
             std::cout << "      Pu: " << str(it->Pu) << "\n";
             }
@@ -241,12 +242,9 @@ void Settings::toYaml()
     else
         std::cout << "[\"" << sBx << "\", \"" << sBy << "\", \"" << sBz << "\"]\n";
     std::cout << "spin_accumulation:\n";
-    std::cout << "  enable: " << str(spin_acc_flag) << "\n";
-    if (spin_acc_flag)
-        {
-	std::cout << "  V_file: " << str(V_file) << "\n";
-	std::cout << "  Q_file: " << str(Q_file) << "\n";
-	}
+    std::cout << "  enable: " << str(spin_acc) << "\n";
+    if (spin_acc)
+        { std::cout << "  V_file: " << str(V_file) << "\n"; }
     std::cout << "demagnetizing_field_solver:\n";
     std::cout << "  nb_threads: " << scalfmmNbTh << "\n";
     std::cout << "finite_element_solver:\n";
@@ -291,11 +289,14 @@ std::string Settings::evolMetadata() const
     return ss.str();
     }
 
-std::string Settings::solMetadata(double t, std::string columnsTitle) const
+std::string Settings::solMetadata(const double t) const
     {
     std::ostringstream ss = commonMetadata();
     ss << tags::sol::time << ' ' << std::scientific << t << std::endl;
-    ss << tags::sol::columns << ' ' << columnsTitle << std::endl;
+    ss << tags::sol::columns << ' ' << tags::sol::defaultColumnsTitle;
+    if (spin_acc)
+        ss << '\t' << tags::sol::sColumnsTitle;
+    ss << std::endl;
     return ss.str();
     }
 
@@ -525,10 +526,9 @@ void Settings::read(YAML::Node yaml)
     YAML::Node spAcc = yaml["spin_accumulation"];
     if (spAcc && !spAcc.IsNull())
         {
-        assign(spin_acc_flag, spAcc["enable"]);
+        assign(spin_acc, spAcc["enable"]);
         assign(V_file, spAcc["V_file"]);
-        assign(Q_file, spAcc["Q_file"]);
-	}  // spin_accumulation
+	    }  // spin_accumulation
 
     // The number of available processors (actually, hardware threads) is the default for the number
     // of threads to spin.

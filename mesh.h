@@ -293,7 +293,8 @@ public:
     /** text file (tsv) writing function for a solution, node indices are zero based */
     void savesol(const int precision /**< [in] numeric precision in .sol output text file */,
                  const std::string fileName /**< [in] */,
-                 std::string const &metadata /**< [in] */) const;
+                 std::string const &metadata /**< [in] */,
+                  bool withSpinAcc /**< [in] */ ) const;
 
     /** setter for node[i]; what_to_set will fix what is the part of the node struct to set (usefull
      * for fmm_demag.h) */
@@ -321,6 +322,9 @@ public:
      * */
     void buildBoundaryConditions(std::vector<Facette::prm> &paramFacette,
             Mesh::allBoundCond<Eigen::Vector3d> &BC_spin);
+
+    /** spin accumulation solution over the nodes (might be empty) */
+    std::vector<Eigen::Vector3d> s;
 
 private:
     /** node container: not initialized by constructor, but later while reading the mesh by member

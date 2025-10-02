@@ -90,7 +90,7 @@ public:
     std::string evolMetadata() const;
 
     /** build a metadata string for .sol text files */
-    std::string solMetadata(double t, std::string columnsTitle) const;
+    std::string solMetadata(const double t) const;
 
     /** read settings from a parsed YAML document */
     void read(YAML::Node);
@@ -155,11 +155,8 @@ public:
     /** if true creates an output file of the solution of the electrostatic problem  */
     bool V_file;
 
-     /** if true creates an output file of the solution of the spin accumulation problem  */
-    bool Q_file;
-
-    /** if spin_acc_flag is true then spin accumulation contributions are computed */
-    bool spin_acc_flag;
+    /** if spin_acc is true then spin accumulation contributions are computed */
+    bool spin_acc;
 
     /** string for analytical definition of Mx */
     std::string sMx;

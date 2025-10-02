@@ -141,8 +141,8 @@ void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const i
             cout << " " << str << endl;
             }
 
-        string metadata = settings.solMetadata(t_prm.get_t(), "idx\tmx\tmy\tmz\tphi");
-        msh.savesol(settings.getPrecision(), str, metadata);
+        string metadata = settings.solMetadata(t_prm.get_t());
+        msh.savesol(settings.getPrecision(), str, metadata, settings.spin_acc);
         if (settings.verbose)
             {
             cout << "all nodes written." << endl;
@@ -151,7 +151,7 @@ void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const i
     }
 
 void Mesh::mesh::savesol(const int precision, const std::string fileName,
-                         std::string const &metadata) const
+                         std::string const &metadata, bool withSpinAcc) const
     {
     ofstream fout(fileName, ios::out);
     if (fout.fail())
@@ -163,12 +163,24 @@ void Mesh::mesh::savesol(const int precision, const std::string fileName,
     fout << metadata << std::scientific << std::setprecision(precision);
 
     Eigen::IOFormat outputSolFmt(precision, Eigen::DontAlignCols, "\t", "\t", "", "", "", "");
-    for (unsigned int i = 0; i < node.size(); i++)
+    if(!withSpinAcc)
         {
-        const dataNode &dn = node[node_index[i]].d[Nodes::NEXT];
-        fout << i << '\t' << dn.u.format(outputSolFmt) << '\t' << dn.phi << endl;
+        for (unsigned int i = 0; i < node.size(); i++)
+            {
+            const dataNode &dn = node[node_index[i]].d[Nodes::NEXT];
+            fout << i << '\t' << dn.u.format(outputSolFmt) << '\t' << dn.phi << endl;
+            }
         }
-
+    else
+        {
+        for (unsigned int i = 0; i < node.size(); i++)
+            {
+            const int j = node_index[i];
+            const dataNode &dn = node[j].d[Nodes::NEXT];
+            fout << i << '\t' << dn.u.format(outputSolFmt) << '\t' << dn.phi << '\t' <<
+                    s[j].format(outputSolFmt) << endl;
+            }
+        }
     fout.close();
     }
 
