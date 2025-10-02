@@ -42,10 +42,10 @@ and 773&nbsp;elements), which is expected to be in the directory
 ## Manual testing
 
 Manual tests are done on VMs (virtual machines). In order to run these
-VMs, install [Incus][], [QEMU][] and genisoimage:
+VMs, install [Incus][], [QEMU][], yq and genisoimage:
 
 ```shell
-sudo apt install incus qemu-system-x86 genisoimage
+sudo apt install incus qemu-system-x86 yq genisoimage
 ```
 
 Then, in this directory, run

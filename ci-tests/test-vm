@@ -48,7 +48,7 @@ config:
 devices:
   root:
     path: /
-    pool: default
+    pool: @STORAGE_POOL@
     type: disk
     size: 10GiB
 "
@@ -94,11 +94,19 @@ status() {
     echo "${status:-NOT CREATED}"
 }
 
+# Patch the configuration in order to use the storage pool defined in
+# the default profile.
+patch_config() {
+    pool=$(incus profile show default | yq -r .devices.root.pool)
+    config=${config/@STORAGE_POOL@/$pool}
+}
+
 # Create the VM if it does not exist, then start it.
 start() {
     case "$(status)" in
         "NOT CREATED")
             get_vm_data  # set $image and $config
+            patch_config
             incus launch images:$image $machine --vm <<<"$config"
             wait_for_vm
             echo "Making 'clean' snapshot"
