@@ -116,8 +116,8 @@ static void exit_if_signal_received(const Fem &fem, const Settings &settings, co
         std::cout << ": saving the magnetization configuration...\n";
         std::string fileName =
                 settings.r_path_output_dir + '/' + settings.getSimName() + "_at_exit.sol";
-        std::string metadata = settings.solMetadata(t_prm.get_t(), "idx\tmx\tmy\tmz\tphi");
-        fem.msh.savesol(settings.getPrecision(), fileName, metadata);
+        std::string metadata = settings.solMetadata(t_prm.get_t());
+        fem.msh.savesol(settings.getPrecision(), fileName, metadata, settings.spin_acc);
         std::cout << "Magnetization configuration saved to " << fileName << "\n";
         }
     else

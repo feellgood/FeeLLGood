@@ -23,29 +23,16 @@ class spinAcc
     std::vector<Facette::prm> _pFac /**< [in] ref to vector of param facette (surface region parameters) */,
     const double _tol /**< [in] tolerance for solvers */,  // _tol could be 1e-6
     const bool v /**< [in] verbose bool */,
-    const int max_iter /**< [in] maximum number of iteration */,
-    const std::string _Q_fileName /**< [in] output file name for spin accumulation vector field */):
+    const int max_iter /**< [in] maximum number of iteration */):
         msh(_msh), elec(_elec), paramTetra(_pTetra),  paramFacette(_pFac),
-        iter("bicg_dir",_tol,v,max_iter), verbose(v), Q_fileName(_Q_fileName), NOD(_msh.getNbNodes())
+        iter("bicg_dir",_tol,v,max_iter), verbose(v), NOD(_msh.getNbNodes())
         {
-        Qs.resize(NOD);
+        msh.s.resize(NOD);
         bool has_converged = solve();
         if (!has_converged)
             { std::cout << "spin accumulation solver: " << iter.infos() << std::endl; exit(1); }
-	else if (!Q_fileName.empty())
-            {
-	    if (verbose)
-                { std::cout << "writing spin accumulation vector to file " << Q_fileName << std::endl; }
-	    bool iznogood = save("## columns: index\tQx\tQy\tQz\n");
-	    if (verbose && iznogood)
-                { std::cout << "file " << Q_fileName << " written.\n"; }
-	    }
-	prepareExtras();
+		prepareExtras();
         }
-
-    /** text file (tsv) writing function for the solution of spin accumulation vector field Q over all volume regions of the mesh,
-     * node indices are zero based */
-    bool save(std::string const &metadata) const;
 
     /** boundary conditions on different surfaces. They must not share any triangle nor nodes. */
     Mesh::allBoundCond<Eigen::Vector3d> all_bc;
@@ -71,9 +58,6 @@ class spinAcc
 
     /** number of digits in the optional output file */
     const int precision = 8;
-
-    /** output file name for spin accumulation problem */
-    const std::string Q_fileName;
 
     /** number of Nodes (needed for templates) */
     const int NOD;
@@ -105,9 +89,6 @@ class spinAcc
     /** solver, using biconjugate stabilized gradient, with diagonal preconditionner and Dirichlet
      * boundary conditions */
     bool solve(void);
-
-    /** solution of the accumulation spin diffusion problem (3D vector field) */
-    std::vector<Eigen::Vector3d> Qs;
 
     /** dimensionnality of the spin accumulation problem */
     static const int DIM_PROBLEM = 3;

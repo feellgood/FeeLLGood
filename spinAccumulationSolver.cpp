@@ -110,9 +110,7 @@ bool spinAcc::solve(void)
 
     for (int i=0; i<NOD; i++)
         {
-        Qs[i][IDX_X] = Xw[DIM_PROBLEM*i];
-        Qs[i][IDX_Y] = Xw[DIM_PROBLEM*i + 1];
-        Qs[i][IDX_Z] = Xw[DIM_PROBLEM*i + 2];
+        msh.s[i] = Eigen::Vector3d(Xw[DIM_PROBLEM*i], Xw[DIM_PROBLEM*i + 1], Xw[DIM_PROBLEM*i +2]);
         }
     return (iter.status == algebra::CONVERGED);
     }
@@ -235,24 +233,3 @@ void spinAcc::integrales(Facette::Fac &fac, Eigen::Vector3d &Q, std::vector<doub
         }
     }
 
-bool spinAcc::save(std::string const &metadata) const
-    {
-    using namespace Nodes;
-    std::ofstream fout(Q_fileName, std::ios::out);
-    if (fout.fail())
-        {
-        std::cout << "cannot open file " << Q_fileName << std::endl;
-        SYSTEM_ERROR;
-        }
-
-    fout << tags::sol::rw_time << ' ' << date() << '\n' << metadata << std::scientific
-         << std::setprecision(precision);
-
-    for (int i = 0; i < NOD; i++)
-        {
-        int _i = msh.getNodeIndex(i);
-        fout << i << '\t' << Qs[_i][IDX_X] << '\t' << Qs[_i][IDX_Y] << '\t' << Qs[_i][IDX_Z] << std::endl;
-        }
-    fout.close();
-    return !(fout.good());
-    }

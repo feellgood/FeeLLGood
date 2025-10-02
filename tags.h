@@ -13,6 +13,8 @@ namespace tags
         const std::string time = "## time:";
         const std::string rw_time = "## real-world time:";
         const std::string columns = "## columns:";
+        const std::string defaultColumnsTitle = "idx\tmx\tmy\tmz\tphi";
+        const std::string sColumnsTitle = "sx\tsy\tsz";
         }
     
     namespace evol
