@@ -26,16 +26,10 @@ public:
             std::vector<Tetra::prm> _pTetra /**< [in] ref to vector of param tetra (volume region parameters) */,
             std::vector<Facette::prm> _pFac /**< [in] ref to vector of param facette (surface region parameters) */,
             const double _tol /**< [in] tolerance for solvers */,
-            const bool v /**< [in] verbose bool */,
-            const int max_iter /**< [in] maximum number of iteration */,
-            const std::string _V_fileName /**< [in] output file name for electrostatic potential */)
-        : msh(_msh), paramTetra(_pTetra), paramFacette(_pFac),
-        iter("cg_dir",_tol,v,max_iter), verbose(v), V_fileName(_V_fileName)
-        {
-        if (verbose)
-            { infos(); }
-        V.resize(msh.getNbNodes());
-        }
+            const bool v /**< [in] verbose mode for iteration monitor */,
+            const int max_iter /**< [in] maximum number of iteration */)
+        : msh(_msh), paramTetra(_pTetra), paramFacette(_pFac), iter("cg_dir",_tol,v,max_iter)
+        { V.resize(msh.getNbNodes()); }
 
     /** electrostatic potential values for boundary conditions, V.size() is the size of the vector
      * of nodes */
@@ -60,7 +54,7 @@ public:
 
     /** text file (tsv) writing function for the solution V over all volume regions of the mesh,
      * node indices are zero based */
-    bool save(std::string const &metadata /**< [in] */) const;
+    bool save(const std::string V_fileName /**< [in] output file name */, std::string const &metadata /**< [in] */) const;
 
     /** returns sigma of the tetraedron, (conductivity in (Ohm.m)^-1 */
     double getSigma(Tetra::Tet const &tet) const;
@@ -68,8 +62,9 @@ public:
     /** returns current density of the facette if it is defined in the boundary conditions, else zero */
     double getCurrentDensity(Facette::Fac const &fac) const;
 
-    /** solves the potential in V, computes gradV and Hm, save to text file if needed */
-    void compute(void);
+    /** solves the potential in V, computes gradV and Hm, save to text file if needed
+     * if verbose set to true, some printing are sent to terminal */
+    void compute(const bool verbose /**< [in] */, const std::string V_fileName /**< [in] output file name for V solution */);
 private:
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh (
      * const ref ) */
@@ -84,14 +79,8 @@ private:
     /** monitor the solver called in method solve() */
     algebra::iteration<double> iter;
 
-    /** if verbose set to true, some printing are sent to terminal */
-    const bool verbose;
-
     /** number of digits in the optional output file */
     const int precision = 8;
-
-    /** output file name for electrostatic problem */
-    const std::string V_fileName;
 
     /** suppress twins in the indices Dirichlet list v_idx */
 template <typename T>
