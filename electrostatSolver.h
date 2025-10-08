@@ -30,45 +30,12 @@ public:
             const int max_iter /**< [in] maximum number of iteration */,
             const std::string _V_fileName /**< [in] output file name for electrostatic potential */)
         : msh(_msh), paramTetra(_pTetra), paramFacette(_pFac),
-        iter("cg_dir",_tol,v,max_iter), verbose(v), V_fileName(_V_fileName), NOD(_msh.getNbNodes())
+        iter("cg_dir",_tol,v,max_iter), verbose(v), V_fileName(_V_fileName)
         {
         if (verbose)
             { infos(); }
-        V.resize(NOD);
-        bool has_converged = solve();
-        if (verbose)
-            { std::cout << "electrostatic solver: " << iter.infos() << std::endl; }
-        if (has_converged)
-            {
-            if (!V_fileName.empty())
-                {
-                if (verbose)
-                    { std::cout << "writing electrostatic potential to file " << V_fileName << std::endl; }
-                bool iznogood = save("## columns: index\tV\n");
-                if (verbose && iznogood)
-                    { std::cout << "file " << V_fileName << " written.\n"; }
-                }
-            std::for_each(msh.tet.begin(), msh.tet.end(), [this](Tetra::Tet const &tet)
-                          {
-                          Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _gradV;
-                          calc_gradV(tet, _gradV);
-                          gradV.push_back(_gradV);
-
-                          Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _Hm;
-                          calc_Hm(tet, _gradV, _Hm);
-                          Hm.push_back(_Hm);
-                          });
-            }
-        else
-            { exit(1); }
+        V.resize(msh.getNbNodes());
         }
-
-    /** computes the gradient(V) for tetra tet */
-    void calc_gradV(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV);
-
-    /** computes Hm contributions for each npi for tetrahedron tet */
-    void calc_Hm(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV,
-                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _Hm);
 
     /** electrostatic potential values for boundary conditions, V.size() is the size of the vector
      * of nodes */
@@ -101,6 +68,8 @@ public:
     /** returns current density of the facette if it is defined in the boundary conditions, else zero */
     double getCurrentDensity(Facette::Fac const &fac) const;
 
+    /** solves the potential in V, computes gradV and Hm, save to text file if needed */
+    void compute(void);
 private:
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh (
      * const ref ) */
@@ -124,9 +93,6 @@ private:
     /** output file name for electrostatic problem */
     const std::string V_fileName;
 
-    /** number of Nodes (needed for templates) */
-    const int NOD;
-
     /** suppress twins in the indices Dirichlet list v_idx */
 template <typename T>
     void suppress_copies(std::vector<T> &v_idx)
@@ -135,6 +101,13 @@ template <typename T>
         v_idx.resize( std::distance( v_idx.begin(), std::unique(v_idx.begin(), v_idx.end()) ) );
         v_idx.shrink_to_fit();
         }
+
+    /** computes the gradient(V) for tetra tet */
+    void calc_gradV(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV);
+
+    /** computes Hm contributions for each npi for tetrahedron tet */
+    void calc_Hm(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV,
+                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _Hm);
 
     /** solver, using conjugate gradient with masking, with diagonal preconditionner and Dirichlet
      * boundary conditions, returns true if has converged */
