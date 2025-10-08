@@ -71,7 +71,7 @@ void electrostatSolver::integrales(Facette::Fac const &fac, std::vector<double> 
         }
     }
 
-void electrostatSolver::compute(void)
+void electrostatSolver::compute(const bool verbose, const std::string V_fileName)
     {
     bool has_converged = solve();
     if (verbose)
@@ -80,7 +80,7 @@ void electrostatSolver::compute(void)
         {
         if (!V_fileName.empty())
             {
-            bool iznogood = save("## columns: index\tV\n");
+            bool iznogood = save(V_fileName,"## columns: index\tV\n");
             if (verbose && iznogood)
                 { std::cout << "file " << V_fileName << " written.\n"; }
             }
@@ -105,9 +105,6 @@ bool electrostatSolver::solve(void)
     const int DIM_1D = 1;
     algebra::w_sparseMat Kw(NOD);
     std::vector<double> Lw(NOD, 0.0);
-
-    if (verbose)
-        { std::cout << "assembling and solving ..." << std::endl; }
 
     std::for_each( msh.tet.begin(),msh.tet.end(),[this,&Kw](Tetra::Tet &elem)
         {
@@ -148,7 +145,7 @@ bool electrostatSolver::solve(void)
     return ( iter.status == algebra::CONVERGED);
     }
 
-bool electrostatSolver::save(std::string const &metadata) const
+bool electrostatSolver::save(const std::string V_fileName, std::string const &metadata) const
     {
     std::ofstream fout(V_fileName, std::ios::out);
     if (fout.fail())
