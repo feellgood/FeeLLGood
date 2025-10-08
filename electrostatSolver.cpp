@@ -71,8 +71,37 @@ void electrostatSolver::integrales(Facette::Fac const &fac, std::vector<double> 
         }
     }
 
+void electrostatSolver::compute(void)
+    {
+    bool has_converged = solve();
+    if (verbose)
+        { std::cout << "electrostatic solver: " << iter.infos() << std::endl; }
+    if (has_converged)
+        {
+        if (!V_fileName.empty())
+            {
+            bool iznogood = save("## columns: index\tV\n");
+            if (verbose && iznogood)
+                { std::cout << "file " << V_fileName << " written.\n"; }
+            }
+        std::for_each(msh.tet.begin(), msh.tet.end(), [this](Tetra::Tet const &tet)
+                     {
+                     Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _gradV;
+                     calc_gradV(tet, _gradV);
+                     gradV.push_back(_gradV);
+
+                     Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _Hm;
+                     calc_Hm(tet, _gradV, _Hm);
+                     Hm.push_back(_Hm);
+                     });
+        }
+    else
+        { exit(1); }
+    }
+
 bool electrostatSolver::solve(void)
     {
+    const int NOD = msh.getNbNodes();
     const int DIM_1D = 1;
     algebra::w_sparseMat Kw(NOD);
     std::vector<double> Lw(NOD, 0.0);
@@ -130,7 +159,7 @@ bool electrostatSolver::save(std::string const &metadata) const
 
     fout << tags::sol::rw_time << ' ' << date() << '\n' << metadata << std::scientific
          << std::setprecision(precision);
-
+    const int NOD = msh.getNbNodes();
     for (int i = 0; i < NOD; i++)
         {
         int _i = msh.getNodeIndex(i);

@@ -239,14 +239,16 @@ int main(int argc, char *argv[])
     std::cout << "starting on:       " << date() << std::endl;
     LinAlgebra linAlg(mySettings, fem.msh);
 
+    std::string V_fileName("");
+    if(mySettings.V_file) V_fileName = mySettings.getSimName() + "_V.sol";
+    electrostatSolver pot_solver = electrostatSolver(fem.msh, mySettings.paramTetra,
+                                                     mySettings.paramFacette, 1e-8,
+                                                     mySettings.verbose, 1000, V_fileName);
+
     if (mySettings.spin_acc)
         {
-        std::string V_fileName("");
-        if(mySettings.V_file) V_fileName = mySettings.getSimName() + "_V.sol";
-        electrostatSolver pot_solver = electrostatSolver(fem.msh, mySettings.paramTetra,
-                                                         mySettings.paramFacette, 1e-8,
-                                                         mySettings.verbose, 1000, V_fileName);
-	    spinAcc spinAcc_solver = spinAcc(fem.msh,pot_solver,mySettings.paramTetra,
+        pot_solver.compute();
+        spinAcc spinAcc_solver = spinAcc(fem.msh,pot_solver,mySettings.paramTetra,
 			                             mySettings.paramFacette,1e-8,
                                          mySettings.verbose,1000);
 
