@@ -18,13 +18,13 @@ class spinAcc
     public:
     /** constructor */
     spinAcc(Mesh::mesh &_msh /**< [in] ref to the mesh */,
-    electrostatSolver &_elec /**< [in] ref to the the electrostatic sub_problem */,
+    std::vector<double> &_V /**< [in] ref to the the potentials on nodes */,
     std::vector<Tetra::prm> _pTetra /**< [in] ref to vector of param tetra (volume region parameters) */,
     std::vector<Facette::prm> _pFac /**< [in] ref to vector of param facette (surface region parameters) */,
     const double _tol /**< [in] tolerance for solvers */,  // _tol could be 1e-6
     const bool v /**< [in] verbose bool */,
     const int max_iter /**< [in] maximum number of iteration */):
-        msh(_msh), elec(_elec), paramTetra(_pTetra),  paramFacette(_pFac),
+        msh(_msh), paramTetra(_pTetra),  paramFacette(_pFac), V(_V),
         iter("bicg_dir",_tol,v,max_iter), verbose(v), NOD(_msh.getNbNodes())
         {
         msh.s.resize(NOD);
@@ -32,6 +32,16 @@ class spinAcc
         if (!has_converged)
             { std::cout << "spin accumulation solver: " << iter.infos() << std::endl; exit(1); }
 		prepareExtras();
+        std::for_each(msh.tet.begin(), msh.tet.end(), [this](Tetra::Tet const &tet)
+                     {
+                     Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _gradV;
+                     calc_gradV(tet, _gradV);
+                     gradV.push_back(_gradV);
+
+                     Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _Hm;
+                     calc_Hm(tet, _gradV, _Hm);
+                     Hm.push_back(_Hm);
+                     });
         }
 
     /** boundary conditions on different surfaces. They must not share any triangle nor nodes. */
@@ -41,14 +51,21 @@ class spinAcc
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh */
     Mesh::mesh msh;
 
-    /** electrostatic sub-problem */
-    electrostatSolver elec;
-
     /** this vector contains the material parameters for all regions for all the tetrahedrons */
     std::vector<Tetra::prm> paramTetra;
 
     /** this vector contains the material parameters for all surface regions for all the triangular facettes */
     std::vector<Facette::prm> paramFacette;
+
+    /** container for potential values */
+    std::vector<double> V;
+
+    /** table of the gradients of the potential, gradV.size() is the number of tetra */
+    std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > gradV;
+
+    /** table of the Hm vectors (contribution of spinAcc to the tet::integrales) ; Hm.size() is the
+     * number of tetra */
+    std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > Hm;
 
     /** monitor the solver called in method solve() */
     algebra::iteration<double> iter;
@@ -83,8 +100,18 @@ class spinAcc
     /** spin Hall constant */
     double getSpinHall(Tetra::Tet &tet) const;
 
+    /**set potential V */
+    void setPotential(std::vector<double> &_V);
+
     /** affect extraField function and extraCoeffs_BE function using lambdas for all the tetrahedrons (functor) */
     void prepareExtras(void);
+
+    /** computes the gradient(V) for tetra tet */
+    void calc_gradV(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV);
+
+    /** computes Hm contributions for each npi for tetrahedron tet */
+    void calc_Hm(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV,
+                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _Hm);
 
     /** solver, using biconjugate stabilized gradient, with diagonal preconditionner and Dirichlet
      * boundary conditions */
