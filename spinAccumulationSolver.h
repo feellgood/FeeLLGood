@@ -18,34 +18,25 @@ class spinAcc
     public:
     /** constructor */
     spinAcc(Mesh::mesh &_msh /**< [in] ref to the mesh */,
-    std::vector<double> &_V /**< [in] ref to the the potentials on nodes */,
     std::vector<Tetra::prm> _pTetra /**< [in] ref to vector of param tetra (volume region parameters) */,
     std::vector<Facette::prm> _pFac /**< [in] ref to vector of param facette (surface region parameters) */,
     const double _tol /**< [in] tolerance for solvers */,  // _tol could be 1e-6
     const bool v /**< [in] verbose bool */,
     const int max_iter /**< [in] maximum number of iteration */):
-        msh(_msh), paramTetra(_pTetra),  paramFacette(_pFac), V(_V),
-        iter("bicg_dir",_tol,v,max_iter), verbose(v), NOD(_msh.getNbNodes())
-        {
-        msh.s.resize(NOD);
-        bool has_converged = solve();
-        if (!has_converged)
-            { std::cout << "spin accumulation solver: " << iter.infos() << std::endl; exit(1); }
-		prepareExtras();
-        std::for_each(msh.tet.begin(), msh.tet.end(), [this](Tetra::Tet const &tet)
-                     {
-                     Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _gradV;
-                     calc_gradV(tet, _gradV);
-                     gradV.push_back(_gradV);
-
-                     Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _Hm;
-                     calc_Hm(tet, _gradV, _Hm);
-                     Hm.push_back(_Hm);
-                     });
-        }
+        msh(_msh), paramTetra(_pTetra),  paramFacette(_pFac),
+        iter("bicg_dir",_tol,v,max_iter), verbose(v), NOD(_msh.getNbNodes()) {}
 
     /** boundary conditions on different surfaces. They must not share any triangle nor nodes. */
     Mesh::allBoundCond<Eigen::Vector3d> all_bc;
+
+    /** initializations: compute gradV and Hm and call prepareExtras method */
+    void preCompute(void);
+
+    /** call solver and update spin diffusion solution */
+    void compute(void);
+
+    /** set potential V */
+    void setPotential(std::vector<double> &_V);
 
     private:
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh */
@@ -99,9 +90,6 @@ class spinAcc
 
     /** spin Hall constant */
     double getSpinHall(Tetra::Tet &tet) const;
-
-    /**set potential V */
-    void setPotential(std::vector<double> &_V);
 
     /** affect extraField function and extraCoeffs_BE function using lambdas for all the tetrahedrons (functor) */
     void prepareExtras(void);
