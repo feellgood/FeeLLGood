@@ -5,26 +5,6 @@
 #include "electrostatSolver.h"
 #include "algebra/cg.h"
 #include "solverUtils.h"  // build(Mat|Vect)
-void electrostatSolver::calc_gradV(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV)
-    {
-    for (int npi = 0; npi < Tetra::NPI; npi++)
-        {
-        Eigen::Vector3d v(0,0,0);
-        for (int i = 0; i < Tetra::N; i++)
-            { v += V[tet.ind[i]] * tet.da.row(i); }
-        _gradV.col(npi) = v;
-        }
-    }
-
-void electrostatSolver::calc_Hm(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV,
-                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _Hm)
-    {
-    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> p_g;
-    tet.getPtGauss(p_g);
-    const double sigma = getSigma(tet);
-    for (int npi = 0; npi < Tetra::NPI; npi++)
-        { _Hm.col(npi) = -sigma * _gradV.col(npi).cross(p_g.col(npi)); }
-    }
 
 void electrostatSolver::infos(void)
     {
@@ -84,16 +64,6 @@ void electrostatSolver::compute(const bool verbose, const std::string V_fileName
             if (verbose && iznogood)
                 { std::cout << "file " << V_fileName << " written.\n"; }
             }
-        std::for_each(msh.tet.begin(), msh.tet.end(), [this](Tetra::Tet const &tet)
-                     {
-                     Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _gradV;
-                     calc_gradV(tet, _gradV);
-                     gradV.push_back(_gradV);
-
-                     Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _Hm;
-                     calc_Hm(tet, _gradV, _Hm);
-                     Hm.push_back(_Hm);
-                     });
         }
     else
         { exit(1); }

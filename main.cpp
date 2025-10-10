@@ -248,7 +248,7 @@ int main(int argc, char *argv[])
         std::string V_fileName("");
         if(mySettings.V_file) V_fileName = mySettings.getSimName() + "_V.sol";
         pot_solver.compute(mySettings.verbose, V_fileName);
-        spinAcc spinAcc_solver = spinAcc(fem.msh,pot_solver,mySettings.paramTetra,
+        spinAcc spinAcc_solver = spinAcc(fem.msh,pot_solver.V,mySettings.paramTetra,
 			                             mySettings.paramFacette,1e-8, mySettings.verbose, 1000);
 
         fem.msh.buildBoundaryConditions(mySettings.paramFacette, spinAcc_solver.all_bc);

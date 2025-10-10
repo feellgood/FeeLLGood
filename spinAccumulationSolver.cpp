@@ -25,6 +25,9 @@ double spinAcc::getLsf(Tetra::Tet &tet) const
 double spinAcc::getSpinHall(Tetra::Tet &tet) const
     { return paramTetra[tet.idxPrm].spinHall; }
 
+void spinAcc::setPotential(std::vector<double> &_V)
+    { V = _V; }
+
 void spinAcc::prepareExtras(void)
     {
     using namespace Nodes;
@@ -33,7 +36,7 @@ void spinAcc::prepareExtras(void)
     std::for_each( msh.tet.begin(), msh.tet.end(), [this](Tet &t)
         {
         const int _idx = t.idx;
-        const double sigma = elec.getSigma(t);
+        const double sigma = getSigma(t);
         const double beta = getBeta(t);
         const double lsd = getLsd(t);
         const double lsf = getLsf(t);
@@ -42,7 +45,7 @@ void spinAcc::prepareExtras(void)
         double prefactor = mu0*BOHRS_MUB*beta/(gamma0*Js*CHARGE_ELECTRON*(1.0 + sq(ksi)));
 
         t.extraField = [this, _idx](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)
-                         { for(int npi = 0; npi<Tetra::NPI; npi++) { H.col(npi) += elec.Hm[_idx].col(npi); } };
+                         { for(int npi = 0; npi<Tetra::NPI; npi++) { H.col(npi) += Hm[_idx].col(npi); } };
 
         t.extraCoeffs_BE = [this, sigma, ksi, prefactor, &t](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
                                           Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdx,
@@ -52,7 +55,7 @@ void spinAcc::prepareExtras(void)
                 {
                 for (int npi = 0; npi < NPI; npi++)
                     {
-                    Eigen::Vector3d const &_gV = elec.gradV[t.idx].col(npi);
+                    Eigen::Vector3d const &_gV = gradV[t.idx].col(npi);
                     Eigen::Vector3d j_grad_u =
                     -sigma * Eigen::Vector3d(_gV.dot( Eigen::Vector3d(dUdx(IDX_X,npi), dUdy(IDX_X,npi), dUdz(IDX_X,npi))),
                                              _gV.dot( Eigen::Vector3d(dUdx(IDX_Y,npi), dUdy(IDX_Y,npi), dUdz(IDX_Y,npi))),
@@ -62,11 +65,32 @@ void spinAcc::prepareExtras(void)
                     for (int i = 0; i < N; i++)
                         {
                         const double ai_w = t.weight[npi] * a[i][npi];
-                        BE.col(i) += ai_w*( elec.Hm[t.idx].col(npi) + prefactor*m);
+                        BE.col(i) += ai_w*( Hm[t.idx].col(npi) + prefactor*m);
                         }
                     } // end loop on npi
                 }; //end lambda
         });//end for_each
+    }
+
+void spinAcc::calc_gradV(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV)
+    {
+    for (int npi = 0; npi < Tetra::NPI; npi++)
+        {
+        Eigen::Vector3d v(0,0,0);
+        for (int i = 0; i < Tetra::N; i++)
+            { v += V[tet.ind[i]] * tet.da.row(i); }
+        _gradV.col(npi) = v;
+        }
+    }
+
+void spinAcc::calc_Hm(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV,
+                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _Hm)
+    {
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> p_g;
+    tet.getPtGauss(p_g);
+    const double sigma = getSigma(tet);
+    for (int npi = 0; npi < Tetra::NPI; npi++)
+        { _Hm.col(npi) = -sigma * _gradV.col(npi).cross(p_g.col(npi)); }
     }
 
 bool spinAcc::solve(void)
@@ -135,7 +159,7 @@ void spinAcc::integrales(Tetra::Tet &tet,
     for (size_t ie=0; ie<N; ie++)
         {
         size_t i= tet.ind[ie];
-        V_nod[ie] = elec.V[i];
+        V_nod[ie] = V[i];
         }
 
     Eigen::Matrix<double,N,NPI> dadx;

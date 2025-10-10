@@ -35,13 +35,6 @@ public:
      * of nodes */
     std::vector<double> V;
 
-    /** table of the gradients of the potential, gradV.size() is the number of tetra */
-    std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > gradV;
-
-    /** table of the Hm vectors (contribution of spinAcc to the tet::integrales) ; Hm.size() is the
-     * number of tetra */
-    std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > Hm;
-
     /** basic informations on boundary conditions */
     void infos(void);
 
@@ -62,7 +55,7 @@ public:
     /** returns current density of the facette if it is defined in the boundary conditions, else zero */
     double getCurrentDensity(Facette::Fac const &fac) const;
 
-    /** solves the potential in V, computes gradV and Hm, save to text file if needed
+    /** solves the potential and stores result in V, save to text file if needed
      * if verbose set to true, some printing are sent to terminal */
     void compute(const bool verbose /**< [in] */, const std::string V_fileName /**< [in] output file name for V solution */);
 private:
@@ -90,13 +83,6 @@ template <typename T>
         v_idx.resize( std::distance( v_idx.begin(), std::unique(v_idx.begin(), v_idx.end()) ) );
         v_idx.shrink_to_fit();
         }
-
-    /** computes the gradient(V) for tetra tet */
-    void calc_gradV(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV);
-
-    /** computes Hm contributions for each npi for tetrahedron tet */
-    void calc_Hm(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV,
-                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _Hm);
 
     /** solver, using conjugate gradient with masking, with diagonal preconditionner and Dirichlet
      * boundary conditions, returns true if has converged */
