@@ -242,16 +242,20 @@ int main(int argc, char *argv[])
     electrostatSolver pot_solver = electrostatSolver(fem.msh, mySettings.paramTetra,
                                                      mySettings.paramFacette,
                                                      1e-8, mySettings.verbose, 1000);
+    spinAcc spinAcc_solver = spinAcc(fem.msh,mySettings.paramTetra,
+			                         mySettings.paramFacette,
+                                     1e-8, mySettings.verbose, 1000);
 
     if (mySettings.spin_acc)
         {
         std::string V_fileName("");
         if(mySettings.V_file) V_fileName = mySettings.getSimName() + "_V.sol";
+        pot_solver.V.resize(fem.msh.getNbNodes());
         pot_solver.compute(mySettings.verbose, V_fileName);
-        spinAcc spinAcc_solver = spinAcc(fem.msh,pot_solver.V,mySettings.paramTetra,
-			                             mySettings.paramFacette,1e-8, mySettings.verbose, 1000);
-
+        spinAcc_solver.setPotential(pot_solver.V);
+        spinAcc_solver.preCompute();
         fem.msh.buildBoundaryConditions(mySettings.paramFacette, spinAcc_solver.all_bc);
+        spinAcc_solver.compute();
         }
 
     chronometer fmm_counter(2);

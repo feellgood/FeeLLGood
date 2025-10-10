@@ -28,8 +28,7 @@ public:
             const double _tol /**< [in] tolerance for solvers */,
             const bool v /**< [in] verbose mode for iteration monitor */,
             const int max_iter /**< [in] maximum number of iteration */)
-        : msh(_msh), paramTetra(_pTetra), paramFacette(_pFac), iter("cg_dir",_tol,v,max_iter)
-        { V.resize(msh.getNbNodes()); }
+        : msh(_msh), paramTetra(_pTetra), paramFacette(_pFac), iter("cg_dir",_tol,v,max_iter) {}
 
     /** electrostatic potential values for boundary conditions, V.size() is the size of the vector
      * of nodes */

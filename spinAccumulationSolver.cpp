@@ -72,6 +72,29 @@ void spinAcc::prepareExtras(void)
         });//end for_each
     }
 
+void spinAcc::preCompute(void)
+    {
+    msh.s.resize(NOD);
+    std::for_each(msh.tet.begin(), msh.tet.end(), [this](Tetra::Tet const &tet)
+                 {
+                 Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _gradV;
+                 calc_gradV(tet, _gradV);
+                 gradV.push_back(_gradV);
+
+                 Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _Hm;
+                 calc_Hm(tet, _gradV, _Hm);
+                 Hm.push_back(_Hm);
+                 });
+    prepareExtras();
+    }
+
+void spinAcc::compute(void)
+    {
+    bool has_converged = solve();
+    if (!has_converged)
+        { std::cout << "spin accumulation solver: " << iter.infos() << std::endl; exit(1); }
+    }
+
 void spinAcc::calc_gradV(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV)
     {
     for (int npi = 0; npi < Tetra::NPI; npi++)
