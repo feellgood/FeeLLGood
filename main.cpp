@@ -255,7 +255,12 @@ int main(int argc, char *argv[])
         spinAcc_solver.setPotential(pot_solver.V);
         spinAcc_solver.preCompute();
         fem.msh.buildBoundaryConditions(mySettings.paramFacette, spinAcc_solver.all_bc);
-        spinAcc_solver.compute();
+        bool succeed = spinAcc_solver.compute();
+        if(!succeed)
+            {
+            mySettings.spin_acc = false;
+            std::cout << "Warning: spin diffusion solver failed, turn off spin accumulation computations.\n";
+            }
         }
 
     chronometer fmm_counter(2);

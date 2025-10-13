@@ -32,8 +32,8 @@ class spinAcc
     /** initializations: compute gradV and Hm and call prepareExtras method */
     void preCompute(void);
 
-    /** call solver and update spin diffusion solution */
-    void compute(void);
+    /** call solver and update spin diffusion solution, returns true if solver succeeded */
+    bool compute(void);
 
     /** set potential V */
     void setPotential(std::vector<double> &_V);
