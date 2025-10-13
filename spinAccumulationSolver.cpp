@@ -88,11 +88,18 @@ void spinAcc::preCompute(void)
     prepareExtras();
     }
 
-void spinAcc::compute(void)
+bool spinAcc::compute(void)
     {
     bool has_converged = solve();
     if (!has_converged)
-        { std::cout << "spin accumulation solver: " << iter.infos() << std::endl; exit(1); }
+        {
+        std::cout << "spin accumulation solver: " << iter.infos() << std::endl;
+        for(int i=0;i<NOD;i++)
+            { msh.s[i].setZero(); }
+        }
+    else
+        { if (verbose) { std::cout << "spin accumulation solved.\n"; } }
+    return has_converged;
     }
 
 void spinAcc::calc_gradV(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV)
@@ -148,12 +155,6 @@ bool spinAcc::solve(void)
     algebra::r_sparseMat Kr(Kw);
     std::vector<double> Xw(DIM_PROBLEM*NOD);
     algebra::bicg(iter, Kr, Xw, Lw);
-
-    if ( (iter.status  == algebra::ITER_OVERFLOW) || (iter.status == algebra::CANNOT_CONVERGE) || (iter.get_res() > iter.resmax) )
-        {
-        if (verbose)
-            { std::cout << "spin accumulation solver: " << iter.infos() << std::endl; }
-        }
 
     for (int i=0; i<NOD; i++)
         {
