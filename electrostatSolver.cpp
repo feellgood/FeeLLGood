@@ -6,6 +6,18 @@
 #include "algebra/cg.h"
 #include "solverUtils.h"  // build(Mat|Vect)
 
+bool electrostatSolver::checkBoundaryConditions(void) const
+    {
+    int nbSurfJ(0);
+    int nbSurfV(0);
+    std::for_each(paramFacette.begin(),paramFacette.end(),[&nbSurfJ,&nbSurfV](Facette::prm const &p)
+        {
+        if (std::isfinite(p.J)) nbSurfJ++;
+        if (std::isfinite(p.V)) nbSurfV++;
+        });
+    return ((nbSurfJ == 1)&&(nbSurfV == 1));
+    }
+
 void electrostatSolver::infos(void)
     {
     std::cout << "Boundary conditions:\n";

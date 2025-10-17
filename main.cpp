@@ -250,6 +250,12 @@ int main(int argc, char *argv[])
         {
         std::string V_fileName("");
         if(mySettings.V_file) V_fileName = mySettings.getSimName() + "_V.sol";
+        if (!pot_solver.checkBoundaryConditions())
+            {
+            std::cout << "Error: incorrect boundary conditions for potential solver.\n";
+            exit(1);
+            }
+        else if (mySettings.verbose) { std::cout << "boundary conditions Ok.\n"; }
         pot_solver.V.resize(fem.msh.getNbNodes());
         pot_solver.compute(mySettings.verbose, V_fileName);
         spinAcc_solver.setPotential(pot_solver.V);

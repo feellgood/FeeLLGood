@@ -34,6 +34,10 @@ public:
      * of nodes */
     std::vector<double> V;
 
+    /** check boundary conditions: mesh and settings have to define a single surface with constant current
+     * density J (normal componant to the surface) and another single surface with constant potential V */
+    bool checkBoundaryConditions(void) const;
+
     /** basic informations on boundary conditions */
     void infos(void);
 
