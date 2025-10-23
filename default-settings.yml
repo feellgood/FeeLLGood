@@ -129,8 +129,8 @@ mesh:
       # Density of states.
       dens_state: 1.0
 
-      # STT beta parameter: polarization rate.
-      beta: 0
+      # polarization rate.
+      P: 0
 
       # Diffusion length related to s-d coupling in a magnetic material.
       l_sd: 1.0
@@ -138,8 +138,8 @@ mesh:
       # Spin diffusion length in a metal, magnetic or not.
       l_sf: 1.0
 
-      # Spin Hall constant (for Spin Orbit Torque contribution to spin
-      # accumulation effect).
+      # Spin Hall constant for Spin Orbit Torque contribution to spin
+      # diffusion problem.
       spin_hall: 0
 
   # Material parameters of the surface regions defined by the mesh.
@@ -167,8 +167,8 @@ mesh:
       # electrostatic problem.
       V:
 
-      # polarization vector for spin accumulation diffusion problem, example value [0,0,1]
-      Pu:
+      # polarization vector for spin diffusion problem boundary condition
+      P: [0, 0, 1]
 
 # The initial magnetization can be provided as either:
 # - the name of a file in feeLLGood’s format (‘.sol’ file)

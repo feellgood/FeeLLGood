@@ -76,16 +76,16 @@ class spinAcc
     /** returns sigma of the tetraedron, (conductivity in (Ohm.m)^-1 */
     double getSigma(Tetra::Tet const &tet) const;
     
-    /** \f$ \beta \f$ is polarization rate of the current */
-    double getBeta(Tetra::Tet &tet) const;
+    /** \f$ P \f$ is polarization rate of the current */
+    double getPolarization(Tetra::Tet &tet) const;
 
     /** density of states at Fermi level, units : J^-1 nm^-3  */
     double getN0(Tetra::Tet &tet) const;
 
-    /** length s-d */
+    /** length s-d : only in magnetic material */
     double getLsd(Tetra::Tet &tet) const;
 
-    /** spin flip length */
+    /** spin flip length : exists in both non magnetic and magnetic metals */
     double getLsf(Tetra::Tet &tet) const;
 
     /** spin Hall constant */

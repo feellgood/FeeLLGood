@@ -71,12 +71,12 @@ struct prm
     Eigen::Vector3d ey;  /**< unit vector2 (for cubic anisotropy) */
     Eigen::Vector3d ez;  /**< unit vector3 (for cubic anisotropy) */
 
-    double beta;         /**< spin accumulation polarization rate */
+    double P;            /**< spin diffusion polarization rate */
     double N0;           /**< density of states */
     double sigma;        /**< conductivity */
     double lsd;          /**< diffusion length related to s-d coupling in a magnetic material */
     double lsf;          /**< spin diffusion length in a metal (magnetic or not) */
-    double spinHall;     /**< Spin Orbit Torque contribution to accumulation spin problem due to spin Hall effect */
+    double spinHall;     /**< Spin Orbit Torque contribution to spin diffusion due to spin Hall effect */
 
     double volume = 0; /**< total volume of the region */
 

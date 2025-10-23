@@ -13,7 +13,7 @@ mesh_size = 3
 class cylinder:
     def __init__(self,n,h,r):
         '''
-        define a geometric cylinder of radius r and length h, named n (should be a string) 
+        define a geometric cylinder of radius r and length h, named n (string) 
         '''
         self.name = n # region volume name
         self.height = h
@@ -56,19 +56,19 @@ l_e = 40
 r_e = 30
 e = cylinder("metal",l_e,r_e) #electrode
 if r_n > r_e:
-    print("Error: diameter of the magnetic nanopillar exceed diameter of the electrode.")
+    print("Error: diameter of the magnetic nanopillar exceed electrode diameter.")
     exit(1)
 
 # cross section of the mesh (xOz) plane:
 #
-#      ---  z= nw.height (#202) boundary condition V = 3.0
+#      ---  z= nw.height (#202) boundary condition J = 1.0
 #     |   |
 #     |   |
 #     |   |    magnet (z>0) radius = r_n
 #     |   |
 #     |---|  z=0
 #     |   |    electrode (z<0) radius = r_e
-#      ---   z= -e.height (#212)  boundary condition V = 0.1
+#      ---   z= -e.height (#212)  boundary condition V = 0.0
 
 gmsh.initialize()
 gmsh.option.setNumber("General.Terminal",verboseGmsh)
@@ -147,13 +147,14 @@ settings = {
         "filename": meshFileName,
         "length_unit": 1e-9,
         "volume_regions": {
-            nw.name: { "Ae": 1e-11, "Js": 1, "alpha_LLG": 0.05, "beta": 0.7, "sigma": 1.7e7 }, #Co
-            e.name: { "Ae": 0, "Js": 0, "beta": 0.7, "sigma": 5.8e7 } #Cu
+            nw.name: { "Ae": 1e-11, "Js": 1, "alpha_LLG": 0.05, "P": 0.7, "sigma": 1.7e7, "l_sd": 1,
+            "l_sf": 1}, #Co
+            e.name: { "Ae": 0, "Js": 0, "P": 0.7, "sigma": 5.8e7, "l_sf": 0.5 } #Cu
             },
         "surface_regions": {
             surf_regName: {},
-            surface_top_name2:{ "J": 1.0, "Pu":[0,0,1] },
-            surface_top_name:{ "V": 0.0, "Pu":[0,1,0] }
+            surface_top_name2:{ "V": 0.0 },
+            surface_top_name:{ "J": 1.0, "P":[0,1,0] }
             }
     },
     "initial_magnetization": [0.01, 0, 1],

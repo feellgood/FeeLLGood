@@ -179,7 +179,7 @@ void Settings::toYaml()
         std::cout << "      alpha_LLG: " << it->alpha_LLG << "\n";
         std::cout << "      sigma: " << it->sigma << "\n";
         std::cout << "      dens_state: " << it->N0 << "\n";
-        std::cout << "      beta: " << it->beta << "\n";
+        std::cout << "      P: " << it->P << "\n";
         std::cout << "      l_sd: " << it->lsd << "\n";
         std::cout << "      l_sf: " << it->lsf << "\n";
         std::cout << "      spin_hall: " << it->spinHall << "\n";
@@ -397,10 +397,11 @@ void Settings::read(YAML::Node yaml)
 
                 assign(p.sigma, volume["sigma"]);
                 assign(p.N0, volume["dens_state"]);
-                assign(p.beta, volume["beta"]);
+                assign(p.P, volume["P"]);
                 assign(p.lsd, volume["l_sd"]); // exists only for magnetic material, as Js
                 assign(p.lsf, volume["l_sf"]);
-                assign(p.spinHall, volume["spin_hall"]); // SOT contribution to spin accumulation
+                assign(p.spinHall, volume["spin_hall"]); // SOT contribution to spin diffusion,
+                                                         // through spin Hall effect
                 paramTetra.push_back(p);
                 }
             }  // mesh.volume_regions

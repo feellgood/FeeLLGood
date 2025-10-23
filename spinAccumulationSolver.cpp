@@ -13,8 +13,8 @@ double spinAcc::getSigma(Tetra::Tet const &tet) const
 double spinAcc::getN0(Tetra::Tet &tet) const
     { return paramTetra[tet.idxPrm].N0; }
 
-double spinAcc::getBeta(Tetra::Tet &tet) const
-    { return paramTetra[tet.idxPrm].beta; }
+double spinAcc::getPolarization(Tetra::Tet &tet) const
+    { return paramTetra[tet.idxPrm].P; }
 
 double spinAcc::getLsd(Tetra::Tet &tet) const
     { return paramTetra[tet.idxPrm].lsd; }
@@ -37,12 +37,12 @@ void spinAcc::prepareExtras(void)
         {
         const int _idx = t.idx;
         const double sigma = getSigma(t);
-        const double beta = getBeta(t);
+        const double P = getPolarization(t);
         const double lsd = getLsd(t);
         const double lsf = getLsf(t);
         const double ksi = sq(lsd/lsf);
         const double Js = getJs(t);// Js = Ms/nu_0
-        double prefactor = mu0*BOHRS_MUB*beta/(gamma0*Js*CHARGE_ELECTRON*(1.0 + sq(ksi)));
+        double prefactor = mu0*BOHRS_MUB*P/(gamma0*Js*CHARGE_ELECTRON*(1.0 + sq(ksi)));
 
         t.extraField = [this, _idx](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)
                          { for(int npi = 0; npi<Tetra::NPI; npi++) { H.col(npi) += Hm[_idx].col(npi); } };
@@ -174,7 +174,7 @@ void spinAcc::integrales(Tetra::Tet &tet,
     double sigma = getSigma(tet);
     double spinHall = getSpinHall(tet);
     double N0 = getN0(tet);
-    double beta = getBeta(tet);
+    double P = getPolarization(tet);
     double lsf = getLsf(tet);
     double D0=2.0*sigma/(sq(CHARGE_ELECTRON)*N0);
     Eigen::Matrix<double,N,1> V_nod;
@@ -218,7 +218,7 @@ void spinAcc::integrales(Tetra::Tet &tet,
             for (size_t ie=0; ie<N; ie++)
                 {
                 Eigen::Vector3d grad_ai = tet.da.row(ie);
-                double tmp = BOHRS_MUB*beta*sigma/CHARGE_ELECTRON*w*grad_ai.dot( gradV.col(npi) );
+                double tmp = BOHRS_MUB*P*sigma/CHARGE_ELECTRON*w*grad_ai.dot( gradV.col(npi) );
                 BE[    ie] += tmp*u_nod[0][ie];
                 BE[  N+ie] += tmp*u_nod[1][ie];
                 BE[2*N+ie] += tmp*u_nod[2][ie];

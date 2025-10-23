@@ -39,7 +39,7 @@ void prm::infos(void)
         cout << ", non magnetic metal.\n";
         cout << "l_sd = " << lsd << std::endl;
         cout << "l_sf = " << lsf << std::endl;
-        cout << "beta = " << beta << std::endl;
+        cout << "polarization rate = " << P << std::endl;
         cout << "density of states N0 = " << N0 << std::endl;
         cout << "sigma = " << sigma << std::endl;
         }
