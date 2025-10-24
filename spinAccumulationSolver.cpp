@@ -4,6 +4,18 @@
 #include "tags.h"
 #include "solverUtils.h"
 
+bool spinAcc::checkBoundaryConditions(void) const
+    {
+    int nbSurfJ(0);
+    int nbSurfZeroS(0);
+    std::for_each(paramFacette.begin(),paramFacette.end(),[&nbSurfJ,&nbSurfZeroS](Facette::prm const &p)
+        {
+        if (std::isfinite(p.J) && (p.J != 0)) nbSurfJ++;
+        if (p.s.norm() == 0) nbSurfZeroS++;
+        });
+    return ((nbSurfJ == 1)&&(nbSurfZeroS == 1));
+    }
+
 double spinAcc::getJs(Tetra::Tet const &tet) const
     { return paramTetra[tet.idxPrm].J; }
 
@@ -141,15 +153,18 @@ bool spinAcc::solve(void)
         buildVect<Tetra::N,DIM_PROBLEM>(elem.ind, L, Lw);
         } );
 
-    std::for_each(all_bc.BC.begin(),all_bc.BC.end(),[this,&Lw](Mesh::boundaryCondition<Eigen::Vector3d> &s)
+    // here are the boundary conditions
+    std::for_each(msh.fac.begin(),msh.fac.end(),[this,&Lw](Facette::Fac &f)
         {
-        std::for_each(s.facIdx.begin(),s.facIdx.end(),[this,&s,&Lw](int i)
-                {
-                std::vector<double> L(DIM_PROBLEM*Facette::N,0.0);
-                // s.value should be Eigen::Vector3d Q = -paramFacette[fac.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFacette[fac.idxPrm].Pu;
-                integrales(msh.fac[i],s.value,L);
-                buildVect<Facette::N,DIM_PROBLEM>(msh.fac[i].ind, L, Lw);
-                });
+        std::vector<double> L(DIM_PROBLEM*Facette::N,0.0);
+        Eigen::Vector3d s_value;
+        if (paramFacette[f.idxPrm].s.norm() == 0)
+            s_value.setZero();
+        else if (!std::isfinite( paramFacette[f.idxPrm].s.norm() ) &&
+                std::isfinite(paramFacette[f.idxPrm].J)) // we should also test polarization P
+            s_value = -paramFacette[f.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFacette[f.idxPrm].P;
+        integrales(f,s_value,L);
+        buildVect<Facette::N,DIM_PROBLEM>(f.ind, L, Lw);
         });
 
     algebra::r_sparseMat Kr(Kw);

@@ -205,7 +205,8 @@ void Settings::toYaml()
             std::cout << ' ' << it->V << '\n';
         if (spin_acc)
             {
-            std::cout << "      Pu: " << str(it->Pu) << "\n";
+            std::cout << "      P: " << str(it->P) << "\n";
+            std::cout << "      s: " << str(it->s) << "\n";
             }
         }
     std::cout << "initial_magnetization: ";
@@ -428,7 +429,8 @@ void Settings::read(YAML::Node yaml)
                     p.V = NAN;
                 if (!isnan(p.J) && !isnan(p.V))
                     error("A surface region cannot have both no-null J and V.");
-                assign(!NORMALIZE, p.Pu, surface["Pu"]);
+                assign(!NORMALIZE, p.P, surface["P"]);
+                assign(!NORMALIZE, p.s, surface["s"]);
                 paramFacette.push_back(p);
                 }
             }  // mesh.surface_regions

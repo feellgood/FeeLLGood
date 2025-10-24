@@ -26,9 +26,6 @@ class spinAcc
         msh(_msh), paramTetra(_pTetra),  paramFacette(_pFac),
         iter("bicg_dir",_tol,v,max_iter), verbose(v), NOD(_msh.getNbNodes()) {}
 
-    /** boundary conditions on different surfaces. They must not share any triangle nor nodes. */
-    Mesh::allBoundCond<Eigen::Vector3d> all_bc;
-
     /** initializations: compute gradV and Hm and call prepareExtras method */
     void preCompute(void);
 
@@ -37,6 +34,10 @@ class spinAcc
 
     /** set potential V */
     void setPotential(std::vector<double> &_V);
+
+    /** check boundary conditions: mesh and settings have to define a single surface with constant
+     * normal current density J, a vector polarization P and another single surface where spin diffusion = 0 */
+    bool checkBoundaryConditions(void) const;
 
     private:
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh */

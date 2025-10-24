@@ -153,7 +153,7 @@ settings = {
             },
         "surface_regions": {
             surf_regName: {},
-            surface_top_name2:{ "V": 0.0 },
+            surface_top_name2:{ "V": 0.0, "s": [0,0,0] },
             surface_top_name:{ "J": 1.0, "P":[0,1,0] }
             }
     },

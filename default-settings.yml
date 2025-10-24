@@ -170,6 +170,9 @@ mesh:
       # polarization vector for spin diffusion problem boundary condition
       P: [0, 0, 1]
 
+      # spin diffusion vector boundary condition, user should fix s to [0,0,0] on a single surface
+      s:
+
 # The initial magnetization can be provided as either:
 # - the name of a file in feeLLGood’s format (‘.sol’ file)
 # - an array of three expression depending on the Cartesian spatial
