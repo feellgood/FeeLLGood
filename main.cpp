@@ -255,12 +255,19 @@ int main(int argc, char *argv[])
             std::cout << "Error: incorrect boundary conditions for potential solver.\n";
             exit(1);
             }
-        else if (mySettings.verbose) { std::cout << "boundary conditions Ok.\n"; }
+        else if (mySettings.verbose)
+            { std::cout << " electrostatic problem boundary conditions Ok.\n"; }
         pot_solver.V.resize(fem.msh.getNbNodes());
         pot_solver.compute(mySettings.verbose, V_fileName);
         spinAcc_solver.setPotential(pot_solver.V);
         spinAcc_solver.preCompute();
-        fem.msh.buildBoundaryConditions(mySettings.paramFacette, spinAcc_solver.all_bc);
+        if (!spinAcc_solver.checkBoundaryConditions())
+            {
+            std::cout << "Error: incorrect boundary conditions for spin diffusion solver.\n";
+            exit(1);
+            }
+        else if (mySettings.verbose)
+            { std::cout << "spin diffusion problem boundary conditions Ok.\n"; }
         bool succeed = spinAcc_solver.compute();
         if(!succeed)
             {
