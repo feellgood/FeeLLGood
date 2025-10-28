@@ -74,7 +74,8 @@ static void create_dir_if_needed(std::string dirname)
 
 int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linAlg /**< [in] */,
                      scal_fmm::fmm &myFMM /**< [in] */, timing &t_prm,
-                     int &nt /**< [out] number of time steps performed */);
+                     int &nt /**< [out] number of time steps performed */,
+                     std::vector<Eigen::Vector3d> &s /**< [in] */ );
 
 // Return the number of characters in an UTF-8-encoded string.
 static int char_length(const std::string &s)
@@ -299,10 +300,8 @@ int main(int argc, char *argv[])
         perror("SIGTERM");
         return EXIT_FAILURE;
         }
-
     int nt;  // number of time steps
-    int status = time_integration(fem, mySettings, linAlg, myFMM, t_prm, nt);
-
+    int status = time_integration(fem, mySettings, linAlg, myFMM, t_prm, nt, spinAcc_solver.s);
     double total_time = counter.fp_elapsed();
     std::cout << "\nComputing time:\n\n";
     std::cout << "    total: " << counter.convertSeconds(total_time);

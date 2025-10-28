@@ -12,10 +12,9 @@
 using namespace std;
 using namespace Nodes;
 
-void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const int nt) const
+void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const int nt, std::vector<Eigen::Vector3d> &s) const
     {
     int save_period = settings.save_period;
-
     for (unsigned int i = 0; i < settings.evol_columns.size(); i++)
         {
         const std::string &col_name = settings.evol_columns[i];
@@ -142,7 +141,7 @@ void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const i
             }
 
         string metadata = settings.solMetadata(t_prm.get_t());
-        msh.savesol(settings.getPrecision(), str, metadata, settings.spin_acc);
+        msh.savesol(settings.getPrecision(), str, metadata, settings.spin_acc, s);
         if (settings.verbose)
             {
             cout << "all nodes written." << endl;
@@ -151,7 +150,7 @@ void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const i
     }
 
 void Mesh::mesh::savesol(const int precision, const std::string fileName,
-                         std::string const &metadata, bool withSpinAcc) const
+                         std::string const &metadata, bool withSpinAcc, std::vector<Eigen::Vector3d> &s) const
     {
     ofstream fout(fileName, ios::out);
     if (fout.fail())
@@ -161,7 +160,6 @@ void Mesh::mesh::savesol(const int precision, const std::string fileName,
         }
 
     fout << metadata << std::scientific << std::setprecision(precision);
-
     Eigen::IOFormat outputSolFmt(precision, Eigen::DontAlignCols, "\t", "\t", "", "", "", "");
     if(!withSpinAcc)
         {
@@ -177,8 +175,7 @@ void Mesh::mesh::savesol(const int precision, const std::string fileName,
             {
             const int j = node_index[i];
             const dataNode &dn = node[j].d[Nodes::NEXT];
-            fout << i << '\t' << dn.u.format(outputSolFmt) << '\t' << dn.phi << '\t' <<
-                    s[j].format(outputSolFmt) << endl;
+            fout << i << '\t' << dn.u.format(outputSolFmt) << '\t' << dn.phi << '\t' << s[j].format(outputSolFmt) << endl;
             }
         }
     fout.close();

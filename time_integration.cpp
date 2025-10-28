@@ -102,7 +102,7 @@ static void show_progress(double fraction_done)
 /** Check whether we received a signal politely asking us to terminate.
  * If so, then save the current state and exit. */
 static void exit_if_signal_received(const Fem &fem, const Settings &settings, const timing &t_prm,
-                                    const Stats &stats)
+                                    const Stats &stats, std::vector<Eigen::Vector3d> &s)
     {
     extern volatile sig_atomic_t received_signal;  // set by signal_handler() in main.cpp
     if (!received_signal) return;
@@ -117,7 +117,7 @@ static void exit_if_signal_received(const Fem &fem, const Settings &settings, co
         std::string fileName =
                 settings.r_path_output_dir + '/' + settings.getSimName() + "_at_exit.sol";
         std::string metadata = settings.solMetadata(t_prm.get_t());
-        fem.msh.savesol(settings.getPrecision(), fileName, metadata, settings.spin_acc);
+        fem.msh.savesol(settings.getPrecision(), fileName, metadata, settings.spin_acc, s);
         std::cout << "Magnetization configuration saved to " << fileName << "\n";
         }
     else
@@ -148,13 +148,11 @@ inline void compute_all(Fem &fem, Settings &settings, scal_fmm::fmm &myFMM, cons
     }
 
 int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linAlg /**< [in] */,
-                     scal_fmm::fmm &myFMM /**< [in] */, timing &t_prm, int &nt)
+                     scal_fmm::fmm &myFMM /**< [in] */, timing &t_prm, int &nt, std::vector<Eigen::Vector3d> &s)
     {
     compute_all(fem, settings, myFMM, t_prm.get_t());
-
     std::string baseName = settings.r_path_output_dir + '/' + settings.getSimName();
     std::string str = baseName + ".evol";
-
     std::ofstream fout(str);
 
     if (fout.fail())
@@ -181,11 +179,10 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
     for (int step_nb = 0; step_nb <= step_count; step_nb++)
         {
         double t_target = t_initial + step_nb * t_step;
-
         // Loop over the integration time steps within a visible step.
         while (t_prm.get_t() < t_target)
             {
-            exit_if_signal_received(fem, settings, t_prm, stats);
+            exit_if_signal_received(fem, settings, t_prm, stats, s);
 
             t_prm.set_dt(stepper(t_target - t_prm.get_t()));
             bool last_step = (t_prm.get_dt() == t_target - t_prm.get_t());
@@ -259,7 +256,7 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
 
             stats.max_angle = std::max(stats.max_angle, fem.msh.max_angle());
             }  // endwhile
-        fem.saver(settings, t_prm, fout, nt_output++);
+        fem.saver(settings, t_prm, fout, nt_output++, s);
         }                                       // end for
     if (!settings.verbose) show_progress(1.0);  // show we are done
 

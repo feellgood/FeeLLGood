@@ -86,7 +86,7 @@ void spinAcc::prepareExtras(void)
 
 void spinAcc::preCompute(void)
     {
-    msh.s.resize(NOD);
+    s.resize(NOD);
     std::for_each(msh.tet.begin(), msh.tet.end(), [this](Tetra::Tet const &tet)
                  {
                  Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _gradV;
@@ -107,7 +107,7 @@ bool spinAcc::compute(void)
         {
         std::cout << "spin accumulation solver: " << iter.infos() << std::endl;
         for(int i=0;i<NOD;i++)
-            { msh.s[i].setZero(); }
+            { s[i].setZero(); }
         }
     else
         { if (verbose) { std::cout << "spin accumulation solved.\n"; } }
@@ -172,8 +172,9 @@ bool spinAcc::solve(void)
     algebra::bicg(iter, Kr, Xw, Lw);
 
     for (int i=0; i<NOD; i++)
+        for (int j=0; j<3; j++)
         {
-        msh.s[i] = Eigen::Vector3d(Xw[DIM_PROBLEM*i], Xw[DIM_PROBLEM*i + 1], Xw[DIM_PROBLEM*i +2]);
+        s[i][j] = Xw[DIM_PROBLEM*i + j];
         }
     return (iter.status == algebra::CONVERGED);
     }

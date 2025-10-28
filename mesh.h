@@ -252,7 +252,8 @@ public:
     void savesol(const int precision /**< [in] numeric precision in .sol output text file */,
                  const std::string fileName /**< [in] */,
                  std::string const &metadata /**< [in] */,
-                  bool withSpinAcc /**< [in] */ ) const;
+                 bool withSpinAcc /**< [in] */,
+                 std::vector<Eigen::Vector3d> &s /**< [in] spin accumulation (might be empty) */) const;
 
     /** setter for node[i]; what_to_set will fix what is the part of the node struct to set (usefull
      * for fmm_demag.h) */
@@ -274,9 +275,6 @@ public:
      * Each pair is sorted: first < second.
      * The list is sorted lexicographically, as per std::pair::operator<(). */
     std::vector<std::pair<int, int>> edges;
-
-    /** spin accumulation solution over the nodes (might be empty) */
-    std::vector<Eigen::Vector3d> s;
 
 private:
     /** node container: not initialized by constructor, but later while reading the mesh by member
