@@ -168,7 +168,8 @@ public:
 
     /** saving function for a solution */
     void saver(Settings &settings /**< [in] */, timing const &t_prm /**< [in] */,
-               std::ofstream &fout /**< [out] */, const int nt /**< [in] */) const;
+               std::ofstream &fout /**< [out] */, const int nt /**< [in] */,
+               std::vector<Eigen::Vector3d> &s /**< [in] */ ) const;
 
     /** recentering algorithm for the study of the motion of a domain wall.
 

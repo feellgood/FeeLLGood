@@ -39,6 +39,9 @@ class spinAcc
      * normal current density J, a vector polarization P and another single surface where spin diffusion = 0 */
     bool checkBoundaryConditions(void) const;
 
+    /** spin accumulation solution over the nodes */
+    std::vector<Eigen::Vector3d> s;
+
     private:
     /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh */
     Mesh::mesh msh;

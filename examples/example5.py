@@ -8,7 +8,7 @@ import gmsh
 verboseGmsh = False
 
 #all dimensions are in nm
-mesh_size = 3
+mesh_size = 5
 
 class cylinder:
     def __init__(self,n,h,r):
@@ -131,25 +131,25 @@ gmsh.model.geo.synchronize() # we have to synchronize before the call to 'genera
 gmsh.model.mesh.generate(3) # 3 is the dimension of the mesh
         
 gmsh.write(meshFileName)
-
 print(f"Generated {meshFileName}")
 gmsh.finalize()
 
+# warning: Cobalt l_sd was randomly choosen, just to have spin diffusion solver converges
 settings = {
     "outputs": {
         "file_basename": "test_ex5",
         "evol_time_step": 1e-12,
         "final_time": 2e-11,
         "evol_columns": [ "t", "<Mx>", "<My>", "<Mz>", "E_tot" ],
-        "mag_config_every": False
+        "mag_config_every": 5
     },
     "mesh": {
         "filename": meshFileName,
         "length_unit": 1e-9,
         "volume_regions": {
-            nw.name: { "Ae": 1e-11, "Js": 1, "alpha_LLG": 0.05, "P": 0.7, "sigma": 1.7e7, "l_sd": 1,
-            "l_sf": 1}, #Co
-            e.name: { "Ae": 0, "Js": 0, "P": 0.7, "sigma": 5.8e7, "l_sf": 0.5 } #Cu
+            nw.name: { "Ae": 1e-11, "Js": 1, "alpha_LLG": 0.05, "P": 0.7, "sigma": 1.7e7,
+                       "l_sd": 10e-9, "l_sf": 12.5e-9}, #Co
+            e.name: { "Ae": 0, "Js": 0, "P": 0.7, "sigma": 5.8e7, "l_sf": 350e-9 } #Cu
             },
         "surface_regions": {
             surf_regName: {},
