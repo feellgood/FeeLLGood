@@ -97,6 +97,16 @@ public:
         auto last = std::unique(EXEC_POL, edges.begin(), edges.end());
         edges.erase(last, edges.end());
         edges.shrink_to_fit();  // save memory, as this could be quite big
+        magNode.resize(node.size());
+        std::fill(magNode.begin(),magNode.end(),false);
+        std::for_each(tet.begin(),tet.end(),[this](Tetra::Tet &te)
+                {
+                if(isMagnetic(te))
+                    {
+                    for (int i=0;i<4;i++)
+                        { magNode[te.ind[i]] = true; }
+                    }
+                });
         }
 
     /** return number of nodes  */
@@ -248,7 +258,12 @@ public:
         return std::acos(min_dot_product);
         }
 
-    /** text file (tsv) writing function for a solution, node indices are zero based */
+    /** text file (tsv) writing function for a solution, node indices are zero based
+     * first column is index, then magnetization components, then scalar magnetic potential.
+     * If spin accumulation was involved, there are three extra columns for the componants of the
+     * spin diffusion vector.
+     * Since some volume region might be non magnetic, magnetization is undefined on those nodes and
+     * nan is used */
     void savesol(const int precision /**< [in] numeric precision in .sol output text file */,
                  const std::string fileName /**< [in] */,
                  std::string const &metadata /**< [in] */,
@@ -276,6 +291,10 @@ public:
      * The list is sorted lexicographically, as per std::pair::operator<(). */
     std::vector<std::pair<int, int>> edges;
 
+    /** list of the magnetic nodes, using inner indices (non gmsh indices). If true it is magnetic.
+     * a node is magnetic if it belongs to a magnetic tetrahedron. Consequently any node on a
+     * magnetic/non magnetic interface is set to true in magNode. */
+    std::vector<bool> magNode;
 private:
     /** node container: not initialized by constructor, but later while reading the mesh by member
      * function init_node */
