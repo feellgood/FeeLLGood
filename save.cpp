@@ -161,22 +161,19 @@ void Mesh::mesh::savesol(const int precision, const std::string fileName,
 
     fout << metadata << std::scientific << std::setprecision(precision);
     Eigen::IOFormat outputSolFmt(precision, Eigen::DontAlignCols, "\t", "\t", "", "", "", "");
-    if(!withSpinAcc)
+    for (unsigned int i = 0; i < node.size(); i++)
         {
-        for (unsigned int i = 0; i < node.size(); i++)
-            {
-            const dataNode &dn = node[node_index[i]].d[Nodes::NEXT];
-            fout << i << '\t' << dn.u.format(outputSolFmt) << '\t' << dn.phi << endl;
-            }
-        }
-    else
-        {
-        for (unsigned int i = 0; i < node.size(); i++)
-            {
-            const int j = node_index[i];
-            const dataNode &dn = node[j].d[Nodes::NEXT];
-            fout << i << '\t' << dn.u.format(outputSolFmt) << '\t' << dn.phi << '\t' << s[j].format(outputSolFmt) << endl;
-            }
+        const int j = node_index[i];
+        const dataNode &dn = node[j].d[Nodes::NEXT];
+        fout << i << '\t';
+        if (magNode[j])
+            { fout << dn.u.format(outputSolFmt); }
+        else
+            { fout << "nan\tnan\tnan"; }
+        fout << '\t' << dn.phi;
+        if (withSpinAcc)
+            { fout << '\t' << s[j].format(outputSolFmt); }
+        fout << endl;
         }
     fout.close();
     }

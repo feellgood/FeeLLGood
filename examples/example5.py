@@ -8,7 +8,7 @@ import gmsh
 verboseGmsh = False
 
 #all dimensions are in nm
-mesh_size = 5
+mesh_size = 10
 
 class cylinder:
     def __init__(self,n,h,r):
@@ -157,7 +157,7 @@ settings = {
             surface_top_name:{ "J": 1.0, "P":[0,1,0] }
             }
     },
-    "initial_magnetization": [0.01, 0, 1],
+    "initial_magnetization": ["-y", "x", "2e-9"],
     "Bext": [0, 0, 0],
     "demagnetizing_field_solver": { "nb_threads": 32 },
     "time_integration": {
