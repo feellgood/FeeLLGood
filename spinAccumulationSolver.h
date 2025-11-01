@@ -7,7 +7,7 @@
 #include "tetra.h"
 #include "electrostatSolver.h"
 #include "solverUtils.h"
-
+#include "meshUtils.h"
 /** \class spinAcc
  container for Spin Accumulation constants, diffusive accumulation spin model, Boundary conditions
  (potential fixed value on one surface, current density on another surface)
@@ -24,7 +24,15 @@ class spinAcc
     const bool v /**< [in] verbose bool */,
     const int max_iter /**< [in] maximum number of iteration */):
         msh(_msh), paramTetra(_pTetra),  paramFacette(_pFac),
-        iter("bicg_dir",_tol,v,max_iter), verbose(v), NOD(_msh.getNbNodes()) {}
+        iter("bicg_dir",_tol,v,max_iter), verbose(v), NOD(_msh.getNbNodes())
+        {
+        valDirichlet.resize(DIM_PROBLEM*NOD);
+        boundaryConditions();
+        }
+
+    /** boundary conditions: a surface with a fixed s, and another surface with fixed normal current
+     * density J and polarization vector P */
+    void boundaryConditions(void);
 
     /** initializations: compute gradV and Hm and call prepareExtras method */
     void preCompute(void);
@@ -37,7 +45,7 @@ class spinAcc
 
     /** check boundary conditions: mesh and settings have to define a single surface with constant
      * normal current density J, a vector polarization P and another single surface where spin diffusion = 0 */
-    bool checkBoundaryConditions(void) const;
+    bool checkBoundaryConditions(bool verbose) const;
 
     /** spin accumulation solution over the nodes */
     std::vector<Eigen::Vector3d> s;
@@ -54,6 +62,13 @@ class spinAcc
 
     /** container for potential values */
     std::vector<double> V;
+
+    /** Dirichlet values of the components of s on the nodes, it is zero if the node is not in idxDirichlet */
+    std::vector<double> valDirichlet;
+
+    /** list of the indices for Dirichlet boundary conditions, it contains the indices of the nodes
+     * where s is given by the user to be a constant on a surface */
+    std::vector<int> idxDirichlet;
 
     /** table of the gradients of the potential, gradV.size() is the number of tetra */
     std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > gradV;

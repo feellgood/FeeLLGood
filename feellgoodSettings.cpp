@@ -429,8 +429,10 @@ void Settings::read(YAML::Node yaml)
                     p.V = NAN;
                 if (!isnan(p.J) && !isnan(p.V))
                     error("A surface region cannot have both no-null J and V.");
-                assign(!NORMALIZE, p.P, surface["P"]);
-                assign(!NORMALIZE, p.s, surface["s"]);
+                if (!assign(!NORMALIZE, p.P, surface["P"]))
+                    {p.P = Eigen::Vector3d(NAN,NAN,NAN); }
+                if (!assign(!NORMALIZE, p.s, surface["s"]))
+                    { p.s = Eigen::Vector3d(NAN,NAN,NAN); }
                 paramFacette.push_back(p);
                 }
             }  // mesh.surface_regions
