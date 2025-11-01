@@ -4,16 +4,65 @@
 #include "tags.h"
 #include "solverUtils.h"
 
-bool spinAcc::checkBoundaryConditions(void) const
+bool spinAcc::checkBoundaryConditions(bool verbose) const
     {
     int nbSurfJ(0);
-    int nbSurfZeroS(0);
-    std::for_each(paramFacette.begin(),paramFacette.end(),[&nbSurfJ,&nbSurfZeroS](Facette::prm const &p)
+    int nbSurfS(0);
+    if (verbose)
+        { std::cout<<"total surface region: "<<paramFacette.size()<<std::endl; }
+    std::for_each(paramFacette.begin(),paramFacette.end(),[&nbSurfJ,&nbSurfS,verbose](Facette::prm const &p)
         {
-        if (std::isfinite(p.J) && (p.J != 0)) nbSurfJ++;
-        if (p.s.norm() == 0) nbSurfZeroS++;
+        if(p.regName != "__default__")
+            {
+            if (verbose)
+                {
+                std::cout << p.regName << " : J= " << p.J << "; s= {" << p.s[0] << ';' << p.s[1]
+                          << ';' << p.s[2] << "}\n";
+                }
+            if (std::isfinite(p.J)) nbSurfJ++;
+            if (std::isfinite(p.s.norm())) nbSurfS++;
+            }
         });
-    return ((nbSurfJ == 1)&&(nbSurfZeroS == 1));
+    return ((nbSurfJ == 1)&&(nbSurfS == 1));
+    }
+
+void spinAcc::boundaryConditions(void)
+    {
+    std::fill(valDirichlet.begin(),valDirichlet.end(),0.0);
+    for(unsigned int i=0;i<msh.fac.size();i++)
+        {
+        Facette::Fac &f = msh.fac[i];
+        // we might also have to test polarization P
+        if (std::isnan(paramFacette[f.idxPrm].s.norm()) &&  std::isfinite(paramFacette[f.idxPrm].J))
+            {
+            Eigen::Vector3d s_value = -paramFacette[f.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFacette[f.idxPrm].P;
+            for(int j=0;j<Facette::N;j++)
+                {
+                int k = f.ind[j];
+                valDirichlet[k]=s_value[Nodes::IDX_X];
+                idxDirichlet.push_back(k);
+                valDirichlet[k + NOD]=s_value[Nodes::IDX_Y];
+                idxDirichlet.push_back(k + NOD);
+                valDirichlet[k + 2*NOD]=s_value[Nodes::IDX_Z];
+                idxDirichlet.push_back(k + 2*NOD);
+                }
+            }
+        else if (std::isfinite(paramFacette[f.idxPrm].s.norm()) &&  std::isnan(paramFacette[f.idxPrm].J))
+            {
+            Eigen::Vector3d s_value = paramFacette[f.idxPrm].s;
+            for(int j=0;j<Facette::N;j++)
+                {
+                int k = f.ind[j];
+                valDirichlet[k]=s_value[Nodes::IDX_X];
+                idxDirichlet.push_back(k);
+                valDirichlet[k + NOD]=s_value[Nodes::IDX_Y];
+                idxDirichlet.push_back(k + NOD);
+                valDirichlet[k + 2*NOD]=s_value[Nodes::IDX_Z];
+                idxDirichlet.push_back(k + 2*NOD);
+                }
+            }
+        }
+    suppress_copies<int>(idxDirichlet);
     }
 
 double spinAcc::getJs(Tetra::Tet const &tet) const
@@ -169,7 +218,7 @@ bool spinAcc::solve(void)
 
     algebra::r_sparseMat Kr(Kw);
     std::vector<double> Xw(DIM_PROBLEM*NOD);
-    algebra::bicg(iter, Kr, Xw, Lw);
+    algebra::bicg_dir(iter, Kr, Xw, Lw, valDirichlet, idxDirichlet);
 
     for (int i=0; i<NOD; i++)
         for (int j=0; j<3; j++)

@@ -262,7 +262,7 @@ int main(int argc, char *argv[])
         pot_solver.compute(mySettings.verbose, V_fileName);
         spinAcc_solver.setPotential(pot_solver.V);
         spinAcc_solver.preCompute();
-        if (!spinAcc_solver.checkBoundaryConditions())
+        if (!spinAcc_solver.checkBoundaryConditions(mySettings.verbose))
             {
             std::cout << "Error: incorrect boundary conditions for spin diffusion solver.\n";
             exit(1);
@@ -272,8 +272,8 @@ int main(int argc, char *argv[])
         bool succeed = spinAcc_solver.compute();
         if(!succeed)
             {
-            mySettings.spin_acc = false;
-            std::cout << "Warning: spin diffusion solver failed, turn off spin accumulation computations.\n";
+            std::cout << "Error: spin diffusion solver failed.\n";
+            exit(1);
             }
         }
 
