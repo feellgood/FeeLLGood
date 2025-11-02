@@ -79,10 +79,13 @@ static void replace(std::string &s, const std::string &search, const std::string
 static const char *str(bool x) { return x ? "true" : "false"; }
 
 // Stringify a vector
+// do NOT use std::to_string here, because cout << to_string(1e-7); does print 0.000000
+// with C++20 we should use std::format
 static const std::string str(Eigen::Vector3d v)
     {
-    return std::string("[") + std::to_string(v.x()) + ", " + std::to_string(v.y()) + ", "
-           + std::to_string(v.z()) + "]";
+    char buffer[100];
+    std::sprintf(buffer,"[%g, %g, %g]",v.x(),v.y(),v.z());
+    return std::string(buffer);
     }
 
 // Stringify a string: if it contains a newline, convert it to a multiline string in "literal style"
