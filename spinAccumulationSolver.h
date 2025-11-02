@@ -70,6 +70,10 @@ class spinAcc
      * where s is given by the user to be a constant on a surface */
     std::vector<int> idxDirichlet;
 
+    /** fill valDirichlet and idxDirichlet vectors with k, a node index from fac.ind and the
+     * corresponding spin diffusion s value*/
+    void fillDirichletData(const int k, Eigen::Vector3d &s_value);
+
     /** table of the gradients of the potential, gradV.size() is the number of tetra */
     std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > gradV;
 
