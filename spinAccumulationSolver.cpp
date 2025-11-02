@@ -26,42 +26,34 @@ bool spinAcc::checkBoundaryConditions(bool verbose) const
     return ((nbSurfJ == 1)&&(nbSurfS == 1));
     }
 
+void spinAcc::fillDirichletData(const int k, Eigen::Vector3d &s_value)
+    {
+    valDirichlet[3*k] = s_value[Nodes::IDX_X];
+    idxDirichlet.push_back(3*k);
+    valDirichlet[3*k + 1] = s_value[Nodes::IDX_Y];
+    idxDirichlet.push_back(3*k + 1);
+    valDirichlet[3*k + 2] = s_value[Nodes::IDX_Z];
+    idxDirichlet.push_back(3*k + 2);
+    }
+
 void spinAcc::boundaryConditions(void)
     {
     std::fill(valDirichlet.begin(),valDirichlet.end(),0.0);
-    for(unsigned int i=0;i<msh.fac.size();i++)
+    std::for_each(msh.fac.begin(),msh.fac.end(),[this](Facette::Fac &f)
         {
-        Facette::Fac &f = msh.fac[i];
-        // we might also have to test polarization P
         if (std::isnan(paramFacette[f.idxPrm].s.norm()) &&  std::isfinite(paramFacette[f.idxPrm].J))
-            {
+            {// TODO: check that formula, especially the sign with current convention
             Eigen::Vector3d s_value = -paramFacette[f.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFacette[f.idxPrm].P;
             for(int j=0;j<Facette::N;j++)
-                {
-                int k = f.ind[j];
-                valDirichlet[k]=s_value[Nodes::IDX_X];
-                idxDirichlet.push_back(k);
-                valDirichlet[k + NOD]=s_value[Nodes::IDX_Y];
-                idxDirichlet.push_back(k + NOD);
-                valDirichlet[k + 2*NOD]=s_value[Nodes::IDX_Z];
-                idxDirichlet.push_back(k + 2*NOD);
-                }
+                { fillDirichletData(f.ind[j],s_value); }
             }
         else if (std::isfinite(paramFacette[f.idxPrm].s.norm()) &&  std::isnan(paramFacette[f.idxPrm].J))
             {
             Eigen::Vector3d s_value = paramFacette[f.idxPrm].s;
             for(int j=0;j<Facette::N;j++)
-                {
-                int k = f.ind[j];
-                valDirichlet[k]=s_value[Nodes::IDX_X];
-                idxDirichlet.push_back(k);
-                valDirichlet[k + NOD]=s_value[Nodes::IDX_Y];
-                idxDirichlet.push_back(k + NOD);
-                valDirichlet[k + 2*NOD]=s_value[Nodes::IDX_Z];
-                idxDirichlet.push_back(k + 2*NOD);
-                }
+                { fillDirichletData(f.ind[j],s_value); }
             }
-        }
+        });
     suppress_copies<int>(idxDirichlet);
     }
 
