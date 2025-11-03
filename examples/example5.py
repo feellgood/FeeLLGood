@@ -135,6 +135,8 @@ print(f"Generated {meshFileName}")
 gmsh.finalize()
 
 # warning: Cobalt l_sd was randomly choosen, just to have spin diffusion solver converges
+# polarization vector P is modelling a polarizer "outside" the mesh, such as a polarizing layer. It
+# is attibuted to the adjacency surface of the polarizing layer and the magnet here. 
 settings = {
     "outputs": {
         "file_basename": "test_ex5",
@@ -153,7 +155,7 @@ settings = {
             },
         "surface_regions": {
             surf_regName: {},
-            surface_top_name2:{ "V": 0.0, "s": [1e-7,2e-7,3e-7] },
+            surface_top_name2:{ "V": 0.0, "s": [0,0,0] },
             surface_top_name:{ "J": 1.0, "P":[0,1,0] }
             }
     },

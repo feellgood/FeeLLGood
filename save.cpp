@@ -165,12 +165,7 @@ void Mesh::mesh::savesol(const int precision, const std::string fileName,
         {
         const int j = node_index[i];
         const dataNode &dn = node[j].d[Nodes::NEXT];
-        fout << i << '\t';
-        if (magNode[j])
-            { fout << dn.u.format(outputSolFmt); }
-        else
-            { fout << "nan\tnan\tnan"; }
-        fout << '\t' << dn.phi;
+        fout << i << '\t' << dn.u.format(outputSolFmt) << '\t' << dn.phi;
         if (withSpinAcc)
             { fout << '\t' << s[j].format(outputSolFmt); }
         fout << endl;
