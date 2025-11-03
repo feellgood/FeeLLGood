@@ -30,7 +30,7 @@ public:
     /** constructor : read mesh file, reorder indices and computes some values related to the mesh :
      center and length along coordinates,full volume */
     inline mesh(Settings &mySets /**< [in] */)
-        : paramTetra(mySets.paramTetra)
+        : paramTetra(mySets.paramTetra), volumeRegions(mySets.paramTetra.size())
         {
         readMesh(mySets);
         indexReorder();
@@ -76,6 +76,12 @@ public:
                     });
         vol = std::transform_reduce(paramTetra.begin(), paramTetra.end(), 0.0,
                 std::plus<>(), [](const Tetra::prm &region){ return region.volume; });
+
+        // Build the list of tetrahedrons for each region.
+        std::for_each(tet.begin(), tet.end(), [this](Tetra::Tet const &te)
+            {
+            volumeRegions[te.idxPrm].push_back(te.idx);
+            });
 
         // Build the list of all the mesh edges.
         edges.reserve(tet.size() * 6);  // 6 (non unique) edges per tetrahedron
@@ -239,6 +245,9 @@ private:
      *
      * This is the inverse of the permutation we applied when sorting the nodes. */
     std::vector<int> node_index;
+
+    /** List of tetrahedrons making each volume region. */
+    std::vector<std::vector<int>> volumeRegions;
 
     /** test if mesh file contains surfaces and regions mentionned in yaml settings and their dimensions */
     void checkMeshFile(Settings const &mySets /**< [in] */);
