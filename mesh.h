@@ -186,7 +186,7 @@ public:
                    const std::string fileName /**< [in] input .sol text file */);
 
     /** computes an analytical initial magnetization distribution as a starting point for the
-     * simulation */
+     * simulation. If the node is not magnetic then it is set to NAN. */
     inline void init_distrib(Settings const &mySets /**< [in] */)
         {
         for (int nodeIdx = 0; nodeIdx < int(node.size()); ++nodeIdx)
@@ -194,6 +194,14 @@ public:
             Nodes::Node &n = node[nodeIdx];
             n.d[Nodes::NEXT].phi = 0.;
             n.d[Nodes::NEXT].phiv = 0.;
+
+            // A non-magnetic node's magnetization is a vector of NAN.
+            if (!magNode[nodeIdx])
+                {
+                n.d[Nodes::CURRENT].u = Eigen::Vector3d(NAN, NAN, NAN);
+                n.d[Nodes::NEXT].u = n.d[Nodes::CURRENT].u;
+                continue;
+                }
 
             // If the initial magnetization depends only on the node position, we do not need to
             // build the list of region names.
