@@ -9,8 +9,11 @@
 #include "solverUtils.h"
 #include "meshUtils.h"
 /** \class spinAcc
- container for Spin Accumulation constants, diffusive accumulation spin model, Boundary conditions
- (potential fixed value on one surface, current density on another surface)
+ container for Spin Accumulation constants, solver and related datas. The model obeys the diffusive
+ spin equation. The boundary conditions are Dirichlet type. User has to provide through mesh and
+ settings a surface S0 where spin diffusion vector s is a constant (zero recommended), and another
+ surface S1 where current density and spin polarization is defined. This surface S1 must be the same
+ as the one given to the potential solver for its own boundary conditions.
  */
 
 class spinAcc

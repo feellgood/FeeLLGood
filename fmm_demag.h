@@ -3,7 +3,7 @@
 
 /** \file fmm_demag.h
 \brief this header is the interface to scalfmm. Its purpose is to prepare an octree for the application of
-the fast multipole algorithm, and to compute the demag field.
+the fast multipole algorithm, and to compute the scalar magnetic potential and the demagnetizing field.
 */
 
 #include "Components/FParticleType.hpp"
