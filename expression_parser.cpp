@@ -30,9 +30,20 @@ function atanh(x) { return abs(x)<1e-5 ? x : log((1 + x)/(1 - x)) / 2; }
 Array.prototype.includes = function(value) { return this.indexOf(value) != -1; };
 )--";
 
+// JavaScript print(): output debug messages from a user JavaScript function.
+static duk_ret_t native_print(duk_context *ctx) {
+    std::cout << "SCRIPT:";
+    for (int i = 0; i < duk_get_top(ctx); ++i)
+        std::cout << ' ' << duk_to_string(ctx, i);
+    std::cout << '\n';
+    return 0;  /* no return value (= undefined) */
+}
+
 ExpressionParser::ExpressionParser()
     {
     ctx = duk_create_heap_default();
+    duk_push_c_function(ctx, native_print, DUK_VARARGS);
+    duk_put_global_string(ctx, "print");
     duk_int_t err = duk_peval_string(ctx, js_library);
     die_if_error(err);
     duk_pop(ctx);  // drop the result of the evaluation
