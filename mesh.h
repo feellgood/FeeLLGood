@@ -294,6 +294,10 @@ public:
     /** return true if this tetraedron is magnetic */
     inline bool isMagnetic(const Tetra::Tet &t) { return (paramTetra[t.idxPrm].J > 0); }
 
+    /** return true if this facet is magnetic */
+    inline bool isMagnetic(const Facette::Fac &f)
+        { return (magNode[f.ind[0]] && magNode[f.ind[1]] && magNode[f.ind[2]]); }
+
     /** Edges of all the tetrahedrons, i.e. all the unique pairs of adjacent node indices.
      * Each pair is sorted: first < second.
      * The list is sorted lexicographically, as per std::pair::operator<(). */

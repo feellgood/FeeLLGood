@@ -63,25 +63,42 @@ public:
                std::vector<Tetra::prm> & prmTet /**< [in] */,
                std::vector<Facette::prm> & prmFac /**< [in] */,
                const int ScalfmmNbThreads /**< [in] */)
-        : prmTetra(prmTet), prmFacette(prmFac), NOD(msh.getNbNodes()),
+        : prmTetra(prmTet), prmFacette(prmFac), //NOD(msh.getNbNodes()),
           tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels(NbLevels, boxWidth, boxCenter)
         {
         omp_set_num_threads(ScalfmmNbThreads);
         norm = 2. / msh.l.maxCoeff();
 
         FSize idxPart = 0;
-        for (idxPart = 0; idxPart < NOD; ++idxPart)
+        for (idxPart = 0; idxPart < msh.getNbNodes(); ++idxPart)
             {
-            Eigen::Vector3d pTarget = norm*(msh.getNode_p(idxPart) - msh.c);
-            tree.insert(FPoint<FReal>(pTarget.x(), pTarget.y(), pTarget.z()),
-                        FParticleType::FParticleTypeTarget, idxPart);
+            if (msh.magNode[idxPart])
+                {
+                Eigen::Vector3d pTarget = norm*(msh.getNode_p(idxPart) - msh.c);
+                tree.insert(FPoint<FReal>(pTarget.x(), pTarget.y(), pTarget.z()),
+                            FParticleType::FParticleTypeTarget, idxPart);
+                }
             }
 
-        insertCharges<Tetra::Tet, Tetra::NPI>(msh.tet, idxPart, msh.c);
-        insertCharges<Facette::Fac, Facette::NPI>(msh.fac, idxPart, msh.c);
+        for(unsigned int i=0;i<msh.tet.size();i++)
+            {
+            Tetra::Tet &t = msh.tet[i];
+            if (msh.isMagnetic(t))
+                { magTet.push_back(i); }
+            }
 
-        srcDen.resize( msh.getNbFacs()*Facette::NPI + msh.getNbTets()*Tetra::NPI );
-        corr.resize(NOD);
+        for(unsigned int i=0;i<msh.fac.size();i++)
+            {
+            Facette::Fac &f = msh.fac[i];
+            if (msh.isMagnetic(f))
+                { magFac.push_back(i); }
+            }
+
+        insertCharges<Tetra::Tet, Tetra::NPI>(msh.tet, magTet, idxPart, msh.c);
+        insertCharges<Facette::Fac, Facette::NPI>(msh.fac, magFac, idxPart, msh.c);
+
+        srcDen.resize( magFac.size()*Facette::NPI + magTet.size()*Tetra::NPI );
+        corr.resize(msh.magNode.size());
         }
 
     /**
@@ -96,7 +113,7 @@ public:
     /** sources */
     std::vector<double> srcDen;
     
-    /** corrections associated to the nodes, contributions only due to the facettes */
+    /** corrections associated to the nodes, contributions only due to the facets */
     std::vector<double> corr;
 
     /** all volume region parameters for the tetraedrons */
@@ -106,7 +123,7 @@ public:
     std::vector<Facette::prm> prmFacette;
 
 private:
-    const int NOD; /**< number of nodes */
+    //const int NOD; /**< number of nodes */
 
     OctreeClass tree;    /**< tree initialized by constructor */
 
@@ -114,28 +131,33 @@ private:
 
     double norm; /**< normalization coefficient */
 
+    std::vector<int> magTet; /**< list of the indices of magnetic tetrahedrons */
+
+    std::vector<int> magFac; /**< list of the indices of magnetic facets */
     /**
     function template to insert volume or surface charges in tree for demag computation. class T is
     Tet or Fac, it must have getPtGauss() method, second template parameter is NPI of the namespace
     containing class T
     */
     template<class T, const int NPI>
-    void insertCharges(std::vector<T> const &container, FSize &idx, Eigen::Ref<Eigen::Vector3d> const c)
+    void insertCharges(std::vector<T> const &container, std::vector<int> &idxContainer, FSize &idx,
+                       Eigen::Ref<Eigen::Vector3d> const c)
         {
-        std::for_each(container.begin(), container.end(),
-                      [this, c, &idx](T const &elem)
+        std::for_each(idxContainer.begin(), idxContainer.end(),
+                      [this,&container, c, &idx](int const &idxElem)
                       {
-                          Eigen::Matrix<double,Nodes::DIM,NPI> gauss;
-                          elem.getPtGauss(gauss);
+                      T const &elem = container[idxElem];
+                      Eigen::Matrix<double,Nodes::DIM,NPI> gauss;
+                      elem.getPtGauss(gauss);
 
-                          for (int j = 0; j < NPI; j++, idx++)
-                              {
-                              double x = norm*(gauss(0,j) - c.x());
-                              double y = norm*(gauss(1,j) - c.y());
-                              double z = norm*(gauss(2,j) - c.z());
-                              tree.insert(FPoint<FReal>(x,y,z), FParticleType::FParticleTypeSource, idx, 0.0);
-                              }
-                      });  // end for_each
+                      for (int j = 0; j < NPI; j++, idx++)
+                          {
+                          double x = norm*(gauss(0,j) - c.x());
+                          double y = norm*(gauss(1,j) - c.y());
+                          double z = norm*(gauss(2,j) - c.z());
+                          tree.insert(FPoint<FReal>(x,y,z), FParticleType::FParticleTypeSource, idx, 0.0);
+                          }
+                      });
         }
 
     /** computes all charges from tetraedrons and facettes for the demag field to feed a tree in the fast multipole algo (scalfmm)
@@ -144,14 +166,17 @@ private:
         {
         int nsrc(0);
         std::fill(srcDen.begin(),srcDen.end(),0);
-
-        std::for_each(msh.tet.begin(), msh.tet.end(),
-                      [this, getter, &nsrc](Tetra::Tet const &tet)
-                          { tet.charges(prmTetra[tet.idxPrm], getter, srcDen, nsrc); });
+        std::for_each(magTet.begin(),magTet.end(),[this, &msh, getter, &nsrc](int idx)
+                {
+                Tetra::Tet &t = msh.tet[idx];
+                t.charges(prmTetra[t.idxPrm], getter, srcDen, nsrc);
+                });
         std::fill(corr.begin(),corr.end(),0);
-        std::for_each(msh.fac.begin(), msh.fac.end(),
-                      [this, getter, &nsrc](Facette::Fac const &fac)
-                          { fac.charges(prmFacette[fac.idxPrm], getter, srcDen, nsrc, corr); });
+        std::for_each(magFac.begin(),magFac.end(),[this, &msh, getter, &nsrc](int idx)
+                {
+                Facette::Fac &f = msh.fac[idx];
+                f.charges(prmFacette[f.idxPrm], getter, srcDen, nsrc, corr);
+                });
         }
 
     /**
@@ -163,16 +188,17 @@ private:
         FmmClass algo(&tree, &kernels);
         calc_charges(getter, msh);
 
+        auto nbMagNodes = msh.magNode.size();
         // reset potentials and forces - physicalValues[idxPart] = Q
         tree.forEachLeaf(
-                [this](LeafClass *leaf)
+                [this,&nbMagNodes](LeafClass *leaf)
                 {
                     const int nbParticlesInLeaf = leaf->getSrc()->getNbParticles();
                     const auto &indexes = leaf->getSrc()->getIndexes();
                     FReal *const physicalValues = leaf->getSrc()->getPhysicalValues();
                     for (int idxPart = 0; idxPart < nbParticlesInLeaf; ++idxPart)
                         {
-                        physicalValues[idxPart] = srcDen[indexes[idxPart] - NOD];
+                        physicalValues[idxPart] = srcDen[indexes[idxPart] - nbMagNodes];
                         }
 
                     std::fill_n(leaf->getTargets()->getPotentials(),
