@@ -1,7 +1,9 @@
 /*
  * Parser/evaluator for the analytic expressions given by the user:
- * the initial magnetization M(x, y, z), the applied field (B(t) or B(x, y, z))
- * and a time-dependent scalar field amplitude.
+ *  - vector M(x, y, z, regions): initial magnetization
+ *  - vector B(t): space-independent applied field, or
+ *  - scalar A(t): amplitude of space-dependent applied field, and
+ *  - vector f(x, y, z): space-dependent part of the applied field.
  */
 
 #ifndef expression_parser_h
@@ -14,7 +16,7 @@
 
 /**
  * This class handles a JavaScript function that computes either a scalar or a 3D vector,
- * which depends on either a single parameter t or on (x, y, z).
+ * which depends on either a single parameter t, or on (x, y, z), or (x, y, z, regions).
  */
 class ExpressionParser
     {
@@ -26,8 +28,8 @@ public:
 
     /**
      * Use the provided JavaScript function expression for subsequent computations. The provided
-     * function should take either one or three numeric parameters, and return either a number or an
-     * array of three numbers.
+     * function should take either one, three or four numeric parameters, and return either a number
+     * or an array of three numbers.
      */
     void set_function(const std::string &js_function) const;
 
@@ -53,6 +55,12 @@ public:
      * Compute a vector from the given vector argument.
      */
     Eigen::Vector3d get_vector(const Eigen::Ref<Eigen::Vector3d> arg) const;
+
+    /**
+     * Compute a vector from the given vector and array of strings arguments.
+     */
+    Eigen::Vector3d get_vector(const Eigen::Ref<Eigen::Vector3d> position,
+            const std::vector<std::string> &regions) const;
 
 private:
     /**
