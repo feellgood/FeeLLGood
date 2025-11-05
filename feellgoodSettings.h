@@ -252,13 +252,14 @@ public:
         return idx;
         };
 
-    /** Evaluate the initial magnetization vector as a function of the position vector. This method
-     * is **not thread safe**.
+    /** Evaluate the initial magnetization vector as a function of the position vector and the set
+     * of regions this node belongs to. This method is **not thread safe**.
      * \return reduced magnetization (unit vector)
      */
-    inline Eigen::Vector3d getMagnetization(const Eigen::Ref<Eigen::Vector3d> p) const
+    inline Eigen::Vector3d getMagnetization(const Eigen::Ref<Eigen::Vector3d> p,
+            const std::vector<std::string> &regions) const
         {
-        Eigen::Vector3d tmp = mag_parser.get_vector(p);
+        Eigen::Vector3d tmp = mag_parser.get_vector(p, regions);
         tmp.normalize();
         return tmp;
         }

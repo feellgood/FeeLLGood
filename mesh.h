@@ -180,13 +180,43 @@ public:
      * simulation */
     inline void init_distrib(Settings const &mySets /**< [in] */)
         {
-        std::for_each(node.begin(),node.end(),[&mySets](Nodes::Node &n)
-                                              {
-                                              n.d[Nodes::CURRENT].u = mySets.getMagnetization(n.p);
-                                              n.d[Nodes::NEXT].u = n.d[Nodes::CURRENT].u;
-                                              n.d[Nodes::NEXT].phi = 0.;
-                                              n.d[Nodes::NEXT].phiv = 0.;
-                                              } );
+        for (int nodeIdx = 0; nodeIdx < int(node.size()); ++nodeIdx)
+            {
+            Nodes::Node &n = node[nodeIdx];
+
+            // Get the list of region indices this node belongs to.
+            std::set<int> nodeRegions;
+            // skip region 0 (__default__) which should be empty
+            for (size_t regIdx = 1; regIdx < volumeRegions.size(); ++regIdx)
+                {
+                const std::vector<int> &regionTetras = volumeRegions[regIdx];
+                bool node_in_region = std::any_of(EXEC_POL,
+                    regionTetras.begin(), regionTetras.end(),
+                    [this, nodeIdx](int tetIdx)
+                    {
+                    const Tetra::Tet &tetrahedron = tet[tetIdx];
+                    for (int i = 0; i < Tetra::N; ++i) // node of tetrahedron tetIdx
+                        {
+                        if (tetrahedron.ind[i] == nodeIdx)
+                            { return true; }
+                        }
+                    return false;
+                    });
+                if (node_in_region)
+                    { nodeRegions.insert(regIdx); }
+                }
+
+            // Get the list of region names this node belongs to.
+            std::vector<std::string> region_names;
+            region_names.resize(nodeRegions.size());
+            std::transform(nodeRegions.begin(), nodeRegions.end(), region_names.begin(),
+                [this](int regIdx){ return paramTetra[regIdx].regName; });
+
+            n.d[Nodes::CURRENT].u = mySets.getMagnetization(n.p, region_names);
+            n.d[Nodes::NEXT].u = n.d[Nodes::CURRENT].u;
+            n.d[Nodes::NEXT].phi = 0.;
+            n.d[Nodes::NEXT].phiv = 0.;
+            }
         }
 
     /**
