@@ -160,17 +160,17 @@ mesh:
       uk: [0, 0, 1]
 
       # Fixed current density value (J.n) for the boundary conditions of
-      # the electrostatic problem.
+      # the electrostatic and the spin diffusion problems.
       J:
 
       # Fixed potential value for the boundary conditions of the
       # electrostatic problem.
       V:
 
-      # polarization vector for spin diffusion problem boundary condition
+      # polarization vector for spin diffusion problem boundary condition.
       P: [0, 0, 1]
 
-      # spin diffusion vector boundary condition, user should fix s to [0,0,0] on a single surface
+      # spin diffusion vector for spin diffusion problem boundary condition.
       s:
 
 # The initial magnetization can be provided as either:
