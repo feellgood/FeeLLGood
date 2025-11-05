@@ -300,9 +300,6 @@ public:
     /** getter for the node_index value at position i */
     inline int getNodeIndex(const int i) const { return node_index[i]; }
 
-    /** build the list of the indices where to solve LLG from input mesh, output in lvd */
-    void build_lvd(std::vector<int> &lvd);
-
     /** return true if this tetraedron is magnetic */
     inline bool isMagnetic(const Tetra::Tet &t) { return (paramTetra[t.idxPrm].J > 0); }
 

@@ -51,7 +51,24 @@ public:
 
         if(s.getFieldType() == R4toR3)
             { setExtSpaceField(s); }
-        my_msh.build_lvd(lvd);
+
+        std::vector<int> all(NOD);
+        std::vector<int> dofs; // list of the nodes where LLG does apply
+        std::iota(all.begin(),all.end(),0); // all = { 0,1,...,NOD-1}
+        for(int i=0;i<NOD;i++)
+            {
+            if (my_msh.magNode[i])
+                { dofs.push_back(i); }
+            }
+        std::vector<int> ld(NOD);// list of Dirichlet nodes where to solve LLG
+        auto it = std::set_difference(all.begin(),all.end(),dofs.begin(),dofs.end(),ld.begin());
+        auto nb_coeffs = it - ld.begin();
+        lvd.resize(2*nb_coeffs);
+        for(int i=0;i<nb_coeffs;i++)
+            {
+            lvd[2*i] = ld[i];
+            lvd[2*i+1] = ld[i] + NOD;
+            }
         }
 
     /** build a matrix shape suitable for our mesh */
