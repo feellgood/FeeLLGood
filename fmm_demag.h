@@ -63,7 +63,7 @@ public:
                std::vector<Tetra::prm> & prmTet /**< [in] */,
                std::vector<Facette::prm> & prmFac /**< [in] */,
                const int ScalfmmNbThreads /**< [in] */)
-        : prmTetra(prmTet), prmFacette(prmFac), //NOD(msh.getNbNodes()),
+        : prmTetra(prmTet), prmFacette(prmFac),
           tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels(NbLevels, boxWidth, boxCenter)
         {
         omp_set_num_threads(ScalfmmNbThreads);
@@ -121,11 +121,12 @@ private:
     /**
     function template to insert volume or surface charges in tree for demag computation. class T is
     Tet or Fac, it must have getPtGauss() method, second template parameter is NPI of the namespace
-    containing class T
+    containing class T.
+    idxContainer is the list of indices of the magnetic T elements stored in container.
     */
     template<class T, const int NPI>
-    void insertCharges(std::vector<T> const &container, std::vector<int> &idxContainer, FSize &idx,
-                       Eigen::Ref<Eigen::Vector3d> const c)
+    void insertCharges(std::vector<T> const &container, std::vector<int> const &idxContainer,
+                       FSize &idx, Eigen::Ref<Eigen::Vector3d> const c)
         {
         std::for_each(idxContainer.begin(), idxContainer.end(),
                       [this,&container, c, &idx](int const &idxElem)
@@ -150,13 +151,13 @@ private:
         {
         int nsrc(0);
         std::fill(srcDen.begin(),srcDen.end(),0);
-        std::for_each(msh.magTet.begin(),msh.magTet.end(),[this, &msh, getter, &nsrc](int idx)
+        std::for_each(msh.magTet.begin(),msh.magTet.end(),[this, &msh, getter, &nsrc](const int idx)
                 {
                 Tetra::Tet &t = msh.tet[idx];
                 t.charges(prmTetra[t.idxPrm], getter, srcDen, nsrc);
                 });
         std::fill(corr.begin(),corr.end(),0);
-        std::for_each(msh.magFac.begin(),msh.magFac.end(),[this, &msh, getter, &nsrc](int idx)
+        std::for_each(msh.magFac.begin(),msh.magFac.end(),[this, &msh, getter, &nsrc](const int idx)
                 {
                 Facette::Fac &f = msh.fac[idx];
                 f.charges(prmFacette[f.idxPrm], getter, srcDen, nsrc, corr);
