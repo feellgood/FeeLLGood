@@ -131,22 +131,17 @@ void mesh::sortNodes(Nodes::index long_axis)
 void mesh::build_lvd(std::vector<int> &lvd)
     {
     const int NOD = node.size();
-    std::vector<int> ld(NOD);// list of Dirichlet nodes where to solve LLG
     std::vector<int> all(NOD);
     std::vector<int> dofs; // list of the nodes where LLG does apply
     std::iota(all.begin(),all.end(),0); // all = { 0,1,...,NOD-1}
-    std::for_each(tet.begin(),tet.end(),[this,&dofs](const Tetra::Tet &t)
-                  {
-                  if (isMagnetic(t))
-                      {
-                      dofs.push_back(t.ind[0]);
-                      dofs.push_back(t.ind[1]);
-                      dofs.push_back(t.ind[2]);
-                      dofs.push_back(t.ind[3]);
-                      }
-                  });
 
-    suppress_copies<int>(dofs);
+    for(int i=0;i<NOD;i++)
+        {
+        if (magNode[i])
+            { dofs.push_back(i); }
+        }
+
+    std::vector<int> ld(NOD);// list of Dirichlet nodes where to solve LLG
     auto it = std::set_difference(all.begin(),all.end(),dofs.begin(),dofs.end(),ld.begin());
     auto nb_coeffs = it - ld.begin();
     lvd.resize(2*nb_coeffs);

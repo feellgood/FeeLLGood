@@ -37,7 +37,7 @@ public:
     When debugging it might be usefull to set iter verbosity differently
     */
     LinAlgebra(Settings &s /**< [in] */, Mesh::mesh &my_msh /**< [in] */)
-        : NOD(my_msh.getNbNodes()), refMsh(&my_msh), iter("bicg",s.TOL,s.verbose,s.MAXITER),
+        : NOD(my_msh.getNbNodes()), refMsh(&my_msh), iter("bicg_dir",s.TOL,s.verbose,s.MAXITER),
           K(build_shape()), verbose(s.verbose),
           prmTetra(s.paramTetra), prmFacette(s.paramFacette)
         {
