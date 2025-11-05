@@ -63,12 +63,15 @@ int LinAlgebra::solver(timing const &t_prm)
     const double dt = t_prm.get_dt();
     for (int i = 0; i < NOD; i++)
         {
-        double vp = Xw[2*i];
-        double vq = Xw[2*i+1];
-        double v2 = Nodes::sq(vp) + Nodes::sq(vq);
-        if (v2 > v2max)
-            { v2max = v2; }
-        refMsh->updateNode(i, vp, vq, dt);//gamma0 multiplication handled in updateNode
+        if (refMsh->magNode[i])
+            {
+            double vp = Xw[2*i];
+            double vq = Xw[2*i+1];
+            double v2 = Nodes::sq(vp) + Nodes::sq(vq);
+            if (v2 > v2max)
+                { v2max = v2; }
+            refMsh->updateNode(i, vp, vq, dt);//gamma0 multiplication handled in updateNode
+            }
         }
     v_max = gamma0*sqrt(v2max);
     return 0;
