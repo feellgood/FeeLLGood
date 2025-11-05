@@ -80,24 +80,10 @@ public:
                 }
             }
 
-        for(unsigned int i=0;i<msh.tet.size();i++)
-            {
-            Tetra::Tet &t = msh.tet[i];
-            if (msh.isMagnetic(t))
-                { magTet.push_back(i); }
-            }
+        insertCharges<Tetra::Tet, Tetra::NPI>(msh.tet, msh.magTet, idxPart, msh.c);
+        insertCharges<Facette::Fac, Facette::NPI>(msh.fac, msh.magFac, idxPart, msh.c);
 
-        for(unsigned int i=0;i<msh.fac.size();i++)
-            {
-            Facette::Fac &f = msh.fac[i];
-            if (msh.isMagnetic(f))
-                { magFac.push_back(i); }
-            }
-
-        insertCharges<Tetra::Tet, Tetra::NPI>(msh.tet, magTet, idxPart, msh.c);
-        insertCharges<Facette::Fac, Facette::NPI>(msh.fac, magFac, idxPart, msh.c);
-
-        srcDen.resize( magFac.size()*Facette::NPI + magTet.size()*Tetra::NPI );
+        srcDen.resize( msh.magFac.size()*Facette::NPI + msh.magTet.size()*Tetra::NPI );
         corr.resize(msh.magNode.size());
         }
 
@@ -123,17 +109,15 @@ public:
     std::vector<Facette::prm> prmFacette;
 
 private:
-    //const int NOD; /**< number of nodes */
+    /** tree initialized by constructor */
+    OctreeClass tree;
 
-    OctreeClass tree;    /**< tree initialized by constructor */
+    /** kernel initialized by constructor */
+    KernelClass kernels;
 
-    KernelClass kernels; /**< kernel initialized by constructor */
+    /** normalization coefficient */
+    double norm;
 
-    double norm; /**< normalization coefficient */
-
-    std::vector<int> magTet; /**< list of the indices of magnetic tetrahedrons */
-
-    std::vector<int> magFac; /**< list of the indices of magnetic facets */
     /**
     function template to insert volume or surface charges in tree for demag computation. class T is
     Tet or Fac, it must have getPtGauss() method, second template parameter is NPI of the namespace
@@ -166,13 +150,13 @@ private:
         {
         int nsrc(0);
         std::fill(srcDen.begin(),srcDen.end(),0);
-        std::for_each(magTet.begin(),magTet.end(),[this, &msh, getter, &nsrc](int idx)
+        std::for_each(msh.magTet.begin(),msh.magTet.end(),[this, &msh, getter, &nsrc](int idx)
                 {
                 Tetra::Tet &t = msh.tet[idx];
                 t.charges(prmTetra[t.idxPrm], getter, srcDen, nsrc);
                 });
         std::fill(corr.begin(),corr.end(),0);
-        std::for_each(magFac.begin(),magFac.end(),[this, &msh, getter, &nsrc](int idx)
+        std::for_each(msh.magFac.begin(),msh.magFac.end(),[this, &msh, getter, &nsrc](int idx)
                 {
                 Facette::Fac &f = msh.fac[idx];
                 f.charges(prmFacette[f.idxPrm], getter, srcDen, nsrc, corr);

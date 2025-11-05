@@ -9,8 +9,12 @@ int LinAlgebra::solver(timing const &t_prm)
     iter.reset();
 
     K.clear();
-    std::for_each(EXEC_POL, refMsh->tet.begin(), refMsh->tet.end(),
-                      [this](Tetra::Tet &my_elem) { my_elem.assemble_mat(K); } );
+    std::for_each(EXEC_POL, refMsh->magTet.begin(), refMsh->magTet.end(),
+                  [this](const int idx)
+                      {
+                      Tetra::Tet &my_elem = refMsh->tet[idx];
+                      my_elem.assemble_mat(K);
+                      });
 
     if (verbose)
         {
@@ -19,10 +23,19 @@ int LinAlgebra::solver(timing const &t_prm)
         }
 
     std::fill(L_rhs.begin(),L_rhs.end(),0);
-    std::for_each(refMsh->tet.begin(), refMsh->tet.end(),
-                      [this](Tetra::Tet &my_elem) { my_elem.assemble_vect(L_rhs); } );
-    std::for_each(refMsh->fac.begin(), refMsh->fac.end(),
-                      [this](Facette::Fac &my_elem) { my_elem.assemble_vect(L_rhs); } );
+    std::for_each(refMsh->magTet.begin(), refMsh->magTet.end(),
+                  [this](const int idx)
+                      {
+                      Tetra::Tet &my_elem = refMsh->tet[idx];
+                      my_elem.assemble_vect(L_rhs);
+                      });
+
+    std::for_each(refMsh->magFac.begin(), refMsh->magFac.end(),
+                  [this](const int idx)
+                      {
+                      Facette::Fac &my_elem = refMsh->fac[idx];
+                      my_elem.assemble_vect(L_rhs);
+                      });
 
     /* RHS forced to zero outside mag material defined by mask, corresponding K diagonal coefficients set to 1  */
     algebra::applyMask(lvd,L_rhs);

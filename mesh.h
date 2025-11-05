@@ -107,6 +107,18 @@ public:
                         { magNode[te.ind[i]] = true; }
                     }
                 });
+
+        for(unsigned int i=0;i<tet.size();i++)
+            {
+            if (isMagnetic(tet[i]))
+                { magTet.push_back(i); }
+            }
+
+        for(unsigned int i=0;i<fac.size();i++)
+            {
+            if (isMagnetic(fac[i]))
+                { magFac.push_back(i); }
+            }
         }
 
     /** return number of nodes  */
@@ -307,6 +319,12 @@ public:
      * a node is magnetic if it belongs to a magnetic tetrahedron. Consequently any node on a
      * magnetic/non magnetic interface is set to true in magNode. */
     std::vector<bool> magNode;
+
+     /** list of the indices of all magnetic tetrahedrons from all volume regions */
+    std::vector<int> magTet;
+
+    /** list of the indices of all magnetic facets from all surface regions */
+    std::vector<int> magFac;
 private:
     /** node container: not initialized by constructor, but later while reading the mesh by member
      * function init_node */
