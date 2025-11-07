@@ -8,9 +8,10 @@ void Fem::energy(double const t, Settings &settings)
     Etot = 0.0;
     Eigen::Vector3d Hext = settings.getField(t);
 
-    std::for_each(msh.tet.begin(), msh.tet.end(),
-                  [this, &Hext, &settings](Tetra::Tet const &te)
-                  {
+    std::for_each(msh.magTet.begin(), msh.magTet.end(),
+                  [this, &Hext, &settings](const int &idxElem)
+                      {
+                      Tetra::Tet const &te = msh.tet[idxElem];
                       Tetra::prm const &param = settings.paramTetra[te.idxPrm];
                       Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> u,dudx,dudy,dudz;
                       Eigen::Matrix<double,Tetra::NPI,1> phi;
@@ -25,11 +26,12 @@ void Fem::energy(double const t, Settings &settings)
                           { E[ANISOTROPY] += te.anisotropyEnergy(param, u); }
 
                       E[ZEEMAN] += te.zeemanEnergy(param, Hext, u);
-                  });
+                      });
 
-    std::for_each(msh.fac.begin(), msh.fac.end(),
-                  [this, &settings](Facette::Fac const &fa)
-                  {
+    std::for_each(msh.magFac.begin(), msh.magFac.end(),
+                  [this, &settings](const int &idxElem)
+                      {
+                      Facette::Fac const &fa =msh.fac[idxElem];
                       Facette::prm const &param = settings.paramFacette[fa.idxPrm];
                       Eigen::Matrix<double,Facette::NPI,1> phi;
                       Eigen::Matrix<double,Nodes::DIM,Facette::NPI> u;
@@ -41,7 +43,7 @@ void Fem::energy(double const t, Settings &settings)
                           { E[ANISOTROPY] += fa.anisotropyEnergy(param, u); }
                       
                       E[DEMAG] += fa.demagEnergy(u, phi);
-                  });
+                      });
     Etot = std::reduce(E.begin(),E.end());//sum of all terms
     if (settings.verbose && (Etot > Etot0))
         { std::cout << "WARNING: energy increased from " << Etot0 << " to " << Etot << "\n"; }
