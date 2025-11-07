@@ -27,7 +27,7 @@ trixie debian/13/cloud Debian 13 \"trixie\"
 forky debian/14/cloud Debian 14 \"forky\" (testing)
 jammy ubuntu/jammy/cloud Ubuntu 22.04 LTS \"jammy\"
 noble ubuntu/noble/cloud Ubuntu 24.04 LTS \"noble\"
-plucky ubuntu/plucky/cloud Ubuntu 25.04 \"plucky\"
+questing ubuntu/questing/cloud Ubuntu 25.10 \"questing\"
 quartz rockylinux/10/cloud Rocky Linux 10 \"red quartz\"
 "
 all_machines=$(cut -d' ' -f1 <<<"$supported_machines" | tr '\n' ' ')
