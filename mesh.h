@@ -67,11 +67,15 @@ public:
             }
         sortNodes(long_axis);
 
+        totalMagVol = 0;
         // Compute the per-region volumes and the total volume.
         std::for_each(tet.begin(), tet.end(),
                 [this](Tetra::Tet const &te)
                     {
-                    paramTetra[te.idxPrm].volume += te.calc_vol();
+                    double vol_tet = te.calc_vol();
+                    paramTetra[te.idxPrm].volume += vol_tet;
+                    if(isMagnetic(te))
+                        totalMagVol += vol_tet;
                     });
         vol = std::transform_reduce(paramTetra.begin(), paramTetra.end(), 0.0,
                 std::plus<>(), [](const Tetra::prm &region){ return region.volume; });
@@ -182,6 +186,9 @@ public:
     /** total volume of the mesh */
     double vol;
 
+    /** total magnetic volume of the mesh */
+    double totalMagVol;
+
     /** face container */
     std::vector<Facette::Fac> fac;
 
@@ -262,7 +269,7 @@ public:
     */
     double avg(std::function<double(Nodes::Node, Nodes::index)> getter /**< [in] */,
                Nodes::index d /**< [in] */,
-               int region = -1 /**< region index, or -1 for all regions */) const;
+               int region = -1 /**< region index, or -1 for all magnetic regions */) const;
 
     /** Compute the maximum angle of the magnetization between two adjacent nodes. */
     double max_angle() const

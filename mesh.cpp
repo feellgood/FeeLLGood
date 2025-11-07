@@ -15,19 +15,20 @@ void mesh::infos(void) const
 
 double mesh::avg(std::function<double(Nodes::Node, Nodes::index)> getter /**< [in] */,
                  Nodes::index d /**< [in] */,
-                 int region /**< region index, or -1 for all regions */) const
+                 int region /**< region index, or -1 for all magnetic regions */) const
     {
-    double sum = std::transform_reduce(EXEC_POL, tet.begin(), tet.end(), 0.0,
+    double sum = std::transform_reduce(EXEC_POL, magTet.begin(), magTet.end(), 0.0,
                                        std::plus<>(),
-                                       [getter, &d, region](Tetra::Tet const &te)
+                                       [this, getter, &d, region](const int &idxElem)
                                        {
+                                       Tetra::Tet const &te = tet[idxElem];
                                        if (te.idxPrm != region && region != -1)
                                            return 0.0;
                                        Eigen::Matrix<double,Tetra::NPI,1> val;
                                        te.interpolation(getter, d, val);
                                        return te.weight.dot(val);
                                        });
-    double volume = (region == -1) ? vol : paramTetra[region].volume;
+    double volume = (region == -1) ? totalMagVol : paramTetra[region].volume;
     return sum / volume;
     }
 
