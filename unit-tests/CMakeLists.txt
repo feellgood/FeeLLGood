@@ -36,6 +36,8 @@ add_executable(test_ut_dukTapeParser ../expression_parser.cpp ut_dukTapeParser.c
 
 add_executable (test_ut_node ut_node.cpp)
 
+add_executable (test_ut_index ut_index.cpp)
+
 SET(SOURCES ../facette.cpp ../tetra.cpp ut_element.cpp)
 add_executable (test_ut_element ${SOURCES})
 
@@ -177,6 +179,16 @@ target_link_libraries(test_ut_node
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
   )
 
+target_compile_options(test_ut_index PUBLIC -Wno-deprecated-declarations )
+# warning about deprecated code is silented here because it is the goal of one test in test_ut_index
+# to check the replacement of a transform(...,bind2nd(...)) by a loop
+# the deprecated code is found in the LLG solver of feellgood research version for LLG + spin accumulation (June 2025)
+target_link_libraries(test_ut_index
+  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY}
+  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  )
+
 #target_compile_options(test_ut_facette PUBLIC -fsanitize=leak )
 #target_link_options(test_ut_facette PUBLIC -fsanitize=leak )
 target_link_libraries(test_ut_facette
@@ -222,6 +234,7 @@ add_test (NAME ut_OMP_solver COMMAND test_ut_OMP_solver)
 add_test (NAME ut_algebra COMMAND test_ut_algebra)
 add_test (NAME ut_dukTapeParser COMMAND test_ut_dukTapeParser)
 add_test (NAME ut_node COMMAND test_ut_node)
+add_test (NAME ut_index COMMAND test_ut_index)
 add_test (NAME ut_element COMMAND test_ut_element)
 add_test (NAME ut_facette COMMAND test_ut_facette)
 add_test (NAME ut_tetra COMMAND test_ut_tetra)
