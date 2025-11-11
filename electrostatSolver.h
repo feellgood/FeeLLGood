@@ -78,15 +78,6 @@ private:
     /** number of digits in the optional output file */
     const int precision = 8;
 
-    /** suppress twins in the indices Dirichlet list v_idx */
-template <typename T>
-    void suppress_copies(std::vector<T> &v_idx)
-        {
-        std::sort(v_idx.begin(), v_idx.end());
-        v_idx.resize( std::distance( v_idx.begin(), std::unique(v_idx.begin(), v_idx.end()) ) );
-        v_idx.shrink_to_fit();
-        }
-
     /** solver, using conjugate gradient with masking, with diagonal preconditionner and Dirichlet
      * boundary conditions, returns true if has converged */
     bool solve(void);

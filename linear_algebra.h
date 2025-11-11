@@ -17,6 +17,7 @@
 #include "facette.h"
 #include "feellgoodSettings.h"
 #include "mesh.h"
+#include "meshUtils.h"
 #include "node.h"
 #include "tetra.h"
 
@@ -55,17 +56,28 @@ public:
         std::vector<int> all(NOD);
         std::vector<int> dofs; // list of the nodes where LLG does apply
         std::iota(all.begin(),all.end(),0); // all = { 0,1,...,NOD-1}
-        for(int i=0;i<NOD;i++)
+        std::for_each(my_msh.tet.begin(),my_msh.tet.end(),[&my_msh,&dofs](Tetra::Tet &t)
             {
-            if (my_msh.magNode[i])
-                { dofs.push_back(i); }
-            }
+            if (my_msh.isMagnetic(t))
+                {
+                dofs.push_back(t.ind[0]);
+                dofs.push_back(t.ind[1]);
+                dofs.push_back(t.ind[2]);
+                dofs.push_back(t.ind[3]);
+                }
+            });
+        suppress_copies<int>(dofs);
+
         std::vector<int> ld(NOD);// list of Dirichlet nodes where to solve LLG
         auto it = std::set_difference(all.begin(),all.end(),dofs.begin(),dofs.end(),ld.begin());
         auto nb_coeffs = it - ld.begin();
-        lvd.resize(2*nb_coeffs);
-        for(int i=0;i<nb_coeffs;i++)
+        ld.resize(nb_coeffs);
+        ld.shrink_to_fit();
+        //for(unsigned int i=0;i<ld.size();i++) { std::cout << i << ": " << ld[i]<< std::endl; }
+        lvd.resize(2*ld.size());
+        for(unsigned int i=0;i<ld.size();i++)
             {
+            //carefull, combining new node indexation and mask seems to be a bug source (to check)
             lvd[2*i] = ld[i];
             lvd[2*i+1] = ld[i] + NOD;
             }
