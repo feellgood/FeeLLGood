@@ -20,6 +20,17 @@ output file format wanted by the user. This is done mainly with the class Settin
 #include "tetra.h"
 #include "time_integration.h"
 
+/** Specify how the initial magnetization is defined as a JavaScript function. It is either a
+ * function of (x, y, z), the position coordinates of the node, or it takes a fourth parameter,
+ * which is an array of strings with the names of the mesh volume regions the node belongs to.
+ *
+ */
+enum mag_exprType
+    {
+    POSITION_ONLY,        ///< M(x, y, z)
+    POSITION_AND_REGIONS  ///< M(x, y, z, regions)
+    };
+
 /** Specify how the applied magnetic field is defined using JavaScript functions. The choices are:
  *
  * * `RtoR3`: **B**(t), a vector function of time only, for a uniform applied field.
@@ -251,6 +262,23 @@ public:
             }
         return idx;
         };
+
+    inline mag_exprType getMagType() const
+        {
+        if (mag_parser.parameter_count() < 4) return POSITION_ONLY;
+        return POSITION_AND_REGIONS;
+        }
+
+    /** Evaluate the initial magnetization vector as a function of the position vector. This method
+     * is **not thread safe**.
+     * \return reduced magnetization (unit vector)
+     */
+    inline Eigen::Vector3d getMagnetization(const Eigen::Ref<Eigen::Vector3d> p) const
+        {
+        Eigen::Vector3d tmp = mag_parser.get_vector(p);
+        tmp.normalize();
+        return tmp;
+        }
 
     /** Evaluate the initial magnetization vector as a function of the position vector and the set
      * of regions this node belongs to. This method is **not thread safe**.

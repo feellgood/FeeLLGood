@@ -183,6 +183,17 @@ public:
         for (int nodeIdx = 0; nodeIdx < int(node.size()); ++nodeIdx)
             {
             Nodes::Node &n = node[nodeIdx];
+            n.d[Nodes::NEXT].phi = 0.;
+            n.d[Nodes::NEXT].phiv = 0.;
+
+            // If the initial magnetization depends only on the node position, we do not need to
+            // build the list of region names.
+            if (mySets.getMagType() == POSITION_ONLY)
+                {
+                n.d[Nodes::CURRENT].u = mySets.getMagnetization(n.p);
+                n.d[Nodes::NEXT].u = n.d[Nodes::CURRENT].u;
+                continue;
+                }
 
             // Get the list of region indices this node belongs to.
             std::set<int> nodeRegions;
@@ -214,8 +225,6 @@ public:
 
             n.d[Nodes::CURRENT].u = mySets.getMagnetization(n.p, region_names);
             n.d[Nodes::NEXT].u = n.d[Nodes::CURRENT].u;
-            n.d[Nodes::NEXT].phi = 0.;
-            n.d[Nodes::NEXT].phiv = 0.;
             }
         }
 

@@ -42,6 +42,11 @@ public:
                          const std::string &expr_y, const std::string &expr_z);
 
     /**
+     * Return the number of parameters of the JavaScript function.
+     */
+    int parameter_count() const { return duk_get_length(ctx, -1); }
+
+    /**
      * Compute a scalar from the given scalar argument.
      */
     double get_scalar(double arg) const;
