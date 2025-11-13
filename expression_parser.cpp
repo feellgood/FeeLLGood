@@ -25,6 +25,9 @@ function tanh(x) { return abs(x)>20 ? sign(x) : expm1(2*x)/(exp(2*x) + 1); }
 function acosh(x) { return x>1e8 ? log(x) + LN2 : log(x + sqrt(x*x - 1)); }
 function asinh(x) { return abs(x)<1e-5 ? x : sign(x) * (log(abs(x)/2 + hypot(1, x)/2) + LN2); }
 function atanh(x) { return abs(x)<1e-5 ? x : log((1 + x)/(1 - x)) / 2; }
+
+/* Simplified, one-argument version of Array.prototype.includes(). */
+Array.prototype.includes = function(value) { return this.indexOf(value) != -1; };
 )--";
 
 ExpressionParser::ExpressionParser()
