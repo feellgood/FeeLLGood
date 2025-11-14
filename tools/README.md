@@ -6,6 +6,7 @@ working with feeLLGood:
 * **fg-sol2vtk**: to convert FeeLLGood's output .sol files to paraview format
 * **fg-h5extract**: to extract from a hdf5 archive some .sol back
 * **fg-merge-sol**: .sol tool
+* **fg-gensol**: .sol generation tool
 * **fg-plot**:plot tool
 * **fg-mesh-stat**: print statistics on a mesh
 
