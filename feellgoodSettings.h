@@ -263,6 +263,9 @@ public:
         return idx;
         };
 
+    /** Returns the initial magnetization type, which can be either `POSITION_ONLY` (depends only
+     * on the position) or `POSITION_AND_REGIONS` (depends on the position and volume regions).
+     */
     inline mag_exprType getMagType() const
         {
         if (mag_parser.parameter_count() < 4) return POSITION_ONLY;
