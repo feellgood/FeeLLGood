@@ -75,7 +75,7 @@ void bicg(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vec
  * iter is an iteration object
  * the linear system to solve is A x = rhs
  * ld is a mask: a list of indices that will be zeroed when using applyMask(ld, vector)
- * xd is a vector containing some values on the nodes where Dirichlet applies (to check)
+ * xd is a vector containing some values on the nodes where Dirichlet applies
  */
 template<typename T>
 void bicg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T> & rhs,

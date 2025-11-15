@@ -89,17 +89,30 @@ BOOST_AUTO_TEST_CASE(test_scaled_add, *boost::unit_test::tolerance(UT_TOL))
     BOOST_CHECK( y[3] == (0.5 + 2.0*sqrt(42)) );
     }
 
-/** test on applyMask */
+/** tests on applyMask */
 BOOST_AUTO_TEST_CASE(test_applyMask)
     {
-    std::vector<double> x {1,4,-2,sqrt(42)};
+    const double a = sqrt(42);
+    std::vector<double> x {1,4,-2,a};
+    std::vector<int> emptyMask;
+    applyMask(emptyMask,x);
+
+    BOOST_TEST( x[0] == 1.0 );
+    BOOST_TEST( x[1] == 4.0 );
+    BOOST_TEST( x[2] == -2.0 );
+    BOOST_TEST( x[3] == a );
+
     std::vector<int> mask {1,3};
     applyMask(mask,x);
-    
+
     BOOST_TEST( x[0] == 1.0 );
     BOOST_TEST( x[1] == 0.0 );
     BOOST_TEST( x[2] == -2.0 );
     BOOST_TEST( x[3] == 0.0 );
+
+    x[1]= NAN;
+    applyMask(mask,x);
+    BOOST_TEST( x[1] == 0.0 );
     }
 
 /** tests on r_sparseMat built from w_sparseMat */
