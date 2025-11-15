@@ -53,34 +53,7 @@ public:
         if(s.getFieldType() == R4toR3)
             { setExtSpaceField(s); }
 
-        std::vector<int> all(NOD);
-        std::vector<int> dofs; // list of the nodes where LLG does apply
-        std::iota(all.begin(),all.end(),0); // all = { 0,1,...,NOD-1}
-        std::for_each(my_msh.tet.begin(),my_msh.tet.end(),[&my_msh,&dofs](Tetra::Tet &t)
-            {
-            if (my_msh.isMagnetic(t))
-                {
-                dofs.push_back(t.ind[0]);
-                dofs.push_back(t.ind[1]);
-                dofs.push_back(t.ind[2]);
-                dofs.push_back(t.ind[3]);
-                }
-            });
-        suppress_copies<int>(dofs);
-
-        std::vector<int> ld(NOD);// list of Dirichlet nodes where to solve LLG
-        auto it = std::set_difference(all.begin(),all.end(),dofs.begin(),dofs.end(),ld.begin());
-        auto nb_coeffs = it - ld.begin();
-        ld.resize(nb_coeffs);
-        ld.shrink_to_fit();
-        //for(unsigned int i=0;i<ld.size();i++) { std::cout << i << ": " << ld[i]<< std::endl; }
-        lvd.resize(2*ld.size());
-        for(unsigned int i=0;i<ld.size();i++)
-            {
-            //carefull, combining new node indexation and mask seems to be a bug source (to check)
-            lvd[2*i] = ld[i];
-            lvd[2*i+1] = ld[i] + NOD;
-            }
+        init_lvd(my_msh);
         }
 
     /** build a matrix shape suitable for our mesh */
@@ -132,6 +105,9 @@ public:
 
     /** computes local vector basis {ep,eq} in the tangeant plane for projection on the elements */
     void base_projection();
+
+    /** initializes lvd */
+    void init_lvd(Mesh::mesh &my_msh);
 private:
     /** recentering index direction if any */
     Nodes::index idx_dir;
@@ -172,7 +148,7 @@ private:
     /** external applied space field, values on gauss points, size is number of tetraedrons */
     std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > extSpaceField;
 
-    /** list of the Dirichlet indices where (vp,vq) are zero, built by constructor */
-    std::vector<int> lvd; //devNote : must use the new indexation
+    /** list of the Dirichlet indices where (vp,vq) are zero, initialized by constructor */
+    std::vector<int> lvd;
     };// end class linAlgebra
 #endif
