@@ -1,7 +1,7 @@
 #define BOOST_TEST_MODULE indexTest
 
 #include <boost/test/unit_test.hpp>
-
+#include <numeric>   // iota
 #include "meshUtils.h"
 
 BOOST_AUTO_TEST_SUITE(ut_index)
@@ -45,6 +45,34 @@ BOOST_AUTO_TEST_CASE(deprecated_stuff)
     BOOST_CHECK(lvd.size() == lvdNew.size());
     for(unsigned int i=0;i<lvd.size();i++)
         { BOOST_CHECK(lvd[i] == lvdNew[i]); }
+    }
+
+BOOST_AUTO_TEST_CASE(LLG_index_lvd_preparation)
+    {
+    /*
+     *if diff size is initialized bigger than what is really needed, there are some zero's in the
+     resulting diff if set_difference fifth argument is just diff.begin().
+     But you do not know in advance diff size, so to avoid setting an arbitrary initial size and
+     resizing after calling set_difference it is better not to memory initialize diff and call
+     set_difference with the proper inserter
+     * */
+    const int NOD = 10;
+    std::vector<int> v1{0, 0, 1, 2, 5, 5, 5, 9};
+    suppress_copies<int>(v1);
+    std::cout << "v1= ";
+    for(unsigned int i=0;i<v1.size();i++) { std::cout << v1[i] << '\t'; }
+    std::cout << std::endl;
+    std::vector<int> v2(NOD);
+    std::iota(v2.begin(),v2.end(),0);
+    std::cout << "v2= ";
+    for(unsigned int i=0;i<v2.size();i++) { std::cout << v2[i] << '\t'; }
+    std::cout << std::endl;
+    std::vector<int> diff;
+    std::set_difference(v2.begin(),v2.end(),v1.begin(),v1.end(),std::inserter(diff,diff.begin()));
+    std::cout << "v2 - v1 = diff= ";
+    for(unsigned int i=0;i<diff.size();i++) { std::cout << diff[i] << '\t'; }
+    std::cout << std::endl;
+    BOOST_CHECK(diff.size() == (size_t)5);
     }
 
 BOOST_AUTO_TEST_SUITE_END()
