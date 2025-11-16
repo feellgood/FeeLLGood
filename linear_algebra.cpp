@@ -111,16 +111,13 @@ void LinAlgebra::init_lvd(Mesh::mesh &msh)
     suppress_copies<int>(dofs);
     std::vector<int> all(NOD);
     std::iota(all.begin(),all.end(),0); // all = { 0,1,...,NOD-1}
-    std::vector<int> ld(NOD);// list of Dirichlet nodes
-    auto it = std::set_difference(all.begin(),all.end(),dofs.begin(),dofs.end(),ld.begin());
-    ld.resize(it - ld.begin());
-    ld.shrink_to_fit();
-
+    std::vector<int> ld;// list of Dirichlet nodes indices
+    std::set_difference(all.begin(),all.end(),dofs.begin(),dofs.end(),std::inserter(ld,ld.begin()));
     lvd.resize(2*ld.size());
+    lvd.shrink_to_fit();
     for(unsigned int i=0;i<ld.size();i++)
         {
         lvd[2*i] = ld[i];
         lvd[2*i+1] = ld[i] + 1;//NOD;
         }
-    lvd.shrink_to_fit();
     }
