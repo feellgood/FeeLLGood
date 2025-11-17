@@ -8,7 +8,7 @@ import gmsh
 verboseGmsh = False
 
 #all dimensions are in nm
-mesh_size = 10
+mesh_size = 5
 
 class cylinder:
     def __init__(self,n,h,r):
@@ -140,10 +140,10 @@ gmsh.finalize()
 settings = {
     "outputs": {
         "file_basename": "test_ex5",
-        "evol_time_step": 1e-12,
+        "evol_time_step": 1e-13,
         "final_time": 2e-11,
         "evol_columns": [ "t", "<Mx>", "<My>", "<Mz>", "E_tot" ],
-        "mag_config_every": 5
+        "mag_config_every": 10
     },
     "mesh": {
         "filename": meshFileName,
