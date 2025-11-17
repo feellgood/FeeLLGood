@@ -179,6 +179,7 @@ endif()
 
 install(TARGETS feellgood RUNTIME DESTINATION bin)
 install(PROGRAMS ./tools/fg-configurator DESTINATION bin)
+install(PROGRAMS ./tools/fg-gensol DESTINATION bin)
 install(PROGRAMS ./tools/fg-h5extract DESTINATION bin)
 install(PROGRAMS ./tools/fg-merge-sol DESTINATION bin)
 install(PROGRAMS ./tools/fg-mesh-stat DESTINATION bin)
