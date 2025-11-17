@@ -280,7 +280,7 @@ def main(mesh_file):
 __version__ = '1.0.0'
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: ./fg-gensol.py mesh_file.msh")
+        print(f"Usage: {sys.argv[0]} mesh_file.msh")
         sys.exit(1)
 
     mesh_file = sys.argv[1]
