@@ -97,27 +97,16 @@ void LinAlgebra::setExtSpaceField(Settings &s /**< [in] */)
 
 void LinAlgebra::init_lvd(Mesh::mesh &msh)
     {
-    std::vector<int> dofs; // list of the nodes where LLG does apply
-    std::for_each(msh.tet.begin(),msh.tet.end(),[&msh,&dofs](Tetra::Tet &t)
-        {
-        if (msh.isMagnetic(t))
-            {
-            dofs.push_back(t.ind[0]);
-            dofs.push_back(t.ind[1]);
-            dofs.push_back(t.ind[2]);
-            dofs.push_back(t.ind[3]);
-            }
-        });
-    suppress_copies<int>(dofs);
-    std::vector<int> all(NOD);
-    std::iota(all.begin(),all.end(),0); // all = { 0,1,...,NOD-1}
     std::vector<int> ld;// list of Dirichlet nodes indices
-    std::set_difference(all.begin(),all.end(),dofs.begin(),dofs.end(),std::inserter(ld,ld.begin()));
+    for(int i=0;i<NOD;i++)
+        {
+        if (!msh.magNode[i]) { ld.push_back(i); }
+        }
     lvd.resize(2*ld.size());
     lvd.shrink_to_fit();
     for(unsigned int i=0;i<ld.size();i++)
         {
-        lvd[2*i] = ld[i];
-        lvd[2*i+1] = ld[i] + 1;//NOD;
+        lvd[2*i] = 2*ld[i];
+        lvd[2*i+1] = 2*ld[i] + 1;
         }
     }
