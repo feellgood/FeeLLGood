@@ -29,7 +29,7 @@ def autogenerate_init_cfg(regions):
     
     region_lines = []
     for region_name in sorted(regions.keys()):
-        line = f"        '{region_name}': lambda x, y, z: np.array([0, 0, 1]),"
+        line = f"        '{region_name}': lambda x, y, z: [0, 0, 1],"
         region_lines.append(line)
 
     module_content = [
@@ -189,7 +189,7 @@ def apply_region_functions(points, regions, region_functions):
             for node_id in elem['nodes']:
                 idx = node_id # Meshio uses zero-based indexing
                 xyz = points[idx, :]
-                m[idx] = func(*xyz)
+                m[idx] = np.array(func(*xyz))
 
     norms = np.linalg.norm(m, axis=1)
     nonzero = norms > 0    
