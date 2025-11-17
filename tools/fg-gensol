@@ -208,10 +208,9 @@ def write_solution_file(m, filename="sol.in"):
     hostname = socket.gethostname()
     
     header_lines = [
-        "## fg-gensol",
+        "## generator: fg-gensol",
         f"## hostname: {hostname}",
         f"## real-world time: {now}",
-        "## settings file: ",
         "## time: 0",
         "## columns: idx\tmx\tmy\tmz\tphi"
     ]
