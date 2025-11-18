@@ -143,7 +143,7 @@ settings = {
         "evol_time_step": 1e-13,
         "final_time": 2e-11,
         "evol_columns": [ "t", "<Mx>", "<My>", "<Mz>", "E_tot" ],
-        "mag_config_every": 10
+        "mag_config_every": 20
     },
     "mesh": {
         "filename": meshFileName,

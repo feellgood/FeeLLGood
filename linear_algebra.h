@@ -53,7 +53,15 @@ public:
         if(s.getFieldType() == R4toR3)
             { setExtSpaceField(s); }
 
-        init_lvd(my_msh);
+        for (int i=0;i<NOD;i++)
+            {
+            if(!my_msh.magNode[i])
+                {
+                lvd.push_back(2*i);
+                lvd.push_back(2*i+1);
+                }
+            }
+        lvd.shrink_to_fit();
         }
 
     /** build a matrix shape suitable for our mesh */
@@ -106,8 +114,6 @@ public:
     /** computes local vector basis {ep,eq} in the tangeant plane for projection on the elements */
     void base_projection();
 
-    /** initializes lvd */
-    void init_lvd(Mesh::mesh &my_msh);
 private:
     /** recentering index direction if any */
     Nodes::index idx_dir;
