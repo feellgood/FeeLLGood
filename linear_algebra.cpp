@@ -94,19 +94,3 @@ void LinAlgebra::setExtSpaceField(Settings &s /**< [in] */)
         k++;
         });
     }
-
-void LinAlgebra::init_lvd(Mesh::mesh &msh)
-    {
-    std::vector<int> ld;// list of Dirichlet nodes indices
-    for(int i=0;i<NOD;i++)
-        {
-        if (!msh.magNode[i]) { ld.push_back(i); }
-        }
-    lvd.resize(2*ld.size());
-    lvd.shrink_to_fit();
-    for(unsigned int i=0;i<ld.size();i++)
-        {
-        lvd[2*i] = 2*ld[i];
-        lvd[2*i+1] = 2*ld[i] + 1;
-        }
-    }
