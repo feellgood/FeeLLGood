@@ -46,9 +46,11 @@ class mesh(object):
 
             # Get the mesh elements for the entity (dim, tag):
             elemTypes, elemTags, elemNodeTags = gmsh.model.mesh.getElements(dim, tag)
-            
+            if len(elemTypes) == 0:
+                continue # ugly
             if len(elemTypes) != 1:
                 print("Error : feellgood.core only handles mesh with first order tetrahedron elements")
+                print(elemTypes,len(elemTypes),elemTags,elemNodeTags)
                 sys.exit(1)
 
             for n in range(0,len(elemTags[0])):

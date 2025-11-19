@@ -7,8 +7,10 @@ import gmsh
 
 verboseGmsh = False
 
+justMagnet = False #if False magnet + electrode is meshed, else just the magnet, json also modified
+
 #all dimensions are in nm
-mesh_size = 5
+mesh_size = 15
 
 class cylinder:
     def __init__(self,n,h,r):
@@ -86,10 +88,11 @@ surf_regName = "frontier(magnet)"
 gmsh.model.addPhysicalGroup(2,[surf, out[0][1], out[2][1], out[3][1], out[4][1], out[5][1]],surface_tag)
 gmsh.model.setPhysicalName(2,surface_tag,surf_regName)
 
-surface_tag = 202 # should be disk in z=nw.height plane : boundary condition for electrostatic problem
-surface_top_name = "top_mag_pillar"
-gmsh.model.addPhysicalGroup(2,[ out[0][1] ],surface_tag)
-gmsh.model.setPhysicalName(2,surface_tag,surface_top_name)
+if not justMagnet:
+    surface_tag = 202 # should be disk in z=nw.height plane : boundary condition for electrostatic problem
+    surface_top_name = "top_mag_pillar"
+    gmsh.model.addPhysicalGroup(2,[ out[0][1] ],surface_tag)
+    gmsh.model.setPhysicalName(2,surface_tag,surface_top_name)
 
 volume_tag = 300 # magnetic volume
 gmsh.model.addPhysicalGroup(3,[out[1][1]],volume_tag)
@@ -118,14 +121,15 @@ elif r_n == r_e:
     metal_vol = out2[1][1]
     surf3 = out2[0][1]
 
-surface_tag = 212 # disk in z= z0-e.height plane : boundary condition for electrostatic problem
-surface_top_name2 = "metal_electrode"
-gmsh.model.addPhysicalGroup(2,[surf3],surface_tag)
-gmsh.model.setPhysicalName(2,surface_tag,surface_top_name2)
+if not justMagnet:
+    surface_tag = 212 # disk in z= z0-e.height plane : boundary condition for electrostatic problem
+    surface_top_name2 = "metal_electrode"
+    gmsh.model.addPhysicalGroup(2,[surf3],surface_tag)
+    gmsh.model.setPhysicalName(2,surface_tag,surface_top_name2)
 
-volume_tag = 310 # normal metal volume
-gmsh.model.addPhysicalGroup(3,[metal_vol],volume_tag)
-gmsh.model.setPhysicalName(3,volume_tag,e.name)
+    volume_tag = 310 # normal metal volume
+    gmsh.model.addPhysicalGroup(3,[metal_vol],volume_tag)
+    gmsh.model.setPhysicalName(3,volume_tag,e.name)
 
 gmsh.model.geo.synchronize() # we have to synchronize before the call to 'generate' to build the mesh
 gmsh.model.mesh.generate(3) # 3 is the dimension of the mesh
@@ -150,13 +154,10 @@ settings = {
         "length_unit": 1e-9,
         "volume_regions": {
             nw.name: { "Ae": 1e-11, "Js": 1, "alpha_LLG": 0.05, "P": 0.7, "sigma": 1.7e7,
-                       "l_sd": 10e-9, "l_sf": 12.5e-9}, #Co
-            e.name: { "Ae": 0, "Js": 0, "P": 0.7, "sigma": 5.8e7, "l_sf": 350e-9 } #Cu
+                       "l_sd": 10e-9, "l_sf": 12.5e-9} #Co
             },
         "surface_regions": {
-            surf_regName: {},
-            surface_top_name2:{ "V": 0.0, "s": [0,0,0] },
-            surface_top_name:{ "J": 1.0, "P":[0,1,0] }
+            surf_regName: {}
             }
     },
     "initial_magnetization": ["-y", "x", "2e-9"],
@@ -168,6 +169,11 @@ settings = {
     },
     "spin_accumulation": { "enable": False, "V_file": True }
 }
+
+if not justMagnet:
+    settings["mesh"]["volume_regions"][e.name] =  { "Ae": 0, "Js": 0, "P": 0.7, "sigma": 5.8e7, "l_sf": 350e-9 } #Cu
+    settings["mesh"]["surface_regions"][surface_top_name] = { "J": 1.0, "P":[0,1,0] }
+    settings["mesh"]["surface_regions"][surface_top_name2] = { "V": 0.0, "s": [0,0,0] }
 
 jsonFileName = "nanowire_spinAcc.json"
 with open(jsonFileName,'w') as outfile:

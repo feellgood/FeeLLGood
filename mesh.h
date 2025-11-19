@@ -120,7 +120,7 @@ public:
 
         for(unsigned int i=0;i<fac.size();i++)
             {
-            if (isMagnetic(fac[i]))
+            if (isMagnetic(fac[i]) && !isInMagList(magFac,fac[i]) )
                 { magFac.push_back(i); }
             }
         }
@@ -410,6 +410,24 @@ private:
      * positive  */
     double surface(std::vector<int> &facIndices);
 
+    /**return true if facette f is already indexed in the lisd idxMagList. Two facettes are equal if
+     * there exists a permutation where node indices are the same */
+    bool isInMagList(std::vector<int> &idxMagList,Facette::Fac &f)
+        {
+        auto it = std::find_if(idxMagList.begin(),idxMagList.end(),[this,&f](int idx)
+                {
+                const int a=f.ind[0];
+                const int b=f.ind[1];
+                const int c=f.ind[2];
+                const int i= fac[idx].ind[0];
+                const int j= fac[idx].ind[1];
+                const int k= fac[idx].ind[2];
+                return ((a==i)&&(b==j)&&(c==k))||((a==j)&&(b==i)&&(c==k))
+                     ||((a==i)&&(b==k)&&(c==j))|| ((a==k)&&(b==i)&&(c==j))
+                     ||((a==j)&&(b==k)&&(c==i))|| ((a==k)&&(b==j)&&(c==i));
+                });
+        return(it != idxMagList.end());
+        }
     }; // end class mesh
     }  // end namespace Mesh
 #endif
