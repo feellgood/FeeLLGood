@@ -157,6 +157,21 @@ public:
                        || ((this->ind[1] == f.ind[1]) && (this->ind[2] < f.ind[2]))));
         }
 
+    /** two facets are equal if there exists an indices permutation where node indices are the same
+     * Warning: it does not take into account orientation (direct or indirect) */
+    bool operator==(const Fac &f) const
+        {
+        const int a= this->ind[0];
+        const int b= this->ind[1];
+        const int c= this->ind[2];
+        const int i= f.ind[0];
+        const int j= f.ind[1];
+        const int k= f.ind[2];
+        return ((a==i)&&(b==j)&&(c==k))||((a==j)&&(b==i)&&(c==k))
+             ||((a==i)&&(b==k)&&(c==j))||((a==k)&&(b==i)&&(c==j))
+             ||((a==j)&&(b==k)&&(c==i))||((a==k)&&(b==j)&&(c==i));
+        }
+
     /** computes the norm to the face, returns a unit vector */
     inline Eigen::Vector3d calc_norm(void) const
         {
