@@ -25,8 +25,9 @@ It does also contains the definition of many constants for the solver, and for s
 
 #include "mesh.h"
 #include "fmm_demag.h"
+#include "spinAccumulationSolver.h"
 #include "linear_algebra.h"
-
+#include "chronometer.h"
 #include "ANN.h"
 #include "feellgoodSettings.h"
 
@@ -188,10 +189,11 @@ public:
                   char recentering_direction /**< [in] X|Y|Z */);
 
     /** performs the time integration of the LLG problem, with spin accumulation if any */
-    int time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /**< [in] */,
-                         scal_fmm::fmm &myFMM /**< [in] */, timing &t_prm,
-                         int &nt /**< [out] number of time steps performed */,
-                         std::vector<Eigen::Vector3d> &s /**< [in] */ );
+    int time_integration(Settings &settings /**< [in] */,
+                         LinAlgebra &linAlg /**< [in] */,
+                         spinAcc &spinAcc_solver /**< [in] */,
+                         scal_fmm::fmm &myFMM /**< [in] */,
+                         timing &t_prm, int &nt /**< [out] number of time steps performed */);
 
 private:
     bool recenter_mem;  /**< flag to know if kdtree and pts are allocated */
@@ -201,6 +203,17 @@ private:
 
     /** find direction of motion of DW */
     void direction(enum Nodes::index idx_dir /**< [in] */);
+
+    /** compute demagnetizing field, energies, and prepare for next time step quantitites at time t */
+    void compute_all(Settings &settings, scal_fmm::fmm &myFMM, const double t)
+        {
+        chronometer fmm_counter(2);
+        myFMM.calc_demag(msh);
+        if (settings.verbose)
+            { std::cout << "magnetostatics done in " << fmm_counter.millis() << std::endl; }
+        energy(t, settings);
+        evolution();
+        }
     };  // end class
 
 #endif

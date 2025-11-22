@@ -5,7 +5,6 @@
 
 #include "fem.h"
 #include "time_integration.h"
-#include "chronometer.h"
 #include "log-stats.h"
 
 /** Logic for finding a reasonable time step. */
@@ -134,22 +133,11 @@ static void exit_if_signal_received(const Fem &fem, const Settings &settings, co
     exit(1);
     }
 
-/** compute all quantitites at time t */
-inline void compute_all(Fem &fem, Settings &settings, scal_fmm::fmm &myFMM, const double t)
-    {
-    chronometer fmm_counter(2);
-    myFMM.calc_demag(fem.msh);
-    if (settings.verbose)
-            { std::cout << "magnetostatics done in " << fmm_counter.millis() << std::endl; }
-    fem.energy(t, settings);
-    fem.evolution();
-    }
-
 int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /**< [in] */,
-                          scal_fmm::fmm &myFMM /**< [in] */, timing &t_prm, int &nt,
-                          std::vector<Eigen::Vector3d> &s /**< [in] */)
+                          spinAcc &spinAcc_solver /**< [in] */,
+                          scal_fmm::fmm &myFMM /**< [in] */, timing &t_prm, int &nt)
     {
-    compute_all(*this, settings, myFMM, t_prm.get_t());
+    compute_all(settings, myFMM, t_prm.get_t());
     std::string baseName = settings.r_path_output_dir + '/' + settings.getSimName();
     std::string str = baseName + ".evol";
     std::ofstream fout(str);
@@ -181,7 +169,7 @@ int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /*
         // Loop over the integration time steps within a visible step.
         while (t_prm.get_t() < t_target)
             {
-            exit_if_signal_received(*this, settings, t_prm, stats, s);
+            exit_if_signal_received(*this, settings, t_prm, stats, spinAcc_solver.s);
 
             t_prm.set_dt(stepper(t_target - t_prm.get_t()));
             bool last_step = (t_prm.get_dt() == t_target - t_prm.get_t());
@@ -240,7 +228,7 @@ int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /*
                 continue;
                 }
 
-            compute_all(*this, settings, myFMM, t_prm.get_t());
+            compute_all(settings, myFMM, t_prm.get_t());
             nt++;
             flag = 0;
 
@@ -255,7 +243,7 @@ int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /*
 
             stats.max_angle = std::max(stats.max_angle, msh.max_angle());
             }  // endwhile
-        saver(settings, t_prm, fout, nt_output++, s);
+        saver(settings, t_prm, fout, nt_output++, spinAcc_solver.s);
         }                                       // end for
     if (!settings.verbose) show_progress(1.0);  // show we are done
 

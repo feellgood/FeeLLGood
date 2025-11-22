@@ -1,3 +1,6 @@
+#ifndef electrostat_h
+#define electrostat_h
+
 /** \file electrostatSolver.h
   \brief solver for electrostatic problem when spin accumulation is required
   header containing electrostatSolver class. It uses biconjugate stabilized gradient with diagonal
@@ -9,7 +12,6 @@
 #include <map>
 
 #include "config.h"
-#include "fem.h"
 #include "mesh.h"
 #include "algebra/algebra.h"
 
@@ -82,3 +84,4 @@ private:
      * boundary conditions, returns true if has converged */
     bool solve(void);
     };  // end class electrostatSolver
+#endif
