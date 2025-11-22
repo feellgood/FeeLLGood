@@ -6,8 +6,6 @@
 #include "fem.h"
 #include "time_integration.h"
 #include "chronometer.h"
-#include "fmm_demag.h"
-#include "linear_algebra.h"
 #include "log-stats.h"
 
 /** Logic for finding a reasonable time step. */
@@ -147,10 +145,11 @@ inline void compute_all(Fem &fem, Settings &settings, scal_fmm::fmm &myFMM, cons
     fem.evolution();
     }
 
-int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linAlg /**< [in] */,
-                     scal_fmm::fmm &myFMM /**< [in] */, timing &t_prm, int &nt, std::vector<Eigen::Vector3d> &s)
+int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /**< [in] */,
+                          scal_fmm::fmm &myFMM /**< [in] */, timing &t_prm, int &nt,
+                          std::vector<Eigen::Vector3d> &s /**< [in] */)
     {
-    compute_all(fem, settings, myFMM, t_prm.get_t());
+    compute_all(*this, settings, myFMM, t_prm.get_t());
     std::string baseName = settings.r_path_output_dir + '/' + settings.getSimName();
     std::string str = baseName + ".evol";
     std::ofstream fout(str);
@@ -172,7 +171,7 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
     int step_count = std::round((t_prm.tf - t_initial) / t_step);
     TimeStepper stepper(t_prm.get_dt(), t_prm.DTMIN, t_prm.DTMAX);
     Stats stats;
-    stats.max_angle = fem.msh.max_angle();
+    stats.max_angle = msh.max_angle();
 
     // Loop over the visible time steps, i.e. those that will appear on the output file.
     nt = 0;
@@ -182,7 +181,7 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
         // Loop over the integration time steps within a visible step.
         while (t_prm.get_t() < t_target)
             {
-            exit_if_signal_received(fem, settings, t_prm, stats, s);
+            exit_if_signal_received(*this, settings, t_prm, stats, s);
 
             t_prm.set_dt(stepper(t_target - t_prm.get_t()));
             bool last_step = (t_prm.get_dt() == t_target - t_prm.get_t());
@@ -216,7 +215,7 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
                 }
 
             int err = linAlg.solver(t_prm);
-            fem.vmax = linAlg.get_v_max();
+            vmax = linAlg.get_v_max();
 
             if (err)
                 {
@@ -226,22 +225,22 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
                 continue;
                 }
 
-            double dumax = t_prm.get_dt() * fem.vmax;
+            double dumax = t_prm.get_dt() * vmax;
             stats.good_dt.add(t_prm.get_dt());
             stats.good_dumax.add(dumax);
             if (settings.verbose)
                 {
-                std::cout << "  -> dumax = " << dumax << ",  vmax = " << fem.vmax << std::endl;
+                std::cout << "  -> dumax = " << dumax << ",  vmax = " << vmax << std::endl;
                 }
 
-            stepper.set_soft_limit(settings.DUMAX / fem.vmax / 2);
+            stepper.set_soft_limit(settings.DUMAX / vmax / 2);
             if (dumax > settings.DUMAX)
                 {
                 flag++;
                 continue;
                 }
 
-            compute_all(fem, settings, myFMM, t_prm.get_t());
+            compute_all(*this, settings, myFMM, t_prm.get_t());
             nt++;
             flag = 0;
 
@@ -251,12 +250,12 @@ int time_integration(Fem &fem, Settings &settings /**< [in] */, LinAlgebra &linA
             else
                 t_prm.inc_t();
 
-            if (settings.recenter) fem.recenter(settings.threshold, settings.recentering_direction);
+            if (settings.recenter) recenter(settings.threshold, settings.recentering_direction);
             if (!settings.verbose) show_progress(t_prm.get_t() / t_prm.tf);
 
-            stats.max_angle = std::max(stats.max_angle, fem.msh.max_angle());
+            stats.max_angle = std::max(stats.max_angle, msh.max_angle());
             }  // endwhile
-        fem.saver(settings, t_prm, fout, nt_output++, s);
+        saver(settings, t_prm, fout, nt_output++, s);
         }                                       // end for
     if (!settings.verbose) show_progress(1.0);  // show we are done
 

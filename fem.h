@@ -24,6 +24,8 @@ It does also contains the definition of many constants for the solver, and for s
 #include <unistd.h>
 
 #include "mesh.h"
+#include "fmm_demag.h"
+#include "linear_algebra.h"
 
 #include "ANN.h"
 #include "feellgoodSettings.h"
@@ -184,6 +186,12 @@ public:
 
     bool recenter(double thres /**< [in] threshold parameter */,
                   char recentering_direction /**< [in] X|Y|Z */);
+
+    /** performs the time integration of the LLG problem, with spin accumulation if any */
+    int time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /**< [in] */,
+                         scal_fmm::fmm &myFMM /**< [in] */, timing &t_prm,
+                         int &nt /**< [out] number of time steps performed */,
+                         std::vector<Eigen::Vector3d> &s /**< [in] */ );
 
 private:
     bool recenter_mem;  /**< flag to know if kdtree and pts are allocated */
