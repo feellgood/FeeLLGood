@@ -10,9 +10,7 @@
 #include "fem.h"
 #include "fmm_demag.h"
 #include "linear_algebra.h"
-#include "mesh.h"
 #include "time_integration.h"
-#include "spinAccumulationSolver.h"
 
 // Catch some deadly signals in order to save the state before quitting.
 volatile sig_atomic_t received_signal = 0;
@@ -297,7 +295,7 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
         }
     int nt;  // number of time steps
-    int status = fem.time_integration(mySettings, linAlg, myFMM, t_prm, nt, spinAcc_solver.s);
+    int status = fem.time_integration(mySettings, linAlg, spinAcc_solver, myFMM, t_prm, nt);
     double total_time = counter.fp_elapsed();
     std::cout << "\nComputing time:\n\n";
     std::cout << "    total: " << counter.convertSeconds(total_time);
