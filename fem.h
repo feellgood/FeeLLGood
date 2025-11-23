@@ -205,12 +205,25 @@ private:
     void direction(enum Nodes::index idx_dir /**< [in] */);
 
     /** compute demagnetizing field, energies, and prepare for next time step quantitites at time t */
-    void compute_all(Settings &settings, scal_fmm::fmm &myFMM, const double t)
+    void compute_all(Settings &settings, spinAcc &spinAcc_solver /**< [in] */,
+                     scal_fmm::fmm &myFMM, const double t)
         {
+        bool success(false);
         chronometer fmm_counter(2);
         myFMM.calc_demag(msh);
+        if (settings.spin_acc && spinAcc_solver.compute())
+            { success = true; }
         if (settings.verbose)
-            { std::cout << "magnetostatics done in " << fmm_counter.millis() << std::endl; }
+            {
+            std::cout << "magnetostatics done in " << fmm_counter.millis() << std::endl;
+            if (settings.spin_acc)
+                {
+                if (success)
+                    { std::cout << "spin diffusion solved.\n"; }
+                else
+                    { std::cout << "spin diffusion solver failed.\n"; }
+                }
+            }
         energy(t, settings);
         evolution();
         }

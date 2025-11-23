@@ -137,7 +137,7 @@ int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /*
                           spinAcc &spinAcc_solver /**< [in] */,
                           scal_fmm::fmm &myFMM /**< [in] */, timing &t_prm, int &nt)
     {
-    compute_all(settings, myFMM, t_prm.get_t());
+    compute_all(settings, spinAcc_solver, myFMM, t_prm.get_t());
     std::string baseName = settings.r_path_output_dir + '/' + settings.getSimName();
     std::string str = baseName + ".evol";
     std::ofstream fout(str);
@@ -228,7 +228,7 @@ int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /*
                 continue;
                 }
 
-            compute_all(settings, myFMM, t_prm.get_t());
+            compute_all(settings, spinAcc_solver, myFMM, t_prm.get_t());
             nt++;
             flag = 0;
 

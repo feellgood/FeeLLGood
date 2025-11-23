@@ -8,8 +8,7 @@ bool spinAcc::checkBoundaryConditions(bool verbose) const
     {
     int nbSurfJ(0);
     int nbSurfS(0);
-    if (verbose)
-        { std::cout<<"total surface region: "<<paramFacette.size()<<std::endl; }
+    // TODO: check (N0 != 0) and (0 <= P < 1)  in all volume regions
     std::for_each(paramFacette.begin(),paramFacette.end(),[&nbSurfJ,&nbSurfS,verbose](Facette::prm const &p)
         {
         if(p.regName != "__default__")

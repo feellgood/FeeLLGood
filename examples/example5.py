@@ -167,7 +167,7 @@ settings = {
         "min(dt)": 0.5e-16,
         "max(dt)": 1e-11
     },
-    "spin_accumulation": { "enable": False, "V_file": True }
+    "spin_accumulation": { "enable": True, "V_file": True }
 }
 
 if not justMagnet:
