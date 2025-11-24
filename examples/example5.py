@@ -140,7 +140,7 @@ gmsh.finalize()
 
 # warning: Cobalt l_sd was randomly choosen, just to have spin diffusion solver converges
 # polarization vector P is modelling a polarizer "outside" the mesh, such as a polarizing layer. It
-# is attibuted to the adjacency surface of the polarizing layer and the magnet here. 
+# is attributed to the adjacency surface of the polarizing layer and the magnet.
 settings = {
     "outputs": {
         "file_basename": "test_ex5",
@@ -154,7 +154,7 @@ settings = {
         "length_unit": 1e-9,
         "volume_regions": {
             nw.name: { "Ae": 1e-11, "Js": 1, "alpha_LLG": 0.05, "P": 0.7, "sigma": 1.7e7,
-                       "l_sd": 10e-9, "l_sf": 12.5e-9} #Co
+                       "dens_state": 1.34e47, "l_sd": 10e-9, "l_sf": 12.5e-9} #Co
             },
         "surface_regions": {
             surf_regName: {}
@@ -171,8 +171,9 @@ settings = {
 }
 
 if not justMagnet:
-    settings["mesh"]["volume_regions"][e.name] =  { "Ae": 0, "Js": 0, "P": 0.7, "sigma": 5.8e7, "l_sf": 350e-9 } #Cu
-    settings["mesh"]["surface_regions"][surface_top_name] = { "J": 1.0, "P":[0,1,0] }
+    settings["mesh"]["volume_regions"][e.name] = { "Ae": 0, "Js": 0, "P": 0.7, "sigma":
+    5.8e7, "dens_state": 1.34e47, "l_sf": 350e-9 } #Cu
+    settings["mesh"]["surface_regions"][surface_top_name] = { "J": 1.0e12, "P":[0,1,0] }
     settings["mesh"]["surface_regions"][surface_top_name2] = { "V": 0.0, "s": [0,0,0] }
 
 jsonFileName = "nanowire_spinAcc.json"

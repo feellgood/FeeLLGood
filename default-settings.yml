@@ -124,19 +124,19 @@ mesh:
       alpha_LLG: 0.5
 
       # Conductivity.
-      sigma: 1.0
+      sigma: 0
 
       # Density of states.
-      dens_state: 1.0
+      dens_state: 0
 
       # polarization rate.
       P: 0
 
       # Diffusion length related to s-d coupling in a magnetic material.
-      l_sd: 1.0
+      l_sd: 0
 
       # Spin diffusion length in a metal, magnetic or not.
-      l_sf: 1.0
+      l_sf: 0
 
       # Spin Hall constant for Spin Orbit Torque contribution to spin
       # diffusion problem.

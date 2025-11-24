@@ -6,9 +6,19 @@
 
 bool spinAcc::checkBoundaryConditions(bool verbose) const
     {
+    // nbVolP and nbVolN0 initialized to 1 because of __default__
+    unsigned int nbVolP(1);
+    unsigned int nbVolN0(1);
+    std::for_each(paramTetra.begin(),paramTetra.end(),[&nbVolN0,&nbVolP](Tetra::prm const &p)
+        {
+        if(p.regName != "__default__")
+            {
+            if (std::isfinite(p.N0) && (p.N0 != 0)) nbVolN0++;
+            if(std::isfinite(p.P) && (0 <= p.P) && (p.P < 1.0)) nbVolP++;
+            }
+        });
     int nbSurfJ(0);
     int nbSurfS(0);
-    // TODO: check (N0 != 0) and (0 <= P < 1)  in all volume regions
     std::for_each(paramFacette.begin(),paramFacette.end(),[&nbSurfJ,&nbSurfS,verbose](Facette::prm const &p)
         {
         if(p.regName != "__default__")
@@ -22,7 +32,9 @@ bool spinAcc::checkBoundaryConditions(bool verbose) const
             if (std::isfinite(p.s.norm())) nbSurfS++;
             }
         });
-    return ((nbSurfJ == 1)&&(nbSurfS == 1));
+    return ( (nbSurfJ == 1)&&(nbSurfS == 1)
+           && (nbVolN0 == paramTetra.size())
+           && (nbVolP == paramTetra.size()) );
     }
 
 void spinAcc::fillDirichletData(const int k, Eigen::Vector3d &s_value)
