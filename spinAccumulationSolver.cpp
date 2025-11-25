@@ -4,6 +4,9 @@
 #include "tags.h"
 #include "solverUtils.h"
 
+using algebra::sq;
+using namespace Nodes;
+
 bool spinAcc::checkBoundaryConditions(bool verbose) const
     {
     // nbVolP and nbVolN0 initialized to 1 because of __default__
@@ -94,7 +97,6 @@ void spinAcc::setPotential(std::vector<double> &_V)
 
 void spinAcc::prepareExtras(void)
     {
-    using namespace Nodes;
     using namespace Tetra;
 
     std::for_each( msh.tet.begin(), msh.tet.end(), [this](Tet &t)
@@ -189,8 +191,6 @@ void spinAcc::calc_Hm(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nod
 
 bool spinAcc::solve(void)
     {
-    using namespace Nodes;
-
     iter.reset();
     algebra::w_sparseMat Kw(DIM_PROBLEM*NOD);
     std::vector<double> Lw(DIM_PROBLEM*NOD,0);
@@ -201,6 +201,8 @@ bool spinAcc::solve(void)
         K.setZero();
         std::vector<double> L(DIM_PROBLEM*Tetra::N,0.0);
         integrales(elem,K,L);
+        if(msh.isMagnetic(elem))
+            { integraleMag(elem,K,L); }
         buildMat<Tetra::N,DIM_PROBLEM>(elem.ind, K, Kw);
         buildVect<Tetra::N,DIM_PROBLEM>(elem.ind, L, Lw);
         } );
@@ -231,29 +233,77 @@ bool spinAcc::solve(void)
     return (iter.status == algebra::CONVERGED);
     }
 
+void spinAcc::integraleMag(Tetra::Tet &tet,
+                           Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,DIM_PROBLEM*Tetra::N> &AE,
+                           std::vector<double> &BE)
+    {
+    using namespace Tetra;
+
+    double sigma = getSigma(tet);
+    double N0 = getN0(tet);
+    double P = getPolarization(tet);
+    double lsd = getLsd(tet);
+    double D0=2.0*sigma/(sq(CHARGE_ELECTRON)*N0);
+    /* these two constants in a magnetic region are the only parameter involved in the diffusion
+       equation for magnetic contribution */
+    double cst0 = BOHRS_MUB*P*sigma/CHARGE_ELECTRON;
+    double cst1 = D0/sq(lsd);
+    Eigen::Matrix<double,N,1> V_nod;
+    Eigen::Matrix<double,Nodes::DIM,NPI> gradV;
+    // we should not recompute gradV, it is already done by electrostat solver
+    for (size_t ie=0; ie<N; ie++)
+        { V_nod[ie] = V[ tet.ind[ie] ]; }
+    Eigen::Matrix<double,N,NPI> dadx;
+    dadx.colwise() = tet.da.col(IDX_X); // colwise() means da.col(IDX_X) is repeated to build dadx
+    Eigen::Matrix<double,N,NPI> dady;
+    dady.colwise() = tet.da.col(IDX_Y);
+    Eigen::Matrix<double,N,NPI> dadz;
+    dadz.colwise() = tet.da.col(IDX_Z);
+    // building explicitely dad(x|y|z) migth be avoided rewritting the following multiplications
+    gradV.row(IDX_X) = V_nod.transpose() * dadx;// V_nod^T * dadx
+    gradV.row(IDX_Y) = V_nod.transpose() * dady;// V_nod^T * dady
+    gradV.row(IDX_Z) = V_nod.transpose() * dadz;// V_nod^T * dadz
+
+    for (size_t npi=0; npi<NPI; npi++)
+        {
+        double w = tet.weight[npi];
+
+        for (size_t ie=0; ie<N; ie++)
+            {
+            const Eigen::Vector3d &m = msh.getNode_u(tet.ind[ie]);//magnetization
+            Eigen::Vector3d grad_ai = tet.da.row(ie);
+            double tmp = cst0*w*grad_ai.dot( gradV.col(npi) );
+            BE[    ie] += tmp*m[0];
+            BE[  N+ie] += tmp*m[1];
+            BE[2*N+ie] += tmp*m[2];
+
+            tmp = cst1*w*Tetra::a[ie][npi];
+            AE(    ie,   N+ie) += tmp*m[2];
+            AE(    ie, 2*N+ie) -= tmp*m[1];
+            AE(  N+ie,     ie) -= tmp*m[2];
+            AE(  N+ie, 2*N+ie) += tmp*m[0];
+            AE(2*N+ie,     ie) += tmp*m[1];
+            AE(2*N+ie,   N+ie) -= tmp*m[0];
+            }
+        }
+    }
+
 void spinAcc::integrales(Tetra::Tet &tet,
                          Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,DIM_PROBLEM*Tetra::N> &AE,
                          std::vector<double> &BE)
     {
-    using algebra::sq;
-    using namespace Nodes;
     using namespace Tetra;
 
     double sigma = getSigma(tet);
     double spinHall = getSpinHall(tet);
     double N0 = getN0(tet);
-    double P = getPolarization(tet);
     double lsf = getLsf(tet);
     double D0=2.0*sigma/(sq(CHARGE_ELECTRON)*N0);
     Eigen::Matrix<double,N,1> V_nod;
     Eigen::Matrix<double,Nodes::DIM,NPI> gradV;
 
     for (size_t ie=0; ie<N; ie++)
-        {
-        size_t i= tet.ind[ie];
-        V_nod[ie] = V[i];
-        }
-
+        { V_nod[ie] = V[ tet.ind[ie] ]; }
     Eigen::Matrix<double,N,NPI> dadx;
     dadx.colwise() = tet.da.col(IDX_X); // colwise() means da.col(IDX_X) is repeated to build dadx 
     Eigen::Matrix<double,N,NPI> dady;
@@ -264,43 +314,6 @@ void spinAcc::integrales(Tetra::Tet &tet,
     gradV.row(IDX_X) = V_nod.transpose() * dadx;// V_nod^T * dadx
     gradV.row(IDX_Y) = V_nod.transpose() * dady;// V_nod^T * dady
     gradV.row(IDX_Z) = V_nod.transpose() * dadz;// V_nod^T * dadz
-
-    if(msh.isMagnetic(tet))
-        {
-        double lsd = getLsd(tet);
-        double u_nod[DIM][N];
-
-        for (size_t ie=0; ie<N; ie++)
-            {
-            size_t i= tet.ind[ie];
-            for (size_t d=0; d<DIM; d++)
-                {
-                u_nod[d][ie] = msh.getNode_u(i)(d);//msh.node[i].u[d]; // carefull here do we need u comp of Node(NEXT) or Node(CURRENT) ?
-                }
-            }
-
-        for (size_t npi=0; npi<NPI; npi++)
-            {
-            double w = tet.weight[npi];
-
-            for (size_t ie=0; ie<N; ie++)
-                {
-                Eigen::Vector3d grad_ai = tet.da.row(ie);
-                double tmp = BOHRS_MUB*P*sigma/CHARGE_ELECTRON*w*grad_ai.dot( gradV.col(npi) );
-                BE[    ie] += tmp*u_nod[0][ie];
-                BE[  N+ie] += tmp*u_nod[1][ie];
-                BE[2*N+ie] += tmp*u_nod[2][ie];
-
-                tmp = Tetra::a[ie][npi]*D0*w/sq(lsd);
-                AE(    ie,   N+ie) += tmp*u_nod[2][ie];
-                AE(    ie, 2*N+ie) -= tmp*u_nod[1][ie];
-                AE(  N+ie,     ie) -= tmp*u_nod[2][ie];
-                AE(  N+ie, 2*N+ie) += tmp*u_nod[0][ie];
-                AE(2*N+ie,     ie) += tmp*u_nod[1][ie];
-                AE(2*N+ie,   N+ie) -= tmp*u_nod[0][ie];
-                }
-            }
-        }
 
     for (size_t npi=0; npi<NPI; npi++)
         {

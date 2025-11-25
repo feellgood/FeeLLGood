@@ -145,7 +145,7 @@ settings = {
     "outputs": {
         "file_basename": "test_ex5",
         "evol_time_step": 1e-13,
-        "final_time": 2e-11,
+        "final_time": 1e-11,
         "evol_columns": [ "t", "<Mx>", "<My>", "<Mz>", "E_tot" ],
         "mag_config_every": 20
     },

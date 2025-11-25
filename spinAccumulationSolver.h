@@ -134,7 +134,12 @@ class spinAcc
     /** dimensionnality of the spin accumulation problem */
     static const int DIM_PROBLEM = 3;
 
-    /** computes contributions to matrix AE and vector BE from tetrahedron tet */
+    /** computes magnetic contributions to spin diffusion from tetrahedron tet */
+    void integraleMag(Tetra::Tet &tet,
+                      Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,DIM_PROBLEM*Tetra::N> &AE,
+                      std::vector<double> &BE);
+
+    /** computes normal metal contributions to matrix AE and vector BE from tetrahedron tet */
     void integrales(Tetra::Tet &tet,
                     Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,DIM_PROBLEM*Tetra::N> &AE,
                     std::vector<double> &BE);
