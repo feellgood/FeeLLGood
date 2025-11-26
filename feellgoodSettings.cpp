@@ -384,7 +384,7 @@ void Settings::read(YAML::Node yaml)
                 {
                 std::string name = it->first.as<std::string>();
                 YAML::Node volume = it->second;
-                Tetra::prm p;
+                Tetra::prm &p = paramTetra.emplace_back();
                 if (default_idx >= 0) p = paramTetra[default_idx];
                 p.regName = name;
                 assign(p.A, volume["Ae"]);
@@ -406,7 +406,6 @@ void Settings::read(YAML::Node yaml)
                 assign(p.lsf, volume["l_sf"]);
                 assign(p.spinHall, volume["spin_hall"]); // SOT contribution to spin diffusion,
                                                          // through spin Hall effect
-                paramTetra.push_back(p);
                 }
             }  // mesh.volume_regions
         YAML::Node surfaces = mesh["surface_regions"];
@@ -418,7 +417,7 @@ void Settings::read(YAML::Node yaml)
                 {
                 std::string name = it->first.as<std::string>();
                 YAML::Node surface = it->second;
-                Facette::prm p;
+                Facette::prm &p = paramFacette.emplace_back();
                 if (default_idx >= 0) p = paramFacette[default_idx];
                 p.regName = name;
                 assign(p.suppress_charges, surface["suppress_charges"]);
@@ -436,7 +435,6 @@ void Settings::read(YAML::Node yaml)
                     {p.P = Eigen::Vector3d(NAN,NAN,NAN); }
                 if (!assign(!NORMALIZE, p.s, surface["s"]))
                     { p.s = Eigen::Vector3d(NAN,NAN,NAN); }
-                paramFacette.push_back(p);
                 }
             }  // mesh.surface_regions
         }      // mesh
