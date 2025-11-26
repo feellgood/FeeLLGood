@@ -103,10 +103,10 @@ public:
     std::vector<double> corr;
 
     /** all volume region parameters for the tetraedrons */
-    std::vector<Tetra::prm> prmTetra;
+    const std::vector<Tetra::prm> &prmTetra;
 
     /** all surface region parameters for the facettes */
-    std::vector<Facette::prm> prmFacette;
+    const std::vector<Facette::prm> &prmFacette;
 
 private:
     /** tree initialized by constructor */
