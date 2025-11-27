@@ -139,10 +139,13 @@ class spinAcc
                       Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,DIM_PROBLEM*Tetra::N> &AE,
                       std::vector<double> &BE);
 
+    /** computes spin Hall effect contribution to spin diffusion. This contribution does not depend
+     * on magnetization, its origin is Spin Orbit Torque. */
+    void integraleSpinHall(Tetra::Tet &tet, std::vector<double> &BE);
+
     /** computes normal metal contributions to matrix AE and vector BE from tetrahedron tet */
     void integrales(Tetra::Tet &tet,
-                    Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,DIM_PROBLEM*Tetra::N> &AE,
-                    std::vector<double> &BE);
+                    Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,DIM_PROBLEM*Tetra::N> &AE);
 
     /** computes contributions to vector BE from facette fac */
     void integrales(Facette::Fac &fac, Eigen::Vector3d &Q, std::vector<double> &BE);

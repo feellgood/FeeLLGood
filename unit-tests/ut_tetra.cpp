@@ -404,4 +404,63 @@ BOOST_AUTO_TEST_CASE(Tet_Pcoeff)
             }
     }
 
+/* test of two equivalent formulas for a gradient of V scalar potential on the nodes */
+BOOST_AUTO_TEST_CASE(Tet_gradV, *boost::unit_test::tolerance(UT_TOL))
+    {
+    using namespace Nodes;
+    const int nbNod = 4;
+    std::vector<double> V(nbNod); // scalar potential
+    std::vector<Nodes::Node> node;
+    dummyNodes<nbNod>(node);
+
+
+    unsigned sd = my_seed();
+    std::mt19937 gen(sd);
+    std::uniform_real_distribution<> distrib(0.0, 1.0);
+    std::cout << "test on gradV with a tetrahedron\n V = ";
+    for (int i = 0; i < nbNod; i++)
+        {
+        node[i].p[0] += distrib(gen)/10.0;
+        node[i].p[1] += distrib(gen)/10.0;
+        node[i].p[2] += distrib(gen)/10.0;
+        V[i] = distrib(gen);
+        std::cout << V[i] << '\t';
+        }
+    std::cout << std::endl;
+    // carefull with indices (starting from 1)
+    Tetra::Tet tet(node, 0, {1, 2, 3, 4});
+
+    // compact version
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> gradV;
+    for (int npi = 0; npi < Tetra::NPI; npi++)
+        {
+        Eigen::Vector3d v(0,0,0);
+        for (int i = 0; i < Tetra::N; i++)
+            { v += V[tet.ind[i]] * tet.da.row(i); }
+        gradV.col(npi) = v;
+        }
+    
+    // ugly version
+    Eigen::Matrix<double,Tetra::N,1> V_nod;
+    for (size_t ie=0; ie<Tetra::N; ie++) { V_nod[ie] = V[ tet.ind[ie] ]; }
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> gradVbis;
+    Eigen::Matrix<double,Tetra::N,Tetra::NPI> dadx;
+    dadx.colwise() = tet.da.col(IDX_X); // colwise() means da.col(IDX_X) is repeated to build dadx
+    Eigen::Matrix<double,Tetra::N,Tetra::NPI> dady;
+    dady.colwise() = tet.da.col(IDX_Y);
+    Eigen::Matrix<double,Tetra::N,Tetra::NPI> dadz;
+    dadz.colwise() = tet.da.col(IDX_Z);
+    // building explicitely dad(x|y|z) migth be avoided rewritting the following multiplications
+    gradVbis.row(IDX_X) = V_nod.transpose() * dadx;// V_nod^T * dadx
+    gradVbis.row(IDX_Y) = V_nod.transpose() * dady;// V_nod^T * dady
+    gradVbis.row(IDX_Z) = V_nod.transpose() * dadz;// V_nod^T * dadz
+
+    for(int i=0;i<Nodes::DIM;i++)
+        for(int j=0;j<Tetra::NPI;j++)
+            {
+            std::cout << gradV(i,j) << " should be " << gradVbis(i,j) << std::endl;
+            BOOST_TEST( gradV(i,j) == gradVbis(i,j) );
+            }
+    }
+
 BOOST_AUTO_TEST_SUITE_END()
