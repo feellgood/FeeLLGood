@@ -96,7 +96,7 @@ class spinAcc
     /** number of Nodes (needed for templates) */
     const int NOD;
 
-    /** returns Js = Ms/nu_0 */
+    /** returns Js = mu_0 Ms */
     double getJs(Tetra::Tet const &tet) const;
 
     /** returns sigma of the tetraedron, (conductivity in (Ohm.m)^-1 */

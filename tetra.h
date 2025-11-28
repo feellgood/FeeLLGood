@@ -60,9 +60,9 @@ region number and material constants
 struct prm
     {
     std::string regName; /**< region name */
-    double alpha_LLG;    /**< \f$ \alpha \f$ damping parameter */
-    double A;            /**< exchange constant stiffness */
-    double J = 0;        /**< \f$ M_s = \nu_0 J \f$ if J<=0 then the region is non magnetic */
+    double alpha_LLG;    /**< \f$ \alpha \f$ damping parameter, dimensionless */
+    double A;            /**< exchange constant stiffness in [Joule per meter] = kg m^1 s^-2 */
+    double J = 0;        /**< \f$ J = \mu_0 Ms \f$ if J<=0 then the region is non magnetic */
     double K;            /**< uniaxial anisotropy constant */
     Eigen::Vector3d uk;  /**< uniaxial anisotropy axis */
 
@@ -71,11 +71,11 @@ struct prm
     Eigen::Vector3d ey;  /**< unit vector2 (for cubic anisotropy) */
     Eigen::Vector3d ez;  /**< unit vector3 (for cubic anisotropy) */
 
-    double P;            /**< spin diffusion polarization rate */
-    double N0;           /**< density of states */
-    double sigma;        /**< conductivity */
-    double lsd;          /**< diffusion length related to s-d coupling in a magnetic material */
-    double lsf;          /**< spin diffusion length in a metal (magnetic or not) */
+    double P;            /**< spin diffusion polarization rate, dimensionless */
+    double N0;           /**< density of states at Fermi level in [Energy]^-1 [Volume]^-1 = kg^-1 m^-5 s^2 */
+    double sigma;        /**< electrical conductivity in [Siemens per meter] = kg^-1 m^-3 s^3 A^2  */
+    double lsd;          /**< diffusion length related to s-d coupling in a magnetic material m^1 */
+    double lsf;          /**< spin diffusion length in a metal (magnetic or not) m^1 */
     double spinHall;     /**< Spin Orbit Torque contribution to spin diffusion due to spin Hall effect */
 
     double volume = 0; /**< total volume of the region */

@@ -107,7 +107,7 @@ void spinAcc::prepareExtras(void)
         const double lsd = getLsd(t);
         const double lsf = getLsf(t);
         const double ksi = sq(lsd/lsf);
-        const double Js = getJs(t);// Js = Ms/nu_0
+        const double Js = getJs(t);// Js = mu_0 Ms
         double prefactor = mu0*BOHRS_MUB*P/(gamma0*Js*CHARGE_ELECTRON*(1.0 + sq(ksi)));
 
         t.extraField = [this, _idx](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)
