@@ -30,7 +30,7 @@ public:
             const double _tol /**< [in] tolerance for solvers */,
             const bool v /**< [in] verbose mode for iteration monitor */,
             const int max_iter /**< [in] maximum number of iteration */)
-        : msh(_msh), paramTetra(_pTetra), paramFacette(_pFac), iter("cg_dir",_tol,v,max_iter) {}
+        : refMsh(&_msh), paramTetra(_pTetra), paramFacette(_pFac), iter("cg_dir",_tol,v,max_iter) {}
 
     /** electrostatic potential values for boundary conditions, V.size() is the size of the vector
      * of nodes */
@@ -64,9 +64,8 @@ public:
      * if verbose set to true, some printing are sent to terminal */
     void compute(const bool verbose /**< [in] */, const std::string V_fileName /**< [in] output file name for V solution */);
 private:
-    /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh (
-     * const ref ) */
-    Mesh::mesh msh;
+    /** mesh ref to access nodes, fac, tet, and others geometrical values and methods */
+    Mesh::mesh *refMsh;
 
     /** this vector contains the material parameters for all volume regions for all the tetrahedrons */
     std::vector<Tetra::prm> paramTetra;

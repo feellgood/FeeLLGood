@@ -125,6 +125,12 @@ public:
             }
         }
 
+    /** operator copy deleted */
+    mesh(const mesh &) = delete;
+
+    /** operator= deleted */
+    mesh &operator=(const mesh &) = delete;
+
     /** return number of nodes  */
     inline int getNbNodes(void) const { return node.size(); }
 

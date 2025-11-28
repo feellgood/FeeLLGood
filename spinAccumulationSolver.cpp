@@ -53,7 +53,7 @@ void spinAcc::fillDirichletData(const int k, Eigen::Vector3d &s_value)
 void spinAcc::boundaryConditions(void)
     {
     std::fill(valDirichlet.begin(),valDirichlet.end(),0.0);
-    std::for_each(msh.fac.begin(),msh.fac.end(),[this](Facette::Fac &f)
+    std::for_each(refMsh->fac.begin(),refMsh->fac.end(),[this](Facette::Fac &f)
         {
         if (std::isnan(paramFacette[f.idxPrm].s.norm()) &&  std::isfinite(paramFacette[f.idxPrm].J))
             {// TODO: check that formula, especially the sign with current convention
@@ -99,7 +99,7 @@ void spinAcc::prepareExtras(void)
     {
     using namespace Tetra;
 
-    std::for_each( msh.tet.begin(), msh.tet.end(), [this](Tet &t)
+    std::for_each( refMsh->tet.begin(), refMsh->tet.end(), [this](Tet &t)
         {
         const int _idx = t.idx;
         const double sigma = getSigma(t);
@@ -141,7 +141,7 @@ void spinAcc::prepareExtras(void)
 void spinAcc::preCompute(void)
     {
     s.resize(NOD);
-    std::for_each(msh.tet.begin(), msh.tet.end(), [this](Tetra::Tet const &tet)
+    std::for_each(refMsh->tet.begin(), refMsh->tet.end(), [this](Tetra::Tet const &tet)
                  {
                  Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _gradV;
                  calc_gradV(tet, _gradV);
@@ -196,13 +196,13 @@ bool spinAcc::solve(void)
     algebra::w_sparseMat Kw(DIM_PROBLEM*NOD);
     std::vector<double> Lw(DIM_PROBLEM*NOD,0);
 
-    std::for_each( msh.tet.begin(), msh.tet.end(),[this,&Kw,&Lw](Tetra::Tet &elem)
+    std::for_each( refMsh->tet.begin(), refMsh->tet.end(),[this,&Kw,&Lw](Tetra::Tet &elem)
         {
         Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,DIM_PROBLEM*Tetra::N> K;
         K.setZero();
         std::vector<double> L(DIM_PROBLEM*Tetra::N,0.0);
         integrales(elem,K);
-        if(msh.isMagnetic(elem))
+        if(refMsh->isMagnetic(elem))
             { integraleMag(elem,K,L); }
         if(paramTetra[elem.idxPrm].spinHall != 0)
             { integraleSpinHall(elem,L); }
@@ -211,7 +211,7 @@ bool spinAcc::solve(void)
         } );
 
     // here are the boundary conditions
-    std::for_each(msh.fac.begin(),msh.fac.end(),[this,&Lw](Facette::Fac &f)
+    std::for_each(refMsh->fac.begin(),refMsh->fac.end(),[this,&Lw](Facette::Fac &f)
         {
         std::vector<double> L(DIM_PROBLEM*Facette::N,0.0);
         Eigen::Vector3d s_value;
@@ -261,7 +261,7 @@ void spinAcc::integraleMag(Tetra::Tet &tet,
 
         for (size_t ie=0; ie<N; ie++)
             {
-            const Eigen::Vector3d &m = msh.getNode_u(tet.ind[ie]);//magnetization
+            const Eigen::Vector3d &m = refMsh->getNode_u(tet.ind[ie]);//magnetization
             Eigen::Vector3d grad_ai = tet.da.row(ie);
             double tmp = cst0*w*grad_ai.dot( _gradV.col(npi) );
             BE[    ie] += tmp*m[0];
@@ -286,7 +286,7 @@ void spinAcc::integraleSpinHall(Tetra::Tet &tet, std::vector<double> &BE)
     double cst0 = spinHall*CHARGE_ELECTRON/MASS_ELECTRON;
     Eigen::Matrix<double,N,1> V_nod;
     for (size_t ie=0; ie<N; ie++) { V_nod[ie] = V[ tet.ind[ie] ]; }
-    Eigen::Matrix<double,Nodes::DIM,NPI> &_gradV = gradV[tet.idx];//calc_gradV_aussi(tet,V_nod);
+    Eigen::Matrix<double,Nodes::DIM,NPI> &_gradV = gradV[tet.idx];
     for (size_t npi=0; npi<NPI; npi++)
         {
         double w = tet.weight[npi];

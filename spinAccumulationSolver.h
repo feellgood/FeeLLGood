@@ -26,7 +26,7 @@ class spinAcc
     const double _tol /**< [in] tolerance for solvers */,  // _tol could be 1e-6
     const bool v /**< [in] verbose bool */,
     const int max_iter /**< [in] maximum number of iteration */):
-        msh(_msh), paramTetra(_pTetra),  paramFacette(_pFac),
+        refMsh(&_msh), paramTetra(_pTetra),  paramFacette(_pFac),
         iter("bicg_dir",_tol,v,max_iter), verbose(v), NOD(_msh.getNbNodes())
         {
         valDirichlet.resize(DIM_PROBLEM*NOD);
@@ -54,8 +54,8 @@ class spinAcc
     std::vector<Eigen::Vector3d> s;
 
     private:
-    /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh */
-    Mesh::mesh msh;
+    /** ref to the mesh to access nodes, fac, tet, and others geometrical values and methods */
+    Mesh::mesh *refMsh;
 
     /** this vector contains the material parameters for all regions for all the tetrahedrons */
     std::vector<Tetra::prm> paramTetra;

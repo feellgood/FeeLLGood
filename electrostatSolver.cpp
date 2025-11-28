@@ -84,12 +84,12 @@ void electrostatSolver::compute(const bool verbose, const std::string V_fileName
 
 bool electrostatSolver::solve(void)
     {
-    const int NOD = msh.getNbNodes();
+    const int NOD = refMsh->getNbNodes();
     const int DIM_1D = 1;
     algebra::w_sparseMat Kw(NOD);
     std::vector<double> Lw(NOD, 0.0);
 
-    std::for_each( msh.tet.begin(),msh.tet.end(),[this,&Kw](Tetra::Tet &elem)
+    std::for_each( refMsh->tet.begin(),refMsh->tet.end(),[this,&Kw](Tetra::Tet &elem)
         {
         Eigen::Matrix<double,DIM_1D*Tetra::N,DIM_1D*Tetra::N> K;
         K.setZero();
@@ -97,7 +97,7 @@ bool electrostatSolver::solve(void)
         buildMat<Tetra::N,DIM_1D>(elem.ind,K,Kw);
         } );
 
-    std::for_each( msh.fac.begin(), msh.fac.end(),[this,&Lw](Facette::Fac &elem)
+    std::for_each( refMsh->fac.begin(), refMsh->fac.end(),[this,&Lw](Facette::Fac &elem)
         {
         std::vector<double> L(DIM_1D*Facette::N,0.0);
         integrales(elem,L);
@@ -108,7 +108,7 @@ bool electrostatSolver::solve(void)
     std::vector<int> ld; // vector of the Dirichlet Nodes
     std::vector<double> Vd(NOD); // potential values on Dirichlet nodes, zero on the others
 
-    std::for_each(msh.fac.begin(),msh.fac.end(),[this,&Vd,&ld](Facette::Fac &fac)
+    std::for_each(refMsh->fac.begin(),refMsh->fac.end(),[this,&Vd,&ld](Facette::Fac &fac)
         {
         double _V = paramFacette[fac.idxPrm].V;
         if (!std::isnan(_V))
@@ -139,10 +139,10 @@ bool electrostatSolver::save(const std::string V_fileName, std::string const &me
 
     fout << tags::sol::rw_time << ' ' << date() << '\n' << metadata << std::scientific
          << std::setprecision(precision);
-    const int NOD = msh.getNbNodes();
+    const int NOD = refMsh->getNbNodes();
     for (int i = 0; i < NOD; i++)
         {
-        int _i = msh.getNodeIndex(i);
+        int _i = refMsh->getNodeIndex(i);
         fout << i << '\t' << V[_i] << std::endl;
         }
     fout.close();
