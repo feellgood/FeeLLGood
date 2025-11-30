@@ -56,7 +56,11 @@ void spinAcc::boundaryConditions(void)
     std::for_each(refMsh->fac.begin(),refMsh->fac.end(),[this](Facette::Fac &f)
         {
         if (std::isnan(paramFacette[f.idxPrm].s.norm()) &&  std::isfinite(paramFacette[f.idxPrm].J))
-            {// TODO: check that formula, especially the sign with current convention
+            {
+             /* units:
+             * [J] = A m^-2; [BOHRS_MUB/CHARGE_ELECTRON] = m^2 ; [P] = 1 ⇒ [s_value] = A
+             * check s_value formula, especially the sign with current convention
+             * */
             Eigen::Vector3d s_value = -paramFacette[f.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFacette[f.idxPrm].P;
             for(int j=0;j<Facette::N;j++)
                 { fillDirichletData(f.ind[j],s_value); }
@@ -107,9 +111,11 @@ void spinAcc::prepareExtras(void)
         const double lsd = getLsd(t);
         const double lsf = getLsf(t);
         const double ksi = sq(lsd/lsf);
-        const double Js = getJs(t);// Js = mu_0 Ms
+        const double Js = getJs(t);// Js = mu_0 Ms; [Js] = T A^-1 m A m^-1 = T
         double prefactor = mu0*BOHRS_MUB*P/(gamma0*Js*CHARGE_ELECTRON*(1.0 + sq(ksi)));
-
+        /* units:
+         * [prefactor] = [mu0*BOHRS_MUB/(gamma0*Js*CHARGE_ELECTRON)] = s^1 m^2
+         * */
         t.extraField = [this, _idx](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)
                          { for(int npi = 0; npi<Tetra::NPI; npi++) { H.col(npi) += Hm[_idx].col(npi); } };
 
@@ -251,6 +257,10 @@ void spinAcc::integraleMag(Tetra::Tet &tet,
        equation for magnetic contribution */
     double cst0 = BOHRS_MUB*P*sigma/CHARGE_ELECTRON;
     double cst1 = D0/sq(lsd);
+    /* units:
+     * [cst0] = [sigma] m^2 = A^2 s^3 m^-1 kg^-1
+     * [cst1] = s^-1
+     * */
     Eigen::Matrix<double,N,1> V_nod;
     for (size_t ie=0; ie<N; ie++) { V_nod[ie] = V[ tet.ind[ie] ]; }
     Eigen::Matrix<double,Nodes::DIM,NPI> &_gradV = gradV[tet.idx];
@@ -311,6 +321,10 @@ void spinAcc::integrales(Tetra::Tet &tet,
     double lsf = getLsf(tet);
     double D0=2.0*sigma/(sq(CHARGE_ELECTRON)*N0);
     double cst0 = D0/sq(lsf);
+    /* units:
+     * [D0] = [sigma/(sq(CHARGE_ELECTRON)*N0)] = s^-1 m^2 : it is a diffusion coefficient
+     * [cst0] = s^-1
+     * */
     for (size_t npi=0; npi<NPI; npi++)
         {
         double w = tet.weight[npi];
