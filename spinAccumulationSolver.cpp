@@ -115,6 +115,7 @@ void spinAcc::prepareExtras(void)
         double prefactor = mu0*BOHRS_MUB*P/(gamma0*Js*CHARGE_ELECTRON*(1.0 + sq(ksi)));
         /* units:
          * [prefactor] = [mu0*BOHRS_MUB/(gamma0*Js*CHARGE_ELECTRON)] = s^1 m^2
+         * [Hm] = s^1 A [grad_u]
          * */
         t.extraField = [this, _idx](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)
                          { for(int npi = 0; npi<Tetra::NPI; npi++) { H.col(npi) += Hm[_idx].col(npi); } };

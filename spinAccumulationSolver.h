@@ -77,7 +77,9 @@ class spinAcc
      * corresponding spin diffusion s value*/
     void fillDirichletData(const int k, Eigen::Vector3d &s_value);
 
-    /** table of the gradients of the potential, gradV.size() is the number of tetra */
+    /** table of the gradients of the potential, gradV.size() is the number of tetrahedrons
+     * [gradV] = Volt/m = kg m A^-1 s^-3
+     * */
     std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > gradV;
 
     /** table of the Hm vectors (contribution of spinAcc to the tet::integrales) ; Hm.size() is the
