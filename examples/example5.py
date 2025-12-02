@@ -172,7 +172,7 @@ settings = {
 
 if not justMagnet:
     settings["mesh"]["volume_regions"][e.name] = { "Ae": 0, "Js": 0, "P": 0.7, "sigma":
-    5.8e7, "dens_state": 1.34e47, "l_sf": 350e-9 } #Cu
+    5.8e7, "dens_state": 1.34e74, "l_sf": 350e-9 } #Cu
     settings["mesh"]["surface_regions"][surface_top_name] = { "J": 1.0e12, "P":[0,1,0] }
     settings["mesh"]["surface_regions"][surface_top_name2] = { "V": 0.0, "s": [0,0,0] }
 

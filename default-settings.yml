@@ -167,7 +167,7 @@ mesh:
       # electrostatic problem.
       V:
 
-      # polarization vector for spin diffusion problem boundary condition.
+      # polarization unit vector for spin diffusion problem boundary condition.
       P: [0, 0, 1]
 
       # spin diffusion vector for spin diffusion problem boundary condition.
