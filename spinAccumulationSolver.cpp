@@ -11,7 +11,7 @@ bool spinAcc::checkBoundaryConditions(bool verbose) const
     // nbVolP and nbVolN0 initialized to 1 because of __default__
     unsigned int nbVolP(1);
     unsigned int nbVolN0(1);
-    std::for_each(paramTetra.begin(),paramTetra.end(),[&nbVolN0,&nbVolP](Tetra::prm const &p)
+    std::for_each(paramTet.begin(),paramTet.end(),[&nbVolN0,&nbVolP](Tetra::prm const &p)
         {
         if(p.regName != "__default__")
             {
@@ -21,7 +21,7 @@ bool spinAcc::checkBoundaryConditions(bool verbose) const
         });
     int nbSurfJ(0);
     int nbSurfS(0);
-    std::for_each(paramFacette.begin(),paramFacette.end(),[&nbSurfJ,&nbSurfS,verbose](Facette::prm const &p)
+    std::for_each(paramFac.begin(),paramFac.end(),[&nbSurfJ,&nbSurfS,verbose](Facette::prm const &p)
         {
         if(p.regName != "__default__")
             {
@@ -35,8 +35,8 @@ bool spinAcc::checkBoundaryConditions(bool verbose) const
             }
         });
     return ( (nbSurfJ == 1)&&(nbSurfS == 1)
-           && (nbVolN0 == paramTetra.size())
-           && (nbVolP == paramTetra.size()) );
+           && (nbVolN0 == paramTet.size())
+           && (nbVolP == paramTet.size()) );
     }
 
 void spinAcc::fillDirichletData(const int k, Eigen::Vector3d &s_value)
@@ -52,21 +52,21 @@ void spinAcc::fillDirichletData(const int k, Eigen::Vector3d &s_value)
 void spinAcc::boundaryConditions(void)
     {
     std::fill(valDirichlet.begin(),valDirichlet.end(),0.0);
-    std::for_each(refMsh->fac.begin(),refMsh->fac.end(),[this](Facette::Fac &f)
+    std::for_each(msh->fac.begin(),msh->fac.end(),[this](Facette::Fac &f)
         {
-        if (std::isnan(paramFacette[f.idxPrm].s.norm()) &&  std::isfinite(paramFacette[f.idxPrm].J))
+        if (std::isnan(paramFac[f.idxPrm].s.norm()) &&  std::isfinite(paramFac[f.idxPrm].J))
             {
              /* units:
              * [J] = A m^-2; [BOHRS_MUB/CHARGE_ELECTRON] = m^2 ; [P] = 1 ⇒ [s_value] = A
              * check s_value formula, especially the sign with current convention
              * */
-            Eigen::Vector3d s_value = -paramFacette[f.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFacette[f.idxPrm].P;
+            Eigen::Vector3d s_value = -paramFac[f.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFac[f.idxPrm].P;
             for(int j=0;j<Facette::N;j++)
                 { fillDirichletData(f.ind[j],s_value); }
             }
-        else if (std::isfinite(paramFacette[f.idxPrm].s.norm()) &&  std::isnan(paramFacette[f.idxPrm].J))
+        else if (std::isfinite(paramFac[f.idxPrm].s.norm()) &&  std::isnan(paramFac[f.idxPrm].J))
             {
-            Eigen::Vector3d s_value = paramFacette[f.idxPrm].s;
+            Eigen::Vector3d s_value = paramFac[f.idxPrm].s;
             for(int j=0;j<Facette::N;j++)
                 { fillDirichletData(f.ind[j],s_value); }
             }
@@ -75,25 +75,25 @@ void spinAcc::boundaryConditions(void)
     }
 
 double spinAcc::getJs(Tetra::Tet const &tet) const
-    { return paramTetra[tet.idxPrm].J; }
+    { return paramTet[tet.idxPrm].J; }
 
 double spinAcc::getSigma(Tetra::Tet const &tet) const
-    { return paramTetra[tet.idxPrm].sigma; }
+    { return paramTet[tet.idxPrm].sigma; }
 
 double spinAcc::getN0(Tetra::Tet &tet) const
-    { return paramTetra[tet.idxPrm].N0; }
+    { return paramTet[tet.idxPrm].N0; }
 
 double spinAcc::getPolarization(Tetra::Tet &tet) const
-    { return paramTetra[tet.idxPrm].P; }
+    { return paramTet[tet.idxPrm].P; }
 
 double spinAcc::getLsd(Tetra::Tet &tet) const
-    { return paramTetra[tet.idxPrm].lsd; }
+    { return paramTet[tet.idxPrm].lsd; }
 
 double spinAcc::getLsf(Tetra::Tet &tet) const
-    { return paramTetra[tet.idxPrm].lsf; }
+    { return paramTet[tet.idxPrm].lsf; }
 
 double spinAcc::getSpinHall(Tetra::Tet &tet) const
-    { return paramTetra[tet.idxPrm].spinHall; }
+    { return paramTet[tet.idxPrm].spinHall; }
 
 void spinAcc::setPotential(std::vector<double> &_V)
     { V = _V; }
@@ -102,7 +102,7 @@ void spinAcc::prepareExtras(void)
     {
     using namespace Tetra;
 
-    std::for_each( refMsh->tet.begin(), refMsh->tet.end(), [this](Tet &t)
+    std::for_each( msh->tet.begin(), msh->tet.end(), [this](Tet &t)
         {
         const int _idx = t.idx;
         const double sigma = getSigma(t);
@@ -147,7 +147,7 @@ void spinAcc::prepareExtras(void)
 void spinAcc::preCompute(void)
     {
     s.resize(NOD);
-    std::for_each(refMsh->tet.begin(), refMsh->tet.end(), [this](Tetra::Tet const &tet)
+    std::for_each(msh->tet.begin(), msh->tet.end(), [this](Tetra::Tet const &tet)
                  {
                  Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _gradV;
                  calc_gradV(tet, _gradV);
@@ -202,32 +202,32 @@ bool spinAcc::solve(void)
     algebra::w_sparseMat Kw(DIM_PROBLEM*NOD);
     std::vector<double> Lw(DIM_PROBLEM*NOD,0);
 
-    std::for_each( refMsh->tet.begin(), refMsh->tet.end(),[this,&Kw,&Lw](Tetra::Tet &elem)
+    std::for_each( msh->tet.begin(), msh->tet.end(),[this,&Kw,&Lw](Tetra::Tet &elem)
         {
         Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,DIM_PROBLEM*Tetra::N> K;
         K.setZero();
         std::vector<double> L(DIM_PROBLEM*Tetra::N,0.0);
         integrales(elem,K);
-        if(refMsh->isMagnetic(elem))
+        if(msh->isMagnetic(elem))
             { integraleMag(elem,K,L); }
-        if(paramTetra[elem.idxPrm].spinHall != 0)
+        if(paramTet[elem.idxPrm].spinHall != 0)
             { integraleSpinHall(elem,L); }
-        buildMat<Tetra::N,DIM_PROBLEM>(elem.ind, K, Kw);
-        buildVect<Tetra::N,DIM_PROBLEM>(elem.ind, L, Lw);
+        buildMat<Tetra::N>(elem.ind, K, Kw);
+        buildVect<Tetra::N>(elem.ind, L, Lw);
         } );
 
     // here are the boundary conditions
-    std::for_each(refMsh->fac.begin(),refMsh->fac.end(),[this,&Lw](Facette::Fac &f)
+    std::for_each(msh->fac.begin(),msh->fac.end(),[this,&Lw](Facette::Fac &f)
         {
         std::vector<double> L(DIM_PROBLEM*Facette::N,0.0);
         Eigen::Vector3d s_value;
-        if (paramFacette[f.idxPrm].s.norm() == 0)
+        if (paramFac[f.idxPrm].s.norm() == 0)
             s_value.setZero();
-        else if (!std::isfinite( paramFacette[f.idxPrm].s.norm() ) &&
-                std::isfinite(paramFacette[f.idxPrm].J)) // we should also test polarization P
-            s_value = -paramFacette[f.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFacette[f.idxPrm].P;
+        else if (!std::isfinite( paramFac[f.idxPrm].s.norm() ) &&
+                std::isfinite(paramFac[f.idxPrm].J)) // we should also test polarization P
+            s_value = -paramFac[f.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFac[f.idxPrm].P;
         integrales(f,s_value,L);
-        buildVect<Facette::N,DIM_PROBLEM>(f.ind, L, Lw);
+        buildVect<Facette::N>(f.ind, L, Lw);
         });
 
     algebra::r_sparseMat Kr(Kw);
@@ -271,7 +271,7 @@ void spinAcc::integraleMag(Tetra::Tet &tet,
 
         for (size_t ie=0; ie<N; ie++)
             {
-            const Eigen::Vector3d &m = refMsh->getNode_u(tet.ind[ie]);//magnetization
+            const Eigen::Vector3d &m = msh->getNode_u(tet.ind[ie]);//magnetization
             Eigen::Vector3d grad_ai = tet.da.row(ie);
             double tmp = cst0*w*grad_ai.dot( _gradV.col(npi) );
             BE[    ie] += tmp*m[0];

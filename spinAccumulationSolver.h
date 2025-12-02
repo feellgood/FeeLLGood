@@ -8,6 +8,10 @@
 #include "electrostatSolver.h"
 #include "solver.h"
 #include "meshUtils.h"
+
+/** dimensionnality of the spin diffusion problem */
+const int DIM_PB_SPIN_ACC = 3;
+
 /** \class spinAcc
  container for Spin Accumulation constants, solver and related datas. The model obeys the diffusive
  spin equation. The boundary conditions are Dirichlet type. User has to provide through mesh and
@@ -15,18 +19,17 @@
  surface S1 where current density and spin polarization is defined. This surface S1 must be the same
  as the one given to the potential solver for its own boundary conditions.
  */
-
-class spinAcc
+class spinAcc : public solver<DIM_PB_SPIN_ACC>
     {
     public:
     /** constructor */
     spinAcc(Mesh::mesh &_msh /**< [in] ref to the mesh */,
-    std::vector<Tetra::prm> _pTetra /**< [in] ref to vector of param tetra (volume region parameters) */,
-    std::vector<Facette::prm> _pFac /**< [in] ref to vector of param facette (surface region parameters) */,
+    std::vector<Tetra::prm> & _pTetra /**< [in] ref to vector of param tetra (volume region parameters) */,
+    std::vector<Facette::prm> & _pFac /**< [in] ref to vector of param facette (surface region parameters) */,
     const double _tol /**< [in] tolerance for solvers */,  // _tol could be 1e-6
     const bool v /**< [in] verbose bool */,
     const int max_iter /**< [in] maximum number of iteration */):
-        refMsh(&_msh), paramTetra(_pTetra),  paramFacette(_pFac),
+        solver<DIM_PB_SPIN_ACC>(_msh,_pTetra,_pFac),
         iter("bicg_dir",_tol,v,max_iter), verbose(v), NOD(_msh.getNbNodes())
         {
         valDirichlet.resize(DIM_PROBLEM*NOD);
@@ -54,15 +57,6 @@ class spinAcc
     std::vector<Eigen::Vector3d> s;
 
     private:
-    /** ref to the mesh to access nodes, fac, tet, and others geometrical values and methods */
-    Mesh::mesh *refMsh;
-
-    /** this vector contains the material parameters for all regions for all the tetrahedrons */
-    std::vector<Tetra::prm> paramTetra;
-
-    /** this vector contains the material parameters for all surface regions for all the triangular facettes */
-    std::vector<Facette::prm> paramFacette;
-
     /** container for potential values */
     std::vector<double> V;
 
