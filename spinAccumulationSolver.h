@@ -107,7 +107,7 @@ class spinAcc
     /** \f$ P \f$ is polarization rate of the current */
     double getPolarization(Tetra::Tet &tet) const;
 
-    /** density of states at Fermi level, units : J^-1 nm^-3  */
+    /** density of states at Fermi level, units : J^-1 m^-3  */
     double getN0(Tetra::Tet &tet) const;
 
     /** length s-d : only in magnetic material */
