@@ -4,7 +4,7 @@
 #include "tags.h"
 #include "electrostatSolver.h"
 #include "algebra/cg.h"
-#include "solverUtils.h"  // build(Mat|Vect)
+#include "solver.h"  // build(Mat|Vect)
 #include "meshUtils.h"
 
 bool electrostatSolver::checkBoundaryConditions(void) const

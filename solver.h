@@ -1,7 +1,7 @@
-#ifndef solverUtils_h
-#define solverUtils_h
+#ifndef solver_h
+#define solver_h
 
-/** \file solverUtils.h
+/** \file solver.h
  \brief two templates to fill matrix and vectors in various dimensionnality situations. DIM_PROBLEM = 1 is used for electrostatics (V) DIM_PROBLEM = 3 is used for spin accumulation (Q has three components)
 Warning : DIM_PROBLEM = 2 cannot be used for micromagnetic problem. The latter is solved in the tangent plane of the magnetization plane, leading to a different indices computation and matrix filling than here.
 TODO: these templates could be specialized for DIM_PROBLEM = 2 (see warning above)
@@ -24,7 +24,6 @@ void buildMat(std::vector<int> &ind, Eigen::Matrix<double,DIM_PROBLEM*N,DIM_PROB
             for (int di=0; di<DIM_PROBLEM; di++)
                 for (int dj=0; dj<DIM_PROBLEM; dj++)
                     K.insert(DIM_PROBLEM*i_ + di, DIM_PROBLEM*j_ + dj, Ke(di*N+ie,dj*N+je));
-                    //K.insert(di*NOD+i_, dj*NOD+j_, Ke(di*N+ie,dj*N+je));
             }
         }
     }
@@ -39,7 +38,7 @@ void buildVect(std::vector<int> &ind, std::vector<double> &Le, std::vector<doubl
         {
         int i_ = ind[ie];
         for (int di=0; di<DIM_PROBLEM; di++)
-            { L[DIM_PROBLEM*i_ + di] += Le[di*N+ie]; }//{ L[di*NOD+i_] += Le[di*N+ie]; }
+            { L[DIM_PROBLEM*i_ + di] += Le[di*N+ie]; }
         }
     }
 

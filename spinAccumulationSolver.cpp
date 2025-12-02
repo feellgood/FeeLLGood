@@ -2,7 +2,6 @@
 #include "spinAccumulationSolver.h"
 #include "chronometer.h" //date()
 #include "tags.h"
-#include "solverUtils.h"
 
 using algebra::sq;
 using namespace Nodes;

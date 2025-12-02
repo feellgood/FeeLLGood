@@ -6,7 +6,7 @@
 #include "node.h"
 #include "tetra.h"
 #include "electrostatSolver.h"
-#include "solverUtils.h"
+#include "solver.h"
 #include "meshUtils.h"
 /** \class spinAcc
  container for Spin Accumulation constants, solver and related datas. The model obeys the diffusive
