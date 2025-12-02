@@ -10,27 +10,28 @@
 
 #include <iostream>
 #include <map>
-
+#include "solver.h"
 #include "config.h"
-#include "mesh.h"
 #include "algebra/algebra.h"
+
+const int DIM_PB_ELEC = 1;
 
 /** \class electrostatSolver
 this class is containing both data and a solver to compute potential from dirichlet boundary
 conditions problem for the current density flowing in the sample.
 */
-class electrostatSolver
+class electrostatSolver: public solver<DIM_PB_ELEC>
     {
 public:
     /** constructor */
     electrostatSolver(
             Mesh::mesh & _msh /**< [in] reference to the mesh */,
-            std::vector<Tetra::prm> _pTetra /**< [in] ref to vector of param tetra (volume region parameters) */,
-            std::vector<Facette::prm> _pFac /**< [in] ref to vector of param facette (surface region parameters) */,
+            std::vector<Tetra::prm> & _pTetra /**< [in] ref to vector of param tetra (volume region parameters) */,
+            std::vector<Facette::prm> & _pFac /**< [in] ref to vector of param facette (surface region parameters) */,
             const double _tol /**< [in] tolerance for solvers */,
             const bool v /**< [in] verbose mode for iteration monitor */,
             const int max_iter /**< [in] maximum number of iteration */)
-        : refMsh(&_msh), paramTetra(_pTetra), paramFacette(_pFac), iter("cg_dir",_tol,v,max_iter) {}
+        : solver<DIM_PB_ELEC>(_msh,_pTetra,_pFac), iter("cg_dir",_tol,v,max_iter) {}
 
     /** electrostatic potential values for boundary conditions, V.size() is the size of the vector
      * of nodes */
@@ -64,15 +65,6 @@ public:
      * if verbose set to true, some printing are sent to terminal */
     void compute(const bool verbose /**< [in] */, const std::string V_fileName /**< [in] output file name for V solution */);
 private:
-    /** mesh ref to access nodes, fac, tet, and others geometrical values and methods */
-    Mesh::mesh *refMsh;
-
-    /** this vector contains the material parameters for all volume regions for all the tetrahedrons */
-    std::vector<Tetra::prm> paramTetra;
-
-    /** this vector contains the material parameters for all surface regions for all the triangular facettes */
-    std::vector<Facette::prm> paramFacette;
-
     /** monitor the solver called in method solve() */
     algebra::iteration<double> iter;
 

@@ -11,7 +11,7 @@ bool electrostatSolver::checkBoundaryConditions(void) const
     {
     int nbSurfJ(0);
     int nbSurfV(0);
-    std::for_each(paramFacette.begin(),paramFacette.end(),[&nbSurfJ,&nbSurfV](Facette::prm const &p)
+    std::for_each(paramFac.begin(),paramFac.end(),[&nbSurfJ,&nbSurfV](Facette::prm const &p)
         {
         if (std::isfinite(p.J)) nbSurfJ++;
         if (std::isfinite(p.V)) nbSurfV++;
@@ -22,7 +22,7 @@ bool electrostatSolver::checkBoundaryConditions(void) const
 void electrostatSolver::infos(void)
     {
     std::cout << "Boundary conditions:\n";
-    std::for_each(paramFacette.begin(),paramFacette.end(),[](Facette::prm &p)
+    std::for_each(paramFac.begin(),paramFac.end(),[](Facette::prm &p)
         {
         if (!std::isnan(p.J)) { std::cout << "\tJ= " << p.J << std::endl; }
         if (!std::isnan(p.V)) { std::cout << "\tV= " << p.V << std::endl; }
@@ -84,33 +84,32 @@ void electrostatSolver::compute(const bool verbose, const std::string V_fileName
 
 bool electrostatSolver::solve(void)
     {
-    const int NOD = refMsh->getNbNodes();
-    const int DIM_1D = 1;
+    const int NOD = msh->getNbNodes();
     algebra::w_sparseMat Kw(NOD);
     std::vector<double> Lw(NOD, 0.0);
 
-    std::for_each( refMsh->tet.begin(),refMsh->tet.end(),[this,&Kw](Tetra::Tet &elem)
+    std::for_each( msh->tet.begin(),msh->tet.end(),[this,&Kw](Tetra::Tet &elem)
         {
-        Eigen::Matrix<double,DIM_1D*Tetra::N,DIM_1D*Tetra::N> K;
+        Eigen::Matrix<double,DIM_PB_ELEC*Tetra::N,DIM_PB_ELEC*Tetra::N> K;
         K.setZero();
         integrales(elem,K);
-        buildMat<Tetra::N,DIM_1D>(elem.ind,K,Kw);
+        buildMat<Tetra::N>(elem.ind,K,Kw);
         } );
 
-    std::for_each( refMsh->fac.begin(), refMsh->fac.end(),[this,&Lw](Facette::Fac &elem)
+    std::for_each( msh->fac.begin(), msh->fac.end(),[this,&Lw](Facette::Fac &elem)
         {
-        std::vector<double> L(DIM_1D*Facette::N,0.0);
+        std::vector<double> L(DIM_PB*Facette::N,0.0);
         integrales(elem,L);
-        buildVect<Facette::N,DIM_1D>(elem.ind,L,Lw);
+        buildVect<Facette::N>(elem.ind,L,Lw);
         } );
 
     algebra::r_sparseMat Kr(Kw);
     std::vector<int> ld; // vector of the Dirichlet Nodes
     std::vector<double> Vd(NOD); // potential values on Dirichlet nodes, zero on the others
 
-    std::for_each(refMsh->fac.begin(),refMsh->fac.end(),[this,&Vd,&ld](Facette::Fac &fac)
+    std::for_each(msh->fac.begin(),msh->fac.end(),[this,&Vd,&ld](Facette::Fac &fac)
         {
-        double _V = paramFacette[fac.idxPrm].V;
+        double _V = paramFac[fac.idxPrm].V;
         if (!std::isnan(_V))
             {
             for(int ie=0; ie<Facette::N; ie++)
@@ -139,10 +138,10 @@ bool electrostatSolver::save(const std::string V_fileName, std::string const &me
 
     fout << tags::sol::rw_time << ' ' << date() << '\n' << metadata << std::scientific
          << std::setprecision(precision);
-    const int NOD = refMsh->getNbNodes();
+    const int NOD = msh->getNbNodes();
     for (int i = 0; i < NOD; i++)
         {
-        int _i = refMsh->getNodeIndex(i);
+        int _i = msh->getNodeIndex(i);
         fout << i << '\t' << V[_i] << std::endl;
         }
     fout.close();
@@ -150,11 +149,11 @@ bool electrostatSolver::save(const std::string V_fileName, std::string const &me
     }
 
 double electrostatSolver::getSigma(Tetra::Tet const &tet) const
-    { return paramTetra[tet.idxPrm].sigma; }
+    { return paramTet[tet.idxPrm].sigma; }
 
 double electrostatSolver::getCurrentDensity(Facette::Fac const &fac) const
     {
-    double val = paramFacette[fac.idxPrm].J;
+    double val = paramFac[fac.idxPrm].J;
     if (!std::isfinite(val)) val = 0.0;
     return val;
     }
