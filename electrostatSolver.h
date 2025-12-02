@@ -14,6 +14,7 @@
 #include "config.h"
 #include "algebra/algebra.h"
 
+/** dimensionnality of the electrostatic problem */
 const int DIM_PB_ELEC = 1;
 
 /** \class electrostatSolver

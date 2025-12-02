@@ -19,6 +19,7 @@ template <int DIM_PROBLEM>
 class solver
     {
     public:
+        /** constructor */
         explicit solver(Mesh::mesh & _msh /**< [in] mesh */,
                         std::vector<Tetra::prm> & _pTetra /**< [in] ref to vector of param tetra (volume region parameters) */,
                         std::vector<Facette::prm> & _pFac /**< [in] ref to vector of param facette (surface region parameters) */
