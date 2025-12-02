@@ -72,38 +72,4 @@ class solver
             }
     }; // end template class solver
 
-/** function template.
-first parameter N is the number of indices of the element to build matrix from: ind.size() = N
-second parameter DIM_PROBLEM is the dimension of the quantity to solve (should be 1,2 or 3)  */
-
-template <int N, int DIM_PROBLEM>
-void buildMat(std::vector<int> &ind, Eigen::Matrix<double,DIM_PROBLEM*N,DIM_PROBLEM*N> &Ke, algebra::w_sparseMat &K)
-    {
-    for (int ie=0; ie<N; ie++)
-        {
-        int i_ = ind[ie];
-        for (int je=0; je<N; je++)
-            {
-            int j_ = ind[je];
-            for (int di=0; di<DIM_PROBLEM; di++)
-                for (int dj=0; dj<DIM_PROBLEM; dj++)
-                    K.insert(DIM_PROBLEM*i_ + di, DIM_PROBLEM*j_ + dj, Ke(di*N+ie,dj*N+je));
-            }
-        }
-    }
-
-/** function template.
-first parameter N is the number of indices of the element to build vector from
-second parameter DIM_PROBLEM is the dimension of the quantity to solve (should be 1,2 or 3)  */
-template <int N, int DIM_PROBLEM>
-void buildVect(std::vector<int> &ind, std::vector<double> &Le, std::vector<double> &L)
-    {
-    for (int ie=0; ie<N; ie++)
-        {
-        int i_ = ind[ie];
-        for (int di=0; di<DIM_PROBLEM; di++)
-            { L[DIM_PROBLEM*i_ + di] += Le[di*N+ie]; }
-        }
-    }
-
 #endif
