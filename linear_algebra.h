@@ -16,12 +16,15 @@
 
 #include "facette.h"
 #include "feellgoodSettings.h"
-#include "mesh.h"
+#include "solver.h"
 #include "meshUtils.h"
 #include "node.h"
 #include "tetra.h"
 
 #include "algebra/algebra.h"
+
+/**dimensionnality of the micromagnetic problem */
+const int DIM_PB_MAG = 2;
 
 /** \class LinAlgebra
 convenient class to grab altogether some part of the calculations involved using algebra::bicg solver at each
@@ -31,16 +34,15 @@ Be aware of time units: when entering solver method, division by gamma0 and mult
 The bicg algorithm is monitored by iter object.
 When debugging it might be usefull to set iter verbosity differently from LinAlgebra Solver (see constructor list initialization)
 */
-class LinAlgebra
+class LinAlgebra : public solver<DIM_PB_MAG>
     {
 public:
     /** constructor
     When debugging it might be usefull to set iter verbosity differently
     */
     LinAlgebra(Settings &s /**< [in] */, Mesh::mesh &my_msh /**< [in] */)
-        : NOD(my_msh.getNbNodes()), refMsh(&my_msh), iter("bicg_dir",s.TOL,s.verbose,s.MAXITER),
-          K(build_shape()), verbose(s.verbose),
-          prmTetra(s.paramTetra), prmFacette(s.paramFacette)
+        : solver<DIM_PB_MAG>(my_msh,s.paramTetra,s.paramFacette), NOD(my_msh.getNbNodes()),
+          iter("bicg_dir",s.TOL,s.verbose,s.MAXITER), K(build_shape()), verbose(s.verbose)
         {
         L_rhs.resize(2*NOD);
         Xw.resize(2*NOD);
@@ -77,7 +79,7 @@ public:
             };
         for (int i = 0; i < NOD; ++i)
             { insert_pair(i, i); }
-        for (auto edge: refMsh->edges)
+        for (auto edge: msh->edges)
             {
             insert_pair(edge.first, edge.second);
             insert_pair(edge.second, edge.first);
@@ -121,9 +123,6 @@ private:
     /** number of nodes, also an offset for filling sparseMatrix, initialized by constructor */
     const int NOD;
 
-    /** direct access to the mesh */
-    Mesh::mesh *refMsh;
-
     /** monitor the solver */
     algebra::iteration<double> iter;
 
@@ -138,12 +137,6 @@ private:
 
     /** verbosity */
     const int verbose;
-
-    /** material parameters of the tetrahedrons */
-    const std::vector<Tetra::prm> &prmTetra;
-
-    /** material parameters of the facettes */
-    const std::vector<Facette::prm> &prmFacette;
 
     /** speed of the domain wall */
     double DW_vz;
