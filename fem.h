@@ -193,7 +193,8 @@ public:
                          LinAlgebra &linAlg /**< [in] */,
                          spinAcc &spinAcc_solver /**< [in] */,
                          scal_fmm::fmm &myFMM /**< [in] */,
-                         timing &t_prm, int &nt /**< [out] number of time steps performed */);
+                         timing &t_prm /**< [in] */,
+                         int &nt /**< [out] number of time steps performed */);
 
 private:
     bool recenter_mem;  /**< flag to know if kdtree and pts are allocated */
@@ -205,8 +206,8 @@ private:
     void direction(enum Nodes::index idx_dir /**< [in] */);
 
     /** compute demagnetizing field, energies, and prepare for next time step quantitites at time t */
-    void compute_all(Settings &settings, spinAcc &spinAcc_solver /**< [in] */,
-                     scal_fmm::fmm &myFMM, const double t)
+    void compute_all(Settings &settings /**< [in] */, spinAcc &spinAcc_solver /**< [in|out] */,
+                     scal_fmm::fmm &myFMM /**< [in|out] */, const double t /**< [in]*/)
         {
         bool success(false);
         chronometer fmm_counter(2);
