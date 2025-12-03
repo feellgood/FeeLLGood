@@ -29,7 +29,7 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     const double _tol /**< [in] tolerance for bicg_dir solver */,  // _tol could be 1e-6
     const bool v /**< [in] verbose bool */,
     const int max_iter /**< [in] maximum number of iterations */):
-        solver<DIM_PB_SPIN_ACC>(_msh,_pTetra,_pFac,"bicg_dir",_tol,v,max_iter), verbose(v), NOD(_msh.getNbNodes())
+        solver<DIM_PB_SPIN_ACC>(_msh,_pTetra,_pFac,"bicg_dir",_tol,v,max_iter), verbose(v)
         {
         valDirichlet.resize(DIM_PROBLEM*NOD);
         boundaryConditions();
@@ -84,9 +84,6 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
 
     /** number of digits in the optional output file */
     const int precision = 8;
-
-    /** number of Nodes (needed for templates) */
-    const int NOD;
 
     /** returns Js = mu_0 Ms */
     double getJs(Tetra::Tet const &tet) const;

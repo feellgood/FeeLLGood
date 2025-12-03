@@ -42,7 +42,7 @@ public:
     */
     LinAlgebra(Settings &s /**< [in] */, Mesh::mesh &my_msh /**< [in] */)
         : solver<DIM_PB_MAG>(my_msh, s.paramTetra, s.paramFacette, "bicg_dir", s.TOL, s.verbose, s.MAXITER),
-        NOD(my_msh.getNbNodes()), K(build_shape()), verbose(s.verbose)
+        K(build_shape()), verbose(s.verbose)
         {
         L_rhs.resize(2*NOD);
         Xw.resize(2*NOD);
@@ -119,9 +119,6 @@ public:
 private:
     /** recentering index direction if any */
     Nodes::index idx_dir;
-
-    /** number of nodes, also an offset for filling sparseMatrix, initialized by constructor */
-    const int NOD;
 
     /** matrix of the system to solve */
     algebra::r_sparseMat K;

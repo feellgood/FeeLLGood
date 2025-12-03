@@ -27,7 +27,7 @@ class solver
                         const double _tol /**< [in] solver tolerance */,
                         const bool v /**< [in] verbose mode for iteration monitor */,
                         const int max_iter /**< [in] maximum number of iterations */):
-                        DIM_PB(DIM_PROBLEM), msh(&_msh), paramTet(_pTetra), paramFac(_pFac), iter(name,_tol,v,max_iter) {}
+                        DIM_PB(DIM_PROBLEM), msh(&_msh), NOD(_msh.getNbNodes()), paramTet(_pTetra), paramFac(_pFac), iter(name,_tol,v,max_iter) {}
 
     protected:
         /** dimensionnality of th problem */
@@ -35,6 +35,9 @@ class solver
 
         /** mesh pointer to access nodes, fac, tet, and others geometrical values and methods */
         Mesh::mesh *msh;
+
+        /** number of nodes in the mesh */
+        const int NOD;
 
         /** this vector contains the material parameters for all volume regions for all the tetrahedrons */
         const std::vector<Tetra::prm> &paramTet;
