@@ -45,13 +45,13 @@ bool LinAlgebra::solve(timing const &t_prm)
         std::cout << "matrix assembly done in " << counter.millis() << std::endl;
         counter.reset();
         }
-    std::vector<double> Xvd(2*NOD,0.0);
     /*
      *bicg with Dirichlet boundary conditions is used to mask non magnetic mesh regions, the
-     Dirichlet values Xvd are zeroes
+     Dirichlet values are zeros, so a specific bicg_dir is called assuming those zeros, instead of
+     the standard one.
      * */
     buildInitGuess(Xw);// gamma0 division handled by function buildInitGuess
-    algebra::bicg_dir<double>(iter, K, Xw, L_rhs, Xvd, lvd);
+    algebra::bicg_dir<double>(iter, K, Xw, L_rhs, lvd);
 
     if( (iter.status == algebra::ITER_OVERFLOW) || (iter.status == algebra::CANNOT_CONVERGE) || (iter.get_res() > iter.resmax) )
         {
