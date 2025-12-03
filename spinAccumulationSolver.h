@@ -26,11 +26,10 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     spinAcc(Mesh::mesh &_msh /**< [in] ref to the mesh */,
     std::vector<Tetra::prm> & _pTetra /**< [in] ref to vector of param tetra (volume region parameters) */,
     std::vector<Facette::prm> & _pFac /**< [in] ref to vector of param facette (surface region parameters) */,
-    const double _tol /**< [in] tolerance for solvers */,  // _tol could be 1e-6
+    const double _tol /**< [in] tolerance for bicg_dir solver */,  // _tol could be 1e-6
     const bool v /**< [in] verbose bool */,
-    const int max_iter /**< [in] maximum number of iteration */):
-        solver<DIM_PB_SPIN_ACC>(_msh,_pTetra,_pFac),
-        iter("bicg_dir",_tol,v,max_iter), verbose(v), NOD(_msh.getNbNodes())
+    const int max_iter /**< [in] maximum number of iterations */):
+        solver<DIM_PB_SPIN_ACC>(_msh,_pTetra,_pFac,"bicg_dir",_tol,v,max_iter), verbose(v), NOD(_msh.getNbNodes())
         {
         valDirichlet.resize(DIM_PROBLEM*NOD);
         boundaryConditions();
@@ -79,9 +78,6 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** table of the Hm vectors (contribution of spinAcc to the tet::integrales) ; Hm.size() is the
      * number of tetra */
     std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > Hm;
-
-    /** monitor the solver called in method solve() */
-    algebra::iteration<double> iter;
 
     /** if verbose set to true, some printing are sent to terminal */
     const bool verbose;

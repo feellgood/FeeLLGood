@@ -21,9 +21,13 @@ class solver
     public:
         /** constructor */
         explicit solver(Mesh::mesh & _msh /**< [in] mesh */,
-                        std::vector<Tetra::prm> & _pTetra /**< [in] ref to vector of param tetra (volume region parameters) */,
-                        std::vector<Facette::prm> & _pFac /**< [in] ref to vector of param facette (surface region parameters) */
-                       ):DIM_PB(DIM_PROBLEM), msh(&_msh), paramTet(_pTetra), paramFac(_pFac) {}
+                        std::vector<Tetra::prm> & _pTetra /**< [in] ref to vector of param tet (volume region parameters) */,
+                        std::vector<Facette::prm> & _pFac /**< [in] ref to vector of param fac (surface region parameters) */,
+                        const std::string name /**< [in] name of the solver method */,
+                        const double _tol /**< [in] solver tolerance */,
+                        const bool v /**< [in] verbose mode for iteration monitor */,
+                        const int max_iter /**< [in] maximum number of iterations */):
+                        DIM_PB(DIM_PROBLEM), msh(&_msh), paramTet(_pTetra), paramFac(_pFac), iter(name,_tol,v,max_iter) {}
 
     protected:
         /** dimensionnality of th problem */
@@ -37,6 +41,9 @@ class solver
 
         /** this vector contains the material parameters for all surface regions for all the triangular facettes */
         std::vector<Facette::prm> paramFac;
+
+        /** monitor the solver called in method solve() */
+        algebra::iteration<double> iter;
 
         /** function template.
         parameter N is the number of indices of the element to build matrix from: ind.size() = N

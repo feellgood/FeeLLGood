@@ -41,8 +41,8 @@ public:
     When debugging it might be usefull to set iter verbosity differently
     */
     LinAlgebra(Settings &s /**< [in] */, Mesh::mesh &my_msh /**< [in] */)
-        : solver<DIM_PB_MAG>(my_msh,s.paramTetra,s.paramFacette), NOD(my_msh.getNbNodes()),
-          iter("bicg_dir",s.TOL,s.verbose,s.MAXITER), K(build_shape()), verbose(s.verbose)
+        : solver<DIM_PB_MAG>(my_msh, s.paramTetra, s.paramFacette, "bicg_dir", s.TOL, s.verbose, s.MAXITER),
+        NOD(my_msh.getNbNodes()), K(build_shape()), verbose(s.verbose)
         {
         L_rhs.resize(2*NOD);
         Xw.resize(2*NOD);
@@ -102,7 +102,7 @@ public:
 
     /** solver, uses stabilized biconjugate gradient solver (bicg) with diagonal preconditionner, sparse matrix and vector are filled with multiThreading. Sparse matrix is row major.
     */
-    int solver(timing const &t_prm /**< [in] */);
+    int solver(timing const &t_prm /**< [in] */); // TODO: change that name
 
     /** setter for DW_dz */
     inline void set_DW_vz(double vz /**< [in] */) { DW_vz = vz; }
@@ -122,9 +122,6 @@ private:
 
     /** number of nodes, also an offset for filling sparseMatrix, initialized by constructor */
     const int NOD;
-
-    /** monitor the solver */
-    algebra::iteration<double> iter;
 
     /** matrix of the system to solve */
     algebra::r_sparseMat K;

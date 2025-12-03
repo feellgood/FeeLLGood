@@ -29,10 +29,10 @@ public:
             Mesh::mesh & _msh /**< [in] reference to the mesh */,
             std::vector<Tetra::prm> & _pTetra /**< [in] ref to vector of param tetra (volume region parameters) */,
             std::vector<Facette::prm> & _pFac /**< [in] ref to vector of param facette (surface region parameters) */,
-            const double _tol /**< [in] tolerance for solvers */,
+            const double _tol /**< [in] cg_dir tolerance */,
             const bool v /**< [in] verbose mode for iteration monitor */,
-            const int max_iter /**< [in] maximum number of iteration */)
-        : solver<DIM_PB_ELEC>(_msh,_pTetra,_pFac), iter("cg_dir",_tol,v,max_iter) {}
+            const int max_iter /**< [in] maximum number of iterations */):
+            solver<DIM_PB_ELEC>(_msh,_pTetra,_pFac,"cg_dir",_tol,v,max_iter) {}
 
     /** electrostatic potential values for boundary conditions, V.size() is the size of the vector
      * of nodes */
@@ -66,9 +66,6 @@ public:
      * if verbose set to true, some printing are sent to terminal */
     void compute(const bool verbose /**< [in] */, const std::string V_fileName /**< [in] output file name for V solution */);
 private:
-    /** monitor the solver called in method solve() */
-    algebra::iteration<double> iter;
-
     /** number of digits in the optional output file */
     const int precision = 8;
 
