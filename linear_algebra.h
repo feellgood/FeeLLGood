@@ -100,9 +100,9 @@ public:
     /** build init guess for bicg solver */
     void buildInitGuess(std::vector<double> &G/**< [out] */) const;
 
-    /** solver, uses stabilized biconjugate gradient solver (bicg) with diagonal preconditionner, sparse matrix and vector are filled with multiThreading. Sparse matrix is row major.
+    /** call the solver, uses stabilized biconjugate gradient solver (bicg) with diagonal preconditionner, sparse matrix and vector are filled with multiThreading. Sparse matrix is row major.
     */
-    int solver(timing const &t_prm /**< [in] */); // TODO: change that name
+    bool solve(timing const &t_prm /**< [in] */);
 
     /** setter for DW_dz */
     inline void set_DW_vz(double vz /**< [in] */) { DW_vz = vz; }

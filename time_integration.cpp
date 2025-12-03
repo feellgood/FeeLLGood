@@ -202,7 +202,7 @@ int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /*
                 linAlg.prepareElements(amp_field_time,t_prm);
                 }
 
-            int err = linAlg.solver(t_prm);
+            bool err = linAlg.solve(t_prm);
             vmax = linAlg.get_v_max();
 
             if (err)

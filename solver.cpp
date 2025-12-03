@@ -3,7 +3,7 @@
 
 #include "algebra/bicg.h"
 
-int LinAlgebra::solver(timing const &t_prm)
+bool LinAlgebra::solve(timing const &t_prm)
     {
     chronometer counter(2);
     iter.reset();
@@ -57,7 +57,7 @@ int LinAlgebra::solver(timing const &t_prm)
         {
         if (verbose)
             { std::cout << "solver: " << iter.infos() << std::endl; }
-        return 1;
+        return true;
         }
 
     if (verbose)
@@ -78,5 +78,5 @@ int LinAlgebra::solver(timing const &t_prm)
             }
         }
     v_max = gamma0*sqrt(v2max);
-    return 0;
+    return false;
     }
