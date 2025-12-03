@@ -22,7 +22,7 @@ bool electrostatSolver::checkBoundaryConditions(void) const
 void electrostatSolver::infos(void)
     {
     std::cout << "Boundary conditions:\n";
-    std::for_each(paramFac.begin(),paramFac.end(),[](Facette::prm &p)
+    std::for_each(paramFac.begin(),paramFac.end(),[](const Facette::prm &p)
         {
         if (!std::isnan(p.J)) { std::cout << "\tJ= " << p.J << std::endl; }
         if (!std::isnan(p.V)) { std::cout << "\tV= " << p.V << std::endl; }

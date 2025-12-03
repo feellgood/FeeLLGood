@@ -37,10 +37,10 @@ class solver
         Mesh::mesh *msh;
 
         /** this vector contains the material parameters for all volume regions for all the tetrahedrons */
-        std::vector<Tetra::prm> paramTet;
+        const std::vector<Tetra::prm> &paramTet;
 
         /** this vector contains the material parameters for all surface regions for all the triangular facettes */
-        std::vector<Facette::prm> paramFac;
+        const std::vector<Facette::prm> &paramFac;
 
         /** monitor the solver called in method solve() */
         algebra::iteration<double> iter;

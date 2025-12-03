@@ -27,7 +27,7 @@ bool checkNamedObjects(std::vector<T> const &v_prm, const int dim_obj)
         o_names.push_back(physGroupName);
         });
 
-    std::for_each(v_prm.begin(),v_prm.end(),[&existRegions,&o_names](auto p)
+    std::for_each(v_prm.begin(),v_prm.end(),[&existRegions,&o_names](const auto &p)
         {
         if (p.regName != "__default__")
             {
