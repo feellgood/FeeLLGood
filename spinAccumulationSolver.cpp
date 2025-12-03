@@ -199,14 +199,14 @@ void spinAcc::calc_Hm(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nod
 bool spinAcc::solve(void)
     {
     iter.reset();
-    algebra::w_sparseMat Kw(DIM_PROBLEM*NOD);
-    std::vector<double> Lw(DIM_PROBLEM*NOD,0);
+    algebra::w_sparseMat Kw(DIM_PB*NOD);
+    std::vector<double> Lw(DIM_PB*NOD,0);
 
     std::for_each( msh->tet.begin(), msh->tet.end(),[this,&Kw,&Lw](Tetra::Tet &elem)
         {
-        Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,DIM_PROBLEM*Tetra::N> K;
+        Eigen::Matrix<double,DIM_PB*Tetra::N,DIM_PB*Tetra::N> K;
         K.setZero();
-        std::vector<double> L(DIM_PROBLEM*Tetra::N,0.0);
+        std::vector<double> L(DIM_PB*Tetra::N,0.0);
         integrales(elem,K);
         if(msh->isMagnetic(elem))
             { integraleMag(elem,K,L); }
@@ -219,7 +219,7 @@ bool spinAcc::solve(void)
     // here are the boundary conditions
     std::for_each(msh->fac.begin(),msh->fac.end(),[this,&Lw](Facette::Fac &f)
         {
-        std::vector<double> L(DIM_PROBLEM*Facette::N,0.0);
+        std::vector<double> L(DIM_PB*Facette::N,0.0);
         Eigen::Vector3d s_value;
         if (paramFac[f.idxPrm].s.norm() == 0)
             s_value.setZero();
@@ -231,19 +231,19 @@ bool spinAcc::solve(void)
         });
 
     algebra::r_sparseMat Kr(Kw);
-    std::vector<double> Xw(DIM_PROBLEM*NOD);
+    std::vector<double> Xw(DIM_PB*NOD);
     algebra::bicg_dir(iter, Kr, Xw, Lw, valDirichlet, idxDirichlet);
 
     for (int i=0; i<NOD; i++)
         for (int j=0; j<3; j++)
         {
-        s[i][j] = Xw[DIM_PROBLEM*i + j];
+        s[i][j] = Xw[DIM_PB*i + j];
         }
     return (iter.status == algebra::CONVERGED);
     }
 
 void spinAcc::integraleMag(Tetra::Tet &tet,
-                           Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,DIM_PROBLEM*Tetra::N> &AE,
+                           Eigen::Matrix<double,DIM_PB*Tetra::N,DIM_PB*Tetra::N> &AE,
                            std::vector<double> &BE)
     {
     using namespace Tetra;
@@ -312,7 +312,7 @@ void spinAcc::integraleSpinHall(Tetra::Tet &tet, std::vector<double> &BE)
     }
 
 void spinAcc::integrales(Tetra::Tet &tet,
-                         Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,DIM_PROBLEM*Tetra::N> &AE)
+                         Eigen::Matrix<double,DIM_PB*Tetra::N,DIM_PB*Tetra::N> &AE)
     {
     using namespace Tetra;
 

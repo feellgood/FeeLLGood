@@ -27,11 +27,11 @@ class solver
                         const double _tol /**< [in] solver tolerance */,
                         const bool v /**< [in] verbose mode for iteration monitor */,
                         const int max_iter /**< [in] maximum number of iterations */):
-                        DIM_PB(DIM_PROBLEM), msh(&_msh), NOD(_msh.getNbNodes()), paramTet(_pTetra), paramFac(_pFac), iter(name,_tol,v,max_iter) {}
+                        msh(&_msh), NOD(_msh.getNbNodes()), paramTet(_pTetra), paramFac(_pFac), iter(name,_tol,v,max_iter) {}
 
     protected:
-        /** dimensionnality of th problem */
-        const int DIM_PB;
+        /** dimensionnality of the problem */
+        static const int DIM_PB = DIM_PROBLEM;
 
         /** mesh pointer to access nodes, fac, tet, and others geometrical values and methods */
         Mesh::mesh *msh;

@@ -31,7 +31,7 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     const int max_iter /**< [in] maximum number of iterations */):
         solver<DIM_PB_SPIN_ACC>(_msh,_pTetra,_pFac,"bicg_dir",_tol,v,max_iter), verbose(v)
         {
-        valDirichlet.resize(DIM_PROBLEM*NOD);
+        valDirichlet.resize(DIM_PB*NOD);
         boundaryConditions();
         }
 
@@ -120,12 +120,9 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
      * boundary conditions */
     bool solve(void);
 
-    /** dimensionnality of the spin accumulation problem */
-    static const int DIM_PROBLEM = 3;
-
     /** computes magnetic contributions to spin diffusion from tetrahedron tet */
     void integraleMag(Tetra::Tet &tet,
-                      Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,DIM_PROBLEM*Tetra::N> &AE,
+                      Eigen::Matrix<double,DIM_PB*Tetra::N,DIM_PB*Tetra::N> &AE,
                       std::vector<double> &BE);
 
     /** computes spin Hall effect contribution to spin diffusion. This contribution does not depend
@@ -134,7 +131,7 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
 
     /** computes normal metal contributions to matrix AE and vector BE from tetrahedron tet */
     void integrales(Tetra::Tet &tet,
-                    Eigen::Matrix<double,DIM_PROBLEM*Tetra::N,DIM_PROBLEM*Tetra::N> &AE);
+                    Eigen::Matrix<double,DIM_PB*Tetra::N,DIM_PB*Tetra::N> &AE);
 
     /** computes contributions to vector BE from facette fac */
     void integrales(Facette::Fac &fac, Eigen::Vector3d &Q, std::vector<double> &BE);
