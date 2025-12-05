@@ -12,13 +12,13 @@ except:
     from core import mesh
 
 class data(object):
-    def __init__(self,fileName,list_idx):
-        self.Mag = vtk.vtkFloatArray()
-        magFile = open(fileName,'r')
-        lines = magFile.readlines()
-        magFile.close()
-        self.Mag.SetNumberOfComponents(len(list_idx))
-
+    def __init__(self,fileName,list_idx,name):
+        self.X = vtk.vtkFloatArray()
+        solFile = open(fileName,'r')
+        lines = solFile.readlines()
+        solFile.close()
+        self.X.SetNumberOfComponents(len(list_idx))
+        self.X.SetName(name)
         for i in range(0,len(lines)):
             ls = self.filter(lines[i])
             vector = []
@@ -26,7 +26,7 @@ class data(object):
                 self.check_idx(ls,list_idx)
                 for idx in list_idx:
                     vector.append(float(ls[idx]))
-                self.Mag.InsertNextTuple(vector)
+                self.X.InsertNextTuple(vector)
             
                 
     def filter(self,line):# the separator is either a '\t' or spaces, because s.sol files may be post-treated
@@ -56,6 +56,8 @@ def get_params():
     parser.add_argument('solFileName', help='a .sol feellgood file')
     parser.add_argument('--version',action='version',version= __version__,help='show the version number')
     parser.add_argument('integers',metavar='N',type=int, nargs='*', help='0-based indices of the columns to copy into output .vtu file')
+    parser.add_argument('--name',help='name of the data in the output .vtu file')
+    parser.add_argument('-o','--output', help='output file name, extension .vtu will be added')
     args = parser.parse_args()
     indices = []
     if len(args.integers)>0:
@@ -63,20 +65,18 @@ def get_params():
     else:
         indices = [1,2,3]
 
-    return [args.mshFileName,args.solFileName,indices]
+    return [args.mshFileName,args.solFileName,indices,args.name,args.output]
 
 def main():
     #print("This is fg-sol2vtk ", __version__ ,", using VTK " + vtk.vtkVersion.GetVTKVersion(), " and GMSH " + gmsh.__version__ )
-    [meshFileName, solFileName, indices] = get_params()
-
+    [meshFileName, solFileName, indices, name, outputFileName] = get_params()
     path, ext = os.path.splitext(meshFileName)
     ext = ext.lower()
     if ext != '.msh':
         print("extension " + ext + "not recognized.")
         sys.exit(1)
-    
     msh = mesh(meshFileName)
-    my_data = data(solFileName,indices)
+    my_data = data(solFileName,indices,name)
     
     points = vtk.vtkPoints()
     points.SetNumberOfPoints(len(msh.Nodes))
@@ -90,18 +90,18 @@ def main():
 # here we insert all the tetraherons, in some append mode, so no need to call ugrid.Allocate
     for i in range(0,len(msh.Tet)):
         ugrid.InsertNextCell(vtk.VTK_TETRA,4,msh.Tet[i])
-
-    newFileName = solFileName[0:solFileName.rfind('.')]
+    if outputFileName == None:
+        newFileName = solFileName[0:solFileName.rfind('.')]
+    else:
+        newFileName = outputFileName
     newFileName += ".vtu"
-    
     #the vectors are fixed on each nodes, so we have to associate them to ugrid as Points, not to the cells = tetrahedrons
     if len(indices) == 3:
         print( newFileName ,"saved as 3D vectors, using ", indices ," columns")
-        my_data.Mag.SetName("Magnetization")
-        ugrid.GetPointData().SetVectors(my_data.Mag)
+        ugrid.GetPointData().SetVectors(my_data.X)
     else:
         print(newFileName ,"saved as " + str(len(indices)) + "D scalars, using ", indices ," column(s)")
-        ugrid.GetPointData().SetScalars(my_data.Mag)
+        ugrid.GetPointData().SetScalars(my_data.X)
 
     writer = vtk.vtkXMLUnstructuredGridWriter()
     writer.SetFileName(newFileName)
@@ -109,6 +109,6 @@ def main():
     writer.SetDataModeToBinary() #writer.SetDataModeToAscii() #available only if XML
     writer.Write()
 
-__version__ = '1.0.2'
+__version__ = '1.1.2'
 if __name__ == "__main__":
     main()
