@@ -208,7 +208,7 @@ void Settings::toYaml()
             std::cout << ' ' << it->V << '\n';
         if (spin_acc)
             {
-            std::cout << "      P: " << str(it->P) << "\n";
+            std::cout << "      uP: " << str(it->uP) << "\n";
             std::cout << "      s: " << str(it->s) << "\n";
             }
         }
@@ -431,8 +431,8 @@ void Settings::read(YAML::Node yaml)
                     p.V = NAN;
                 if (!isnan(p.J) && !isnan(p.V))
                     error("A surface region cannot have both no-null J and V.");
-                if (!assign(NORMALIZE, p.P, surface["P"]))
-                    {p.P = Eigen::Vector3d(NAN,NAN,NAN); }
+                if (!assign(NORMALIZE, p.uP, surface["uP"]))
+                    {p.uP = Eigen::Vector3d(NAN,NAN,NAN); }
                 if (!assign(!NORMALIZE, p.s, surface["s"]))
                     { p.s = Eigen::Vector3d(NAN,NAN,NAN); }
                 }

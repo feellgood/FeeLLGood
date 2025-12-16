@@ -60,7 +60,7 @@ void spinAcc::boundaryConditions(void)
              * [J] = A m^-2; [BOHRS_MUB/CHARGE_ELECTRON] = m^2 ; [P] = 1 ⇒ [s_value] = A
              * check s_value formula, especially the sign with current convention
              * */
-            Eigen::Vector3d s_value = -paramFac[f.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFac[f.idxPrm].P;
+            Eigen::Vector3d s_value = -paramFac[f.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFac[f.idxPrm].uP;
             for(int j=0;j<Facette::N;j++)
                 { fillDirichletData(f.ind[j],s_value); }
             }
@@ -225,7 +225,7 @@ bool spinAcc::solve(void)
             s_value.setZero();
         else if (!std::isfinite( paramFac[f.idxPrm].s.norm() ) &&
                 std::isfinite(paramFac[f.idxPrm].J)) // we should also test polarization P
-            s_value = -paramFac[f.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFac[f.idxPrm].P;
+            s_value = -paramFac[f.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFac[f.idxPrm].uP;
         integrales(f,s_value,L);
         buildVect<Facette::N>(f.ind, L, Lw);
         });
