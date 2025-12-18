@@ -221,11 +221,14 @@ bool spinAcc::solve(void)
         {
         std::vector<double> L(DIM_PB*Facette::N,0.0);
         Eigen::Vector3d s_value;
-        if (paramFac[f.idxPrm].s.norm() == 0)
-            s_value.setZero();
-        else if (!std::isfinite( paramFac[f.idxPrm].s.norm() ) &&
-                std::isfinite(paramFac[f.idxPrm].J)) // we should also test polarization P
+        if (!std::isfinite(paramFac[f.idxPrm].s.norm()) && std::isfinite(paramFac[f.idxPrm].J))
+            { // we should also test polarization P
             s_value = -paramFac[f.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFac[f.idxPrm].uP;
+            }
+        else
+            {
+            s_value.setZero();
+            }
         integrales(f,s_value,L);
         buildVect<Facette::N>(f.ind, L, Lw);
         });
