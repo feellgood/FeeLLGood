@@ -23,7 +23,7 @@ public:
     /** Update soft_max to be no larger than max. */
     void set_soft_limit(double max) { soft_max = std::min(soft_max, max); }
 
-    /** Return a reasonable time step. `stride' is distance to the next
+    /** Return a reasonable time step. `stride` is distance to the next
      * time we want to hit exactly. */
     double operator()(double stride)
         {
