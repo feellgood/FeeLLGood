@@ -120,10 +120,11 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
      * boundary conditions */
     bool solve(void);
 
-    /** computes magnetic contributions to spin diffusion from tetrahedron tet */
-    void integraleMag(Tetra::Tet &tet,
-                      Eigen::Matrix<double,DIM_PB*Tetra::N,DIM_PB*Tetra::N> &AE,
-                      std::vector<double> &BE);
+    /** computes magnetic contributions to spin diffusion from tetrahedron tet (LHS) */
+    void integraleMag(Tetra::Tet &tet, Eigen::Matrix<double,DIM_PB*Tetra::N,DIM_PB*Tetra::N> &AE);
+
+    /** computes magnetic contributions to spin diffusion from tetrahedron tet (RHS) */
+    void integraleMag(Tetra::Tet &tet,std::vector<double> &BE);
 
     /** computes spin Hall effect contribution to spin diffusion. This contribution does not depend
      * on magnetization, its origin is Spin Orbit Torque. */
