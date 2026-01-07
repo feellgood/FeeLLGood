@@ -10,7 +10,7 @@ verboseGmsh = False
 justMagnet = False #if False magnet + electrode is meshed, else just the magnet, json also modified
 
 #all dimensions are in nm
-mesh_size = 15
+mesh_size = 5
 
 class cylinder:
     def __init__(self,n,h,r):

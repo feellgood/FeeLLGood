@@ -45,14 +45,14 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** call solver and update spin diffusion solution, returns true if solver succeeded */
     bool compute(void);
 
-    /** set potential V */
+    /** set potential V, solution of j = -sigma grad V over the nodes */
     void setPotential(std::vector<double> &_V);
 
     /** check boundary conditions: mesh and settings have to define a single surface with constant
      * normal current density J, a vector polarization P and another single surface where spin diffusion = 0 */
     bool checkBoundaryConditions(bool verbose) const;
 
-    /** spin accumulation solution over the nodes */
+    /** solution of the spin diffusion vector s over the nodes */
     std::vector<Eigen::Vector3d> s;
 
     private:
@@ -109,7 +109,7 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** affect extraField function and extraCoeffs_BE function using lambdas for all the tetrahedrons (functor) */
     void prepareExtras(void);
 
-    /** computes the gradient(V) for tetra tet */
+    /** computes grad(V) for tetra tet */
     void calc_gradV(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV);
 
     /** computes Hm contributions for each npi for tetrahedron tet */
@@ -129,12 +129,9 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
      * on magnetization, its origin is Spin Orbit Torque. */
     void integraleSpinHall(Tetra::Tet &tet, std::vector<double> &BE);
 
-    /** computes normal metal contributions to matrix AE and vector BE from tetrahedron tet */
+    /** computes normal metal contributions to matrix AE from tetrahedron tet */
     void integrales(Tetra::Tet &tet,
                     Eigen::Matrix<double,DIM_PB*Tetra::N,DIM_PB*Tetra::N> &AE);
-
-    /** computes contributions to vector BE from facette fac */
-    void integrales(Facette::Fac &fac, Eigen::Vector3d &Q, std::vector<double> &BE);
     };
 
 #endif

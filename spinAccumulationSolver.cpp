@@ -224,12 +224,18 @@ bool spinAcc::solve(void)
         if (!std::isfinite(paramFac[f.idxPrm].s.norm()) && std::isfinite(paramFac[f.idxPrm].J))
             { // we should also test polarization P
             s_value = -paramFac[f.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFac[f.idxPrm].uP;
+            for (int npi=0; npi<Facette::NPI; npi++)
+                {
+                const double w = f.weight[npi];
+                for (int ie=0; ie<Facette::N; ie++)
+                    {
+                    double ai_w = w*Facette::a[ie][npi];
+                    L[               ie] -= s_value[IDX_X]* ai_w;
+                    L[  Facette::N + ie] -= s_value[IDX_Y]* ai_w;
+                    L[2*Facette::N + ie] -= s_value[IDX_Z]* ai_w;
+                    }
+                }
             }
-        else
-            {
-            s_value.setZero();
-            }
-        integrales(f,s_value,L);
         buildVect<Facette::N>(f.ind, L, Lw);
         });
 
@@ -251,18 +257,16 @@ void spinAcc::integraleMag(Tetra::Tet &tet,
     {
     using namespace Tetra;
 
-    double sigma = getSigma(tet);
-    double N0 = getN0(tet);
-    double P = getPolarization(tet);
-    double lsd = getLsd(tet);
-    double D0=2.0*sigma/(sq(CHARGE_ELECTRON)*N0);
+    const double sigma = getSigma(tet);
+    const double N0 = getN0(tet);
+    const double D0 = 2.0*sigma/(sq(CHARGE_ELECTRON)*N0);
     /* these two constants in a magnetic region are the only parameters involved in the diffusion
        equation for magnetic contribution */
-    double cst0 = BOHRS_MUB*P*sigma/CHARGE_ELECTRON;
-    double cst1 = D0/sq(lsd);
+    const double cst0 = BOHRS_MUB*getPolarization(tet)*sigma/CHARGE_ELECTRON;
+    const double cst1 = D0/sq(getLsd(tet));
     /* units:
      * [cst0] = [sigma] m^2 = A^2 s^3 m^-1 kg^-1
-     * [cst1] = s^-1
+     * [cst1] = s^-1 : it is 1/tau_sd
      * */
     Eigen::Matrix<double,N,1> V_nod;
     for (size_t ie=0; ie<N; ie++) { V_nod[ie] = V[ tet.ind[ie] ]; }
@@ -295,8 +299,8 @@ void spinAcc::integraleMag(Tetra::Tet &tet,
 void spinAcc::integraleSpinHall(Tetra::Tet &tet, std::vector<double> &BE)
     {
     using namespace Tetra;
-    double spinHall = getSpinHall(tet);
-    double cst0 = spinHall*CHARGE_ELECTRON/MASS_ELECTRON;
+
+    const double cst0 = getSpinHall(tet)*CHARGE_ELECTRON/MASS_ELECTRON;
     Eigen::Matrix<double,N,1> V_nod;
     for (size_t ie=0; ie<N; ie++) { V_nod[ie] = V[ tet.ind[ie] ]; }
     Eigen::Matrix<double,Nodes::DIM,NPI> &_gradV = gradV[tet.idx];
@@ -319,50 +323,30 @@ void spinAcc::integrales(Tetra::Tet &tet,
     {
     using namespace Tetra;
 
-    double sigma = getSigma(tet);
-    double N0 = getN0(tet);
-    double lsf = getLsf(tet);
-    double D0=2.0*sigma/(sq(CHARGE_ELECTRON)*N0);
-    double cst0 = D0/sq(lsf);
+    const double N0 = getN0(tet);
+    const double lsf = getLsf(tet);
+    const double D0 = 2.0*getSigma(tet)/(sq(CHARGE_ELECTRON)*N0);
     /* units:
      * [D0] = [sigma/(sq(CHARGE_ELECTRON)*N0)] = s^-1 m^2 : it is a diffusion coefficient
-     * [cst0] = s^-1
+     * [sq(lsf)/D0] = s : it is tau_sf
      * */
     for (size_t npi=0; npi<NPI; npi++)
         {
-        double w = tet.weight[npi];
+        const double D0_w = D0*tet.weight[npi];
         for (size_t ie=0; ie<N; ie++)
             {
             Eigen::Vector3d grad_ai = tet.da.row(ie);
-            double tmp = cst0*w*Tetra::a[ie][npi];
+            double tmp = D0_w*Tetra::a[ie][npi]/sq(lsf);
             AE(    ie,     ie) += tmp;
             AE(  N+ie,   N+ie) += tmp;
             AE(2*N+ie, 2*N+ie) += tmp;
             for (size_t je=0; je<N; je++)
                 {
-                tmp = D0*w*(grad_ai.dot( tet.da.row(je) ));
+                tmp = D0_w*(grad_ai.dot( tet.da.row(je) ));
                 AE(    ie,     je) += tmp;
                 AE(  N+ie,   N+je) += tmp;
                 AE(2*N+ie, 2*N+je) += tmp;
                 }
-            }
-        }
-    }
-
-void spinAcc::integrales(Facette::Fac &fac, Eigen::Vector3d &Q, std::vector<double> &BE)
-    {
-    using namespace Nodes;
-    using namespace Facette;
-
-    for (int npi=0; npi<NPI; npi++)
-        {
-        double w = fac.weight[npi];
-        for (int ie=0; ie<N; ie++)
-            {
-            double ai_w = w*a[ie][npi];
-            BE[    ie] -= Q[IDX_X]* ai_w;
-            BE[  N+ie] -= Q[IDX_Y]* ai_w;
-            BE[2*N+ie] -= Q[IDX_Z]* ai_w;
             }
         }
     }
