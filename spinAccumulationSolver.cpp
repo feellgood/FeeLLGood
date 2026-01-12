@@ -74,8 +74,8 @@ void spinAcc::boundaryConditions(void)
     suppress_copies<int>(idxDirichlet);
     }
 
-double spinAcc::getJs(Tetra::Tet const &tet) const
-    { return paramTet[tet.idxPrm].J; }
+double spinAcc::getMs(Tetra::Tet const &tet) const
+    { return paramTet[tet.idxPrm].Ms; }
 
 double spinAcc::getSigma(Tetra::Tet const &tet) const
     { return paramTet[tet.idxPrm].sigma; }
@@ -110,12 +110,11 @@ void spinAcc::prepareExtras(void)
         const double lsd = getLsd(t);
         const double lsf = getLsf(t);
         const double ksi = sq(lsd/lsf);
-        const double Js = getJs(t);// Js = mu_0 Ms; [Js] = T A^-1 m A m^-1 = T
-        double prefactor = mu0*BOHRS_MUB*P/(gamma0*Js*CHARGE_ELECTRON*(1.0 + sq(ksi)));
-        /* units:
-         * [prefactor] = [mu0*BOHRS_MUB/(gamma0*Js*CHARGE_ELECTRON)] = s^1 m^2
-         * [Hm] = s^1 A [grad_u]
-         * */
+        const double Ms = getMs(t);
+
+        // this formula might be mistaken, mixture of different models, to check
+        double prefactor = BOHRS_MUB*P/(gamma0*Ms*CHARGE_ELECTRON*(1.0 + sq(ksi)));
+
         t.extraField = [this, _idx](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)
                          { for(int npi = 0; npi<Tetra::NPI; npi++) { H.col(npi) += Hm[_idx].col(npi); } };
 

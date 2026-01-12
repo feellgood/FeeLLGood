@@ -85,8 +85,8 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** number of digits in the optional output file */
     const int precision = 8;
 
-    /** returns Js = mu_0 Ms */
-    double getJs(Tetra::Tet const &tet) const;
+    /** returns Ms */
+    double getMs(Tetra::Tet const &tet) const;
 
     /** returns sigma of the tetraedron, (conductivity in (Ohm.m)^-1 */
     double getSigma(Tetra::Tet const &tet) const;

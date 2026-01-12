@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(tet_charges, *boost::unit_test::tolerance(UT_TOL))
     // carefull with indices (starting from 1)
     Tetra::Tet t(node, 0, {1, 2, 3, 4});
     Tetra::prm p;
-    p.J = distrib(gen);
+    p.Ms = distrib(gen);
     auto getter = Nodes::get_u<Nodes::NEXT>;
 
     // code to test
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(tet_charges, *boost::unit_test::tolerance(UT_TOL))
     for (int j = 0; j < Tetra::NPI; j++)
         { result(j) = dudx(0,j) + dudy(1,j) + dudz(2,j); }
     result = t.weight.cwiseProduct(result);
-    result *= -p.J/mu0;
+    result *= -p.Ms;
     // ref code end
     BOOST_CHECK(nsrc == Tetra::NPI);
     BOOST_CHECK(srcDen.size() == nsrc);

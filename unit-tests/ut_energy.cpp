@@ -48,7 +48,6 @@ BOOST_AUTO_TEST_CASE(demagEnergy, *boost::unit_test::tolerance(UT_TOL))
     // src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
 
     double Ms = distrib(gen);
-    double Js = mu0 * Ms;
     double u_nod[3][Tetra::N], u[3][Tetra::NPI];
     double negphi_nod[Tetra::N], Hdx[Tetra::NPI], Hdy[Tetra::NPI], Hdz[Tetra::NPI];
     
@@ -67,7 +66,7 @@ BOOST_AUTO_TEST_CASE(demagEnergy, *boost::unit_test::tolerance(UT_TOL))
     
     double dens[Tetra::NPI];
     for (int npi=0; npi<Tetra::NPI; npi++) {
-        dens[npi] = -0.5*Js* (u[0][npi]*Hdx[npi] + u[1][npi]*Hdy[npi] + u[2][npi]*Hdz[npi]);
+        dens[npi] = -0.5*mu0*Ms* (u[0][npi]*Hdx[npi] + u[1][npi]*Hdy[npi] + u[2][npi]*Hdz[npi]);
         }
     double Edemag(0);
     for (int npi=0; npi<Tetra::NPI; npi++) { Edemag += dens[npi]*t.weight[npi]; }
@@ -79,7 +78,7 @@ BOOST_AUTO_TEST_CASE(demagEnergy, *boost::unit_test::tolerance(UT_TOL))
     t.interpolation(Nodes::get_u<Nodes::NEXT>, _u, dudx, dudy, dudz);
     t.interpolation(Nodes::get_phi<Nodes::NEXT>, _phi);
     Tetra::prm param;
-    param.J = Js;
+    param.Ms = Ms;
     double result_to_test = t.demagEnergy(param, dudx, dudy, dudz, _phi);
     std::cout << "E_demag(vol)= " << result_to_test << std::endl;
     

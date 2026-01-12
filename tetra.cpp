@@ -16,12 +16,12 @@ void prm::infos(void)
     {
     using std::cout;
     cout << "volume region name = " << regName;
-    if(J > 0)
+    if(Ms > 0)
         {
         cout << ", magnetic.\n";
         cout << "alpha_LLG = " << alpha_LLG << std::endl;
         cout << "A = " << A << std::endl;
-        cout << "J = " << J << std::endl;
+        cout << "Ms = " << Ms << std::endl;
 
         if (K != 0)
             {
@@ -163,8 +163,8 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
                      Nodes::index idx_dir, double Vdrift)
     {
     const double alpha = param.alpha_LLG;
-    const double Js = param.J;
-    const double Abis = 2.0 * param.A / Js;
+    const double Ms = param.Ms;
+    const double Abis = 2.0 * param.A / (mu0*Ms);
     const double dt = prm_t.get_dt();
     const double s_dt = THETA * dt * gamma0;  // theta from theta scheme in config.h.in
 
@@ -186,12 +186,12 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
 
     if(param.K != 0)
         {
-        double Kbis = 2.0 * param.K / Js;
+        double Kbis = 2.0 * param.K/(mu0*Ms);
         uHeff += calc_aniso_uniax(param.uk, Kbis, s_dt, U, V, H_aniso);
         }
     if(param.K3 != 0)
         {
-        double K3bis = 2.0 * param.K3 / Js;
+        double K3bis = 2.0 * param.K3/(mu0*Ms);
         uHeff += calc_aniso_cub(param.ex, param.ey, param.ez, K3bis, s_dt, U, V, H_aniso);
         }
 
@@ -288,7 +288,7 @@ void Tet::charges(Tetra::prm const &param,
                    + (vec_nod.row(IDX_Y)).dot( da.col(IDX_Y) )
                    + (vec_nod.row(IDX_Z)).dot( da.col(IDX_Z) );
     
-    dud_sum *= -param.J/mu0;
+    dud_sum *= -param.Ms;
     for(int i=0;i<Tetra::NPI;i++)
         { srcDen[nsrc+i] = weight(i)*dud_sum; }
     nsrc += Tetra::NPI;
@@ -304,7 +304,7 @@ double Tet::demagEnergy(Tetra::prm const &param,
 
     for (int npi = 0; npi < NPI; npi++)
         { dens[npi] = (dudx(0,npi) + dudy(1,npi) + dudz(2,npi)) * phi[npi]; }
-    return -0.5*param.J*weight.dot(dens);
+    return -0.5*mu0*param.Ms*weight.dot(dens);
     }
 
 double Tet::zeemanEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Vector3d> const Hext,
@@ -312,7 +312,7 @@ double Tet::zeemanEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Vector3d> co
     {
     Eigen::Matrix<double,NPI,1> dens = u.transpose() * Hext;
 
-    return -param.J*weight.dot(dens);
+    return -mu0*param.Ms*weight.dot(dens);
     }
 
 double Tet::Jacobian(Eigen::Ref<Eigen::Matrix3d> J)

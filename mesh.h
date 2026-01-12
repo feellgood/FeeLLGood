@@ -314,7 +314,7 @@ public:
     inline int getNodeIndex(const int i) const { return node_index[i]; }
 
     /** return true if this tetraedron is magnetic */
-    inline bool isMagnetic(const Tetra::Tet &t) { return (paramTetra[t.idxPrm].J > 0); }
+    inline bool isMagnetic(const Tetra::Tet &t) { return (paramTetra[t.idxPrm].Ms > 0); }
 
     /** return true if this facet is magnetic */
     inline bool isMagnetic(const Facette::Fac &f)
