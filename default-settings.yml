@@ -159,9 +159,9 @@ mesh:
       # Unit vector along the surface anisotropy axis.
       uk: [0, 0, 1]
 
-      # Fixed current density value (J.n) for the boundary conditions of
+      # Fixed normal current density value (j.n) for the boundary conditions of
       # the electrostatic and the spin diffusion problems.
-      J:
+      jn:
 
       # Fixed potential value for the boundary conditions of the
       # electrostatic problem.

@@ -45,7 +45,8 @@ struct prm
     double Ks;             /**< uniaxial surface anisotropy constant */
     Eigen::Vector3d uk;    /**< anisotropy axis */
     double V;              /**< fixed potential (boundary condition for electrostatic sub-problem) */
-    double J;              /**< current density (boundary condition for electrostatic sub-problem) */
+    double jn;             /**< \f$ j \dot \hat{n} \f$ normal current density (boundary condition for electrostatic and
+                             spin diffusion sub-problems) */
     Eigen::Vector3d uP;    /**< Polarization spin accumulation orientation (unit vector for spin diffusion problem) */
     Eigen::Vector3d s;     /**< spin diffusion vector (for spin diffusion boundary conditions) */
 

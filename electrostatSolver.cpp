@@ -13,7 +13,7 @@ bool electrostatSolver::checkBoundaryConditions(void) const
     int nbSurfV(0);
     std::for_each(paramFac.begin(),paramFac.end(),[&nbSurfJ,&nbSurfV](Facette::prm const &p)
         {
-        if (std::isfinite(p.J)) nbSurfJ++;
+        if (std::isfinite(p.jn)) nbSurfJ++;
         if (std::isfinite(p.V)) nbSurfV++;
         });
     return ((nbSurfJ == 1)&&(nbSurfV == 1));
@@ -24,7 +24,7 @@ void electrostatSolver::infos(void)
     std::cout << "Boundary conditions:\n";
     std::for_each(paramFac.begin(),paramFac.end(),[](const Facette::prm &p)
         {
-        if (!std::isnan(p.J)) { std::cout << "\tJ= " << p.J << std::endl; }
+        if (!std::isnan(p.jn)) { std::cout << "\tjn= " << p.jn << std::endl; }
         if (!std::isnan(p.V)) { std::cout << "\tV= " << p.V << std::endl; }
         } );
     }
@@ -153,7 +153,7 @@ double electrostatSolver::getSigma(Tetra::Tet const &tet) const
 
 double electrostatSolver::getCurrentDensity(Facette::Fac const &fac) const
     {
-    double val = paramFac[fac.idxPrm].J;
+    double val = paramFac[fac.idxPrm].jn;
     if (!std::isfinite(val)) val = 0.0;
     return val;
     }

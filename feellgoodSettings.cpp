@@ -197,10 +197,10 @@ void Settings::toYaml()
         std::cout << "      Ks: " << it->Ks << "\n";
         if (it->Ks != 0) std::cout << "      uk: " << str(it->uk) << "\n";
         std::cout <<  "      J:";
-        if (isnan(it->J))
+        if (isnan(it->jn))
             std::cout << "\n";
         else
-            std::cout << ' ' << it->J << '\n';
+            std::cout << ' ' << it->jn << '\n';
         std::cout <<  "      V:";
         if (isnan(it->V))
             std::cout << "\n";
@@ -432,11 +432,11 @@ void Settings::read(YAML::Node yaml)
                 assign(NORMALIZE, p.uk, surface["uk"]);
 
                 // J and V may be null, which we map to NAN.
-                if (!assign(p.J, surface["J"]))
-                    p.J = NAN;
+                if (!assign(p.jn, surface["jn"]))
+                    p.jn = NAN;
                 if (!assign(p.V, surface["V"]))
                     p.V = NAN;
-                if (!isnan(p.J) && !isnan(p.V))
+                if (!isnan(p.jn) && !isnan(p.V))
                     error("A surface region cannot have both no-null J and V.");
                 if (!assign(NORMALIZE, p.uP, surface["uP"]))
                     {p.uP = Eigen::Vector3d(NAN,NAN,NAN); }

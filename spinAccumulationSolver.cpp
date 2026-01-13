@@ -27,10 +27,10 @@ bool spinAcc::checkBoundaryConditions(bool verbose) const
             {
             if (verbose)
                 {
-                std::cout << p.regName << " : J= " << p.J << "; s= {" << p.s[0] << ';' << p.s[1]
+                std::cout << p.regName << " : jn= " << p.jn << "; s= {" << p.s[0] << ';' << p.s[1]
                           << ';' << p.s[2] << "}\n";
                 }
-            if (std::isfinite(p.J)) nbSurfJ++;
+            if (std::isfinite(p.jn)) nbSurfJ++;
             if (std::isfinite(p.s.norm())) nbSurfS++;
             }
         });
@@ -54,17 +54,17 @@ void spinAcc::boundaryConditions(void)
     std::fill(valDirichlet.begin(),valDirichlet.end(),0.0);
     std::for_each(msh->fac.begin(),msh->fac.end(),[this](Facette::Fac &f)
         {
-        if (std::isnan(paramFac[f.idxPrm].s.norm()) &&  std::isfinite(paramFac[f.idxPrm].J))
+        if (std::isnan(paramFac[f.idxPrm].s.norm()) &&  std::isfinite(paramFac[f.idxPrm].jn))
             {
              /* units:
-             * [J] = A m^-2; [BOHRS_MUB/CHARGE_ELECTRON] = m^2 ; [P] = 1 ⇒ [s_value] = A
+             * [jn] = A m^-2; [BOHRS_MUB/CHARGE_ELECTRON] = m^2 ; [P] = 1 ⇒ [s_value] = A
              * check s_value formula, especially the sign with current convention
              * */
-            Eigen::Vector3d s_value = -paramFac[f.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFac[f.idxPrm].uP;
+            Eigen::Vector3d s_value = -paramFac[f.idxPrm].jn*(BOHRS_MUB/CHARGE_ELECTRON)*paramFac[f.idxPrm].uP;
             for(int j=0;j<Facette::N;j++)
                 { fillDirichletData(f.ind[j],s_value); }
             }
-        else if (std::isfinite(paramFac[f.idxPrm].s.norm()) &&  std::isnan(paramFac[f.idxPrm].J))
+        else if (std::isfinite(paramFac[f.idxPrm].s.norm()) &&  std::isnan(paramFac[f.idxPrm].jn))
             {
             Eigen::Vector3d s_value = paramFac[f.idxPrm].s;
             for(int j=0;j<Facette::N;j++)
@@ -223,9 +223,9 @@ bool spinAcc::solve(void)
         {
         std::vector<double> L(DIM_PB*Facette::N,0.0);
         Eigen::Vector3d s_value;
-        if (!std::isfinite(paramFac[f.idxPrm].s.norm()) && std::isfinite(paramFac[f.idxPrm].J))
+        if (!std::isfinite(paramFac[f.idxPrm].s.norm()) && std::isfinite(paramFac[f.idxPrm].jn))
             { // we should also test polarization P
-            s_value = -paramFac[f.idxPrm].J*(BOHRS_MUB/CHARGE_ELECTRON)*paramFac[f.idxPrm].uP;
+            s_value = -paramFac[f.idxPrm].jn*(BOHRS_MUB/CHARGE_ELECTRON)*paramFac[f.idxPrm].uP;
             for (int npi=0; npi<Facette::NPI; npi++)
                 {
                 const double w = f.weight[npi];
