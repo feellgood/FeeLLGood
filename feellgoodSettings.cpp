@@ -382,15 +382,20 @@ void Settings::read(YAML::Node yaml)
             int default_idx = findTetraRegionIdx("__default__");
             for (auto it = volumes.begin(); it != volumes.end(); ++it)
                 {
+                bool has_Ms = false, has_Js = false;  // whether Ms and/or Js are defined
                 std::string name = it->first.as<std::string>();
                 YAML::Node volume = it->second;
                 Tetra::prm &p = paramTetra.emplace_back();
                 if (default_idx >= 0) p = paramTetra[default_idx];
                 p.regName = name;
                 assign(p.A, volume["Ae"]);
+                if (assign(p.Ms, volume["Ms"]))
+                    { has_Ms = true; }
                 double Js;
                 if (assign(Js, volume["Js"]))
-                    { p.Ms = Js / mu0; }
+                    { has_Js = true; p.Ms = Js / mu0; }
+                if (has_Ms && has_Js)
+                    error("Ms and Js should not be both defined in the same region.");
                 assign(p.K, volume["K"]);
                 assign(NORMALIZE, p.uk, volume["uk"]);
                 assign(p.K3, volume["K3"]);
