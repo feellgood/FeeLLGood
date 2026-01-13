@@ -42,7 +42,7 @@ mesh:
   volume_regions:
     ellipsoid_volume:
       Ae: 1e-11
-      Js: 1
+      Ms: 796e3
       alpha_LLG: 0.05
   surface_regions:
     ellipsoid_surface:  # use defaults

@@ -153,7 +153,7 @@ settings = {
         "filename": meshFileName,
         "length_unit": 1e-9,
         "volume_regions": {
-            nw.name: { "Ae": 1e-11, "Js": 1, "alpha_LLG": 0.05, "P": 0.7, "sigma": 1.7e7,
+            nw.name: { "Ae": 1e-11, "Ms": 800e3, "alpha_LLG": 0.05, "P": 0.7, "sigma": 1.7e7,
                        "dens_state": 1.34e47, "l_sd": 10e-9, "l_sf": 12.5e-9} #Co
             },
         "surface_regions": {
@@ -171,7 +171,7 @@ settings = {
 }
 
 if not justMagnet:
-    settings["mesh"]["volume_regions"][e.name] = { "Ae": 0, "Js": 0, "P": 0.7, "sigma":
+    settings["mesh"]["volume_regions"][e.name] = { "Ae": 0, "Ms": 0, "P": 0.7, "sigma":
     5.8e7, "dens_state": 1.34e74, "l_sf": 350e-9 } #Cu
     settings["mesh"]["surface_regions"][surface_top_name] = { "J": 1.0e12, "uP":[0,1,0] }
     settings["mesh"]["surface_regions"][surface_top_name2] = { "V": 0.0, "s": [0,0,0] }

@@ -27,7 +27,7 @@ mySettings.createSurfRegion( surf_region_name )
 mySettings["mesh"]["volume_regions"]["whole_volume"]["K3"] = 4.2e4
 
 #magnetization at saturation (SI unit = A/m)
-mySettings["mesh"]["volume_regions"]["whole_volume"]["Js"] = 800e3
+mySettings["mesh"]["volume_regions"]["whole_volume"]["Ms"] = 800e3
 
 # exchange constant (unit = J/m)
 mySettings["mesh"]["volume_regions"]["whole_volume"]["Ae"] = 10e-12

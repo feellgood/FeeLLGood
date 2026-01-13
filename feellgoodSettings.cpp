@@ -169,7 +169,7 @@ void Settings::toYaml()
             continue;
         std::cout << "    " << it->regName << ":\n";
         std::cout << "      Ae: " << it->A << "\n";
-        std::cout << "      Js: " << mu0 * it->Ms << "\n";
+        std::cout << "      Ms: " << it->Ms << "\n";
         std::cout << "      K: " << it->K << "\n";
         if (it->K != 0) std::cout << "      uk: " << str(it->uk) << "\n";
         std::cout << "      K3: " << it->K3 << "\n";
@@ -409,7 +409,7 @@ void Settings::read(YAML::Node yaml)
                 assign(p.sigma, volume["sigma"]);
                 assign(p.N0, volume["dens_state"]);
                 assign(p.P, volume["P"]);
-                assign(p.lsd, volume["l_sd"]); // exists only for magnetic material, as Js
+                assign(p.lsd, volume["l_sd"]); // exists only for magnetic material, as Ms
                 assign(p.lsf, volume["l_sf"]);
                 assign(p.spinHall, volume["spin_hall"]); // SOT contribution to spin diffusion,
                                                          // through spin Hall effect

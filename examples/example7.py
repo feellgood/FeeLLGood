@@ -110,12 +110,12 @@ settings = {
         "filename": mesh_filename,
         "volume_regions": {
             particles[0]["volume"]["name"]: {
-                "Js": 1.0,
+                "Ms": 800e3,
                 "Ae": 1e-11,
                 "alpha_LLG": 0.1
             },
             particles[1]["volume"]["name"]: {
-                "Js": 0.5,
+                "Ms": 400e3,
                 "Ae": 1e-11,
                 "alpha_LLG": 0.1
             }

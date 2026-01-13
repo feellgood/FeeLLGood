@@ -53,14 +53,6 @@ class Settings(object):
             regions[key] = {}
         return regions[key]
 
-    ## \brief set material constants exchange , magnetization at saturation and alpha_LLG for region 'key', create if if key does not exists
-    # (key) , initialized with def values
-    def setMaterialRegion(self,key,cst_exch,mag_sat,cst_alpha):
-        region = self.createVolRegion(key)
-        region["Ae"] = cst_exch
-        region["Js"] = mag_sat
-        region["alpha_LLG"] = cst_alpha
-
     ## \brief create a new surface region
     # (key) , initialized with def values
     def createSurfRegion(self,key):

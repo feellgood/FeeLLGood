@@ -102,8 +102,8 @@ mesh:
       # Exchange constant.
       Ae: 1e-11
 
-      # Saturation magnetization times µ₀, in tesla.
-      Js: 1
+      # Saturation magnetization. Default is 1 T/μ₀.
+      Ms: 795774.7
 
       # Second order magnetocrystalline anisotropy constant.
       K: 0
