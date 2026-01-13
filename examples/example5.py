@@ -143,7 +143,7 @@ gmsh.finalize()
 # is attributed to the adjacency surface of the polarizing layer and the magnet.
 settings = {
     "outputs": {
-        "file_basename": "test_ex5",
+        "file_basename": "ex5",
         "evol_time_step": 1e-13,
         "final_time": 1e-11,
         "evol_columns": [ "t", "<Mx>", "<My>", "<Mz>", "E_tot" ],
@@ -172,7 +172,7 @@ settings = {
 
 if not justMagnet:
     settings["mesh"]["volume_regions"][e.name] = { "Ae": 0, "Ms": 0, "P": 0.7, "sigma":
-    5.8e7, "dens_state": 1.34e74, "l_sf": 350e-9 } #Cu
+    5.8e7, "dens_state": 1.34e47, "l_sf": 350e-9 } #Cu
     settings["mesh"]["surface_regions"][surface_top_name] = { "jn": 1.0e12, "uP":[0,1,0] }
     settings["mesh"]["surface_regions"][surface_top_name2] = { "V": 0.0, "s": [0,0,0] }
 

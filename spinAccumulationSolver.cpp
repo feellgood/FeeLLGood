@@ -6,7 +6,7 @@
 using algebra::sq;
 using namespace Nodes;
 
-bool spinAcc::checkBoundaryConditions(bool verbose) const
+void spinAcc::checkBoundaryConditions(void) const
     {
     // nbVolP and nbVolN0 initialized to 1 because of __default__
     unsigned int nbVolP(1);
@@ -21,22 +21,26 @@ bool spinAcc::checkBoundaryConditions(bool verbose) const
         });
     int nbSurfJ(0);
     int nbSurfS(0);
-    std::for_each(paramFac.begin(),paramFac.end(),[&nbSurfJ,&nbSurfS,verbose](Facette::prm const &p)
+    std::for_each(paramFac.begin(),paramFac.end(),[&nbSurfJ,&nbSurfS](Facette::prm const &p)
         {
         if(p.regName != "__default__")
             {
-            if (verbose)
-                {
-                std::cout << p.regName << " : jn= " << p.jn << "; s= {" << p.s[0] << ';' << p.s[1]
-                          << ';' << p.s[2] << "}\n";
-                }
             if (std::isfinite(p.jn)) nbSurfJ++;
             if (std::isfinite(p.s.norm())) nbSurfS++;
             }
         });
-    return ( (nbSurfJ == 1)&&(nbSurfS == 1)
+
+    bool result = ( (nbSurfJ == 1)&&(nbSurfS == 1)
            && (nbVolN0 == paramTet.size())
            && (nbVolP == paramTet.size()) );
+
+    if (!result)
+        {
+        std::cout << "Error: incorrect boundary conditions for spin diffusion solver.\n";
+        exit(1);
+        }
+    else if (verbose)
+        { std::cout << "spin diffusion problem boundary conditions Ok.\n"; }
     }
 
 void spinAcc::fillDirichletData(const int k, Eigen::Vector3d &s_value)

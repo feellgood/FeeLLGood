@@ -29,7 +29,7 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     const double _tol /**< [in] tolerance for bicg_dir solver */,  // _tol could be 1e-6
     const bool v /**< [in] verbose bool */,
     const int max_iter /**< [in] maximum number of iterations */):
-        solver<DIM_PB_SPIN_ACC>(_msh,_pTetra,_pFac,"bicg_dir",_tol,v,max_iter), verbose(v)
+        solver<DIM_PB_SPIN_ACC>(_msh,_pTetra,_pFac,"bicg_dir",_tol,v,max_iter)
         {
         valDirichlet.resize(DIM_PB*NOD);
         boundaryConditions();
@@ -37,7 +37,7 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
 
     /** boundary conditions: a surface with a fixed s, and another surface with fixed normal current
      * density J and polarization vector P */
-    void boundaryConditions(void);
+    void boundaryConditions(void); // should be private
 
     /** initializations: compute gradV and Hm and call prepareExtras method */
     void preCompute(void);
@@ -48,12 +48,12 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** set potential V, solution of j = -sigma grad V over the nodes */
     void setPotential(std::vector<double> &_V);
 
-    /** check boundary conditions: mesh and settings have to define a single surface with constant
-     * normal current density J, a vector polarization P and another single surface where spin diffusion = 0 */
-    bool checkBoundaryConditions(bool verbose) const;
-
     /** solution of the spin diffusion vector s over the nodes */
     std::vector<Eigen::Vector3d> s;
+
+    /** check boundary conditions: mesh and settings have to define a single surface with constant
+     * normal current density J, a vector polarization P and another single surface where spin diffusion = 0 */
+    void checkBoundaryConditions(void) const;
 
     private:
     /** container for potential values */
@@ -78,9 +78,6 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** table of the Hm vectors (contribution of spinAcc to the tet::integrales) ; Hm.size() is the
      * number of tetra */
     std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > Hm;
-
-    /** if verbose set to true, some printing are sent to terminal */
-    const bool verbose;
 
     /** number of digits in the optional output file */
     const int precision = 8;

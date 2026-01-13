@@ -27,7 +27,11 @@ class solver
                         const double _tol /**< [in] solver tolerance */,
                         const bool v /**< [in] verbose mode for iteration monitor */,
                         const int max_iter /**< [in] maximum number of iterations */):
-                        msh(&_msh), NOD(_msh.getNbNodes()), paramTet(_pTetra), paramFac(_pFac), iter(name,_tol,v,max_iter) {}
+                        msh(&_msh), NOD(_msh.getNbNodes()), paramTet(_pTetra),
+                        paramFac(_pFac), verbose(v), iter(name,_tol,v,max_iter) {}
+
+        /** check boundary conditions, exit if there is a mistake in the boundary conditions */
+        virtual void checkBoundaryConditions(void) const = 0;
 
     protected:
         /** dimensionnality of the problem */
@@ -44,6 +48,9 @@ class solver
 
         /** this vector contains the material parameters for all surface regions for all the triangular facettes */
         const std::vector<Facette::prm> &paramFac;
+
+        /** if verbose set to true, some printing are sent to terminal */
+        const bool verbose;
 
         /** monitor the solver called in method solve() */
         algebra::iteration<double> iter;

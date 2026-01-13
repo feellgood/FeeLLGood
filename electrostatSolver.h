@@ -38,10 +38,6 @@ public:
      * of nodes */
     std::vector<double> V;
 
-    /** check boundary conditions: mesh and settings have to define a single surface with constant current
-     * density J (normal componant to the surface) and another single surface with constant potential V */
-    bool checkBoundaryConditions(void) const;
-
     /** basic informations on boundary conditions */
     void infos(void);
 
@@ -65,6 +61,11 @@ public:
     /** solves the potential and stores result in V, save to text file if needed
      * if verbose set to true, some printing are sent to terminal */
     void compute(const bool verbose /**< [in] */, const std::string V_fileName /**< [in] output file name for V solution */);
+
+    /** check boundary conditions: mesh and settings have to define a single surface with constant current
+     * density J (normal componant to the surface) and another single surface with constant potential V */
+    void checkBoundaryConditions(void) const;
+
 private:
     /** number of digits in the optional output file */
     const int precision = 8;

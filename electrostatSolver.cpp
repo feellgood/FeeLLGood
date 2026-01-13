@@ -7,7 +7,7 @@
 #include "solver.h"  // build(Mat|Vect)
 #include "meshUtils.h"
 
-bool electrostatSolver::checkBoundaryConditions(void) const
+void electrostatSolver::checkBoundaryConditions(void) const
     {
     int nbSurfJ(0);
     int nbSurfV(0);
@@ -16,7 +16,14 @@ bool electrostatSolver::checkBoundaryConditions(void) const
         if (std::isfinite(p.jn)) nbSurfJ++;
         if (std::isfinite(p.V)) nbSurfV++;
         });
-    return ((nbSurfJ == 1)&&(nbSurfV == 1));
+    bool result = ((nbSurfJ == 1)&&(nbSurfV == 1));
+    if (!result)
+        {
+        std::cout << "Error: incorrect boundary conditions for potential V solver.\n";
+        exit(1);
+        }
+    else if (verbose)
+        { std::cout << " electrostatic problem boundary conditions Ok.\n"; }
     }
 
 void electrostatSolver::infos(void)

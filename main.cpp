@@ -234,35 +234,23 @@ int main(int argc, char *argv[])
     std::cout << "starting on:       " << date() << std::endl;
     LinAlgebra linAlg(mySettings, fem.msh);
 
-    electrostatSolver pot_solver = electrostatSolver(fem.msh, mySettings.paramTetra,
-                                                     mySettings.paramFacette,
-                                                     1e-8, mySettings.verbose, 1000);
     spinAcc spinAcc_solver = spinAcc(fem.msh,mySettings.paramTetra,
 			                         mySettings.paramFacette,
                                      1e-8, mySettings.verbose, 1000);
 
     if (mySettings.spin_acc)
         {
+        spinAcc_solver.checkBoundaryConditions();
+        electrostatSolver pot_solver = electrostatSolver(fem.msh, mySettings.paramTetra,
+                                                     mySettings.paramFacette,
+                                                     1e-8, mySettings.verbose, 1000);
+        pot_solver.checkBoundaryConditions();
         std::string V_fileName("");
         if(mySettings.V_file) V_fileName = mySettings.getSimName() + "_V.sol";
-        if (!pot_solver.checkBoundaryConditions())
-            {
-            std::cout << "Error: incorrect boundary conditions for potential solver.\n";
-            exit(1);
-            }
-        else if (mySettings.verbose)
-            { std::cout << " electrostatic problem boundary conditions Ok.\n"; }
         pot_solver.V.resize(fem.msh.getNbNodes());
         pot_solver.compute(mySettings.verbose, V_fileName);
         spinAcc_solver.setPotential(pot_solver.V);
         spinAcc_solver.preCompute();
-        if (!spinAcc_solver.checkBoundaryConditions(mySettings.verbose))
-            {
-            std::cout << "Error: incorrect boundary conditions for spin diffusion solver.\n";
-            exit(1);
-            }
-        else if (mySettings.verbose)
-            { std::cout << "spin diffusion problem boundary conditions Ok.\n"; }
         bool succeed = spinAcc_solver.compute();
         if(!succeed)
             {

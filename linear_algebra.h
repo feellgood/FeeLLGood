@@ -87,6 +87,9 @@ public:
         return shape;
         }
 
+    /** check LLG boundary conditions */
+    void checkBoundaryConditions(void) const {}
+
     /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors)
     this member function is overloaded to fit to two different situations, either if std::function passed to element = tetra is corresponding to the simple case of constant external field applied to the magnetic region or space dependant. Here is the constant space applied field.
     */
