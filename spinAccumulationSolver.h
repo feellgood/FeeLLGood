@@ -87,12 +87,12 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
 
     /** returns sigma of the tetraedron, (conductivity in (Ohm.m)^-1 */
     double getSigma(Tetra::Tet const &tet) const;
-    
-    /** \f$ P \f$ is polarization rate of the current */
-    double getPolarization(Tetra::Tet &tet) const;
 
-    /** density of states at Fermi level, units : J^-1 m^-3  */
-    double getN0(Tetra::Tet &tet) const;
+    /** \f$ P \f$ is polarization rate of the current density */
+    double getPolarizationRate(Tetra::Tet &tet) const;
+
+    /** diffusion constant, units: s^-1 m^2 */
+    double getDiffusionCst(Tetra::Tet &tet) const;
 
     /** length s-d : only in magnetic material */
     double getLsd(Tetra::Tet &tet) const;

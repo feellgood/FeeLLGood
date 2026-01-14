@@ -84,10 +84,13 @@ double spinAcc::getMs(Tetra::Tet const &tet) const
 double spinAcc::getSigma(Tetra::Tet const &tet) const
     { return paramTet[tet.idxPrm].sigma; }
 
-double spinAcc::getN0(Tetra::Tet &tet) const
-    { return paramTet[tet.idxPrm].N0; }
+double spinAcc::getDiffusionCst(Tetra::Tet &tet) const
+    {
+    const double N0 = paramTet[tet.idxPrm].N0;
+    return 2.0*getSigma(tet)/(sq(CHARGE_ELECTRON)*N0);
+    }
 
-double spinAcc::getPolarization(Tetra::Tet &tet) const
+double spinAcc::getPolarizationRate(Tetra::Tet &tet) const
     { return paramTet[tet.idxPrm].P; }
 
 double spinAcc::getLsd(Tetra::Tet &tet) const
@@ -108,9 +111,8 @@ void spinAcc::prepareExtras(void)
 
     std::for_each( msh->tet.begin(), msh->tet.end(), [this](Tet &t)
         {
-        const int _idx = t.idx;
         const double sigma = getSigma(t);
-        const double P = getPolarization(t);
+        const double P = getPolarizationRate(t);
         const double lsd = getLsd(t);
         const double lsf = getLsf(t);
         const double ksi = sq(lsd/lsf);
@@ -119,7 +121,7 @@ void spinAcc::prepareExtras(void)
         // this formula might be mistaken, mixture of different models, to check
         double prefactor = BOHRS_MUB*P/(gamma0*Ms*CHARGE_ELECTRON*(1.0 + sq(ksi)));
 
-        t.extraField = [this, _idx](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)
+        t.extraField = [this, _idx = t.idx](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)
                          { for(int npi = 0; npi<Tetra::NPI; npi++) { H.col(npi) += Hm[_idx].col(npi); } };
 
         t.extraCoeffs_BE = [this, sigma, ksi, prefactor, &t](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
@@ -262,7 +264,7 @@ void spinAcc::integraleMag(Tetra::Tet &tet,
     {
     using namespace Tetra;
 
-    const double D0 = 2.0*getSigma(tet)/(sq(CHARGE_ELECTRON)*getN0(tet));
+    const double D0 = getDiffusionCst(tet);
     /* constant cst1 in a magnetic region is the only LHS parameter involved in the diffusion
      *  equation for magnetic contribution
      *  units: [cst1] = s^-1 : it is 1/tau_sd
@@ -291,10 +293,10 @@ void spinAcc::integraleMag(Tetra::Tet &tet, std::vector<double> &BE)
     using namespace Tetra;
 
     /* constant cst0 in a magnetic region is the only RHS parameter involved in the diffusion
-     * equation for magnetic contribution 
+     * equation for magnetic contribution
      * units: [cst0] = [sigma] m^2 = A^2 s^3 m^-1 kg^-1
      */
-    const double cst0 = BOHRS_MUB*getPolarization(tet)*getSigma(tet)/CHARGE_ELECTRON;
+    const double cst0 = BOHRS_MUB*getPolarizationRate(tet)*getSigma(tet)/CHARGE_ELECTRON;
     Eigen::Matrix<double,Nodes::DIM,NPI> &_gradV = gradV[tet.idx];
 
     for (size_t npi=0; npi<NPI; npi++)
@@ -318,19 +320,17 @@ void spinAcc::integraleSpinHall(Tetra::Tet &tet, std::vector<double> &BE)
     using namespace Tetra;
 
     const double cst0 = getSpinHall(tet)*CHARGE_ELECTRON/MASS_ELECTRON;
-    Eigen::Matrix<double,N,1> V_nod;
-    for (size_t ie=0; ie<N; ie++) { V_nod[ie] = V[ tet.ind[ie] ]; }
     Eigen::Matrix<double,Nodes::DIM,NPI> &_gradV = gradV[tet.idx];
     for (size_t npi=0; npi<NPI; npi++)
         {
-        double w = tet.weight[npi];
+        const double cst0_w = cst0*tet.weight[npi];
         for (size_t ie=0; ie<N; ie++)
             {
             Eigen::Vector3d grad_ai = tet.da.row(ie);
             Eigen::Vector3d v = grad_ai.cross(_gradV.col(npi));
-            BE[    ie] += cst0*w*v[IDX_X];
-            BE[  N+ie] += cst0*w*v[IDX_Y];
-            BE[2*N+ie] += cst0*w*v[IDX_Z];
+            BE[    ie] += cst0_w*v[IDX_X];
+            BE[  N+ie] += cst0_w*v[IDX_Y];
+            BE[2*N+ie] += cst0_w*v[IDX_Z];
             }
         }
     }
@@ -340,12 +340,10 @@ void spinAcc::integrales(Tetra::Tet &tet,
     {
     using namespace Tetra;
 
-    const double N0 = getN0(tet);
     const double lsf = getLsf(tet);
-    const double D0 = 2.0*getSigma(tet)/(sq(CHARGE_ELECTRON)*N0);
+    const double D0 = getDiffusionCst(tet);
     /* units:
-     * [D0] = [sigma/(sq(CHARGE_ELECTRON)*N0)] = s^-1 m^2 : it is a diffusion coefficient
-     * [sq(lsf)/D0] = s : it is tau_sf
+     * [D0/sq(lsf)] = s^-1 : it is 1/tau_sf
      * */
     for (size_t npi=0; npi<NPI; npi++)
         {
