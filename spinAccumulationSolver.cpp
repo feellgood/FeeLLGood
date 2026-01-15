@@ -122,7 +122,7 @@ void spinAcc::prepareExtras(void)
         double prefactor = BOHRS_MUB*P/(gamma0*Ms*CHARGE_ELECTRON*(1.0 + sq(ksi)));
 
         t.extraField = [this, _idx = t.idx](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)
-                         { for(int npi = 0; npi<Tetra::NPI; npi++) { H.col(npi) += Hm[_idx].col(npi); } };
+                         { for(int npi = 0; npi<Tetra::NPI; npi++) { H.col(npi) += Hst[_idx].col(npi); } };
 
         t.extraCoeffs_BE = [this, sigma, ksi, prefactor, &t](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
                                           Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdx,
@@ -142,7 +142,7 @@ void spinAcc::prepareExtras(void)
                     for (int i = 0; i < N; i++)
                         {
                         const double ai_w = t.weight[npi] * a[i][npi];
-                        BE.col(i) += ai_w*( Hm[t.idx].col(npi) + prefactor*m);
+                        BE.col(i) += ai_w*( Hst[t.idx].col(npi) + prefactor*m);
                         }
                     } // end loop on npi
                 }; //end lambda
@@ -158,9 +158,9 @@ void spinAcc::preCompute(void)
                  calc_gradV(tet, _gradV);
                  gradV.push_back(_gradV);
 
-                 Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _Hm;
-                 calc_Hm(tet, _gradV, _Hm);
-                 Hm.push_back(_Hm);
+                 Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _Hst;
+                 calc_Hst(tet, _gradV, _Hst);
+                 Hst.push_back(_Hst);
                  });
     prepareExtras();
     }
@@ -191,14 +191,14 @@ void spinAcc::calc_gradV(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,
     }
 
 // Hm is a torque involving current density
-void spinAcc::calc_Hm(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV,
-                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _Hm)
+void spinAcc::calc_Hst(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV,
+                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _Hst)
     {
     Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> p_g;
     tet.getPtGauss(p_g);
     const double sigma = getSigma(tet);
     for (int npi = 0; npi < Tetra::NPI; npi++)
-        { _Hm.col(npi) = -sigma * _gradV.col(npi).cross(p_g.col(npi)); }
+        { _Hst.col(npi) = -sigma * _gradV.col(npi).cross(p_g.col(npi)); }
     }
 
 bool spinAcc::solve(void)

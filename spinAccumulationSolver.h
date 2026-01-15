@@ -75,9 +75,11 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
      * */
     std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > gradV;
 
-    /** table of the Hm vectors (contribution of spinAcc to the tet::integrales) ; Hm.size() is the
-     * number of tetra */
-    std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > Hm;
+    /** table of the Hst vectors (contribution of spinAcc to the tet::integrales)
+     * Hst.size() is the number of tetra
+     * Hst is a contribution to the effective field due to spin transfert, it is used by
+     * tet::integrales through  */
+    std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > Hst;
 
     /** number of digits in the optional output file */
     const int precision = 8;
@@ -109,9 +111,9 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** computes grad(V) for tetra tet */
     void calc_gradV(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV);
 
-    /** computes Hm contributions for each npi for tetrahedron tet */
-    void calc_Hm(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV,
-                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _Hm);
+    /** computes Hst contributions for each npi for tetrahedron tet */
+    void calc_Hst(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV,
+                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _Hst);
 
     /** solver, using biconjugate stabilized gradient, with diagonal preconditionner and Dirichlet
      * boundary conditions */
