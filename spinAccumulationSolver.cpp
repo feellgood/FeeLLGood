@@ -337,30 +337,28 @@ void spinAcc::integraleSpinHall(Tetra::Tet &tet, std::vector<double> &BE)
 
 void spinAcc::integrales(Tetra::Tet &tet,
                          Eigen::Matrix<double,DIM_PB*Tetra::N,DIM_PB*Tetra::N> &AE)
-    {
+    {//AE has a block structure, it might be usefull to remove loops and fill it with N*N blocks, as exchange
     using namespace Tetra;
 
     const double lsf = getLsf(tet);
     const double D0 = getDiffusionCst(tet);
-    /* units:
-     * [D0/sq(lsf)] = s^-1 : it is 1/tau_sf
-     * */
+    /* units: [D0/sq(lsf)] = s^-1 : it is 1/tau_sf */
+    Eigen::Matrix<double,N,N> da_daT = tet.da*tet.da.transpose();
+
     for (size_t npi=0; npi<NPI; npi++)
         {
         const double D0_w = D0*tet.weight[npi];
         for (size_t ie=0; ie<N; ie++)
             {
-            Eigen::Vector3d grad_ai = tet.da.row(ie);
             double tmp = D0_w*Tetra::a[ie][npi]/sq(lsf);
             AE(    ie,     ie) += tmp;
             AE(  N+ie,   N+ie) += tmp;
             AE(2*N+ie, 2*N+ie) += tmp;
             for (size_t je=0; je<N; je++)
                 {
-                tmp = D0_w*(grad_ai.dot( tet.da.row(je) ));
-                AE(    ie,     je) += tmp;
-                AE(  N+ie,   N+je) += tmp;
-                AE(2*N+ie, 2*N+je) += tmp;
+                AE(    ie,     je) += D0_w*da_daT(ie,je);
+                AE(  N+ie,   N+je) += D0_w*da_daT(ie,je);
+                AE(2*N+ie, 2*N+je) += D0_w*da_daT(ie,je);
                 }
             }
         }
