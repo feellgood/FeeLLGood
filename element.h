@@ -95,10 +95,10 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
             for (int j = 0; j < N; j++)
                 {
                 int j_ = ind[j];
-                if (Kp(i,   j)   != 0) K.add(2*i_+1, 2*j_,   Kp(i,   j)  );
-                if (Kp(i,   N+j) != 0) K.add(2*i_+1, 2*j_+1, Kp(i,   N+j));
-                if (Kp(N+i, j)   != 0) K.add(2*i_,   2*j_,   Kp(N+i, j)  );
-                if (Kp(N+i, N+j) != 0) K.add(2*i_,   2*j_+1, Kp(N+i, N+j));
+                if (Kp(i,   j)   != 0) K.add(2*i_,   2*j_,   Kp(i,   j)  );
+                if (Kp(i,   N+j) != 0) K.add(2*i_,   2*j_+1, Kp(i,   N+j));
+                if (Kp(N+i, j)   != 0) K.add(2*i_+1, 2*j_,   Kp(N+i, j)  );
+                if (Kp(N+i, N+j) != 0) K.add(2*i_+1, 2*j_+1, Kp(N+i, N+j));
                 }
             }
         }
@@ -110,9 +110,9 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
             {
             const int i_ = ind[i];
             if(Lp[i] != 0)
-                { L[2*i_+1] += Lp[i]; }
+                { L[2*i_] += Lp[i]; }
             if(Lp[N+i] != 0)
-                { L[2*i_] += Lp[N + i]; }
+                { L[2*i_+1] += Lp[N + i]; }
             }
         }
 

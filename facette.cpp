@@ -27,8 +27,12 @@ void Fac::integrales(Facette::prm const &params)
     Eigen::Matrix<double,2*N,3*N> P;
     buildMatP(P);
     
+    // Similar to the permutation used in Tet::integrales(), but for 3 nodes.
+    Eigen::PermutationMatrix<6> Perm;
+    Perm.indices() = {3, 4, 5, 0, 1, 2};
+
     /*-------------------- PROJECTION --------------------*/
-    Lp = P * BE.reshaped<Eigen::RowMajor>();
+    Lp = Perm * P * BE.reshaped<Eigen::RowMajor>();
     }
 
 double Fac::anisotropyEnergy(Facette::prm const &param,

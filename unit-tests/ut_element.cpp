@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(Fac_assemble_mat, *boost::unit_test::tolerance(UT_TOL))
     f.Kp(2*Facette::N - 1,2*Facette::N - 1) += 1.0;
     f.assemble_mat(Kr);
     int i = Facette::N - 1;
-    BOOST_CHECK(Kr(2*f.ind[i], 2*f.ind[i]+1) == 1.0);
+    BOOST_CHECK(Kr(2*f.ind[i]+1, 2*f.ind[i]+1) == 1.0);
     }
 
 
@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE(Tet_assemble_mat, *boost::unit_test::tolerance(UT_TOL))
     t.Kp(2*Tetra::N - 1,2*Tetra::N - 1) += 1.0;
     t.assemble_mat(Kr);
     int i = Tetra::N - 1;
-    BOOST_CHECK(Kr(2*t.ind[i], 2*t.ind[i]+1) == 1.0);
+    BOOST_CHECK(Kr(2*t.ind[i]+1, 2*t.ind[i]+1) == 1.0);
     }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -233,8 +233,15 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     Eigen::Matrix<double,2*N,3*N> P;
     buildMatP(P);
 
+    // Perm is a permutation that swaps the block-lines of P:
+    //   Perm × P = ⎛Eqx Eqy Eqz⎞
+    //              ⎝Epx Epy Epz⎠
+    // This permutation makes the global linear system better conditioned.
+    Eigen::PermutationMatrix<8> Perm;
+    Perm.indices() = {4, 5, 6, 7, 0, 1, 2, 3};
+
     /*--------------------   PROJECTION: AE->Kp   --------------------*/
-    Kp = P*AE*P.transpose();// with MKL installed this operation should call dgemm_direct
+    Kp = Perm * P * AE * P.transpose();// with MKL installed this operation should call dgemm_direct
     
     /*********************   calculations on BE   *********************/
     Eigen::Matrix<double,DIM,N> BE;
@@ -263,7 +270,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     extraCoeffs_BE(U, dUdx, dUdy, dUdz, BE);  // spinAcc
 
     /*--------------------   PROJECTION: BE->Lp   --------------------*/
-    Lp = P * BE.reshaped<Eigen::RowMajor>();
+    Lp = Perm * P * BE.reshaped<Eigen::RowMajor>();
     }
 
 double Tet::exchangeEnergy(Tetra::prm const &param,
