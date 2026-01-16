@@ -10,7 +10,7 @@ from gmsh import __version__ as gmshVersion
 from math import log2,floor
 from feellgood.meshMaker import Cylinder
 
-def makeSettings(mesh, surface_name, volume_name, nbThreads, final_time, ILU_t, ILU_f):
+def makeSettings(mesh, surface_name, volume_name, nbThreads, final_time):
     """ returns a dictionary of settings for feellgood input """
     settings = {
         "outputs": {
@@ -27,7 +27,6 @@ def makeSettings(mesh, surface_name, volume_name, nbThreads, final_time, ILU_t, 
         },
         "initial_magnetization": [0, 0, 1],
         "Bext": [1, 0, 1],
-        "finite_element_solver": { "nb_threads": nbThreads, "ILU_tolerance": ILU_t, "ILU_fill_factor": ILU_f },
         "demagnetizing_field_solver": { "nb_threads": nbThreads },
         "time_integration": {
             "min(dt)": 5e-18,
@@ -56,7 +55,7 @@ def task2test(str_executable, settings):
     val = subprocess.run([str_executable, "--seed", "2", "-"], input=json.dumps(settings), text=True)
     return val
 
-def bench(str_executable, outputFileName, metadata, elt_sizes, listNbThreads, final_time, ILU_t, ILU_f):
+def bench(str_executable, outputFileName, metadata, elt_sizes, listNbThreads, final_time):
     """
     loop over mesh size and nb threads for benchmarking feellgood executable,
     mesh is a cylinder of fixed geometry, varying mesh size
@@ -74,7 +73,7 @@ def bench(str_executable, outputFileName, metadata, elt_sizes, listNbThreads, fi
             mesh = Cylinder(radius, height, elt_size, surface_name, volume_name)
             mesh.make(meshFileName)
             for nbThreads in listNbThreads:
-                settings = makeSettings(meshFileName, surface_name, volume_name, nbThreads, final_time, ILU_t, ILU_f)
+                settings = makeSettings(meshFileName, surface_name, volume_name, nbThreads, final_time)
                 t = timeit.timeit(lambda: task2test(str_executable,settings), number=1)
                 str_t = "{:.2f}".format(t)
                 if nbThreads == listNbThreads[-1]:
@@ -88,7 +87,13 @@ def get_params(default_elt_sizes, default_listNbThreads, default_final_time):
     import argparse
     description = 'feellgood benchmark'
     epilogue = '''
-    runs several feellgood simulations varying meshSize of a cylinder and thread numbers with fixed ILU preconditioner tolerance and filling factor
+    runs several feellgood simulations varying meshSize of a cylinder and thread numbers
+    output text file is named starting with benchmark- followed by the beginning of the SHA1, ending
+    with extension txt
+
+    exemple:
+    ./benchmark.py -s 5 -n 32
+    will launch a single simulation with average element size 5 nm, on 32 threads for scalfmm
     '''
     parser = argparse.ArgumentParser(description=description, epilog=epilogue,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -98,14 +103,11 @@ def get_params(default_elt_sizes, default_listNbThreads, default_final_time):
                         help='table of number of threads', default=default_listNbThreads)
     parser.add_argument('-t','--final_time',type=float,help='final physical simulation time in s',
                         default=default_final_time)
-    #devNote: the ILU_preconditioner default values should not be hard coded here -> read from .yml ?
-    parser.add_argument('--ILU_tol',type=float,help='ILU preconditioner tolerance',default=1e-1)
-    parser.add_argument('--ILU_fillFactor',type=int,help='ILU preconditioner filling factor',default=8)
     parser.add_argument('--version',action='version',version= __version__,help='show the version number')
     parser.add_argument('-f','--fast',help='fast benchmarking',action="store_true")
     return parser.parse_args()
 
-__version__ = '1.0.3'
+__version__ = '1.0.4'
 if __name__ == '__main__':
     default_final_time = 2e-11
     default_elt_sizes = [4.0, 3.5, 3.0, 2.5]
@@ -123,17 +125,14 @@ if __name__ == '__main__':
     else:
         print("full benchmark version "+ __version__,"using gmsh", gmshVersion)
     os.chdir(sys.path[0])
-    print("ILU tolerance:", args.ILU_tol," ILU filling factor:", args.ILU_fillFactor)
     try:
         str_version = version2test()
         outputFileName = 'benchmark-' + str_version + '.txt'
         metadata = "# " + str_version
         metadata += "\n# " + datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-        metadata += "\n# ILU tolerance: " + str(args.ILU_tol)
-        metadata += "\n# ILU filling factor: " + str(args.ILU_fillFactor)
         metadata += "\n# nbThreads: " + str(args.nbThreads) + '\n'
         str_exec = "../feellgood"
-        bench(str_exec, outputFileName, metadata, args.sizes, args.nbThreads, args.final_time, args.ILU_tol, args.ILU_fillFactor)
+        bench(str_exec, outputFileName, metadata, args.sizes, args.nbThreads, args.final_time)
     except KeyboardInterrupt:
         print(" benchmark interrupted")
         sys.exit()
