@@ -190,7 +190,7 @@ void spinAcc::calc_gradV(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,
         }
     }
 
-// Hm is a torque involving current density
+// Hst is a torque involving current density
 void spinAcc::calc_Hst(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV,
                  Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _Hst)
     {

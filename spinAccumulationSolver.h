@@ -39,7 +39,7 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
      * density J and polarization vector P */
     void boundaryConditions(void); // should be private
 
-    /** initializations: compute gradV and Hm and call prepareExtras method */
+    /** initializations: compute gradV and Hst and call prepareExtras method */
     void preCompute(void);
 
     /** call solver and update spin diffusion solution, returns true if solver succeeded */

@@ -294,7 +294,7 @@ public:
     /** idx is the index of the tetrahedron in the vector of tetrahedron */
     int idx;
 
-    /** for extra contribution to the effective field, such as spin transfert torque Hm */
+    /** for extra contribution to the effective field, such as spin transfert torque Hst */
     std::function<void( Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)> extraField;
 
     /** for extra contribution to the matrix BE, such as spin transfer torque contribs */
