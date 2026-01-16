@@ -228,10 +228,9 @@ bool spinAcc::solve(void)
     std::for_each(msh->fac.begin(),msh->fac.end(),[this,&Lw](Facette::Fac &f)
         {
         std::vector<double> L(DIM_PB*Facette::N,0.0);
-        Eigen::Vector3d s_value;
         if (!std::isfinite(paramFac[f.idxPrm].s.norm()) && std::isfinite(paramFac[f.idxPrm].jn))
             { // we should also test polarization P
-            s_value = -paramFac[f.idxPrm].jn*(BOHRS_MUB/CHARGE_ELECTRON)*paramFac[f.idxPrm].uP;
+            Eigen::Vector3d s_value = -paramFac[f.idxPrm].jn*(BOHRS_MUB/CHARGE_ELECTRON)*paramFac[f.idxPrm].uP;
             for (int npi=0; npi<Facette::NPI; npi++)
                 {
                 const double w = f.weight[npi];
@@ -337,30 +336,28 @@ void spinAcc::integraleSpinHall(Tetra::Tet &tet, std::vector<double> &BE)
 
 void spinAcc::integrales(Tetra::Tet &tet,
                          Eigen::Matrix<double,DIM_PB*Tetra::N,DIM_PB*Tetra::N> &AE)
-    {//AE has a block structure, it might be usefull to remove loops and fill it with N*N blocks, as exchange
+    {
+    /* non magnetic metal contribution to AE has a block diagonal structure:
+     * AE = (A 0 0)
+            (0 A 0)
+            (0 0 A)
+    A is a N*N matrix
+    A = cst*da*transpose(da) + Id*a*w/tau_sf
+    with cst = D0*sum(weight)
+    */
     using namespace Tetra;
 
     const double lsf = getLsf(tet);
     const double D0 = getDiffusionCst(tet);
     /* units: [D0/sq(lsf)] = s^-1 : it is 1/tau_sf */
     Eigen::Matrix<double,N,N> da_daT = tet.da*tet.da.transpose();
+    da_daT *= D0*tet.weight.sum();
+    Eigen::Matrix<double,N,1> contrib = (D0/sq(lsf))*eigen_a*tet.weight;
+    da_daT.diagonal() += contrib; 
 
-    for (size_t npi=0; npi<NPI; npi++)
-        {
-        const double D0_w = D0*tet.weight[npi];
-        for (size_t ie=0; ie<N; ie++)
-            {
-            double tmp = D0_w*Tetra::a[ie][npi]/sq(lsf);
-            AE(    ie,     ie) += tmp;
-            AE(  N+ie,   N+ie) += tmp;
-            AE(2*N+ie, 2*N+ie) += tmp;
-            for (size_t je=0; je<N; je++)
-                {
-                AE(    ie,     je) += D0_w*da_daT(ie,je);
-                AE(  N+ie,   N+je) += D0_w*da_daT(ie,je);
-                AE(2*N+ie, 2*N+je) += D0_w*da_daT(ie,je);
-                }
-            }
-        }
+    AE.block<N,N>(0,0) += da_daT;
+    AE.block<N,N>(N,N) += da_daT;
+    AE.block<N,N>(2*N,2*N) += da_daT;
+    //if(msh->isMagnetic(tet)) integraleMag(tet,AE);
     }
 

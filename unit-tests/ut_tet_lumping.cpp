@@ -196,4 +196,80 @@ BOOST_AUTO_TEST_CASE(tet_lumping, *boost::unit_test::tolerance(UT_TOL))
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
     }
 
+BOOST_AUTO_TEST_CASE(tet_spin_diff_non_mag, *boost::unit_test::tolerance(UT_TOL))
+    {
+    Eigen::Matrix<double, 3*Tetra::N, 3*Tetra::N> AE_to_check;
+    AE_to_check.setZero();
+    double AE[3 * Tetra::N][3 * Tetra::N] = {{0}};
+
+    const int nbNod = 4;
+    std::vector<Nodes::Node> node;
+    dummyNodes<nbNod>(node);
+
+    unsigned sd = my_seed();
+    std::mt19937 gen(sd);
+    std::uniform_real_distribution<> distrib(0.0, 1.0);
+    
+    for (int i = 0; i < nbNod; i++)
+        {
+        node[i].d[0].u = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        }
+
+    // carefull with indices (starting from 1)
+    Tetra::Tet t(node, 0, {1, 2, 3, 4});
+
+    const double lsf = distrib(gen);
+    const double D0 = distrib(gen);
+    /* units: [D0/sq(lsf)] = s^-1 : it is 1/tau_sf */
+    using algebra::sq;
+    using namespace Tetra;
+    Eigen::Matrix<double,N,N> da_daT = t.da*t.da.transpose();
+    da_daT *= D0*t.weight.sum();
+    Eigen::Matrix<double,N,1> contrib = (D0/sq(lsf))*eigen_a*t.weight;
+    da_daT.diagonal() += contrib; 
+
+    AE_to_check.block<N,N>(0,0) += da_daT;
+    AE_to_check.block<N,N>(N,N) += da_daT;
+    AE_to_check.block<N,N>(2*N,2*N) += da_daT;
+
+
+// start code ref
+for (size_t npi=0; npi<NPI; npi++)
+    {
+    double w, ai, dai_dx, dai_dy, dai_dz, aj, daj_dx, daj_dy, daj_dz, Dai_Daj;
+    w = t.weight[npi];
+
+    for (size_t ie=0; ie<N; ie++)
+        {
+        ai = Tetra::a[ie][npi];//t.a[ie][npi];
+        dai_dx = t.da(ie,0);
+        dai_dy = t.da(ie,1);
+        dai_dz = t.da(ie,2);
+        AE[    ie][     ie] +=  D0/pow(lsf, 2.)* ai *w;
+        AE[  N+ie][   N+ie] +=  D0/pow(lsf, 2.)* ai *w;
+        AE[2*N+ie][ 2*N+ie] +=  D0/pow(lsf, 2.)* ai *w;
+   
+        for (size_t je=0; je<N; je++)
+            {
+            aj =  Tetra::a[je][npi];//t.a[je][npi];
+            daj_dx = t.da(je,0);
+            daj_dy = t.da(je,1);
+            daj_dz = t.da(je,2);
+            Dai_Daj = dai_dx*daj_dx + dai_dy*daj_dy + dai_dz*daj_dz;
+            AE[    ie][     je] += D0* Dai_Daj *w;
+            AE[  N+ie][   N+je] += D0* Dai_Daj *w;
+            AE[2*N+ie][ 2*N+je] += D0* Dai_Daj *w;
+	        }
+	    }
+    }
+// end code ref
+
+    for (int i = 0; i < 3*Tetra::N; i++)
+        for (int j = 0; j < 3*Tetra::N; j++)
+            {
+            //std::cout << AE_to_check(i,j) << std::endl;
+            BOOST_TEST(AE_to_check(i,j) == AE[i][j]);
+            }
+    }
+
 BOOST_AUTO_TEST_SUITE_END()
