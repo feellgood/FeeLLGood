@@ -224,14 +224,12 @@ BOOST_AUTO_TEST_CASE(tet_spin_diff_AE_filling, *boost::unit_test::tolerance(UT_T
     /* units: [D0/sq(lsf)] = s^-1 : it is 1/tau_sf */
     using algebra::sq;
     using namespace Tetra;
-    Eigen::Matrix<double,N,N> da_daT = t.da*t.da.transpose();
-    da_daT *= D0*t.weight.sum();
     Eigen::Matrix<double,N,1> a_w = eigen_a*t.weight;
-    da_daT.diagonal() += (D0/sq(lsf))*a_w;
-
-    AE_to_check.block<N,N>(0,0) += da_daT;
-    AE_to_check.block<N,N>(N,N) += da_daT;
-    AE_to_check.block<N,N>(2*N,2*N) += da_daT;
+    Eigen::Matrix<double,N,1> diag = (D0/sq(lsf))*a_w;
+    Eigen::Matrix<double,N,N> diagBlock = t.calcDiagBlock(D0,diag);
+    AE_to_check.block<N,N>(0,0) += diagBlock;
+    AE_to_check.block<N,N>(N,N) += diagBlock;
+    AE_to_check.block<N,N>(2*N,2*N) += diagBlock;
     const double cst1 = D0/sq(lsd);
 
     for (size_t ie=0; ie<N; ie++)

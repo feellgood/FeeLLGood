@@ -260,22 +260,19 @@ void spinAcc::integrales(Tetra::Tet &tet,
             (0 A 0)
             (0 0 A)
     A is a N*N matrix
-    A = cst*da*transpose(da) + asMatrixDiagonal(a*w)/tau_sf
-    with cst = D0*sum(weight)
+    A = asMatrixDiagonal(a*w)/tau_sf + c*da*transpose(da) with c = D0*sum(weight)
     */
     using namespace Tetra;
 
     const double lsf = getLsf(tet);
     const double D0 = getDiffusionCst(tet);
-    /* units: [D0/sq(lsf)] = s^-1 : it is 1/tau_sf */
-    Eigen::Matrix<double,N,N> da_daT = tet.da*tet.da.transpose();
-    da_daT *= D0*tet.weight.sum();
-    Eigen::Matrix<double,N,1> a_w = eigen_a*tet.weight;
-    da_daT.diagonal() += (D0/sq(lsf))*a_w;
 
-    AE.block<N,N>(0,0) += da_daT;
-    AE.block<N,N>(N,N) += da_daT;
-    AE.block<N,N>(2*N,2*N) += da_daT;
+    Eigen::Matrix<double,N,1> a_w = eigen_a*tet.weight;
+    Eigen::Matrix<double,N,1> diag = (D0/sq(lsf))*a_w; // units: [D0/sq(lsf)] = s^-1 : it is 1/tau_sf
+    Eigen::Matrix<double,N,N> diagBlock = tet.calcDiagBlock(D0,diag);
+    AE.block<N,N>(0,0) += diagBlock;
+    AE.block<N,N>(N,N) += diagBlock;
+    AE.block<N,N>(2*N,2*N) += diagBlock;
 
 //here is the magnetic contribution to AE, it is also block diagonal, and antisymmetric
     if(msh->isMagnetic(tet))

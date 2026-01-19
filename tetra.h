@@ -226,6 +226,12 @@ public:
     void lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double prefactor,
                   Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const;
 
+    /**
+     * computes elementary matrix block
+     * returns Id⊗x + c Sum_i w_i da*transpose(da)
+     * */
+    Eigen::Matrix<double,N,N> calcDiagBlock(const double c, Eigen::Matrix<double,N,1> &x) const;
+
     /** add drift contribution due to eventual recentering to vectors BE */
     void add_drift_BE(double alpha, double s_dt, double Vdrift,
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
