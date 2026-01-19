@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(tet_lumping, *boost::unit_test::tolerance(UT_TOL))
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
     }
 
-BOOST_AUTO_TEST_CASE(tet_spin_diff_non_mag, *boost::unit_test::tolerance(UT_TOL))
+BOOST_AUTO_TEST_CASE(tet_spin_diff_AE_filling, *boost::unit_test::tolerance(UT_TOL))
     {
     Eigen::Matrix<double, 3*Tetra::N, 3*Tetra::N> AE_to_check;
     AE_to_check.setZero();
@@ -219,21 +219,44 @@ BOOST_AUTO_TEST_CASE(tet_spin_diff_non_mag, *boost::unit_test::tolerance(UT_TOL)
     Tetra::Tet t(node, 0, {1, 2, 3, 4});
 
     const double lsf = distrib(gen);
+    const double lsd = distrib(gen);
     const double D0 = distrib(gen);
     /* units: [D0/sq(lsf)] = s^-1 : it is 1/tau_sf */
     using algebra::sq;
     using namespace Tetra;
     Eigen::Matrix<double,N,N> da_daT = t.da*t.da.transpose();
     da_daT *= D0*t.weight.sum();
-    Eigen::Matrix<double,N,1> contrib = (D0/sq(lsf))*eigen_a*t.weight;
-    da_daT.diagonal() += contrib; 
+    Eigen::Matrix<double,N,1> a_w = eigen_a*t.weight;
+    da_daT.diagonal() += (D0/sq(lsf))*a_w;
 
     AE_to_check.block<N,N>(0,0) += da_daT;
     AE_to_check.block<N,N>(N,N) += da_daT;
     AE_to_check.block<N,N>(2*N,2*N) += da_daT;
+    const double cst1 = D0/sq(lsd);
 
+    for (size_t ie=0; ie<N; ie++)
+        {
+        const Eigen::Vector3d &m = node[t.ind[ie]].d[0].u;//getNode_u(t.ind[ie]);
+        AE_to_check(    ie,   N+ie) += cst1*a_w[ie]*m[2];
+        AE_to_check(    ie, 2*N+ie) -= cst1*a_w[ie]*m[1];
+        AE_to_check(  N+ie,     ie) -= cst1*a_w[ie]*m[2];
+        AE_to_check(  N+ie, 2*N+ie) += cst1*a_w[ie]*m[0];
+        AE_to_check(2*N+ie,     ie) += cst1*a_w[ie]*m[1];
+        AE_to_check(2*N+ie,   N+ie) -= cst1*a_w[ie]*m[0];
+        }
 
-// start code ref
+// start code ref (from june 2025)
+double u_nod[3][Tetra::N];
+    for (int ie = 0; ie < Tetra::N; ie++)
+        {
+        int i = t.ind[ie];
+        Nodes::dataNode &d0 = node[i].d[0];
+        for (int dim = 0; dim < Nodes::DIM; dim++)
+            {
+            u_nod[dim][ie] = d0.u(dim);  // magnetization
+            }
+        }
+const double ilJ = 1.0/lsd;
 for (size_t npi=0; npi<NPI; npi++)
     {
     double w, ai, dai_dx, dai_dy, dai_dz, aj, daj_dx, daj_dy, daj_dz, Dai_Daj;
@@ -241,17 +264,26 @@ for (size_t npi=0; npi<NPI; npi++)
 
     for (size_t ie=0; ie<N; ie++)
         {
-        ai = Tetra::a[ie][npi];//t.a[ie][npi];
+        ai = Tetra::a[ie][npi];
         dai_dx = t.da(ie,0);
         dai_dy = t.da(ie,1);
         dai_dz = t.da(ie,2);
         AE[    ie][     ie] +=  D0/pow(lsf, 2.)* ai *w;
         AE[  N+ie][   N+ie] +=  D0/pow(lsf, 2.)* ai *w;
         AE[2*N+ie][ 2*N+ie] +=  D0/pow(lsf, 2.)* ai *w;
-   
+
+        AE[    ie][   N+ie] +=  D0*pow(ilJ, 2.)*u_nod[2][ie] * ai *w;
+        AE[    ie][ 2*N+ie] += -D0*pow(ilJ, 2.)*u_nod[1][ie] * ai *w;
+
+        AE[  N+ie][     ie] += -D0*pow(ilJ, 2.)*u_nod[2][ie] * ai *w;
+        AE[  N+ie][ 2*N+ie] +=  D0*pow(ilJ, 2.)*u_nod[0][ie] * ai *w;
+
+        AE[2*N+ie][     ie] +=  D0*pow(ilJ, 2.)*u_nod[1][ie] * ai *w;
+        AE[2*N+ie][   N+ie] += -D0*pow(ilJ, 2.)*u_nod[0][ie] * ai *w;
+
         for (size_t je=0; je<N; je++)
             {
-            aj =  Tetra::a[je][npi];//t.a[je][npi];
+            aj =  Tetra::a[je][npi];
             daj_dx = t.da(je,0);
             daj_dy = t.da(je,1);
             daj_dz = t.da(je,2);

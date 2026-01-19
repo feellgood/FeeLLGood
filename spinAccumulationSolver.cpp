@@ -213,13 +213,7 @@ bool spinAcc::solve(void)
         K.setZero();
         std::vector<double> L(DIM_PB*Tetra::N,0.0);
         integrales(elem,K);
-        if(msh->isMagnetic(elem))
-            {
-            integraleMag(elem,K);
-            integraleMag(elem,L);
-            }
-        if(paramTet[elem.idxPrm].spinHall != 0)
-            { integraleSpinHall(elem,L); }
+        integrales(elem,L);
         buildMat<Tetra::N>(elem.ind, K, Kw);
         buildVect<Tetra::N>(elem.ind, L, Lw);
         } );
@@ -258,43 +252,56 @@ bool spinAcc::solve(void)
     return (iter.status == algebra::CONVERGED);
     }
 
-void spinAcc::integraleMag(Tetra::Tet &tet,
-                           Eigen::Matrix<double,DIM_PB*Tetra::N,DIM_PB*Tetra::N> &AE)
+void spinAcc::integrales(Tetra::Tet &tet,
+                         Eigen::Matrix<double,DIM_PB*Tetra::N,DIM_PB*Tetra::N> &AE)
     {
+    /* non magnetic metal contribution to AE has a block diagonal structure:
+     * AE = (A 0 0)
+            (0 A 0)
+            (0 0 A)
+    A is a N*N matrix
+    A = cst*da*transpose(da) + asMatrixDiagonal(a*w)/tau_sf
+    with cst = D0*sum(weight)
+    */
     using namespace Tetra;
 
+    const double lsf = getLsf(tet);
     const double D0 = getDiffusionCst(tet);
-    /* constant cst1 in a magnetic region is the only LHS parameter involved in the diffusion
-     *  equation for magnetic contribution
-     *  units: [cst1] = s^-1 : it is 1/tau_sd
-     */
-    const double cst1 = D0/sq(getLsd(tet));
+    /* units: [D0/sq(lsf)] = s^-1 : it is 1/tau_sf */
+    Eigen::Matrix<double,N,N> da_daT = tet.da*tet.da.transpose();
+    da_daT *= D0*tet.weight.sum();
+    Eigen::Matrix<double,N,1> a_w = eigen_a*tet.weight;
+    da_daT.diagonal() += (D0/sq(lsf))*a_w;
 
-    for (size_t npi=0; npi<NPI; npi++)
+    AE.block<N,N>(0,0) += da_daT;
+    AE.block<N,N>(N,N) += da_daT;
+    AE.block<N,N>(2*N,2*N) += da_daT;
+
+//here is the magnetic contribution to AE, it is also block diagonal, and antisymmetric
+    if(msh->isMagnetic(tet))
         {
-        const double cst1_w = cst1*tet.weight[npi];
+        const double cst1 = D0/sq(getLsd(tet)); //units: [cst1] = s^-1 : it is 1/tau_sd
         for (size_t ie=0; ie<N; ie++)
-            {
-            const double tmp = cst1_w*Tetra::a[ie][npi];
-            const Eigen::Vector3d &m = msh->getNode_u(tet.ind[ie]);
-            AE(    ie,   N+ie) += tmp*m[2];
-            AE(    ie, 2*N+ie) -= tmp*m[1];
-            AE(  N+ie,     ie) -= tmp*m[2];
-            AE(  N+ie, 2*N+ie) += tmp*m[0];
-            AE(2*N+ie,     ie) += tmp*m[1];
-            AE(2*N+ie,   N+ie) -= tmp*m[0];
+           {
+           const Eigen::Vector3d &m = msh->getNode_u(tet.ind[ie]);
+            AE(    ie,   N+ie) += cst1*a_w[ie]*m[2];
+            AE(    ie, 2*N+ie) -= cst1*a_w[ie]*m[1];
+            AE(  N+ie,     ie) -= cst1*a_w[ie]*m[2];
+            AE(  N+ie, 2*N+ie) += cst1*a_w[ie]*m[0];
+            AE(2*N+ie,     ie) += cst1*a_w[ie]*m[1];
+            AE(2*N+ie,   N+ie) -= cst1*a_w[ie]*m[0];
             }
         }
     }
 
-void spinAcc::integraleMag(Tetra::Tet &tet, std::vector<double> &BE)
+void spinAcc::integrales(Tetra::Tet &tet, std::vector<double> &BE)
     {
     using namespace Tetra;
 
     /* constant cst0 in a magnetic region is the only RHS parameter involved in the diffusion
-     * equation for magnetic contribution
-     * units: [cst0] = [sigma] m^2 = A^2 s^3 m^-1 kg^-1
-     */
+    * equation for magnetic contribution
+    * units: [cst0] = [sigma] m^2 = A^2 s^3 m^-1 kg^-1
+    */
     const double cst0 = BOHRS_MUB*getPolarizationRate(tet)*getSigma(tet)/CHARGE_ELECTRON;
     Eigen::Matrix<double,Nodes::DIM,NPI> &_gradV = gradV[tet.idx];
 
@@ -312,52 +319,22 @@ void spinAcc::integraleMag(Tetra::Tet &tet, std::vector<double> &BE)
             BE[2*N+ie] += tmp*m[2];
             }
         }
-    }
 
-void spinAcc::integraleSpinHall(Tetra::Tet &tet, std::vector<double> &BE)
-    {
-    using namespace Tetra;
-
-    const double cst0 = getSpinHall(tet)*CHARGE_ELECTRON/MASS_ELECTRON;
-    Eigen::Matrix<double,Nodes::DIM,NPI> &_gradV = gradV[tet.idx];
-    for (size_t npi=0; npi<NPI; npi++)
+    if(paramTet[tet.idxPrm].spinHall != 0)
         {
-        const double cst0_w = cst0*tet.weight[npi];
-        for (size_t ie=0; ie<N; ie++)
+        const double cst0 = getSpinHall(tet)*CHARGE_ELECTRON/MASS_ELECTRON;
+        for (size_t npi=0; npi<NPI; npi++)
             {
-            Eigen::Vector3d grad_ai = tet.da.row(ie);
-            Eigen::Vector3d v = grad_ai.cross(_gradV.col(npi));
-            BE[    ie] += cst0_w*v[IDX_X];
-            BE[  N+ie] += cst0_w*v[IDX_Y];
-            BE[2*N+ie] += cst0_w*v[IDX_Z];
+            const double cst0_w = cst0*tet.weight[npi];
+            for (size_t ie=0; ie<N; ie++)
+                {
+                Eigen::Vector3d grad_ai = tet.da.row(ie);
+                Eigen::Vector3d v = grad_ai.cross(_gradV.col(npi));
+                BE[    ie] += cst0_w*v[IDX_X];
+                BE[  N+ie] += cst0_w*v[IDX_Y];
+                BE[2*N+ie] += cst0_w*v[IDX_Z];
+                }
             }
         }
-    }
-
-void spinAcc::integrales(Tetra::Tet &tet,
-                         Eigen::Matrix<double,DIM_PB*Tetra::N,DIM_PB*Tetra::N> &AE)
-    {
-    /* non magnetic metal contribution to AE has a block diagonal structure:
-     * AE = (A 0 0)
-            (0 A 0)
-            (0 0 A)
-    A is a N*N matrix
-    A = cst*da*transpose(da) + Id*a*w/tau_sf
-    with cst = D0*sum(weight)
-    */
-    using namespace Tetra;
-
-    const double lsf = getLsf(tet);
-    const double D0 = getDiffusionCst(tet);
-    /* units: [D0/sq(lsf)] = s^-1 : it is 1/tau_sf */
-    Eigen::Matrix<double,N,N> da_daT = tet.da*tet.da.transpose();
-    da_daT *= D0*tet.weight.sum();
-    Eigen::Matrix<double,N,1> contrib = (D0/sq(lsf))*eigen_a*tet.weight;
-    da_daT.diagonal() += contrib; 
-
-    AE.block<N,N>(0,0) += da_daT;
-    AE.block<N,N>(N,N) += da_daT;
-    AE.block<N,N>(2*N,2*N) += da_daT;
-    //if(msh->isMagnetic(tet)) integraleMag(tet,AE);
     }
 
