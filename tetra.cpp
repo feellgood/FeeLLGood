@@ -86,18 +86,16 @@ void Tet::lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double pref
     AE.block<N,N>(2*N,2*N) += exch_block;
       
     // off diagonal blocks are filled with magnetization components weighted products
-    // it could be rewritten using block matrix and avoid getNode().get_u() in the loop 
-    Eigen::Matrix<double,N,1> a_w = eigen_a * weight; 
-    for (int i = 0; i < N; i++)
-        {
-        const Eigen::Vector3d ai_w_u0 = a_w[i] * getNode(i).get_u(Nodes::CURRENT);
-        AE(i, 2*N + i) += ai_w_u0(IDX_Y);
-        AE(i, N + i) -= ai_w_u0(IDX_Z);
-        AE(N + i, i) += ai_w_u0(IDX_Z);
-        AE(N + i, 2*N + i) -= ai_w_u0(IDX_X);
-        AE(2*N + i, N + i) += ai_w_u0(IDX_X);
-        AE(2*N + i, i) -= ai_w_u0(IDX_Y);
-        }
+    Eigen::Matrix<double,N,1> a_w = eigen_a * weight;
+    Eigen::Matrix<double,N,1> diag = a_w.cwiseProduct(calcOffDiagBlock(IDX_X));
+    AE.block<N,N>(N,2*N).diagonal() -= diag;
+    AE.block<N,N>(2*N,N).diagonal() += diag;
+    diag = a_w.cwiseProduct(calcOffDiagBlock(IDX_Y));
+    AE.block<N,N>(0,2*N).diagonal() += diag;
+    AE.block<N,N>(2*N,0).diagonal() -= diag;
+    diag = a_w.cwiseProduct(calcOffDiagBlock(IDX_Z));
+    AE.block<N,N>(0,N).diagonal() -= diag;
+    AE.block<N,N>(N,0).diagonal() += diag;
     }
 
 Eigen::Matrix<double,N,N> Tet::calcDiagBlock(const double c, Eigen::Matrix<double,N,1> &x) const
@@ -105,6 +103,14 @@ Eigen::Matrix<double,N,N> Tet::calcDiagBlock(const double c, Eigen::Matrix<doubl
     Eigen::Matrix<double,N,N> result = da*da.transpose();
     result *= c*weight.sum();
     result.diagonal() += x;
+    return result;
+    }
+
+Eigen::Matrix<double,N,1> Tet::calcOffDiagBlock(const Nodes::index idx) const
+    {
+    Eigen::Matrix<double,N,1> result;
+    for (int i = 0; i < N; i++)
+        result[i] = getNode(i).get_u(Nodes::CURRENT)[idx];
     return result;
     }
 

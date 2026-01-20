@@ -277,17 +277,16 @@ void spinAcc::integrales(Tetra::Tet &tet,
 //here is the magnetic contribution to AE, it is also block diagonal, and antisymmetric
     if(msh->isMagnetic(tet))
         {
-        const double cst1 = D0/sq(getLsd(tet)); //units: [cst1] = s^-1 : it is 1/tau_sd
-        for (size_t ie=0; ie<N; ie++)
-           {
-           const Eigen::Vector3d &m = msh->getNode_u(tet.ind[ie]);
-            AE(    ie,   N+ie) += cst1*a_w[ie]*m[2];
-            AE(    ie, 2*N+ie) -= cst1*a_w[ie]*m[1];
-            AE(  N+ie,     ie) -= cst1*a_w[ie]*m[2];
-            AE(  N+ie, 2*N+ie) += cst1*a_w[ie]*m[0];
-            AE(2*N+ie,     ie) += cst1*a_w[ie]*m[1];
-            AE(2*N+ie,   N+ie) -= cst1*a_w[ie]*m[0];
-            }
+        const double invTau_sd = D0/sq(getLsd(tet)); //units: [D0/sq(lsd)] = s^-1 : it is 1/tau_sd
+        diag = invTau_sd * a_w.cwiseProduct(tet.calcOffDiagBlock(IDX_X));
+        AE.block<N,N>(N,2*N).diagonal() += diag;
+        AE.block<N,N>(2*N,N).diagonal() -= diag;
+        diag = invTau_sd * a_w.cwiseProduct(tet.calcOffDiagBlock(IDX_Y));
+        AE.block<N,N>(0,2*N).diagonal() -= diag;
+        AE.block<N,N>(2*N,0).diagonal() += diag;
+        diag = invTau_sd * a_w.cwiseProduct(tet.calcOffDiagBlock(IDX_Z));
+        AE.block<N,N>(0,N).diagonal() += diag;
+        AE.block<N,N>(N,0).diagonal() -= diag;
         }
     }
 

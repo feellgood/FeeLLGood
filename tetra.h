@@ -227,10 +227,16 @@ public:
                   Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const;
 
     /**
-     * computes elementary matrix block
+     * computes elementary N*N matrix block
      * returns Id⊗x + c Sum_i w_i da*transpose(da)
      * */
     Eigen::Matrix<double,N,N> calcDiagBlock(const double c, Eigen::Matrix<double,N,1> &x) const;
+
+    /**
+     * computes elementary diagonal elementary block (stored in a N vector)
+     * returns m(idx) on the nodes, with m(idx) a component of the magnetization
+     * */
+    Eigen::Matrix<double,N,1> calcOffDiagBlock(const Nodes::index idx) const;
 
     /** add drift contribution due to eventual recentering to vectors BE */
     void add_drift_BE(double alpha, double s_dt, double Vdrift,

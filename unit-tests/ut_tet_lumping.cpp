@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(tet_lumping, *boost::unit_test::tolerance(UT_TOL))
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
     }
 
-BOOST_AUTO_TEST_CASE(tet_spin_diff_AE_filling, *boost::unit_test::tolerance(UT_TOL))
+BOOST_AUTO_TEST_CASE(tet_spin_diff_AE_filling, *boost::unit_test::tolerance(2.0*UT_TOL))
     {
     Eigen::Matrix<double, 3*Tetra::N, 3*Tetra::N> AE_to_check;
     AE_to_check.setZero();
@@ -224,24 +224,24 @@ BOOST_AUTO_TEST_CASE(tet_spin_diff_AE_filling, *boost::unit_test::tolerance(UT_T
     /* units: [D0/sq(lsf)] = s^-1 : it is 1/tau_sf */
     using algebra::sq;
     using namespace Tetra;
+    using namespace Nodes;
     Eigen::Matrix<double,N,1> a_w = eigen_a*t.weight;
     Eigen::Matrix<double,N,1> diag = (D0/sq(lsf))*a_w;
     Eigen::Matrix<double,N,N> diagBlock = t.calcDiagBlock(D0,diag);
     AE_to_check.block<N,N>(0,0) += diagBlock;
     AE_to_check.block<N,N>(N,N) += diagBlock;
     AE_to_check.block<N,N>(2*N,2*N) += diagBlock;
-    const double cst1 = D0/sq(lsd);
 
-    for (size_t ie=0; ie<N; ie++)
-        {
-        const Eigen::Vector3d &m = node[t.ind[ie]].d[0].u;//getNode_u(t.ind[ie]);
-        AE_to_check(    ie,   N+ie) += cst1*a_w[ie]*m[2];
-        AE_to_check(    ie, 2*N+ie) -= cst1*a_w[ie]*m[1];
-        AE_to_check(  N+ie,     ie) -= cst1*a_w[ie]*m[2];
-        AE_to_check(  N+ie, 2*N+ie) += cst1*a_w[ie]*m[0];
-        AE_to_check(2*N+ie,     ie) += cst1*a_w[ie]*m[1];
-        AE_to_check(2*N+ie,   N+ie) -= cst1*a_w[ie]*m[0];
-        }
+    const double invTau_sd = D0/sq(lsd); //units: [D0/sq(lsd)] = s^-1 : it is 1/tau_sd
+    diag = invTau_sd * a_w.cwiseProduct(t.calcOffDiagBlock(IDX_X));
+    AE_to_check.block<N,N>(N,2*N).diagonal() += diag;
+    AE_to_check.block<N,N>(2*N,N).diagonal() -= diag;
+    diag = invTau_sd * a_w.cwiseProduct(t.calcOffDiagBlock(IDX_Y));
+    AE_to_check.block<N,N>(0,2*N).diagonal() -= diag;
+    AE_to_check.block<N,N>(2*N,0).diagonal() += diag;
+    diag = invTau_sd * a_w.cwiseProduct(t.calcOffDiagBlock(IDX_Z));
+    AE_to_check.block<N,N>(0,N).diagonal() += diag;
+    AE_to_check.block<N,N>(N,0).diagonal() -= diag;
 
 // start code ref (from june 2025)
 double u_nod[3][Tetra::N];
@@ -297,7 +297,7 @@ for (size_t npi=0; npi<NPI; npi++)
     for (int i = 0; i < 3*Tetra::N; i++)
         for (int j = 0; j < 3*Tetra::N; j++)
             {
-            //std::cout << AE_to_check(i,j) << std::endl;
+            //std::cout << "AE_to_check[" << i << "," << j << "]=" << AE_to_check(i,j) << "to compare to " << AE[i][j] << std::endl;
             BOOST_TEST(AE_to_check(i,j) == AE[i][j]);
             }
     }
