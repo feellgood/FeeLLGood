@@ -59,9 +59,9 @@ if(val.returncode==0):
     threshold = 1e-5
     success = distance < threshold
     print("feeLLGood terminated successfully")
-    print(f"final average reduced magnetization = ({mx}, {my}, {mz})")
-    print("distance from expected value        = %.2e" % distance)
-    print("threshold of acceptability          = %.2e" % threshold)
+    print(f"final average reduced magnetization = ({mx:.6f}, {my:.6f}, {mz:.6f})")
+    print(f"distance from expected value        = {distance:.2e}")
+    print(f"threshold of acceptability          = {threshold:.2e}")
 else:
     print("feeLLGood failed: exit status = " + str(val.returncode))
     success = False
