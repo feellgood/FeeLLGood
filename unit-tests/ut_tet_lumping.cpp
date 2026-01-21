@@ -198,6 +198,7 @@ BOOST_AUTO_TEST_CASE(tet_lumping, *boost::unit_test::tolerance(UT_TOL))
 
 BOOST_AUTO_TEST_CASE(tet_spin_diff_AE_filling, *boost::unit_test::tolerance(2.0*UT_TOL))
     {
+    std::cout <<"\ttest on spin diffusion AE filling\n";
     Eigen::Matrix<double, 3*Tetra::N, 3*Tetra::N> AE_to_check;
     AE_to_check.setZero();
     double AE[3 * Tetra::N][3 * Tetra::N] = {{0}};
@@ -300,6 +301,120 @@ for (size_t npi=0; npi<NPI; npi++)
             //std::cout << "AE_to_check[" << i << "," << j << "]=" << AE_to_check(i,j) << "to compare to " << AE[i][j] << std::endl;
             BOOST_TEST(AE_to_check(i,j) == AE[i][j]);
             }
+    }
+
+//similar to method calc_gradV of spinAcc class
+Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> calc_gradV(std::vector<double> &V,Tetra::Tet const &tet)
+    {
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _gradV;
+    for (int npi = 0; npi < Tetra::NPI; npi++)
+        {
+        Eigen::Vector3d v(0,0,0);
+        for (int i = 0; i < Tetra::N; i++)
+            { v += V[tet.ind[i]] * tet.da.row(i); }
+        _gradV.col(npi) = v;
+        }
+    return _gradV;
+    }
+
+BOOST_AUTO_TEST_CASE(tet_spin_diff_BE_filling, *boost::unit_test::tolerance(2.0*UT_TOL))
+    {
+    std::cout <<"\ttest on spin diffusion BE filling\n";
+    const int nbNod = 4;
+    std::vector<Nodes::Node> node;
+    std::vector<double> V(nbNod);
+    dummyNodes<nbNod>(node);
+
+    unsigned sd = my_seed();
+    std::mt19937 gen(sd);
+    std::uniform_real_distribution<> distrib(0.0, 1.0);
+
+    for (int i = 0; i < nbNod; i++)
+        {
+        node[i].d[0].u = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        V[i] = distrib(gen);
+        }
+
+    // carefull with indices (starting from 1)
+    Tetra::Tet t(node, 0, {1, 2, 3, 4});
+    double sigma = distrib(gen);
+    double P = distrib(gen);
+
+    using namespace Tetra;
+    double beta = P;
+    double C0 = sigma;
+    std::vector<double> BE(3*N,0.0);
+    double u_nod[3][N];
+    Eigen::Matrix<double,N,1> V_nod;
+
+    Eigen::Matrix<double,N,NPI> dadx,dady,dadz;// matrices dad(x|y|z) are repetition of da parts
+    for (int j = 0; j < NPI; j++)
+        {
+        for (int i = 0; i < N; i++)
+            {
+            dadx(i,j) = t.da(i,0);
+            dady(i,j) = t.da(i,1);
+            dadz(i,j) = t.da(i,2);
+            }
+        }
+
+        for (size_t ie=0; ie<N; ie++)
+            {
+            V_nod[ie] = V[t.ind[ie]];
+            for(size_t d=0;d<3;d++) { u_nod[d][ie] = node[t.ind[ie]].d[0].u[d]; }
+            }
+
+    Eigen::Matrix<double,NPI,1> dVdx = V_nod.transpose() * dadx;//tiny::transposed_mult<double, N, NPI> (V_nod, dadx, dVdx);
+    Eigen::Matrix<double,NPI,1> dVdy = V_nod.transpose() * dady;//tiny::transposed_mult<double, N, NPI> (V_nod, dady, dVdy);
+    Eigen::Matrix<double,NPI,1> dVdz = V_nod.transpose() * dadz;//tiny::transposed_mult<double, N, NPI> (V_nod, dadz, dVdz);
+
+    // start code to test
+    std::vector<double> BE_to_check(3*N,0.0);
+    const double cst0 = BOHRS_MUB*P*sigma/CHARGE_ELECTRON;
+    // the four following messy lines mimic pre_compute() method
+    std::vector< Eigen::Matrix<double,Nodes::DIM,NPI> > gradV;
+    Eigen::Matrix<double,Nodes::DIM,NPI> tempo = calc_gradV(V,t);
+    gradV.push_back(tempo);
+    Eigen::Matrix<double,Nodes::DIM,NPI> &_gradV = gradV[t.idx];
+
+    for (size_t npi=0; npi<NPI; npi++)
+        {
+        const double cst0_w = cst0*t.weight[npi];
+
+        for (size_t ie=0; ie<N; ie++)
+            {
+            const Eigen::Vector3d &m = node[t.ind[ie]].d[0].u;//magnetization
+            Eigen::Vector3d grad_ai = t.da.row(ie);
+            double tmp = cst0_w*grad_ai.dot( _gradV.col(npi) );
+            BE_to_check[    ie] += tmp*m[0];
+            BE_to_check[  N+ie] += tmp*m[1];
+            BE_to_check[2*N+ie] += tmp*m[2];
+            }
+        }
+    // end code to test
+
+    // start code ref (from june 2025)
+    for (size_t npi=0; npi<NPI; npi++)
+        {
+        double w = t.weight[npi];
+        for (size_t ie=0; ie<N; ie++)
+            {
+            double dai_dx = t.da(ie,0);
+            double dai_dy = t.da(ie,1);
+            double dai_dz = t.da(ie,2);
+            /* Changement de convention de signe pour le courant dans l'expression du ST tel que j = -C0 grad V */
+            double Dai_DV = dai_dx * dVdx[npi] + dai_dy * dVdy[npi] + dai_dz * dVdz[npi];
+            BE[    ie] += BOHRS_MUB*beta*C0/CHARGE_ELECTRON*u_nod[0][ie]* Dai_DV *w; // lumping
+            BE[  N+ie] += BOHRS_MUB*beta*C0/CHARGE_ELECTRON*u_nod[1][ie]* Dai_DV *w; // lumping
+            BE[2*N+ie] += BOHRS_MUB*beta*C0/CHARGE_ELECTRON*u_nod[2][ie]* Dai_DV *w; // lumping
+	        }
+        }
+    // end code ref
+    for(size_t i=0;i<BE.size();i++)
+        {
+        std::cout << BE_to_check[i] << " should be " << BE[i] << std::endl;
+        BOOST_TEST( BE_to_check[i] == BE[i]);
+        }
     }
 
 BOOST_AUTO_TEST_SUITE_END()

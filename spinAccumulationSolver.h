@@ -108,8 +108,8 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** affect extraField function and extraCoeffs_BE function using lambdas for all the tetrahedrons (functor) */
     void prepareExtras(void);
 
-    /** computes grad(V) for tetra tet */
-    void calc_gradV(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV);
+    /** returns grad(V) for tetra tet */
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> calc_gradV(Tetra::Tet const &tet);
 
     /** computes Hst contributions for each npi for tetrahedron tet */
     void calc_Hst(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV,

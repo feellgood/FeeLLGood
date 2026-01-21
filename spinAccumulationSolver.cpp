@@ -154,8 +154,7 @@ void spinAcc::preCompute(void)
     s.resize(NOD);
     std::for_each(msh->tet.begin(), msh->tet.end(), [this](Tetra::Tet const &tet)
                  {
-                 Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _gradV;
-                 calc_gradV(tet, _gradV);
+                 Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _gradV = calc_gradV(tet);
                  gradV.push_back(_gradV);
 
                  Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _Hst;
@@ -179,8 +178,9 @@ bool spinAcc::compute(void)
     return has_converged;
     }
 
-void spinAcc::calc_gradV(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV)
+Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> spinAcc::calc_gradV(Tetra::Tet const &tet)
     {
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _gradV;
     for (int npi = 0; npi < Tetra::NPI; npi++)
         {
         Eigen::Vector3d v(0,0,0);
@@ -188,6 +188,7 @@ void spinAcc::calc_gradV(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,
             { v += V[tet.ind[i]] * tet.da.row(i); }
         _gradV.col(npi) = v;
         }
+    return _gradV;
     }
 
 // Hst is a torque involving current density
