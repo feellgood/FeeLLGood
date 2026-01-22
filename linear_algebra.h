@@ -81,8 +81,11 @@ public:
             { insert_pair(i, i); }
         for (auto edge: msh->edges)
             {
-            insert_pair(edge.first, edge.second);
-            insert_pair(edge.second, edge.first);
+            if (msh->magNode[edge.first] && msh->magNode[edge.second])
+                {
+                insert_pair(edge.first, edge.second);
+                insert_pair(edge.second, edge.first);
+                }
             }
         return shape;
         }
