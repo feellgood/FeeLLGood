@@ -40,13 +40,10 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     void boundaryConditions(void); // should be private
 
     /** initializations: compute gradV and Hst and call prepareExtras method */
-    void preCompute(void);
+    void preCompute(std::vector<double> &V);
 
     /** call solver and update spin diffusion solution, returns true if solver succeeded */
     bool compute(void);
-
-    /** set potential V, solution of j = -sigma grad V over the nodes */
-    void setPotential(std::vector<double> &_V);
 
     /** solution of the spin diffusion vector s over the nodes */
     std::vector<Eigen::Vector3d> s;
@@ -56,9 +53,6 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     void checkBoundaryConditions(void) const;
 
     private:
-    /** container for potential values */
-    std::vector<double> V;
-
     /** Dirichlet values of the components of s on the nodes, it is zero if the node is not in idxDirichlet */
     std::vector<double> valDirichlet;
 
@@ -107,9 +101,6 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
 
     /** affect extraField function and extraCoeffs_BE function using lambdas for all the tetrahedrons (functor) */
     void prepareExtras(void);
-
-    /** returns grad(V) for tetra tet */
-    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> calc_gradV(Tetra::Tet const &tet);
 
     /** computes Hst contributions for each npi for tetrahedron tet */
     void calc_Hst(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV,

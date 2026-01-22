@@ -341,6 +341,9 @@ private:
      * a piecewise formula */
     Eigen::Matrix<double,NPI,1> calc_alpha_eff(const double dt, const double alpha,
                                                Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff);
+
+    /** returns grad(V) for tetra tet */
+    Eigen::Matrix<double,Nodes::DIM,NPI> calc_gradV(std::vector<double> &V, Tet const &tet);
     }   // end namespace Tetra
 
 #endif /* tetra_h */

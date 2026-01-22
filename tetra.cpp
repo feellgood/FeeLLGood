@@ -75,6 +75,19 @@ Eigen::Matrix<double,NPI,1> Tetra::calc_alpha_eff(const double dt, const double 
     return a_eff;
     }
 
+Eigen::Matrix<double,Nodes::DIM,NPI> Tetra::calc_gradV(std::vector<double> &V, Tet const &tet)
+    {
+    Eigen::Matrix<double,Nodes::DIM,NPI> _gradV;
+    for (int npi = 0; npi < NPI; npi++)
+        {
+        Eigen::Vector3d v(0,0,0);
+        for (int i = 0; i < N; i++)
+            { v += V[tet.ind[i]] * tet.da.row(i); }
+        _gradV.col(npi) = v;
+        }
+    return _gradV;
+    }
+
 void Tet::lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double prefactor,
                   Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const
     {

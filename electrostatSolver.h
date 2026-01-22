@@ -74,4 +74,5 @@ private:
      * boundary conditions, returns true if has converged */
     bool solve(void);
     };  // end class electrostatSolver
+
 #endif

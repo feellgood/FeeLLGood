@@ -303,20 +303,6 @@ for (size_t npi=0; npi<NPI; npi++)
             }
     }
 
-//similar to method calc_gradV of spinAcc class
-Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> calc_gradV(std::vector<double> &V,Tetra::Tet const &tet)
-    {
-    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _gradV;
-    for (int npi = 0; npi < Tetra::NPI; npi++)
-        {
-        Eigen::Vector3d v(0,0,0);
-        for (int i = 0; i < Tetra::N; i++)
-            { v += V[tet.ind[i]] * tet.da.row(i); }
-        _gradV.col(npi) = v;
-        }
-    return _gradV;
-    }
-
 BOOST_AUTO_TEST_CASE(tet_spin_diff_BE_filling, *boost::unit_test::tolerance(2.0*UT_TOL))
     {
     std::cout <<"\ttest on spin diffusion BE filling\n";
@@ -371,10 +357,9 @@ BOOST_AUTO_TEST_CASE(tet_spin_diff_BE_filling, *boost::unit_test::tolerance(2.0*
     // start code to test
     std::vector<double> BE_to_check(3*N,0.0);
     const double cst0 = BOHRS_MUB*P*sigma/CHARGE_ELECTRON;
-    // the four following messy lines mimic pre_compute() method
+    // the three following messy lines mimic pre_compute() method
     std::vector< Eigen::Matrix<double,Nodes::DIM,NPI> > gradV;
-    Eigen::Matrix<double,Nodes::DIM,NPI> tempo = calc_gradV(V,t);
-    gradV.push_back(tempo);
+    gradV.push_back(calc_gradV(V,t));
     Eigen::Matrix<double,Nodes::DIM,NPI> &_gradV = gradV[t.idx];
 
     for (size_t npi=0; npi<NPI; npi++)

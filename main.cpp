@@ -249,8 +249,7 @@ int main(int argc, char *argv[])
         if(mySettings.V_file) V_fileName = mySettings.getSimName() + "_V.sol";
         pot_solver.V.resize(fem.msh.getNbNodes());
         pot_solver.compute(mySettings.verbose, V_fileName);
-        spinAcc_solver.setPotential(pot_solver.V);
-        spinAcc_solver.preCompute();
+        spinAcc_solver.preCompute(pot_solver.V);
         bool succeed = spinAcc_solver.compute();
         if(!succeed)
             {

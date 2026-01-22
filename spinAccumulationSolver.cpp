@@ -102,9 +102,6 @@ double spinAcc::getLsf(Tetra::Tet &tet) const
 double spinAcc::getSpinHall(Tetra::Tet &tet) const
     { return paramTet[tet.idxPrm].spinHall; }
 
-void spinAcc::setPotential(std::vector<double> &_V)
-    { V = _V; }
-
 void spinAcc::prepareExtras(void)
     {
     using namespace Tetra;
@@ -149,12 +146,12 @@ void spinAcc::prepareExtras(void)
         });//end for_each
     }
 
-void spinAcc::preCompute(void)
+void spinAcc::preCompute(std::vector<double> &V)
     {
     s.resize(NOD);
-    std::for_each(msh->tet.begin(), msh->tet.end(), [this](Tetra::Tet const &tet)
+    std::for_each(msh->tet.begin(), msh->tet.end(), [this,&V](Tetra::Tet const &tet)
                  {
-                 Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _gradV = calc_gradV(tet);
+                 Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _gradV = calc_gradV(V,tet);
                  gradV.push_back(_gradV);
 
                  Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _Hst;
@@ -176,19 +173,6 @@ bool spinAcc::compute(void)
     else
         { if (verbose) { std::cout << "spin accumulation solved.\n"; } }
     return has_converged;
-    }
-
-Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> spinAcc::calc_gradV(Tetra::Tet const &tet)
-    {
-    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _gradV;
-    for (int npi = 0; npi < Tetra::NPI; npi++)
-        {
-        Eigen::Vector3d v(0,0,0);
-        for (int i = 0; i < Tetra::N; i++)
-            { v += V[tet.ind[i]] * tet.da.row(i); }
-        _gradV.col(npi) = v;
-        }
-    return _gradV;
     }
 
 // Hst is a torque involving current density
