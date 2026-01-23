@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE(silly_problem_solver, *boost::unit_test::tolerance(UT_TOL))
     std::vector<double> x(N,0.0), b(N,1.0);
     std::vector<MatrixCoefficient> coefficients;
     for(int i=0;i<N;i++) { coefficients.push_back({i, i, 1.0}); }
-    algebra::r_sparseMat Ar = buildSparseMat(N, coefficients);
+    algebra::SparseMatrix Ar = buildSparseMat(N, coefficients);
     algebra::bicg<double>(iter,Ar,x,b);
     std::cout << "#iterations:     " << iter.get_iteration() << std::endl;
     std::cout << "estimated error: " << iter.get_res()      << std::endl;
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(rand_sp_mat_problem_solver, *boost::unit_test::tolerance(UT
         coefficients.push_back({j, i, 1.0});
         }
 
-    algebra::r_sparseMat Ar = buildSparseMat(N, coefficients);
+    algebra::SparseMatrix Ar = buildSparseMat(N, coefficients);
     algebra::bicg<double>(iter,Ar,x,b);
     std::cout << "#iterations:     " << iter.get_iteration() << std::endl;
     std::cout << "estimated error: " << iter.get_res()      << std::endl;
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(rand_asym_sp_mat_problem_solver, *boost::unit_test::toleran
         coefficients.push_back({i, j, 1.0});
         }
 
-    algebra::r_sparseMat Ar = buildSparseMat(N, coefficients);
+    algebra::SparseMatrix Ar = buildSparseMat(N, coefficients);
     algebra::bicg<double>(iter,Ar,x,b);
 
     std::cout << "#iterations:     " << iter.get_iteration() << std::endl;

@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(test_applyMask)
     BOOST_TEST( x[1] == 0.0 );
     }
 
-/** tests on r_sparseMat built from MatrixShape */
+/** tests on SparseMatrix built from MatrixShape */
 BOOST_AUTO_TEST_CASE(test_matrix_shape, *boost::unit_test::tolerance(UT_TOL))
     {
     const int N=4;
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(test_matrix_shape, *boost::unit_test::tolerance(UT_TOL))
     shape[3].insert(3);
     shape[1].insert(3);
     shape[0].insert(3);
-    r_sparseMat m(shape);
+    SparseMatrix m(shape);
     m.add(1, 1, 3.14);
     m.add(0, 0, 1);
     m.add(2, 2, 5);
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(test_matrix_shape, *boost::unit_test::tolerance(UT_TOL))
 BOOST_AUTO_TEST_CASE(test_cg, *boost::unit_test::tolerance(10.0*UT_TOL))
     {
     const int N=4;
-    r_sparseMat bob = buildSparseMat(N, {
+    SparseMatrix bob = buildSparseMat(N, {
         {1, 1,  3.14},
         {0, 0,   1.0},
         {2, 2,   5.0},
@@ -221,7 +221,7 @@ BOOST_AUTO_TEST_CASE(test_cg_dir, *boost::unit_test::tolerance(UT_TOL))
     ld.push_back(NOD-1);
     Vd[NOD-1]=1.0;
 
-    r_sparseMat Kr = buildSparseMat(NOD, coefficients);
+    SparseMatrix Kr = buildSparseMat(NOD, coefficients);
     std::vector<double> Lr(NOD,0.0);
 
     iteration iter("cg_dir",cg_dir_tol,VERBOSE,MAXITER);
@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE(test_cg_dir, *boost::unit_test::tolerance(UT_TOL))
 BOOST_AUTO_TEST_CASE(test_bicg, *boost::unit_test::tolerance(UT_TOL))
     {
     const int N=4;
-    r_sparseMat bob = buildSparseMat(N, {
+    SparseMatrix bob = buildSparseMat(N, {
         {1, 1,  3.14},
         {0, 0,   1.0},
         {2, 2,   5.0},
@@ -306,7 +306,7 @@ BOOST_AUTO_TEST_CASE(test_bicg_dir, *boost::unit_test::tolerance(UT_TOL))
     ld.push_back(NOD-1);
     Vd[NOD-1]=1.0;
 
-    r_sparseMat Kr = buildSparseMat(NOD, coefficients);
+    SparseMatrix Kr = buildSparseMat(NOD, coefficients);
     std::vector<double> Lr(NOD,0.0);
 
     iteration iter("bicg_dir",bicg_dir_tol,VERBOSE,MAXITER);

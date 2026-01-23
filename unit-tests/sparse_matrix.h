@@ -9,7 +9,7 @@
 
 #include "../algebra/sparseMat.h"
 
-using algebra::r_sparseMat;
+using algebra::SparseMatrix;
 using algebra::MatrixShape;
 
 /** Matrix coefficient consumed by buildSparseMat() below. */
@@ -20,14 +20,14 @@ struct MatrixCoefficient
     };
 
 /** Helper function to build a one-off sparse matrix from a list of coefficients. */
-inline r_sparseMat buildSparseMat(int N, const std::vector<MatrixCoefficient>& coefficients)
+inline SparseMatrix buildSparseMat(int N, const std::vector<MatrixCoefficient>& coefficients)
     {
     MatrixShape shape(N);
     for (const MatrixCoefficient& coefficient : coefficients)
         {
         shape[coefficient.row].insert(coefficient.col);
         }
-    r_sparseMat matrix(shape);
+    SparseMatrix matrix(shape);
     for (const MatrixCoefficient& coefficient : coefficients)
         {
         matrix.add(coefficient.row, coefficient.col, coefficient.value);

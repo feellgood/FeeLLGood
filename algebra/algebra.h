@@ -63,9 +63,9 @@ void scaled_add(const std::vector<T> & X,const T alpha, std::vector<T> & Y)
         Y[i] += alpha * X[i];
     }
 
-/** Y = A*X with r_sparseMat A */
+/** Y = A*X with SparseMatrix A */
 template <typename T>
-void mult(r_sparseMat & A, std::vector<T> const& X, std::vector<T> &Y)
+void mult(SparseMatrix & A, std::vector<T> const& X, std::vector<T> &Y)
     {
     A.mult(X,Y); // Y = A*X
     }
@@ -75,8 +75,8 @@ template <typename T>
 void applyMask(const std::vector<int>& mask, std::vector<T> & X)
     { std::for_each(mask.begin(),mask.end(),[&X](const int _i){ X[_i] = (T)(0); }); }
 
-/** operator<< for r_sparseMat */
-inline std::ostream & operator<<(std::ostream & flux, r_sparseMat const& m)
+/** operator<< for SparseMatrix */
+inline std::ostream & operator<<(std::ostream & flux, SparseMatrix const& m)
     {m.print(flux); return flux;}
 
 /** return true if the given vector is free of NaNs */

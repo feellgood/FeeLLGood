@@ -11,7 +11,7 @@ vectors x and rhs must have the same size.
 The status of the convergence is returned in iter.status as well as total number of iterations and error
 */
 template<typename T>
-void cg(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T> & rhs)
+void cg(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std::vector<T> & rhs)
     {
     T rho, rho_1(0.0);
     const size_t DIM = x.size();
@@ -60,7 +60,7 @@ vectors x and rhs must have the same size. ld is a vector of indices where to ap
 The status of the convergence is returned in iter.status as well as total number of iterations and error
  */
 template<typename T>
-void cg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T> & rhs, const std::vector<T> & xd, const std::vector<int>& ld)
+void cg_dir(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std::vector<T> & rhs, const std::vector<T> & xd, const std::vector<int>& ld)
     {
     T rho, rho_1(0.0);
     const size_t DIM = x.size();

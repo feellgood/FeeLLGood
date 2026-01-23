@@ -10,7 +10,7 @@ vectors x and rhs must have the same size.
 The status of the convergence is returned in iter.status as well as total number of iterations and error
  */
 template <typename T>
-void bicg(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T> & rhs)
+void bicg(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std::vector<T> & rhs)
     {
     const size_t DIM = x.size();
     T rho_1(0.0), rho_2(0.0), alpha(0.0), beta(0.0), omega(0.0);
@@ -78,7 +78,7 @@ void bicg(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vec
  * xd is a vector containing some values on the nodes where Dirichlet applies
  */
 template<typename T>
-void bicg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T> & rhs,
+void bicg_dir(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std::vector<T> & rhs,
            const std::vector<T>& xd, const std::vector<int>& ld)
     {
     T rho_1(0.0), rho_2(0.0), alpha(0.0), beta(0.0), omega(0.0);
@@ -156,7 +156,7 @@ void bicg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std:
  * ld is a mask: a list of indices that will be zeroed when using applyMask(ld, vector)
  */
 template<typename T>
-T bicg_dir(iteration<T> &iter, r_sparseMat& A, std::vector<T> & x, const std::vector<T> & rhs, const std::vector<int>& ld)
+T bicg_dir(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std::vector<T> & rhs, const std::vector<int>& ld)
     {
     T rho_1(0.0), rho_2(0.0), alpha(0.0), beta(0.0), omega(0.0);
     const size_t DIM = x.size();

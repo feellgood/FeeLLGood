@@ -60,7 +60,7 @@ class solver
         algebra::iteration<double> iter;
 
         /** matrix of the system to solve */
-        algebra::r_sparseMat K;
+        algebra::SparseMatrix K;
 
         /** RHS vector of the system to solve */
         std::vector<double> L_rhs;

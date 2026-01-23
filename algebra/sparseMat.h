@@ -4,11 +4,11 @@
 /** \file sparseMat.h
  \brief Sparse matrices
 
-The main class provided here is `r_sparseMat`, a square sparse matrix. It is meant to efficiently
+The main class provided here is `SparseMatrix`, a square sparse matrix. It is meant to efficiently
 compute matrix-vector products, where the vectors are full (not sparse), represented as
 std::vector<double>.
 
-In order to build a `r_sparseMat`, one has to first store in a `MatrixShape` the set of valid index
+In order to build a `SparseMatrix`, one has to first store in a `MatrixShape` the set of valid index
 pairs, then use this shape to construct the sparse matrix with all values initialized to zero.
 
 Once constructed, the set of valid index pairs is immutable. However, the associated values can be
@@ -37,12 +37,12 @@ is the set of j indices such that (i, j) is a valid index pair for the matrix.
  */
 using MatrixShape = std::vector<std::set<int>>;
 
-/** \class r_sparseMat
+/** \class SparseMatrix
 \brief Square sparse matrix.
 
 This is the sparse matrix class, meant for efficiently computing matrix-vector products.
 */
-class r_sparseMat
+class SparseMatrix
 {
     /**
     Sparse vector.
@@ -76,7 +76,7 @@ class r_sparseMat
 
 public:
     /** Construct from a matrix shape. Initialize all stored values to zero. */
-    r_sparseMat(const MatrixShape &shape) : rows(shape.size())
+    SparseMatrix(const MatrixShape &shape) : rows(shape.size())
         {
         for (size_t i = 0; i < shape.size(); ++i)
             {
@@ -188,7 +188,7 @@ private:
     resized.
     */
     std::vector<SparseVector> rows;
-}; // end class r_sparseMat
+}; // end class SparseMatrix
 
 } // end namespace algebra
 
