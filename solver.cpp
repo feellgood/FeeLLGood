@@ -13,7 +13,7 @@ bool LinAlgebra::solve(timing const &t_prm)
                   [this](const int idx)
                       {
                       Tetra::Tet &my_elem = msh->tet[idx];
-                      my_elem.assemble_mat(K);
+                      buildMat<Tetra::N>(my_elem.ind, my_elem.Kp);
                       });
 
     if (verbose)
@@ -27,14 +27,20 @@ bool LinAlgebra::solve(timing const &t_prm)
                   [this](const int idx)
                       {
                       Tetra::Tet &my_elem = msh->tet[idx];
-                      my_elem.assemble_vect(L_rhs);
+                      double *data_start = my_elem.Lp.data();
+                      double *data_end = data_start + 2*Tetra::N;
+                      std::vector<double> Le(data_start, data_end);
+                      buildVect<Tetra::N>(my_elem.ind, Le);
                       });
 
     std::for_each(msh->magFac.begin(), msh->magFac.end(),
                   [this](const int idx)
                       {
                       Facette::Fac &my_elem = msh->fac[idx];
-                      my_elem.assemble_vect(L_rhs);
+                      double *data_start = my_elem.Lp.data();
+                      double *data_end = data_start + 2*Facette::N;
+                      std::vector<double> Le(data_start, data_end);
+                      buildVect<Facette::N>(my_elem.ind, Le);
                       });
 
     /* RHS forced to zero outside mag material defined by mask, corresponding K diagonal coefficients set to 1  */
