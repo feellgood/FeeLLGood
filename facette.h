@@ -14,27 +14,54 @@
  */
 namespace Facette
     {
-const int N = 3;   /**< number of sommits */
-const int NPI = 4; /**< number of weights  */
+/** number of sommits */
+const int N = 3;
 
-constexpr double u[NPI] = {1 / 3., 1 / 5., 3 / 5.,
-                           1 / 5.}; /**< some constants to build hat functions */
-constexpr double v[NPI] = {1 / 3., 1 / 5., 1 / 5.,
-                           3 / 5.}; /**< some constants  to build hat functions */
-constexpr double pds[NPI] = {-27 / 96., 25 / 96., 25 / 96.,
-                             25 / 96.}; /**< some constant weights  to build hat functions */
+#ifdef ONE_GAUSS_POINT  // Single Gauss point at barycenter of triangle
+    /** number of Gauss points */
+    const int NPI = 1;
 
-/** hat function constants */
-constexpr double a[N][NPI] = {
+    /** u coordinate of single Gauss point at barycenter */
+    constexpr double u[NPI] = {1. / 3.};
+
+     /** v coordinate of single Gauss point at barycenter */
+    constexpr double v[NPI] = {1. / 3.};
+
+     /** weight for single point integration (area of reference triangle = 1/2) */
+    constexpr double pds[NPI] = {1. / 2.};
+
+    /** hat function constants evaluated at barycenter
+    All shape functions are equal to 1/3 at barycenter
+    */
+    constexpr double a[N][NPI] = { {1. - u[0] - v[0]}, {u[0]}, {v[0]}};
+
+    /** eigen matrix a initialization from C array - shape functions evaluated at Gauss point */
+    const Eigen::Matrix<double,N,NPI> eigen_a =
+        (Eigen::MatrixXd(N,NPI) << a[0][0], a[1][0], a[2][0] ).finished();
+#else
+    /** number of Gauss points  */
+    const int NPI = 4;
+
+    /** some constants to build hat functions */
+    constexpr double u[NPI] = {1 / 3., 1 / 5., 3 / 5., 1 / 5.};
+
+    /** some constants  to build hat functions */
+    constexpr double v[NPI] = {1 / 3., 1 / 5., 1 / 5., 3 / 5.};
+
+    /** some constant weights  to build hat functions */
+    constexpr double pds[NPI] = {-27 / 96., 25 / 96., 25 / 96., 25 / 96.};
+
+    /** hat function constants */
+    constexpr double a[N][NPI] = {
         {1. - u[0] - v[0], 1. - u[1] - v[1], 1. - u[2] - v[2], 1. - u[3] - v[3]},
         {u[0], u[1], u[2], u[3]},
         {v[0], v[1], v[2], v[3]}};
 
-/** eigen matrix a initialization from C array */
-const Eigen::Matrix<double,N,NPI> eigen_a = (Eigen::MatrixXd(N,NPI) << a[0][0], a[0][1], a[0][2], a[0][3],
+    /** eigen matrix a initialization from C array */
+    const Eigen::Matrix<double,N,NPI> eigen_a = (Eigen::MatrixXd(N,NPI) << a[0][0], a[0][1], a[0][2], a[0][3],
                                                                        a[1][0], a[1][1], a[1][2], a[1][3],
                                                                        a[2][0], a[2][1], a[2][2], a[2][3] ).finished();
-
+#endif
 /** \class prm
 region number and material constants
 */

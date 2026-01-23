@@ -161,6 +161,18 @@ std::string parseOptions(Settings &settings, int argc, char *argv[], unsigned in
     if (print_version)
         {
         std::cout << "feeLLGood " << feellgood_version << "\n";
+        std::cout << "Compiled with:\n\tONE_GAUSS_POINT=";
+        #ifdef ONE_GAUSS_POINT
+            std::cout << "ON\n";
+        #else
+            std::cout << "OFF\n";
+        #endif
+        std::cout << "\tENABLE_SEQ=";
+        #ifdef ENABLE_SEQ
+            std::cout << "ON\n";
+        #else
+            std::cout << "OFF\n";
+        #endif
         exit(0);
         }
     if (print_defaults)

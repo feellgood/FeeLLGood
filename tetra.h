@@ -18,41 +18,65 @@
  */
 namespace Tetra
     {
-const int N = 4;   /**< number of sommits */
-const int NPI = 5; /**< number of weights  */
-
-const double epsilon =
-        EPSILON; /**< this constant is defined from a macro in config.h.in, it is used to check the
+ /** this constant is defined from config.h.in, it is used to check the
                     validity of the tetrahedreon, a degeneracy test */
+const double epsilon = EPSILON;
 
-constexpr double A = 1. / 4.;                /**< constant to build hat functions */
-constexpr double B = 1. / 6.;                /**< constant to build hat functions */
-constexpr double C = 1. / 2.;                /**< constant to build hat functions */
-constexpr double D = -2. / 15.;              /**< constant to build hat functions */
-constexpr double E = 3. / 40.;               /**< constant to build hat functions */
-constexpr double u[NPI] = {A, B, B, B, C};   /**< some constants to build hat functions */
-constexpr double v[NPI] = {A, B, B, C, B};   /**< some constants to build hat functions */
-constexpr double w[NPI] = {A, B, C, B, B};   /**< some constants to build hat functions */
-constexpr double pds[NPI] = {D, E, E, E, E}; /**< some constant weights to build hat functions */
+const int N = 4;   /**< number of vertices */
 
-/** constant matrix \f$ j:0..4 \f$
-a[0][j]   = 1.-u[j]-v[j]-w[j];
-a[1][j]   = u[j];
-a[2][j]   = v[j];
-a[3][j]   = w[j];
-*/
-constexpr double a[N][NPI] = {{1. - u[0] - v[0] - w[0], 1. - u[1] - v[1] - w[1],
-                               1. - u[2] - v[2] - w[2], 1. - u[3] - v[3] - w[3],
-                               1. - u[4] - v[4] - w[4]},
-                              {u[0], u[1], u[2], u[3], u[4]},
-                              {v[0], v[1], v[2], v[3], v[4]},
-                              {w[0], w[1], w[2], w[3], w[4]}};
+#ifdef ONE_GAUSS_POINT
+    const int NPI = 1; /**< number of Gauss points = 1 : single point integration at barycentre of
+                         tetrahedron */
 
-/** eigen constant matrix a */
-const Eigen::Matrix<double,N,NPI> eigen_a = (Eigen::MatrixXd(N,NPI) << a[0][0], a[0][1], a[0][2], a[0][3], a[0][4],
-                                                                       a[1][0], a[1][1], a[1][2], a[1][3], a[1][4],
-                                                                       a[2][0], a[2][1], a[2][2], a[2][3], a[2][4],
-                                                                       a[3][0], a[3][1], a[3][2], a[3][3], a[3][4] ).finished();
+    constexpr double A = 1. / 4.;                /**< barycentric coordinate for single Gauss point */
+    constexpr double u[NPI] = {A};               /**< u coordinate of single Gauss point at barycenter */
+    constexpr double v[NPI] = {A};               /**< v coordinate of single Gauss point at barycenter */
+    constexpr double w[NPI] = {A};               /**< w coordinate of single Gauss point at barycenter */
+    constexpr double pds[NPI] = {1./6.};         /**< weight for single point integration (volume of reference tetrahedron) */
+
+    /** All shape functions are equal to 1/4 at barycenter */
+    constexpr double a[N][NPI] = {{1. - u[0] - v[0] - w[0]},
+                              {u[0]},
+                              {v[0]},
+                              {w[0]}};
+
+    /** eigen constant matrix a - shape functions evaluated at Gauss point */
+    const Eigen::Matrix<double,N,NPI> eigen_a = (Eigen::MatrixXd(N,NPI) << a[0][0],
+                                                                       a[1][0],
+                                                                       a[2][0],
+                                                                       a[3][0] ).finished();
+#else
+    const int NPI = 5; /**< number of Gauss points = 5  */
+
+    constexpr double A = 1. / 4.;                /**< constant to build hat functions */
+    constexpr double B = 1. / 6.;                /**< constant to build hat functions */
+    constexpr double C = 1. / 2.;                /**< constant to build hat functions */
+    constexpr double D = -2. / 15.;              /**< constant to build hat functions */
+    constexpr double E = 3. / 40.;               /**< constant to build hat functions */
+    constexpr double u[NPI] = {A, B, B, B, C};   /**< some constants to build hat functions */
+    constexpr double v[NPI] = {A, B, B, C, B};   /**< some constants to build hat functions */
+    constexpr double w[NPI] = {A, B, C, B, B};   /**< some constants to build hat functions */
+    constexpr double pds[NPI] = {D, E, E, E, E}; /**< some constant weights to build hat functions */
+
+    /** constant matrix \f$ j:0.. NPI-1 \f$
+    a[0][j]   = 1.-u[j]-v[j]-w[j];
+    a[1][j]   = u[j];
+    a[2][j]   = v[j];
+    a[3][j]   = w[j];
+    */
+    constexpr double a[N][NPI] = {{1. - u[0] - v[0] - w[0], 1. - u[1] - v[1] - w[1],
+                                   1. - u[2] - v[2] - w[2], 1. - u[3] - v[3] - w[3],
+                                   1. - u[4] - v[4] - w[4]},
+                                  {u[0], u[1], u[2], u[3], u[4]},
+                                  {v[0], v[1], v[2], v[3], v[4]},
+                                  {w[0], w[1], w[2], w[3], w[4]}};
+
+    /** eigen constant matrix a */
+    const Eigen::Matrix<double,N,NPI> eigen_a = (Eigen::MatrixXd(N,NPI) << a[0][0], a[0][1], a[0][2], a[0][3], a[0][4],
+                                                                           a[1][0], a[1][1], a[1][2], a[1][3], a[1][4],
+                                                                           a[2][0], a[2][1], a[2][2], a[2][3], a[2][4],
+                                                                           a[3][0], a[3][1], a[3][2], a[3][3], a[3][4] ).finished();
+#endif
 
 /** \class prm
 region number and material constants
@@ -112,7 +136,9 @@ class Tet : public element<N,NPI>
 public:
     /** constructor. It initializes weight hat function with weights \f$ w_i = |J| p_i \f$
     with  \f$ p_i = pds[i] = (D,E,E,E,E) \f$ and dad(x|y|z) if \f$ | detJ | < \epsilon \f$ jacobian
-    is considered degenerated unit tests : Tet_constructor; Tet_inner_tables
+    is considered degenerated
+    If NPI=1 (single Gauss point) then w[0] is the tetrahedron volume
+    unit tests : Tet_constructor; Tet_inner_tables
     */
     inline Tet(const std::vector<Nodes::Node> &_p_node /**< vector of nodes */,
                const int _idx /**< [in] region index in region vector */,
@@ -136,12 +162,12 @@ public:
                 element::infos();
                 SYSTEM_ERROR;
                 }
-            Eigen::Matrix<double,N,Nodes::DIM> dadu;
+            Eigen::Matrix<double,N,Nodes::DIM> dadu; //Shape function derivatives(constant for linear tetrahedron)
             dadu << -1., -1., -1., 1., 0., 0., 0., 1., 0., 0., 0., 1.;
             da = dadu * J.inverse();
 
             for (int j = 0; j < NPI; j++)
-                { weight[j] = detJ * Tetra::pds[j]; }
+                { weight[j] = detJ * Tetra::pds[j]; }// if NPI=1 weight[0] is the tetrahedron volume
             }
         // do nothing lambda's (usefull for spin transfer torque)
         extraField = [] ( Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> ) {};
@@ -152,11 +178,14 @@ public:
                             Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,N>>) {};
         }
 
-    /** local hat functions matrix, initialized by constructor: da = dadu * inverse(Jacobian) */
+    /** local hat functions matrix, initialized by constructor: da = dadu * inverse(Jacobian)
+     * For linear tetrahedron, gradients are constant in the element */
     Eigen::Matrix<double,N,Nodes::DIM> da;
 
     /** interpolation for scalar field : the getter function is given as a parameter in order to
-     * know what part of the node you want to interpolate */
+     * know what part of the node you want to interpolate
+     * If single Gauss point evaluates scalar at barycenter
+     * */
     inline void interpolation(std::function<double(Nodes::Node)> getter,
                               Eigen::Ref<Eigen::Matrix<double,NPI,1>> result) const
         {
@@ -176,14 +205,17 @@ public:
         Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
         for (int i = 0; i < N; i++) vec_nod.col(i) = getter(getNode(i));
 
-        result = vec_nod * eigen_a;
+        result = vec_nod * eigen_a;// interpolated value at Gauss point
+
+        //Spatial derivatives: constant for linear elements, evaluated at any point including Gauss point
         Tx = vec_nod * (da.col(Nodes::IDX_X)).replicate(1,NPI);
         Ty = vec_nod * (da.col(Nodes::IDX_Y)).replicate(1,NPI);
         Tz = vec_nod * (da.col(Nodes::IDX_Z)).replicate(1,NPI);
         }
 
     /** interpolation for components of a field : the getter function is given as a parameter in
-     * order to know what part of the node you want to interpolate */
+     * order to know what part of the node you want to interpolate
+     * Computes gradient at single Gauss point, constant for linear tetrahedron */
     inline void interpolation_field(std::function<double(Nodes::Node)> getter,
                                     Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> X) const
         {

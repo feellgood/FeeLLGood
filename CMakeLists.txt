@@ -28,6 +28,14 @@ endif()
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)
 
 #===========================================================================
+# cmake . -DONE_GAUSS_POINT=ON
+# if ON set the number of integration points to one
+# if OFF (default): 4 points Gauss integration
+#===========================================================================
+option(ONE_GAUSS_POINT "Use single Gauss point integration" OFF)
+message( STATUS "Single Gauss point integration: ONE_GAUSS_POINT = " ${ONE_GAUSS_POINT} )
+
+#===========================================================================
 # cmake . -DENABLE_SEQ=OFF
 # execution policy, by default it is parallel, sequential is for debug purpose.
 # when ENABLE_SEQ is ON, executable does not link to TBB
@@ -130,7 +138,11 @@ include_directories (${CMAKE_SOURCE_DIR} ${GMSH_INC})
 
 ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES} default-settings.o)
 target_compile_options( feellgood PUBLIC -Wall -Wextra -O3 -march=native ${MKL_CFLAGS} )
-target_compile_definitions(feellgood PUBLIC -DNDEBUG -DTBB_SUPPRESS_DEPRECATED_MESSAGES ${EIGEN_MKL_CFLAGS} )
+if (${ONE_GAUSS_POINT})
+    target_compile_definitions(feellgood PUBLIC -DNDEBUG -DTBB_SUPPRESS_DEPRECATED_MESSAGES -DONE_GAUSS_POINT ${EIGEN_MKL_CFLAGS} )
+else()
+    target_compile_definitions(feellgood PUBLIC -DNDEBUG -DTBB_SUPPRESS_DEPRECATED_MESSAGES ${EIGEN_MKL_CFLAGS} )
+endif()
 
 if (MKL_FOUND)
     #option --no-as-needed for mkl, see https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-link-line-advisor.html
