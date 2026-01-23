@@ -9,6 +9,7 @@ TODO: these templates could be specialized for DIM_PROBLEM = 2 (see warning abov
 
 #include <eigen3/Eigen/Dense>
 #include "mesh.h"
+#include "algebra/algebra.h"
 
 /** \class solver
  * \brief template class for the different solvers
@@ -26,9 +27,12 @@ class solver
                         const std::string name /**< [in] name of the solver method */,
                         const double _tol /**< [in] solver tolerance */,
                         const bool v /**< [in] verbose mode for iteration monitor */,
-                        const int max_iter /**< [in] maximum number of iterations */):
+                        const int max_iter /**< [in] maximum number of iterations */,
+                        std::function<bool(Mesh::Edge)> edge_filter = [](Mesh::Edge){ return true; }
+                            /** [in] predicate for relevant mesh edges */):
                         msh(&_msh), NOD(_msh.getNbNodes()), paramTet(_pTetra),
-                        paramFac(_pFac), verbose(v), iter(name,_tol,v,max_iter) {}
+                        paramFac(_pFac), verbose(v), iter(name,_tol,v,max_iter),
+                        K(build_shape(edge_filter)), L_rhs(DIM_PROBLEM*NOD) {}
 
         /** check boundary conditions, exit if there is a mistake in the boundary conditions */
         virtual void checkBoundaryConditions(void) const = 0;
@@ -54,6 +58,44 @@ class solver
 
         /** monitor the solver called in method solve() */
         algebra::iteration<double> iter;
+
+        /** matrix of the system to solve */
+        algebra::r_sparseMat K;
+
+        /** RHS vector of the system to solve */
+        std::vector<double> L_rhs;
+
+        /** Build a matrix shape suitable for the current problem. */
+        algebra::MatrixShape build_shape(std::function<bool(Mesh::Edge)> edge_filter)
+            {
+            algebra::MatrixShape shape(DIM_PROBLEM * NOD);
+
+            // Add a DIM_PROBLEM × DIM_PROBLEM block connecting nodes i and j.
+            auto add_block = [this, &shape](int i, int j)
+                {
+                for (int k = 0; k < DIM_PROBLEM; ++k)
+                    {
+                    for (int l = 0; l < DIM_PROBLEM; ++l)
+                        { shape[DIM_PROBLEM*i+k].insert(DIM_PROBLEM*j+l); }
+                    }
+                };
+
+            // Add a diagonal block for each node.
+            for (int i = 0; i < NOD; ++i)
+                { add_block(i, i); }
+
+            // Add two off-diagonal blocks for each edge relevant to the current problem.
+            for (auto edge: msh->edges)
+                {
+                if (edge_filter(edge))
+                    {
+                    add_block(edge.first, edge.second);
+                    add_block(edge.second, edge.first);
+                    }
+                }
+
+            return shape;
+            }
 
         /** function template.
         parameter N is the number of indices of the element to build matrix from: ind.size() = N

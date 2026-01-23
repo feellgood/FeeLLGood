@@ -41,10 +41,12 @@ public:
     When debugging it might be usefull to set iter verbosity differently
     */
     LinAlgebra(Settings &s /**< [in] */, Mesh::mesh &my_msh /**< [in] */)
-        : solver<DIM_PB_MAG>(my_msh, s.paramTetra, s.paramFacette, "bicg_dir", s.TOL, s.verbose, s.MAXITER),
-        K(build_shape()), verbose(s.verbose)
+        : solver<DIM_PB_MAG>(
+            my_msh, s.paramTetra, s.paramFacette, "bicg_dir", s.TOL, s.verbose, s.MAXITER,
+            [this](Mesh::Edge edge){ return msh->magNode[edge.first] && msh->magNode[edge.second]; }
+        ),
+        verbose(s.verbose)
         {
-        L_rhs.resize(2*NOD);
         Xw.resize(2*NOD);
         base_projection();
         if (!s.recenter)
@@ -64,30 +66,6 @@ public:
                 }
             }
         lvd.shrink_to_fit();
-        }
-
-    /** build a matrix shape suitable for our mesh */
-    algebra::MatrixShape build_shape()
-        {
-        algebra::MatrixShape shape(2 * NOD);
-        auto insert_pair = [this, &shape](int i, int j)
-            {
-            shape[2*i].insert(2*j);
-            shape[2*i].insert(2*j+1);
-            shape[2*i+1].insert(2*j);
-            shape[2*i+1].insert(2*j+1);
-            };
-        for (int i = 0; i < NOD; ++i)
-            { insert_pair(i, i); }
-        for (auto edge: msh->edges)
-            {
-            if (msh->magNode[edge.first] && msh->magNode[edge.second])
-                {
-                insert_pair(edge.first, edge.second);
-                insert_pair(edge.second, edge.first);
-                }
-            }
-        return shape;
         }
 
     /** check LLG boundary conditions */
@@ -125,12 +103,6 @@ public:
 private:
     /** recentering index direction if any */
     Nodes::index idx_dir;
-
-    /** matrix of the system to solve */
-    algebra::r_sparseMat K;
-
-    /** RHS vector of the system to solve */
-    std::vector<double> L_rhs;
 
     /** solution of the system to solve */
     std::vector<double> Xw;
