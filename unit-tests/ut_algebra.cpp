@@ -116,29 +116,6 @@ BOOST_AUTO_TEST_CASE(test_applyMask)
     BOOST_TEST( x[1] == 0.0 );
     }
 
-/** tests on r_sparseMat built from w_sparseMat */
-BOOST_AUTO_TEST_CASE(test_w_sparseMat, *boost::unit_test::tolerance(UT_TOL))
-    {
-    const int N=4;
-    w_sparseMat m(N);
-    m.insert( 1,1,3.14 );
-    m.insert( 0,0,1.0 );
-    m.insert( 2,2,5.0 );
-    m.insert( 3,3,42.0 );
-    m.insert( 1,3,-10.0 );
-    m.insert( 1,3,10.0 );
-    m.insert( 0,3,0.5 );
-    r_sparseMat bob(m);
-    std::vector<double> x {1.0,1.0,1.0,1.0};
-    std::vector<double> y(N);
-    m.insert( 2,2,5.0 );// m modification must not affect bob
-    mult(bob,x,y); //y = m*x
-    BOOST_CHECK( y[0] == 1.5 );
-    BOOST_CHECK( y[1] == 3.14 );
-    BOOST_CHECK( y[2] == 5.0 );
-    BOOST_CHECK( y[3] == 42.0 );
-    }
-
 /** tests on r_sparseMat built from MatrixShape */
 BOOST_AUTO_TEST_CASE(test_matrix_shape, *boost::unit_test::tolerance(UT_TOL))
     {

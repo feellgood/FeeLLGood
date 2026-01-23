@@ -4,16 +4,12 @@
 /** \file sparseMat.h
  \brief Sparse matrices
 
-The main class provided here is `r_sparseMat`, a "read-mode" square sparse matrix. It is meant to
-efficiently compute matrix-vector products, where the vectors are full (not sparse), represented as
-std::vector<double>. Such a matrix can be constructed in two ways:
+The main class provided here is `r_sparseMat`, a square sparse matrix. It is meant to efficiently
+compute matrix-vector products, where the vectors are full (not sparse), represented as
+std::vector<double>.
 
-- If the set of valid index pairs (locations that can have non-zero values) is **not** known in
-  advance, one can construct a `w_sparseMat` (write-mode sparse matrix), populate it with its
-  `insert()` method, then use it to construct the read-mode sparse matrix.
-
-- If the set of valid index pairs is known, one can store it in a `MatrixShape`, then use this shape
-  to construct the read-mode sparse matrix with all values initialized to zero.
+In order to build a `r_sparseMat`, one has to first store in a `MatrixShape` the set of valid index
+pairs, then use this shape to construct the sparse matrix with all values initialized to zero.
 
 Once constructed, the set of valid index pairs is immutable. However, the associated values can be
 modified with `clear()` and `add()`. Rewriting the values this way is way more efficient than
@@ -41,54 +37,15 @@ is the set of j indices such that (i, j) is a valid index pair for the matrix.
  */
 using MatrixShape = std::vector<std::set<int>>;
 
-/**
-\class w_sparseMat
-\brief Write-mode sparse matrix.
-
-This is a container for matrix elements that can be modified by inserting elements at arbitrary
-locations.
-*/
-class w_sparseMat
-{
-    friend class r_sparseMat;
-
-    /**
-    Write-mode sparse vector. This is an (index -> value) map.
-    */
-    using SparseVector = std::map<int, double>;
-
-public:
-    /** Constructor. N is the matrix size: this is a square N×N matrix. */
-    w_sparseMat(int N) : rows(N) {}
-
-    /**
-    Insert a matrix element with value val, at row i, column j. If an element already exists at this
-    position, add `val` to its value.
-
-    The caller must ensure both indices lie within [0, N).
-    */
-    void insert(const int i, const int j, const double val)
-        {
-        assert(i >= 0 && i < rows.size());
-        assert(j >= 0 && j < rows.size());
-        rows[i][j] += val;
-        }
-
-private:
-    /** Matrix data: each row is a sparse vector. */
-    std::vector<SparseVector> rows;
-};
-
-
 /** \class r_sparseMat
-\brief Read-mode square sparse matrix.
+\brief Square sparse matrix.
 
-This is the main sparse matrix class, meant for efficiently computing matrix-vector products.
+This is the sparse matrix class, meant for efficiently computing matrix-vector products.
 */
 class r_sparseMat
 {
     /**
-    Read-mode sparse vector.
+    Sparse vector.
 
     This holds a mutex that protects the data during calls to add(), a list of indices, and a list
     of matching values. The following invariants should be enforced:
@@ -118,23 +75,6 @@ class r_sparseMat
     };
 
 public:
-    /** Construct from a read-mode sparse matrix. */
-    r_sparseMat(const w_sparseMat &source) : rows(source.rows.size())
-        {
-        for (size_t i = 0; i < source.rows.size(); ++i)
-            {
-            const w_sparseMat::SparseVector& source_row = source.rows[i];
-            SparseVector& row = rows[i];
-            row.indices.reserve(source_row.size());
-            row.values.reserve(source_row.size());
-            for (auto it = source_row.begin(); it != source_row.end(); ++it)
-                {
-                row.indices.push_back(it->first);
-                row.values.push_back(it->second);
-                }
-            }
-        }
-
     /** Construct from a matrix shape. Initialize all stored values to zero. */
     r_sparseMat(const MatrixShape &shape) : rows(shape.size())
         {
