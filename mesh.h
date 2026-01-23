@@ -19,6 +19,9 @@
 
 namespace Mesh
     {
+    /** A mesh edge is a sorted pair of adjacent node indices: first < second. */
+    using Edge = std::pair<int, int>;
+
 /** \class mesh
 class for storing the mesh, including mesh geometry values, containers for the nodes, triangular
 faces and tetrahedrons. nodes data are private. They are accessible only through getter and setter.
@@ -282,7 +285,7 @@ public:
         {
         double min_dot_product = std::transform_reduce(EXEC_POL, edges.begin(), edges.end(), 1.0,
                 [](double a, double b){ return std::min(a, b); },
-                [this](const std::pair<int, int> edge)
+                [this](const Edge edge)
                     {
                     Eigen::Vector3d m1 = getNode_u(edge.first);
                     Eigen::Vector3d m2 = getNode_u(edge.second);
@@ -320,10 +323,9 @@ public:
     inline bool isMagnetic(const Facette::Fac &f)
         { return (magNode[f.ind[0]] && magNode[f.ind[1]] && magNode[f.ind[2]]); }
 
-    /** Edges of all the tetrahedrons, i.e. all the unique pairs of adjacent node indices.
-     * Each pair is sorted: first < second.
+    /** Edges of all the tetrahedrons. Each edge is a sorted pair of indices.
      * The list is sorted lexicographically, as per std::pair::operator<(). */
-    std::vector<std::pair<int, int>> edges;
+    std::vector<Edge> edges;
 
     /** list of the magnetic nodes, using inner indices (non gmsh indices). If true it is magnetic.
      * a node is magnetic if it belongs to a magnetic tetrahedron. Consequently any node on a
