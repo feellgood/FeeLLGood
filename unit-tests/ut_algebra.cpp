@@ -6,6 +6,7 @@
 #include <chrono>
 
 #include "ut_config.h"  // for tolerance UT_TOL macro
+#include "sparse_matrix.h"
 #include "../algebra/algebra.h"
 #include "../algebra/cg.h"
 #include "../algebra/bicg.h"
@@ -182,15 +183,15 @@ BOOST_AUTO_TEST_CASE(test_matrix_shape, *boost::unit_test::tolerance(UT_TOL))
 BOOST_AUTO_TEST_CASE(test_cg, *boost::unit_test::tolerance(10.0*UT_TOL))
     {
     const int N=4;
-    w_sparseMat m(N);
-    m.insert( 1,1,3.14 );
-    m.insert( 0,0,1.0 );
-    m.insert( 2,2,5.0 );
-    m.insert( 3,3,42.0 );
-    m.insert( 1,3,-10.0 );
-    m.insert( 1,3,10.0 );
-    m.insert( 0,3,0.5 );
-    r_sparseMat bob(m);
+    r_sparseMat bob = buildSparseMat(N, {
+        {1, 1,  3.14},
+        {0, 0,   1.0},
+        {2, 2,   5.0},
+        {3, 3,  42.0},
+        {1, 3, -10.0},
+        {1, 3,  10.0},
+        {0, 3,   0.5}
+    });
     std::vector<double> b {1.0,1.0,1.0,1.0};
     std::vector<double> x(N);
     iteration<double> algo_it("cg",1e-6,false,700);
@@ -224,17 +225,18 @@ BOOST_AUTO_TEST_CASE(test_cg_dir, *boost::unit_test::tolerance(UT_TOL))
     std::vector<int> ld;
     std::vector<double> Vd(NOD, 0.0);
 
-    w_sparseMat Kw(NOD);
-    Kw.insert(0,0,1.0);
-    Kw.insert(0,1,-1.0);
-    Kw.insert(NOD-1,NOD-2,-1.0);
-    Kw.insert(NOD-1,NOD-1,1.0);
+    std::vector<MatrixCoefficient> coefficients = {
+            {0,     0,      1.0},
+            {0,     1,     -1.0},
+            {NOD-1, NOD-2, -1.0},
+            {NOD-1, NOD-1,  1.0}
+    };
 
     for (int n=1; n<NOD-1; ++n)
         {
-        Kw.insert(n,n-1,-1.0);
-        Kw.insert(n,n,2.0);
-        Kw.insert(n,n+1,-1.0);
+        coefficients.push_back({n, n-1, -1.0});
+        coefficients.push_back({n, n,    2.0});
+        coefficients.push_back({n, n+1, -1.0});
         }
     ld.push_back(0);
     Vd[0]=0.0;
@@ -242,7 +244,7 @@ BOOST_AUTO_TEST_CASE(test_cg_dir, *boost::unit_test::tolerance(UT_TOL))
     ld.push_back(NOD-1);
     Vd[NOD-1]=1.0;
 
-    r_sparseMat Kr(Kw);
+    r_sparseMat Kr = buildSparseMat(NOD, coefficients);
     std::vector<double> Lr(NOD,0.0);
 
     iteration iter("cg_dir",cg_dir_tol,VERBOSE,MAXITER);
@@ -266,15 +268,15 @@ BOOST_AUTO_TEST_CASE(test_cg_dir, *boost::unit_test::tolerance(UT_TOL))
 BOOST_AUTO_TEST_CASE(test_bicg, *boost::unit_test::tolerance(UT_TOL))
     {
     const int N=4;
-    w_sparseMat m(N);
-    m.insert( 1,1,3.14 );
-    m.insert( 0,0,1.0 );
-    m.insert( 2,2,5.0 );
-    m.insert( 3,3,42.0 );
-    m.insert( 1,3,-10.0 );
-    m.insert( 1,3,10.0 );
-    m.insert( 0,3,0.5 );
-    r_sparseMat bob(m);
+    r_sparseMat bob = buildSparseMat(N, {
+        {1, 1,  3.14},
+        {0, 0,   1.0},
+        {2, 2,   5.0},
+        {3, 3,  42.0},
+        {1, 3, -10.0},
+        {1, 3,  10.0},
+        {0, 3,   0.5},
+    });
     std::vector<double> b {1.0,1.0,1.0,1.0};
     std::vector<double> x(N);
     iteration<double> algo_it("bicg",1e-6,false,700);
@@ -308,17 +310,18 @@ BOOST_AUTO_TEST_CASE(test_bicg_dir, *boost::unit_test::tolerance(UT_TOL))
     std::vector<int> ld;
     std::vector<double> Vd(NOD, 0.0);
 
-    w_sparseMat Kw(NOD);
-    Kw.insert(0,0,1.0);
-    Kw.insert(0,1,-1.0);
-    Kw.insert(NOD-1,NOD-2,-1.0);
-    Kw.insert(NOD-1,NOD-1,1.0);
+    std::vector<MatrixCoefficient> coefficients = {
+            {0,     0,      1.0},
+            {0,     1,     -1.0},
+            {NOD-1, NOD-2, -1.0},
+            {NOD-1, NOD-1,  1.0}
+    };
 
     for (int n=1; n<NOD-1; ++n)
         {
-        Kw.insert(n,n-1,-1.0);
-        Kw.insert(n,n,2.0);
-        Kw.insert(n,n+1,-1.0);
+        coefficients.push_back({n, n-1, -1.0});
+        coefficients.push_back({n, n,    2.0});
+        coefficients.push_back({n, n+1, -1.0});
         }
     ld.push_back(0);
     Vd[0]=0.0;
@@ -326,7 +329,7 @@ BOOST_AUTO_TEST_CASE(test_bicg_dir, *boost::unit_test::tolerance(UT_TOL))
     ld.push_back(NOD-1);
     Vd[NOD-1]=1.0;
 
-    r_sparseMat Kr(Kw);
+    r_sparseMat Kr = buildSparseMat(NOD, coefficients);
     std::vector<double> Lr(NOD,0.0);
 
     iteration iter("bicg_dir",bicg_dir_tol,VERBOSE,MAXITER);

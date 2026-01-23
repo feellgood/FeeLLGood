@@ -92,25 +92,22 @@ void electrostatSolver::compute(const bool verbose, const std::string V_fileName
 bool electrostatSolver::solve(void)
     {
     const int NOD = msh->getNbNodes();
-    algebra::w_sparseMat Kw(NOD);
-    std::vector<double> Lw(NOD, 0.0);
 
-    std::for_each( msh->tet.begin(),msh->tet.end(),[this,&Kw](Tetra::Tet &elem)
+    std::for_each( msh->tet.begin(),msh->tet.end(),[this](Tetra::Tet &elem)
         {
-        Eigen::Matrix<double,DIM_PB_ELEC*Tetra::N,DIM_PB_ELEC*Tetra::N> K;
-        K.setZero();
-        integrales(elem,K);
-        buildMat<Tetra::N>(elem.ind,K,Kw);
+        Eigen::Matrix<double,DIM_PB_ELEC*Tetra::N,DIM_PB_ELEC*Tetra::N> Ke;
+        Ke.setZero();
+        integrales(elem,Ke);
+        buildMat<Tetra::N>(elem.ind,Ke);
         } );
 
-    std::for_each( msh->fac.begin(), msh->fac.end(),[this,&Lw](Facette::Fac &elem)
+    std::for_each( msh->fac.begin(), msh->fac.end(),[this](Facette::Fac &elem)
         {
-        std::vector<double> L(DIM_PB*Facette::N,0.0);
-        integrales(elem,L);
-        buildVect<Facette::N>(elem.ind,L,Lw);
+        std::vector<double> Le(DIM_PB*Facette::N,0.0);
+        integrales(elem,Le);
+        buildVect<Facette::N>(elem.ind,Le);
         } );
 
-    algebra::r_sparseMat Kr(Kw);
     std::vector<int> ld; // vector of the Dirichlet Nodes
     std::vector<double> Vd(NOD); // potential values on Dirichlet nodes, zero on the others
 
@@ -129,7 +126,7 @@ bool electrostatSolver::solve(void)
         });
     suppress_copies<int>(ld);
     iter.reset();
-    algebra::cg_dir<double>(iter, Kr, V, Lw, Vd, ld);
+    algebra::cg_dir<double>(iter, K, V, L_rhs, Vd, ld);
 
     return ( iter.status == algebra::CONVERGED);
     }

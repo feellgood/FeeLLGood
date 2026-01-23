@@ -101,7 +101,7 @@ class solver
         parameter N is the number of indices of the element to build matrix from: ind.size() = N
          */
         template <int N>
-        void buildMat(std::vector<int> &ind, Eigen::Matrix<double,DIM_PROBLEM*N,DIM_PROBLEM*N> &Ke, algebra::w_sparseMat &K)
+        void buildMat(std::vector<int> &ind, Eigen::Matrix<double,DIM_PROBLEM*N,DIM_PROBLEM*N> &Ke)
             {
             for (int ie=0; ie<N; ie++)
                 {
@@ -111,7 +111,7 @@ class solver
                     int j_ = ind[je];
                     for (int di=0; di<DIM_PROBLEM; di++)
                         for (int dj=0; dj<DIM_PROBLEM; dj++)
-                            K.insert(DIM_PROBLEM*i_ + di, DIM_PROBLEM*j_ + dj, Ke(di*N+ie,dj*N+je));
+                            K.add(DIM_PROBLEM*i_ + di, DIM_PROBLEM*j_ + dj, Ke(di*N+ie,dj*N+je));
                     }
                 }
             }
@@ -120,13 +120,13 @@ class solver
         parameter N is the number of indices of the element to build vector from
         */
         template <int N>
-        void buildVect(std::vector<int> &ind, std::vector<double> &Le, std::vector<double> &L)
+        void buildVect(std::vector<int> &ind, std::vector<double> &Le)
             {
             for (int ie=0; ie<N; ie++)
                 {
                 int i_ = ind[ie];
                 for (int di=0; di<DIM_PROBLEM; di++)
-                    { L[DIM_PROBLEM*i_ + di] += Le[di*N+ie]; }
+                    { L_rhs[DIM_PROBLEM*i_ + di] += Le[di*N+ie]; }
                 }
             }
     }; // end template class solver

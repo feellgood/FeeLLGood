@@ -189,24 +189,22 @@ void spinAcc::calc_Hst(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,No
 bool spinAcc::solve(void)
     {
     iter.reset();
-    algebra::w_sparseMat Kw(DIM_PB*NOD);
-    std::vector<double> Lw(DIM_PB*NOD,0);
 
-    std::for_each( msh->tet.begin(), msh->tet.end(),[this,&Kw,&Lw](Tetra::Tet &elem)
+    std::for_each( msh->tet.begin(), msh->tet.end(),[this](Tetra::Tet &elem)
         {
-        Eigen::Matrix<double,DIM_PB*Tetra::N,DIM_PB*Tetra::N> K;
-        K.setZero();
-        std::vector<double> L(DIM_PB*Tetra::N,0.0);
-        integrales(elem,K);
-        integrales(elem,L);
-        buildMat<Tetra::N>(elem.ind, K, Kw);
-        buildVect<Tetra::N>(elem.ind, L, Lw);
+        Eigen::Matrix<double,DIM_PB*Tetra::N,DIM_PB*Tetra::N> Ke;
+        Ke.setZero();
+        std::vector<double> Le(DIM_PB*Tetra::N,0.0);
+        integrales(elem,Ke);
+        integrales(elem,Le);
+        buildMat<Tetra::N>(elem.ind, Ke);
+        buildVect<Tetra::N>(elem.ind, Le);
         } );
 
     // here are the boundary conditions
-    std::for_each(msh->fac.begin(),msh->fac.end(),[this,&Lw](Facette::Fac &f)
+    std::for_each(msh->fac.begin(),msh->fac.end(),[this](Facette::Fac &f)
         {
-        std::vector<double> L(DIM_PB*Facette::N,0.0);
+        std::vector<double> Le(DIM_PB*Facette::N,0.0);
         if (!std::isfinite(paramFac[f.idxPrm].s.norm()) && std::isfinite(paramFac[f.idxPrm].jn))
             { // we should also test polarization P
             Eigen::Vector3d s_value = -paramFac[f.idxPrm].jn*(BOHRS_MUB/CHARGE_ELECTRON)*paramFac[f.idxPrm].uP;
@@ -216,18 +214,17 @@ bool spinAcc::solve(void)
                 for (int ie=0; ie<Facette::N; ie++)
                     {
                     double ai_w = w*Facette::a[ie][npi];
-                    L[               ie] -= s_value[IDX_X]* ai_w;
-                    L[  Facette::N + ie] -= s_value[IDX_Y]* ai_w;
-                    L[2*Facette::N + ie] -= s_value[IDX_Z]* ai_w;
+                    Le[               ie] -= s_value[IDX_X]* ai_w;
+                    Le[  Facette::N + ie] -= s_value[IDX_Y]* ai_w;
+                    Le[2*Facette::N + ie] -= s_value[IDX_Z]* ai_w;
                     }
                 }
             }
-        buildVect<Facette::N>(f.ind, L, Lw);
+        buildVect<Facette::N>(f.ind, Le);
         });
 
-    algebra::r_sparseMat Kr(Kw);
     std::vector<double> Xw(DIM_PB*NOD);
-    algebra::bicg_dir(iter, Kr, Xw, Lw, valDirichlet, idxDirichlet);
+    algebra::bicg_dir(iter, K, Xw, L_rhs, valDirichlet, idxDirichlet);
 
     for (int i=0; i<NOD; i++)
         for (int j=0; j<3; j++)
