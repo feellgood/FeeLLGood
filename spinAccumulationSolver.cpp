@@ -286,21 +286,23 @@ void spinAcc::integrales(Tetra::Tet &tet, std::vector<double> &BE)
     const double cst0 = BOHRS_MUB*getPolarizationRate(tet)*getSigma(tet)/CHARGE_ELECTRON;
     Eigen::Matrix<double,Nodes::DIM,NPI> &_gradV = gradV[tet.idx];
 
-    for (size_t npi=0; npi<NPI; npi++)
+    if(msh->isMagnetic(tet))
         {
-        const double cst0_w = cst0*tet.weight[npi];
-
-        for (size_t ie=0; ie<N; ie++)
+        for (size_t npi=0; npi<NPI; npi++)
             {
-            const Eigen::Vector3d &m = msh->getNode_u(tet.ind[ie]);//magnetization
-            Eigen::Vector3d grad_ai = tet.da.row(ie);
-            double tmp = cst0_w*grad_ai.dot( _gradV.col(npi) );
-            BE[    ie] += tmp*m[0];
-            BE[  N+ie] += tmp*m[1];
-            BE[2*N+ie] += tmp*m[2];
+            const double cst0_w = cst0*tet.weight[npi];
+
+            for (size_t ie=0; ie<N; ie++)
+                {
+                const Eigen::Vector3d &m = msh->getNode_u(tet.ind[ie]);//magnetization
+                Eigen::Vector3d grad_ai = tet.da.row(ie);
+                double tmp = cst0_w*grad_ai.dot( _gradV.col(npi) );
+                BE[    ie] += tmp*m[0];
+                BE[  N+ie] += tmp*m[1];
+                BE[2*N+ie] += tmp*m[2];
+                }
             }
         }
-
     if(paramTet[tet.idxPrm].spinHall != 0)
         {
         const double cst0 = getSpinHall(tet)*CHARGE_ELECTRON/MASS_ELECTRON;
