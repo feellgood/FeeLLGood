@@ -221,7 +221,7 @@ int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /*
                 std::cout << "  -> dumax = " << dumax << ",  vmax = " << vmax << std::endl;
                 }
 
-            stepper.set_soft_limit(settings.DUMAX / vmax / 2);
+            stepper.set_soft_limit((settings.DUMAX / vmax) * 0.9);
             if (dumax > settings.DUMAX)
                 {
                 flag++;
