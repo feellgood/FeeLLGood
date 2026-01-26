@@ -430,16 +430,9 @@ BOOST_AUTO_TEST_CASE(Tet_gradV, *boost::unit_test::tolerance(UT_TOL))
     // carefull with indices (starting from 1)
     Tetra::Tet tet(node, 0, {1, 2, 3, 4});
 
-    // compact version
-    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> gradV;
-    for (int npi = 0; npi < Tetra::NPI; npi++)
-        {
-        Eigen::Vector3d v(0,0,0);
-        for (int i = 0; i < Tetra::N; i++)
-            { v += V[tet.ind[i]] * tet.da.row(i); }
-        gradV.col(npi) = v;
-        }
-    
+    // code to test
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> gradV = Tetra::calc_gradV(V,tet);
+
     // ugly version
     Eigen::Matrix<double,Tetra::N,1> V_nod;
     for (size_t ie=0; ie<Tetra::N; ie++) { V_nod[ie] = V[ tet.ind[ie] ]; }
