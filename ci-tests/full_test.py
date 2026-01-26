@@ -36,6 +36,16 @@ settings = {
     }
 }
 
+val = subprocess.check_output(["../feellgood","--version"])
+if b'ONE_GAUSS_POINT=ON' in val:
+    X = 0.312732
+    Y = 0.406896
+    Z = -0.858274
+else:
+    X = 0.312906
+    Y = 0.406555
+    Z = -0.858372
+
 sys.stdout.flush()
 val = subprocess.run(["../feellgood", "--seed", "2", "-"], input=json.dumps(settings), text=True)
 
@@ -52,9 +62,6 @@ if(val.returncode==0):
     mx = float(data[1])
     my = float(data[2])
     mz = float(data[3])
-    X = 0.312906
-    Y = 0.406555
-    Z = -0.858372
     distance = sqrt((X-mx)**2+(Y-my)**2+(Z-mz)**2)
     threshold = 1e-5
     success = distance < threshold
