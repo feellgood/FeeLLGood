@@ -104,10 +104,6 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** affect extraField function and extraCoeffs_BE function using lambdas for all the tetrahedrons (functor) */
     void prepareExtras(void);
 
-    /** computes Hst contributions for each npi for tetrahedron tet */
-    void calc_Hst(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV,
-                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _Hst);
-
     /** solver, using biconjugate stabilized gradient, with diagonal preconditionner and Dirichlet
      * boundary conditions */
     bool solve(void);

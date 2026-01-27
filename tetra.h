@@ -375,7 +375,11 @@ private:
                                                Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff);
 
     /** returns grad(V) for tetra tet */
-    Eigen::Matrix<double,Nodes::DIM,NPI> calc_gradV(std::vector<double> &V, Tet const &tet);
+    Eigen::Matrix<double,Nodes::DIM,NPI> calc_gradV(Tet const &tet,std::vector<double> &V);
+
+    /** returns Hst field on the NPI Gauss point(s) */
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> calc_Hst(Tetra::Tet const &tet, const double sigma,
+            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV);
     }   // end namespace Tetra
 
 #endif /* tetra_h */

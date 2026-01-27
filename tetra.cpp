@@ -75,7 +75,7 @@ Eigen::Matrix<double,NPI,1> Tetra::calc_alpha_eff(const double dt, const double 
     return a_eff;
     }
 
-Eigen::Matrix<double,Nodes::DIM,NPI> Tetra::calc_gradV(std::vector<double> &V, Tet const &tet)
+Eigen::Matrix<double,Nodes::DIM,NPI> Tetra::calc_gradV(Tet const &tet, std::vector<double> &V)
     {
     Eigen::Matrix<double,N,1> _V;
     for (int i = 0; i < N; i++)
@@ -89,6 +89,17 @@ Eigen::Matrix<double,Nodes::DIM,NPI> Tetra::calc_gradV(std::vector<double> &V, T
         _gradV.col(npi) = v;
         }
     return _gradV;
+    }
+
+// Hst is a torque involving current density
+Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> Tetra::calc_Hst(Tetra::Tet const &tet, const double sigma, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV)
+    {
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> Hst;
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> p_g;
+    tet.getPtGauss(p_g);
+    for (int npi = 0; npi < Tetra::NPI; npi++)
+        { Hst.col(npi) = -sigma * _gradV.col(npi).cross(p_g.col(npi)); }
+    return Hst;
     }
 
 void Tet::lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double prefactor,
