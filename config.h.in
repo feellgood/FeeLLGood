@@ -36,6 +36,9 @@ const double CHARGE_ELECTRON = 1.602176634e-19;     /**< C */
 const double MASS_ELECTRON = 9.1093837139e-31;      /**< kg */
 const double BOHRS_MUB = CHARGE_ELECTRON * PLANCKS_HBAR / (2. * MASS_ELECTRON); /**< C.m^2 */
 
+/** use of a single Gauss point */
+#cmakedefine01 ONE_GAUSS_POINT
+
 /** set execution policy */
 #cmakedefine01 ENABLE_SEQ
 

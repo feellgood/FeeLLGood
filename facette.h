@@ -17,7 +17,7 @@ namespace Facette
 /** number of sommits */
 const int N = 3;
 
-#ifdef ONE_GAUSS_POINT  // Single Gauss point at barycenter of triangle
+#if ONE_GAUSS_POINT  // Single Gauss point at barycenter of triangle
     /** number of Gauss points */
     const int NPI = 1;
 
