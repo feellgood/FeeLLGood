@@ -161,18 +161,9 @@ std::string parseOptions(Settings &settings, int argc, char *argv[], unsigned in
     if (print_version)
         {
         std::cout << "feeLLGood " << feellgood_version << "\n";
-        std::cout << "Compiled with:\n\tONE_GAUSS_POINT=";
-        #ifdef ONE_GAUSS_POINT
-            std::cout << "ON\n";
-        #else
-            std::cout << "OFF\n";
-        #endif
-        std::cout << "\tENABLE_SEQ=";
-        #ifdef ENABLE_SEQ
-            std::cout << "ON\n";
-        #else
-            std::cout << "OFF\n";
-        #endif
+        std::cout << "Compiled with:\n"
+                  << "\tONE_GAUSS_POINT=" << (ONE_GAUSS_POINT ? "ON" : "OFF") << '\n'
+                  << "\tENABLE_SEQ=" << (ENABLE_SEQ ? "ON" : "OFF") << '\n';
         exit(0);
         }
     if (print_defaults)
@@ -213,8 +204,12 @@ int main(int argc, char *argv[])
     prompt();
     if (mySettings.verbose) std::cout << "verbose mode:      on\n";
     std::cout << "feeLLGood version: " << feellgood_version << '\n';
-    if (ENABLE_SEQ) std::cout << "parallelism:       disabled\n";
-    else std::cout << "parallelism:       enabled\n";
+    std::string compile_options;
+    if (ONE_GAUSS_POINT) compile_options += "ONE_GAUSS_POINT, ";
+    if (ENABLE_SEQ) compile_options += "ENABLE_SEQ, ";
+    if (compile_options.empty()) compile_options = "defaults, ";
+    compile_options.resize(compile_options.size() - 2);  // remove trailing ", "
+    std::cout << "compiled with:     " << compile_options << '\n';
     std::cout << "process ID:        " << std::to_string(getpid()) << '\n';
     std::cout << "random seed:       " << random_seed << '\n';
     mySettings.setFileDisplayName(filename == "-" ? "standard input" : filename);

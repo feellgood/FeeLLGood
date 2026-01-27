@@ -138,11 +138,7 @@ include_directories (${CMAKE_SOURCE_DIR} ${GMSH_INC})
 
 ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES} default-settings.o)
 target_compile_options( feellgood PUBLIC -Wall -Wextra -O3 -march=native ${MKL_CFLAGS} )
-if (${ONE_GAUSS_POINT})
-    target_compile_definitions(feellgood PUBLIC -DNDEBUG -DTBB_SUPPRESS_DEPRECATED_MESSAGES -DONE_GAUSS_POINT ${EIGEN_MKL_CFLAGS} )
-else()
-    target_compile_definitions(feellgood PUBLIC -DNDEBUG -DTBB_SUPPRESS_DEPRECATED_MESSAGES ${EIGEN_MKL_CFLAGS} )
-endif()
+target_compile_definitions(feellgood PUBLIC -DNDEBUG -DTBB_SUPPRESS_DEPRECATED_MESSAGES ${EIGEN_MKL_CFLAGS} )
 
 if (MKL_FOUND)
     #option --no-as-needed for mkl, see https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-link-line-advisor.html

@@ -24,7 +24,7 @@ const double epsilon = EPSILON;
 
 const int N = 4;   /**< number of vertices */
 
-#ifdef ONE_GAUSS_POINT
+#if ONE_GAUSS_POINT
     const int NPI = 1; /**< number of Gauss points = 1 : single point integration at barycentre of
                          tetrahedron */
 
