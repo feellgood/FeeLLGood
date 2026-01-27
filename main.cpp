@@ -168,7 +168,7 @@ std::string parseOptions(Settings &settings, int argc, char *argv[], unsigned in
             std::cout << "OFF\n";
         #endif
         std::cout << "\tENABLE_SEQ=";
-        #ifdef ENABLE_SEQ
+        #if ENABLE_SEQ
             std::cout << "ON\n";
         #else
             std::cout << "OFF\n";
