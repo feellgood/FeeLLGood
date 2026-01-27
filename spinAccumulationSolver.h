@@ -36,7 +36,9 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
         }
 
     /** boundary conditions: a surface with a fixed s, and another surface with fixed normal current
-     * density J and polarization vector P */
+     * density J and polarization vector P
+     * set valDirichlet values and fill vector of indices idxDirichlet
+     * */
     void boundaryConditions(void); // should be private
 
     /** initializations: compute gradV and Hst and call prepareExtras method */

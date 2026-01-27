@@ -45,12 +45,12 @@ void spinAcc::checkBoundaryConditions(void) const
 
 void spinAcc::fillDirichletData(const int k, Eigen::Vector3d &s_value)
     {
-    valDirichlet[3*k] = s_value[Nodes::IDX_X];
-    idxDirichlet.push_back(3*k);
-    valDirichlet[3*k + 1] = s_value[Nodes::IDX_Y];
-    idxDirichlet.push_back(3*k + 1);
-    valDirichlet[3*k + 2] = s_value[Nodes::IDX_Z];
-    idxDirichlet.push_back(3*k + 2);
+    valDirichlet[DIM_PB*k] = s_value[Nodes::IDX_X];
+    idxDirichlet.push_back(DIM_PB*k);
+    valDirichlet[DIM_PB*k + 1] = s_value[Nodes::IDX_Y];
+    idxDirichlet.push_back(DIM_PB*k + 1);
+    valDirichlet[DIM_PB*k + 2] = s_value[Nodes::IDX_Z];
+    idxDirichlet.push_back(DIM_PB*k + 2);
     }
 
 void spinAcc::boundaryConditions(void)
@@ -201,13 +201,18 @@ bool spinAcc::solve(void)
         buildVect<Tetra::N>(elem.ind, Le);
         } );
 
-    // here are the boundary conditions
+    /* here are the boundary conditions: either a vector s is defined on a surface, or a normal
+     current density and a unit polarization vector */
     std::for_each(msh->fac.begin(),msh->fac.end(),[this](Facette::Fac &f)
         {
         std::vector<double> Le(DIM_PB*Facette::N,0.0);
-        if (!std::isfinite(paramFac[f.idxPrm].s.norm()) && std::isfinite(paramFac[f.idxPrm].jn))
-            { // we should also test polarization P
-            Eigen::Vector3d s_value = -paramFac[f.idxPrm].jn*(BOHRS_MUB/CHARGE_ELECTRON)*paramFac[f.idxPrm].uP;
+        Eigen::Vector3d s_value = paramFac[f.idxPrm].s;
+
+        if (std::isfinite(paramFac[f.idxPrm].jn) && std::isfinite(paramFac[f.idxPrm].uP.norm()))
+            { s_value = -paramFac[f.idxPrm].jn*(BOHRS_MUB/CHARGE_ELECTRON)*paramFac[f.idxPrm].uP; }
+
+        if (std::isfinite(s_value.norm()))
+            {
             for (int npi=0; npi<Facette::NPI; npi++)
                 {
                 const double w = f.weight[npi];
@@ -227,10 +232,8 @@ bool spinAcc::solve(void)
     algebra::bicg_dir(iter, K, Xw, L_rhs, valDirichlet, idxDirichlet);
 
     for (int i=0; i<NOD; i++)
-        for (int j=0; j<3; j++)
-        {
-        s[i][j] = Xw[DIM_PB*i + j];
-        }
+        for (int j=0; j<DIM_PB; j++)
+            { s[i][j] = Xw[DIM_PB*i + j]; }
     return (iter.status == algebra::CONVERGED);
     }
 

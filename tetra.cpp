@@ -77,12 +77,15 @@ Eigen::Matrix<double,NPI,1> Tetra::calc_alpha_eff(const double dt, const double 
 
 Eigen::Matrix<double,Nodes::DIM,NPI> Tetra::calc_gradV(std::vector<double> &V, Tet const &tet)
     {
+    Eigen::Matrix<double,N,1> _V;
+    for (int i = 0; i < N; i++)
+        { _V[i] = V[tet.ind[i]]; }
     Eigen::Matrix<double,Nodes::DIM,NPI> _gradV;
     for (int npi = 0; npi < NPI; npi++)
         {
         Eigen::Vector3d v(0,0,0);
         for (int i = 0; i < N; i++)
-            { v += V[tet.ind[i]] * tet.da.row(i); }
+            { v += _V[i] * tet.da.row(i); }
         _gradV.col(npi) = v;
         }
     return _gradV;
