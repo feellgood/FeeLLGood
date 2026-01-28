@@ -87,19 +87,19 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     double getSigma(Tetra::Tet const &tet) const;
 
     /** \f$ P \f$ is polarization rate of the current density */
-    double getPolarizationRate(Tetra::Tet &tet) const;
+    double getPolarizationRate(Tetra::Tet const &tet) const;
 
     /** diffusion constant, units: s^-1 m^2 */
-    double getDiffusionCst(Tetra::Tet &tet) const;
+    double getDiffusionCst(Tetra::Tet const &tet) const;
 
     /** length s-d : only in magnetic material */
-    double getLsd(Tetra::Tet &tet) const;
+    double getLsd(Tetra::Tet const &tet) const;
 
     /** spin flip length : exists in both non magnetic and magnetic metals */
-    double getLsf(Tetra::Tet &tet) const;
+    double getLsf(Tetra::Tet const &tet) const;
 
     /** spin Hall constant */
-    double getSpinHall(Tetra::Tet &tet) const;
+    double getSpinHall(Tetra::Tet const &tet) const;
 
     /** affect extraField function and extraCoeffs_BE function using lambdas for all the tetrahedrons (functor) */
     void prepareExtras(void);

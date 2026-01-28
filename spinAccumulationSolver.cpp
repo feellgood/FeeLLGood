@@ -84,22 +84,22 @@ double spinAcc::getMs(Tetra::Tet const &tet) const
 double spinAcc::getSigma(Tetra::Tet const &tet) const
     { return paramTet[tet.idxPrm].sigma; }
 
-double spinAcc::getDiffusionCst(Tetra::Tet &tet) const
+double spinAcc::getDiffusionCst(Tetra::Tet const &tet) const
     {
     const double N0 = paramTet[tet.idxPrm].N0;
     return 2.0*getSigma(tet)/(sq(CHARGE_ELECTRON)*N0);
     }
 
-double spinAcc::getPolarizationRate(Tetra::Tet &tet) const
+double spinAcc::getPolarizationRate(Tetra::Tet const &tet) const
     { return paramTet[tet.idxPrm].P; }
 
-double spinAcc::getLsd(Tetra::Tet &tet) const
+double spinAcc::getLsd(Tetra::Tet const &tet) const
     { return paramTet[tet.idxPrm].lsd; }
 
-double spinAcc::getLsf(Tetra::Tet &tet) const
+double spinAcc::getLsf(Tetra::Tet const &tet) const
     { return paramTet[tet.idxPrm].lsf; }
 
-double spinAcc::getSpinHall(Tetra::Tet &tet) const
+double spinAcc::getSpinHall(Tetra::Tet const &tet) const
     { return paramTet[tet.idxPrm].spinHall; }
 
 void spinAcc::prepareExtras(void)
@@ -154,7 +154,9 @@ void spinAcc::preCompute(std::vector<double> &V)
                  Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _gradV = calc_gradV(tet,V);
                  gradV.push_back(_gradV);
 
-                 Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _Hst = calc_Hst(tet, getSigma(tet), _gradV);
+                 double D0 = getDiffusionCst(tet);
+                 double prefactor = D0/(sq(getLsd(tet))*gamma0*getMs(tet));
+                 Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _Hst = calc_Hst(tet, prefactor, s);
                  Hst.push_back(_Hst);
                  });
     prepareExtras();

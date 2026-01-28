@@ -91,14 +91,18 @@ Eigen::Matrix<double,Nodes::DIM,NPI> Tetra::calc_gradV(Tet const &tet, std::vect
     return _gradV;
     }
 
-// Hst is a torque involving current density
-Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> Tetra::calc_Hst(Tetra::Tet const &tet, const double sigma, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV)
+Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> Tetra::calc_Hst(Tetra::Tet const &tet,
+                                                            const double prefactor, std::vector<Eigen::Vector3d> &s)
     {
-    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> Hst;
-    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> p_g;
-    tet.getPtGauss(p_g);
-    for (int npi = 0; npi < Tetra::NPI; npi++)
-        { Hst.col(npi) = -sigma * _gradV.col(npi).cross(p_g.col(npi)); }
+    Eigen::Matrix<double,Nodes::DIM,Tetra::N> s_nod;
+    for(size_t ie=0;ie<Tetra::N;ie++)
+        {
+        size_t i = tet.ind[ie];
+        for(size_t d=0;d<Nodes::DIM;d++)
+            { s_nod(d,ie)= s[i][d]; }
+        }
+
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> Hst = prefactor * s_nod * Tetra::eigen_a;
     return Hst;
     }
 

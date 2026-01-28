@@ -378,8 +378,9 @@ private:
     Eigen::Matrix<double,Nodes::DIM,NPI> calc_gradV(Tet const &tet,std::vector<double> &V);
 
     /** returns Hst field on the NPI Gauss point(s) */
-    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> calc_Hst(Tetra::Tet const &tet, const double sigma,
-            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> _gradV);
-    }   // end namespace Tetra
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> calc_Hst(Tetra::Tet const &tet,
+                                                         const double prefactor,
+                                                         std::vector<Eigen::Vector3d> &s);
+}   // end namespace Tetra
 
 #endif /* tetra_h */
