@@ -108,41 +108,8 @@ void spinAcc::prepareExtras(void)
 
     std::for_each( msh->tet.begin(), msh->tet.end(), [this](Tet &t)
         {
-        const double sigma = getSigma(t);
-        const double P = getPolarizationRate(t);
-        const double lsd = getLsd(t);
-        const double lsf = getLsf(t);
-        const double ksi = sq(lsd/lsf);
-        const double Ms = getMs(t);
-
-        // this formula might be mistaken, mixture of different models, to check
-        double prefactor = BOHRS_MUB*P/(gamma0*Ms*CHARGE_ELECTRON*(1.0 + sq(ksi)));
-
         t.extraField = [this, _idx = t.idx](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)
                          { for(int npi = 0; npi<Tetra::NPI; npi++) { H.col(npi) += Hst[_idx].col(npi); } };
-
-        t.extraCoeffs_BE = [this, sigma, ksi, prefactor, &t](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
-                                          Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdx,
-                                          Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdy,
-                                          Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdz,
-                                          Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,N>> BE)
-                {
-                for (int npi = 0; npi < NPI; npi++)
-                    {
-                    Eigen::Vector3d const &_gV = gradV[t.idx].col(npi);
-                    Eigen::Vector3d j_grad_u =
-                    -sigma * Eigen::Vector3d(_gV.dot( Eigen::Vector3d(dUdx(IDX_X,npi), dUdy(IDX_X,npi), dUdz(IDX_X,npi))),
-                                             _gV.dot( Eigen::Vector3d(dUdx(IDX_Y,npi), dUdy(IDX_Y,npi), dUdz(IDX_Y,npi))),
-                                             _gV.dot( Eigen::Vector3d(dUdx(IDX_Z,npi), dUdy(IDX_Z,npi), dUdz(IDX_Z,npi))));
-
-                    Eigen::Vector3d m = ksi * j_grad_u + U.col(npi).cross(j_grad_u);
-                    for (int i = 0; i < N; i++)
-                        {
-                        const double ai_w = t.weight[npi] * a[i][npi];
-                        BE.col(i) += ai_w*( Hst[t.idx].col(npi) + prefactor*m);
-                        }
-                    } // end loop on npi
-                }; //end lambda
         });//end for_each
     }
 

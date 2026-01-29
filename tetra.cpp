@@ -239,7 +239,11 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
 
     Eigen::Matrix<double,DIM,NPI> Heff = Hd + calc_Hext();
     Eigen::Matrix<double,DIM,NPI> H = Heff; // we need Hd+Hext for future computations
-    extraField(Heff);// extraField do a +=like for spinAcc contrib on Heff
+    Eigen::Matrix<double,DIM,NPI> Hst; // Hst is an effective field for spin accumulation
+    Hst.setZero();
+    extraField(Hst); // carefull, extrafield do a += like operation on Hst, not a =
+
+    Heff += Hst;
     uHeff += (U.cwiseProduct(Heff)).colwise().sum();//dot product on each col of U and Heff
 
     Eigen::Matrix<double,NPI,1> a_eff = calc_alpha_eff(dt, alpha, uHeff);
@@ -279,13 +283,15 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     for (int npi = 0; npi < NPI; npi++)
         {
         const double w = weight[npi];
+        double scal_Hst_u = (Hst.col(npi)).dot(U.col(npi));
         for (int i = 0; i < N; i++)
             {
-            BE.col(i) -= w*Abis*(da(i,0)*dUdx.col(npi) + da(i,1)*dUdy.col(npi) + da(i,2)*dUdz.col(npi));
-            BE.col(i) += w*a[i][npi]*H.col(npi);
+            const double ai_w = w*a[i][npi];
+            BE.col(i) -= w*Abis*(da(i,0)*dUdx.col(npi) + da(i,1)*dUdy.col(npi) + da(i,2)*dUdz.col(npi));// exchange
+            BE.col(i) += ai_w*(H.col(npi) + Hst.col(npi) ); // Hst contribution to BE
+            BE.col(i) -= ai_w*scal_Hst_u*s_dt*V.col(npi); // spin acc second order contrib
             }
         }
-    extraCoeffs_BE(U, dUdx, dUdy, dUdz, BE);  // spinAcc
 
     /*--------------------   PROJECTION: BE->Lp   --------------------*/
     Lp = Perm * P * BE.reshaped<Eigen::RowMajor>();

@@ -171,11 +171,6 @@ public:
             }
         // do nothing lambda's (usefull for spin transfer torque)
         extraField = [] ( Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> ) {};
-        extraCoeffs_BE = [](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>>,
-                            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>>,
-                            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>>,
-                            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>>,
-                            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,N>>) {};
         }
 
     /** local hat functions matrix, initialized by constructor: da = dadu * inverse(Jacobian)
@@ -338,15 +333,8 @@ public:
     /** idx is the index of the tetrahedron in the vector of tetrahedron */
     int idx;
 
-    /** for extra contribution to the effective field, such as spin transfert torque Hst */
+    /** do a += to the effective field H, to add contributions as spin transfert torque Hst */
     std::function<void( Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)> extraField;
-
-    /** for extra contribution to the matrix BE, such as spin transfer torque contribs */
-    std::function<void(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
-                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdx,
-                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdy,
-                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdz,
-                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,N>> BE)> extraCoeffs_BE;
 
     /** returns gauss points in result = vec_nod*Tetra::a  */
     void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result) const
