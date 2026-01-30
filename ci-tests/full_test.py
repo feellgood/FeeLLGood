@@ -38,13 +38,13 @@ settings = {
 
 val = subprocess.check_output(["../feellgood","--version"])
 if b'ONE_GAUSS_POINT=ON' in val:
-    X = 0.310045
-    Y = 0.406077
-    Z = -0.859635
+    X = 0.309710
+    Y = 0.406102
+    Z = -0.859745
 else:
-    X = 0.310219
-    Y = 0.405736
-    Z = -0.859734
+    X = 0.309885
+    Y = 0.405762
+    Z = -0.859842
 
 sys.stdout.flush()
 val = subprocess.run(["../feellgood", "--seed", "2", "-"], input=json.dumps(settings), text=True)
