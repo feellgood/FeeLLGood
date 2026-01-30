@@ -48,7 +48,14 @@ def get_params():
     import argparse
     description = 'convert .sol to .vtu using gmsh mesh and .sol file'
     epilogue = '''
- build a .vtu file from feellgood output .sol file and .msh mesh file 
+ build a .vtu file from feellgood output .sol file and .msh mesh file
+ By default the .vtu will contain magnetization components as a vector field
+ Exemple:
+ ./fg-sol2vtk myMesh.msh myMagConfig.sol
+ If some columns are specified by their indices the .vtu file is built using them
+ Exemple:
+ ./fgsol2vtk myMesh.msh myMagConfig.sol 1 2 3 4
+ Would create a .vtu with four scalar fields, mx, my, mz and demagnetizing potential.
    '''
     parser = argparse.ArgumentParser(description=description, epilog=epilogue,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
