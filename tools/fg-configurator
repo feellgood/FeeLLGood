@@ -50,115 +50,105 @@ def writeYaml(fileName,metadata):
             file.write(f"    Affiliation: {metadata['Affiliation']}\n")
         if metadata['Licence'] != "None":
             file.write(f"    Licence: {metadata['Licence']}\n")
-        file.write("\n"
-            "finite_element_solver:\n"
-           f"  nb_threads: {metadata['nbThreads']}\n")
     message = outputFile + " written."
 
     return message
 
-try:
-    from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QGridLayout, QLineEdit, QComboBox, QSpinBox, QMessageBox
-    from PyQt5.QtCore import Qt
+def whatQt():
+    str_version = ""
+    try:
+        from PyQt5.QtCore import PYQT_VERSION_STR
+        str_version = PYQT_VERSION_STR
+    except:
+        str_version = "None"
+    return str_version
 
-    class MainWindow(QWidget):
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
+if whatQt() != "None":
+    try:
+        from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QGridLayout, QLineEdit, QComboBox, QSpinBox, QMessageBox
+        from PyQt5.QtCore import Qt
 
-            self.resize(400,200)
-            self.setWindowTitle("feeLLGood config")
+        class MainWindow(QWidget):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.resize(400,200)
+                self.setWindowTitle("feeLLGood config")
+                layout = QGridLayout()
+                self.setLayout(layout)
+                # username
+                layout.addWidget(QLabel('Username:'), 0, 0)
+                self.userNameLineEdit = QLineEdit()
+                self.userNameLineEdit.textChanged.connect(self.updateWindowTitle)
+                layout.addWidget(self.userNameLineEdit,0,1,1,2)
+                # affiliation
+                layout.addWidget(QLabel('Affiliation:'), 1, 0)
+                self.affiliationLineEdit = QLineEdit()
+                self.affiliationLineEdit.textChanged.connect(self.updateWindowTitle)
+                layout.addWidget(self.affiliationLineEdit,1,1,1,2)
+                # licence
+                layout.addWidget(QLabel("Licence:"),2,0)
+                self.licenceComboBox = QComboBox()
+                self.licenceComboBox.setToolTip("Licence of the output file(s).")
+                self.licenceComboBox.addItems(licences)
+                self.licenceComboBox.currentTextChanged.connect(self.updateWindowTitle)
+                layout.addWidget(self.licenceComboBox,2,1,1,2)
+                # echo text
+                self.echoText = QLabel("")
+                layout.addWidget(self.echoText,4,0,1,3)
+                # buttons
+                self.cancelBtn = QPushButton('Cancel')
+                self.cancelBtn.setToolTip("Quit without saving.")
+                self.cancelBtn.clicked.connect(self.closeEvent)
+                self.saveBtn = QPushButton('Save')
+                self.saveBtn.setToolTip("Save config to a yaml file.\nIf a config file already exists it is overwritten.")
+                self.saveBtn.clicked.connect(self.writeConfig)
+                self.okBtn = QPushButton('Ok')
+                self.okBtn.setToolTip("Save and Quit")
+                self.okBtn.clicked.connect(self.saveAndClose)
+                self.hLayout = QHBoxLayout()
+                self.hLayout.addWidget(self.cancelBtn)
+                self.hLayout.addWidget(self.saveBtn)
+                self.hLayout.addWidget(self.okBtn)
+                layout.addLayout(self.hLayout,3,0,1,3)
+                self.show()
 
-            layout = QGridLayout()
-            self.setLayout(layout)
-            
-            # username
-            layout.addWidget(QLabel('Username:'), 0, 0)
-            self.userNameLineEdit = QLineEdit()
-            self.userNameLineEdit.textChanged.connect(self.updateWindowTitle)
-            layout.addWidget(self.userNameLineEdit,0,1,1,2)
-            
-            # affiliation
-            layout.addWidget(QLabel('Affiliation:'), 1, 0)
-            self.affiliationLineEdit = QLineEdit()
-            self.affiliationLineEdit.textChanged.connect(self.updateWindowTitle)
-            layout.addWidget(self.affiliationLineEdit,1,1,1,2)
+            def saveAndClose(self):
+                self.writeConfig()
+                print("config done.")
+                sys.exit()
 
-            # licence
-            layout.addWidget(QLabel("Licence:"),2,0)
-            self.licenceComboBox = QComboBox()
-            self.licenceComboBox.setToolTip("Licence of the output file(s).")
-            self.licenceComboBox.addItems(licences)
-            self.licenceComboBox.currentTextChanged.connect(self.updateWindowTitle)
-            layout.addWidget(self.licenceComboBox,2,1,1,2)
-            
-            #nb threads
-            layout.addWidget(QLabel("Nb threads:"),3,0)
-            self.nbThreadsSpinBox = QSpinBox()
-            self.nbThreadsSpinBox.setToolTip("Equation solver number of threads to use.\n 0 means to match the number of available processors.")
-            self.nbThreadsSpinBox.setMinimum(0)
-            self.nbThreadsSpinBox.setMaximum(maxNbThreads)
-            self.nbThreadsSpinBox.setValue(int(maxNbThreads/2))
-            layout.addWidget(self.nbThreadsSpinBox,3,1,1,2)
-            self.nbThreadsSpinBox.valueChanged.connect(self.updateWindowTitle)
-            self.echoText = QLabel("")
-            layout.addWidget(self.echoText,5,0,1,3)
-            
-            # buttons
-            self.cancelBtn = QPushButton('Cancel')
-            self.cancelBtn.setToolTip("Quit without saving.")
-            self.cancelBtn.clicked.connect(self.closeEvent)
-            self.saveBtn = QPushButton('Save')
-            self.saveBtn.setToolTip("Save config to a yaml file.\nIf a config file already exists it is overwritten.")
-            self.saveBtn.clicked.connect(self.writeConfig)
-            self.okBtn = QPushButton('Ok')
-            self.okBtn.setToolTip("Save and Quit")
-            self.okBtn.clicked.connect(self.saveAndClose)
-            self.hLayout = QHBoxLayout()
-            self.hLayout.addWidget(self.cancelBtn)
-            self.hLayout.addWidget(self.saveBtn)
-            self.hLayout.addWidget(self.okBtn)
-            layout.addLayout(self.hLayout,4,0,1,3)
+            def writeConfig(self):
+                metadata = {}
+                metadata["Author"] = self.userNameLineEdit.text()
+                metadata["Affiliation"] = self.affiliationLineEdit.text()
+                metadata["Licence"] = self.licenceComboBox.currentText()
+                message = writeYaml(fileName,metadata)
+                self.setWindowTitle(" feeLLGood config")
+                self.echoText.setText(message)
 
-            self.show()
+            def updateWindowTitle(self):
+                self.setWindowTitle("*feeLLGood config")
+                self.echoText.setText("")
 
-        def saveAndClose(self):
-            self.writeConfig()
-            print("config done.")
-            sys.exit()
-
-        def writeConfig(self):
-            metadata = {}
-            metadata["Author"] = self.userNameLineEdit.text()
-            metadata["Affiliation"] = self.affiliationLineEdit.text()
-            metadata["Licence"] = self.licenceComboBox.currentText()
-            metadata["nbThreads"] = int(self.nbThreadsSpinBox.value())
-            message = writeYaml(fileName,metadata)
-            self.setWindowTitle(" feeLLGood config")
-            self.echoText.setText(message)
-
-        def updateWindowTitle(self):
-            self.setWindowTitle("*feeLLGood config")
-            self.echoText.setText("")
-
-        def closeEvent(self, event):
-            close = QMessageBox.question(self, "QUIT", "Are you sure want to quit?", QMessageBox.Yes | QMessageBox.No)
-            if close == QMessageBox.Yes:
-                if not type(event) == bool:
-                    event.accept()
+            def closeEvent(self, event):
+                close = QMessageBox.question(self, "QUIT", "Are you sure want to quit?", QMessageBox.Yes | QMessageBox.No)
+                if close == QMessageBox.Yes:
+                    if not type(event) == bool:
+                        event.accept()
+                    else:
+                        sys.exit()
                 else:
-                    sys.exit()
-            else:
-                if not type(event) == bool:
-                    event.ignore()
+                    if not type(event) == bool:
+                        event.ignore()
 
-except:
-    print("PyQt5 not installed.")
+    except Exception as A:
+        print("PyQt5 is not available:",A)
 
 def get_params():
     import argparse
     description = 'save configuration for feeLLGood'
     epilogue = '''
-    define author and affiliation, licence, nbthreads
+    define author and affiliation, licence
     '''
     parser = argparse.ArgumentParser(description=description, epilog=epilogue, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-v','--verbose', help='verbose mode, print all inputs', action="store_true")
@@ -182,15 +172,6 @@ def dialog(args):
         licence_idx = 0
     metadata["Licence"] = licences[licence_idx]
         
-    try:
-        nb_th = int(input( "Nb threads(maximum "+ str(maxNbThreads) +"): " ))
-    except ValueError:
-        print("Error: nb threads must be integer")
-        sys.exit()
-    if nb_th > maxNbThreads:
-        print("Warning: nbThreads forced to", maxNbThreads, "in", fileName)
-        nb_th = maxNbThreads
-    metadata["nbThreads"] = nb_th
     message = writeYaml(fileName,metadata)
     if args.verbose:
         print("config=", metadata, '\n', message)
@@ -207,8 +188,9 @@ def main():
             w = MainWindow()
             app.exec()
         except:
-            print("Cannot run Qt5")
+            print("PyQt5 not installed, run in text mode.")
+            dialog(args)
 
-__version__ = '0.0.0'
+__version__ = '0.0.1'
 if __name__ == "__main__":
     main()
