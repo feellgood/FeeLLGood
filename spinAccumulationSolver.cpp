@@ -108,8 +108,16 @@ void spinAcc::prepareExtras(void)
 
     std::for_each( msh->tet.begin(), msh->tet.end(), [this](Tet &t)
         {
-        t.extraField = [this, _idx = t.idx](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)
-                         { for(int npi = 0; npi<Tetra::NPI; npi++) { H.col(npi) += Hst[_idx].col(npi); } };
+        if (msh->isMagnetic(t))
+            {
+            double D0 = getDiffusionCst(t);
+            double prefactor = D0/(sq(getLsd(t))*gamma0*getMs(t));
+            t.extraField = [this, &t, prefactor](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)
+                        {
+                        Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _Hst = calc_Hst(t, prefactor, s);
+                        H += _Hst;
+                        };
+            }
         });//end for_each
     }
 
@@ -120,11 +128,6 @@ void spinAcc::preCompute(std::vector<double> &V)
                  {
                  Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _gradV = calc_gradV(tet,V);
                  gradV.push_back(_gradV);
-
-                 double D0 = getDiffusionCst(tet);
-                 double prefactor = D0/(sq(getLsd(tet))*gamma0*getMs(tet));
-                 Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _Hst = calc_Hst(tet, prefactor, s);
-                 Hst.push_back(_Hst);
                  });
     prepareExtras();
     }

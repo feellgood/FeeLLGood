@@ -10,7 +10,7 @@ verboseGmsh = False
 justMagnet = False #if False magnet + electrode is meshed, else just the magnet, json also modified
 
 #all dimensions are in nm
-mesh_size = 5
+mesh_size = 4
 
 class cylinder:
     def __init__(self,n,h,r):
@@ -173,7 +173,7 @@ settings = {
 if not justMagnet:
     settings["mesh"]["volume_regions"][e.name] = { "Ae": 0, "Ms": 0, "P": 0.7, "sigma":
     5.8e7, "dens_state": 1.34e47, "l_sf": 350e-9 } #Cu
-    settings["mesh"]["surface_regions"][surface_top_name] = { "jn": 1.0e12, "uP":[0,1,0] }
+    settings["mesh"]["surface_regions"][surface_top_name] = { "jn": 1.0, "uP":[0,1,0] }
     settings["mesh"]["surface_regions"][surface_top_name2] = { "V": 0.0, "s": [0,0,0] }
 
 jsonFileName = "nanowire_spinAcc.json"

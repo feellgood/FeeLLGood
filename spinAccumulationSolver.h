@@ -41,7 +41,7 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
      * */
     void boundaryConditions(void); // should be private
 
-    /** initializations: compute gradV and Hst and call prepareExtras method */
+    /** initializations: compute gradV and call prepareExtras method */
     void preCompute(std::vector<double> &V);
 
     /** call solver and update spin diffusion solution, returns true if solver succeeded */
@@ -71,12 +71,6 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
      * */
     std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > gradV;
 
-    /** table of the Hst vectors (contribution of spinAcc to the tet::integrales)
-     * Hst.size() is the number of tetra
-     * Hst is a contribution to the effective field due to spin transfert, it is used by
-     * tet::integrales through  */
-    std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > Hst;
-
     /** number of digits in the optional output file */
     const int precision = 8;
 
@@ -101,7 +95,7 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** spin Hall constant */
     double getSpinHall(Tetra::Tet const &tet) const;
 
-    /** affect extraField function and extraCoeffs_BE function using lambdas for all the tetrahedrons (functor) */
+    /** affect extraField member function of all tetrahedrons */
     void prepareExtras(void);
 
     /** solver, using biconjugate stabilized gradient, with diagonal preconditionner and Dirichlet
