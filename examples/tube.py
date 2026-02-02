@@ -2,9 +2,9 @@
 import json
 from feellgood.meshMaker import Tube
 
-r1= 50 #inner radius
-r2= 70 #outer radius
-l= 200 #length
+r1= 50 #inner radius (nm)
+r2= 70 #outer radius (nm)
+l= 200 #length (nm)
 meshSize= 4
 meshFileName = "tube.msh"
 volRegionName = "bulk tube"
@@ -15,10 +15,10 @@ t.make(meshFileName)
 settings = {
     "outputs": {
         "file_basename": "tube",
-        "evol_time_step": 1e-13,
-        "final_time": 1e-11,
+        "evol_time_step": 1e-12,
+        "final_time": 1e-9,
         "evol_columns": [ "t", "<Mx>", "<My>", "<Mz>", "E_tot" ],
-        "mag_config_every": 20
+        "mag_config_every": 200
     },
     "mesh": {
         "filename": meshFileName,
