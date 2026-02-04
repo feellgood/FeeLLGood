@@ -15,6 +15,15 @@ using namespace Nodes;
 void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const int nt, std::vector<Eigen::Vector3d> &s) const
     {
     int save_period = settings.save_period;
+
+    // Cache the applied field if we are going to print any of "Hx", "Hy" or "Hz".
+    bool field_needed = std::any_of(settings.evol_columns.begin(), settings.evol_columns.end(),
+        [](const std::string &col_name)
+        { return col_name[0] == 'H' && col_name[1] >= 'x' && col_name[1] <= 'z'; });
+    Eigen::Vector3d applied_field(NAN, NAN, NAN);
+    if (field_needed)
+        { applied_field = settings.getField(t_prm.get_t()); }
+
     for (unsigned int i = 0; i < settings.evol_columns.size(); i++)
         {
         const std::string &col_name = settings.evol_columns[i];
@@ -111,15 +120,15 @@ void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const i
             }
         else if (keyVal == "Hx")
             {
-            fout << settings.getField(t_prm.get_t()).x() << sep;
+            fout << applied_field.x() << sep;
             }
         else if (keyVal == "Hy")
             {
-            fout << settings.getField(t_prm.get_t()).y() << sep;
+            fout << applied_field.y() << sep;
             }
         else if (keyVal == "Hz")
             {
-            fout << settings.getField(t_prm.get_t()).z() << sep;
+            fout << applied_field.z() << sep;
             }
         else
             {
