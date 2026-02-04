@@ -294,12 +294,16 @@ public:
         return tmp;
         }
 
-    /** Evaluate the applied field as a function of time. This is allowed only if field_type is
-     * `RtoR3`. This method is **not thread safe**.
+    /** Evaluate the applied field as a function of time. This is only meaningful if field_type is
+     * `RtoR3`, otherwise we return a vector of NAN. This method is **not thread safe**.
      * \return applied **H** field (not **B**!)
      */
     inline Eigen::Vector3d getField(const double t_val) const
         {
+        // If this is not meaningful, return a vector of NAN.
+        if (field_type != RtoR3)
+            { return {NAN, NAN, NAN}; }
+
         return (field_parser.get_vector(t_val))/mu0;
         }
 
