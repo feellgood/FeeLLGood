@@ -6,10 +6,16 @@ void Fem::energy(double const t, Settings &settings)
     {
     std::fill(E.begin(),E.end(),0);
     Etot = 0.0;
-    Eigen::Vector3d Hext = settings.getField(t);
+    Eigen::Vector3d Hext{NAN, NAN, NAN};  // only valid if field type is RtoR3
+    double fieldAmp = NAN;                // only valid if field type is R4toR3
+    if (settings.getFieldType() == RtoR3) {
+        Hext = settings.getField(t);
+    } else if (settings.getFieldType() == R4toR3) {
+        fieldAmp = settings.getFieldTime(t);
+    }
 
     std::for_each(msh.magTet.begin(), msh.magTet.end(),
-                  [this, &Hext, &settings](const int &idxElem)
+                  [this, &Hext, fieldAmp, &settings](const int &idxElem)
                       {
                       Tetra::Tet const &te = msh.tet[idxElem];
                       Tetra::prm const &param = settings.paramTetra[te.idxPrm];
@@ -25,7 +31,17 @@ void Fem::energy(double const t, Settings &settings)
                       if ((param.K != 0.0) || (param.K3 != 0.0))
                           { E[ANISOTROPY] += te.anisotropyEnergy(param, u); }
 
-                      E[ZEEMAN] += te.zeemanEnergy(param, Hext, u);
+                      switch (settings.getFieldType())
+                          {
+                          case RtoR3:
+                              E[ZEEMAN] += te.zeemanEnergy(param, Hext, u);
+                              break;
+                          case R4toR3:
+                              E[ZEEMAN] += te.zeemanEnergy(param, fieldAmp, msh.extSpaceField, u);
+                              break;
+                          default:
+                              E[ZEEMAN] = NAN;
+                          }
                       });
 
     std::for_each(msh.magFac.begin(), msh.magFac.end(),
