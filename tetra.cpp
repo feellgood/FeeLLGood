@@ -370,6 +370,16 @@ double Tet::zeemanEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Vector3d> co
     return -mu0*param.Ms*weight.dot(dens);
     }
 
+double Tet::zeemanEnergy(Tetra::prm const &param, double fieldAmp,
+        std::vector<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> &spaceField,
+        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> const u) const
+    {
+    Eigen::Matrix<double,DIM,NPI> Hext = spaceField[idx];
+    Eigen::Matrix<double,NPI,1> dens = u.cwiseProduct(Hext).colwise().sum(); // dot product column to column
+
+    return -mu0*param.Ms*fieldAmp*weight.dot(dens);
+    }
+
 double Tet::Jacobian(Eigen::Ref<Eigen::Matrix3d> J)
     {
     Eigen::Vector3d p0p1 = getNode(1).p - getNode(0).p;

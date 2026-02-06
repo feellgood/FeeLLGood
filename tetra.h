@@ -320,9 +320,14 @@ public:
                        Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudz,
                        Eigen::Ref<Eigen::Matrix<double,NPI,1>> phi) const;
 
-    /** zeeman energy of the tetrahedron */
+    /** zeeman energy of the tetrahedron for a constant Hext */
     double zeemanEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Vector3d> const Hext,
                         Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> const u) const;
+
+    /** zeeman energy of the tetrahedron for a varying Hext */
+    double zeemanEnergy(Tetra::prm const &param, double fieldAmp,
+        std::vector<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> &spaceField,
+        Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> const u) const;
 
     /** \return \f$ |J| \f$ build Jacobian \f$ J \f$ */
     double Jacobian(Eigen::Ref<Eigen::Matrix3d> J);

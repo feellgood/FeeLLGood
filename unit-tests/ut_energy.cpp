@@ -108,4 +108,30 @@ BOOST_AUTO_TEST_CASE(demagEnergy, *boost::unit_test::tolerance(UT_TOL))
     BOOST_TEST( Nodes::sq(result_to_test - Edemag) == 0.0 );
     }
 
+BOOST_AUTO_TEST_CASE(zeemanEnergyWithVarField, *boost::unit_test::tolerance(UT_TOL))
+    {
+    unsigned sd = my_seed();
+    std::mt19937 gen(sd);
+    std::uniform_real_distribution<> distrib(0.0, 1.0);
+
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> Hext;
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> u;
+    for(int i=0;i<Nodes::DIM;i++)
+        for(int j=0;j<Tetra::NPI;j++)
+            {
+            Hext(i,j) = distrib(gen);
+            u(i,j) = distrib(gen);
+            }
+
+    // dens is the result to test
+    Eigen::Matrix<double,Tetra::NPI,1> dens = u.cwiseProduct(Hext).colwise().sum();
+
+    for(int i = 0;i<Tetra::NPI;i++)
+        {
+        double p_scal=Hext.col(i).dot(u.col(i));
+
+        BOOST_TEST( dens[i] == p_scal );
+        }
+    }
+
 BOOST_AUTO_TEST_SUITE_END()
