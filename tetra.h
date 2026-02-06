@@ -321,13 +321,17 @@ public:
                        Eigen::Ref<Eigen::Matrix<double,NPI,1>> phi) const;
 
     /** zeeman energy of the tetrahedron for a constant Hext */
-    double zeemanEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Vector3d> const Hext,
-                        Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> const u) const;
+    double zeemanEnergy(Tetra::prm const &param  /**< [in] */,
+                        Eigen::Ref<Eigen::Vector3d> const Hext /**< [in] constant applied field */,
+                        Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> const u /**< [in] */) const;
 
     /** zeeman energy of the tetrahedron for a varying Hext */
-    double zeemanEnergy(Tetra::prm const &param, double fieldAmp,
-        std::vector<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> &spaceField,
-        Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> const u) const;
+    double zeemanEnergy(Tetra::prm const &param /**< [in] */,
+                        double fieldAmp /**< [in] applied field amplitude, may be time dependant */,
+                        std::vector<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> &spaceField
+                        /**< [in] space varying applied field */,
+                        Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> const u
+                        /**< [in] magnetization at Gauss points */) const;
 
     /** \return \f$ |J| \f$ build Jacobian \f$ J \f$ */
     double Jacobian(Eigen::Ref<Eigen::Matrix3d> J);

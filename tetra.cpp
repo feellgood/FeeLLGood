@@ -363,7 +363,7 @@ double Tet::demagEnergy(Tetra::prm const &param,
     }
 
 double Tet::zeemanEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Vector3d> const Hext,
-                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> const u) const
+                        Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> const u) const
     {
     Eigen::Matrix<double,NPI,1> dens = u.transpose() * Hext;
 
@@ -372,7 +372,7 @@ double Tet::zeemanEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Vector3d> co
 
 double Tet::zeemanEnergy(Tetra::prm const &param, double fieldAmp,
         std::vector<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> &spaceField,
-        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> const u) const
+        Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> const u) const
     {
     Eigen::Matrix<double,DIM,NPI> Hext = spaceField[idx];
     Eigen::Matrix<double,NPI,1> dens = u.cwiseProduct(Hext).colwise().sum(); // dot product column to column
