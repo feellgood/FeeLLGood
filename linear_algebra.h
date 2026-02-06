@@ -45,7 +45,8 @@ public:
             my_msh, s.paramTetra, s.paramFacette, "bicg_dir", s.TOL, s.verbose, s.MAXITER,
             [this](Mesh::Edge edge){ return msh->magNode[edge.first] && msh->magNode[edge.second]; }
         ),
-        verbose(s.verbose)
+        verbose(s.verbose),
+        extSpaceField(my_msh.extSpaceField)
         {
         Xw.resize(2*NOD);
         base_projection();
@@ -53,9 +54,6 @@ public:
             { idx_dir = Nodes::IDX_UNDEF; }
         else
             { idx_dir = s.recentering_direction; }
-
-        if(s.getFieldType() == R4toR3)
-            { setExtSpaceField(s); }
 
         for (int i=0;i<NOD;i++)
             {
@@ -117,7 +115,7 @@ private:
     double v_max;
 
     /** external applied space field, values on gauss points, size is number of tetraedrons */
-    std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > extSpaceField;
+    const std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> >& extSpaceField;
 
     /** list of the Dirichlet indices where (vp,vq) are zero, initialized by constructor */
     std::vector<int> lvd;

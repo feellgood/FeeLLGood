@@ -78,19 +78,3 @@ void LinAlgebra::prepareElements(double const A_Hext /**< [in] amplitude applied
                     { fac.integrales(paramFac[fac.idxPrm]);  }
                   });
     }
-
-
-void LinAlgebra::setExtSpaceField(Settings &s /**< [in] */)
-    { // see here for ref code /data/jc/st_feellgood_2024/src_Tube_scalfmm_zhang_ec_mu_oersted_spinHall_thiele_dyn20240320_dev
-    extSpaceField.resize(msh->magTet.size());
-    int k(0);
-    std::for_each(msh->magTet.begin(), msh->magTet.end(), [this,&s,&k](const int idx)
-        {
-        Tetra::Tet const &t = msh->tet[idx];
-        Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> pg;// gauss points
-        t.getPtGauss(pg);
-        for(int i=0;i<Tetra::NPI;i++)
-            { extSpaceField[k].col(i) = s.getFieldSpace(pg.col(i)); }
-        k++;
-        });
-    }

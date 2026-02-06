@@ -126,6 +126,9 @@ public:
             if (isMagnetic(fac[i]) && !isInMagList(magFac,fac[i]) )
                 { magFac.push_back(i); }
             }
+
+        if(mySets.getFieldType() == R4toR3)
+            { setExtSpaceField(mySets); }
         }
 
     /** operator copy deleted */
@@ -337,6 +340,10 @@ public:
 
     /** list of the indices of all magnetic facets from all surface regions */
     std::vector<int> magFac;
+
+    /** external applied space field, values on gauss points, size is number of tetraedrons */
+    std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > extSpaceField;
+
 private:
     /** node container: not initialized by constructor, but later while reading the mesh by member
      * function init_node */
@@ -425,6 +432,10 @@ private:
                                [this,&f](int idx) { return (fac[idx] == f); });
         return(it != idxMagList.end());
         }
+
+    /** when external applied field is of field_type R4toR3 values of field_space are stored in
+     * spaceField */
+    void setExtSpaceField(Settings &s /**< [in] */);
     }; // end class mesh
     }  // end namespace Mesh
 #endif
