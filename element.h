@@ -43,7 +43,7 @@ class element
     /** indices to the nodes */
     std::vector<int> ind;
     
-    /** index of the material parameters of the element */
+    /** index of the material region of the element */
     int idxPrm;
     
     /** weights hat function of the element */
@@ -88,7 +88,7 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
     /** computes Gauss point of the element, return in result */
     virtual void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result) const = 0;
 
-    /** print node indices of the element and the vector index of the associated param */
+    /** print the vector index of the associated region and the node indices of the element */
     void infos(void)
         {
         std::cout << "idxPrm: " << idxPrm << " ind: {";
