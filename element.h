@@ -85,17 +85,17 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
         P.template block<N,N>(N,2*N).diagonal() = tempo.row(Nodes::IDX_Z);
         }
 
-    /** info: print node indices of the element and the vector index of the associated param */
-    void infos() const
+    /** computes Gauss point of the element, return in result */
+    virtual void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result) const = 0;
+
+    /** print node indices of the element and the vector index of the associated param */
+    void infos(void)
         {
         std::cout << "idxPrm: " << idxPrm << " ind: {";
         for(unsigned int i = 0; i < N-1; i++)
             { std::cout << ind[i] << ": " << refNode[ind[i]].p << std::endl; }
         std::cout << ind[N-1] <<": " << refNode[ind[N-1]].p << "}\n";
-        };
-    
-    /** computes Gauss point of the element, return in result */
-    virtual void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result) const = 0;
+        }
 
     protected:
         /** returns reference to node at ind[i] from mesh node vector */
@@ -116,5 +116,4 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
         /** a method to orientate the element */
         virtual void orientate() = 0;
     };
-    
 #endif

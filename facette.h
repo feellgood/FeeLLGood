@@ -77,8 +77,8 @@ struct prm
     Eigen::Vector3d uP;    /**< Polarization spin accumulation orientation (unit vector for spin diffusion problem) */
     Eigen::Vector3d s;     /**< spin diffusion vector (for spin diffusion boundary conditions) */
 
-    /** print the struct parameters */
-    inline void infos()
+    /** print the region surface parameters, optional boolean spinAcc for spin accumulation datas */
+    inline void infos(const bool spinAcc = false)
         {
         std::cout << "surface region name = " << regName
                   << " ; suppress charges = " << suppress_charges << std::endl;
@@ -89,6 +89,11 @@ struct prm
             }
         else
             std::cout << "no surface anisotropy" << std::endl;
+
+        if (spinAcc)
+            {
+            std::cout<< "V= " << V << "; jn= " << jn << "; uP= " << uP << "; s= " << s << std::endl;
+            }
         };
     };
 
