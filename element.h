@@ -102,8 +102,7 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
         inline const Nodes::Node & getNode(const int i) const { return refNode[ind[i]]; }
 
         /** returns true if mesh node vector is not empty */
-        inline bool existNodes(void)
-        { return (refNode.size() > 0); }
+        inline bool existNodes(void) const { return (refNode.size() > 0); }
 
         /** zeroBasing: index convention Matlab/msh (one based) -> C++ (zero based) */
         inline void zeroBasing(void)
