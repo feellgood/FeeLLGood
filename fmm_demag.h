@@ -96,9 +96,6 @@ public:
         demag(Nodes::get_v<Nodes::NEXT>, Nodes::set_phiv, msh);
         }
 
-    /** sources */
-    std::vector<double> srcDen;
-    
     /** corrections associated to the nodes, contributions only due to the facets */
     std::vector<double> corr;
 
@@ -109,6 +106,9 @@ public:
     const std::vector<Facette::prm> &prmFacette;
 
 private:
+    /** sources: both surface and volume charges */
+    std::vector<double> srcDen;
+
     /** tree initialized by constructor */
     OctreeClass tree;
 
