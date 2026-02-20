@@ -308,7 +308,7 @@ public:
     double anisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u) const;
 
     /** computes volume charges, the divergence of the magnetization, returns result */
-    Eigen::Matrix<double,Tetra::NPI,1> charges(Tetra::prm const &param,
+    Eigen::Matrix<double,Tetra::NPI,1> charges(const double &Ms,
                                                std::function<Eigen::Vector3d(Nodes::Node)> getter) const;
 
     /** demagnetizing energy of the tetrahedron */

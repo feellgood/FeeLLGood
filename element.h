@@ -97,6 +97,10 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
         std::cout << ind[N-1] <<": " << refNode[ind[N-1]].p << "}\n";
         }
 
+    /** a method to compute associated charges to the element */
+    virtual Eigen::Matrix<double,NPI,1> charges(const double &Ms,
+                                        std::function<Eigen::Vector3d(Nodes::Node)> getter) const = 0;
+
     protected:
         /** returns reference to node at ind[i] from mesh node vector */
         inline const Nodes::Node & getNode(const int i) const { return refNode[ind[i]]; }

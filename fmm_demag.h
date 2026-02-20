@@ -154,7 +154,7 @@ private:
         std::for_each(msh.magTet.begin(),msh.magTet.end(),[this, &msh, getter, &nsrc](const int idx)
                 {
                 Tetra::Tet &t = msh.tet[idx];
-                Eigen::Matrix<double,Tetra::NPI,1> result = t.charges(prmTetra[t.idxPrm], getter);
+                Eigen::Matrix<double,Tetra::NPI,1> result = t.charges(prmTetra[t.idxPrm].Ms, getter);
                 for(int i=0;i<Tetra::NPI;i++)
                     { srcDen[nsrc+i] = result(i); }
                 nsrc += Tetra::NPI;
@@ -163,7 +163,10 @@ private:
         std::for_each(msh.magFac.begin(),msh.magFac.end(),[this, &msh, getter, &nsrc](const int idx)
                 {
                 Facette::Fac &f = msh.fac[idx];
-                Eigen::Matrix<double,Facette::NPI,1> result = f.charges(prmFacette[f.idxPrm], getter);
+                double dMs(0);
+                if (!prmFacette[f.idxPrm].suppress_charges) { dMs = f.dMs; }
+                // to suppress surface charges we have to set to zero some values in srcDen
+                Eigen::Matrix<double,Facette::NPI,1> result = f.charges(dMs, getter);
                 for(int i=0;i<Facette::NPI;i++)
                     { srcDen[nsrc+i] = result(i); }
                 nsrc += Facette::NPI;

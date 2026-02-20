@@ -42,18 +42,18 @@ double Fac::anisotropyEnergy(Facette::prm const &param,
     return -param.Ks*weight.dot(dens);
     }
 
-Eigen::Matrix<double,NPI,1> Fac::charges(Facette::prm const &param,
+Eigen::Matrix<double,NPI,1> Fac::charges(const double &Ms,
                                          std::function<Eigen::Vector3d(Nodes::Node)> getter) const
     {
     Eigen::Matrix<double,NPI,1> result;
     result.setZero();
-    if (!(param.suppress_charges))
+    if (Ms != 0.0)
         {
         Eigen::Matrix<double,DIM,N> vec_nod;
         for(int i=0;i<N;i++)
             { vec_nod.col(i) << getter(getNode(i)); }
         Eigen::Matrix<double,DIM,NPI> _u = vec_nod * eigen_a;
-        result = dMs*weight.cwiseProduct( _u.transpose()*n );
+        result = Ms*weight.cwiseProduct( _u.transpose()*n );
         }
     return result;
     }

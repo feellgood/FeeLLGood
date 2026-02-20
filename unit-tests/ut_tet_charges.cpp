@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(tet_charges, *boost::unit_test::tolerance(UT_TOL))
     auto getter = Nodes::get_u<Nodes::NEXT>;
 
     // code to test
-    Eigen::Matrix<double,Tetra::NPI,1> result = t.charges(p, getter);
+    Eigen::Matrix<double,Tetra::NPI,1> result = t.charges(p.Ms, getter);
 
     // ref code begin
     Eigen::Matrix<double,Nodes::DIM,Tetra::N> vec_nod;
