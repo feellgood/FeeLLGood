@@ -167,12 +167,14 @@ public:
     double anisotropyEnergy(Facette::prm const &param /**< [in] */,
                             Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> const u /**< [in] */) const;
 
-    /** computes surface charges and some corrections, stored in srcDen at position nsrc and corr */
-    void charges(Facette::prm const &param /**< [in] */,
-                 std::function<Eigen::Vector3d(Nodes::Node)> getter /**< [in] */,
-                 std::vector<double> &srcDen /**< [in|out]*/,
-                 int &nsrc /**< [in|out]*/,
-                 std::vector<double> &corr /**< [in|out]*/ ) const;
+    /** computes surface charges, return result on NPI */
+    Eigen::Matrix<double,NPI,1>  charges(Facette::prm const &param /**< [in] */,
+                                         std::function<Eigen::Vector3d(Nodes::Node)> getter /**< [in] */) const;
+
+    /** computes correction on surface charges from localCharges input, result directly stored in corr */
+    void correctionCharges(std::function<Eigen::Vector3d(Nodes::Node)> getter /**< [in] */,
+                           Eigen::Matrix<double,Facette::NPI,1> &localCharges /**< [in] */,
+                           std::vector<double> &corr /**< [in|out]*/);
 
     /** demagnetizing energy of the facette */
     double demagEnergy(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u /**< [in] */,

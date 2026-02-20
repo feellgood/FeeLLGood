@@ -160,7 +160,11 @@ private:
         std::for_each(msh.magFac.begin(),msh.magFac.end(),[this, &msh, getter, &nsrc](const int idx)
                 {
                 Facette::Fac &f = msh.fac[idx];
-                f.charges(prmFacette[f.idxPrm], getter, srcDen, nsrc, corr);
+                Eigen::Matrix<double,Facette::NPI,1> result = f.charges(prmFacette[f.idxPrm], getter);
+                for(int i=0;i<Facette::NPI;i++)
+                    { srcDen[nsrc+i] = result(i); }
+                f.correctionCharges(getter,result,corr);
+                nsrc += Facette::NPI;
                 });
         }
 
