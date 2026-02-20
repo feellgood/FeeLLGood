@@ -154,7 +154,10 @@ private:
         std::for_each(msh.magTet.begin(),msh.magTet.end(),[this, &msh, getter, &nsrc](const int idx)
                 {
                 Tetra::Tet &t = msh.tet[idx];
-                t.charges(prmTetra[t.idxPrm], getter, srcDen, nsrc);
+                Eigen::Matrix<double,Tetra::NPI,1> result = t.charges(prmTetra[t.idxPrm], getter);
+                for(int i=0;i<Tetra::NPI;i++)
+                    { srcDen[nsrc+i] = result(i); }
+                nsrc += Tetra::NPI;
                 });
         std::fill(corr.begin(),corr.end(),0);
         std::for_each(msh.magFac.begin(),msh.magFac.end(),[this, &msh, getter, &nsrc](const int idx)
@@ -163,8 +166,8 @@ private:
                 Eigen::Matrix<double,Facette::NPI,1> result = f.charges(prmFacette[f.idxPrm], getter);
                 for(int i=0;i<Facette::NPI;i++)
                     { srcDen[nsrc+i] = result(i); }
-                f.correctionCharges(getter,result,corr);
                 nsrc += Facette::NPI;
+                f.correctionCharges(getter,result,corr);
                 });
         }
 

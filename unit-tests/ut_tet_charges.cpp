@@ -17,10 +17,6 @@ BOOST_AUTO_TEST_SUITE(ut_tet_charges)
 
 BOOST_AUTO_TEST_CASE(tet_charges, *boost::unit_test::tolerance(UT_TOL))
     {
-    int nsrc(0);
-    std::vector<double> srcDen;
-    srcDen.resize( Tetra::NPI );
-    
     const int nbNod = 4;
     std::vector<Nodes::Node> node;
     dummyNodes<nbNod>(node);
@@ -41,7 +37,7 @@ BOOST_AUTO_TEST_CASE(tet_charges, *boost::unit_test::tolerance(UT_TOL))
     auto getter = Nodes::get_u<Nodes::NEXT>;
 
     // code to test
-    t.charges(p, getter, srcDen, nsrc);
+    Eigen::Matrix<double,Tetra::NPI,1> result = t.charges(p, getter);
 
     // ref code begin
     Eigen::Matrix<double,Nodes::DIM,Tetra::N> vec_nod;
@@ -51,16 +47,14 @@ BOOST_AUTO_TEST_CASE(tet_charges, *boost::unit_test::tolerance(UT_TOL))
     Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> dudy = vec_nod * (t.da.col(Nodes::IDX_Y)).replicate(1,Tetra::NPI);
     Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> dudz = vec_nod * (t.da.col(Nodes::IDX_Z)).replicate(1,Tetra::NPI);
 
-    Eigen::Matrix<double,Tetra::NPI,1> result;
+    Eigen::Matrix<double,Tetra::NPI,1> resultRef;
     for (int j = 0; j < Tetra::NPI; j++)
-        { result(j) = dudx(0,j) + dudy(1,j) + dudz(2,j); }
-    result = t.weight.cwiseProduct(result);
-    result *= -p.Ms;
+        { resultRef(j) = dudx(0,j) + dudy(1,j) + dudz(2,j); }
+    resultRef = t.weight.cwiseProduct(resultRef);
+    resultRef *= -p.Ms;
     // ref code end
-    BOOST_CHECK(nsrc == Tetra::NPI);
-    BOOST_CHECK(srcDen.size() == nsrc);
     for (int j = 0; j < Tetra::NPI; j++)
-        BOOST_TEST(result(j) == srcDen[j]);
+        BOOST_TEST(resultRef(j) == result(j));
     }
 
 BOOST_AUTO_TEST_SUITE_END()

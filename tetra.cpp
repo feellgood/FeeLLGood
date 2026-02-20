@@ -330,10 +330,8 @@ double Tet::anisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<d
     return weight.dot(dens);
     }
 
-void Tet::charges(Tetra::prm const &param,
-                  std::function<Eigen::Vector3d(Nodes::Node)> getter,
-                  std::vector<double> &srcDen,
-                  int &nsrc) const
+Eigen::Matrix<double,Tetra::NPI,1> Tet::charges(Tetra::prm const &param,
+                  std::function<Eigen::Vector3d(Nodes::Node)> getter) const
     {
     Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
     for (int i = 0; i < N; i++)
@@ -343,10 +341,7 @@ void Tet::charges(Tetra::prm const &param,
                    + (vec_nod.row(IDX_Y)).dot( da.col(IDX_Y) )
                    + (vec_nod.row(IDX_Z)).dot( da.col(IDX_Z) );
     
-    dud_sum *= -param.Ms;
-    for(int i=0;i<Tetra::NPI;i++)
-        { srcDen[nsrc+i] = weight(i)*dud_sum; }
-    nsrc += Tetra::NPI;
+    return -param.Ms*weight*dud_sum;
     }
 
 double Tet::demagEnergy(Tetra::prm const &param,
