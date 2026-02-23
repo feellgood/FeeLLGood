@@ -110,16 +110,11 @@ public:
                 {
                 if(isMagnetic(te))
                     {
+                    magTet.push_back(te.idx);
                     for (int i=0;i<4;i++)
                         { magNode[te.ind[i]] = true; }
                     }
                 });
-
-        for(unsigned int i=0;i<tet.size();i++)
-            {
-            if (isMagnetic(tet[i]))
-                { magTet.push_back(i); }
-            }
 
         for(unsigned int i=0;i<fac.size();i++)
             {
