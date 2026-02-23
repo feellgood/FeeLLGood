@@ -14,8 +14,7 @@ void bicg(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std::ve
     {
     const size_t DIM = x.size();
     T rho_1(0.0), rho_2(0.0), alpha(0.0), beta(0.0), omega(0.0);
-    std::vector<T> p(DIM), phat(DIM,0), shat(DIM), r(DIM), rt(DIM), s(DIM), t(DIM), v(DIM), diag_precond(DIM), b(DIM);
-    b.assign(rhs.begin(),rhs.end());// b = rhs;
+    std::vector<T> p(DIM), phat(DIM,0), shat(DIM), r(DIM), rt(DIM), s(DIM), t(DIM), v(DIM), diag_precond(DIM), b(rhs);
 
     A.build_diag_precond<T>(diag_precond);
     iter.set_rhsnorm(norm(b));

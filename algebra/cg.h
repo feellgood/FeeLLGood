@@ -15,8 +15,7 @@ void cg(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std::vect
     {
     T rho, rho_1(0.0);
     const size_t DIM = x.size();
-    std::vector<T> p(DIM),q(DIM),r(DIM),z(DIM),diag_precond(DIM), b(DIM);
-    b.assign(rhs.begin(),rhs.end());// b = rhs;
+    std::vector<T> p(DIM),q(DIM),r(DIM),z(DIM),diag_precond(DIM), b(rhs);
 
     A.build_diag_precond<T>(diag_precond);
     iter.set_rhsnorm(norm(b));
@@ -64,8 +63,7 @@ void cg_dir(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std::
     {
     T rho, rho_1(0.0);
     const size_t DIM = x.size();
-    std::vector<T> p(DIM),q(DIM),r(DIM),z(DIM),diag_precond(DIM), b(DIM);
-    b.assign(rhs.begin(),rhs.end());// b = rhs;
+    std::vector<T> p(DIM),q(DIM),r(DIM),z(DIM),diag_precond(DIM), b(rhs);
 
     A.build_diag_precond<T>(diag_precond);
     mult(A, xd, z);
