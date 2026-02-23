@@ -147,7 +147,7 @@ private:
 
     /** computes all charges from tetraedrons and facettes for the demag field to feed a tree in the fast multipole algo (scalfmm)
      */
-    void calc_charges(std::function<const Eigen::Vector3d(Nodes::Node)> getter, Mesh::mesh &msh)
+    void calc_charges(std::function<const Eigen::Vector3d(const Nodes::Node&)> getter, Mesh::mesh &msh)
         {
         int nsrc(0);
         std::fill(srcDen.begin(),srcDen.end(),0);
@@ -177,7 +177,7 @@ private:
     /**
     computes the demag field, with (getter  = u,setter = phi) or (getter = v,setter = phi_v)
     */
-    void demag(std::function<const Eigen::Vector3d(Nodes::Node)> getter,
+    void demag(std::function<const Eigen::Vector3d(const Nodes::Node&)> getter,
                std::function<void(Nodes::Node &, const double)> setter, Mesh::mesh &msh)
         {
         FmmClass algo(&tree, &kernels);

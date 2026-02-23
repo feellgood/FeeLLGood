@@ -169,7 +169,7 @@ public:
 
     /** computes surface charges, return result on NPI */
     Eigen::Matrix<double,NPI,1>  charges(const double &dMs /**< [in] */,
-                                         std::function<Eigen::Vector3d(Nodes::Node)> getter /**< [in] */) const;
+            std::function<Eigen::Vector3d(const Nodes::Node&)> getter /**< [in] */) const;
 
     /** computes correction on surface charges from localCharges input, result directly stored in corr */
     void correctionCharges(std::function<Eigen::Vector3d(Nodes::Node)> getter /**< [in] */,

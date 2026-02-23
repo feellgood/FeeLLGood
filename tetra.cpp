@@ -331,7 +331,7 @@ double Tet::anisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<d
     }
 
 Eigen::Matrix<double,Tetra::NPI,1> Tet::charges(const double &Ms,
-                  std::function<Eigen::Vector3d(Nodes::Node)> getter) const
+                  std::function<Eigen::Vector3d(const Nodes::Node&)> getter) const
     {
     Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
     for (int i = 0; i < N; i++)

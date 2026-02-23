@@ -100,7 +100,7 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
     /** Compute the magnetic charges on the element. The first parameter is Ms on a volume element,
      * and dMs on a surface element.*/
     virtual Eigen::Matrix<double,NPI,1> charges(const double &Ms_or_dMs,
-                                        std::function<Eigen::Vector3d(Nodes::Node)> getter) const = 0;
+            std::function<Eigen::Vector3d(const Nodes::Node&)> getter) const = 0;
 
     protected:
         /** returns reference to node at ind[i] from mesh node vector */

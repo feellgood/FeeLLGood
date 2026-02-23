@@ -309,7 +309,7 @@ public:
 
     /** computes volume charges, the divergence of the magnetization, returns result */
     Eigen::Matrix<double,Tetra::NPI,1> charges(const double &Ms,
-                                               std::function<Eigen::Vector3d(Nodes::Node)> getter) const;
+            std::function<Eigen::Vector3d(const Nodes::Node&)> getter) const;
 
     /** demagnetizing energy of the tetrahedron */
     double demagEnergy(Tetra::prm const &param,

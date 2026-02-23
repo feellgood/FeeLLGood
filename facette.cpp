@@ -43,7 +43,7 @@ double Fac::anisotropyEnergy(Facette::prm const &param,
     }
 
 Eigen::Matrix<double,NPI,1> Fac::charges(const double &dMs,
-                                         std::function<Eigen::Vector3d(Nodes::Node)> getter) const
+        std::function<Eigen::Vector3d(const Nodes::Node&)> getter) const
     {
     Eigen::Matrix<double,NPI,1> result;
     result.setZero();
