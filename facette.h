@@ -168,7 +168,7 @@ public:
                             Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> const u /**< [in] */) const;
 
     /** computes surface charges, return result on NPI */
-    Eigen::Matrix<double,NPI,1>  charges(const double &Ms /**< [in] */,
+    Eigen::Matrix<double,NPI,1>  charges(const double &dMs /**< [in] */,
                                          std::function<Eigen::Vector3d(Nodes::Node)> getter /**< [in] */) const;
 
     /** computes correction on surface charges from localCharges input, result directly stored in corr */
