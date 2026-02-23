@@ -70,7 +70,7 @@ public:
         norm = 2. / msh.l.maxCoeff();
 
         FSize idxPart = 0;
-        for (idxPart = 0; idxPart < msh.getNbNodes(); ++idxPart)
+        for (idxPart = 0; idxPart < (FSize)msh.magNode.size(); ++idxPart)
             {
             if (msh.magNode[idxPart])
                 {
