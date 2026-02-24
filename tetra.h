@@ -304,8 +304,11 @@ public:
                           Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudy,
                           Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudz) const;
 
-    /** anisotropy energy of the tetrahedron */
-    double anisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u) const;
+    /** uniaxial anisotropy energy of the tetrahedron */
+    double uniaxialAnisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u) const;
+
+    /** cubic anisotropy energy of the tetrahedron */
+    double cubicAnisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u) const;
 
     /** computes volume charges, the divergence of the magnetization, returns result */
     Eigen::Matrix<double,Tetra::NPI,1> charges(const double &Ms,

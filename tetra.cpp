@@ -308,26 +308,29 @@ double Tet::exchangeEnergy(Tetra::prm const &param,
     return param.A * weight.dot(dens);
     }
 
-double Tet::anisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> u) const
+double Tet::uniaxialAnisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> u) const
+    {
+    Eigen::Matrix<double,NPI,1> dens;
+
+    for (int npi = 0; npi < NPI; npi++)
+        { dens[npi] = sq( param.uk.dot( u.col(npi) )); }
+    return -param.K*weight.dot(dens);
+    }
+
+double Tet::cubicAnisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> u) const
     {
     Eigen::Matrix<double,NPI,1> dens;
 
     for (int npi = 0; npi < NPI; npi++)
         {
         Eigen::Vector3d m = u.col(npi);
-        // uniaxial magnetocrystalline anisotropy constant K, anisotropy axis uk
-        dens[npi] = -param.K * sq( param.uk.dot( m ));
-
         // cosinus directeurs
         double al0 = m.dot(param.ex);
         double al1 = m.dot(param.ey);
         double al2 = m.dot(param.ez);
-
-        dens[npi] += param.K3
-                     * (sq(al0 * al1) + sq(al1 * al2) + sq(al2 * al0));  // cubic anisotropy (K3)
+        dens[npi] = sq(al0 * al1) + sq(al1 * al2) + sq(al2 * al0);
         }
-
-    return weight.dot(dens);
+    return param.K3*weight.dot(dens);
     }
 
 Eigen::Matrix<double,Tetra::NPI,1> Tet::charges(const double &Ms,

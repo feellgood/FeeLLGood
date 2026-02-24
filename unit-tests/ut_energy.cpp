@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_SUITE(ut_energy)
 /*
  *test of the second order uniaxial anisotropy energy expression
  * */
-BOOST_AUTO_TEST_CASE(anisotropyEnergy, *boost::unit_test::tolerance(UT_TOL))
+BOOST_AUTO_TEST_CASE(uniaxialAnisotropyEnergy, *boost::unit_test::tolerance(UT_TOL))
     {
     const int nbNod = 4;
     std::vector<Nodes::Node> node;
@@ -44,10 +44,6 @@ BOOST_AUTO_TEST_CASE(anisotropyEnergy, *boost::unit_test::tolerance(UT_TOL))
     Tetra::prm param;
     param.K = distrib(gen);
     param.uk = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
-    param.K3 = 0;
-    param.ex.setZero();
-    param.ey.setZero();
-    param.ez.setZero();
     Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> U;
     double u[Nodes::DIM][Tetra::NPI];
     tiny::mult<double, 3, Tetra::N, Tetra::NPI>(u_nod, Tetra::a, u);
@@ -56,7 +52,7 @@ BOOST_AUTO_TEST_CASE(anisotropyEnergy, *boost::unit_test::tolerance(UT_TOL))
         {
         U.col(npi) << u[Nodes::IDX_X][npi], u[Nodes::IDX_Y][npi], u[Nodes::IDX_Z][npi];
         }
-    double energyToTest = t.anisotropyEnergy(param,U);
+    double energyToTest = t.uniaxialAnisotropyEnergy(param,U);
     // begin code ref from src_Tube_scalfmm_zhang_ec_mu_oersted_spinHall_thiele_dyn20260203_dev
     // file MuMag_energy.cc
     double dens[Tetra::NPI];

@@ -28,8 +28,10 @@ void Fem::energy(double const t, Settings &settings)
                       E[EXCHANGE] += te.exchangeEnergy(param, dudx, dudy, dudz);
                       E[DEMAG] += te.demagEnergy(param, dudx, dudy, dudz, phi);
 
-                      if ((param.K != 0.0) || (param.K3 != 0.0))
-                          { E[ANISOTROPY] += te.anisotropyEnergy(param, u); }
+                      if (param.K != 0.0)
+                          { E[ANISOTROPY] += te.uniaxialAnisotropyEnergy(param, u); }
+                      if (param.K3 != 0.0)
+                          { E[ANISOTROPY] += te.cubicAnisotropyEnergy(param, u); }
 
                       switch (settings.getFieldType())
                           {
