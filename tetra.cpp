@@ -229,12 +229,12 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     if(param.K != 0)
         {
         double Kbis = 2.0 * param.K/(mu0*Ms);
-        uHeff += calc_aniso_uniax(param.uk, Kbis, s_dt, U, V, H_aniso);
+        uHeff += calc_aniso_uniax(param.uk, Kbis, s_dt/gamma0, U, V, H_aniso);
         }
     if(param.K3 != 0)
         {
         double K3bis = 2.0 * param.K3/(mu0*Ms);
-        uHeff += calc_aniso_cub(param.ex, param.ey, param.ez, K3bis, s_dt, U, V, H_aniso);
+        uHeff += calc_aniso_cub(param.ex, param.ey, param.ez, K3bis, s_dt/gamma0, U, V, H_aniso);
         }
 
     Eigen::Matrix<double,DIM,NPI> Heff = Hd + calc_Hext();
