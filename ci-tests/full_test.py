@@ -23,7 +23,9 @@ settings = {
     "mesh": {
         "filename": "../examples/ellipsoid.msh",
         "length_unit": 1e-9,
-        "volume_regions": { "ellipsoid_volume": {} },
+        "volume_regions": {
+            "ellipsoid_volume": { "K": 3e5, "uk": [0, 1, 0] }
+        },
         "surface_regions": { "ellipsoid_surface": {} }
     },
     "initial_magnetization": [0, 0, 1],
@@ -38,13 +40,13 @@ settings = {
 
 val = subprocess.check_output(["../feellgood","--version"])
 if b'ONE_GAUSS_POINT=ON' in val:
-    X = 0.309710
-    Y = 0.406102
-    Z = -0.859745
+    X = 0.307432
+    Y = 0.476202
+    Z = -0.823843
 else:
-    X = 0.309885
-    Y = 0.405762
-    Z = -0.859842
+    X = 0.307542
+    Y = 0.475877
+    Z = -0.823989
 
 sys.stdout.flush()
 val = subprocess.run(["../feellgood", "--seed", "2", "-"], input=json.dumps(settings), text=True)
