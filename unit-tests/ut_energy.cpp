@@ -12,6 +12,69 @@
 
 BOOST_AUTO_TEST_SUITE(ut_energy)
 
+/*
+ *test of the second order uniaxial anisotropy energy expression
+ * */
+BOOST_AUTO_TEST_CASE(anisotropyEnergy, *boost::unit_test::tolerance(UT_TOL))
+    {
+    const int nbNod = 4;
+    std::vector<Nodes::Node> node;
+    dummyNodes<nbNod>(node);
+
+    unsigned sd = my_seed();
+    std::mt19937 gen(sd);
+    std::uniform_real_distribution<> distrib(0.0, 1.0);
+
+    for (int i = 0; i < nbNod; i++)
+        {
+        node[i].d[0].u = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        }
+
+    // carefull with indices (starting from 1)
+    Tetra::Tet t(node, 0, {1, 2, 3, 4});
+    double u_nod[Nodes::DIM][Tetra::N];
+    for (int ie=0;ie < Tetra::N; ie++)
+        {
+        int i = t.ind[ie];
+        Nodes::dataNode &d0 = node[i].d[0];
+        for (int dim=0;dim<Nodes::DIM;dim++)
+            { u_nod[dim][ie] = d0.u(dim); }
+        }
+
+    Tetra::prm param;
+    param.K = distrib(gen);
+    param.uk = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+    param.K3 = 0;
+    param.ex.setZero();
+    param.ey.setZero();
+    param.ez.setZero();
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> U;
+    double u[Nodes::DIM][Tetra::NPI];
+    tiny::mult<double, 3, Tetra::N, Tetra::NPI>(u_nod, Tetra::a, u);
+
+    for (int npi=0; npi < Tetra::NPI; npi++)
+        {
+        U.col(npi) << u[Nodes::IDX_X][npi], u[Nodes::IDX_Y][npi], u[Nodes::IDX_Z][npi];
+        }
+    double energyToTest = t.anisotropyEnergy(param,U);
+    // begin code ref from src_Tube_scalfmm_zhang_ec_mu_oersted_spinHall_thiele_dyn20260203_dev
+    // file MuMag_energy.cc
+    double dens[Tetra::NPI];
+    double uk00=param.uk(Nodes::IDX_X);
+    double uk01=param.uk(Nodes::IDX_Y);
+    double uk02=param.uk(Nodes::IDX_Z);
+    for (int npi=0;npi<Tetra::NPI;npi++)
+        {
+        double al0 = uk00*u[0][npi] + uk01*u[1][npi] + uk02*u[2][npi];
+        dens[npi] = -param.K*sq(al0);
+        }
+    double energyRef(0);
+    for(int npi=0;npi<Tetra::NPI;npi++)
+        { energyRef += t.weight[npi] * dens[npi]; }
+    //end code ref
+    BOOST_TEST( energyToTest == energyRef);
+    }
+
 /*---------------------------------------*/
 /* test: check if demag energy computed through demag field Hd gives same energy as tet+fac demag energy computed from scaler potential phi   */
 /*---------------------------------------*/
