@@ -44,6 +44,9 @@ add_executable (test_ut_element ${SOURCES})
 SET(SOURCES ../facette.cpp ut_facette.cpp)
 add_executable (test_ut_facette ${SOURCES})
 
+SET(SOURCES ../facette.cpp ut_fac_charges.cpp)
+add_executable (test_ut_fac_charges ${SOURCES})
+
 SET(SOURCES ../tetra.cpp ut_tetra.cpp)
 add_executable (test_ut_tetra ${SOURCES})
 
@@ -198,6 +201,13 @@ target_link_libraries(test_ut_facette
   TBB::tbb
   )
 
+target_link_libraries(test_ut_fac_charges
+  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY}
+  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  TBB::tbb
+  )
+
 #target_compile_options(test_ut_tiny PUBLIC -fsanitize=leak )
 #target_link_options(test_ut_tiny PUBLIC -fsanitize=leak )
 target_link_libraries(test_ut_tiny
@@ -237,6 +247,7 @@ add_test (NAME ut_node COMMAND test_ut_node)
 add_test (NAME ut_index COMMAND test_ut_index)
 add_test (NAME ut_element COMMAND test_ut_element)
 add_test (NAME ut_facette COMMAND test_ut_facette)
+add_test (NAME ut_fac_charges COMMAND test_ut_fac_charges)
 add_test (NAME ut_tetra COMMAND test_ut_tetra)
 add_test (NAME ut_tet_lumping COMMAND test_ut_tet_lumping)
 add_test (NAME ut_tet_charges COMMAND test_ut_tet_charges)
