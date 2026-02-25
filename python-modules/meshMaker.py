@@ -92,17 +92,22 @@ class Hexahedron(object):
         gmsh.finalize()
         
 class Cylinder(object):
-    def __init__ (self,radius,thickness,mesh_size,surfName,volName,fileFormat=4.1,verbose=False):
+    def __init__ (self,radius,thickness,mesh_size,surfName,volName,partitionSurface=False,fileFormat=4.1,verbose=False):
         """ 
             geometrical cylinder is zero centered, with radius r and length t along (Oz)
             this cylinder mesh is generated with python geo
+            if optional parameter partitionSurface is set to True, then the surface of the cylinder
+            is split in three surfaces: two disks and the lateral surface of the cylinder. Their
+            names will be constituted of surfName + "#" + integer (0|1|2)
             by default gmsh file format 4.1 is used to write the mesh text file
+            verbose set the verbosity of gmsh
         """
         
         self.r = radius
         self.t = thickness
         self.msh_s = mesh_size
         self.surfName = surfName
+        self.partitionSurface = partitionSurface
         self.volName = volName
         self.withExtraSurf = False
         gmsh_init("cyl",fileFormat,0,verbose)
@@ -135,9 +140,20 @@ class Cylinder(object):
         out = gmsh.model.geo.extrude([(2,surf)],0,0,self.t) # 2 is the dimension of the object refered by index surf
         gmsh.model.geo.synchronize() # we have to sync before calling addPhysicalGroup
 
-        surface_tag = 200
-        gmsh.model.addPhysicalGroup(2,[surf, out[0][1], out[2][1], out[3][1], out[4][1], out[5][1]],surface_tag)
-        gmsh.model.setPhysicalName(2,surface_tag,self.surfName)
+        if self.partitionSurface:
+            surface_tag = 200
+            gmsh.model.addPhysicalGroup(2,[out[2][1], out[3][1], out[4][1], out[5][1]],surface_tag)
+            gmsh.model.setPhysicalName(2,surface_tag, self.surfName + "#0")
+            surface_tag = 210
+            gmsh.model.addPhysicalGroup(2,[surf],surface_tag)
+            gmsh.model.setPhysicalName(2,surface_tag, self.surfName + "#1")
+            surface_tag = 220
+            gmsh.model.addPhysicalGroup(2,[out[0][1]],surface_tag)
+            gmsh.model.setPhysicalName(2,surface_tag, self.surfName + "#2")
+        else:
+            surface_tag = 200
+            gmsh.model.addPhysicalGroup(2,[surf, out[0][1], out[2][1], out[3][1], out[4][1], out[5][1]],surface_tag)
+            gmsh.model.setPhysicalName(2,surface_tag,self.surfName)
 
         if self.withExtraSurf :
                 surface_tag_left = 201
