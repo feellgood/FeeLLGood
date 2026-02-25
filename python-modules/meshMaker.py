@@ -143,13 +143,13 @@ class Cylinder(object):
         if self.partitionSurface:
             surface_tag = 200
             gmsh.model.addPhysicalGroup(2,[out[2][1], out[3][1], out[4][1], out[5][1]],surface_tag)
-            gmsh.model.setPhysicalName(2,surface_tag, self.surfName + "#0")
+            gmsh.model.setPhysicalName(2,surface_tag, self.surfName + "_side")
             surface_tag = 210
             gmsh.model.addPhysicalGroup(2,[surf],surface_tag)
-            gmsh.model.setPhysicalName(2,surface_tag, self.surfName + "#1")
+            gmsh.model.setPhysicalName(2,surface_tag, self.surfName + "_bottom")
             surface_tag = 220
             gmsh.model.addPhysicalGroup(2,[out[0][1]],surface_tag)
-            gmsh.model.setPhysicalName(2,surface_tag, self.surfName + "#2")
+            gmsh.model.setPhysicalName(2,surface_tag, self.surfName + "_top")
         else:
             surface_tag = 200
             gmsh.model.addPhysicalGroup(2,[surf, out[0][1], out[2][1], out[3][1], out[4][1], out[5][1]],surface_tag)
