@@ -160,10 +160,13 @@ class Cylinder(object):
         gmsh.finalize()
 
 class Tube(object):
-    def __init__ (self,radius1,radius2,length,mesh_size,surfName,volName,fileFormat=4.1,verbose=False):
+    def __init__ (self,radius1,radius2,length,mesh_size,surfName,volName,partitionSurface=False,fileFormat=4.1,verbose=False):
         """
             geometrical Tube is zero centered, with inner radius radius1 and outer radius
             radius2 and length along (Oz)
+            if optional parameter partitionSurface is set to True, then the surface of the tube
+            is split in four surfaces: two disks and the lateral surfaces of the tube. Their
+            names will be constituted of surfName +  ("_inner"|"_outer"|"_bottom"|"_top")
             this tube mesh is generated with python geo
             by default gmsh file format 4.1 is used to write the mesh text file
         """
@@ -173,15 +176,9 @@ class Tube(object):
         self.l = length
         self.msh_s = mesh_size
         self.surfName = surfName
+        self.partitionSurface = partitionSurface
         self.volName = volName
-        self.withExtraSurf = False
         gmsh_init("tube",fileFormat,0,verbose)
-
-    def addEdgeSurf(self,name1,name2):
-        """ optional surfaces : name1 will refer to the base surface, name2 will refer to the translated name1 surface from extrusion """
-        self.n1 = name1
-        self.n2 = name2
-        self.withExtraSurf = True
 
     def make(self,meshFileName):
         """ write tube mesh file """
@@ -218,19 +215,28 @@ class Tube(object):
         out = gmsh.model.geo.extrude([(2,surf)],0,0,self.l) # 2 is the dimension of the object refered by index surf
         gmsh.model.geo.synchronize() # we have to sync before calling addPhysicalGroup
 
-        surface_tag = 200
-        gmsh.model.addPhysicalGroup(2,[surf, out[0][1], out[2][1], out[3][1], out[4][1], out[5][1],
-        out[6][1], out[7][1], out[8][1], out[9][1] ],surface_tag)
-        gmsh.model.setPhysicalName(2,surface_tag,self.surfName)
+        if self.partitionSurface:
+            surface_tag = 200
+            gmsh.model.addPhysicalGroup(2,[out[2][1], out[3][1], out[4][1], out[5][1]],surface_tag)
+            gmsh.model.setPhysicalName(2,surface_tag,self.surfName + "_outer")
+            
+            surface_tag = 210
+            gmsh.model.addPhysicalGroup(2,[out[6][1], out[7][1], out[8][1], out[9][1]],surface_tag)
+            gmsh.model.setPhysicalName(2,surface_tag,self.surfName + "_inner")
+            
+            surface_tag = 220
+            gmsh.model.addPhysicalGroup(2,[surf],surface_tag)
+            gmsh.model.setPhysicalName(2,surface_tag,self.surfName + "_bottom")
+            
+            surface_tag = 230
+            gmsh.model.addPhysicalGroup(2,[out[0][1]],surface_tag)
+            gmsh.model.setPhysicalName(2,surface_tag,self.surfName + "_top")
 
-        if self.withExtraSurf :
-                surface_tag_left = 201
-                gmsh.model.addPhysicalGroup(2,[surf],surface_tag_left)
-                gmsh.model.setPhysicalName(2,surface_tag_left,self.n1)
-
-                surface_tag_right = 202
-                gmsh.model.addPhysicalGroup(2,[ out[0][1] ],surface_tag_right)
-                gmsh.model.setPhysicalName(2,surface_tag_right,self.n2)
+        else:
+            surface_tag = 200
+            gmsh.model.addPhysicalGroup(2,[surf, out[0][1], out[2][1], out[3][1], out[4][1], out[5][1],
+            out[6][1], out[7][1], out[8][1], out[9][1] ],surface_tag)
+            gmsh.model.setPhysicalName(2,surface_tag,self.surfName)
 
         volume_tag = 300
         gmsh.model.addPhysicalGroup(3,[out[1][1]],volume_tag)
