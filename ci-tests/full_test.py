@@ -44,10 +44,12 @@ if b'ONE_GAUSS_POINT=ON' in val:
     X = 0.307432
     Y = 0.476202
     Z = -0.823843
+    E = -4.446980e-19
 else:
     X = 0.307542
     Y = 0.475877
     Z = -0.823989
+    E = -4.445605e-19
 
 # Run the simulation.
 sys.stdout.flush()
@@ -67,12 +69,16 @@ if(val.returncode==0):
     mx = float(data[1])
     my = float(data[2])
     mz = float(data[3])
+    e_tot = float(data[7])
     distance = sqrt((X-mx)**2+(Y-my)**2+(Z-mz)**2)
+    e_error = abs((e_tot - E) / E)  # relative error
     threshold = 1e-5
-    success = distance < threshold
+    success = distance < threshold and e_error < threshold
     print("feeLLGood terminated successfully")
     print(f"final average reduced magnetization = ({mx:.6f}, {my:.6f}, {mz:.6f})")
     print(f"distance from expected value        = {distance:.2e}")
+    print(f"final total energy                  = {e_tot:.6e}")
+    print(f"relative error on total energy      = {e_error:.2e}")
     print(f"threshold of acceptability          = {threshold:.2e}")
 else:
     print("feeLLGood failed: exit status = " + str(val.returncode))
