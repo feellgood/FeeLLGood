@@ -10,9 +10,9 @@ from math import sqrt
 os.chdir(sys.path[0])
 sys.path.insert(0, '../python-modules')
 
+# Simulation settings. The number of threads depends on the number of available CPUs.
 MaxNbThreads = int(subprocess.check_output(["getconf","_NPROCESSORS_ONLN"]))
 nbThreads = (MaxNbThreads + 4) // 3 # ellipsoid.msh is small, maxnbthreads is counterproductive
-
 settings = {
     "outputs": {
         "file_basename": "full_test",
@@ -38,6 +38,7 @@ settings = {
     }
 }
 
+# Expected outcome. It depends on whether feeLLGood was compiled in ONE_GAUSS_POINT mode.
 val = subprocess.check_output(["../feellgood","--version"])
 if b'ONE_GAUSS_POINT=ON' in val:
     X = 0.307432
@@ -48,12 +49,14 @@ else:
     Y = 0.475877
     Z = -0.823989
 
+# Run the simulation.
 sys.stdout.flush()
 val = subprocess.run(["../feellgood", "--seed", "2", "-"], input=json.dumps(settings), text=True)
 
 #(devNote) to avoid -fsanitize=leak ASLR bug, we turn off address randomizer
 #val = subprocess.run(["setarch", "--addr-no-randomize", "../feellgood", "--seed", "2", "-"], input=json.dumps(settings), text=True)
 
+# Report results.
 if(val.returncode==0):
     with open("full_test.evol","r") as f:
         for line in f:
