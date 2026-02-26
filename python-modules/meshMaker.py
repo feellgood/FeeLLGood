@@ -98,7 +98,7 @@ class Cylinder(object):
             this cylinder mesh is generated with python geo
             if optional parameter partitionSurface is set to True, then the surface of the cylinder
             is split in three surfaces: two disks and the lateral surface of the cylinder. Their
-            names will be constituted of surfName + "#" + integer (0|1|2)
+            names will be constituted of surfName +  ("_side"|"_bottom"|"_top")
             by default gmsh file format 4.1 is used to write the mesh text file
             verbose set the verbosity of gmsh
         """
@@ -109,15 +109,8 @@ class Cylinder(object):
         self.surfName = surfName
         self.partitionSurface = partitionSurface
         self.volName = volName
-        self.withExtraSurf = False
         gmsh_init("cyl",fileFormat,0,verbose)
 
-    def addEdgeSurf(self,name1,name2):
-        """ optional surfaces : name1 will refer to the base surface, name2 will refer to the translated name1 surface from extrusion """
-        self.n1 = name1
-        self.n2 = name2
-        self.withExtraSurf = True
-    
     def make(self,meshFileName):
         """ write cylinder mesh file """
         
@@ -154,15 +147,6 @@ class Cylinder(object):
             surface_tag = 200
             gmsh.model.addPhysicalGroup(2,[surf, out[0][1], out[2][1], out[3][1], out[4][1], out[5][1]],surface_tag)
             gmsh.model.setPhysicalName(2,surface_tag,self.surfName)
-
-        if self.withExtraSurf :
-                surface_tag_left = 201
-                gmsh.model.addPhysicalGroup(2,[surf],surface_tag_left)
-                gmsh.model.setPhysicalName(2,surface_tag_left,self.n1)
-
-                surface_tag_right = 202
-                gmsh.model.addPhysicalGroup(2,[ out[0][1] ],surface_tag_right)
-                gmsh.model.setPhysicalName(2,surface_tag_right,self.n2)
 
         volume_tag = 300
         gmsh.model.addPhysicalGroup(3,[out[1][1]],volume_tag)

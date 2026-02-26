@@ -10,7 +10,6 @@ meshFileName = "tube.msh"
 volRegionName = "bulk tube"
 surfRegionName = "frontier(" + volRegionName + ")"
 t = Tube(r1,r2,l,meshSize,surfRegionName,volRegionName)
-#t.addEdgeSurf("leftS","rightS")
 t.make(meshFileName)
 settings = {
     "outputs": {
