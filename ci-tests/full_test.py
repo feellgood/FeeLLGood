@@ -6,6 +6,10 @@ import json
 import subprocess
 from math import sqrt
 
+# Distance between two vectors of R^3.
+def distance_R3(v1, v2):
+    return sqrt((v2[0] - v1[0])**2 + (v2[1] - v1[1])**2 + (v2[2] - v1[2])**2)
+
 # Move to the script's directory.
 os.chdir(sys.path[0])
 sys.path.insert(0, '../python-modules')
@@ -41,15 +45,9 @@ settings = {
 # Expected outcome. It depends on whether feeLLGood was compiled in ONE_GAUSS_POINT mode.
 val = subprocess.check_output(["../feellgood","--version"])
 if b'ONE_GAUSS_POINT=ON' in val:
-    X = 0.307432
-    Y = 0.476202
-    Z = -0.823843
-    E = -4.446980e-19
+    expected = { "m": [0.307432, 0.476202, -0.823843], "E_tot": -4.446980e-19 }
 else:
-    X = 0.307542
-    Y = 0.475877
-    Z = -0.823989
-    E = -4.445605e-19
+    expected = { "m": [0.307542, 0.475877, -0.823989], "E_tot": -4.445605e-19 }
 
 # Run the simulation.
 sys.stdout.flush()
@@ -65,19 +63,17 @@ if(val.returncode==0):
             pass
         lastLine = line
     f.close()
-    data = lastLine.split()
-    mx = float(data[1])
-    my = float(data[2])
-    mz = float(data[3])
-    e_tot = float(data[7])
-    distance = sqrt((X-mx)**2+(Y-my)**2+(Z-mz)**2)
-    e_error = abs((e_tot - E) / E)  # relative error
+    data = list(map(float, lastLine.split()))
+    m = [data[1], data[2], data[3]]
+    E_tot = data[7]
+    m_error = distance_R3(expected["m"], m)
+    e_error = abs((E_tot - expected["E_tot"]) / expected["E_tot"])  # relative error
     threshold = 1e-5
-    success = distance < threshold and e_error < threshold
+    success = m_error < threshold and e_error < threshold
     print("feeLLGood terminated successfully")
-    print(f"final average reduced magnetization = ({mx:.6f}, {my:.6f}, {mz:.6f})")
-    print(f"distance from expected value        = {distance:.2e}")
-    print(f"final total energy                  = {e_tot:.6e}")
+    print(f"final average reduced magnetization = ({m[0]:.6f}, {m[1]:.6f}, {m[2]:.6f})")
+    print(f"final total energy                  = {E_tot:.6e}")
+    print(f"error on magnetization              = {m_error:.2e}")
     print(f"relative error on total energy      = {e_error:.2e}")
     print(f"threshold of acceptability          = {threshold:.2e}")
 else:
