@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 
 description = '''
-fg-gensol is an executable that generates initial magnetization configurations (`sol.in` files) for
-feeLLGood simulations from Gmsh mesh files. It automatically detects physical volume regions in the
-input mesh and allows to define custom vector fields for each region.
 '''
 
 import socket 
@@ -229,9 +226,26 @@ def write_solution_file(m, filename="sol.in"):
 
     print(f"✅ File '{filename}' successfully written ({len(header_lines)} header lines and {m.shape[0]} data lines).")
 
+def get_params():
+    import argparse
+    description = 'generate a sol.in file'
+    epilogue = '''
+fg-gensol is an executable that generates initial magnetization configurations (`sol.in` files) for
+feeLLGood simulations from mesh files. Input mesh file has to be readable by meshio python module.
+It automatically detects physical volume regions in the input mesh and allows to define custom 
+vector fields for each region.
+'''
 
-def main(mesh_file):
+    parser = argparse.ArgumentParser(description=description, epilog=epilogue,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('mshFileName', help='a mesh file meshio module can open, for example a gmsh file')
+    parser.add_argument('--version',action='version',version= __version__,help='show the version number')
+    args = parser.parse_args()
+    return args.mshFileName
+
+def main():
     """Main routine."""
+    mesh_file = get_params()
     points, regions = load_mesh(mesh_file)
     
     # Check if init_cfg.py exists in current directory
@@ -281,11 +295,6 @@ def main(mesh_file):
         autogenerate_init_cfg(regions)
         sys.exit(0)
 
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print(f"Usage: {sys.argv[0]} mesh_file.msh")
-        sys.exit(1)
-
-    mesh_file = sys.argv[1]
-    main(mesh_file)
+    main()
