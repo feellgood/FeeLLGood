@@ -6,6 +6,11 @@ Combine a mesh file (which has the node coordinates) with a feeLLGood’s
 potentials). Output the .sol physical quantities (magnetization or
 potential) as a function of position, in a tab-separated-values file:
 (x, y, z, physical_quantity...).
+Exemple:
+fg-merge-sol my_mesh.msh my_simul.sol -o my_results.tsv
+
+will generate an output file named results.tsv, without node indices, replaced by physical node
+coordinates, and associated physical quantities from my_simul.sol input file
 '''
 
 import sys
