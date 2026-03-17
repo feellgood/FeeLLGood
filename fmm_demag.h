@@ -163,10 +163,7 @@ private:
         std::for_each(msh.magFac.begin(),msh.magFac.end(),[this, &msh, getter, &nsrc](const int idx)
                 {
                 Facette::Fac &f = msh.fac[idx];
-                double dMs(0);
-                if (!prmFacette[f.idxPrm].suppress_charges) { dMs = f.dMs; }
-                // to suppress surface charges we have to set to zero some values in srcDen
-                Eigen::Matrix<double,Facette::NPI,1> result = f.charges(dMs, getter);
+                Eigen::Matrix<double,Facette::NPI,1> result = f.charges(f.dMs, getter);
                 for(int i=0;i<Facette::NPI;i++)
                     { srcDen[nsrc+i] = result(i); }
                 nsrc += Facette::NPI;

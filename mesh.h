@@ -118,7 +118,8 @@ public:
 
         for(unsigned int i=0;i<fac.size();i++)
             {
-            if (isMagnetic(fac[i]) && !isInMagList(magFac,fac[i]) )
+            if (isMagnetic(fac[i]) && !mySets.paramFacette[fac[i].idxPrm].suppress_charges
+                    && !isInMagList(magFac,fac[i]) )
                 { magFac.push_back(i); }
             }
 
@@ -333,7 +334,10 @@ public:
      /** list of the indices of all magnetic tetrahedrons from all volume regions */
     std::vector<int> magTet;
 
-    /** list of the indices of all magnetic facets from all surface regions */
+    /** List of the indices of all surface faces which can hold magnetic charges,
+     * i.e. the faces where:
+     *   * all the vertices are magnetic nodes
+     *   * the `suppress_charges` flag is unset. */
     std::vector<int> magFac;
 
     /** external applied space field, values on gauss points, size is number of tetraedrons */
