@@ -58,7 +58,7 @@ if [ "$ID" = "rocky" ]; then
     sudo dnf install -y $packages
 else  # Debian-like OS
     packages="$packages wget g++ libeigen3-dev libtbb-dev libyaml-cpp-dev duktape-dev"
-    packages="$packages libgmsh-dev"
+    packages="$packages libann-dev libgmsh-dev"
     sudo apt-get update -q
     if [ "$unit_tests" = "true" ]; then
         packages="$packages libboost-system-dev libboost-filesystem-dev libboost-test-dev"
@@ -73,22 +73,24 @@ fi
 mkdir -p ~/src
 cd ~/src
 
-# Download and install ANN.
-rm -rf ann_1.1.2/
-if [ ! -f "ann_1.1.2.tar.gz" ]; then
-    wget -nv https://www.cs.umd.edu/~mount/ANN/Files/1.1.2/ann_1.1.2.tar.gz
-fi
-tar xzf ann_1.1.2.tar.gz
-cd ann_1.1.2/
-sed -i 's/CFLAGS =.* -O3/& -std=c++98/' Make-config
-make -j $job_count linux-g++
-sudo cp lib/libANN.a /usr/local/lib/
-sudo cp include/ANN/ANN.h /usr/local/include/
-cd ..
-
-# On Rocky Linux, download and install GMSH.
-# On Debian and Ubuntu, it has already been installed with apt.
+# On Rocky Linux, download and install ANN and GMSH.
+# On Debian and Ubuntu, they have already been installed with apt.
 if [ "$ID" = "rocky" ]; then
+
+    # Download and install ANN.
+    rm -rf ann_1.1.2/
+    if [ ! -f "ann_1.1.2.tar.gz" ]; then
+        wget -nv https://www.cs.umd.edu/~mount/ANN/Files/1.1.2/ann_1.1.2.tar.gz
+    fi
+    tar xzf ann_1.1.2.tar.gz
+    cd ann_1.1.2/
+    sed -i 's/CFLAGS =.* -O3/& -std=c++98/' Make-config
+    make -j $job_count linux-g++
+    sudo cp lib/libANN.a /usr/local/lib/libann.a
+    sudo cp --parents include/ANN/ANN.h /usr/local/
+    cd ..
+
+    # Download and install GMSH.
     if [ ! -f "gmsh-4.8.4-source.tgz" ]; then
         wget -nv https://gmsh.info/src/gmsh-4.8.4-source.tgz
     fi

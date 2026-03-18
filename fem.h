@@ -28,7 +28,7 @@ It does also contains the definition of many constants for the solver, and for s
 #include "spinAccumulationSolver.h"
 #include "linear_algebra.h"
 #include "chronometer.h"
-#include "ANN.h"
+#include "ANN/ANN.h"
 #include "feellgoodSettings.h"
 
 /** number of energy terms in energy array E */
