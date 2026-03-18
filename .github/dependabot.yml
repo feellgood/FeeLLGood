@@ -1,0 +1,9 @@
+# Dependabot configuration.
+# C.f. https://docs.github.com/code-security/dependabot/
+
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
