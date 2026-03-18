@@ -105,6 +105,7 @@ std::string parseOptions(Settings &settings, int argc, char *argv[], unsigned in
     int print_help = false;
     int print_version = false;
     int print_defaults = false;
+    int print_template = false;
     int verify = false;
     int use_fixed_seed = false;
     struct Option
@@ -117,6 +118,7 @@ std::string parseOptions(Settings &settings, int argc, char *argv[], unsigned in
             {"-h", "--help", "display short help and exit", &print_help},
             {"-V", "--version", "display version information and exit", &print_version},
             {"", "--print-defaults", "print default settings and exit", &print_defaults},
+            {"", "--print-template", "print a template configuration and exit", &print_template},
             {"", "--verify", "verify a settings file and exit", &verify},
             {"-v", "--verbose", "enable verbose mode", &settings.verbose},
             {"", "--seed", "set random seed", &use_fixed_seed},
@@ -169,6 +171,11 @@ std::string parseOptions(Settings &settings, int argc, char *argv[], unsigned in
     if (print_defaults)
         {
         Settings::dumpDefaults();
+        exit(0);
+        }
+    if (print_template)
+        {
+        Settings::dumpTemplate();
         exit(0);
         }
     if (optind != argc - 1)

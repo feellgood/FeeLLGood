@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <regex>
 #include <cmath>
 #include <unistd.h>  // for sysconf(), gethostname()
 
@@ -140,6 +141,14 @@ Settings::Settings()
     }
 
 void Settings::dumpDefaults() { std::cout << get_default_yaml(); }
+
+void Settings::dumpTemplate()
+    {
+    std::string s = get_default_yaml();
+    s = std::regex_replace(s, std::regex(" *#.*"), "");  // remove comments
+    s = std::regex_replace(s, std::regex("^\n", std::regex::multiline), "");  // remove empty lines
+    std::cout << s;
+    }
 
 void Settings::toYaml()
     {

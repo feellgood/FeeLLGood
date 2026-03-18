@@ -83,6 +83,10 @@ public:
     /** Print to stdout the embedded YAML document defining the default settings. */
     static void dumpDefaults();
 
+    /** Print to stdout a template configuration file. This does the same as dumpDefaults(), except
+     * that it removes comments and empty lines. */
+    static void dumpTemplate();
+
     /** Serialize these settings as a YAML document, and print them to stdout. */
     void toYaml(void);
 
