@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pyfeellgood"
+description = "python module to help writing simple meshes for feellgood software"
+keywords = ["mesh", "micromagnetism"]
+authors = [{name = "Christophe Thirion", email = "christophe.thirion@neel.cnrs.fr"},
+           {name = "Edgar Bonet", email = "edgar.bonet@neel.cnrs.fr"},
+           {name = "Jean-Christophe Toussaint"}]
+maintainers =[{name = "Christophe Thirion", email = "christophe.thirion@neel.cnrs.fr"},
+              {name = "Edgar Bonet", email = "edgar.bonet@neel.cnrs.fr"}]
+
+
+readme = "README.md"
+version = "0.0"
+dependencies = [
+  "numpy",
+  "gmsh"
+]
+requires-python = ">=3.8"
+license = "GPL-3.0-or-later"
+license-files = ["LICEN[CS]E"]
+
+[project.urls]
+Homepage = "https://feellgood.neel.cnrs.fr/modules.html"
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/meshMaker.py",
+  "/LICENSE",
+  "/README.md"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["/meshMaker.py"]
