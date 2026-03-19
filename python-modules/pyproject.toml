@@ -7,10 +7,10 @@ name = "pyfeellgood"
 description = "python module to help writing simple meshes for feellgood software"
 keywords = ["mesh", "micromagnetism"]
 authors = [{name = "Christophe Thirion", email = "christophe.thirion@neel.cnrs.fr"},
-           {name = "Edgar Bonet", email = "edgar.bonet@neel.cnrs.fr"},
+           {name = "Edgar Bonet", email = "bonet@grenoble.cnrs.fr"},
            {name = "Jean-Christophe Toussaint"}]
 maintainers =[{name = "Christophe Thirion", email = "christophe.thirion@neel.cnrs.fr"},
-              {name = "Edgar Bonet", email = "edgar.bonet@neel.cnrs.fr"}]
+              {name = "Edgar Bonet", email = "bonet@grenoble.cnrs.fr"}]
 
 
 readme = "README.md"
