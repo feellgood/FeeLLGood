@@ -7,7 +7,7 @@
 
 #include "tags.h"
 #include "chronometer.h"
-#include "feellgoodSettings.h"
+#include "settings.h"
 
 using namespace Nodes;
 

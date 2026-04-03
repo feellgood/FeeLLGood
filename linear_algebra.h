@@ -15,7 +15,7 @@
 #include "config.h"
 
 #include "facette.h"
-#include "feellgoodSettings.h"
+#include "settings.h"
 #include "solver.h"
 #include "meshUtils.h"
 #include "node.h"

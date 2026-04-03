@@ -15,7 +15,7 @@
 #include "facette.h"
 #include "node.h"
 #include "tetra.h"
-#include "feellgoodSettings.h"
+#include "settings.h"
 
 namespace Mesh
     {

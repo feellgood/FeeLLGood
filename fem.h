@@ -29,7 +29,7 @@ It does also contains the definition of many constants for the solver, and for s
 #include "linear_algebra.h"
 #include "chronometer.h"
 #include "ANN/ANN.h"
-#include "feellgoodSettings.h"
+#include "settings.h"
 
 /** number of energy terms in energy array E */
 const int NB_ENERGY_TERMS = 4;

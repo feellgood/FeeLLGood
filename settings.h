@@ -1,7 +1,7 @@
-#ifndef feellgoodSettings_h
-#define feellgoodSettings_h
+#ifndef settings_h
+#define settings_h
 
-/** \file feellgoodSettings.h
+/** \file settings.h
 \brief many settings to give some parameters to the solver, boundary conditions for the problem, the
 output file format wanted by the user. This is done mainly with the class Settings.
 */
@@ -365,4 +365,4 @@ private:
     const bool NORMALIZE = true;
     };
 
-#endif /* feellgoodSettings_h */
+#endif /* settings_h */

@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <gmsh.h>
 
-#include "feellgoodSettings.h"
+#include "settings.h"
 #include "mesh.h"
 #include "meshUtils.h"
 #include "tags.h"
