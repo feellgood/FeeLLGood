@@ -45,16 +45,25 @@ void mesh::checkMeshFile(Settings const &mySets)
     msh_available = msh_available && (elemTypes.size() == 1); // only one type of 3D element allowed
     msh_available = msh_available && (elemTypes[0] == TYP_ELEM_TETRAEDRON); // only Tetrahedrons
     if (!msh_available)
-        { std::cout<<"Fatal Error: mesh file contains other 3D elements than tetraedrons.\n"; exit(1); }
+        {
+        std::cout<<"Fatal Error: mesh file contains other 3D elements than tetraedrons.\n";
+        exit(1);
+        }
     gmsh::model::mesh::getElementTypes(elemTypes, DIM_OBJ_2D, -1);
     msh_available = msh_available && (elemTypes.size() == 1); // only one type of 2D element allowed
     msh_available = msh_available && (elemTypes[0] == TYP_ELEM_TRIANGLE); // only Triangles
     if (!msh_available)
-        { std::cout<<"Fatal Error: mesh file contains other 2D elements than triangles.\n"; exit(1); }
+        {
+        std::cout<<"Fatal Error: mesh file contains other 2D elements than triangles.\n";
+        exit(1);
+        }
     bool o_2D = checkNamedObjects<Facette::prm>(mySets.paramFacette,DIM_OBJ_2D);
     bool o_3D = checkNamedObjects<Tetra::prm>(mySets.paramTetra,DIM_OBJ_3D);
     if (!(o_2D && o_3D))
-        { std::cout <<"Fatal Error: mismatch between input mesh file and yaml regions.\n"; exit(1); }
+        {
+        std::cout <<"Fatal Error: mismatch between input mesh file and yaml regions.\n";
+        exit(1);
+        }
     }
 
 void mesh::readNodes(Settings const &mySets /**< [in] */)
@@ -87,7 +96,9 @@ void mesh::readTetraedrons(Settings const &mySets /**< [in] */)
     std::for_each(entities.begin(),entities.end(), [this,&mySets]( std::pair<int, int> &p)
         {
         std::string entity_name;
-        gmsh::model::getEntityName(p.first,p.second,entity_name);// warning! entity index p.second is different from physical region volume index
+        gmsh::model::getEntityName(p.first,p.second,entity_name);// warning! entity index p.second
+                                                                 // is different from physical
+                                                                 // region volume index
         std::vector<int> physicalTags;
         gmsh::model::getPhysicalGroupsForEntity(p.first, p.second, physicalTags);
         if(physicalTags.size())
@@ -102,7 +113,8 @@ void mesh::readTetraedrons(Settings const &mySets /**< [in] */)
                     { //named volume region is found
                     std::vector<int> elemTypes;
                     std::vector<std::vector<std::size_t> > elemTags, elemNodeTags;
-                    gmsh::model::mesh::getElements(elemTypes, elemTags, elemNodeTags, p.first, p.second);
+                    gmsh::model::mesh::getElements(elemTypes, elemTags, elemNodeTags,
+                            p.first, p.second);
                     if (all_elems_are<TYP_ELEM_TETRAEDRON>(elemTypes))
                         { // all elements are tetrahedrons
                         int idx = mySets.findTetraRegionIdx(n);
@@ -119,7 +131,11 @@ void mesh::readTetraedrons(Settings const &mySets /**< [in] */)
                             }
                         }
                     else
-                        { std::cout << "Fatal error: a volume mesh entity contains other elements than tetraedrons.\n"; exit(1); }
+                        {
+                        std::cout << "Fatal error: "
+                                "a volume mesh entity contains other elements than tetraedrons.\n";
+                        exit(1);
+                        }
                     }
                 }
             }
@@ -135,7 +151,9 @@ void mesh::readTriangles(Settings const &mySets /**< [in] */)
     std::for_each(entities.begin(),entities.end(), [this,&mySets]( std::pair<int, int> &p)
         {
         std::string entity_name;
-        gmsh::model::getEntityName(p.first,p.second,entity_name);// warning! entity index p.second is different from physical region surface index
+        gmsh::model::getEntityName(p.first,p.second,entity_name);// warning! entity index p.second
+                                                                 // is different from physical
+                                                                 // region surface index
         std::vector<int> physicalTags;
         gmsh::model::getPhysicalGroupsForEntity(p.first, p.second, physicalTags);
         if(physicalTags.size())
@@ -149,7 +167,8 @@ void mesh::readTriangles(Settings const &mySets /**< [in] */)
                     { //named surface region is found
                     std::vector<int> elemTypes;
                     std::vector<std::vector<std::size_t> > elemTags, elemNodeTags;
-                    gmsh::model::mesh::getElements(elemTypes, elemTags, elemNodeTags, p.first, p.second);
+                    gmsh::model::mesh::getElements(elemTypes, elemTags, elemNodeTags,
+                            p.first, p.second);
                     if (all_elems_are<TYP_ELEM_TRIANGLE>(elemTypes))
                         { // all elements are triangles
                         int idx = mySets.findFacetteRegionIdx(n);
@@ -163,7 +182,11 @@ void mesh::readTriangles(Settings const &mySets /**< [in] */)
                             }
                         }
                     else
-                        { std::cout << "Fatal error: a surface mesh entity contains other elements than triangles.\n"; exit(1); }
+                        {
+                        std::cout << "Fatal error: "
+                                "a surface mesh entity contains other elements than triangles.\n";
+                        exit(1);
+                        }
                     }
                 }
             }

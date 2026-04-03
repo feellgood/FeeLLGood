@@ -24,7 +24,8 @@ class cylinder:
 def buildCircle(r,z0,orientation = True):
     '''
     create four arc circles composing a circle zero centered in the plane z=z0
-    if orientation is True, return positive indices else negative (to be able to create holes with indirect orientation)
+    if orientation is True, return positive indices else negative (to be able to create holes with
+    indirect orientation)
     '''
     p_origin = gmsh.model.geo.addPoint(0,0,z0,mesh_size)
     start_pt = gmsh.model.geo.addPoint(r,0,z0,mesh_size)
@@ -80,16 +81,19 @@ gmsh.model.add("nanowireWithElectrode")
 z0=0
 circle0 = buildCircle(nw.radius,z0)
 surf = buildDisk(circle0)
-out = gmsh.model.geo.extrude([(2,surf)],0,0,nw.height) # 2 is the dimension of the object refered by index surf
+out = gmsh.model.geo.extrude([(2,surf)],0,0,nw.height) # 2 is the dimension of the object
+                                                       # refered by index surf
 gmsh.model.geo.synchronize() # we have to sync before calling addPhysicalGroup
 
 surface_tag = 200 # this surface is frontier(magnetic volume)
 surf_regName = "frontier(magnet)"
-gmsh.model.addPhysicalGroup(2,[surf, out[0][1], out[2][1], out[3][1], out[4][1], out[5][1]],surface_tag)
+gmsh.model.addPhysicalGroup(2,[surf, out[0][1], out[2][1], out[3][1], out[4][1], out[5][1]],
+        surface_tag)
 gmsh.model.setPhysicalName(2,surface_tag,surf_regName)
 
 if not justMagnet:
-    surface_tag = 202 # should be disk in z=nw.height plane : boundary condition for electrostatic problem
+    surface_tag = 202 # should be disk in z=nw.height plane :
+                      # boundary condition for electrostatic problem
     surface_top_name = "top_mag_pillar"
     gmsh.model.addPhysicalGroup(2,[ out[0][1] ],surface_tag)
     gmsh.model.setPhysicalName(2,surface_tag,surface_top_name)
@@ -104,7 +108,8 @@ if r_n < r_e:
     curvedLoop = gmsh.model.geo.addCurveLoop(circle2)
     hole = gmsh.model.geo.addCurveLoop(circle1)
     surf2 = gmsh.model.geo.addPlaneSurface([curvedLoop,hole])
-    out2 = gmsh.model.geo.extrude([(1,circle2[0]),(1,circle2[1]),(1,circle2[2]),(1,circle2[3])],0,0,-e.height)
+    out2 = gmsh.model.geo.extrude([(1,circle2[0]),(1,circle2[1]),(1,circle2[2]),(1,circle2[3])],
+            0,0,-e.height)
     gmsh.model.geo.synchronize()
     circle4 = buildCircle(e.radius,z0-e.height)
     surf3 = buildDisk(circle4)
@@ -112,11 +117,13 @@ if r_n < r_e:
 
     frontier_metal = [surf,surf2,out2[1][1],out2[5][1],out2[9][1],out2[13][1],surf3]
     surf_loop = gmsh.model.geo.addSurfaceLoop(frontier_metal)
-    gmsh.model.geo.removeAllDuplicates() # we have to, otherwise some error occurs while 3D meshing, because of "intersection of line and point", weird...
+    gmsh.model.geo.removeAllDuplicates() # we have to, otherwise some error occurs while 3D meshing,
+                                         # because of "intersection of line and point", weird...
     metal_vol = gmsh.model.geo.addVolume([surf_loop])
     gmsh.model.geo.synchronize()
 elif r_n == r_e:
-    out2 = gmsh.model.geo.extrude([(2,surf)],0,0,-e.height) # 2 is the dimension of the object refered by index surf
+    out2 = gmsh.model.geo.extrude([(2,surf)],0,0,-e.height) # 2 is the dimension of the object
+                                                            # refered by index surf
     gmsh.model.geo.synchronize() # we have to sync before calling addPhysicalGroup
     metal_vol = out2[1][1]
     surf3 = out2[0][1]
@@ -131,7 +138,8 @@ if not justMagnet:
     gmsh.model.addPhysicalGroup(3,[metal_vol],volume_tag)
     gmsh.model.setPhysicalName(3,volume_tag,e.name)
 
-gmsh.model.geo.synchronize() # we have to synchronize before the call to 'generate' to build the mesh
+gmsh.model.geo.synchronize() # we have to synchronize before the call to 'generate'
+                             # to build the mesh
 gmsh.model.mesh.generate(3) # 3 is the dimension of the mesh
         
 gmsh.write(meshFileName)

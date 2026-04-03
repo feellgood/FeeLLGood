@@ -24,8 +24,10 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     public:
     /** constructor */
     spinAcc(Mesh::mesh &_msh /**< [in] ref to the mesh */,
-    std::vector<Tetra::prm> & _pTetra /**< [in] ref to vector of param tetra (volume region parameters) */,
-    std::vector<Facette::prm> & _pFac /**< [in] ref to vector of param facette (surface region parameters) */,
+    std::vector<Tetra::prm> & _pTetra /**< [in] ref to vector of param tetra
+                                        (volume region parameters) */,
+    std::vector<Facette::prm> & _pFac /**< [in] ref to vector of param facette
+                                        (surface region parameters) */,
     const double _tol /**< [in] tolerance for bicg_dir solver */,  // _tol could be 1e-6
     const bool v /**< [in] verbose bool */,
     const int max_iter /**< [in] maximum number of iterations */):
@@ -51,11 +53,13 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     std::vector<Eigen::Vector3d> s;
 
     /** check boundary conditions: mesh and settings have to define a single surface with constant
-     * normal current density J, a vector polarization P and another single surface where spin diffusion = 0 */
+     * normal current density J, a vector polarization P and another single surface where spin
+     * diffusion = 0 */
     void checkBoundaryConditions(void) const;
 
     private:
-    /** Dirichlet values of the components of s on the nodes, it is zero if the node is not in idxDirichlet */
+    /** Dirichlet values of the components of s on the nodes, it is zero if the node is not in
+     * idxDirichlet */
     std::vector<double> valDirichlet;
 
     /** list of the indices for Dirichlet boundary conditions, it contains the indices of the nodes

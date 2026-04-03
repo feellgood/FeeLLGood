@@ -47,12 +47,15 @@ def makeListNbThreads():
     return listNbThreads
 
 def version2test():
-    feellgood_version = subprocess.run(["git", "show-ref", "--head", "--hash", "--abbrev", "HEAD" ], text=True, capture_output=True)
+    feellgood_version = subprocess.run(["git", "show-ref", "--head", "--hash", "--abbrev", "HEAD" ],
+            text=True, capture_output=True)
     return feellgood_version.stdout[0:7]
 
 def task2test(str_executable, settings):
-    """ elementary task to benchmark. feellgood executable runs in a subprocess with seed=2 for being deterministic """
-    val = subprocess.run([str_executable, "--seed", "2", "-"], input=json.dumps(settings), text=True)
+    """ elementary task to benchmark. feellgood executable runs in a subprocess with seed=2 for
+    being deterministic """
+    val = subprocess.run([str_executable, "--seed", "2", "-"], input=json.dumps(settings),
+            text=True)
     return val
 
 def bench(str_executable, outputFileName, metadata, elt_sizes, listNbThreads, final_time):
@@ -73,7 +76,8 @@ def bench(str_executable, outputFileName, metadata, elt_sizes, listNbThreads, fi
             mesh = Cylinder(radius, height, elt_size, surface_name, volume_name)
             mesh.make(meshFileName)
             for nbThreads in listNbThreads:
-                settings = makeSettings(meshFileName, surface_name, volume_name, nbThreads, final_time)
+                settings = makeSettings(meshFileName, surface_name, volume_name, nbThreads,
+                        final_time)
                 t = timeit.timeit(lambda: task2test(str_executable,settings), number=1)
                 str_t = "{:.2f}".format(t)
                 if nbThreads == listNbThreads[-1]:
@@ -103,7 +107,8 @@ def get_params(default_elt_sizes, default_listNbThreads, default_final_time):
                         help='table of number of threads', default=default_listNbThreads)
     parser.add_argument('-t','--final_time',type=float,help='final physical simulation time in s',
                         default=default_final_time)
-    parser.add_argument('--version',action='version',version= __version__,help='show the version number')
+    parser.add_argument('--version',action='version',version= __version__,
+            help='show the version number')
     parser.add_argument('-f','--fast',help='fast benchmarking',action="store_true")
     return parser.parse_args()
 

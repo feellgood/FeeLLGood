@@ -1,7 +1,8 @@
 #ifndef time_integration_h
 #define time_integration_h
 
-/** all timing parameters for integrating in time LLG with adaptative time-step and relaxation corrections throught prefactor=f(dt) */
+/** all timing parameters for integrating in time LLG with adaptative time-step and relaxation
+ * corrections throught prefactor=f(dt) */
 class timing
     {
 public:

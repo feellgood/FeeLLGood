@@ -2,8 +2,12 @@
 #define solver_h
 
 /** \file solver.h
- \brief two templates to fill matrix and vectors in various dimensionnality situations. DIM_PROBLEM = 1 is used for electrostatics (V) DIM_PROBLEM = 3 is used for spin accumulation (Q has three components)
-Warning : DIM_PROBLEM = 2 cannot be used for micromagnetic problem. The latter is solved in the tangent plane of the magnetization plane, leading to a different indices computation and matrix filling than here.
+ \brief two templates to fill matrix and vectors in various dimensionnality situations. DIM_PROBLEM
+ = 1 is used for electrostatics (V) DIM_PROBLEM = 3 is used for spin accumulation (Q has three
+ components)
+Warning : DIM_PROBLEM = 2 cannot be used for micromagnetic problem. The latter is solved in the
+tangent plane of the magnetization plane, leading to a different indices computation and matrix
+filling than here.
 TODO: these templates could be specialized for DIM_PROBLEM = 2 (see warning above)
 */
 
@@ -22,17 +26,19 @@ class solver
     public:
         /** constructor */
         explicit solver(Mesh::mesh & _msh /**< [in] mesh */,
-                        std::vector<Tetra::prm> & _pTetra /**< [in] ref to vector of param tet (volume region parameters) */,
-                        std::vector<Facette::prm> & _pFac /**< [in] ref to vector of param fac (surface region parameters) */,
-                        const std::string name /**< [in] name of the solver method */,
-                        const double _tol /**< [in] solver tolerance */,
-                        const bool v /**< [in] verbose mode for iteration monitor */,
-                        const int max_iter /**< [in] maximum number of iterations */,
-                        std::function<bool(Mesh::Edge)> edge_filter = [](Mesh::Edge){ return true; }
-                            /** [in] predicate for relevant mesh edges */):
-                        msh(&_msh), NOD(_msh.getNbNodes()), paramTet(_pTetra),
-                        paramFac(_pFac), verbose(v), iter(name,_tol,v,max_iter),
-                        K(build_shape(edge_filter)), L_rhs(DIM_PROBLEM*NOD) {}
+                std::vector<Tetra::prm> & _pTetra /**< [in] ref to vector of param tet
+                                                    (volume region parameters) */,
+                std::vector<Facette::prm> & _pFac /**< [in] ref to vector of param fac
+                                                    (surface region parameters) */,
+                const std::string name /**< [in] name of the solver method */,
+                const double _tol /**< [in] solver tolerance */,
+                const bool v /**< [in] verbose mode for iteration monitor */,
+                const int max_iter /**< [in] maximum number of iterations */,
+                std::function<bool(Mesh::Edge)> edge_filter = [](Mesh::Edge){ return true; }
+                    /** [in] predicate for relevant mesh edges */):
+                msh(&_msh), NOD(_msh.getNbNodes()), paramTet(_pTetra),
+                paramFac(_pFac), verbose(v), iter(name,_tol,v,max_iter),
+                K(build_shape(edge_filter)), L_rhs(DIM_PROBLEM*NOD) {}
 
         /** check boundary conditions, exit if there is a mistake in the boundary conditions */
         virtual void checkBoundaryConditions(void) const = 0;
@@ -47,10 +53,12 @@ class solver
         /** number of nodes in the mesh */
         const int NOD;
 
-        /** this vector contains the material parameters for all volume regions for all the tetrahedrons */
+        /** this vector contains the material parameters for all volume regions for all the
+         * tetrahedrons */
         const std::vector<Tetra::prm> &paramTet;
 
-        /** this vector contains the material parameters for all surface regions for all the triangular facettes */
+        /** this vector contains the material parameters for all surface regions for all the
+         * triangular facettes */
         const std::vector<Facette::prm> &paramFac;
 
         /** if verbose set to true, some printing are sent to terminal */

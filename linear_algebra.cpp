@@ -51,7 +51,8 @@ void LinAlgebra::prepareElements(Eigen::Vector3d const &Hext /**< [in] applied f
                   });
     }
 
-void LinAlgebra::prepareElements(double const A_Hext /**< [in] amplitude applied field (might be time dependant)*/,
+void LinAlgebra::prepareElements(double const A_Hext /**< [in] amplitude applied field (might be
+                                                       time dependant)*/,
                                  timing const &t_prm /**< [in] */)
     {
     std::for_each(EXEC_POL, msh->tet.begin(), msh->tet.end(),

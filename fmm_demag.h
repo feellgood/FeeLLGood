@@ -2,8 +2,9 @@
 #define FMM_DEMAG_H
 
 /** \file fmm_demag.h
-\brief this header is the interface to scalfmm. Its purpose is to prepare an octree for the application of
-the fast multipole algorithm, and to compute the scalar magnetic potential and the demagnetizing field.
+\brief this header is the interface to scalfmm. Its purpose is to prepare an octree for the
+application of the fast multipole algorithm, and to compute the scalar magnetic potential and the
+demagnetizing field.
 */
 
 #include "Components/FParticleType.hpp"
@@ -26,7 +27,8 @@ const int P = 9;              /**< truncation of the spherical harmonics series 
 const int NbLevels = 6;       /**< number of levels in the tree */
 const int SizeSubLevels = 3;  /**< size of the sub levels  */
 
-typedef double FReal; /**< parameter of scalfmm templates, all computations are made in double precision */
+typedef double FReal; /**< parameter of scalfmm templates, all computations are made in double
+                        precision */
 
 typedef FTypedRotationCell<FReal, P>
         CellClass; /**< convenient typedef for the definition of cell type in scalfmm  */
@@ -140,21 +142,25 @@ private:
                           double x = norm*(gauss(0,j) - c.x());
                           double y = norm*(gauss(1,j) - c.y());
                           double z = norm*(gauss(2,j) - c.z());
-                          tree.insert(FPoint<FReal>(x,y,z), FParticleType::FParticleTypeSource, idx, 0.0);
+                          tree.insert(FPoint<FReal>(x,y,z), FParticleType::FParticleTypeSource,
+                                  idx, 0.0);
                           }
                       });
         }
 
-    /** computes all charges from tetraedrons and facettes for the demag field to feed a tree in the fast multipole algo (scalfmm)
+    /** computes all charges from tetraedrons and facettes for the demag field to feed a tree in the
+     * fast multipole algo (scalfmm)
      */
-    void calc_charges(std::function<const Eigen::Vector3d(const Nodes::Node&)> getter, Mesh::mesh &msh)
+    void calc_charges(std::function<const Eigen::Vector3d(const Nodes::Node&)> getter,
+            Mesh::mesh &msh)
         {
         int nsrc(0);
         std::fill(srcDen.begin(),srcDen.end(),0);
         std::for_each(msh.magTet.begin(),msh.magTet.end(),[this, &msh, getter, &nsrc](const int idx)
                 {
                 Tetra::Tet &t = msh.tet[idx];
-                Eigen::Matrix<double,Tetra::NPI,1> result = t.charges(prmTetra[t.idxPrm].Ms, getter);
+                Eigen::Matrix<double,Tetra::NPI,1> result =
+                        t.charges(prmTetra[t.idxPrm].Ms, getter);
                 for(int i=0;i<Tetra::NPI;i++)
                     { srcDen[nsrc+i] = result(i); }
                 nsrc += Tetra::NPI;

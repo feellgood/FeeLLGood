@@ -12,7 +12,8 @@
 using namespace std;
 using namespace Nodes;
 
-void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const int nt, std::vector<Eigen::Vector3d> &s) const
+void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const int nt,
+        std::vector<Eigen::Vector3d> &s) const
     {
     int save_period = settings.save_period;
 
@@ -159,7 +160,7 @@ void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const i
     }
 
 void Mesh::mesh::savesol(const int precision, const std::string fileName,
-                         std::string const &metadata, bool withSpinAcc, std::vector<Eigen::Vector3d> &s) const
+        std::string const &metadata, bool withSpinAcc, std::vector<Eigen::Vector3d> &s) const
     {
     ofstream fout(fileName, ios::out);
     if (fout.fail())

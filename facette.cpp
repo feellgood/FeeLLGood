@@ -78,7 +78,8 @@ void Fac::correctionCharges(std::function<Eigen::Vector3d(Nodes::Node)> getter,
         }
     }
 
-double Fac::demagEnergy(Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> u, Eigen::Ref<Eigen::Matrix<double,NPI,1>> phi) const
+double Fac::demagEnergy(Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> u,
+        Eigen::Ref<Eigen::Matrix<double,NPI,1>> phi) const
     {
     Eigen::Matrix<double,NPI,1> dens = (u.transpose()*n).cwiseProduct(phi);
     return 0.5*mu0*dMs*dens.dot(weight);

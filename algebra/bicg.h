@@ -7,14 +7,16 @@ namespace algebra
 {
 /** solve A x = rhs. Algo is stabilized biconjugate gradient with diagonal preconditioner,
 vectors x and rhs must have the same size.
-The status of the convergence is returned in iter.status as well as total number of iterations and error
+The status of the convergence is returned in iter.status as well as total number of iterations and
+error
  */
 template <typename T>
 void bicg(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std::vector<T> & rhs)
     {
     const size_t DIM = x.size();
     T rho_1(0.0), rho_2(0.0), alpha(0.0), beta(0.0), omega(0.0);
-    std::vector<T> p(DIM), phat(DIM,0), shat(DIM), r(DIM), rt(DIM), s(DIM), t(DIM), v(DIM), diag_precond(DIM), b(rhs);
+    std::vector<T> p(DIM), phat(DIM,0), shat(DIM);
+    std::vector<T> r(DIM), rt(DIM), s(DIM), t(DIM), v(DIM), diag_precond(DIM), b(rhs);
 
     A.build_diag_precond<T>(diag_precond);
     iter.set_rhsnorm(norm(b));
@@ -70,7 +72,8 @@ void bicg(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std::ve
         }
     }
 
-/** directional stabilized biconjugate gradient (mask) with diagonal preconditioner with Dirichlet conditions, returns residu
+/** directional stabilized biconjugate gradient (mask) with diagonal preconditioner with Dirichlet
+ * conditions, returns residu
  * iter is an iteration object
  * the linear system to solve is A x = rhs
  * ld is a mask: a list of indices that will be zeroed when using applyMask(ld, vector)
@@ -82,7 +85,8 @@ void bicg_dir(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std
     {
     T rho_1(0.0), rho_2(0.0), alpha(0.0), beta(0.0), omega(0.0);
     const size_t DIM = x.size();
-    std::vector<T> p(DIM), phat(DIM), shat(DIM), r(DIM), rt(DIM), s(DIM), t(DIM), v(DIM), diag_precond(DIM), b(rhs);
+    std::vector<T> p(DIM), phat(DIM), shat(DIM);
+    std::vector<T> r(DIM), rt(DIM), s(DIM), t(DIM), v(DIM), diag_precond(DIM), b(rhs);
 
     A.build_diag_precond<T>(diag_precond);
     mult(A, xd, v);
@@ -149,19 +153,22 @@ void bicg_dir(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std
     add(xd, x);                // x += xd
     }
 
-/** directional stabilized biconjugate gradient (mask is ld) with diagonal preconditioner, returns residu
+/** directional stabilized biconjugate gradient (mask is ld) with diagonal preconditioner, returns
+ * residu
  * iter is an iteration object
  * the linear system to solve is A x = rhs
  * ld is a mask: a list of indices that will be zeroed when using applyMask(ld, vector)
  */
 template<typename T>
-T bicg_dir(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std::vector<T> & rhs, const std::vector<int>& ld)
+T bicg_dir(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x,
+        const std::vector<T> & rhs, const std::vector<int>& ld)
     {
     T rho_1(0.0), rho_2(0.0), alpha(0.0), beta(0.0), omega(0.0);
     const size_t DIM = x.size();
     if (rhs.size()!=DIM){std::cout << "rhs size mismatch" << std::endl; exit(1);}
 
-    std::vector<T> p(DIM), phat(DIM), shat(DIM), r(DIM), rt(DIM), s(DIM), t(DIM), v(DIM), diag_precond(DIM), b(rhs);
+    std::vector<T> p(DIM), phat(DIM), shat(DIM);
+    std::vector<T> r(DIM), rt(DIM), s(DIM), t(DIM), v(DIM), diag_precond(DIM), b(rhs);
 
     A.build_diag_precond<T>(diag_precond);
     applyMask(ld,b);

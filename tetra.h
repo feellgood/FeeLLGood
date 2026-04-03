@@ -28,11 +28,12 @@ const int N = 4;   /**< number of vertices */
     const int NPI = 1; /**< number of Gauss points = 1 : single point integration at barycentre of
                          tetrahedron */
 
-    constexpr double A = 1. / 4.;                /**< barycentric coordinate for single Gauss point */
-    constexpr double u[NPI] = {A};               /**< u coordinate of single Gauss point at barycenter */
-    constexpr double v[NPI] = {A};               /**< v coordinate of single Gauss point at barycenter */
-    constexpr double w[NPI] = {A};               /**< w coordinate of single Gauss point at barycenter */
-    constexpr double pds[NPI] = {1./6.};         /**< weight for single point integration (volume of reference tetrahedron) */
+    constexpr double A = 1. / 4.;           /**< barycentric coordinate for single Gauss point */
+    constexpr double u[NPI] = {A};          /**< u coordinate of single Gauss point at barycenter */
+    constexpr double v[NPI] = {A};          /**< v coordinate of single Gauss point at barycenter */
+    constexpr double w[NPI] = {A};          /**< w coordinate of single Gauss point at barycenter */
+    constexpr double pds[NPI] = {1./6.};    /**< weight for single point integration
+                                              (volume of reference tetrahedron) */
 
     /** All shape functions are equal to 1/4 at barycenter */
     constexpr double a[N][NPI] = {{1. - u[0] - v[0] - w[0]},
@@ -56,7 +57,7 @@ const int N = 4;   /**< number of vertices */
     constexpr double u[NPI] = {A, B, B, B, C};   /**< some constants to build hat functions */
     constexpr double v[NPI] = {A, B, B, C, B};   /**< some constants to build hat functions */
     constexpr double w[NPI] = {A, B, C, B, B};   /**< some constants to build hat functions */
-    constexpr double pds[NPI] = {D, E, E, E, E}; /**< some constant weights to build hat functions */
+    constexpr double pds[NPI] = {D, E, E, E, E}; /**< constant weights to build hat functions */
 
     /** constant matrix \f$ j:0.. NPI-1 \f$
     a[0][j]   = 1.-u[j]-v[j]-w[j];
@@ -72,10 +73,11 @@ const int N = 4;   /**< number of vertices */
                                   {w[0], w[1], w[2], w[3], w[4]}};
 
     /** eigen constant matrix a */
-    const Eigen::Matrix<double,N,NPI> eigen_a = (Eigen::MatrixXd(N,NPI) << a[0][0], a[0][1], a[0][2], a[0][3], a[0][4],
-                                                                           a[1][0], a[1][1], a[1][2], a[1][3], a[1][4],
-                                                                           a[2][0], a[2][1], a[2][2], a[2][3], a[2][4],
-                                                                           a[3][0], a[3][1], a[3][2], a[3][3], a[3][4] ).finished();
+    const Eigen::Matrix<double,N,NPI> eigen_a =
+            (Eigen::MatrixXd(N,NPI) << a[0][0], a[0][1], a[0][2], a[0][3], a[0][4],
+                                       a[1][0], a[1][1], a[1][2], a[1][3], a[1][4],
+                                       a[2][0], a[2][1], a[2][2], a[2][3], a[2][4],
+                                       a[3][0], a[3][1], a[3][2], a[3][3], a[3][4] ).finished();
 #endif
 
 /** \class prm
@@ -86,7 +88,8 @@ struct prm
     std::string regName; /**< region name */
     double alpha_LLG;    /**< \f$ \alpha \f$ damping parameter, dimensionless */
     double A;            /**< exchange constant stiffness in [Joule per meter] = kg m^1 s^-2 */
-    double Ms;           /**< Magnetization at saturation in [Ms] = A m^-1 if Ms<=0 the the region is non magnetic */
+    double Ms;           /**< Magnetization at saturation in [Ms] = A m^-1 if Ms<=0 the
+                           the region is non magnetic */
     double K;            /**< uniaxial anisotropy constant */
     Eigen::Vector3d uk;  /**< uniaxial anisotropy axis */
 
@@ -96,11 +99,14 @@ struct prm
     Eigen::Vector3d ez;  /**< unit vector3 (for cubic anisotropy) */
 
     double P;            /**< spin diffusion polarization rate, dimensionless */
-    double N0;           /**< density of states at Fermi level in [Energy]^-1 [Volume]^-1 = kg^-1 m^-5 s^2 */
-    double sigma;        /**< electrical conductivity in [Siemens per meter] = kg^-1 m^-3 s^3 A^2  */
+    double N0;           /**< density of states at Fermi level
+                           in [Energy]^-1 [Volume]^-1 = kg^-1 m^-5 s^2 */
+    double sigma;        /**< electrical conductivity
+                           in [Siemens per meter] = kg^-1 m^-3 s^3 A^2  */
     double lsd;          /**< diffusion length related to s-d coupling in a magnetic material m^1 */
     double lsf;          /**< spin diffusion length in a metal (magnetic or not) m^1 */
-    double spinHall;     /**< Spin Orbit Torque contribution to spin diffusion due to spin Hall effect */
+    double spinHall;     /**< Spin Orbit Torque contribution to spin diffusion
+                           due to spin Hall effect */
 
     double volume = 0; /**< total volume of the region */
 
@@ -158,11 +164,13 @@ public:
 
             if (fabs(detJ) < Tetra::epsilon)
                 {
-                std::cerr << "Singular jacobian in tetrahedron: |det(J)|= " << fabs(detJ) << std::endl;
+                std::cerr << "Singular jacobian in tetrahedron: |det(J)|= "
+                        << fabs(detJ) << std::endl;
                 element::infos();
                 SYSTEM_ERROR;
                 }
-            Eigen::Matrix<double,N,Nodes::DIM> dadu; //Shape function derivatives(constant for linear tetrahedron)
+            Eigen::Matrix<double,N,Nodes::DIM> dadu; // Shape function derivatives
+                                                     // (constant for linear tetrahedron)
             dadu << -1., -1., -1., 1., 0., 0., 0., 1., 0., 0., 0., 1.;
             da = dadu * J.inverse();
 
@@ -202,7 +210,8 @@ public:
 
         result = vec_nod * eigen_a;// interpolated value at Gauss point
 
-        //Spatial derivatives: constant for linear elements, evaluated at any point including Gauss point
+        //Spatial derivatives: constant for linear elements, evaluated at any point including Gauss
+        //point
         Tx = vec_nod * (da.col(Nodes::IDX_X)).replicate(1,NPI);
         Ty = vec_nod * (da.col(Nodes::IDX_Y)).replicate(1,NPI);
         Tz = vec_nod * (da.col(Nodes::IDX_Z)).replicate(1,NPI);
@@ -227,10 +236,10 @@ public:
             }
         }
 
-    /** interpolation for the component idx of a field : the getter function is given as a parameter in order to
-     * know what part of the node you want to interpolate */
-    inline void interpolation(std::function<double(Nodes::Node, Nodes::index)> getter, Nodes::index idx,
-                              Eigen::Ref<Eigen::Matrix<double,Tetra::NPI,1>> result) const
+    /** interpolation for the component idx of a field : the getter function is given as a parameter
+     * in order to know what part of the node you want to interpolate */
+    inline void interpolation(std::function<double(Nodes::Node, Nodes::index)> getter,
+            Nodes::index idx, Eigen::Ref<Eigen::Matrix<double,Tetra::NPI,1>> result) const
         {
         Eigen::Matrix<double,N,1> scalar_nod;
 
@@ -241,13 +250,14 @@ public:
         result = scalar_nod.transpose() * eigen_a;
         }
     
-    /** AE matrix filling with exchange contributions, diagonal contributions and magnetization contribution
-    AE has a block structure:
+    /** AE matrix filling with exchange contributions, diagonal contributions and magnetization
+     contribution
+     AE has a block structure:
     ( E -Z +Y)
     ( +Z E -X)
     ( -Y +X E)
     E X Y Z are N*N matrices
-    E is the sum of the exchange contribution and modified alpha (scheme stabilizer) on its diagonal 
+    E is the sum of the exchange contribution and modified alpha (scheme stabilizer) on its diagonal
     X Y Z are diagonal matrices with magnetization component contributions
      */
     void lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double prefactor,
@@ -273,23 +283,23 @@ public:
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dVd_,
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,N>> BE) const;
 
-    /** append(+=) H_aniso for uniaxial anisotropy contribution, returns contribution to uHeff (used to
-     * compute the stabilizing effective damping) */
+    /** append(+=) H_aniso for uniaxial anisotropy contribution, returns contribution to uHeff (used
+     * to compute the stabilizing effective damping) */
     Eigen::Matrix<double,NPI,1> calc_aniso_uniax(Eigen::Ref<const Eigen::Vector3d> uk,
-                                                 const double Kbis, const double s_dt,
-                                                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
-                                                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V,
-                                                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H_aniso) const;
+            const double Kbis, const double s_dt,
+            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
+            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V,
+            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H_aniso) const;
 
     /** append(+=) H_aniso for cubic anisotropy contribution, returns contribution to uHeff (used to
      * compute the stabilizing effective damping) */
     Eigen::Matrix<double,NPI,1> calc_aniso_cub(Eigen::Ref<const Eigen::Vector3d> ex,
-                                               Eigen::Ref<const Eigen::Vector3d> ey,
-                                               Eigen::Ref<const Eigen::Vector3d> ez,
-                                               const double K3bis, const double s_dt,
-                                               Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
-                                               Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V,
-                                               Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H_aniso) const;
+            Eigen::Ref<const Eigen::Vector3d> ey,
+            Eigen::Ref<const Eigen::Vector3d> ez,
+            const double K3bis, const double s_dt,
+            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
+            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V,
+            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H_aniso) const;
 
     /** computes the integral contribution of the tetrahedron to the evolution of the magnetization
      * calc_Hext is a function that returns external H field defined on gauss points
@@ -305,10 +315,12 @@ public:
                           Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudz) const;
 
     /** uniaxial anisotropy energy of the tetrahedron */
-    double uniaxialAnisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u) const;
+    double uniaxialAnisotropyEnergy(Tetra::prm const &param,
+            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u) const;
 
     /** cubic anisotropy energy of the tetrahedron */
-    double cubicAnisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u) const;
+    double cubicAnisotropyEnergy(Tetra::prm const &param,
+            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u) const;
 
     /** computes volume charges, the divergence of the magnetization, returns result */
     Eigen::Matrix<double,Tetra::NPI,1> charges(const double &Ms,
@@ -323,8 +335,8 @@ public:
 
     /** zeeman energy of the tetrahedron for a constant Hext */
     double zeemanEnergy(Tetra::prm const &param  /**< [in] */,
-                        Eigen::Ref<Eigen::Vector3d> const Hext /**< [in] constant applied field */,
-                        Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> const u /**< [in] */) const;
+            Eigen::Ref<Eigen::Vector3d> const Hext /**< [in] constant applied field */,
+            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> const u /**< [in] */) const;
 
     /** zeeman energy of the tetrahedron for a varying Hext */
     double zeemanEnergy(Tetra::prm const &param /**< [in] */,

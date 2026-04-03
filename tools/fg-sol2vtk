@@ -29,7 +29,8 @@ class data(object):
                 self.X.InsertNextTuple(vector)
             
                 
-    def filter(self,line):# the separator is either a '\t' or spaces, because s.sol files may be post-treated
+    def filter(self,line):# the separator is either a '\t' or spaces,
+                          # because s.sol files may be post-treated
         if not line.startswith('#'): # to ignore comments
             filtered_line = re.sub('\\s+','\t',line)
             return filtered_line.strip().split('\t')
@@ -61,8 +62,10 @@ def get_params():
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('mshFileName', help='a mesh file in gmsh format with .msh extension')
     parser.add_argument('solFileName', help='a .sol feellgood file')
-    parser.add_argument('--version',action='version',version= __version__,help='show the version number')
-    parser.add_argument('integers',metavar='N',type=int, nargs='*', help='0-based indices of the columns to copy into output .vtu file')
+    parser.add_argument('--version',action='version',version= __version__,
+            help='show the version number')
+    parser.add_argument('integers',metavar='N',type=int, nargs='*',
+            help='0-based indices of the columns to copy into output .vtu file')
     parser.add_argument('--name',help='name of the data in the output .vtu file')
     parser.add_argument('-o','--output', help='output file name, extension .vtu will be added')
     args = parser.parse_args()
@@ -75,7 +78,8 @@ def get_params():
     return [args.mshFileName,args.solFileName,indices,args.name,args.output]
 
 def main():
-    #print("This is fg-sol2vtk ", __version__ ,", using VTK " + vtk.vtkVersion.GetVTKVersion(), " and GMSH " + gmsh.__version__ )
+    #print("This is fg-sol2vtk ", __version__ ,", using VTK " + vtk.vtkVersion.GetVTKVersion(),
+    # " and GMSH " + gmsh.__version__ )
     [meshFileName, solFileName, indices, name, outputFileName] = get_params()
     path, ext = os.path.splitext(meshFileName)
     ext = ext.lower()
@@ -102,12 +106,14 @@ def main():
     else:
         newFileName = outputFileName
     newFileName += ".vtu"
-    #the vectors are fixed on each nodes, so we have to associate them to ugrid as Points, not to the cells = tetrahedrons
+    #the vectors are fixed on each nodes, so we have to associate them to ugrid as Points,
+    # not to the cells = tetrahedrons
     if len(indices) == 3:
         print( newFileName ,"saved as 3D vectors, using ", indices ," columns")
         ugrid.GetPointData().SetVectors(my_data.X)
     else:
-        print(newFileName ,"saved as " + str(len(indices)) + "D scalars, using ", indices ," column(s)")
+        print(newFileName ,"saved as " + str(len(indices)) + "D scalars, using ", indices,
+                " column(s)")
         ugrid.GetPointData().SetScalars(my_data.X)
 
     writer = vtk.vtkXMLUnstructuredGridWriter()

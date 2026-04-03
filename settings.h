@@ -351,7 +351,8 @@ private:
     /** parser for the time dependant applied field expressions R->R³ */
     ExpressionParser field_parser;
 
-    // field(x,y,z,t) = field_time(t) * field_space(x,y,z) with field_time R -> R and field_space R³->R³
+    // field(x,y,z,t) = field_time(t) * field_space(x,y,z) with field_time R -> R
+    // and field_space R³->R³
     /** parser for the field time dependant scalar expression */
     ExpressionParser field_time_parser;
 

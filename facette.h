@@ -58,9 +58,10 @@ const int N = 3;
         {v[0], v[1], v[2], v[3]}};
 
     /** eigen matrix a initialization from C array */
-    const Eigen::Matrix<double,N,NPI> eigen_a = (Eigen::MatrixXd(N,NPI) << a[0][0], a[0][1], a[0][2], a[0][3],
-                                                                       a[1][0], a[1][1], a[1][2], a[1][3],
-                                                                       a[2][0], a[2][1], a[2][2], a[2][3] ).finished();
+    const Eigen::Matrix<double,N,NPI> eigen_a =
+            (Eigen::MatrixXd(N,NPI) << a[0][0], a[0][1], a[0][2], a[0][3],
+                                       a[1][0], a[1][1], a[1][2], a[1][3],
+                                       a[2][0], a[2][1], a[2][2], a[2][3] ).finished();
 #endif
 /** \class prm
 region number and material constants
@@ -71,10 +72,12 @@ struct prm
     bool suppress_charges; /**< suppress charges if true */
     double Ks;             /**< uniaxial surface anisotropy constant */
     Eigen::Vector3d uk;    /**< anisotropy axis */
-    double V;              /**< fixed potential (boundary condition for electrostatic sub-problem) */
-    double jn;             /**< \f$ j \dot \hat{n} \f$ normal current density (boundary condition for electrostatic and
-                             spin diffusion sub-problems) */
-    Eigen::Vector3d uP;    /**< Polarization spin accumulation orientation (unit vector for spin diffusion problem) */
+    double V;              /**< fixed potential (boundary condition for electrostatic
+                             sub-problem) */
+    double jn;             /**< \f$ j \dot \hat{n} \f$ normal current density (boundary condition
+                             for electrostatic and spin diffusion sub-problems) */
+    Eigen::Vector3d uP;    /**< Polarization spin accumulation orientation (unit vector
+                             for spin diffusion problem) */
     Eigen::Vector3d s;     /**< spin diffusion vector (for spin diffusion boundary conditions) */
 
     /** print the region surface parameters, optional boolean spinAcc for spin accumulation datas */
@@ -98,8 +101,9 @@ struct prm
     };
 
 /** \class Fac
-Face is a class containing the index references to nodes, its surface and its normal unit vector, it has a triangular shape and should not
-be degenerated, orientation must be defined in adequation with the mesh
+Face is a class containing the index references to nodes, its surface and its normal unit vector,
+it has a triangular shape and should not be degenerated, orientation must be defined in adequation
+with the mesh
 */
 class Fac : public element<N,NPI>
     {
@@ -130,7 +134,8 @@ public:
     /** surface of the element */
     double surf;
 
-    /** difference (d for delta) of magnetization at the facette between corresponding tetrahedrons */
+    /** difference (d for delta) of magnetization at the facette between corresponding
+     * tetrahedrons */
     double dMs;
 
     /** normal vector (unit vector) */
@@ -160,18 +165,20 @@ public:
         result = scalar_nod.transpose() * eigen_a;
         }
 
-    /** computes the integral contribution of the triangular face, the only contribution comes from Neel surface anisotropy */
+    /** computes the integral contribution of the triangular face, the only contribution comes
+     * from Neel surface anisotropy */
     void integrales(Facette::prm const &params /**< [in] */);
 
     /** anisotropy energy of the facette */
     double anisotropyEnergy(Facette::prm const &param /**< [in] */,
-                            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> const u /**< [in] */) const;
+            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> const u /**< [in] */) const;
 
     /** computes surface charges, return result on NPI */
     Eigen::Matrix<double,NPI,1>  charges(const double &dMs /**< [in] */,
             std::function<Eigen::Vector3d(const Nodes::Node&)> getter /**< [in] */) const;
 
-    /** computes correction on surface charges from localCharges input, result directly stored in corr */
+    /** computes correction on surface charges from localCharges input, result directly stored in
+     * corr */
     void correctionCharges(std::function<Eigen::Vector3d(Nodes::Node)> getter /**< [in] */,
                            Eigen::Matrix<double,Facette::NPI,1> &localCharges /**< [in] */,
                            std::vector<double> &corr /**< [in|out]*/);

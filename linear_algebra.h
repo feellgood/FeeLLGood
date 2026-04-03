@@ -3,7 +3,8 @@
 
 /** \file linear_algebra.h
 \brief secondary header, it grabs altogether the linear algebra by the solver to apply fem method
-<br> It encapsulates the calls to algebra BiCGSTAB solver, the assemblage and projection of the matrix for all elements
+<br> It encapsulates the calls to algebra BiCGSTAB solver, the assemblage and projection of the
+matrix for all elements
 <br> projection and matrix assembly is multithreaded for tetrahedron, monothread for facette
 */
 #include <random>
@@ -27,12 +28,14 @@
 const int DIM_PB_MAG = 2;
 
 /** \class LinAlgebra
-convenient class to grab altogether some part of the calculations involved using algebra::bicg solver at each
-timestep. The solver is handled by solver method, and is using algebra sparse matrices(Row major). The write sparse matrix
-is prepared in 'batch mode', to add all non zero coefficients with a '+=' logic. Then it is turned into a read sparse matrix before being used by bicg algo.
-Be aware of time units: when entering solver method, division by gamma0 and multiplication by gamma0 when ending are mandatory.
-The bicg algorithm is monitored by iter object.
-When debugging it might be usefull to set iter verbosity differently from LinAlgebra Solver (see constructor list initialization)
+convenient class to grab altogether some part of the calculations involved using algebra::bicg
+solver at each timestep. The solver is handled by solver method, and is using algebra sparse
+matrices(Row major). The write sparse matrix is prepared in 'batch mode', to add all non zero
+coefficients with a '+=' logic. Then it is turned into a read sparse matrix before being used by
+bicg algo. Be aware of time units: when entering solver method, division by gamma0 and
+multiplication by gamma0 when ending are mandatory. The bicg algorithm is monitored by iter object.
+When debugging it might be usefull to set iter verbosity differently from LinAlgebra Solver (see
+constructor list initialization)
 */
 class LinAlgebra : public solver<DIM_PB_MAG>
     {
@@ -69,21 +72,31 @@ public:
     /** check LLG boundary conditions */
     void checkBoundaryConditions(void) const {}
 
-    /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors)
-    this member function is overloaded to fit to two different situations, either if std::function passed to element = tetra is corresponding to the simple case of constant external field applied to the magnetic region or space dependant. Here is the constant space applied field.
+    /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L
+    vectors) this member function is overloaded to fit to two different situations, either if
+    std::function passed to element = tetra is corresponding to the simple case of constant external
+    field applied to the magnetic region or space dependant. Here is the constant space applied
+    field.
     */
-    void prepareElements(Eigen::Vector3d const &Hext /**< [in] applied field */, timing const &t_prm /**< [in] */);
+    void prepareElements(Eigen::Vector3d const &Hext /**< [in] applied field */,
+            timing const &t_prm /**< [in] */);
 
-    /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L vectors) 
-    this member function is overloaded to fit to two different situations, either if std::function passed to element = tetra is corresponding to the simple case of constant external field applied to the magnetic region or space dependant. Here is the variable space applied field.
+    /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L
+    vectors) this member function is overloaded to fit to two different situations, either if
+    std::function passed to element = tetra is corresponding to the simple case of constant external
+    field applied to the magnetic region or space dependant. Here is the variable space applied
+    field.
     */
-    void prepareElements(double const A_Hext /**< [in] amplitude applied field (might be time dependant)*/, timing const &t_prm /**< [in] */);
+    void prepareElements(double const A_Hext /**< [in] amplitude applied field (might be time
+                                               dependant)*/,
+            timing const &t_prm /**< [in] */);
 
     /** build init guess for bicg solver */
     void buildInitGuess(std::vector<double> &G/**< [out] */) const;
 
-    /** call the solver, uses stabilized biconjugate gradient solver (bicg) with diagonal preconditionner, sparse matrix and vector are filled with multiThreading. Sparse matrix is row major.
-    */
+    /** call the solver, uses stabilized biconjugate gradient solver (bicg) with diagonal
+     * preconditionner, sparse matrix and vector are filled with multiThreading. Sparse matrix is
+     * row major. */
     bool solve(timing const &t_prm /**< [in] */);
 
     /** setter for DW_dz */
@@ -92,7 +105,8 @@ public:
     /** getter for v_max */
     inline double get_v_max(void) { return v_max; }
 
-    /** when external applied field is of field_type R4toR3 values of field_space are stored in spaceField */
+    /** when external applied field is of field_type R4toR3 values of field_space are stored in
+     * spaceField */
     void setExtSpaceField(Settings &s /**< [in] */);
 
     /** computes local vector basis {ep,eq} in the tangeant plane for projection on the elements */

@@ -18,7 +18,8 @@ namespace algebra
 UNDEFINED means no iteration done
 CONVERGED means algo succeeded after some iterations < MAXITER to achieve residu<TOL
 ITER_OVERFLOW means number of iterations has exceeded MAXITER
-CANNOT_CONVERGE means an algebric operation leads to nan (might happen while computing beta in bicg inner loop)
+CANNOT_CONVERGE means an algebric operation leads to nan (might happen while computing beta in bicg
+inner loop)
 */
 enum algoStatus
     {
@@ -83,8 +84,9 @@ class iteration
 
     public :
     /** constructor */
-    iteration(const std::string name, T r, bool _noise, int _maxiter): rhsn(1.0), maxiter(_maxiter),
-        noise(_noise), nit(0), res(std::numeric_limits<T>::max()), written(false), solver_name(name), resmax(r)
+    iteration(const std::string name, T r, bool _noise, int _maxiter)
+            : rhsn(1.0), maxiter(_maxiter), noise(_noise), nit(0),
+            res(std::numeric_limits<T>::max()), written(false), solver_name(name), resmax(r)
         { status = UNDEFINED; }
 
     /** status of the monitored algorithm */
@@ -103,11 +105,13 @@ class iteration
         status = UNDEFINED;
         }
 
-    /** return a string aggregating the status of the monitored algorithm, the number of iterations and the residu */
+    /** return a string aggregating the status of the monitored algorithm, the number of iterations
+     * and the residu */
     std::string infos(void) const
         {
         std::stringstream sstr;
-        sstr << solver_name << " status " << str_status() << " after " << nit << " iterations, residu= " << res;
+        sstr << solver_name << " status " << str_status() << " after " << nit
+                << " iterations, residu= " << res;
         return sstr.str();
         }
 
@@ -158,14 +162,16 @@ class iteration
         return converged();
         }
 
-    /** returns true if the algo has converged according the convergence criterias through a norm value nr */
+    /** returns true if the algo has converged according the convergence criterias through a norm
+     * value nr */
     bool finished(T nr)
         {
         if (noise && !written)
             {
             T a = (rhsn == 0) ? 1.0 : rhsn;
             converged(nr);
-            std::cout << " iter " << std::setw(3) << nit << " residual " << std::setw(12) << std::fabs(nr) / a << std::endl;
+            std::cout << " iter " << std::setw(3) << nit
+                    << " residual " << std::setw(12) << std::fabs(nr) / a << std::endl;
             written = true;
             }
         return converged(nr);
