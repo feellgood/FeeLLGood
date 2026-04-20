@@ -186,6 +186,7 @@ endif()
 #===========================================================================
 
 install(TARGETS feellgood RUNTIME DESTINATION bin)
+install(PROGRAMS ./tools/fg-3D DESTINATION bin)
 install(PROGRAMS ./tools/fg-configurator DESTINATION bin)
 install(PROGRAMS ./tools/fg-gensol DESTINATION bin)
 install(PROGRAMS ./tools/fg-h5extract DESTINATION bin)

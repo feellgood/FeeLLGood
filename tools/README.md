@@ -1,6 +1,7 @@
 This directory contains a collection of tools that can be useful when
 working with feeLLGood:
 
+* **fg-3D**: 3D renderer to plot mesh and sol file
 * **fg-configurator**: to configure some inputs
 * **fg-sol2hdf5**: to convert some simulations outputs into a hdf5 file
 * **fg-sol2vtk**: to convert FeeLLGood's output .sol files to paraview format

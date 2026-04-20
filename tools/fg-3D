@@ -1,0 +1,575 @@
+#!/usr/bin/env python3
+
+import os
+import pathlib
+import sys
+import numpy as np
+import re
+import meshio
+import pyvista as pv
+from pyvistaqt import QtInteractor
+from typing import Any, Dict, List, Union
+
+strHelp = """Workflow:
+Open mesh file from file menu
+Open sol file from file menu
+Export vtu : create a vtu (paraview) file
+"""
+
+def has_nvidia_gpu():
+    ''' ask nvidia-smi if there is any nvidia GPU with proprietary driver, return true if any '''
+    import subprocess
+    try:
+        subprocess.run(["nvidia-smi"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+        return True
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return False
+
+def load_sol_file(filename):
+    """
+    Load magnetization vectors from a .sol file.
+    Returns a dictionary: node_index -> (mx, my, mz)
+    """
+    magnetization = {}
+    try:
+        with open(filename, 'r') as f:
+            for line in f:
+                line = line.strip()
+                # Skip comments and empty lines
+                if line.startswith('#') or not line:
+                    continue
+                
+                # Parse data lines
+                parts = line.split()
+                if len(parts) >= 4:
+                    try:
+                        idx = int(parts[0])
+                        mx = float(parts[1])
+                        my = float(parts[2])
+                        mz = float(parts[3])
+                        magnetization[idx] = np.array([mx, my, mz])
+                    except (ValueError, IndexError):
+                        continue
+        
+        return magnetization
+    except Exception as e:
+        raise RuntimeError(f"❌ Error loading .sol file '{filename}': {e}")
+
+def get_surface_nodes(mesh):
+    """
+    Extract surface nodes from the mesh.
+    Returns a set of node indices that are on the surface (triangular elements).
+    """
+    surface_nodes = set()
+    
+    for cell_block in mesh.cells:
+        if cell_block.type == "triangle":
+            # Add all nodes from triangular elements
+            for tri in cell_block.data:
+                surface_nodes.update(tri)
+    
+    return surface_nodes
+
+def get_region_elements(mesh):
+    """
+    Return a dictionary mapping region name -> list of element descriptions.
+    Each element description is a dict:
+      {
+        "cell_type": "triangle" / "tetra" / ...,
+        "block_index": i,            # index of the cell block in mesh.cells
+        "local_element_index": j,    # element index inside its cell block
+        "global_element_index": g,   # element index counting across all blocks
+        "nodes": array([...], dtype=int)  # node indices for that element
+      }
+
+    Requires mesh.field_data to map names -> [physical_id, dim].
+    Uses mesh.cell_data to find the physical tag per element (common key is "gmsh:physical").
+    """
+    if not hasattr(mesh, "cells"):
+        raise ValueError("❌ mesh has no attribute 'cells'")
+
+    # 1) build mapping physical_id -> region_name using mesh.field_data
+    id_to_name = {}
+    for name, arr in mesh.field_data.items():
+        try:
+            phys_id = int(np.asarray(arr).flatten()[0])
+        except Exception:
+            continue
+        id_to_name[phys_id] = name
+
+    # 2) find the appropriate key in mesh.cell_data that holds physical tags
+    phys_key = None
+    if hasattr(mesh, "cell_data") and mesh.cell_data:
+        for k in mesh.cell_data.keys():
+            if k == "gmsh:physical":
+                phys_key = k
+                break
+        if phys_key is None:
+            for k in mesh.cell_data.keys():
+                if "physical" in k.lower():
+                    phys_key = k
+                    break
+
+    if phys_key is None:
+        raise ValueError("No physical tags found in mesh.cell_data. Look for key 'gmsh:physical' or similar.")
+
+    # 3) iterate cell blocks and attach elements to regions
+    regions = {}
+    global_idx = 0
+    phys_tags_list = mesh.cell_data[phys_key]
+    if len(phys_tags_list) != len(mesh.cells):
+        raise ValueError("❌ Mismatch between number of cell blocks and number of cell_data arrays for key "
+                         f"'{phys_key}' (found {len(phys_tags_list)} vs {len(mesh.cells)}).")
+
+    for block_index, (cell_block, phys_tags) in enumerate(zip(mesh.cells, phys_tags_list)):
+        cell_type = cell_block.type
+        connectivity = np.asarray(cell_block.data, dtype=int)
+        phys_tags = np.asarray(phys_tags, dtype=int).flatten()
+
+        if connectivity.shape[0] != phys_tags.shape[0]:
+            raise ValueError(f"❌ Number of elements in cell block {block_index} ({connectivity.shape[0]}) "
+                             f"does not match number of physical tags ({phys_tags.shape[0]}).")
+
+        for local_idx in range(connectivity.shape[0]):
+            phys_id = int(phys_tags[local_idx])
+            region_name = id_to_name.get(phys_id, f"phys_{phys_id}")
+            elem = {
+                "cell_type": cell_type,
+                "block_index": block_index,
+                "local_element_index": local_idx,
+                "global_element_index": global_idx,
+                "nodes": connectivity[local_idx].tolist()
+            }
+            regions.setdefault(region_name, []).append(elem)
+            global_idx += 1
+
+    return regions
+
+
+def load_mesh(filename):
+    """
+    Load a mesh from a file.
+    Returns a string message, surface node indices, point coordinates and triangular connectivity.
+    Raises an error if the file does not exist or contains no triangles.
+    """
+    strLog = ""
+    if not os.path.isfile(filename):
+        raise FileNotFoundError(f"❌ The file '{filename}' does not exist.")
+    try:
+        mesh = meshio.read(filename)
+        strLog += f"✓ mesh file '{filename}' loaded, "
+        for cell_block, cell_data in zip(mesh.cells, mesh.cell_data["gmsh:physical"]):
+            cell_type = cell_block.type
+            for region_name, (region_id, dim) in mesh.field_data.items():
+                element_indices = np.where(cell_data == region_id)[0]
+
+        regions = get_region_elements(mesh)
+        points = mesh.points[:, :3]
+        triangles = []
+        for cell_block in mesh.cells:
+            if cell_block.type == "triangle":
+                triangles.append(cell_block.data)
+
+        if not triangles:
+            strLog += f"✗ No triangles found in mesh '{filename}'."
+            raise ValueError(f"❌ No triangles found in mesh '{filename}'.")
+
+        triangles = np.vstack(triangles)
+        strLog += str(len(triangles)) + " triangles"
+        surface_nodes = get_surface_nodes(mesh)
+
+        return strLog, surface_nodes, points, triangles
+
+    except Exception as e:
+        raise RuntimeError(f"❌ Error while loading mesh '{filename}': {e}")
+
+def create_pyvista_mesh(points, triangles):
+    ''' return pyvista triangles '''
+    faces = np.hstack([np.full((triangles.shape[0], 1), 3), triangles]).astype(np.int32)
+    return pv.PolyData(points, faces)
+
+try:
+    from PyQt5.QtWidgets import (
+    QWidget, QTabWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
+    QFileDialog, QLineEdit, QMessageBox, QCheckBox, QMainWindow, QFrame,
+    QSplitter, QTextEdit, QGroupBox, QDoubleSpinBox, QRadioButton, QAction)
+
+    from PyQt5.QtGui import QFont, QTextCharFormat, QColor, QSyntaxHighlighter, QPixmap
+    from PyQt5.QtCore import Qt, QRegExp, QLocale, QProcess
+
+    class helpText(QWidget):
+        def __init__(self, parent=None):
+            super().__init__(parent)
+            layout = QVBoxLayout()
+            layout.addWidget(QLabel(strHelp))
+            self.setLayout(layout)
+            self.setWindowTitle("fg-3D v"+ __version__ +" help")
+
+    class CombinedInterface(QMainWindow):
+        def __init__(self, mesh_file):
+            super().__init__()
+            self.setWindowTitle("FeeLLGood - 3D")
+            self.showMaximized()
+
+            # Variables
+            self.meshFileName = mesh_file
+            self.solFileName = None
+            self.magnetization_data = None
+            self.surface_nodes = None
+            self.original_points = None
+            self.triangles = None
+            self.help = None
+            self.mesh = None
+            self.strLog = ""
+            self.setup_ui()
+            if mesh_file != None:
+                msg, self.surface_nodes, self.original_points, self.triangles = load_mesh(mesh_file)
+                self.strLog += msg + "\n"
+                self.mesh = create_pyvista_mesh(self.original_points, self.triangles)
+                self.update_mesh()
+
+        def setup_ui(self):
+            """ build the PyQt5 GUI """
+            central_widget = QWidget()
+            self.setCentralWidget(central_widget)
+            self.strLog += "Welcome to fg-3D\n"
+            main_splitter = QSplitter(Qt.Horizontal)
+            central_widget.setLayout(QHBoxLayout())
+            central_widget.layout().addWidget(main_splitter)
+            central_widget.layout().setContentsMargins(2,2,2,2)
+            minLeftPanelWidth = 333
+            spacing = 2
+
+            # File menu
+            file_menu = self.menuBar().addMenu("&File")
+            help_menu = self.menuBar().addMenu("&Help")
+
+            meshFileAction = QAction("&Open .msh", self)
+            meshFileAction.setStatusTip('Open a mesh file')
+            meshFileAction.setShortcut('Ctrl+M')
+            meshFileAction.triggered.connect(self.select_msh_file)
+            file_menu.addAction(meshFileAction)
+
+            solFileAction = QAction("&Open .sol", self)
+            solFileAction.setStatusTip('Open a simulation .sol file')
+            solFileAction.setShortcut('Ctrl+O')
+            solFileAction.triggered.connect(self.select_sol_file)
+            file_menu.addAction(solFileAction)
+
+            helpAction = QAction("&Help",self)
+            helpAction.setShortcut('Ctrl+H')
+            helpAction.triggered.connect(self.help_viewer)
+            help_menu.addAction(helpAction)
+
+            file_menu.addSeparator()
+            
+            exportAction = QAction("&Export vtu",self)
+            exportAction.setStatusTip('Export 3D to vtu (paraview)')
+            exportAction.setShortcut('Ctrl+S')
+            exportAction.triggered.connect(self.export2vtu)
+            file_menu.addAction(exportAction)
+            
+            # === Left Panel ===
+            left_panel = QFrame()
+            left_panel.setFrameShape(QFrame.StyledPanel)
+            left_panel.setMinimumWidth(minLeftPanelWidth)
+            left_layout = QVBoxLayout(left_panel)
+
+            # Magnetization display controls
+            magnetization_group = QGroupBox("Magnetization")
+            magnetization_layout = QVBoxLayout(magnetization_group)
+            self.sol_label = QLabel("✗ no .sol file selected.")
+            magnetization_layout.addWidget(self.sol_label)
+
+            #magnetization 3D view parameters
+            vector_layout = QHBoxLayout()
+            self.show_vectors_checkbox = QCheckBox("Show")
+            self.show_vectors_checkbox.setChecked(False)
+            self.show_vectors_checkbox.stateChanged.connect(self.update_mesh)
+
+            scale_layout = QHBoxLayout()
+            scale_layout.addWidget(self.show_vectors_checkbox)
+            scale_layout.addWidget(QLabel("Vector Scale:"))
+            self.vector_scale_spinbox = QDoubleSpinBox()
+            self.vector_scale_spinbox.setRange(0.001, 100.0)
+            self.vector_scale_spinbox.setValue(1.0)
+            self.vector_scale_spinbox.setSingleStep(0.1)
+            self.vector_scale_spinbox.setDecimals(3)
+            self.vector_scale_spinbox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))  # Force decimal point
+            self.vector_scale_spinbox.editingFinished.connect(self.on_vector_scale_changed)
+            scale_layout.addWidget(self.vector_scale_spinbox)
+            vector_layout.addLayout(scale_layout)
+
+            magnetization_layout.addLayout(vector_layout)
+            magnetization_layout.setSpacing(spacing)
+
+            left_layout.addWidget(magnetization_group)
+            
+            # output files group
+            meshInfos_group = QGroupBox("Renderer informations")
+            meshInfos_layout = QVBoxLayout(meshInfos_group)
+
+            self.infos_display = QTextEdit()
+            self.infos_display.setToolTip("Informations on the current .msh and .sol files")
+            self.infos_display.setReadOnly(True)
+            meshInfos_layout.addWidget(self.infos_display)
+            meshInfos_layout.setSpacing(spacing)
+            left_layout.addWidget(meshInfos_group, stretch = 1)
+
+            left_layout.setContentsMargins(2,2,2,2)
+            left_layout.setSpacing(spacing)
+
+            # === Right Panel: 3D ===
+            self.right_visualization = QWidget()
+            right_layout = QVBoxLayout(self.right_visualization)
+
+            self.plotter = QtInteractor(self) # QtInteractor comes from pyvista
+            self.plotter.enable_parallel_projection()
+            self.plotter.set_background("white")
+            right_layout.addWidget(self.plotter.interactor,stretch=1)
+            right_layout.setContentsMargins(0,0,0,0)
+            right_layout.setSpacing(spacing)
+            
+            main_splitter.addWidget(left_panel)
+            main_splitter.addWidget(self.right_visualization)
+            main_splitter.setSizes([minLeftPanelWidth, 900])
+
+            self.statusBar().setFont(QFont('Times',12))
+            self.update_infos()
+            self.update_mesh()
+
+        def closeEvent(self, event):
+            """ handle close event to close help window if opened """
+            if self.help != None:
+                self.help.close()
+            self.close()
+
+        def help_viewer(self):
+            self.help = helpText()
+            self.help.show()
+
+        def select_sol_file(self):
+            """ slot triggered by clicking on Open .sol menu
+            launch file browser and read input sol file
+            """
+            path, _ = QFileDialog.getOpenFileName(self, "Select a .sol file", "", "SOL files (*.sol)")
+            if path:
+                self.sol_file_path = path
+                fileName = pathlib.Path(path)
+                self.solFileName = fileName.name
+                self.sol_label.setText(self.solFileName)
+                self.update_infos()
+                msg = "✓ .sol file " + path + " selected"
+                self.strLog += msg + "\n"
+                self.statusBar().showMessage(msg)
+                try:
+                    self.magnetization_data = load_sol_file(path)
+                    self.update_mesh()
+                except Exception as e:
+                    msg = f"Error loading .sol file: {e}"
+                    QMessageBox.critical(self, "Error", msg)
+                    self.strLog += msg + "\n"
+                    self.magnetization_data = None
+                self.update_infos()
+
+        def select_msh_file(self):
+            """ slot triggered by clicking on Open .msh menu 
+            launch file browser and read input mesh file, update 3D
+            """
+            path,_ = QFileDialog.getOpenFileName(self, "Select a .msh file", "", "mesh files (*.msh)")
+            if path:
+                meshInputFile = pathlib.Path(path)
+                os.chdir(meshInputFile.parent)
+                msg = ""
+                try:
+                    msg, self.surface_nodes, self.original_points, self.triangles = load_mesh(meshInputFile)
+                    self.mesh = create_pyvista_mesh(self.original_points, self.triangles)
+                    self.magnetization_data = None
+                    self.update_mesh()
+                except Exception as e:
+                    msg = f"✗ Error loading mesh: {e}"
+
+                self.meshFileName = meshInputFile
+                self.statusBar().showMessage(msg)
+                self.strLog += msg + "\n"
+                self.update_infos()
+
+        def updateUI(self):
+            """ this function updates the whole UI, it is called after reading a mesh file
+            triggered by the file/open .msh menu
+            """
+            self.magnetization_data = None
+            self.sol_label.setText("✗ no .sol file selected.")
+            self.show_vectors_checkbox.setChecked(False)
+            self.update_infos()
+
+        def update_infos(self):
+            """ update mesh informations textEdit box """
+            self.infos_display.setPlainText(self.strLog)
+
+        def export2vtu(self):
+            """ export combination of the mesh and a .sol file to a .vtu file """
+            if self.solFileName:
+                base = pathlib.Path(self.solFileName).stem
+                ext = ".vtu"
+                self.outputFileName = f"{base}{ext}"
+            self.statusBar().showMessage("not yet implemented, will come soon")
+
+        def on_vector_scale_changed(self):
+            """Called when vector scale spinbox value changes"""
+            if self.show_vectors_checkbox.isChecked():
+                self.update_mesh()
+
+        def update_mesh(self):
+            ''' 3D (re)plot of the mesh '''
+            if (self.mesh == None):
+                self.statusBar().showMessage("✗ Nothing to 3D render.")
+            else:
+                try:
+                    self.plotter.clear_actors()
+                    self.plotter.add_mesh(self.mesh,smooth_shading=True,split_sharp_edges=True,color="lightblue")
+                    self.add_bounding_box(self.original_points)
+
+                # Add magnetization vectors if available and enabled
+                    if (self.show_vectors_checkbox.isChecked() and 
+                        self.magnetization_data is not None and 
+                        self.surface_nodes is not None):
+                        self.add_magnetization_vectors()
+                
+            # Grid and ticks X Y Z, grid and location are crucial
+                    self.plotter.show_bounds(
+                        grid="back", location="outer",  ticks="both", all_edges=True,
+                        xtitle="X", ytitle="Y", ztitle="Z", font_size=12)
+                    self.plotter.add_axes() # visible XYZ trihedral vectors
+
+                except Exception as e:
+                    self.statusBar().showMessage(f"✗ Error while updating mesh: {e}")
+
+        def add_magnetization_vectors(self):
+            """ Add magnetization vectors to surface nodes using glyphs """
+            try:
+                positions = []
+                vectors = []
+                vector_scale = self.vector_scale_spinbox.value()
+            
+            # Collect all positions and vectors
+                for node_idx in self.surface_nodes:
+                    if node_idx in self.magnetization_data:
+                        node_pos = self.original_points[node_idx]
+                        m_vec = self.magnetization_data[node_idx]
+                        positions.append(node_pos)
+                        vectors.append(m_vec)
+            
+                if not positions:
+                    self.statusBar().showMessage("✗ No magnetization data found for surface nodes!")
+                    return
+
+                positions = np.array(positions)
+                vectors = np.array(vectors)
+            
+            # Create a PolyData object with points and vectors
+                vector_poly = pv.PolyData(positions)
+                vector_poly['vectors'] = vectors * vector_scale
+            
+            # Create arrows using glyphs 
+                vector_scale = self.vector_scale_spinbox.value()
+                arrows = vector_poly.glyph(orient='vectors', scale=False, factor=vector_scale,
+                    geom=pv.Arrow(tip_length=0.25, tip_radius=0.1, shaft_radius=0.05)
+                )
+            
+                self.plotter.add_mesh(arrows, color='grey', opacity=0.8, show_scalar_bar=False)
+                self.statusBar().showMessage(f"✓ Magnetization vectors plotted. If nothing is visible increase vector scale.")
+                    
+            except Exception as e:
+                self.statusBar().showMessage(f"✗ Error adding magnetization vectors: {e}")
+                import traceback
+                traceback.print_exc()
+
+        def add_bounding_box(self, original_points):
+            """
+            Add a bounding box around the mesh using 8 corners and 12 edges and a rectangle for
+            the sensor
+            """
+            xmin, ymin, zmin = np.min(original_points, axis=0)
+            xmax, ymax, zmax = np.max(original_points, axis=0)
+        
+            corners = np.array([
+                [xmin, ymin, zmin],  # 0
+                [xmax, ymin, zmin],  # 1
+                [xmax, ymax, zmin],  # 2
+                [xmin, ymax, zmin],  # 3
+                [xmin, ymin, zmax],  # 4
+                [xmax, ymin, zmax],  # 5
+                [xmax, ymax, zmax],  # 6
+                [xmin, ymax, zmax],  # 7
+            ])
+            
+            self.add_wireframed_rect(corners, [0, 1, 3, 2, 4, 5], 'red', 4)
+            self.add_wireframed_rect(corners, [1, 2, 0, 3, 4, 7], 'green', 4)
+            self.add_wireframed_rect(corners, [0, 4, 1, 5, 3, 7], 'blue', 4)
+            self.add_wireframed_rect(corners, [7, 6, 5, 6, 2, 6], 'black', 2)
+
+        def add_wireframed_rect(self,corners,edges,str_color,w):
+            """ add to 3D a wired rectangle """
+            line_points = np.array([corners[edges[0]], corners[edges[1]],
+                                    corners[edges[2]], corners[edges[3]],
+                                    corners[edges[4]], corners[edges[5]]])
+            self.plotter.add_lines(line_points,color=str_color,width=w)
+
+except:
+    print("Error: PyQt5 module(s) not imported")
+    sys.exit()
+
+def get_params():
+    ''' parse command line '''
+    import argparse
+    description = 'fg-3D: 3D viewer for mesh and sol files'
+    epilogue = '''
+    lauch a graphic user interface to render magnetization from a feellgood .sol file as a vector field onto the
+    corresponding mesh
+    '''
+    parser = argparse.ArgumentParser(description=description, epilog=epilogue, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('meshFileName',nargs='?',
+        help= """Optional mesh input file. If not provided fg-3D starts with some default parameters,
+        and the user may open a gmsh mesh file from file menu""", 
+        default=None)
+    parser.add_argument('--version',action='version',version= __version__,help='show the version number')
+    args = parser.parse_args()
+    return args
+
+def launchGUI(meshFileName):
+    try:
+        from PyQt5.QtWidgets import QApplication
+        app = QApplication(sys.argv)
+        window = CombinedInterface(meshFileName)
+        window.show()
+        sys.exit(app.exec_())
+    finally:
+        sys.exit()
+
+def main():
+    '''
+    launch the parsing of the command line
+    detect if on windows or unix-like platform
+    On windows, try to launch the GUI, on unix-like, try to fix some environnment variables for
+    nvidia GPU if any. Then it tries to launch the GUI if PyQt5 is available else exit
+    '''
+    args = get_params()
+    if (os.name == "nt"):
+        launchGUI(args.meshFileName)
+    elif (os.name == "posix"):
+        display = os.environ.get('DISPLAY') #might not run correctly on WayLand, see WAYLAND_DISPLAY environment variable
+        if ((display == "") or (display is None)):
+            print("Error: no display.")
+            sys.exit()
+        else:
+            if has_nvidia_gpu():
+                os.environ["__NV_PRIME_RENDER_OFFLOAD"] = "1"
+                os.environ["__GLX_VENDOR_LIBRARY_NAME"] = "nvidia"
+            else:
+                print("Warning: no NVIDIA GPU detected.")
+            launchGUI(args.meshFileName)
+
+__version__ = '0.0.0'
+if __name__ == "__main__":
+    main()
