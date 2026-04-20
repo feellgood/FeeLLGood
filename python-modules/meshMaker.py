@@ -5,7 +5,8 @@ import numpy as np
 
 def gmsh_init(objName,fileFormat,binary,verbose=True):
     """
-    initializations of gmsh used by some classes below. Output file format set to 2.2 or 4.1 and text or binary
+    initializations of gmsh used by some classes below. Output file format set to 2.2 or 4.1 and
+    text or binary
     """
     import gmsh
     global gmsh
@@ -23,12 +24,14 @@ def gmsh_mesh_build(name):
     """
     gmsh.model.setCurrent(name)
     gmsh.model.mesh.removeDuplicateNodes()
-    gmsh.model.geo.synchronize() # we have to synchronize before the call to 'generate' to build the mesh
+    gmsh.model.geo.synchronize() # we have to synchronize before the call to 'generate'
+                                 # to build the mesh
     gmsh.model.mesh.generate(3) # 3 is the dimension of the mesh
 
 def infos(g_opt,name):
     """
-    returns a string with total number of nodes of 3D physical entities, number of tetraedrons, and number of triangles corresponding  to written mesh file of model 'name'
+    returns a string with total number of nodes of 3D physical entities, number of tetraedrons, and
+    number of triangles corresponding  to written mesh file of model 'name'
     """
     gmsh.model.setCurrent(name)
     e_3D = gmsh.model.getEntities(dim = 3)
@@ -75,11 +78,13 @@ class Hexahedron(object):
         closedLoop = gmsh.model.geo.addCurveLoop([l[0],l[1],l[2],l[3]])
         surf = gmsh.model.geo.addPlaneSurface([closedLoop]) # surf is an index (integer)
         t = self.p_max[2] - self.p_min[2] 
-        out = gmsh.model.geo.extrude([(2,surf)],0,0,t) # 2 is the dimension of the object refered by index surf
+        out = gmsh.model.geo.extrude([(2,surf)],0,0,t) # 2 is the dimension of the object
+                                                       # refered by index surf
         gmsh.model.geo.synchronize() # we have to sync before calling addPhysicalGroup
         
         surface_tag = 200
-        gmsh.model.addPhysicalGroup(2,[surf, out[0][1], out[2][1], out[3][1], out[4][1], out[5][1]],surface_tag)
+        gmsh.model.addPhysicalGroup(2,[surf, out[0][1], out[2][1], out[3][1], out[4][1], out[5][1]],
+                surface_tag)
         gmsh.model.setPhysicalName(2,surface_tag,self.surfName)
         
         volume_tag = 300
@@ -92,7 +97,8 @@ class Hexahedron(object):
         gmsh.finalize()
         
 class Cylinder(object):
-    def __init__ (self,radius,thickness,mesh_size,surfName,volName,partitionSurface=False,fileFormat=4.1,verbose=False):
+    def __init__ (self,radius,thickness,mesh_size,surfName,volName,partitionSurface=False,
+            fileFormat=4.1,verbose=False):
         """ 
             geometrical cylinder is zero centered, with radius r and length t along (Oz)
             this cylinder mesh is generated with python geo
@@ -128,9 +134,11 @@ class Cylinder(object):
 
         gmsh.model.geo.remove([(p_origin,0)])
 
-        curvedLoop = gmsh.model.geo.addCurveLoop([big_circle,big_circle1,big_circle2,big_circle3]) # curvedLoop is an index (integer)
+        curvedLoop = gmsh.model.geo.addCurveLoop([big_circle,big_circle1,big_circle2,big_circle3])
+                                                            # curvedLoop is an index (integer)
         surf = gmsh.model.geo.addPlaneSurface([curvedLoop]) # surf is an index (integer)
-        out = gmsh.model.geo.extrude([(2,surf)],0,0,self.t) # 2 is the dimension of the object refered by index surf
+        out = gmsh.model.geo.extrude([(2,surf)],0,0,self.t) # 2 is the dimension of the object
+                                                            # refered by index surf
         gmsh.model.geo.synchronize() # we have to sync before calling addPhysicalGroup
 
         if self.partitionSurface:
@@ -145,14 +153,16 @@ class Cylinder(object):
             gmsh.model.setPhysicalName(2,surface_tag, self.surfName + "_top")
         else:
             surface_tag = 200
-            gmsh.model.addPhysicalGroup(2,[surf, out[0][1], out[2][1], out[3][1], out[4][1], out[5][1]],surface_tag)
+            gmsh.model.addPhysicalGroup(2,[surf, out[0][1], out[2][1], out[3][1], out[4][1],
+                    out[5][1]],surface_tag)
             gmsh.model.setPhysicalName(2,surface_tag,self.surfName)
 
         volume_tag = 300
         gmsh.model.addPhysicalGroup(3,[out[1][1]],volume_tag)
         gmsh.model.setPhysicalName(3,volume_tag,self.volName)
 
-        gmsh.model.geo.synchronize() # we have to synchronize before the call to 'generate' to build the mesh
+        gmsh.model.geo.synchronize() # we have to synchronize before the call to 'generate'
+                                     # to build the mesh
         gmsh.model.mesh.generate(3) # 3 is the dimension of the mesh
         
         gmsh.write(meshFileName)
@@ -160,7 +170,8 @@ class Cylinder(object):
         gmsh.finalize()
 
 class Tube(object):
-    def __init__ (self,radius1,radius2,length,mesh_size,surfName,volName,partitionSurface=False,fileFormat=4.1,verbose=False):
+    def __init__ (self,radius1,radius2,length,mesh_size,surfName,volName,partitionSurface=False,
+            fileFormat=4.1,verbose=False):
         """
             geometrical Tube is zero centered, with inner radius radius1 and outer radius
             radius2 and length along (Oz)
@@ -207,12 +218,15 @@ class Tube(object):
 
         gmsh.model.geo.remove([(p_origin,0)])
 
-        curvedLoop = gmsh.model.geo.addCurveLoop([big_circle,big_circle1,big_circle2,big_circle3]) # curvedLoop is an index (integer)
+        curvedLoop = gmsh.model.geo.addCurveLoop([big_circle,big_circle1,big_circle2,big_circle3])
+                    # curvedLoop is an index (integer)
         #the following curve defines the hole
-        curvedLoop2 = gmsh.model.geo.addCurveLoop([small_circle,small_circle1,small_circle2,small_circle3])
+        curvedLoop2 = gmsh.model.geo.addCurveLoop([small_circle,small_circle1,small_circle2,
+                small_circle3])
 
         surf = gmsh.model.geo.addPlaneSurface([curvedLoop,curvedLoop2]) # surf is an index (integer)
-        out = gmsh.model.geo.extrude([(2,surf)],0,0,self.l) # 2 is the dimension of the object refered by index surf
+        out = gmsh.model.geo.extrude([(2,surf)],0,0,self.l) # 2 is the dimension of the object
+                                                            # refered by index surf
         gmsh.model.geo.synchronize() # we have to sync before calling addPhysicalGroup
 
         if self.partitionSurface:
@@ -234,15 +248,16 @@ class Tube(object):
 
         else:
             surface_tag = 200
-            gmsh.model.addPhysicalGroup(2,[surf, out[0][1], out[2][1], out[3][1], out[4][1], out[5][1],
-            out[6][1], out[7][1], out[8][1], out[9][1] ],surface_tag)
+            gmsh.model.addPhysicalGroup(2,[surf, out[0][1], out[2][1], out[3][1], out[4][1],
+                    out[5][1], out[6][1], out[7][1], out[8][1], out[9][1] ],surface_tag)
             gmsh.model.setPhysicalName(2,surface_tag,self.surfName)
 
         volume_tag = 300
         gmsh.model.addPhysicalGroup(3,[out[1][1]],volume_tag)
         gmsh.model.setPhysicalName(3,volume_tag,self.volName)
 
-        gmsh.model.geo.synchronize() # we have to synchronize before the call to 'generate' to build the mesh
+        gmsh.model.geo.synchronize() # we have to synchronize before the call to 'generate'
+                                     # to build the mesh
         gmsh.model.mesh.generate(3) # 3 is the dimension of the mesh
 
         gmsh.write(meshFileName)
@@ -252,9 +267,9 @@ class Tube(object):
 class Ellipsoid(object):
     def __init__ (self,r1,r2,mesh_size,surfName,volName,fileFormat=4.1,verbose=False):
         """ 
-            geometrical ellipsoid is zero centered, with radius r1 in the plane (Oxy) and r2 along (Oz)
-            this ellipsoid mesh is generated with open cascade (occ)
-            by default gmsh file format 4.1 is used to write the mesh text file
+            geometrical ellipsoid is zero centered, with radius r1 in the plane (Oxy) and r2
+            along (Oz) this ellipsoid mesh is generated with open cascade (occ) by default gmsh file
+            format 4.1 is used to write the mesh text file
         """
         
         self.r1 = r1
@@ -278,15 +293,18 @@ class Ellipsoid(object):
 
         surfaces = gmsh.model.getEntities(dim=2)
         surface_tag = 200
-        gmsh.model.addPhysicalGroup(surfaces[0][0], [surfaces[0][1]], surface_tag) # first parameter should be 2
+        gmsh.model.addPhysicalGroup(surfaces[0][0], [surfaces[0][1]], surface_tag) # first
+                                                                    # parameter should be 2
         gmsh.model.setPhysicalName(2,surface_tag,self.surfName)
 
         volumes = gmsh.model.getEntities(dim=3)
         volume_tag = 300
-        gmsh.model.addPhysicalGroup(volumes[0][0], [volumes[0][1]], volume_tag) # first parameter should be 3
+        gmsh.model.addPhysicalGroup(volumes[0][0], [volumes[0][1]], volume_tag) # first parameter
+                                                                                # should be 3
         gmsh.model.setPhysicalName(3,volume_tag,self.volName)
 
-        gmsh.model.occ.synchronize() # we have to synchronize before the 'generate' call to build the mesh
+        gmsh.model.occ.synchronize() # we have to synchronize before the 'generate' call
+                                     # to build the mesh
         eps = 1e-3
         rescaler = 1.0 + eps
         xmin = -rescaler*self.r1
@@ -309,10 +327,12 @@ class Ellipsoid(object):
 class Cuboid(object):
     def __init__ (self,pt_min,pt_max,nbX,nbY,nbZ):
         """ 
-            constructor, inits nodes lists, and builds tetrahedrons and outer surface mesh of the cuboid in the volume defined by pt_min,pt_max
+            constructor, inits nodes lists, and builds tetrahedrons and outer surface mesh of the
+            cuboid in the volume defined by pt_min,pt_max
             Tet is a table containing 4 indices refering to the list of points
             Fac is a table containing 3 indices refering to the list of points
-            index shift to obey gmsh file format 2.2 is performed while writing the file, except first column indices of points table  
+            index shift to obey gmsh file format 2.2 is performed while writing the file, except
+            first column indices of points table  
         """
         idx = 1
         self.nbX = nbX
@@ -401,7 +421,8 @@ class Cuboid(object):
             self.pts[i][3] = transformed_pt[2]
             
     def stringTet(self,idx):
-        return str(1+self.Tet[idx][0])+"\t"+str(1+self.Tet[idx][1])+"\t"+str(1+self.Tet[idx][2]) +"\t"+str(1+self.Tet[idx][3])
+        return (str(1+self.Tet[idx][0])+"\t"+str(1+self.Tet[idx][1])+"\t"+str(1+self.Tet[idx][2])
+                +"\t"+str(1+self.Tet[idx][3]))
 
     def stringFac(self,table,idx):
         return str(1+table[idx][0])+"\t"+str(1+table[idx][1])+"\t"+str(1+table[idx][2])
@@ -447,11 +468,13 @@ class Cuboid(object):
         meshFile.write("3 " + str(volRegionTag) + ' \"' + volRegionName + '\"\n')
         
         for i in range(0,len(self.subSurfRegName)):
-            meshFile.write( "2 " + str(surfRegionTag + 1 + i) + ' \"' + self.subSurfRegName[i] +'\"\n'  )
+            meshFile.write( "2 " + str(surfRegionTag + 1 + i) + ' \"' + self.subSurfRegName[i]
+                    +'\"\n'  )
         meshFile.write("$EndPhysicalNames\n")
         meshFile.write("$Nodes\n" + str(len(self.pts))+"\n")
         for i in range(0,len(self.pts)):
-            meshFile.write( str(self.pts[i][0])+"\t"+str(self.pts[i][1])+"\t"+str(self.pts[i][2])+"\t"+str(self.pts[i][3]) + "\n" )
+            meshFile.write( str(self.pts[i][0])+"\t"+str(self.pts[i][1])+"\t"+str(self.pts[i][2])
+                    +"\t"+str(self.pts[i][3]) + "\n" )
         meshFile.write("$EndNodes\n$Elements\n")
         nbElem = self.calc_nb_elements()
         meshFile.write(str(nbElem)+"\n")
@@ -477,13 +500,19 @@ class Cuboid(object):
 class Ico(object):
     def __init__ (self):
         """
-            builds a mesh of an icosahedron in text format 2.2, each tetrahedron is built with a outer face of the icosahedron linked to the barycenter.
-            see https://fr.wikipedia.org/wiki/Icosa%C3%A8dre for more informations. Mesh file is written in the output text file without gmsh module.
+            builds a mesh of an icosahedron in text format 2.2, each tetrahedron is built with a
+            outer face of the icosahedron linked to the barycenter.
+            see https://fr.wikipedia.org/wiki/Icosa%C3%A8dre for more informations. Mesh file is
+            written in the output text file without gmsh module.
         """
         self.phi = (1+sqrt(5))/2
-        self.pts = np.array([[self.phi,1,0], [self.phi,-1,0], [-self.phi,1,0], [-self.phi,-1,0],[1,0,self.phi], [1,0,-self.phi], [-1,0,self.phi], [-1,0,-self.phi],[0,self.phi,1], [0,self.phi,-1], [0,-self.phi,1], [0,-self.phi,-1], [0,0,0]] )
+        self.pts = np.array([[self.phi,1,0], [self.phi,-1,0], [-self.phi,1,0], [-self.phi,-1,0],
+                [1,0,self.phi], [1,0,-self.phi], [-1,0,self.phi], [-1,0,-self.phi],[0,self.phi,1],
+                [0,self.phi,-1], [0,-self.phi,1], [0,-self.phi,-1], [0,0,0]])
 
-        self.f_idx = [ [0,8,4], [0,4,1], [0,1,5], [0,5,9], [0,9,8], [8,9,2], [8,2,6], [8,6,4], [6,10,4], [6,3,10], [6,2,3], [10,3,11], [10,11,1], [10,1,4], [1,11,5], [11,3,7], [11,7,5], [3,2,7], [7,9,2],  [5,7,9] ]
+        self.f_idx = [ [0,8,4], [0,4,1], [0,1,5], [0,5,9], [0,9,8], [8,9,2], [8,2,6], [8,6,4],
+                [6,10,4], [6,3,10], [6,2,3], [10,3,11], [10,11,1], [10,1,4], [1,11,5], [11,3,7],
+                [11,7,5], [3,2,7], [7,9,2],  [5,7,9] ]
 
     def make(self,meshFileName,volRegionName,surfRegionName):
         """ write mesh file in gmsh 2.2 text format """
@@ -497,13 +526,18 @@ class Ico(object):
         meshFile.write("$EndPhysicalNames\n")
         meshFile.write("$Nodes\n" + str(len(self.pts))+"\n")
         for i in range(0,len(self.pts)):
-            meshFile.write( str(i+1)+"\t"+str(self.pts[i][0])+"\t"+str(self.pts[i][1])+"\t"+str(self.pts[i][2]) + "\n" )
+            meshFile.write( str(i+1)+"\t"+str(self.pts[i][0])+"\t"+str(self.pts[i][1])+"\t"
+                    +str(self.pts[i][2]) + "\n" )
         meshFile.write("$EndNodes\n$Elements\n")
         meshFile.write(str(2*len(self.f_idx))+"\n")
         for i in range(0,len(self.f_idx)):
-            meshFile.write( str(i+1)+"\t4\t2\t" + str(volRegionTag) + "\t1\t13\t"+str(1+self.f_idx[i][0])+"\t"+str(1+self.f_idx[i][1])+"\t"+str(1+self.f_idx[i][2]) + "\n" )
+            meshFile.write( str(i+1)+"\t4\t2\t" + str(volRegionTag) + "\t1\t13\t"
+                +str(1+self.f_idx[i][0])+"\t"+str(1+self.f_idx[i][1])+"\t"
+                +str(1+self.f_idx[i][2]) + "\n" )
         for i in range(0,len(self.f_idx)):
-            meshFile.write( str(len(self.f_idx)+i+1)+"\t2\t2\t" + str(surfRegionTag) + "\t1\t"+str(1+self.f_idx[i][0])+"\t"+str(1+self.f_idx[i][1])+"\t"+str(1+self.f_idx[i][2]) + "\n" )
+            meshFile.write( str(len(self.f_idx)+i+1)+"\t2\t2\t" + str(surfRegionTag) + "\t1\t"
+                    +str(1+self.f_idx[i][0])+"\t"+str(1+self.f_idx[i][1])+"\t"
+                    +str(1+self.f_idx[i][2]) + "\n" )
 
         meshFile.write("$EndElements\n")
         meshFile.close()

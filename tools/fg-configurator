@@ -65,7 +65,8 @@ def whatQt():
 
 if whatQt() != "None":
     try:
-        from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QGridLayout, QLineEdit, QComboBox, QSpinBox, QMessageBox
+        from PyQt5.QtWidgets import (QWidget, QLabel, QPushButton, QHBoxLayout, QGridLayout,
+                QLineEdit, QComboBox, QSpinBox, QMessageBox)
         from PyQt5.QtCore import Qt
 
         class MainWindow(QWidget):
@@ -100,7 +101,8 @@ if whatQt() != "None":
                 self.cancelBtn.setToolTip("Quit without saving.")
                 self.cancelBtn.clicked.connect(self.closeEvent)
                 self.saveBtn = QPushButton('Save')
-                self.saveBtn.setToolTip("Save config to a yaml file.\nIf a config file already exists it is overwritten.")
+                self.saveBtn.setToolTip("Save config to a yaml file.\n"
+                        + "If a config file already exists it is overwritten.")
                 self.saveBtn.clicked.connect(self.writeConfig)
                 self.okBtn = QPushButton('Ok')
                 self.okBtn.setToolTip("Save and Quit")
@@ -131,7 +133,8 @@ if whatQt() != "None":
                 self.echoText.setText("")
 
             def closeEvent(self, event):
-                close = QMessageBox.question(self, "QUIT", "Are you sure want to quit?", QMessageBox.Yes | QMessageBox.No)
+                close = QMessageBox.question(self, "QUIT", "Are you sure want to quit?",
+                        QMessageBox.Yes | QMessageBox.No)
                 if close == QMessageBox.Yes:
                     if not type(event) == bool:
                         event.accept()
@@ -150,9 +153,12 @@ def get_params():
     epilogue = '''
     define author and affiliation, licence
     '''
-    parser = argparse.ArgumentParser(description=description, epilog=epilogue, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('-v','--verbose', help='verbose mode, print all inputs', action="store_true")
-    parser.add_argument('--version',action='version',version= __version__,help='show the version number')
+    parser = argparse.ArgumentParser(description=description, epilog=epilogue,
+            formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('-v','--verbose', help='verbose mode, print all inputs',
+            action="store_true")
+    parser.add_argument('--version',action='version',version= __version__,
+            help='show the version number')
     args = parser.parse_args()
     return args
 
@@ -178,7 +184,8 @@ def dialog(args):
 
 def main():
     args = get_params()
-    display = os.environ.get('DISPLAY') #might not run correctly on WayLand, see WAYLAND_DISPLAY environment variable 
+    display = os.environ.get('DISPLAY') # might not run correctly on WayLand,
+                                        # see WAYLAND_DISPLAY environment variable 
     if ((display == "") or (display is None)):
         dialog(args)
     else:

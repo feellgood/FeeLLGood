@@ -19,7 +19,8 @@ mySettings["outputs"]["file_basename"] = "rectangle"
 
 mySettings["outputs"]["evol_time_step"] = 2.5e-17
 mySettings["outputs"]["final_time"] = 2.5e-15
-mySettings["outputs"]["evol_columns"] = [ "t", "<Mx>", "<My>", "<Mz>", "E_ex", "E_aniso", "E_demag", "E_tot" ]
+mySettings["outputs"]["evol_columns"] = ["t", "<Mx>", "<My>", "<Mz>", "E_ex", "E_aniso",
+        "E_demag", "E_tot" ]
 
 mySettings["outputs"]["mag_config_every"] = 500
 

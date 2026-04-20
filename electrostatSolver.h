@@ -27,8 +27,10 @@ public:
     /** constructor */
     electrostatSolver(
             Mesh::mesh & _msh /**< [in] reference to the mesh */,
-            std::vector<Tetra::prm> & _pTetra /**< [in] ref to vector of param tetra (volume region parameters) */,
-            std::vector<Facette::prm> & _pFac /**< [in] ref to vector of param facette (surface region parameters) */,
+            std::vector<Tetra::prm> & _pTetra /**< [in] ref to vector of param tetra
+                                                (volume region parameters) */,
+            std::vector<Facette::prm> & _pFac /**< [in] ref to vector of param facette
+                                                (surface region parameters) */,
             const double _tol /**< [in] cg_dir tolerance */,
             const bool v /**< [in] verbose mode for iteration monitor */,
             const int max_iter /**< [in] maximum number of iterations */):
@@ -50,28 +52,32 @@ public:
 
     /** text file (tsv) writing function for the solution V over all volume regions of the mesh,
      * node indices are zero based */
-    bool save(const std::string V_fileName /**< [in] output file name */, std::string const &metadata /**< [in] */) const;
+    bool save(const std::string V_fileName /**< [in] output file name */,
+            std::string const &metadata /**< [in] */) const;
 
     /** returns sigma of the tetraedron, (conductivity in (Ohm.m)^-1 */
     double getSigma(Tetra::Tet const &tet) const;
 
-    /** returns current density of the facette if it is defined in the boundary conditions, else zero */
+    /** returns current density of the facette if it is defined in the boundary conditions,
+     * else zero */
     double getCurrentDensity(Facette::Fac const &fac) const;
 
     /** solves the potential and stores result in V, save to text file if needed
      * if verbose set to true, some printing are sent to terminal */
-    void compute(const bool verbose /**< [in] */, const std::string V_fileName /**< [in] output file name for V solution */);
+    void compute(const bool verbose /**< [in] */,
+            const std::string V_fileName /**< [in] output file name for V solution */);
 
-    /** check boundary conditions: mesh and settings have to define a single surface with constant current
-     * density J (normal componant to the surface) and another single surface with constant potential V */
+    /** check boundary conditions: mesh and settings have to define a single surface
+     * with constant current density J (normal componant to the surface) and another single surface
+     * with constant potential V */
     void checkBoundaryConditions(void) const;
 
 private:
     /** number of digits in the optional output file */
     const int precision = 8;
 
-    /** solver, using conjugate gradient with masking, with diagonal preconditionner and Dirichlet
-     * boundary conditions, returns true if has converged */
+    /** solver, using conjugate gradient with masking, with diagonal preconditionner
+     * and Dirichlet boundary conditions, returns true if has converged */
     bool solve(void);
     };  // end class electrostatSolver
 

@@ -92,7 +92,7 @@ Eigen::Matrix<double,Nodes::DIM,NPI> Tetra::calc_gradV(Tet const &tet, std::vect
     }
 
 Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> Tetra::calc_Hst(Tetra::Tet const &tet,
-                                                            const double prefactor, std::vector<Eigen::Vector3d> &s)
+        const double prefactor, std::vector<Eigen::Vector3d> &s)
     {
     Eigen::Matrix<double,Nodes::DIM,Tetra::N> s_nod;
     for(size_t ie=0;ie<Tetra::N;ie++)
@@ -109,7 +109,8 @@ Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> Tetra::calc_Hst(Tetra::Tet const &te
 void Tet::lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double prefactor,
                   Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const
     {
-    // contrib is alpha contribution to the diagonal of AE; to help stabilizing the scheme, alpha is modified
+    // contrib is alpha contribution to the diagonal of AE; to help stabilizing the scheme, alpha is
+    // modified
     Eigen::Matrix<double,N,1> contrib = eigen_a * weight.cwiseProduct(alpha_eff);
     Eigen::Matrix<double,N,N> exch_block = calcDiagBlock(prefactor,contrib);
     AE.block<N,N>(0,0) += exch_block;
@@ -159,17 +160,19 @@ void Tet::add_drift_BE(double alpha, double s_dt, double Vdrift,
         for (int i = 0; i < N; i++)
             {
             interim.col(i) = a[i][npi]*( alpha*dUd_.col(npi) + U.col(npi).cross(dUd_.col(npi))
-                    + s_dt*(alpha*dVd_.col(npi) + U.col(npi).cross(dVd_.col(npi)) + V.col(npi).cross(dUd_.col(npi))) );
+                    + s_dt*(alpha*dVd_.col(npi) + U.col(npi).cross(dVd_.col(npi))
+                        + V.col(npi).cross(dUd_.col(npi))) );
             }
         BE += Vdrift*weight[npi]*interim;
         }
     }
 
-Eigen::Matrix<double,NPI,1> Tet::calc_aniso_uniax(Eigen::Ref<const Eigen::Vector3d> uk, const double Kbis,
-                             const double s_dt,
-                             Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> U,
-                             Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> V,
-                             Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> H_aniso) const
+Eigen::Matrix<double,NPI,1> Tet::calc_aniso_uniax(Eigen::Ref<const Eigen::Vector3d> uk,
+        const double Kbis,
+        const double s_dt,
+        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> U,
+        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> V,
+        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> H_aniso) const
     {
     for(int npi = 0;npi<NPI;npi++)
         { H_aniso.col(npi) += (Kbis * uk.dot( U.col(npi) + s_dt * V.col(npi))) * uk; }
@@ -187,13 +190,16 @@ Eigen::Matrix<double,NPI,1> Tet::calc_aniso_cub(Eigen::Ref<const Eigen::Vector3d
     Eigen::Matrix<double,NPI,1> result;
     for(int npi = 0;npi<NPI;npi++)
         {
-        Eigen::Vector3d uk_u = Eigen::Vector3d(ex.dot(U.col(npi)), ey.dot(U.col(npi)), ez.dot(U.col(npi)));
-        Eigen::Vector3d uk_v = Eigen::Vector3d(ex.dot(V.col(npi)), ey.dot(V.col(npi)), ez.dot(V.col(npi)));
+        Eigen::Vector3d uk_u = Eigen::Vector3d(ex.dot(U.col(npi)),
+                ey.dot(U.col(npi)), ez.dot(U.col(npi)));
+        Eigen::Vector3d uk_v = Eigen::Vector3d(ex.dot(V.col(npi)),
+                ey.dot(V.col(npi)), ez.dot(V.col(npi)));
         Eigen::Vector3d uk_uuu = uk_u.unaryExpr( [](double x){ return x*(1.0 - x*x);} );
         Eigen::Vector3d tmp = uk_v.cwiseProduct(ex);
 
         H_aniso.col(npi) += -K3bis * (uk_uuu(0) * ex + uk_uuu(1) * ey + uk_uuu(2) * ez
-                  + s_dt * tmp.cwiseProduct( Eigen::Vector3d(1, 1, 1) - 3*uk_u.cwiseProduct(uk_u) ));
+                  + s_dt * tmp.cwiseProduct( Eigen::Vector3d(1, 1, 1)
+                      - 3*uk_u.cwiseProduct(uk_u) ));
 
         result[npi] = uk_u.dot(uk_uuu);
         }
@@ -222,7 +228,8 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     Eigen::Matrix<double,DIM,NPI> Hv;
     interpolation_field(Nodes::get_phiv<CURRENT>, Hv);
     /*-------------------- END INTERPOLATION ----------------*/
-    Eigen::Matrix<double,NPI,1> uHeff = -Abis *( dUdx.colwise().squaredNorm() + dUdy.colwise().squaredNorm() + dUdz.colwise().squaredNorm());
+    Eigen::Matrix<double,NPI,1> uHeff = -Abis *( dUdx.colwise().squaredNorm()
+            + dUdy.colwise().squaredNorm() + dUdz.colwise().squaredNorm());
     Eigen::Matrix<double,DIM,NPI> H_aniso;
     H_aniso.setZero();
 
@@ -287,7 +294,8 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
         for (int i = 0; i < N; i++)
             {
             const double ai_w = w*a[i][npi];
-            BE.col(i) -= w*Abis*(da(i,0)*dUdx.col(npi) + da(i,1)*dUdy.col(npi) + da(i,2)*dUdz.col(npi));// exchange
+            BE.col(i) -= w*Abis*(da(i,0)*dUdx.col(npi) + da(i,1)*dUdy.col(npi)
+                    + da(i,2)*dUdz.col(npi));// exchange
             BE.col(i) += ai_w*(H.col(npi) + Hst.col(npi) ); // Hst contribution to BE
             BE.col(i) -= ai_w*scal_Hst_u*s_dt*V.col(npi); // spin acc second order contrib
             }
@@ -308,7 +316,8 @@ double Tet::exchangeEnergy(Tetra::prm const &param,
     return param.A * weight.dot(dens);
     }
 
-double Tet::uniaxialAnisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> u) const
+double Tet::uniaxialAnisotropyEnergy(Tetra::prm const &param,
+        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> u) const
     {
     Eigen::Matrix<double,NPI,1> dens;
 
@@ -317,7 +326,8 @@ double Tet::uniaxialAnisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::
     return -param.K*weight.dot(dens);
     }
 
-double Tet::cubicAnisotropyEnergy(Tetra::prm const &param, Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> u) const
+double Tet::cubicAnisotropyEnergy(Tetra::prm const &param,
+        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> u) const
     {
     Eigen::Matrix<double,NPI,1> dens;
 
@@ -373,7 +383,8 @@ double Tet::zeemanEnergy(Tetra::prm const &param, double fieldAmp,
         Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> const u) const
     {
     Eigen::Matrix<double,DIM,NPI> Hext = spaceField[idx];
-    Eigen::Matrix<double,NPI,1> dens = u.cwiseProduct(Hext).colwise().sum(); // dot product column to column
+    Eigen::Matrix<double,NPI,1> dens = u.cwiseProduct(Hext).colwise().sum(); // dot product column
+                                                                             // to column
 
     return -mu0*param.Ms*fieldAmp*weight.dot(dens);
     }

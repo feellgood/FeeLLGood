@@ -60,7 +60,8 @@ m(p,t) \f$. Many other values for the computation of the scalar potential \f$ \p
 struct Node
     {
     Eigen::Vector3d p;  /**< Physical position p=(x,y,z)  of the node */
-    Eigen::Vector3d ep; /**< local vector basis : \f$ e_p = \vec{rand} \times u0 \f$ , then normalized */
+    Eigen::Vector3d ep; /**< local vector basis : \f$ e_p = \vec{rand} \times u0 \f$ ,
+                          then normalized */
     Eigen::Vector3d eq; /**< local vector basis : \f$ e_q = u0 \times e_p \f$ , then normalized */
     
     /** datas associated to position p

@@ -64,7 +64,8 @@ void spinAcc::boundaryConditions(void)
              * [jn] = A m^-2; [BOHRS_MUB/CHARGE_ELECTRON] = m^2 ; [P] = 1 ⇒ [s_value] = A
              * check s_value formula, especially the sign with current convention
              * */
-            Eigen::Vector3d s_value = -paramFac[f.idxPrm].jn*(BOHRS_MUB/CHARGE_ELECTRON)*paramFac[f.idxPrm].uP;
+            Eigen::Vector3d s_value =
+                    -paramFac[f.idxPrm].jn*(BOHRS_MUB/CHARGE_ELECTRON)*paramFac[f.idxPrm].uP;
             for(int j=0;j<Facette::N;j++)
                 { fillDirichletData(f.ind[j],s_value); }
             }
@@ -114,7 +115,8 @@ void spinAcc::prepareExtras(void)
             double prefactor = D0/(sq(getLsd(t))*gamma0*getMs(t));
             t.extraField = [this, &t, prefactor](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)
                         {
-                        Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _Hst = calc_Hst(t, prefactor, s);
+                        Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _Hst =
+                                calc_Hst(t, prefactor, s);
                         H += _Hst;
                         };
             }
@@ -213,7 +215,8 @@ void spinAcc::integrales(Tetra::Tet &tet,
     const double D0 = getDiffusionCst(tet);
 
     Eigen::Matrix<double,N,1> a_w = eigen_a*tet.weight;
-    Eigen::Matrix<double,N,1> diag = (D0/sq(lsf))*a_w; // units: [D0/sq(lsf)] = s^-1 : it is 1/tau_sf
+    Eigen::Matrix<double,N,1> diag = (D0/sq(lsf))*a_w; // units: [D0/sq(lsf)] = s^-1 :
+                                                       // it is 1/tau_sf
     Eigen::Matrix<double,N,N> diagBlock = tet.calcDiagBlock(D0,diag);
     AE.block<N,N>(0,0) += diagBlock;
     AE.block<N,N>(N,N) += diagBlock;

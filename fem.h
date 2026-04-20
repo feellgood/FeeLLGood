@@ -28,8 +28,8 @@ It does also contains the definition of many constants for the solver, and for s
 #include "spinAccumulationSolver.h"
 #include "linear_algebra.h"
 #include "chronometer.h"
-#include "ANN.h"
-#include "feellgoodSettings.h"
+#include "ANN/ANN.h"
+#include "settings.h"
 
 /** number of energy terms in energy array E */
 const int NB_ENERGY_TERMS = 4;
@@ -205,7 +205,8 @@ private:
     /** find direction of motion of DW */
     void direction(enum Nodes::index idx_dir /**< [in] */);
 
-    /** compute demagnetizing field, energies, and prepare for next time step quantitites at time t */
+    /** compute demagnetizing field, energies, and prepare for next time step quantitites
+     * at time t */
     void compute_all(Settings &settings /**< [in] */, spinAcc &spinAcc_solver /**< [in|out] */,
                      scal_fmm::fmm &myFMM /**< [in|out] */, const double t /**< [in]*/)
         {

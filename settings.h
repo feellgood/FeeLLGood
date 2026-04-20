@@ -1,7 +1,7 @@
-#ifndef feellgoodSettings_h
-#define feellgoodSettings_h
+#ifndef settings_h
+#define settings_h
 
-/** \file feellgoodSettings.h
+/** \file settings.h
 \brief many settings to give some parameters to the solver, boundary conditions for the problem, the
 output file format wanted by the user. This is done mainly with the class Settings.
 */
@@ -351,7 +351,8 @@ private:
     /** parser for the time dependant applied field expressions R->R³ */
     ExpressionParser field_parser;
 
-    // field(x,y,z,t) = field_time(t) * field_space(x,y,z) with field_time R -> R and field_space R³->R³
+    // field(x,y,z,t) = field_time(t) * field_space(x,y,z) with field_time R -> R
+    // and field_space R³->R³
     /** parser for the field time dependant scalar expression */
     ExpressionParser field_time_parser;
 
@@ -365,4 +366,4 @@ private:
     const bool NORMALIZE = true;
     };
 
-#endif /* feellgoodSettings_h */
+#endif /* settings_h */

@@ -21,10 +21,15 @@ def get_params():
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('meshFileName', help='.msh file name')
     parser.add_argument('solFileName', help='.sol file name to render')
-    parser.add_argument('-P', '--percent', default=100, help='Percentage of the field vectors rendered')
+    parser.add_argument('-P', '--percent', default=100,
+            help='Percentage of the field vectors rendered')
     parser.add_argument('-q', '--qlength', default=1.0, help='quiver length')
-    parser.add_argument('-f','--filter',default="empty_pred", help='predicate: an expression with x,y,z,mx,my,mz returning a boolean')
-    parser.add_argument('-s','--subspace',default= "",help='2D quiver plot of x,y,z,mx,my,mz read from input files, user has to provide four indices, exampl 0 1 3 4 to plot on positions (x,y) the set of quivers(mx,my) ')
+    parser.add_argument('-f','--filter',default="empty_pred",
+            help='predicate: an expression with x,y,z,mx,my,mz returning a boolean')
+    parser.add_argument('-s','--subspace',default= "",
+            help='2D quiver plot of x,y,z,mx,my,mz read from input files, '
+                    + 'user has to provide four indices, exampl 0 1 3 4 to plot '
+                    + 'on positions (x,y) the set of quivers(mx,my) ')
     args = parser.parse_args()
     return args
 
@@ -64,7 +69,8 @@ def plot2D(fig,X,idx):
 
 def plot3D(fig,X,q_l):
     ax = fig.add_subplot(projection='3d')
-    graph = ax.quiver(X[0], X[1], X[2], X[3], X[4], X[5], length=q_l, cmap='rainbow', pivot='middle', normalize=True)
+    graph = ax.quiver(X[0], X[1], X[2], X[3], X[4], X[5], length=q_l, cmap='rainbow',
+            pivot='middle', normalize=True)
     ax.set_box_aspect([1.0,1.0,1.0])
     ax.set_title("Magnetization")
     ax.set_xlabel("x")

@@ -8,10 +8,13 @@ convenient template to check elements type while reading a gmsh mesh file
 */
 template <int TYPE>
 bool all_elems_are(std::vector<int> &container)
-    { return std::all_of(container.begin(), container.end(), [](int &e_type){return e_type == TYPE;} ); }
+    {
+    return std::all_of(container.begin(), container.end(), [](int &e_type){return e_type == TYPE;});
+    }
 
 /**
-convenient template to check named regions(volume or surface) from feellgood settings exist in physical groups gmsh mesh inner structure built from file
+convenient template to check named regions(volume or surface) from feellgood settings exist in
+physical groups gmsh mesh inner structure built from file
 */
 template <class T>
 bool checkNamedObjects(std::vector<T> const &v_prm, const int dim_obj)

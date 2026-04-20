@@ -63,12 +63,17 @@ def get_params():
     parser = argparse.ArgumentParser(description=description, epilog=epilogue,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('h5FileName',help='an input hdf5 file name')
-    parser.add_argument('-g','--groupname',help='group name where to extract',default='emptyGroupName')
-    parser.add_argument('-b','--basename', help='a base name for output file(s)',default='emptyBaseName')
-    parser.add_argument('--view',action='store_true',help='view in standard output the group content')
-    parser.add_argument('--version',action='version',version= __version__,help='show the version number')
+    parser.add_argument('-g','--groupname',help='group name where to extract',
+            default='emptyGroupName')
+    parser.add_argument('-b','--basename', help='a base name for output file(s)',
+            default='emptyBaseName')
+    parser.add_argument('--view',action='store_true',
+            help='view in standard output the group content')
+    parser.add_argument('--version',action='version',version= __version__,
+            help='show the version number')
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('-w','--what',metavar='what',type=str, help='what to extract',default='undefined')
+    group.add_argument('-w','--what',metavar='what',type=str, help='what to extract',
+            default='undefined')
     
     args = parser.parse_args()
     return vars(args)
@@ -82,10 +87,12 @@ def main():
         fileName = inputs['h5FileName']
         f = h5py.File(fileName,'r')
 
-        if ((inputs['groupname'] == 'emptyGroupName')or(inputs['groupname'] in f.keys())) and inputs['view']:
+        if ((inputs['groupname'] == 'emptyGroupName')or(inputs['groupname'] in f.keys()))
+                and inputs['view']:
             view(f,inputs['groupname'])
         elif not(inputs['groupname'] in f.keys()):
-            print("error: group " + inputs['groupname'] + " does not exist in file " + inputs['h5FileName'] )
+            print("error: group " + inputs['groupname'] + " does not exist in file "
+                    + inputs['h5FileName'] )
             exit(1)
 
         if inputs['what'] == 'evol':
@@ -103,7 +110,8 @@ def main():
             for d in list_dset:
                 writeSolFile( inputs['basename']+d+".sol", f[ inputs['groupname']].get(d))
         elif inputs['what'] in f[ inputs['groupname']]:
-            writeSolFile( inputs['basename']+inputs['what']+".sol", f[ inputs['groupname']].get(inputs['what']) )
+            writeSolFile( inputs['basename']+inputs['what']+".sol",
+                    f[ inputs['groupname']].get(inputs['what']) )
         else:# extract all
             extractAll(f,inputs['groupname'],inputs['basename'])
 

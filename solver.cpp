@@ -43,7 +43,8 @@ bool LinAlgebra::solve(timing const &t_prm)
                       buildVect<Facette::N>(my_elem.ind, Le);
                       });
 
-    /* RHS forced to zero outside mag material defined by mask, corresponding K diagonal coefficients set to 1  */
+    /* RHS forced to zero outside mag material defined by mask, corresponding K diagonal
+     * coefficients set to 1  */
     algebra::applyMask(lvd,L_rhs);
     std::for_each(lvd.begin(),lvd.end(),[this](int i){ K.set(i,i,1.0); });
     if (verbose)
@@ -59,7 +60,9 @@ bool LinAlgebra::solve(timing const &t_prm)
     buildInitGuess(Xw);// gamma0 division handled by function buildInitGuess
     algebra::bicg_dir<double>(iter, K, Xw, L_rhs, lvd);
 
-    if( (iter.status == algebra::ITER_OVERFLOW) || (iter.status == algebra::CANNOT_CONVERGE) || (iter.get_res() > iter.resmax) )
+    if ((iter.status == algebra::ITER_OVERFLOW)
+            || (iter.status == algebra::CANNOT_CONVERGE)
+            || (iter.get_res() > iter.resmax))
         {
         if (verbose)
             { std::cout << "solver: " << iter.infos() << std::endl; }

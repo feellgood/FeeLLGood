@@ -7,7 +7,7 @@
 
 #include "tags.h"
 #include "chronometer.h"
-#include "feellgoodSettings.h"
+#include "settings.h"
 
 using namespace Nodes;
 
@@ -117,7 +117,8 @@ static const std::string str(std::string s, int level = 0)
     return s;
     }
 
-bool isOrthogonal(Eigen::Ref<Eigen::Vector3d> a, Eigen::Ref<Eigen::Vector3d> b, Eigen::Ref<Eigen::Vector3d> c, const double precision)
+bool isOrthogonal(Eigen::Ref<Eigen::Vector3d> a, Eigen::Ref<Eigen::Vector3d> b,
+        Eigen::Ref<Eigen::Vector3d> c, const double precision)
     {
     bool val = (fabs(a.dot(b)) < precision);
     val &= (fabs(b.dot(c)) < precision);
@@ -541,7 +542,9 @@ void Settings::read(YAML::Node yaml)
                 field_type = R4toR3;
                 }
             else
-                error("Bext should be a function or a vector of expressions or space & time expressions.");
+                error(
+                "Bext should be a function or a vector of expressions or space & time expressions."
+                );
             }
         }  // Bext
 

@@ -2,7 +2,9 @@
 #define mesh_h
 
 /** \file mesh.h
-\brief class mesh, readMesh is expecting a mesh file in gmsh format either text or binary, from version 2.2 to the latest 4.1. The mesh has to use only first order tetraedrons and triangular facettes, mixed meshes are not allowed.
+\brief class mesh, readMesh is expecting a mesh file in gmsh format either text or binary, from
+version 2.2 to the latest 4.1. The mesh has to use only first order tetraedrons and triangular
+facettes, mixed meshes are not allowed.
 */
 
 #include <cmath>
@@ -15,7 +17,7 @@
 #include "facette.h"
 #include "node.h"
 #include "tetra.h"
-#include "feellgoodSettings.h"
+#include "settings.h"
 
 namespace Mesh
     {
@@ -300,10 +302,10 @@ public:
      * Since some volume region might be non magnetic, magnetization is undefined on those nodes and
      * nan is used */
     void savesol(const int precision /**< [in] numeric precision in .sol output text file */,
-                 const std::string fileName /**< [in] */,
-                 std::string const &metadata /**< [in] */,
-                 bool withSpinAcc /**< [in] */,
-                 std::vector<Eigen::Vector3d> &s /**< [in] spin accumulation (might be empty) */) const;
+            const std::string fileName /**< [in] */,
+             std::string const &metadata /**< [in] */,
+             bool withSpinAcc /**< [in] */,
+             std::vector<Eigen::Vector3d> &s /**< [in] spin accumulation (might be empty) */) const;
 
     /** setter for node[i]; what_to_set will fix what is the part of the node struct to set (usefull
      * for fmm_demag.h) */
@@ -358,7 +360,8 @@ private:
     /** List of tetrahedrons making each volume region. */
     std::vector<std::vector<int>> volumeRegions;
 
-    /** test if mesh file contains surfaces and regions mentionned in yaml settings and their dimensions */
+    /** test if mesh file contains surfaces and regions mentionned in yaml settings and their
+     * dimensions */
     void checkMeshFile(Settings const &mySets /**< [in] */);
     
     /** read Nodes from mesh file */
@@ -420,11 +423,12 @@ private:
     void sortNodes(Nodes::index long_axis /**< [in] */);
 
     /** returns the surface defined by the set of facets of indices in facIndices
-     * each elementary surface triangle defined by points p0,p1,p2 is computed using norm(cross(p0p1,p0p2))/2, it is always
-     * positive  */
+     * each elementary surface triangle defined by points p0,p1,p2 is computed using
+     * norm(cross(p0p1,p0p2))/2, it is always positive  */
     double surface(std::vector<int> &facIndices);
 
-    /**return true if facette f is already indexed in the list idxMagList. Uses operator== for Fac. */
+    /**return true if facette f is already indexed in the list idxMagList.
+     * Uses operator== for Fac. */
     bool isInMagList(std::vector<int> &idxMagList, Facette::Fac &f)
         {
         auto it = std::find_if(idxMagList.begin(),idxMagList.end(),

@@ -21,11 +21,15 @@ def get_params():
     import argparse
     description = 'mesh statistics'
     epilogue = '''
-    list all surface and volume regions of a gmsh mesh. Give their name and indices, their surface or volume, and some global statistics 
+    list all surface and volume regions of a gmsh mesh. Give their name and indices,
+    their surface or volume, and some global statistics 
     '''
-    parser = argparse.ArgumentParser(description=description, epilog=epilogue, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('-v','--verbose', help='verbose mode, print all inputs', action="store_true")
-    parser.add_argument('--version',action='version',version= __version__,help='show the version number')
+    parser = argparse.ArgumentParser(description=description, epilog=epilogue,
+            formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('-v','--verbose', help='verbose mode, print all inputs',
+            action="store_true")
+    parser.add_argument('--version',action='version',version= __version__,
+            help='show the version number')
     parser.add_argument("meshFileName", help='input mesh file (gmsh format)')
     args = parser.parse_args()
     return args
@@ -76,7 +80,8 @@ def Nform(node,dim,tag):
         name = "volume"
         tetras = np.array(elemNodeTags).reshape(-1,4)
         #for t in tetras:
-        #    val += vol_tetrahedron(node,int(t[0]-1),int(t[1]-1),int(t[2]-1),int(t[3]-1))  # wrong indices here
+        #    val += vol_tetrahedron(node,int(t[0]-1),int(t[1]-1),int(t[2]-1),int(t[3]-1))
+        #     wrong indices here
     return [name,val]
 
 def entity_str_info(node,dim,tag,verbose):
@@ -91,7 +96,8 @@ def entity_str_info(node,dim,tag,verbose):
     if len(physicalTags):
         for p in physicalTags:
             n = gmsh.model.getPhysicalName(dim, p)
-            my_str += ", belongs to physical group named " + colored(n,'cyan') + ', indexed ' + colored(str(p),'yellow')
+            my_str += (", belongs to physical group named " + colored(n,'cyan') + ', indexed '
+                    + colored(str(p),'yellow'))
             [Nform_name,val] = Nform(node,dim,tag)
             my_str += ", " + Nform_name + "= " + str(val)
     # Get the mesh nodes for the entity (dim, tag):
@@ -126,7 +132,8 @@ def main():
         print(colored("Warning:",'red'),args.meshFileName,"is not a 3D mesh.")
         exit()
     if not args.verbose:
-        print("Input 3D mesh file", colored(args.meshFileName,'green'), "opened, model name:",gmsh.model.getCurrent())
+        print("Input 3D mesh file", colored(args.meshFileName,'green'), "opened, model name:",
+                gmsh.model.getCurrent())
     else:
         print("Model name:",gmsh.model.getCurrent())
     entities = gmsh.model.getEntities()
@@ -148,7 +155,8 @@ def main():
             nb_3D_entities += 1
             str_3D_entities += entity_str_info(node,dim,tag,args.verbose)
 
-    print(len(entities),"entities, including",nb_2D_entities,"2D entities and",nb_3D_entities,"3D entities")
+    print(len(entities),"entities, including",nb_2D_entities,"2D entities and",nb_3D_entities,
+            "3D entities")
     print(colored("2D entities:\n",'green'),str_2D_entities)
     print(colored("3D entities:\n",'green'),str_3D_entities)
     gmsh.finalize()

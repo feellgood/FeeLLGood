@@ -1,6 +1,6 @@
 PROJECT (feellgood CXX)
 message(STATUS " *** unit test cmaking *** ")
-find_package (Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
+find_package(Boost CONFIG COMPONENTS unit_test_framework REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(TBB REQUIRED)
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)

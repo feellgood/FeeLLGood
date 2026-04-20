@@ -8,7 +8,8 @@ namespace algebra
 /** solver for A x = rhs.
 Algo is conjugate gradient with diagonal preconditioner.
 vectors x and rhs must have the same size.
-The status of the convergence is returned in iter.status as well as total number of iterations and error
+The status of the convergence is returned in iter.status as well as total number of iterations and
+error
 */
 template<typename T>
 void cg(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std::vector<T> & rhs)
@@ -27,7 +28,9 @@ void cg(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std::vect
     p_direct(diag_precond,r,z);           //mult(P, r, z);
     rho = dot(z,r);                       //rho = vect_sp(z, r);
     p.assign(z.begin(),z.end());          //copy(z, p);
-    while (!iter.finished(norm(r)) && (iter.status != ITER_OVERFLOW) && (iter.status != CANNOT_CONVERGE))
+    while (!iter.finished(norm(r))
+            && (iter.status != ITER_OVERFLOW)
+            && (iter.status != CANNOT_CONVERGE))
         {
         if(iter.get_iteration() > 0)
             {
@@ -54,12 +57,16 @@ void cg(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std::vect
     }
 
 /** solver for A x = rhs.
-Algo is conjugate gradient with diagonal preconditioner with Dirichlet conditions (through masking technique)
-vectors x and rhs must have the same size. ld is a vector of indices where to apply zeros, xd the corresponding values.
-The status of the convergence is returned in iter.status as well as total number of iterations and error
+Algo is conjugate gradient with diagonal preconditioner with Dirichlet conditions (through masking
+technique)
+vectors x and rhs must have the same size. ld is a vector of indices where to apply zeros, xd the
+corresponding values.
+The status of the convergence is returned in iter.status as well as total number of iterations and
+error
  */
 template<typename T>
-void cg_dir(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std::vector<T> & rhs, const std::vector<T> & xd, const std::vector<int>& ld)
+void cg_dir(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std::vector<T> & rhs,
+        const std::vector<T> & xd, const std::vector<int>& ld)
     {
     T rho, rho_1(0.0);
     const size_t DIM = x.size();
@@ -82,7 +89,9 @@ void cg_dir(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std::
     p_direct(diag_precond,r,z);           // z = direct_product(diag_precond, r);
     rho = dot(z,r);                       //rho = z . r;
     p.assign(z.begin(),z.end());          //copy(z, p);
-    while (!iter.finished(norm(r)) && (iter.status != ITER_OVERFLOW) && (iter.status != CANNOT_CONVERGE))
+    while (!iter.finished(norm(r))
+            && (iter.status != ITER_OVERFLOW)
+            && (iter.status != CANNOT_CONVERGE))
         {
         if(iter.get_iteration() > 0)
             {

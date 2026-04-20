@@ -83,9 +83,12 @@ void mesh::indexReorder()
                           Eigen::Vector3d p0p1 = node[it->ind[1]].p - node[it->ind[0]].p;
                           Eigen::Vector3d p0p2 = node[it->ind[2]].p - node[it->ind[0]].p;
                                 
-                          // fa.Ms will have the magnitude of first arg of copysign, with second arg sign
+                          // fa.Ms will have the magnitude of first arg of copysign, with second arg
+                          // sign
                           fa.dMs = std::copysign( paramTetra[it->idxPrm].Ms,
-                               p0p1.dot(p0p2.cross(fa.calc_norm())) );  // carefull, calc_norm computes the normal to the face before idx swap
+                               p0p1.dot(p0p2.cross(fa.calc_norm())) );  // carefull, calc_norm
+                                                                        // computes the normal to
+                                                                        // the face before idx swap
                           }
                       std::swap(i1, i2);  // it seems from ref archive we do not want to swap
                                         // inner fac indices but local i1 and i2

@@ -20,7 +20,8 @@
 #include "iter.h"
 
 /** \namespace algebra
- * grab altogether sparse matrix, vector and dedicated functions, and various gradient conjugate algorithms
+ * grab altogether sparse matrix, vector and dedicated functions, and various gradient conjugate
+ * algorithms
 */
 
 namespace algebra

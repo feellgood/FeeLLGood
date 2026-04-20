@@ -18,7 +18,8 @@ class mesh(object):
         gmsh.option.setNumber("General.Terminal",False) # to silent gmsh
         gmsh.open(fileName)
         if gmsh.model.getDimension() != 3:
-            print('Error : feellgood.core does not support Model ' + gmsh.model.getCurrent() + ' : it is not 3D')
+            print('Error : feellgood.core does not support Model ' + gmsh.model.getCurrent()
+                    + ' : it is not 3D')
             sys.exit(1)
         
         self.readNodes()
@@ -49,7 +50,8 @@ class mesh(object):
             if len(elemTypes) == 0:
                 continue # ugly
             if len(elemTypes) != 1:
-                print("Error : feellgood.core only handles mesh with first order tetrahedron elements")
+                print(
+                  "Error : feellgood.core only handles mesh with first order tetrahedron elements")
                 print(elemTypes,len(elemTypes),elemTags,elemNodeTags)
                 sys.exit(1)
 
@@ -80,5 +82,6 @@ class mesh(object):
             print("elemNodeTags:",elemNodeTags)
 
     def infos(self):
-        print("nb Nodes: ",len(self.Nodes),"\tnb Tetrahedrons: ",len(self.Tet), "\tphysical names: ", self.Names)
+        print("nb Nodes: ",len(self.Nodes),"\tnb Tetrahedrons: ",len(self.Tet),
+                "\tphysical names: ", self.Names)
 

@@ -15,9 +15,15 @@
 /** \class element
 \brief Template abstract class, mother class for tetraedrons and facettes.
 
-template parameters are N number of sommits and NPI number of interpolation points. It contains a list of indices to the N nodes of the element, a reference to the full nodes vector, and index refering to the associated material parameters. All indices are zero based, derived class constructor should call zerobasing() if needed. It contains also the vector and matrix weight, Kp, Lp, P related to finite element computations. weight values are not initialized, they have to be set by derived class constructor.
+template parameters are N number of sommits and NPI number of interpolation points. It contains a
+list of indices to the N nodes of the element, a reference to the full nodes vector, and index
+refering to the associated material parameters. All indices are zero based, derived class
+constructor should call zerobasing() if needed. It contains also the vector and matrix weight, Kp,
+Lp, P related to finite element computations. weight values are not initialized, they have to be set
+by derived class constructor.
 Member function getPtGauss() returns Gauss points.
-orientate() is a pure virtual function, it should manipulate indices to orientate positively the element.
+orientate() is a pure virtual function, it should manipulate indices to orientate positively the
+element.
 */
 
 template <int N,int NPI>
@@ -66,7 +72,8 @@ class element
 ( Epx Epy Epz )
 ( Eqz Eqy Eqz )
 with each block E(p|q)(x|y|z) a N*N diagonal matrix
-* see here http://eigen.tuxfamily.org/dox-devel/TopicTemplateKeyword.html for the wierd template syntax
+* see here http://eigen.tuxfamily.org/dox-devel/TopicTemplateKeyword.html for the wierd template
+* syntax
 */
     void buildMatP(Eigen::Ref<Eigen::Matrix<double,2*N,3*N>> P /**< [out] block diagonal matrix */)
         {

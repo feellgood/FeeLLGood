@@ -112,10 +112,10 @@ endif()
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
 
 SET(HEADERS config.h node.h expression_parser.h mesh.h electrostatSolver.h
-    spinAccumulationSolver.h time_integration.h feellgoodSettings.h tetra.h
+    spinAccumulationSolver.h time_integration.h settings.h tetra.h
     facette.h linear_algebra.h log-stats.h tags.h chronometer.h element.h)
 
-SET(SOURCES feellgoodSettings.cpp time_integration.cpp solver.cpp electrostatSolver.cpp
+SET(SOURCES settings.cpp time_integration.cpp solver.cpp electrostatSolver.cpp
     spinAccumulationSolver.cpp read.cpp save.cpp linear_algebra.cpp recentering.cpp tetra.cpp
     energy.cpp facette.cpp expression_parser.cpp chronometer.cpp
     tags.cpp mesh.cpp)
@@ -138,15 +138,20 @@ include_directories (${CMAKE_SOURCE_DIR} ${GMSH_INC})
 
 ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES} default-settings.o)
 target_compile_options( feellgood PUBLIC -Wall -Wextra -O3 -march=native ${MKL_CFLAGS} )
-target_compile_definitions(feellgood PUBLIC -DNDEBUG -DTBB_SUPPRESS_DEPRECATED_MESSAGES ${EIGEN_MKL_CFLAGS} )
+target_compile_definitions(feellgood PUBLIC
+        -DNDEBUG -DTBB_SUPPRESS_DEPRECATED_MESSAGES ${EIGEN_MKL_CFLAGS} )
 
 if (MKL_FOUND)
-    #option --no-as-needed for mkl, see https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-link-line-advisor.html
+    #option --no-as-needed for mkl, see
+    # https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-link-line-advisor.html
     target_link_options(feellgood PUBLIC "-Wl,--no-as-needed" )
-    # not sure we really need it since --no-as-needed is default value, though there might be a --as-needed before
-    TARGET_LINK_LIBRARIES(feellgood yaml-cpp duktape ANN OpenMP::OpenMP_CXX ${TBB_LINK} Eigen3::Eigen ${MKL_TARGET} ${GMSH_LIB})
+    # not sure we really need it since --no-as-needed is default value, though there might be
+    # a --as-needed before
+    TARGET_LINK_LIBRARIES(feellgood yaml-cpp duktape ann OpenMP::OpenMP_CXX ${TBB_LINK}
+            Eigen3::Eigen ${MKL_TARGET} ${GMSH_LIB})
 else()
-    TARGET_LINK_LIBRARIES(feellgood yaml-cpp duktape ANN OpenMP::OpenMP_CXX ${TBB_LINK} Eigen3::Eigen ${GMSH_LIB})
+    TARGET_LINK_LIBRARIES(feellgood yaml-cpp duktape ann OpenMP::OpenMP_CXX ${TBB_LINK}
+            Eigen3::Eigen ${GMSH_LIB})
 endif()
 
 #===========================================================================
@@ -198,8 +203,8 @@ install(PROGRAMS ./tools/fg-sol2vtk DESTINATION bin)
 
 #===========================================================================
 # unit tests, by default it is not built.
-# you have to switch it ON while cmaking to build the unit tests and to be able to call 'make test' afterward:
-#  cmake . -DENABLE_UTESTS=ON
+# you have to switch it ON while cmaking to build the unit tests and to be able to call 'make test'
+# afterward: cmake . -DENABLE_UTESTS=ON
 # NB: ENABLE_UTESTS value is written in CMakeCache.txt
 #===========================================================================
 

@@ -36,7 +36,8 @@ void electrostatSolver::infos(void)
         } );
     }
 
-void electrostatSolver::integrales(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Tetra::N,Tetra::N> > AE)
+void electrostatSolver::integrales(Tetra::Tet const &tet,
+        Eigen::Ref<Eigen::Matrix<double,Tetra::N,Tetra::N> > AE)
     {
     const double sigma = getSigma(tet);
     for (int npi = 0; npi < Tetra::NPI; npi++)
