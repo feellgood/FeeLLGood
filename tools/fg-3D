@@ -4,7 +4,6 @@ import os
 import pathlib
 import sys
 import numpy as np
-import re
 import meshio
 import pyvista as pv
 from pyvistaqt import QtInteractor
@@ -50,24 +49,21 @@ def load_sol_file(filename):
                         magnetization[idx] = np.array([mx, my, mz])
                     except (ValueError, IndexError):
                         continue
-        
         return magnetization
     except Exception as e:
         raise RuntimeError(f"❌ Error loading .sol file '{filename}': {e}")
 
 def get_surface_nodes(mesh):
     """
-    Extract surface nodes from the mesh.
-    Returns a set of node indices that are on the surface (triangular elements).
+    Extract node indices defining the triangles on the surface of the mesh.
+    Returns a set of triplets of node indices that are on the surface.
+    Only triangular elements are considered.
     """
     surface_nodes = set()
-    
     for cell_block in mesh.cells:
         if cell_block.type == "triangle":
-            # Add all nodes from triangular elements
             for tri in cell_block.data:
-                surface_nodes.update(tri)
-    
+                surface_nodes.update(tri) # tri is a triplet of node indices
     return surface_nodes
 
 def get_region_elements(mesh):
@@ -183,6 +179,25 @@ def load_mesh(filename):
     except Exception as e:
         raise RuntimeError(f"❌ Error while loading mesh '{filename}': {e}")
 
+def avg_m(m_list,triangle):
+    ''' returns normed average magnetization of the triangle '''
+    i = triangle[0]
+    j = triangle[1]
+    k = triangle[2]
+    m = (m_list[i] + m_list[j] + m_list[k])/3.0
+    return m/np.linalg.norm(m)
+
+def compute_surf_charges(m,triangles,n):
+    ''' m is the magnetization list on the nodes, triangles the triangle list, n the list of the normal of the triangles
+    returns surface charges
+    '''
+    dot_m_n = np.empty(shape=len(n), dtype=float)
+    if len(triangles) == len(n):
+        for i in np.arange(len(n)):
+            normed_n = n[i]/np.linalg.norm(n[i])
+            dot_m_n[i] = np.dot(avg_m(m,triangles[i]),normed_n)
+    return dot_m_n
+
 def create_pyvista_mesh(points, triangles):
     ''' return pyvista triangles '''
     faces = np.hstack([np.full((triangles.shape[0], 1), 3), triangles]).astype(np.int32)
@@ -220,6 +235,7 @@ try:
             self.triangles = None
             self.help = None
             self.mesh = None
+            self.surf_charges = None
             self.strLog = ""
             self.setup_ui()
             if mesh_file != None:
@@ -276,19 +292,27 @@ try:
             left_layout = QVBoxLayout(left_panel)
 
             # Magnetization display controls
-            magnetization_group = QGroupBox("Magnetization")
+            magnetization_group = QGroupBox("Renderer")
             magnetization_layout = QVBoxLayout(magnetization_group)
             self.sol_label = QLabel("✗ no .sol file selected.")
             magnetization_layout.addWidget(self.sol_label)
 
-            #magnetization 3D view parameters
+            #magnetization 3D renderer parameters
             vector_layout = QHBoxLayout()
-            self.show_vectors_checkbox = QCheckBox("Show")
+            self.show_vectors_checkbox = QCheckBox("Magnetization vectors")
             self.show_vectors_checkbox.setChecked(False)
+            self.show_vectors_checkbox.setToolTip("add magnetization as arrows on the surface of the object")
             self.show_vectors_checkbox.stateChanged.connect(self.update_mesh)
 
+            self.surface_charges_checkbox = QCheckBox("Surface charges")
+            self.surface_charges_checkbox.setChecked(False)
+            self.surface_charges_checkbox.setToolTip("add surface charges on the surface of the object")
+            self.surface_charges_checkbox.stateChanged.connect(self.on_surface_charges_changed)
+
+            magnetization_layout.addWidget(self.show_vectors_checkbox)
+            magnetization_layout.addWidget(self.surface_charges_checkbox)
+
             scale_layout = QHBoxLayout()
-            scale_layout.addWidget(self.show_vectors_checkbox)
             scale_layout.addWidget(QLabel("Vector Scale:"))
             self.vector_scale_spinbox = QDoubleSpinBox()
             self.vector_scale_spinbox.setRange(0.001, 100.0)
@@ -385,6 +409,9 @@ try:
                     msg, self.surface_nodes, self.original_points, self.triangles = load_mesh(meshInputFile)
                     self.mesh = create_pyvista_mesh(self.original_points, self.triangles)
                     self.magnetization_data = None
+                    self.surf_charges = None
+                    self.show_vectors_checkbox.setChecked(False)
+                    self.surface_charges_checkbox.setChecked(False)
                     self.update_mesh()
                 except Exception as e:
                     msg = f"✗ Error loading mesh: {e}"
@@ -393,15 +420,6 @@ try:
                 self.statusBar().showMessage(msg)
                 self.strLog += msg + "\n"
                 self.update_infos()
-
-        def updateUI(self):
-            """ this function updates the whole UI, it is called after reading a mesh file
-            triggered by the file/open .msh menu
-            """
-            self.magnetization_data = None
-            self.sol_label.setText("✗ no .sol file selected.")
-            self.show_vectors_checkbox.setChecked(False)
-            self.update_infos()
 
         def update_infos(self):
             """ update mesh informations textEdit box """
@@ -413,7 +431,25 @@ try:
                 base = pathlib.Path(self.solFileName).stem
                 ext = ".vtu"
                 self.outputFileName = f"{base}{ext}"
-            self.statusBar().showMessage("not yet implemented, will come soon")
+            self.statusBar().showMessage("not yet implemented")
+
+        def on_surface_charges_changed(self):
+            if self.surface_charges_checkbox.isChecked():
+                if (self.mesh != None) and (self.magnetization_data != None):
+                    self.mesh.compute_normals(inplace=True,
+                                              cell_normals=True,
+                                              point_normals=False,
+                                              consistent_normals=True,
+                                              flip_normals=True,
+                                              auto_orient_normals=False)
+                    self.surf_charges = compute_surf_charges(self.magnetization_data,
+                                                             self.triangles,
+                                                             self.mesh.cell_normals)
+                    self.strLog += "surface charges computed\n"
+                    self.update_mesh()
+                else:
+                    self.strLog += "no mesh and/or magnetization data to compute surface charges\n"
+            self.update_infos()
 
         def on_vector_scale_changed(self):
             """Called when vector scale spinbox value changes"""
@@ -427,8 +463,12 @@ try:
             else:
                 try:
                     self.plotter.clear_actors()
-                    self.plotter.add_mesh(self.mesh,smooth_shading=True,split_sharp_edges=True,color="lightblue")
-                    self.add_bounding_box(self.original_points)
+                    if self.surface_charges_checkbox.isChecked():
+                        self.mesh.cell_data['surface charges'] = self.surf_charges
+                        self.plotter.add_mesh(self.mesh,smooth_shading=True,split_sharp_edges=True,cmap='coolwarm')
+                    else:
+                        self.plotter.add_mesh(self.mesh,smooth_shading=True,split_sharp_edges=True,color="lightblue")
+                        self.add_bounding_box(self.original_points)
 
                 # Add magnetization vectors if available and enabled
                     if (self.show_vectors_checkbox.isChecked() and 
