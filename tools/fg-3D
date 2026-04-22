@@ -10,9 +10,9 @@ from pyvistaqt import QtInteractor
 from typing import Any, Dict, List, Union
 
 strHelp = """Workflow:
-Open mesh file from file menu
-Open sol file from file menu
-Export vtu : create a vtu (paraview) file
+Open mesh file from file menu. Only gmsh files can be read, any version.
+Open sol file from file menu. Only output FeeLLGood .sol files can be read. 
+Export vtu : create a vtu (paraview) file from last opened mesh and sol files.
 """
 
 def has_nvidia_gpu():
@@ -53,99 +53,12 @@ def load_sol_file(filename):
     except Exception as e:
         raise RuntimeError(f"❌ Error loading .sol file '{filename}': {e}")
 
-def get_surface_nodes(mesh):
-    """
-    Extract node indices defining the triangles on the surface of the mesh.
-    Returns a set of triplets of node indices that are on the surface.
-    Only triangular elements are considered.
-    """
-    surface_nodes = set()
-    for cell_block in mesh.cells:
-        if cell_block.type == "triangle":
-            for tri in cell_block.data:
-                surface_nodes.update(tri) # tri is a triplet of node indices
-    return surface_nodes
-
-def get_region_elements(mesh):
-    """
-    Return a dictionary mapping region name -> list of element descriptions.
-    Each element description is a dict:
-      {
-        "cell_type": "triangle" / "tetra" / ...,
-        "block_index": i,            # index of the cell block in mesh.cells
-        "local_element_index": j,    # element index inside its cell block
-        "global_element_index": g,   # element index counting across all blocks
-        "nodes": array([...], dtype=int)  # node indices for that element
-      }
-
-    Requires mesh.field_data to map names -> [physical_id, dim].
-    Uses mesh.cell_data to find the physical tag per element (common key is "gmsh:physical").
-    """
-    if not hasattr(mesh, "cells"):
-        raise ValueError("❌ mesh has no attribute 'cells'")
-
-    # 1) build mapping physical_id -> region_name using mesh.field_data
-    id_to_name = {}
-    for name, arr in mesh.field_data.items():
-        try:
-            phys_id = int(np.asarray(arr).flatten()[0])
-        except Exception:
-            continue
-        id_to_name[phys_id] = name
-
-    # 2) find the appropriate key in mesh.cell_data that holds physical tags
-    phys_key = None
-    if hasattr(mesh, "cell_data") and mesh.cell_data:
-        for k in mesh.cell_data.keys():
-            if k == "gmsh:physical":
-                phys_key = k
-                break
-        if phys_key is None:
-            for k in mesh.cell_data.keys():
-                if "physical" in k.lower():
-                    phys_key = k
-                    break
-
-    if phys_key is None:
-        raise ValueError("No physical tags found in mesh.cell_data. Look for key 'gmsh:physical' or similar.")
-
-    # 3) iterate cell blocks and attach elements to regions
-    regions = {}
-    global_idx = 0
-    phys_tags_list = mesh.cell_data[phys_key]
-    if len(phys_tags_list) != len(mesh.cells):
-        raise ValueError("❌ Mismatch between number of cell blocks and number of cell_data arrays for key "
-                         f"'{phys_key}' (found {len(phys_tags_list)} vs {len(mesh.cells)}).")
-
-    for block_index, (cell_block, phys_tags) in enumerate(zip(mesh.cells, phys_tags_list)):
-        cell_type = cell_block.type
-        connectivity = np.asarray(cell_block.data, dtype=int)
-        phys_tags = np.asarray(phys_tags, dtype=int).flatten()
-
-        if connectivity.shape[0] != phys_tags.shape[0]:
-            raise ValueError(f"❌ Number of elements in cell block {block_index} ({connectivity.shape[0]}) "
-                             f"does not match number of physical tags ({phys_tags.shape[0]}).")
-
-        for local_idx in range(connectivity.shape[0]):
-            phys_id = int(phys_tags[local_idx])
-            region_name = id_to_name.get(phys_id, f"phys_{phys_id}")
-            elem = {
-                "cell_type": cell_type,
-                "block_index": block_index,
-                "local_element_index": local_idx,
-                "global_element_index": global_idx,
-                "nodes": connectivity[local_idx].tolist()
-            }
-            regions.setdefault(region_name, []).append(elem)
-            global_idx += 1
-
-    return regions
-
-
 def load_mesh(filename):
     """
-    Load a mesh from a file.
+    Load surfaces and related data from a gmsh file.
+    Surfaces have to be composed of triangles, any other element is not considered.
     Returns a string message, surface node indices, point coordinates and triangular connectivity.
+    This function loads nothing about tetrahedrons.
     Raises an error if the file does not exist or contains no triangles.
     """
     strLog = ""
@@ -154,28 +67,20 @@ def load_mesh(filename):
     try:
         mesh = meshio.read(filename)
         strLog += f"✓ mesh file '{filename}' loaded, "
-        for cell_block, cell_data in zip(mesh.cells, mesh.cell_data["gmsh:physical"]):
-            cell_type = cell_block.type
-            for region_name, (region_id, dim) in mesh.field_data.items():
-                element_indices = np.where(cell_data == region_id)[0]
-
-        regions = get_region_elements(mesh)
         points = mesh.points[:, :3]
         triangles = []
+        surface_nodes = set()
         for cell_block in mesh.cells:
             if cell_block.type == "triangle":
                 triangles.append(cell_block.data)
-
+                for tri in cell_block.data: # tri = triplet of node indices
+                    surface_nodes.update(tri)
         if not triangles:
             strLog += f"✗ No triangles found in mesh '{filename}'."
             raise ValueError(f"❌ No triangles found in mesh '{filename}'.")
-
         triangles = np.vstack(triangles)
         strLog += str(len(triangles)) + " triangles"
-        surface_nodes = get_surface_nodes(mesh)
-
         return strLog, surface_nodes, points, triangles
-
     except Exception as e:
         raise RuntimeError(f"❌ Error while loading mesh '{filename}': {e}")
 
