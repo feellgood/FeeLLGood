@@ -28,7 +28,6 @@ class data(object):
                     vector.append(float(ls[idx]))
                 self.X.InsertNextTuple(vector)
             
-                
     def filter(self,line):# the separator is either a '\t' or spaces,
                           # because s.sol files may be post-treated
         if not line.startswith('#'): # to ignore comments
@@ -37,13 +36,11 @@ class data(object):
         else:
             return []
         
-
     def check_idx(self,ls,list_idx):
         for i in list_idx:
             if (i > len(ls))or i<0:
                 print("error: index out of bounds : index = ",i )
                 sys.exit(1)
-
 
 def get_params():
     import argparse
@@ -74,20 +71,20 @@ def get_params():
         indices = args.integers
     else:
         indices = [1,2,3]
-
-    return [args.mshFileName,args.solFileName,indices,args.name,args.output]
+    return args,indices
 
 def main():
-    #print("This is fg-sol2vtk ", __version__ ,", using VTK " + vtk.vtkVersion.GetVTKVersion(),
-    # " and GMSH " + gmsh.__version__ )
-    [meshFileName, solFileName, indices, name, outputFileName] = get_params()
-    path, ext = os.path.splitext(meshFileName)
+    args, indices = get_params()
+    mshFileName = args.mshFileName
+    solFileName = args.solFileName
+    outputFileName = args.output
+    path, ext = os.path.splitext(mshFileName)
     ext = ext.lower()
     if ext != '.msh':
         print("extension " + ext + "not recognized.")
         sys.exit(1)
-    msh = mesh(meshFileName)
-    my_data = data(solFileName,indices,name)
+    msh = mesh(mshFileName)
+    my_data = data(solFileName, indices, args.name)
     
     points = vtk.vtkPoints()
     points.SetNumberOfPoints(len(msh.Nodes))
