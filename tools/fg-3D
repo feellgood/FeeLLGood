@@ -103,6 +103,15 @@ def compute_surf_charges(m,triangles,n):
             dot_m_n[i] = np.dot(avg_m(m,triangles[i]),normed_n)
     return dot_m_n
 
+def magDict2array(m):
+    ''' return a numpy array of 3D magnetization vectors from input dictionary m
+    since m is a dictionary it might be unsorted
+    '''
+    mag = np.empty(shape=(len(m),3), dtype=float)
+    for i in range(len(m)):
+        mag[i] = m[i]
+    return mag
+
 def create_pyvista_mesh(points, triangles):
     ''' return pyvista triangles '''
     faces = np.hstack([np.full((triangles.shape[0], 1), 3), triangles]).astype(np.int32)
@@ -221,7 +230,7 @@ try:
             scale_layout.addWidget(QLabel("Vector Scale:"))
             self.vector_scale_spinbox = QDoubleSpinBox()
             self.vector_scale_spinbox.setRange(0.001, 100.0)
-            self.vector_scale_spinbox.setValue(1.0)
+            self.vector_scale_spinbox.setValue(5.0)
             self.vector_scale_spinbox.setSingleStep(0.1)
             self.vector_scale_spinbox.setDecimals(3)
             self.vector_scale_spinbox.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))  # Force decimal point
@@ -284,9 +293,8 @@ try:
             path, _ = QFileDialog.getOpenFileName(self, "Select a .sol file", "", "SOL files (*.sol)")
             if path:
                 self.sol_file_path = path
-                fileName = pathlib.Path(path)
-                self.solFileName = fileName.name
-                self.sol_label.setText(self.solFileName)
+                self.solFileName = pathlib.Path(path)
+                self.sol_label.setText(self.solFileName.name)
                 self.update_infos()
                 msg = "✓ .sol file " + path + " selected"
                 self.strLog += msg + "\n"
@@ -331,12 +339,23 @@ try:
             self.infos_display.setPlainText(self.strLog)
 
         def export2vtu(self):
-            """ export combination of the mesh and a .sol file to a .vtu file """
+            """ export combination of the mesh and a .sol file to a .vtu file
+            only surface and related magnetization in the output file
+            TODO: add all volume data: tetrahedrons, nodes, magnetizations
+            """
             if self.solFileName:
-                base = pathlib.Path(self.solFileName).stem
+                base = self.solFileName.stem
                 ext = ".vtu"
-                self.outputFileName = f"{base}{ext}"
-            self.statusBar().showMessage("not yet implemented")
+                outputFileName = f"{base}{ext}"
+                mesh = meshio.Mesh(self.original_points, [("triangle",self.triangles)])
+                #meshio.read(self.meshFileName)
+                if mesh != None:
+                    mag = magDict2array(self.magnetization_data)
+                    mesh.point_data = {"magnetization":mag}
+                    mesh.write(outputFileName)
+                    self.strLog += outputFileName
+                    self.strLog += " written, warning: only contains surface informations.\n"
+            self.statusBar().showMessage(outputFileName + " written")
 
         def on_surface_charges_changed(self):
             if self.surface_charges_checkbox.isChecked():
