@@ -115,7 +115,14 @@ def magDict2array(m):
 def create_pyvista_mesh(points, triangles):
     ''' return pyvista triangles '''
     faces = np.hstack([np.full((triangles.shape[0], 1), 3), triangles]).astype(np.int32)
-    return pv.PolyData(points, faces)
+    mesh = pv.PolyData(points, faces)
+    mesh.compute_normals(inplace=True,
+                         cell_normals=True,
+                         point_normals=False,
+                         consistent_normals=True,
+                         flip_normals=True,
+                         auto_orient_normals=False)
+    return mesh
 
 try:
     from PyQt5.QtWidgets import (
@@ -360,12 +367,6 @@ try:
         def on_surface_charges_changed(self):
             if self.surface_charges_checkbox.isChecked():
                 if (self.mesh != None) and (self.magnetization_data != None):
-                    self.mesh.compute_normals(inplace=True,
-                                              cell_normals=True,
-                                              point_normals=False,
-                                              consistent_normals=True,
-                                              flip_normals=True,
-                                              auto_orient_normals=False)
                     self.surf_charges = compute_surf_charges(self.magnetization_data,
                                                              self.triangles,
                                                              self.mesh.cell_normals)
