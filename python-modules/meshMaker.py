@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from math import sqrt
+from math import sqrt,pi
 import numpy as np
 
 def gmsh_init(objName,fileFormat,binary,verbose=True):
@@ -95,7 +95,120 @@ class Hexahedron(object):
         gmsh.write(meshFileName)
         print(f"Generated {meshFileName}: {infos(gmsh.option,'hex')}")
         gmsh.finalize()
+
+class SolidOfRevolution(object):
+    def __init__ (self,points,mesh_size,surfName,volName,partitionSurface=False,
+            fileFormat=4.1,verbose=False):
+        '''
+        solid of revolution defined by rotating around (Oz) the polyLine defined by points.
+        points is an array of 2D points in the (xOz) plane.
+        partitionSurface split the surface in two disks and side surface.
+        '''
+        self.points = points
+        self.msh_s = mesh_size
+        self.surfName = surfName
+        self.partitionSurface = partitionSurface
+        self.volName = volName
+        gmsh_init("Solid_of_revolution",fileFormat,0,verbose)
+
+    def makeDisk(self,r,z_plane):
+        """ return a disk of radius r in the plane z=z_plane, center is (x,y) = (0,0) """
+        p_origin = gmsh.model.geo.addPoint(0,0,z_plane,self.msh_s)
+        start_pt = gmsh.model.geo.addPoint(r,0,z_plane,self.msh_s)
+        interim_pt = gmsh.model.geo.addPoint(0,r,z_plane,self.msh_s)
+        interim1_pt = gmsh.model.geo.addPoint(-r,0,z_plane,self.msh_s)
+        interim2_pt = gmsh.model.geo.addPoint(0,-r,z_plane,self.msh_s)
+
+        arc_circle = gmsh.model.geo.addCircleArc(start_pt,p_origin,interim_pt)
+        arc_circle1 = gmsh.model.geo.addCircleArc(interim_pt,p_origin,interim1_pt)
+        arc_circle2 = gmsh.model.geo.addCircleArc(interim1_pt,p_origin,interim2_pt)
+        arc_circle3 = gmsh.model.geo.addCircleArc(interim2_pt,p_origin,start_pt)
+
+        gmsh.model.geo.remove([(p_origin,0),(start_pt,0),(interim_pt,0),(interim1_pt,0),(interim2_pt,0)])
         
+        curvedLoop = gmsh.model.geo.addCurveLoop([arc_circle,arc_circle1,arc_circle2,arc_circle3])
+        disk = gmsh.model.geo.addPlaneSurface([curvedLoop]) # disk is an index (integer)
+        return disk
+
+    def makePolyLine(self,idx_pts):
+        ''' add all points indexed in idx_pts to the geo model and return an array of pairs (dim,idx) '''
+        idx_polyLine=[]
+        for i in range(0,len(idx_pts)-1):
+            k = gmsh.model.geo.addLine(idx_pts[i],idx_pts[i+1])
+            idx_polyLine.append((1,k))
+        return idx_polyLine
+
+    def appendToSurf(self,surf,s_elem):
+        ''' append to surf the pair in s_elem of dim=2 '''
+        for p in s_elem:
+            if p[0] == 2:
+                surf.append(p[1])
+        return surf
+
+    def make(self,meshFileName):
+        """ write solid of revolution mesh file """
+        r = self.points[0][0]
+        z_edge = self.points[0][1]
+        disk0 = self.makeDisk(r,z_edge)
+        r = self.points[-1][0] # -1 is the last element
+        z_edge = self.points[-1][1]
+        disk1 = self.makeDisk(r,z_edge)
+
+        surf = []
+        idx_pts = []
+        for idx in range(len(self.points)):
+            i = gmsh.model.geo.addPoint(self.points[idx][0],0,self.points[idx][1],self.msh_s)
+            idx_pts.append(i)
+        idx_polyLine = self.makePolyLine(idx_pts)
+        s_elem = gmsh.model.geo.revolve(idx_polyLine,0,0,0,0,0,1,pi/2)
+        self.appendToSurf(surf,s_elem)
+        s_elem = gmsh.model.geo.revolve(idx_polyLine,0,0,0,0,0,1,-pi/2)
+        self.appendToSurf(surf,s_elem)
+
+        idx_pts = []
+        for idx in range(len(self.points)):
+            k = gmsh.model.geo.addPoint(-self.points[idx][0],0,self.points[idx][1],self.msh_s)
+            idx_pts.append(k)
+        idx_polyLine = self.makePolyLine(idx_pts)
+        s_elem = gmsh.model.geo.revolve(idx_polyLine,0,0,0,0,0,1,pi/2)
+        self.appendToSurf(surf,s_elem)
+        s_elem = gmsh.model.geo.revolve(idx_polyLine,0,0,0,0,0,1,-pi/2)
+        self.appendToSurf(surf,s_elem)
+
+        if self.partitionSurface:
+            surface_tag = 200
+            gmsh.model.addPhysicalGroup(2,surf,surface_tag)
+            gmsh.model.setPhysicalName(2,surface_tag, self.surfName + "_side")
+            surface_tag = 210
+            gmsh.model.addPhysicalGroup(2,[disk0],surface_tag)
+            gmsh.model.setPhysicalName(2,surface_tag, self.surfName + "_bottom")
+            surface_tag = 220
+            gmsh.model.addPhysicalGroup(2,[disk1],surface_tag)
+            gmsh.model.setPhysicalName(2,surface_tag, self.surfName + "_top")
+        else:
+            surface_tag = 200
+            surf.append(disk0)
+            surf.append(disk1)
+            gmsh.model.addPhysicalGroup(2,surf,surface_tag)
+            gmsh.model.setPhysicalName(2,surface_tag,self.surfName)
+
+        gmsh.model.geo.synchronize()
+        s = gmsh.model.getEntities(2)
+        loop_surf = gmsh.model.geo.addSurfaceLoop([e[1] for e in s])
+        idx_vol = gmsh.model.geo.addVolume([loop_surf])
+        gmsh.model.geo.synchronize()
+
+        volume_tag = 300
+        gmsh.model.addPhysicalGroup(3,[idx_vol],volume_tag)
+        gmsh.model.setPhysicalName(3,volume_tag,self.volName)
+
+        gmsh.model.geo.synchronize() # we have to synchronize before the call to 'generate'
+        gmsh.model.mesh.generate(3) # 3 is the dimension of the mesh
+        gmsh.write(meshFileName)
+        print(f"Generated {meshFileName}: {infos(gmsh.option,'Solid_of_revolution')}")
+        gmsh.finalize()
+
+
 class Cylinder(object):
     def __init__ (self,radius,thickness,mesh_size,surfName,volName,partitionSurface=False,
             fileFormat=4.1,verbose=False):
