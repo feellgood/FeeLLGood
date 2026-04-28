@@ -114,6 +114,7 @@ fi
 tar xzf ScalFMM-$scalfmm_sha1.tar.gz
 cd ScalFMM-$scalfmm_sha1/
 sed -i 's/memcpy/if (nbParticles != 0) memcpy/' Src/Components/FBasicParticleContainer.hpp
+sed -Ei 's/(required .VERSION) 2.8.3/\1 3.5/' CMakeLists.txt
 sed -i 's/OPENMP_CXX_FOUND/OPENMP_FOUND OR OPENMP_CXX_FOUND/' CMakeLists.txt
 cd Build
 cmake ..
