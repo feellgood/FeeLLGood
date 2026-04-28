@@ -26,7 +26,7 @@ bookworm debian/12/cloud Debian 12 \"bookworm\"
 trixie debian/13/cloud Debian 13 \"trixie\"
 forky debian/14/cloud Debian 14 \"forky\" (testing)
 noble ubuntu/noble/cloud Ubuntu 24.04 LTS \"noble\"
-resolute ubuntu/resolute/cloud Ubuntu 26.04 \"resolute\"
+resolute ubuntu/resolute/cloud Ubuntu 26.04 LTS \"resolute\"
 quartz rockylinux/10/cloud Rocky Linux 10 \"red quartz\"
 "
 all_machines=$(cut -d' ' -f1 <<<"$supported_machines" | tr '\n' ' ')
