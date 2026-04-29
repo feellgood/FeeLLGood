@@ -111,14 +111,14 @@ endif()
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
 
-SET(HEADERS config.h node.h expression_parser.h mesh.h electrostatSolver.h
-    spinAccumulationSolver.h time_integration.h settings.h tetra.h
-    facette.h linear_algebra.h log-stats.h tags.h chronometer.h element.h)
+SET(HEADERS config.h src/node.h src/expression_parser.h src/mesh.h src/electrostatSolver.h
+    src/spinAccumulationSolver.h src/time_integration.h src/settings.h src/tetra.h
+    src/facette.h src/linear_algebra.h src/log-stats.h src/tags.h src/chronometer.h src/element.h)
 
-SET(SOURCES settings.cpp time_integration.cpp solver.cpp electrostatSolver.cpp
-    spinAccumulationSolver.cpp read.cpp save.cpp linear_algebra.cpp recentering.cpp tetra.cpp
-    energy.cpp facette.cpp expression_parser.cpp chronometer.cpp
-    tags.cpp mesh.cpp)
+SET(SOURCES src/settings.cpp src/time_integration.cpp src/solver.cpp src/electrostatSolver.cpp
+    src/spinAccumulationSolver.cpp src/read.cpp src/save.cpp src/linear_algebra.cpp src/recentering.cpp src/tetra.cpp
+    src/energy.cpp src/facette.cpp src/expression_parser.cpp src/chronometer.cpp
+    src/tags.cpp src/mesh.cpp)
 
 configure_file(config.h.in ./config.h)
 
@@ -136,7 +136,7 @@ add_custom_command(
 
 include_directories (${CMAKE_SOURCE_DIR} ${GMSH_INC})
 
-ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES} default-settings.o)
+ADD_EXECUTABLE(feellgood src/main.cpp ${HEADERS} ${SOURCES} default-settings.o)
 target_compile_options( feellgood PUBLIC -Wall -Wextra -O3 -march=native ${MKL_CFLAGS} )
 target_compile_definitions(feellgood PUBLIC
         -DNDEBUG -DTBB_SUPPRESS_DEPRECATED_MESSAGES ${EIGEN_MKL_CFLAGS} )
