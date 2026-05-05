@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include "../algebra/sparseMat.h"
+#include "algebra/sparseMat.h"
 
 using algebra::SparseMatrix;
 using algebra::MatrixShape;
