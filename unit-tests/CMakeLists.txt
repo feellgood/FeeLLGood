@@ -16,7 +16,7 @@ if(NOT GMSH_INC)
   message(FATAL_ERROR "Could not find gmsh.h")
 endif()
 
-include_directories (${CMAKE_SOURCE_DIR} ${Boost_INCLUDE_DIRS} ${GMSH_INC})
+include_directories (${CMAKE_SOURCE_DIR}/src ${Boost_INCLUDE_DIRS} ${GMSH_INC})
 
 set( BOOST_TEST_LOG_LEVEL "all" )
 
@@ -32,39 +32,39 @@ add_executable (test_ut_algebra ut_algebra.cpp)
 
 add_executable (test_ut_OMP_solver ut_OMP_solver.cpp)
 
-add_executable(test_ut_dukTapeParser ../expression_parser.cpp ut_dukTapeParser.cpp)
+add_executable(test_ut_dukTapeParser ../src/expression_parser.cpp ut_dukTapeParser.cpp)
 
 add_executable (test_ut_node ut_node.cpp)
 
 add_executable (test_ut_index ut_index.cpp)
 
-SET(SOURCES ../facette.cpp ../tetra.cpp ut_element.cpp)
+SET(SOURCES ../src/facette.cpp ../src/tetra.cpp ut_element.cpp)
 add_executable (test_ut_element ${SOURCES})
 
-SET(SOURCES ../facette.cpp ut_facette.cpp)
+SET(SOURCES ../src/facette.cpp ut_facette.cpp)
 add_executable (test_ut_facette ${SOURCES})
 
-SET(SOURCES ../facette.cpp ut_fac_charges.cpp)
+SET(SOURCES ../src/facette.cpp ut_fac_charges.cpp)
 add_executable (test_ut_fac_charges ${SOURCES})
 
-SET(SOURCES ../tetra.cpp ut_tetra.cpp)
+SET(SOURCES ../src/tetra.cpp ut_tetra.cpp)
 add_executable (test_ut_tetra ${SOURCES})
 
-SET(SOURCES ../tetra.cpp ut_tet_lumping.cpp)
+SET(SOURCES ../src/tetra.cpp ut_tet_lumping.cpp)
 add_executable (test_ut_tet_lumping ${SOURCES})
 
-SET(SOURCES ../tetra.cpp ut_tet_charges.cpp)
+SET(SOURCES ../src/tetra.cpp ut_tet_charges.cpp)
 add_executable (test_ut_tet_charges ${SOURCES})
 
-SET(SOURCES ../tetra.cpp ut_energy.cpp ../facette.cpp)
+SET(SOURCES ../src/tetra.cpp ut_energy.cpp ../src/facette.cpp)
 add_executable (test_ut_energy ${SOURCES})
 
-SET(SOURCES ../tetra.cpp ut_anisotropy.cpp)
+SET(SOURCES ../src/tetra.cpp ut_anisotropy.cpp)
 add_executable (test_ut_anisotropy ${SOURCES})
 
 add_executable (test_ut_tiny ut_tiny.cpp)
 
-set(SOURCES ../tetra.cpp ut_time_int.cpp)
+set(SOURCES ../src/tetra.cpp ut_time_int.cpp)
 add_executable (test_ut_time_int ${SOURCES})
 
 add_executable (test_ut_log-stats ut_log-stats.cpp)

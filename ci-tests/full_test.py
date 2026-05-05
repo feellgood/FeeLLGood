@@ -43,7 +43,7 @@ settings = {
 }
 
 # Expected outcome. It depends on whether feeLLGood was compiled in ONE_GAUSS_POINT mode.
-val = subprocess.check_output(["../feellgood","--version"])
+val = subprocess.check_output(["../src/feellgood","--version"])
 if b'ONE_GAUSS_POINT=ON' in val:
     expected = { "m": [0.307432, 0.476202, -0.823843], "E_tot": -4.446980e-19 }
 else:
@@ -51,7 +51,7 @@ else:
 
 # Run the simulation.
 sys.stdout.flush()
-val = subprocess.run(["../feellgood", "--seed", "2", "-"], input=json.dumps(settings), text=True)
+val = subprocess.run(["../src/feellgood", "--seed", "2", "-"], input=json.dumps(settings), text=True)
 
 #(devNote) to avoid -fsanitize=leak ASLR bug, we turn off address randomizer
 #val = subprocess.run(["setarch", "--addr-no-randomize", "../feellgood", "--seed", "2", "-"],

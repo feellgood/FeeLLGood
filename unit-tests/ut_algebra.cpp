@@ -7,9 +7,9 @@
 
 #include "ut_config.h"  // for tolerance UT_TOL macro
 #include "sparse_matrix.h"
-#include "../algebra/algebra.h"
-#include "../algebra/cg.h"
-#include "../algebra/bicg.h"
+#include "algebra/algebra.h"
+#include "algebra/cg.h"
+#include "algebra/bicg.h"
 
 using namespace algebra;
 
