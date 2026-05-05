@@ -13,6 +13,41 @@ void mesh::infos(void) const
     std::cout << "  total volume:       " << vol << '\n';
     }
 
+double mesh::thiele(const int region /** region index, or -1 for all magnetic regions */) const
+    {
+    double sum = std::transform_reduce(EXEC_POL,magTet.begin(),magTet.end(),0.0,std::plus<>(),
+            [this, region](const int idxElem)
+                {//the lambda computes sq(sum(grad(u))) on the tetrahedron indexed by idxElem
+                double val(0);
+                Tetra::Tet const &te = tet[idxElem];
+                if((te.idxPrm == region) || (region == -1))
+                    {
+                    Eigen::Matrix<double,Nodes::DIM,Tetra::N> u_nod;
+                    for (int i = 0; i< Tetra::N; i++)
+                        u_nod.col(i) = getNode_u(te.ind[i]);
+                
+                    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> du_dz = u_nod * (te.da.col(Nodes::IDX_Z)).replicate(1,Tetra::NPI);
+                
+                    for(int npi=0;npi<Tetra::NPI;npi++)
+                        val += du_dz.col(npi).dot(du_dz.col(npi)) * te.weight[npi];
+                    }
+                return val;
+                });
+    
+    double volume_u(0.0);
+    // to check: that sum seems to be the volume of the region, if so we should not recompute it 
+    std::for_each(EXEC_POL,magTet.begin(),magTet.end(),
+            [this,&volume_u,region](const int idxElem)
+                {
+                Tetra::Tet const &te = tet[idxElem];
+                if((te.idxPrm == region) || (region == -1))
+                    { volume_u += te.weight.sum(); }
+                });
+    double cross_section = volume_u/l.z();//average cross-section
+    return 2.0*cross_section/sum;
+    }
+
+
 double mesh::avg(std::function<double(Nodes::Node, Nodes::index)> getter /**< [in] */,
                  Nodes::index d /**< [in] */,
                  int region /**< region index, or -1 for all magnetic regions */) const

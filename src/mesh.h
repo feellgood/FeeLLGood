@@ -275,6 +275,14 @@ public:
         }
 
     /**
+    returns Thiele length in the magnetic volume region of index region.
+    this is an integral on a volume region of sq(grad(u).grad(u)) with usual weighted dot on each
+    tetra. It is normalized by a surface: the average cross-section
+    
+    */
+    double thiele(const int region /** region index, or -1 for all magnetic regions */) const;
+
+    /**
     average component of either u or v through getter on the whole set of tetetrahedron
     */
     double avg(std::function<double(Nodes::Node, Nodes::index)> getter /**< [in] */,
