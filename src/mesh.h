@@ -117,7 +117,8 @@ public:
                         { magNode[te.ind[i]] = true; }
                     }
                 });
-
+        checkFacettes();
+        
         for(unsigned int i=0;i<fac.size();i++)
             {
             if (isMagnetic(fac[i]) && !mySets.paramFacette[fac[i].idxPrm].suppress_charges
@@ -177,7 +178,7 @@ public:
         }
 
     /** make_evol on i^th node */
-    inline void updateNode(int i, double vp, double vq, const double dt)
+    inline void updateNode(const int i, const double vp, const double vq, const double dt)
         { node[i].make_evol(vp*gamma0, vq*gamma0, dt); }
 
     /** call evolution for all the nodes */
@@ -199,7 +200,7 @@ public:
     /** total magnetic volume of the mesh */
     double totalMagVol;
 
-    /** face container */
+    /** face container. Contains only those on a surface region. */
     std::vector<Facette::Fac> fac;
 
     /** tetrahedron container */
@@ -216,63 +217,7 @@ public:
 
     /** computes an analytical initial magnetization distribution as a starting point for the
      * simulation. If the node is not magnetic then it is set to NAN. */
-    inline void init_distrib(Settings const &mySets /**< [in] */)
-        {
-        for (int nodeIdx = 0; nodeIdx < int(node.size()); ++nodeIdx)
-            {
-            Nodes::Node &n = node[nodeIdx];
-            n.d[Nodes::NEXT].phi = 0.;
-            n.d[Nodes::NEXT].phiv = 0.;
-
-            // A non-magnetic node's magnetization is a vector of NAN.
-            if (!magNode[nodeIdx])
-                {
-                n.d[Nodes::CURRENT].u = Eigen::Vector3d(NAN, NAN, NAN);
-                n.d[Nodes::NEXT].u = n.d[Nodes::CURRENT].u;
-                continue;
-                }
-
-            // If the initial magnetization depends only on the node position, we do not need to
-            // build the list of region names.
-            if (mySets.getMagType() == POSITION_ONLY)
-                {
-                n.d[Nodes::CURRENT].u = mySets.getMagnetization(n.p);
-                n.d[Nodes::NEXT].u = n.d[Nodes::CURRENT].u;
-                continue;
-                }
-
-            // Get the list of region indices this node belongs to.
-            std::set<int> nodeRegions;
-            // skip region 0 (__default__) which should be empty
-            for (size_t regIdx = 1; regIdx < volumeRegions.size(); ++regIdx)
-                {
-                const std::vector<int> &regionTetras = volumeRegions[regIdx];
-                bool node_in_region = std::any_of(EXEC_POL,
-                    regionTetras.begin(), regionTetras.end(),
-                    [this, nodeIdx](int tetIdx)
-                    {
-                    const Tetra::Tet &tetrahedron = tet[tetIdx];
-                    for (int i = 0; i < Tetra::N; ++i) // node of tetrahedron tetIdx
-                        {
-                        if (tetrahedron.ind[i] == nodeIdx)
-                            { return true; }
-                        }
-                    return false;
-                    });
-                if (node_in_region)
-                    { nodeRegions.insert(regIdx); }
-                }
-
-            // Get the list of region names this node belongs to.
-            std::vector<std::string> region_names;
-            region_names.resize(nodeRegions.size());
-            std::transform(nodeRegions.begin(), nodeRegions.end(), region_names.begin(),
-                [this](int regIdx){ return paramTetra[regIdx].regName; });
-
-            n.d[Nodes::CURRENT].u = mySets.getMagnetization(n.p, region_names);
-            n.d[Nodes::NEXT].u = n.d[Nodes::CURRENT].u;
-            }
-        }
+    void init_distrib(Settings const &mySets /**< [in] */);
 
     /**
     returns Thiele length in the magnetic volume region of index region.
@@ -285,7 +230,7 @@ public:
     /**
     average component of either u or v through getter on the whole set of tetetrahedron
     */
-    double avg(std::function<double(Nodes::Node, Nodes::index)> getter /**< [in] */,
+    double avg(const std::function<double(Nodes::Node, Nodes::index)>& getter /**< [in] */,
                Nodes::index d /**< [in] */,
                int region = -1 /**< region index, or -1 for all magnetic regions */) const;
 
@@ -294,7 +239,7 @@ public:
         {
         double min_dot_product = std::transform_reduce(EXEC_POL, edges.begin(), edges.end(), 1.0,
                 [](double a, double b){ return std::min(a, b); },
-                [this](const Edge edge)
+                [this](const Edge &edge)
                     {
                     Eigen::Vector3d m1 = getNode_u(edge.first);
                     Eigen::Vector3d m2 = getNode_u(edge.second);
@@ -318,7 +263,7 @@ public:
     /** setter for node[i]; what_to_set will fix what is the part of the node struct to set (usefull
      * for fmm_demag.h) */
     inline void set(const int i /**< [in] */,
-                    std::function<void(Nodes::Node &, const double)> what_to_set /**< [in] */,
+                    const std::function<void(Nodes::Node &, const double)>& what_to_set /**< [in] */,
                     const double val /**< [in] */)
         { what_to_set(node[i], val); }
 
@@ -326,7 +271,7 @@ public:
     inline int getNodeIndex(const int i) const { return node_index[i]; }
 
     /** return true if this tetraedron is magnetic */
-    inline bool isMagnetic(const Tetra::Tet &t) { return (paramTetra[t.idxPrm].Ms > 0); }
+    inline bool isMagnetic(const Tetra::Tet &t) const { return (paramTetra[t.idxPrm].Ms > 0); }
 
     /** return true if this facet is magnetic */
     inline bool isMagnetic(const Facette::Fac &f)
@@ -387,7 +332,7 @@ private:
     /** loop on nodes to apply predicate 'whatTodo'  */
     double doOnNodes(const double init_val /**< [in] */,
                      const Nodes::index coord /**< [in] */,
-                     std::function<bool(double, double)> whatToDo /**< [in] */) const;
+                     const std::function<bool(double, double)>& whatToDo /**< [in] */) const;
 
     /** return the minimum of all nodes coordinate along coord axis */
     inline double minNodes(const Nodes::index coord /**< [in] */) const
@@ -398,7 +343,8 @@ private:
     /** return the maximum of all nodes coordinate along coord axis */
     inline double maxNodes(const Nodes::index coord /**< [in] */) const
         {
-        return doOnNodes(__DBL_MIN__, coord, [](double a, double b) { return a > b; });
+        return doOnNodes(__DBL_MIN__, coord, [](const double a, const double b)
+                        { return a > b; });
         }
 
     /** redefine orientation of triangular faces in accordance with the tetrahedron
@@ -430,14 +376,22 @@ private:
      * the matrix we will have to solve for. */
     void sortNodes(Nodes::index long_axis /**< [in] */);
 
+    /** Check if all facette verify one of the three following conditions :
+     *      - Is part of 2 tetraedrons
+     *      - Is part of 1 tetraedron and one surface region
+     *      - Is part of 1 tetraedron and no surface region
+     * Throws an error if finds one which is not in one of those three cases.
+     */
+    void checkFacettes() const;
+
     /** returns the surface defined by the set of facets of indices in facIndices
      * each elementary surface triangle defined by points p0,p1,p2 is computed using
      * norm(cross(p0p1,p0p2))/2, it is always positive  */
-    double surface(std::vector<int> &facIndices);
+    double surface(std::vector<int> &facIndices) const;
 
     /**return true if facette f is already indexed in the list idxMagList.
      * Uses operator== for Fac. */
-    bool isInMagList(std::vector<int> &idxMagList, Facette::Fac &f)
+    bool isInMagList(std::vector<int> &idxMagList, Facette::Fac &f) const
         {
         auto it = std::find_if(idxMagList.begin(),idxMagList.end(),
                                [this,&f](int idx) { return (fac[idx] == f); });

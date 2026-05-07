@@ -48,7 +48,7 @@ double mesh::thiele(const int region /** region index, or -1 for all magnetic re
     }
 
 
-double mesh::avg(std::function<double(Nodes::Node, Nodes::index)> getter /**< [in] */,
+double mesh::avg(const std::function<double(Nodes::Node, Nodes::index)>& getter /**< [in] */,
                  Nodes::index d /**< [in] */,
                  int region /**< region index, or -1 for all magnetic regions */) const
     {
@@ -68,7 +68,7 @@ double mesh::avg(std::function<double(Nodes::Node, Nodes::index)> getter /**< [i
     }
 
 double mesh::doOnNodes(const double init_val, const Nodes::index coord,
-                     std::function<bool(double, double)> whatToDo) const
+                     const std::function<bool(double, double)>& whatToDo) const
     {
     double result(init_val);
     std::for_each(node.begin(), node.end(),
@@ -100,7 +100,7 @@ void mesh::indexReorder()
     std::for_each(fac.begin(), fac.end(), [this, &sf](Facette::Fac &fa)
                   {
                   int i0 = fa.ind[0], i1 = fa.ind[1], i2 = fa.ind[2];
-                  std::set<Facette::Fac>::iterator it = sf.end();
+                  auto it = sf.end();
                   for (int perm = 0; perm < 2; perm++)
                       {
                       for (int nrot = 0; nrot < 3; nrot++)
@@ -167,7 +167,107 @@ void mesh::sortNodes(Nodes::index long_axis)
                   });
     }
 
-double mesh::surface(std::vector<int> &facIndices)
+void mesh::checkFacettes() const 
+    {
+    std::vector<Facette::Fac> allFacCtnr;
+    std::vector<std::pair<int, bool>> twoTetFacCtnr;    // Bool: if the facettes are 
+                                                        // in the same region or not. 
+    const int tetraN = 4;
+
+    // Put all facettes into allFacCtnr
+    std::for_each(tet.begin(), tet.end(),   // For each tetrahedron
+            [this, &allFacCtnr, &twoTetFacCtnr](const Tetra::Tet &tetrahedron) 
+            {
+            for (int i = 0; i < tetraN; i++)  // For each 4 facettes
+                {   
+                Facette::Fac curFac(node, 0, tetrahedron.idxPrm, {tetrahedron.ind[i], 
+                                 tetrahedron.ind[(i + 1) % tetraN], 
+                                 tetrahedron.ind[(i + 2) % tetraN]});
+
+                // Search for an equal facette, insert at the end if not found.
+                int j = 0;
+                while (j < allFacCtnr.size() && !(allFacCtnr[j] == curFac))
+                    { j++; }
+                if (j == allFacCtnr.size())
+                    { allFacCtnr.push_back(curFac); } 
+                else 
+                    {   // If an equal facette is found
+                    int k = 0;
+                    while (k < twoTetFacCtnr.size() && twoTetFacCtnr[k].first != j)
+                        { k++; }
+
+                    if (k < twoTetFacCtnr.size())
+                        {   // If one facette belongs to 3 tetrahedrons, throws an error
+                        std::cout << "Error : wrong mesh generation";
+                        exit(1);
+                        }
+                    else
+                        {   // If only 2 tetrahedrons, updates twoTetFacCtnr
+                        twoTetFacCtnr.push_back({j, (curFac.idxPrm == allFacCtnr[j].idxPrm)});
+                        }
+                    }
+                }          
+            });
+    
+    std::sort(twoTetFacCtnr.begin(), twoTetFacCtnr.end());
+    
+    int j = 0;
+    for (int i = 0; i < allFacCtnr.size(); i++)
+        {   // For each facette
+        if (j < twoTetFacCtnr.size() && i == twoTetFacCtnr[j].first && twoTetFacCtnr[j].second)
+            {   // If the current one belongs to two tetrahedrons of the same region
+            int k = 0;
+            while (k < fac.size() && !(fac[k] == allFacCtnr[i]))
+                { k++; }
+            if (k < fac.size())
+                {
+                std::cout << "Error : an internal facette belonging "
+                                "to a surface region has been found";
+                exit(1);
+                }
+            j++;
+            }
+        else if (j < twoTetFacCtnr.size() && i == twoTetFacCtnr[j].first && !twoTetFacCtnr[j].second)
+            {   // If the current one belongs to two tetrahedrons of differents regions
+            int k = 0;
+            while (k < fac.size() && !(fac[k] == allFacCtnr[i]))
+                { k++; }
+            if (k < fac.size())
+                {   // Looking for a second identical facette
+                k++;
+                while (k < fac.size() && !(fac[k] == allFacCtnr[i]))
+                    { k++; }
+                if (k < fac.size())
+                    {
+                    std::cout << "Error : an interface facette belonging "
+                                    "to multiple surface regions has been found";
+                    exit(1);
+                    }
+                }
+            j++;
+            }
+        else
+            {   // If the current one belongs to only one tetrahedron
+            int k = 0;
+            while (k < fac.size() && !(fac[k] == allFacCtnr[i]))
+                { k++; }
+            if (k < fac.size())
+                {   // Looking for a second identical facette
+                k++;
+                while (k < fac.size() && !(fac[k] == allFacCtnr[i]))
+                    { k++; }
+                if (k < fac.size())
+                    {
+                    std::cout << "Error : an surface facette belonging "
+                                    "to multiple surface regions has been found";
+                    exit(1);
+                    }
+                }
+            }
+        }
+    }
+
+double mesh::surface(std::vector<int> &facIndices) const
     {
     double S(0);
     std::for_each(facIndices.begin(),facIndices.end(),[this,&S](int idx)
@@ -190,3 +290,56 @@ void mesh::setExtSpaceField(Settings &s /**< [in] */)
         k++;
         });
     }
+
+void mesh::init_distrib(Settings const &mySets)
+{
+    for (int nodeIdx = 0; nodeIdx < int(node.size()); ++nodeIdx)
+        {
+        Nodes::Node &n = node[nodeIdx];
+        n.d[Nodes::NEXT].phi = 0.;
+        n.d[Nodes::NEXT].phiv = 0.;
+        // A non-magnetic node's magnetization is a vector of NAN.
+        if (!magNode[nodeIdx])
+            {
+            n.d[Nodes::CURRENT].u = Eigen::Vector3d(NAN, NAN, NAN);
+            n.d[Nodes::NEXT].u = n.d[Nodes::CURRENT].u;
+            continue;
+            }
+        // If the initial magnetization depends only on the node position, we do not need to
+        // build the list of region names.
+        if (mySets.getMagType() == POSITION_ONLY)
+            {
+            n.d[Nodes::CURRENT].u = mySets.getMagnetization(n.p);
+            n.d[Nodes::NEXT].u = n.d[Nodes::CURRENT].u;
+            continue;
+            }
+        // Get the list of region indices this node belongs to.
+        std::set<int> nodeRegions;
+        // skip region 0 (__default__) which should be empty
+        for (size_t regIdx = 1; regIdx < volumeRegions.size(); ++regIdx)
+            {
+            const std::vector<int> &regionTetras = volumeRegions[regIdx];
+            bool node_in_region = std::any_of(EXEC_POL,
+                regionTetras.begin(), regionTetras.end(),
+                [this, nodeIdx](int tetIdx)
+                {
+                const Tetra::Tet &tetrahedron = tet[tetIdx];
+                for (int i = 0; i < Tetra::N; ++i) // node of tetrahedron tetIdx
+                    {
+                    if (tetrahedron.ind[i] == nodeIdx)
+                        { return true; }
+                    }
+                return false;
+                });
+            if (node_in_region)
+                { nodeRegions.insert(regIdx); }
+            }
+        // Get the list of region names this node belongs to.
+        std::vector<std::string> region_names;
+        region_names.resize(nodeRegions.size());
+        std::transform(nodeRegions.begin(), nodeRegions.end(), region_names.begin(),
+            [this](int regIdx){ return paramTetra[regIdx].regName; });
+        n.d[Nodes::CURRENT].u = mySets.getMagnetization(n.p, region_names);
+        n.d[Nodes::NEXT].u = n.d[Nodes::CURRENT].u;
+        }
+}
