@@ -59,6 +59,7 @@ outputs:
   # - Hx: applied field along x
   # - Hy: applied field along y
   # - Hz: applied field along z
+  # - Thiele_length: Thiele length along (Oz)
   evol_columns:
     - t         # time
     - <Mx>      # Average value of Mx

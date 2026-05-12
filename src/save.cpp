@@ -99,6 +99,10 @@ void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const i
             {
             fout << msh.avg(Nodes::get_v_comp, IDX_Z, region) << sep;
             }
+        else if (keyVal == "Thiele_length")
+            {
+            fout << msh.thiele(region) << sep;
+            }
         else if (keyVal == "E_ex")
             {
             fout << E[EXCHANGE] << sep;

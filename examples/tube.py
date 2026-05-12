@@ -16,7 +16,7 @@ settings = {
         "file_basename": "tube",
         "evol_time_step": 1e-12,
         "final_time": 1e-9,
-        "evol_columns": [ "t", "<Mx>", "<My>", "<Mz>", "E_tot" ],
+        "evol_columns": [ "t", "<Mx>", "<My>", "<Mz>", "E_tot", "Thiele_length" ],
         "mag_config_every": 200
     },
     "mesh": {
