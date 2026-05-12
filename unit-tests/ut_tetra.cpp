@@ -102,6 +102,12 @@ BOOST_AUTO_TEST_CASE(Tet_inner_tables, *boost::unit_test::tolerance(UT_TOL))
 
 BOOST_AUTO_TEST_CASE(Tet_calc_vol, *boost::unit_test::tolerance(UT_TOL))
     {
+    /*
+     *This test computes the volume of the tetrahedron from geometrical definition, the mixt product
+     V = p0p1.p0p2*p0p3/6
+     and from sum_NPI(weight)
+     If the tetrahedron orientation is positive then V = sum_NPI(weight) and is positive
+     * */
     const int nbNod = 4;
     std::vector<Nodes::Node> node;
     dummyNodes<nbNod>(node);
@@ -113,6 +119,7 @@ BOOST_AUTO_TEST_CASE(Tet_calc_vol, *boost::unit_test::tolerance(UT_TOL))
     double vol = t.calc_vol();
     std::cout << "vol(tetra) =" << vol << std::endl;
     BOOST_TEST(vol == result);
+    BOOST_TEST(t.weight.sum() == result);
     }
 
 BOOST_AUTO_TEST_CASE(Tet_nod_interpolation, *boost::unit_test::tolerance(UT_TOL))

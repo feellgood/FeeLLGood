@@ -33,17 +33,10 @@ double mesh::thiele(const int region /** region index, or -1 for all magnetic re
                     }
                 return val;
                 });
-    
-    double volume_u(0.0);
-    // to check: that sum seems to be the volume of the region, if so we should not recompute it 
-    std::for_each(EXEC_POL,magTet.begin(),magTet.end(),
-            [this,&volume_u,region](const int idxElem)
-                {
-                Tetra::Tet const &te = tet[idxElem];
-                if((te.idxPrm == region) || (region == -1))
-                    { volume_u += te.weight.sum(); }
-                });
-    double cross_section = volume_u/l.z();//average cross-section
+    double volume(totalMagVol);
+    if (region != -1)
+        { volume = paramTetra[region].volume; }
+    double cross_section = volume/l.z();//average cross-section
     return 2.0*cross_section/sum;
     }
 
