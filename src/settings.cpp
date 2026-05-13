@@ -389,7 +389,7 @@ void Settings::read(YAML::Node yaml)
         if (volumes && !volumes.IsNull())
             {
             if (!volumes.IsMap()) error("mesh.volume_regions should be a map.");
-            int default_idx = findTetraRegionIdx("__default__");
+            int default_idx = findRegionIdx<Tetra::prm>("__default__");
             for (auto it = volumes.begin(); it != volumes.end(); ++it)
                 {
                 bool has_Ms = false, has_Js = false;  // whether Ms and/or Js are defined
@@ -429,7 +429,7 @@ void Settings::read(YAML::Node yaml)
         if (surfaces && !surfaces.IsNull())
             {
             if (!surfaces.IsMap()) error("mesh.surface_regions should be a map.");
-            int default_idx = findFacetteRegionIdx("__default__");
+            int default_idx = findRegionIdx<Facette::prm>("__default__");
             for (auto it = surfaces.begin(); it != surfaces.end(); ++it)
                 {
                 std::string name = it->first.as<std::string>();

@@ -210,24 +210,29 @@ public:
     /** this vector contains the material parameters for all regions for all the tetrahedrons */
     std::vector<Tetra::prm> paramTetra;
 
-    /** \return index of the region in volume region container  */
-    inline int findTetraRegionIdx(const std::string &name /**< [in] */) const
+    /** \return index of the region in the corresponding container,
+     either paramTetra or paramFacette
+     T has to be Tetra::prm or Facette:prm
+     * */
+    template <typename T>
+    int findRegionIdx(const std::string &name /**< [in] region name to find */) const
         {
-        std::vector<Tetra::prm>::const_iterator result =
-                std::find_if(paramTetra.begin(), paramTetra.end(),
-                             [name](Tetra::prm const &p) { return (p.regName == name); });
+        typename std::vector<T>::const_iterator containerBegin, containerEnd;
+        if constexpr (std::is_same_v<T,Tetra::prm>)
+            { containerBegin = paramTetra.begin(); containerEnd = paramTetra.end(); }
+        else if constexpr (std::is_same_v<T,Facette::prm>)
+            { containerBegin = paramFacette.begin(); containerEnd = paramFacette.end(); }
 
+        typename std::vector<T>::const_iterator result = std::find_if(
+                containerBegin, containerEnd,
+                [name] (T const &p) { return (p.regName == name);} );
         int idx(-2);
-        if (result == paramTetra.end())
-            {
-            idx = -1;
-            }
+        if (result == containerEnd)
+            { idx = -1; }
         else
-            {
-            idx = std::distance(paramTetra.begin(), result);
-            }
+            { idx = std::distance(containerBegin, result); }
         return idx;
-        };
+        }
 
     /** this vector contains the material parameters for all regions for all the facettes */
     std::vector<Facette::prm> paramFacette;
@@ -246,25 +251,6 @@ public:
 
     /** maximal time step */
     double dt_max;
-
-    /** \return index of the region in surface region container  */
-    inline int findFacetteRegionIdx(const std::string name /**< [in] */) const
-        {
-        std::vector<Facette::prm>::const_iterator result =
-                std::find_if(paramFacette.begin(), paramFacette.end(),
-                             [name](Facette::prm const &p) { return (p.regName == name); });
-        int idx(-2);
-
-        if (result == paramFacette.end())
-            {
-            idx = -1;
-            }
-        else
-            {
-            idx = std::distance(paramFacette.begin(), result);
-            }
-        return idx;
-        };
 
     /** Returns the initial magnetization type, which can be either `POSITION_ONLY` (depends only
      * on the position) or `POSITION_AND_REGIONS` (depends on the position and volume regions).

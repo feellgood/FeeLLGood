@@ -35,7 +35,7 @@ void Fem::saver(Settings &settings, timing const &t_prm, ofstream &fout, const i
         if (colon_pos != std::string::npos)
             {
             std::string region_name = col_name.substr(0, colon_pos);
-            region = settings.findTetraRegionIdx(region_name);
+            region = settings.findRegionIdx<Tetra::prm>(region_name);
             if (region == -1)
                 {
                 std::cerr << "Error: no region named '" << region_name << "'\n";

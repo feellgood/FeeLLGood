@@ -117,7 +117,7 @@ void mesh::readTetraedrons(Settings const &mySets /**< [in] */)
                             p.first, p.second);
                     if (all_elems_are<TYP_ELEM_TETRAEDRON>(elemTypes))
                         { // all elements are tetrahedrons
-                        int idx = mySets.findTetraRegionIdx(n);
+                        int idx = mySets.findRegionIdx<Tetra::prm>(n);
                         for(unsigned int i=0;i<elemNodeTags[0].size();i+=SIZE_TETRAEDRON)
                             {
                             int i0 = elemNodeTags[0][i];
@@ -171,7 +171,7 @@ void mesh::readTriangles(Settings const &mySets /**< [in] */)
                             p.first, p.second);
                     if (all_elems_are<TYP_ELEM_TRIANGLE>(elemTypes))
                         { // all elements are triangles
-                        int idx = mySets.findFacetteRegionIdx(n);
+                        int idx = mySets.findRegionIdx<Facette::prm>(n);
                         const int nbNod = node.size();
                         for(unsigned int i=0;i<elemNodeTags[0].size();i+=SIZE_TRIANGLE)
                             {
