@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(Tet_inner_tables, *boost::unit_test::tolerance(UT_TOL))
 BOOST_AUTO_TEST_CASE(Tet_calc_vol, *boost::unit_test::tolerance(UT_TOL))
     {
     /*
-     *This test computes the volume of the tetrahedron from geometrical definition, the mixt product
+     *This test computes the volume of the tetrahedron from geometrical definition, the mixed product
      V = p0p1.p0p2*p0p3/6
      and from sum_NPI(weight)
      If the tetrahedron orientation is positive then V = sum_NPI(weight) and is positive

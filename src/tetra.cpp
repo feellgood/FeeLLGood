@@ -411,14 +411,14 @@ void Tet::orientate(void)
     Eigen::Vector3d p0p1 = getNode(1).p - getNode(0).p;
     Eigen::Vector3d p0p2 = getNode(2).p - getNode(0).p;
     Eigen::Vector3d p0p3 = getNode(3).p - getNode(0).p;
-    const double mixt_prod = p0p1.dot(p0p2.cross(p0p3));
-    if ( fabs(mixt_prod) < Tetra::epsilon )
+    const double mixed_prod = p0p1.dot(p0p2.cross(p0p3));
+    if ( fabs(mixed_prod) < Tetra::epsilon )
         {
-        std::cerr << "Singular tetrahedron: mixt product= " << mixt_prod << std::endl;
+        std::cerr << "Singular tetrahedron: mixed product= " << mixed_prod << std::endl;
         element::infos();
         SYSTEM_ERROR;
         }
-    else if ( mixt_prod < 0.0)
+    else if ( mixed_prod < 0.0)
         { std::swap(ind[2], ind[3]); }
     }
 
