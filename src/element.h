@@ -40,7 +40,8 @@ class element
             { ind.assign(_i); }
         else
             {
-            std::cout<<"Warning: element constructor is given an init list with size() != N\n";
+            std::cerr<<"Warning: element constructor is given an init list with size() != N\n";
+            SYSTEM_ERROR;
             }
         Kp.setZero();
         Lp.setZero();
@@ -109,12 +110,24 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
     virtual Eigen::Matrix<double,NPI,1> charges(const double &Ms_or_dMs,
             std::function<Eigen::Vector3d(const Nodes::Node&)> getter) const = 0;
 
+   /** returns true if all mesh node indices in ind are referring to existing nodes in refNode.
+    * It does not test if two indices are equal, so this function does not detect degenerated
+    * element
+    * */
+    inline bool existNodes(void) const
+        {
+        bool isValid(true);
+        for(unsigned int i=0; i<N; i++)
+            {
+            isValid = (isValid && (-1 < ind[i]));
+            isValid = (isValid && (ind[i] < ((int) refNode.size()) )); //ugly
+            }
+        return isValid;
+        }
+
     protected:
         /** returns reference to node at ind[i] from mesh node vector */
         inline const Nodes::Node & getNode(const int i) const { return refNode[ind[i]]; }
-
-        /** returns true if mesh node vector is not empty */
-        inline bool existNodes(void) const { return (refNode.size() > 0); }
 
         /** zeroBasing: index convention Matlab/msh (one based) -> C++ (zero based) */
         inline void zeroBasing(void)
