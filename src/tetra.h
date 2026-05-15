@@ -156,13 +156,13 @@ public:
 
         if (existNodes())
             {
-            orientate();
+            orientate(); // if tetrahedron orientation is negative orientate() swap two
+                         // node indices to turn it positive
 
             Eigen::Matrix3d J;
-            // we have to rebuild the jacobian in case of ill oriented tetrahedron
             double detJ = Jacobian(J);
 
-            if (fabs(detJ) < Tetra::epsilon)
+            if (fabs(detJ) < Tetra::epsilon) // fabs should be useless here
                 {
                 std::cerr << "Singular jacobian in tetrahedron: |det(J)|= "
                         << fabs(detJ) << std::endl;
@@ -349,7 +349,7 @@ public:
     /** \return \f$ |J| \f$ build Jacobian \f$ J \f$ */
     double Jacobian(Eigen::Ref<Eigen::Matrix3d> J);
 
-    /** computes volume of the tetrahedron ; unit test Tet_calc_vol */
+    /** returns volume of the tetrahedron ; unit test Tet_calc_vol */
     double calc_vol(void) const;
 
     /** idx is the index of the tetrahedron in the vector of tetrahedron */
@@ -370,13 +370,8 @@ public:
         }
 
 private:
-    /** orientation redefined through index swaping if needed */
-    void orientate(void)
-        {
-        if (calc_vol() < 0.0)
-                std::swap(ind[2], ind[3]);
-        }
-
+    /** orientation redefined through node index swaping if needed */
+    void orientate(void);
     };  // end class Tetra
 
     /** to perform some second order corrections, an effective \f$ \alpha \f$ is computed here with

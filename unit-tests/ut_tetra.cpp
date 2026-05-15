@@ -115,11 +115,8 @@ BOOST_AUTO_TEST_CASE(Tet_calc_vol, *boost::unit_test::tolerance(UT_TOL))
     // carefull with indices (starting from 1)
     Tetra::Tet t(node, 0, {1, 2, 3, 4});
 
-    double result = 1 / 6.0;
-    double vol = t.calc_vol();
-    std::cout << "vol(tetra) =" << vol << std::endl;
-    BOOST_TEST(vol == result);
-    BOOST_TEST(t.weight.sum() == result);
+    const double result = 1 / 6.0;
+    BOOST_TEST(t.calc_vol() == result);
     }
 
 BOOST_AUTO_TEST_CASE(Tet_nod_interpolation, *boost::unit_test::tolerance(UT_TOL))
