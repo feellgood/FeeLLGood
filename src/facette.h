@@ -108,9 +108,12 @@ with the mesh
 class Fac : public element<N,NPI>
     {
 public:
-    /** constructor used by readMesh */
+    /** constructor used by readMesh
+     Warning: mesh::indexReorder method call it with both _NOD = 0 and _p_node.size() > 0
+     TODO: get rid of _NOD and rewrite mesh::indexReorder
+     * */
     inline Fac(const std::vector<Nodes::Node> &_p_node /**< [in] vector of nodes */,
-               const int _NOD /**< [in] nb nodes */,
+               const int _NOD /**< [in] it is equal to _p_node.size() except if _NOD == 0 */,
                const int _idx /**< [in] region index in region vector */,
                std::initializer_list<int> _i /**< [in] node index */)
         : element<N,NPI>(_p_node,_idx,_i),dMs(0)
