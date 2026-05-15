@@ -161,14 +161,6 @@ public:
 
             Eigen::Matrix3d J;
             double detJ = Jacobian(J);
-
-            if (fabs(detJ) < Tetra::epsilon) // fabs should be useless here
-                {
-                std::cerr << "Singular jacobian in tetrahedron: |det(J)|= "
-                        << fabs(detJ) << std::endl;
-                element::infos();
-                SYSTEM_ERROR;
-                }
             Eigen::Matrix<double,N,Nodes::DIM> dadu; // Shape function derivatives
                                                      // (constant for linear tetrahedron)
             dadu << -1., -1., -1., 1., 0., 0., 0., 1., 0., 0., 0., 1.;

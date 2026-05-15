@@ -124,7 +124,7 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
         /** vector of nodes */
         const std::vector<Nodes::Node> & refNode;
 
-        /** a method to orientate the element */
+        /** a method to orientate the element. It should also call exit if element is degenerated */
         virtual void orientate() = 0;
     };
 #endif
