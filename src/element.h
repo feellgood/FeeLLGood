@@ -116,13 +116,12 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
     * */
     inline bool existNodes(void) const
         {
-        bool isValid(true);
         for(unsigned int i=0; i<N; i++)
             {
-            isValid = (isValid && (-1 < ind[i]));
-            isValid = (isValid && (ind[i] < ((int) refNode.size()) )); //ugly
+            if (ind[i] < 0 || ind[i] >= int(refNode.size()))
+                return false;
             }
-        return isValid;
+        return true;
         }
 
     protected:
