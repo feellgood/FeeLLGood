@@ -58,13 +58,17 @@ BOOST_AUTO_TEST_CASE(Tet_constructor)
 
 BOOST_AUTO_TEST_CASE(Tet_existNodes)
     {
-    std::cout << "constructor test with empty node vector\n";
+    std::cout << "test Tetra::Tet::existNodes()\n";
     const int nbNod = 4;
     std::vector<Nodes::Node> node;
     dummyNodes<nbNod>(node);
 
-    Tetra::Tet tet(node, idxPrmToTest, {1,2,3,4});
-    BOOST_CHECK(tet.existNodes());
+    Tetra::Tet tet_good(node, idxPrmToTest, {1,2,3,4});
+    Tetra::Tet tet_bad1(node, idxPrmToTest, {0,1,2,3});
+    Tetra::Tet tet_bad2(node, idxPrmToTest, {2,3,4,5});
+    BOOST_CHECK(tet_good.existNodes());
+    BOOST_CHECK(!tet_bad1.existNodes());
+    BOOST_CHECK(!tet_bad2.existNodes());
     }
 
 BOOST_AUTO_TEST_SUITE_END()
