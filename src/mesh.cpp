@@ -4,6 +4,46 @@
 
 using namespace Mesh;
 
+/** \class BasicTri
+BasicTri is a simplified version of the class Fac which contains only
+the nodes, the surface region and the region.
+It is used when checking the validity of the mesh is needed but
+not all the facet elements are needed.
+*/
+class BasicTri
+    {
+public:
+    /** Constructor using the indices vector and the region. sRegion is false by default.
+     * The nodes are sorted because it makes it easier to compare two BasicTri.
+    */
+    BasicTri(const std::vector<int> &inds, const int idReg, const bool surface = false)
+        : nodesInd({inds[0], inds[1], inds[2]}), idRegion(idReg), isSurfaceElement(surface)
+        { std::sort(nodesInd.begin(), nodesInd.end()); }
+
+    /** Constructor used to copy a surface region facette */
+    explicit BasicTri(const Facette::Fac & fac)
+        : BasicTri(fac.ind, fac.idxPrm, true)
+        {}
+
+    /** Compare the nodes indice lexicographically */
+    bool operator<(const BasicTri & o) const
+        { return this->nodesInd < o.nodesInd; }
+
+    /** Returns true if all the nodes of the same indices are the same */
+    bool operator==(const BasicTri & o) const
+        { return this->nodesInd == o.nodesInd; }
+
+    /** The 3 node indices composing the triangle */
+    std::array<int,3> nodesInd;
+
+    /** index of the region of the triangle */
+    int idRegion;
+
+    /** If the triangle is in a surface region */
+    bool isSurfaceElement;
+
+    }; // class BasicTri
+
 void mesh::infos(void) const
     {
     std::cout << "mesh:\n";
