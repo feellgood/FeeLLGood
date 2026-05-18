@@ -160,10 +160,10 @@ void mesh::readTriangles(Settings const &mySets /**< [in] */)
             {
             for(auto physTag : physicalTags)
                 {
-                std::string n;
-                gmsh::model::getPhysicalName(p.first, physTag, n);
+                std::string name;
+                gmsh::model::getPhysicalName(p.first, physTag, name);
                 if ( std::any_of(mySets.paramFacette.begin(),mySets.paramFacette.end(),
-                     [&n] (Facette::prm const &p) { return p.regName == n; } ) )
+                     [&name] (Facette::prm const &p) { return p.regName == name; } ) )
                     { //named surface region is found
                     std::vector<int> elemTypes;
                     std::vector<std::vector<std::size_t> > elemTags, elemNodeTags;
@@ -171,7 +171,7 @@ void mesh::readTriangles(Settings const &mySets /**< [in] */)
                             p.first, p.second);
                     if (all_elems_are<TYP_ELEM_TRIANGLE>(elemTypes))
                         { // all elements are triangles
-                        int idx = mySets.findRegionIdx<Facette::prm>(n);
+                        int idx = mySets.findRegionIdx<Facette::prm>(name);
                         const int nbNod = node.size();
                         for(unsigned int i=0;i<elemNodeTags[0].size();i+=SIZE_TRIANGLE)
                             {

@@ -177,7 +177,7 @@ public:
         }
 
     /** make_evol on i^th node */
-    inline void updateNode(int i, double vp, double vq, const double dt)
+    inline void updateNode(const int i, const double vp, const double vq, const double dt)
         { node[i].make_evol(vp*gamma0, vq*gamma0, dt); }
 
     /** call evolution for all the nodes */
@@ -199,7 +199,7 @@ public:
     /** total magnetic volume of the mesh */
     double totalMagVol;
 
-    /** face container */
+    /** face container. Contains only those on a surface region. */
     std::vector<Facette::Fac> fac;
 
     /** tetrahedron container */
@@ -285,7 +285,7 @@ public:
     /**
     average component of either u or v through getter on the whole set of tetetrahedron
     */
-    double avg(std::function<double(Nodes::Node, Nodes::index)> getter /**< [in] */,
+    double avg(const std::function<double(Nodes::Node, Nodes::index)>& getter /**< [in] */,
                Nodes::index d /**< [in] */,
                int region = -1 /**< region index, or -1 for all magnetic regions */) const;
 
@@ -294,7 +294,7 @@ public:
         {
         double min_dot_product = std::transform_reduce(EXEC_POL, edges.begin(), edges.end(), 1.0,
                 [](double a, double b){ return std::min(a, b); },
-                [this](const Edge edge)
+                [this](const Edge &edge)
                     {
                     Eigen::Vector3d m1 = getNode_u(edge.first);
                     Eigen::Vector3d m2 = getNode_u(edge.second);
@@ -318,7 +318,7 @@ public:
     /** setter for node[i]; what_to_set will fix what is the part of the node struct to set (usefull
      * for fmm_demag.h) */
     inline void set(const int i /**< [in] */,
-                    std::function<void(Nodes::Node &, const double)> what_to_set /**< [in] */,
+                    const std::function<void(Nodes::Node &, const double)>& what_to_set /**< [in] */,
                     const double val /**< [in] */)
         { what_to_set(node[i], val); }
 
@@ -326,7 +326,7 @@ public:
     inline int getNodeIndex(const int i) const { return node_index[i]; }
 
     /** return true if this tetraedron is magnetic */
-    inline bool isMagnetic(const Tetra::Tet &t) { return (paramTetra[t.idxPrm].Ms > 0); }
+    inline bool isMagnetic(const Tetra::Tet &t) const { return (paramTetra[t.idxPrm].Ms > 0); }
 
     /** return true if this facet is magnetic */
     inline bool isMagnetic(const Facette::Fac &f)
@@ -387,7 +387,7 @@ private:
     /** loop on nodes to apply predicate 'whatTodo'  */
     double doOnNodes(const double init_val /**< [in] */,
                      const Nodes::index coord /**< [in] */,
-                     std::function<bool(double, double)> whatToDo /**< [in] */) const;
+                     const std::function<bool(double, double)>& whatToDo /**< [in] */) const;
 
     /** return the minimum of all nodes coordinate along coord axis */
     inline double minNodes(const Nodes::index coord /**< [in] */) const
@@ -398,7 +398,8 @@ private:
     /** return the maximum of all nodes coordinate along coord axis */
     inline double maxNodes(const Nodes::index coord /**< [in] */) const
         {
-        return doOnNodes(__DBL_MIN__, coord, [](double a, double b) { return a > b; });
+        return doOnNodes(__DBL_MIN__, coord, [](const double a, const double b)
+                        { return a > b; });
         }
 
     /** redefine orientation of triangular faces in accordance with the tetrahedron
@@ -433,11 +434,11 @@ private:
     /** returns the surface defined by the set of facets of indices in facIndices
      * each elementary surface triangle defined by points p0,p1,p2 is computed using
      * norm(cross(p0p1,p0p2))/2, it is always positive  */
-    double surface(std::vector<int> &facIndices);
+    double surface(std::vector<int> &facIndices) const;
 
     /**return true if facette f is already indexed in the list idxMagList.
      * Uses operator== for Fac. */
-    bool isInMagList(std::vector<int> &idxMagList, Facette::Fac &f)
+    bool isInMagList(std::vector<int> &idxMagList, Facette::Fac &f) const
         {
         auto it = std::find_if(idxMagList.begin(),idxMagList.end(),
                                [this,&f](int idx) { return (fac[idx] == f); });

@@ -15,7 +15,7 @@
 // Catch some deadly signals in order to save the state before quitting.
 volatile sig_atomic_t received_signal = 0;
 
-static void signal_handler(int signal_number) { received_signal = signal_number; }
+static void signal_handler(const int signal_number) { received_signal = signal_number; }
 
 // Get an environment variable.
 // Returns an empty string if the variable is unset or empty.
@@ -34,7 +34,7 @@ static std::string get_user_defaults_filename()
     }
 
 // Create the output directory if it does not exist yet.
-static void create_dir_if_needed(std::string dirname)
+static void create_dir_if_needed(const std::string& dirname)
     {
     const char *name = dirname.c_str();
     struct stat statbuf;

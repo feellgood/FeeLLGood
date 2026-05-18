@@ -16,8 +16,7 @@ void electrostatSolver::checkBoundaryConditions(void) const
         if (std::isfinite(p.jn)) nbSurfJ++;
         if (std::isfinite(p.V)) nbSurfV++;
         });
-    bool result = ((nbSurfJ == 1)&&(nbSurfV == 1));
-    if (!result)
+    if (!(nbSurfJ == 1 && nbSurfV == 1))
         {
         std::cout << "Error: incorrect boundary conditions for potential V solver.\n";
         exit(1);
@@ -26,7 +25,7 @@ void electrostatSolver::checkBoundaryConditions(void) const
         { std::cout << " electrostatic problem boundary conditions Ok.\n"; }
     }
 
-void electrostatSolver::infos(void)
+void electrostatSolver::infos(void) const
     {
     std::cout << "Boundary conditions:\n";
     std::for_each(paramFac.begin(),paramFac.end(),[](const Facette::prm &p)
@@ -37,7 +36,7 @@ void electrostatSolver::infos(void)
     }
 
 void electrostatSolver::integrales(Tetra::Tet const &tet,
-        Eigen::Ref<Eigen::Matrix<double,Tetra::N,Tetra::N> > AE)
+        Eigen::Ref<Eigen::Matrix<double,Tetra::N,Tetra::N> > AE) const
     {
     const double sigma = getSigma(tet);
     for (int npi = 0; npi < Tetra::NPI; npi++)
@@ -61,7 +60,7 @@ void electrostatSolver::integrales(Tetra::Tet const &tet,
         }
     }
 
-void electrostatSolver::integrales(Facette::Fac const &fac, std::vector<double> &BE)
+void electrostatSolver::integrales(Facette::Fac const &fac, std::vector<double> &BE) const
     {
     double J_bc = getCurrentDensity(fac);// _bc for Boundary Condition
     for (int npi = 0; npi < Facette::NPI; npi++)
@@ -72,7 +71,7 @@ void electrostatSolver::integrales(Facette::Fac const &fac, std::vector<double> 
         }
     }
 
-void electrostatSolver::compute(const bool verbose, const std::string V_fileName)
+void electrostatSolver::compute(const bool verbose, const std::string& V_fileName)
     {
     bool has_converged = solve();
     if (verbose)
@@ -112,7 +111,7 @@ bool electrostatSolver::solve(void)
     std::vector<int> ld; // vector of the Dirichlet Nodes
     std::vector<double> Vd(NOD); // potential values on Dirichlet nodes, zero on the others
 
-    std::for_each(msh->fac.begin(),msh->fac.end(),[this,&Vd,&ld](Facette::Fac &fac)
+    std::for_each(msh->fac.begin(),msh->fac.end(),[this,&Vd,&ld](const Facette::Fac &fac)
         {
         double _V = paramFac[fac.idxPrm].V;
         if (!std::isnan(_V))
@@ -132,7 +131,7 @@ bool electrostatSolver::solve(void)
     return ( iter.status == algebra::CONVERGED);
     }
 
-bool electrostatSolver::save(const std::string V_fileName, std::string const &metadata) const
+bool electrostatSolver::save(const std::string& V_fileName, std::string const &metadata) const
     {
     std::ofstream fout(V_fileName, std::ios::out);
     if (fout.fail())
