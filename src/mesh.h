@@ -118,6 +118,7 @@ public:
                     }
                 });
 
+        checkTriangles();
         for(unsigned int i=0;i<fac.size();i++)
             {
             if (isMagnetic(fac[i]) && !mySets.paramFacette[fac[i].idxPrm].suppress_charges
@@ -430,6 +431,19 @@ private:
     /** Sort the nodes along the longest axis of the sample. This should reduce the bandwidth of
      * the matrix we will have to solve for. */
     void sortNodes(Nodes::index long_axis /**< [in] */);
+
+    /** Check if each triangle verify one of the three following conditions :
+     *      - Is part of no surface region, but part of 2 tetraedrons of the same volume region
+     *      - Is part of at most one surface region, and 2 tetraedrons of differents volume region
+     *      - Is part of 1 tetraedron and at most one surface region
+     * Throws an error if it finds one which is not in one of those three cases.
+     */
+    void checkTriangles();
+
+    /** Called in checkTriangles. Gives the corresponding error message if a
+     * generation error is detected. */
+    void analyzeTriangle(const int nbTotTri, const int nbSurfReg,
+                         const std::pair<int,int> &pairIdVolRegs, const int idSurfReg);
 
     /** returns the surface defined by the set of facets of indices in facIndices
      * each elementary surface triangle defined by points p0,p1,p2 is computed using
