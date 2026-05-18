@@ -33,7 +33,7 @@ class chronometer
             }
 
         /** stringify number of seconds */
-        std::string convertSeconds(double d)
+        std::string convertSeconds(const double d)
             {
             std::stringstream ss;
             ss << d << " s";
@@ -68,7 +68,7 @@ class chronometer
         template function that measure elapsed time since last call
         */
         template<typename T>
-        std::string measure(const std::string str)
+        std::string measure(const std::string& str)
             {
             start = end;
             end = std::chrono::high_resolution_clock::now();

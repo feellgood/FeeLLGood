@@ -41,7 +41,7 @@ double mesh::thiele(const int region /** region index, or -1 for all magnetic re
     }
 
 
-double mesh::avg(std::function<double(Nodes::Node, Nodes::index)> getter /**< [in] */,
+double mesh::avg(const std::function<double(Nodes::Node, Nodes::index)>& getter /**< [in] */,
                  Nodes::index d /**< [in] */,
                  int region /**< region index, or -1 for all magnetic regions */) const
     {
@@ -61,7 +61,7 @@ double mesh::avg(std::function<double(Nodes::Node, Nodes::index)> getter /**< [i
     }
 
 double mesh::doOnNodes(const double init_val, const Nodes::index coord,
-                     std::function<bool(double, double)> whatToDo) const
+                     const std::function<bool(double, double)>& whatToDo) const
     {
     double result(init_val);
     std::for_each(node.begin(), node.end(),
@@ -93,7 +93,7 @@ void mesh::indexReorder()
     std::for_each(fac.begin(), fac.end(), [this, &sf](Facette::Fac &fa)
                   {
                   int i0 = fa.ind[0], i1 = fa.ind[1], i2 = fa.ind[2];
-                  std::set<Facette::Fac>::iterator it = sf.end();
+                  auto it = sf.end();
                   for (int perm = 0; perm < 2; perm++)
                       {
                       for (int nrot = 0; nrot < 3; nrot++)
@@ -160,7 +160,7 @@ void mesh::sortNodes(Nodes::index long_axis)
                   });
     }
 
-double mesh::surface(std::vector<int> &facIndices)
+double mesh::surface(std::vector<int> &facIndices) const
     {
     double S(0);
     std::for_each(facIndices.begin(),facIndices.end(),[this,&S](int idx)

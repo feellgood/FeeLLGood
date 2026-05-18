@@ -193,7 +193,7 @@ public:
     /** computes correction on potential*/
     double potential(std::function<Eigen::Vector3d(Nodes::Node)> getter, int i) const;
 
-    /** lexicographic order on indices */
+    /** Compares indices on lexicographic order : ind[0] then ind[1] then ind[2]. */
     inline bool operator<(const Fac &f) const
         {
         return (this->ind[0] < f.ind[0])

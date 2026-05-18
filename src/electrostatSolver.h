@@ -8,14 +8,12 @@
   when spin accumulation computation is involved.
  */
 
-#include <iostream>
-#include <map>
 #include "solver.h"
 #include "config.h"
 #include "algebra/algebra.h"
 
 /** dimensionnality of the electrostatic problem */
-const int DIM_PB_ELEC = 1;
+constexpr int DIM_PB_ELEC = 1;
 
 /** \class electrostatSolver
 this class is containing both data and a solver to compute potential from dirichlet boundary
@@ -41,18 +39,18 @@ public:
     std::vector<double> V;
 
     /** basic informations on boundary conditions */
-    void infos(void);
+    void infos(void) const;
 
     /** compute side problem (electrostatic potential on the nodes) integrales for matrix
      * coefficients,inputs from tet */
-    void integrales(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Tetra::N,Tetra::N> > AE);
+    void integrales(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Tetra::N,Tetra::N> > AE) const;
 
     /** compute integrales for vector coefficients, input from facette */
-    void integrales(Facette::Fac const &fac, std::vector<double> &BE);
+    void integrales(Facette::Fac const &fac, std::vector<double> &BE) const;
 
     /** text file (tsv) writing function for the solution V over all volume regions of the mesh,
      * node indices are zero based */
-    bool save(const std::string V_fileName /**< [in] output file name */,
+    bool save(const std::string& V_fileName /**< [in] output file name */,
             std::string const &metadata /**< [in] */) const;
 
     /** returns sigma of the tetraedron, (conductivity in (Ohm.m)^-1 */
@@ -64,13 +62,13 @@ public:
 
     /** solves the potential and stores result in V, save to text file if needed
      * if verbose set to true, some printing are sent to terminal */
-    void compute(const bool verbose /**< [in] */,
-            const std::string V_fileName /**< [in] output file name for V solution */);
+    void compute(bool verbose /**< [in] */,
+            const std::string& V_fileName /**< [in] output file name for V solution */);
 
     /** check boundary conditions: mesh and settings have to define a single surface
      * with constant current density J (normal componant to the surface) and another single surface
      * with constant potential V */
-    void checkBoundaryConditions(void) const;
+    void checkBoundaryConditions(void) const override;
 
 private:
     /** number of digits in the optional output file */
