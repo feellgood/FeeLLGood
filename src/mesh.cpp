@@ -29,10 +29,6 @@ public:
     bool operator<(const BasicTri & o) const
         { return this->nodesInd < o.nodesInd; }
 
-    /** Returns true if all the nodes of the same indices are the same */
-    bool operator==(const BasicTri & o) const
-        { return this->nodesInd == o.nodesInd; }
-
     /** The 3 node indices composing the triangle */
     std::array<int,3> nodesInd;
 
@@ -163,6 +159,102 @@ void mesh::indexReorder()
                       fa.n = fa.calc_norm(); // update normal vector
                       }                   // end perm
                   });  // end for_each
+    }
+
+void mesh::checkTriangles()
+    {
+    std::vector<BasicTri> allTriCtnr;
+    // Put all triangles into allTriCtnr after doing the conversion
+    std::for_each(tet.begin(), tet.end(),       // For each tetrahedron
+            [this, &allTriCtnr](const Tetra::Tet &tetrahedron)
+            {
+            for (int i = 0; i < Tetra::N; i++)    // For each 4 faces
+                {
+                BasicTri curTri({tetrahedron.ind[i], tetrahedron.ind[(i+1) % Tetra::N],
+                                        tetrahedron.ind[(i+2) % Tetra::N]},
+                                 tetrahedron.idxPrm);
+                allTriCtnr.push_back(curTri);
+                }
+            });
+    std::for_each(fac.begin(), fac.end(), [this, &allTriCtnr](const Facette::Fac &curFac)
+            {   // For each surface element
+            allTriCtnr.push_back(BasicTri(curFac));
+            });
+
+    if (allTriCtnr.empty())
+        {
+        std::cerr << "Error: not a single triangle is present in the mesh\n";
+        exit(1);
+        }
+
+    std::sort(allTriCtnr.begin(), allTriCtnr.end());
+    BasicTri *prevTri = &allTriCtnr[0];
+    std::pair<int,int> pairIdCurVolRegs(-1, -1);
+    int idCurSurfReg = -1;
+    int nbTotTri = 0;
+    int nbSurfReg = 0;
+
+    for (size_t i = 0; i < allTriCtnr.size(); i++)
+        {   // For each triangle
+        if (allTriCtnr[i].nodesInd != prevTri->nodesInd)
+            {   // If the triangle changes
+            analyzeTriangle(nbTotTri, nbSurfReg, pairIdCurVolRegs, idCurSurfReg);
+            nbTotTri = 0;
+            nbSurfReg = 0;
+            idCurSurfReg = -1;
+            pairIdCurVolRegs.first = -1;
+            pairIdCurVolRegs.second = -1;
+            }
+
+        if (allTriCtnr[i].isSurfaceElement)
+            {
+            idCurSurfReg = allTriCtnr[i].idRegion;
+            nbSurfReg++;
+            }
+        else
+            {
+            if (pairIdCurVolRegs.first == -1)
+                { pairIdCurVolRegs.first = allTriCtnr[i].idRegion; }
+            else
+                { pairIdCurVolRegs.second = allTriCtnr[i].idRegion; }
+            }
+        nbTotTri++;
+        prevTri = &allTriCtnr[i];
+        }
+    analyzeTriangle(nbTotTri, nbSurfReg, pairIdCurVolRegs, idCurSurfReg);
+    }
+
+void mesh::analyzeTriangle(const int nbTotTri, const int nbSurfReg,
+                           const std::pair<int,int> &pairIdVolRegs, const int idSurfReg)
+    {
+    if (nbSurfReg > 1)
+        {
+        std::cerr << "Error: wrong mesh generation. A triangle which belongs to "
+                     "multiple surface regions has been found\n";
+        exit(1);
+        }
+    else if (nbSurfReg == nbTotTri)
+        {
+        std::cout << "Error: wrong mesh generation. A triangle which only belongs "
+                     "to 1 surface region has been found\n";
+        exit(1);
+        }
+    else if (nbTotTri > 3 || (nbTotTri == 3 && nbSurfReg == 0))
+        {
+        std::cout << "Error: wrong mesh generation. Three "
+                     "identical triangles have been found\n";
+        if (nbSurfReg == 1)
+            {
+            std::cout << "In surface region " << idSurfReg << "\n";
+            }
+        exit(1);
+        }
+    else if (nbTotTri == 3 && nbSurfReg == 1 && pairIdVolRegs.first == pairIdVolRegs.second)
+        {
+        std::cout << "Error: wrong mesh generation. An internal triangle belonging "
+                     "to the surface region " << idSurfReg << " has been found\n";
+        exit(1);
+        }
     }
 
 void mesh::sortNodes(Nodes::index long_axis)
