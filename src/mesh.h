@@ -3,8 +3,8 @@
 
 /** \file mesh.h
 \brief class mesh, readMesh is expecting a mesh file in gmsh format either text or binary, from
-version 2.2 to the latest 4.1. The mesh has to use only first order tetraedrons and triangular
-facettes, mixed meshes are not allowed.
+version 2.2 to the latest 4.1. The mesh has to use only first order tetraedrons and triangles,
+mixed meshes are not allowed.
 */
 
 #include <cmath>
@@ -14,7 +14,7 @@ facettes, mixed meshes are not allowed.
 #include <execution>
 #pragma GCC diagnostic pop
 
-#include "facette.h"
+#include "triangle.h"
 #include "node.h"
 #include "tetra.h"
 #include "settings.h"
@@ -25,8 +25,8 @@ namespace Mesh
     using Edge = std::pair<int, int>;
 
 /** \class mesh
-class for storing the mesh, including mesh geometry values, containers for the nodes, triangular
-faces and tetrahedrons. nodes data are private. They are accessible only through getter and setter.
+class for storing the mesh, including mesh geometry values, containers for the nodes, triangles
+and tetrahedrons. nodes data are private. They are accessible only through getter and setter.
 */
 class mesh
     {
@@ -119,11 +119,11 @@ public:
                 });
 
         checkTriangles();
-        for(unsigned int i=0;i<fac.size();i++)
+        for(unsigned int i=0;i<tri.size();i++)
             {
-            if (isMagnetic(fac[i]) && !mySets.paramFacette[fac[i].idxPrm].suppress_charges
-                    && !isInMagList(magFac,fac[i]) )
-                { magFac.push_back(i); }
+            if (isMagnetic(tri[i]) && !mySets.paramTriangle[tri[i].idxPrm].suppress_charges
+                    && !isInMagList(magTri,tri[i]) )
+                { magTri.push_back(i); }
             }
 
         if(mySets.getFieldType() == R4toR3)
@@ -139,8 +139,8 @@ public:
     /** return number of nodes  */
     inline int getNbNodes(void) const { return node.size(); }
 
-    /** return number of triangular fac */
-    inline int getNbFacs(void) const { return fac.size(); }
+    /** return number of triangles */
+    inline int getNbTris(void) const { return tri.size(); }
 
     /** return number of tetrahedrons */
     inline int getNbTets(void) const { return tet.size(); }
@@ -200,8 +200,8 @@ public:
     /** total magnetic volume of the mesh */
     double totalMagVol;
 
-    /** face container. Contains only those on a surface region. */
-    std::vector<Facette::Fac> fac;
+    /** triangle container. Contains only those on a surface region. */
+    std::vector<Triangle::Tri> tri;
 
     /** tetrahedron container */
     std::vector<Tetra::Tet> tet;
@@ -329,8 +329,8 @@ public:
     /** return true if this tetraedron is magnetic */
     inline bool isMagnetic(const Tetra::Tet &t) const { return (paramTetra[t.idxPrm].Ms > 0); }
 
-    /** return true if this facet is magnetic */
-    inline bool isMagnetic(const Facette::Fac &f)
+    /** return true if this triangle is magnetic */
+    inline bool isMagnetic(const Triangle::Tri &f)
         { return (magNode[f.ind[0]] && magNode[f.ind[1]] && magNode[f.ind[2]]); }
 
     /** Edges of all the tetrahedrons. Each edge is a sorted pair of indices.
@@ -345,11 +345,11 @@ public:
      /** list of the indices of all magnetic tetrahedrons from all volume regions */
     std::vector<int> magTet;
 
-    /** List of the indices of all surface faces which can hold magnetic charges,
-     * i.e. the faces where:
+    /** List of the indices of all surface triangles which can hold magnetic charges,
+     * i.e. the triangles where:
      *   * all the vertices are magnetic nodes
      *   * the `suppress_charges` flag is unset. */
-    std::vector<int> magFac;
+    std::vector<int> magTri;
 
     /** external applied space field, values on gauss points, size is number of tetraedrons */
     std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > extSpaceField;
@@ -379,7 +379,7 @@ private:
     /** read tetraedrons of the settings volume regions */
     void readTetraedrons(Settings const &mySets /**< [in] */);
 
-    /** read facettes of the settings surface regions */
+    /** read triangles of the settings surface regions */
     void readTriangles(Settings const &mySets /**< [in] */);
 
     /** reading mesh format 2.2 text file function */
@@ -403,8 +403,8 @@ private:
                         { return a > b; });
         }
 
-    /** redefine orientation of triangular faces in accordance with the tetrahedron
-    * reorientation of the tetrahedrons if needed; definition of Ms on facette elements
+    /** redefine orientation of triangular triangles in accordance with the tetrahedron
+    * reorientation of the tetrahedrons if needed; definition of Ms on triangle elements
     Indices and orientation convention :
 
                         v
@@ -445,17 +445,17 @@ private:
     void analyzeTriangle(const int nbTotTri, const int nbSurfReg,
                          const std::pair<int,int> &pairIdVolRegs, const int idSurfReg);
 
-    /** returns the surface defined by the set of facets of indices in facIndices
+    /** returns the surface defined by the set of triangle of indices in triIndices
      * each elementary surface triangle defined by points p0,p1,p2 is computed using
      * norm(cross(p0p1,p0p2))/2, it is always positive  */
-    double surface(std::vector<int> &facIndices) const;
+    double surface(std::vector<int> &triIndices) const;
 
-    /**return true if facette f is already indexed in the list idxMagList.
-     * Uses operator== for Fac. */
-    bool isInMagList(std::vector<int> &idxMagList, Facette::Fac &f) const
+    /**return true if triangle f is already indexed in the list idxMagList.
+     * Uses operator== for Tri. */
+    bool isInMagList(std::vector<int> &idxMagList, Triangle::Tri &f) const
         {
         auto it = std::find_if(idxMagList.begin(),idxMagList.end(),
-                               [this,&f](int idx) { return (fac[idx] == f); });
+                               [this,&f](int idx) { return (tri[idx] == f); });
         return(it != idxMagList.end());
         }
 

@@ -28,7 +28,7 @@ class solver
         explicit solver(Mesh::mesh & _msh /**< [in] mesh */,
                 std::vector<Tetra::prm> & _pTetra /**< [in] ref to vector of param tet
                                                     (volume region parameters) */,
-                std::vector<Facette::prm> & _pFac /**< [in] ref to vector of param fac
+                std::vector<Triangle::prm> & _pTri /**< [in] ref to vector of param tri
                                                     (surface region parameters) */,
                 const std::string name /**< [in] name of the solver method */,
                 const double _tol /**< [in] solver tolerance */,
@@ -37,7 +37,7 @@ class solver
                 std::function<bool(Mesh::Edge)> edge_filter = [](Mesh::Edge){ return true; }
                     /** [in] predicate for relevant mesh edges */):
                 msh(&_msh), NOD(_msh.getNbNodes()), paramTet(_pTetra),
-                paramFac(_pFac), verbose(v), iter(name,_tol,v,max_iter),
+                paramTri(_pTri), verbose(v), iter(name,_tol,v,max_iter),
                 K(build_shape(edge_filter)), L_rhs(DIM_PROBLEM*NOD) {}
 
         /** check boundary conditions, exit if there is a mistake in the boundary conditions */
@@ -47,7 +47,7 @@ class solver
         /** dimensionnality of the problem */
         static const int DIM_PB = DIM_PROBLEM;
 
-        /** mesh pointer to access nodes, fac, tet, and others geometrical values and methods */
+        /** mesh pointer to access nodes, tri, tet, and others geometrical values and methods */
         Mesh::mesh *msh;
 
         /** number of nodes in the mesh */
@@ -58,8 +58,8 @@ class solver
         const std::vector<Tetra::prm> &paramTet;
 
         /** this vector contains the material parameters for all surface regions for all the
-         * triangular facettes */
-        const std::vector<Facette::prm> &paramFac;
+         * triangles */
+        const std::vector<Triangle::prm> &paramTri;
 
         /** if verbose set to true, some printing are sent to terminal */
         const bool verbose;

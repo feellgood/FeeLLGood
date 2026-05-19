@@ -11,7 +11,7 @@ void electrostatSolver::checkBoundaryConditions(void) const
     {
     int nbSurfJ(0);
     int nbSurfV(0);
-    std::for_each(paramFac.begin(),paramFac.end(),[&nbSurfJ,&nbSurfV](Facette::prm const &p)
+    std::for_each(paramTri.begin(),paramTri.end(),[&nbSurfJ,&nbSurfV](Triangle::prm const &p)
         {
         if (std::isfinite(p.jn)) nbSurfJ++;
         if (std::isfinite(p.V)) nbSurfV++;
@@ -28,7 +28,7 @@ void electrostatSolver::checkBoundaryConditions(void) const
 void electrostatSolver::infos(void) const
     {
     std::cout << "Boundary conditions:\n";
-    std::for_each(paramFac.begin(),paramFac.end(),[](const Facette::prm &p)
+    std::for_each(paramTri.begin(),paramTri.end(),[](const Triangle::prm &p)
         {
         if (!std::isnan(p.jn)) { std::cout << "\tjn= " << p.jn << std::endl; }
         if (!std::isnan(p.V)) { std::cout << "\tV= " << p.V << std::endl; }
@@ -60,14 +60,14 @@ void electrostatSolver::integrales(Tetra::Tet const &tet,
         }
     }
 
-void electrostatSolver::integrales(Facette::Fac const &fac, std::vector<double> &BE) const
+void electrostatSolver::integrales(Triangle::Tri const &tri, std::vector<double> &BE) const
     {
-    double J_bc = getCurrentDensity(fac);// _bc for Boundary Condition
-    for (int npi = 0; npi < Facette::NPI; npi++)
+    double J_bc = getCurrentDensity(tri);// _bc for Boundary Condition
+    for (int npi = 0; npi < Triangle::NPI; npi++)
         {
-        double J_w = J_bc *fac.weight[npi];
-        for (int ie = 0; ie < Facette::N; ie++)
-            { BE[ie] -= Facette::a[ie][npi] * J_w; }
+        double J_w = J_bc *tri.weight[npi];
+        for (int ie = 0; ie < Triangle::N; ie++)
+            { BE[ie] -= Triangle::a[ie][npi] * J_w; }
         }
     }
 
@@ -101,24 +101,24 @@ bool electrostatSolver::solve(void)
         buildMat<Tetra::N>(elem.ind,Ke);
         } );
 
-    std::for_each( msh->fac.begin(), msh->fac.end(),[this](Facette::Fac &elem)
+    std::for_each( msh->tri.begin(), msh->tri.end(),[this](Triangle::Tri &elem)
         {
-        std::vector<double> Le(DIM_PB*Facette::N,0.0);
+        std::vector<double> Le(DIM_PB*Triangle::N,0.0);
         integrales(elem,Le);
-        buildVect<Facette::N>(elem.ind,Le);
+        buildVect<Triangle::N>(elem.ind,Le);
         } );
 
     std::vector<int> ld; // vector of the Dirichlet Nodes
     std::vector<double> Vd(NOD); // potential values on Dirichlet nodes, zero on the others
 
-    std::for_each(msh->fac.begin(),msh->fac.end(),[this,&Vd,&ld](const Facette::Fac &fac)
+    std::for_each(msh->tri.begin(),msh->tri.end(),[this,&Vd,&ld](const Triangle::Tri &tri)
         {
-        double _V = paramFac[fac.idxPrm].V;
+        double _V = paramTri[tri.idxPrm].V;
         if (!std::isnan(_V))
             {
-            for(int ie=0; ie<Facette::N; ie++)
+            for(int ie=0; ie<Triangle::N; ie++)
                 {
-                int i= fac.ind[ie];
+                int i= tri.ind[ie];
                 Vd[i]= _V;
                 ld.push_back(i);
                 }
@@ -155,9 +155,9 @@ bool electrostatSolver::save(const std::string& V_fileName, std::string const &m
 double electrostatSolver::getSigma(Tetra::Tet const &tet) const
     { return paramTet[tet.idxPrm].sigma; }
 
-double electrostatSolver::getCurrentDensity(Facette::Fac const &fac) const
+double electrostatSolver::getCurrentDensity(Triangle::Tri const &tri) const
     {
-    double val = paramFac[fac.idxPrm].jn;
+    double val = paramTri[tri.idxPrm].jn;
     if (!std::isfinite(val)) val = 0.0;
     return val;
     }

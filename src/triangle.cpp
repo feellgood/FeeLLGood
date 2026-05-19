@@ -1,9 +1,9 @@
-#include "facette.h"
+#include "triangle.h"
 
-using namespace Facette;
+using namespace Triangle;
 using namespace Nodes;
 
-void Fac::integrales(Facette::prm const &params)
+void Tri::integrales(Triangle::prm const &params)
     {
     double Kbis = 2.0*params.Ks / dMs;
     
@@ -35,14 +35,14 @@ void Fac::integrales(Facette::prm const &params)
     Lp = Perm * P * BE.reshaped<Eigen::RowMajor>();
     }
 
-double Fac::anisotropyEnergy(Facette::prm const &param,
+double Tri::anisotropyEnergy(Triangle::prm const &param,
                              Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> const u) const
     {  // surface Neel anisotropy (uk is a uniaxial easy axis)
     Eigen::Matrix<double,NPI,1> dens = (u.transpose()*param.uk).array().square();
     return -param.Ks*weight.dot(dens);
     }
 
-Eigen::Matrix<double,NPI,1> Fac::charges(const double &dMs,
+Eigen::Matrix<double,NPI,1> Tri::charges(const double &dMs,
         std::function<Eigen::Vector3d(const Nodes::Node&)> getter) const
     {
     Eigen::Matrix<double,NPI,1> result;
@@ -58,8 +58,8 @@ Eigen::Matrix<double,NPI,1> Fac::charges(const double &dMs,
     return result;
     }
 
-void Fac::correctionCharges(std::function<Eigen::Vector3d(Nodes::Node)> getter,
-                            Eigen::Matrix<double,Facette::NPI,1> &localCharges,
+void Tri::correctionCharges(std::function<Eigen::Vector3d(Nodes::Node)> getter,
+                            Eigen::Matrix<double,Triangle::NPI,1> &localCharges,
                             std::vector<double> &corr)
     {
     Eigen::Matrix<double,DIM,NPI> gauss;
@@ -78,14 +78,14 @@ void Fac::correctionCharges(std::function<Eigen::Vector3d(Nodes::Node)> getter,
         }
     }
 
-double Fac::demagEnergy(Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> u,
+double Tri::demagEnergy(Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> u,
         Eigen::Ref<Eigen::Matrix<double,NPI,1>> phi) const
     {
     Eigen::Matrix<double,NPI,1> dens = (u.transpose()*n).cwiseProduct(phi);
     return 0.5*mu0*dMs*dens.dot(weight);
     }
 
-double Fac::potential(std::function<Eigen::Vector3d(Nodes::Node)> getter, int i) const
+double Tri::potential(std::function<Eigen::Vector3d(Nodes::Node)> getter, int i) const
     {
     int ii = (i + 1) % 3;
     int iii = (i + 2) % 3;
@@ -106,7 +106,7 @@ double Fac::potential(std::function<Eigen::Vector3d(Nodes::Node)> getter, int i)
 
     if (_2s < 0)
         {
-        std::cout << "facette surface is negative : surface is ill-oriented" << std::endl;
+        std::cout << "triangle surface is negative : surface is ill-oriented" << std::endl;
         exit(1);
         }
 

@@ -42,12 +42,12 @@ void LinAlgebra::prepareElements(Eigen::Vector3d const &Hext /**< [in] applied f
                       { tet.integrales(paramTet[tet.idxPrm], t_prm, calc_Hext, idx_dir, DW_vz); }
                   });
 
-    std::for_each(EXEC_POL, msh->fac.begin(), msh->fac.end(),
-                  [this](Facette::Fac &fac)
+    std::for_each(EXEC_POL, msh->tri.begin(), msh->tri.end(),
+                  [this](Triangle::Tri &tri)
                   {
                   // the contribution to Lp computed in integrales is due to surface anisotropy
-                  if ((msh->isMagnetic(fac))&&(paramFac[fac.idxPrm].Ks != 0))
-                      { fac.integrales(paramFac[fac.idxPrm]);  }
+                  if ((msh->isMagnetic(tri))&&(paramTri[tri.idxPrm].Ks != 0))
+                      { tri.integrales(paramTri[tri.idxPrm]);  }
                   });
     }
 
@@ -71,11 +71,11 @@ void LinAlgebra::prepareElements(double const A_Hext /**< [in] amplitude applied
                       }
                   });
 
-    std::for_each(EXEC_POL, msh->fac.begin(), msh->fac.end(),
-                  [this](Facette::Fac &fac)
+    std::for_each(EXEC_POL, msh->tri.begin(), msh->tri.end(),
+                  [this](Triangle::Tri &tri)
                   {
                   // the contribution to Lp computed in integrales is due to surface anisotropy
-                  if ((msh->isMagnetic(fac))&&(paramFac[fac.idxPrm].Ks != 0))
-                    { fac.integrales(paramFac[fac.idxPrm]);  }
+                  if ((msh->isMagnetic(tri))&&(paramTri[tri.idxPrm].Ks != 0))
+                    { tri.integrales(paramTri[tri.idxPrm]);  }
                   });
     }

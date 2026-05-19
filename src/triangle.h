@@ -1,18 +1,18 @@
-#ifndef facette_h
-#define facette_h
+#ifndef triangle_h
+#define triangle_h
 
-/** \file facette.h
-  \brief contains namespace Facette
-  header containing Fac class, and some constants and a less_than operator to redo orientation of
-  triangular faces
+/** \file triangle.h
+  \brief contains namespace Triangle
+  header containing Tri class, and some constants and a less_than operator to redo orientation of
+  triangles
  */
 
 #include "element.h"
 
-/** \namespace Facette
- to grab altogether some constants and calculation functions for class Fac
+/** \namespace Triangle
+ to grab altogether some constants and calculation functions for class Tri
  */
-namespace Facette
+namespace Triangle
     {
 /** number of sommits */
 const int N = 3;
@@ -100,19 +100,19 @@ struct prm
         };
     };
 
-/** \class Fac
-Face is a class containing the index references to nodes, its surface and its normal unit vector,
+/** \class Tri
+Tri is a class containing the index references to nodes, its surface and its normal unit vector,
 it has a triangular shape and should not be degenerated, orientation must be defined in adequation
 with the mesh
 */
-class Fac : public element<N,NPI>
+class Tri : public element<N,NPI>
     {
 public:
     /** constructor used by readMesh
      Warning: mesh::indexReorder method call it with both _NOD = 0 and _p_node.size() > 0
      TODO: get rid of _NOD and rewrite mesh::indexReorder
      * */
-    inline Fac(const std::vector<Nodes::Node> &_p_node /**< [in] vector of nodes */,
+    inline Tri(const std::vector<Nodes::Node> &_p_node /**< [in] vector of nodes */,
                const int _NOD /**< [in] it is equal to _p_node.size() except if _NOD == 0 */,
                const int _idx /**< [in] region index in region vector */,
                std::initializer_list<int> _i /**< [in] node index */)
@@ -128,16 +128,16 @@ public:
             {
             surf = 0.0;
             n = Eigen::Vector3d(0,0,0);
-            }  // no index shift here if NOD == 0 : usefull while reordering face indices
+            }  // no index shift here if NOD == 0 : usefull while reordering triangle indices
 
         for(int i=0;i<NPI;i++)
-            { weight[i] = 2.0 * surf * Facette::pds[i]; }
+            { weight[i] = 2.0 * surf * Triangle::pds[i]; }
         }
 
     /** surface of the element */
     double surf;
 
-    /** difference (d for delta) of magnetization at the facette between corresponding
+    /** difference (d for delta) of magnetization at the triangle between corresponding
      * tetrahedrons */
     double dMs;
 
@@ -168,12 +168,12 @@ public:
         result = scalar_nod.transpose() * eigen_a;
         }
 
-    /** computes the integral contribution of the triangular face, the only contribution comes
+    /** computes the integral contribution of the triangular triangle, the only contribution comes
      * from Neel surface anisotropy */
-    void integrales(Facette::prm const &params /**< [in] */);
+    void integrales(Triangle::prm const &params /**< [in] */);
 
-    /** anisotropy energy of the facette */
-    double anisotropyEnergy(Facette::prm const &param /**< [in] */,
+    /** anisotropy energy of the triangle */
+    double anisotropyEnergy(Triangle::prm const &param /**< [in] */,
             Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> const u /**< [in] */) const;
 
     /** computes surface charges, return result on NPI */
@@ -183,10 +183,10 @@ public:
     /** computes correction on surface charges from localCharges input, result directly stored in
      * corr */
     void correctionCharges(std::function<Eigen::Vector3d(Nodes::Node)> getter /**< [in] */,
-                           Eigen::Matrix<double,Facette::NPI,1> &localCharges /**< [in] */,
+                           Eigen::Matrix<double,Triangle::NPI,1> &localCharges /**< [in] */,
                            std::vector<double> &corr /**< [in|out]*/);
 
-    /** demagnetizing energy of the facette */
+    /** demagnetizing energy of the triangle */
     double demagEnergy(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u /**< [in] */,
                        Eigen::Ref<Eigen::Matrix<double,NPI,1>> phi /**< [in] */) const;
 
@@ -194,7 +194,7 @@ public:
     double potential(std::function<Eigen::Vector3d(Nodes::Node)> getter, int i) const;
 
     /** Compares indices on lexicographic order : ind[0] then ind[1] then ind[2]. */
-    inline bool operator<(const Fac &f) const
+    inline bool operator<(const Tri &f) const
         {
         return (this->ind[0] < f.ind[0])
                || ((this->ind[0] == f.ind[0])
@@ -202,9 +202,9 @@ public:
                        || ((this->ind[1] == f.ind[1]) && (this->ind[2] < f.ind[2]))));
         }
 
-    /** two facets are equal if there exists an indices permutation where node indices are the same
+    /** two triangles are equal if there exists an indices permutation where node indices are the same
      * Warning: it does not take into account orientation (direct or indirect) */
-    bool operator==(const Fac &f) const
+    bool operator==(const Tri &f) const
         {
         const int a= this->ind[0];
         const int b= this->ind[1];
@@ -217,7 +217,7 @@ public:
              ||((a==j)&&(b==k)&&(c==i))||((a==k)&&(b==j)&&(c==i));
         }
 
-    /** computes the norm to the face, returns a unit vector */
+    /** computes the norm to the triangle, returns a unit vector */
     inline Eigen::Vector3d calc_norm(void) const
         {
         Eigen::Vector3d _n = normal_vect();
@@ -225,7 +225,7 @@ public:
         return _n;
         }
 
-    /** returns Gauss points in result = vec_nod*Facette::a */
+    /** returns Gauss points in result = vec_nod*Triangle::a */
     void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result) const
         {
         Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
@@ -236,14 +236,14 @@ public:
         result = vec_nod * eigen_a;
         }
 
-    /** computes surface of the face */
+    /** computes surface of the triangle */
     inline double calc_surf(void) const { return 0.5 * normal_vect().norm(); }
 
 private:
     /** do nothing function: orientation is done in mesh::indexReorder */
     void orientate(void) {}
 
-    /** return normal to the triangular face, not normalized */
+    /** return normal to the triangle, not normalized */
     inline Eigen::Vector3d normal_vect() const
         {
         Eigen::Vector3d p0p1 = getNode(1).p - getNode(0).p;
@@ -251,8 +251,8 @@ private:
 
         return p0p1.cross(p0p2);
         }
-    };  // end class Fac
+    };  // end class Tri
 
-    }  // namespace Facette
+    }  // namespace Triangle
 
-#endif /* facette_h */
+#endif /* triangle_h */

@@ -1,30 +1,30 @@
-#define BOOST_TEST_MODULE facetteTest
+#define BOOST_TEST_MODULE triangleTest
 
 #include <boost/test/unit_test.hpp>
 
 #include <random>
 
-#include "facette.h"
+#include "triangle.h"
 #include "node.h"
 #include "tiny.h"
 #include "ut_tools.h"
 #include "ut_config.h"
 
-BOOST_AUTO_TEST_SUITE(ut_facette)
+BOOST_AUTO_TEST_SUITE(ut_triangle)
 
 /*-----------------------------------------------------*/
 /* zero lvl tests : direct elementary member functions */
 /*-----------------------------------------------------*/
 
-// Facette::Fac constructor is tested in ut_element.cpp
+// Triangle::Tri constructor is tested in ut_element.cpp
 
 /*---------------------------------------*/
 /* first lvl tests : nested calculus,... */
 /*---------------------------------------*/
 
-BOOST_AUTO_TEST_CASE(Fac_operator_infto)
+BOOST_AUTO_TEST_CASE(Tri_operator_infto)
     {
-    std::cout << "Fac operator< unit test" << std::endl;
+    std::cout << "Tri operator< unit test" << std::endl;
 
     unsigned sd = my_seed();
     std::mt19937_64 gen(
@@ -32,9 +32,9 @@ BOOST_AUTO_TEST_CASE(Fac_operator_infto)
     std::uniform_int_distribution<int> distrib;
 
     std::vector<Nodes::Node> node;
-    Facette::Fac f(node, 0, 0, {0,0,0});
+    Triangle::Tri f(node, 0, 0, {0,0,0});
     bool test_result = !(f < f);  // whatever is f, f<f must return false
-    std::cout<<" !(facette < facette): " << test_result << std::endl;
+    std::cout<<" !(triangle < triangle): " << test_result << std::endl;
 
     for (int i = 0; i < 100; i++)
         {
@@ -45,8 +45,8 @@ BOOST_AUTO_TEST_CASE(Fac_operator_infto)
         int e = distrib(gen);
         int f = distrib(gen);
         
-        Facette::Fac f1(node, 0, 0, {a,b,c} );
-        Facette::Fac f2(node, 0, 0, {d,e,f} );
+        Triangle::Tri f1(node, 0, 0, {a,b,c} );
+        Triangle::Tri f2(node, 0, 0, {d,e,f} );
 
         /* ref code */
         bool val_ref = false;
@@ -69,14 +69,14 @@ BOOST_AUTO_TEST_CASE(Fac_operator_infto)
 /* second lvl tests : pure mathematics   */
 /*---------------------------------------*/
 
-BOOST_AUTO_TEST_CASE(Fac_calc_surf, *boost::unit_test::tolerance(UT_TOL))
+BOOST_AUTO_TEST_CASE(Tri_calc_surf, *boost::unit_test::tolerance(UT_TOL))
     {
     std::cout << "calc_surf test" << std::endl;
     const int nbNod = 3;
     std::vector<Nodes::Node> node;
     dummyNodes<nbNod>(node);
 
-    Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
+    Triangle::Tri f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
 
     std::cout << "indices:" << f.ind[0] << ";" << f.ind[1] << ";" << f.ind[2] << std::endl;
 
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(Fac_calc_surf, *boost::unit_test::tolerance(UT_TOL))
     BOOST_TEST(f.surf == s);
     }
 
-BOOST_AUTO_TEST_CASE(Fac_interpolation_pt3D, *boost::unit_test::tolerance(UT_TOL))
+BOOST_AUTO_TEST_CASE(Tri_interpolation_pt3D, *boost::unit_test::tolerance(UT_TOL))
     {
     using namespace Nodes;
     std::cout << "surf interpolation test" << std::endl;
@@ -100,27 +100,27 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_pt3D, *boost::unit_test::tolerance(UT_TOL
     node[1].d[0].u = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
     node[2].d[0].u = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
 
-    Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
+    Triangle::Tri f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
 
-    Eigen::Matrix<double,DIM,Facette::N> _vec_nod;
-    for (int i = 0; i < Facette::N; i++) _vec_nod.col(i) = node[f.ind[i]].get_u(Nodes::CURRENT);
+    Eigen::Matrix<double,DIM,Triangle::N> _vec_nod;
+    for (int i = 0; i < Triangle::N; i++) _vec_nod.col(i) = node[f.ind[i]].get_u(Nodes::CURRENT);
     
-    Eigen::Matrix<double,DIM,Facette::NPI> _u = _vec_nod * Facette::eigen_a;
+    Eigen::Matrix<double,DIM,Triangle::NPI> _u = _vec_nod * Triangle::eigen_a;
     //f.interpolation<Eigen::Vector3d>(Nodes::get_u0, _u);
 
-    double vec_nod[DIM][Facette::N];
+    double vec_nod[DIM][Triangle::N];
     for (int i = 0; i < DIM; i++)
-        for (int j = 0; j < Facette::N; j++)
+        for (int j = 0; j < Triangle::N; j++)
             {
             vec_nod[i][j] = node[j].d[0].u(i);
             }  // hidden transposition here
-    double result[DIM][Facette::NPI];
-    tiny::mult<double, DIM, Facette::N, Facette::NPI>(vec_nod, Facette::a, result);
+    double result[DIM][Triangle::NPI];
+    tiny::mult<double, DIM, Triangle::N, Triangle::NPI>(vec_nod, Triangle::a, result);
 
     double diff_r = 0;
 
     for (int i = 0; i < DIM; i++)
-        for (int j = 0; j < Facette::NPI; j++)
+        for (int j = 0; j < Triangle::NPI; j++)
             diff_r += sq(result[i][j] - _u(i,j));
 
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_pt3D, *boost::unit_test::tolerance(UT_TOL
     BOOST_TEST(sqrt(diff_r) == 0.0);
     }
 
-BOOST_AUTO_TEST_CASE(Fac_interpolation_double, *boost::unit_test::tolerance(UT_TOL))
+BOOST_AUTO_TEST_CASE(Tri_interpolation_double, *boost::unit_test::tolerance(UT_TOL))
     {
     std::cout << "surf interpolation test" << std::endl;
     const int nbNod = 3;
@@ -143,23 +143,23 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_double, *boost::unit_test::tolerance(UT_T
     node[1].d[0].phi = distrib(gen);
     node[2].d[0].phi = distrib(gen);
 
-    Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
+    Triangle::Tri f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
 
-    Eigen::Matrix<double,Facette::NPI,1> _p;
+    Eigen::Matrix<double,Triangle::NPI,1> _p;
     f.interpolation(Nodes::get_phi<Nodes::CURRENT>, _p);
 
     // code ref
-    double scal_nod[Facette::N];
-    for (int j = 0; j < Facette::N; j++)
+    double scal_nod[Triangle::N];
+    for (int j = 0; j < Triangle::N; j++)
         { scal_nod[j] = node[j].d[0].phi; }
 
-    double result[Facette::NPI];
-    tiny::transposed_mult<double, Facette::N, Facette::NPI>(scal_nod, Facette::a, result);
+    double result[Triangle::NPI];
+    tiny::transposed_mult<double, Triangle::N, Triangle::NPI>(scal_nod, Triangle::a, result);
     // end code ref
 
     double diff_r = 0;
 
-    for (int j = 0; j < Facette::NPI; j++)
+    for (int j = 0; j < Triangle::NPI; j++)
         diff_r += Nodes::sq(result[j] - _p[j]);
 
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
@@ -167,10 +167,10 @@ BOOST_AUTO_TEST_CASE(Fac_interpolation_double, *boost::unit_test::tolerance(UT_T
     BOOST_TEST(sqrt(diff_r) == 0.0);
     }
 
-BOOST_AUTO_TEST_CASE(Fac_potential_u, *boost::unit_test::tolerance(10*UT_TOL))
+BOOST_AUTO_TEST_CASE(Tri_potential_u, *boost::unit_test::tolerance(10*UT_TOL))
     {
     using namespace Nodes;
-    std::cout << "fac potential test on u" << std::endl;
+    std::cout << "tri potential test on u" << std::endl;
     const int nbNod = 3;
     std::vector<Nodes::Node> node;
     dummyNodes<nbNod>(node);
@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE(Fac_potential_u, *boost::unit_test::tolerance(10*UT_TOL))
         node[i].d[1].v = Eigen::Vector3d(2*distrib(gen) - 1, 2*distrib(gen) - 1, 2*distrib(gen) - 1);
         }
     
-    Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
+    Triangle::Tri f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
     f.dMs = distrib(gen);
     int i = 0;
     int Hv = 0;
@@ -281,10 +281,10 @@ BOOST_AUTO_TEST_CASE(Fac_potential_u, *boost::unit_test::tolerance(10*UT_TOL))
                "possible rounding error in potential on u corrections");
     }
 
-BOOST_AUTO_TEST_CASE(Fac_potential_v, *boost::unit_test::tolerance(10.0*UT_TOL))
+BOOST_AUTO_TEST_CASE(Tri_potential_v, *boost::unit_test::tolerance(10.0*UT_TOL))
     {
     using namespace Nodes;
-    std::cout << "fac potential test on v" << std::endl;
+    std::cout << "tri potential test on v" << std::endl;
     const int nbNod = 3;
     std::vector<Nodes::Node> node;
     dummyNodes<nbNod>(node);
@@ -304,7 +304,7 @@ BOOST_AUTO_TEST_CASE(Fac_potential_v, *boost::unit_test::tolerance(10.0*UT_TOL))
         node[i].d[1].v = Eigen::Vector3d(2*distrib(gen) - 1, 2*distrib(gen) - 1, 2*distrib(gen) - 1);
         }
     
-    Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
+    Triangle::Tri f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
     f.dMs = distrib(gen);
 
     int i = 0;
@@ -398,10 +398,10 @@ BOOST_AUTO_TEST_CASE(Fac_potential_v, *boost::unit_test::tolerance(10.0*UT_TOL))
                "possible rounding error in potential on v corrections");
     }
 
-BOOST_AUTO_TEST_CASE(Fac_Pcoeff)
+BOOST_AUTO_TEST_CASE(Tri_Pcoeff)
     {
-    std::cout << "fac test on Facette::buildMatP()" << std::endl;
-    const int N = Facette::N;
+    std::cout << "tri test on Triangle::buildMatP()" << std::endl;
+    const int N = Triangle::N;
 
     const int nbNod = 3;
     std::vector<Nodes::Node> node;
@@ -417,7 +417,7 @@ BOOST_AUTO_TEST_CASE(Fac_Pcoeff)
         node[i].setBasis(2 * M_PI * distrib(gen));
         }
 
-    Facette::Fac f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
+    Triangle::Tri f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
     Eigen::Matrix<double,2*N,3*N> P;
     f.buildMatP(P);
 

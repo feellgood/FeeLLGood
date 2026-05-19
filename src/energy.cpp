@@ -46,13 +46,13 @@ void Fem::energy(double const t, Settings &settings)
                           }
                       });
 
-    std::for_each(msh.magFac.begin(), msh.magFac.end(),
+    std::for_each(msh.magTri.begin(), msh.magTri.end(),
                   [this, &settings](const int &idxElem)
                       {
-                      Facette::Fac const &fa =msh.fac[idxElem];
-                      Facette::prm const &param = settings.paramFacette[fa.idxPrm];
-                      Eigen::Matrix<double,Facette::NPI,1> phi;
-                      Eigen::Matrix<double,Nodes::DIM,Facette::NPI> u;
+                      Triangle::Tri const &fa =msh.tri[idxElem];
+                      Triangle::prm const &param = settings.paramTriangle[fa.idxPrm];
+                      Eigen::Matrix<double,Triangle::NPI,1> phi;
+                      Eigen::Matrix<double,Nodes::DIM,Triangle::NPI> u;
 
                       fa.interpolation(Nodes::get_u<NEXT>, u);
                       fa.interpolation(Nodes::get_phi<NEXT>, phi);

@@ -249,14 +249,14 @@ int main(int argc, char *argv[])
     LinAlgebra linAlg(mySettings, fem.msh);
 
     spinAcc spinAcc_solver = spinAcc(fem.msh,mySettings.paramTetra,
-			                         mySettings.paramFacette,
+			                         mySettings.paramTriangle,
                                      1e-8, mySettings.verbose, 1000);
 
     if (mySettings.spin_acc)
         {
         spinAcc_solver.checkBoundaryConditions();
         electrostatSolver pot_solver = electrostatSolver(fem.msh, mySettings.paramTetra,
-                                                     mySettings.paramFacette,
+                                                     mySettings.paramTriangle,
                                                      1e-8, mySettings.verbose, 1000);
         pot_solver.checkBoundaryConditions();
         std::string V_fileName("");
@@ -273,7 +273,7 @@ int main(int argc, char *argv[])
         }
 
     chronometer fmm_counter(2);
-    scal_fmm::fmm myFMM(fem.msh, mySettings.paramTetra, mySettings.paramFacette,
+    scal_fmm::fmm myFMM(fem.msh, mySettings.paramTetra, mySettings.paramTriangle,
             mySettings.scalfmmNbTh);
     if (mySettings.verbose)
             {

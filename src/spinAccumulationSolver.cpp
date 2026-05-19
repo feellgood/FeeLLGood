@@ -21,7 +21,7 @@ void spinAcc::checkBoundaryConditions(void) const
         });
     int nbSurfJ(0);
     int nbSurfS(0);
-    std::for_each(paramFac.begin(),paramFac.end(),[&nbSurfJ,&nbSurfS](Facette::prm const &p)
+    std::for_each(paramTri.begin(),paramTri.end(),[&nbSurfJ,&nbSurfS](Triangle::prm const &p)
         {
         if(p.regName != "__default__")
             {
@@ -56,23 +56,23 @@ void spinAcc::fillDirichletData(const int k, Eigen::Vector3d &s_value)
 void spinAcc::boundaryConditions(void)
     {
     std::fill(valDirichlet.begin(),valDirichlet.end(),0.0);
-    std::for_each(msh->fac.begin(),msh->fac.end(),[this](Facette::Fac &f)
+    std::for_each(msh->tri.begin(),msh->tri.end(),[this](Triangle::Tri &f)
         {
-        if (std::isnan(paramFac[f.idxPrm].s.norm()) &&  std::isfinite(paramFac[f.idxPrm].jn))
+        if (std::isnan(paramTri[f.idxPrm].s.norm()) &&  std::isfinite(paramTri[f.idxPrm].jn))
             {
              /* units:
              * [jn] = A m^-2; [BOHRS_MUB/CHARGE_ELECTRON] = m^2 ; [P] = 1 ⇒ [s_value] = A
              * check s_value formula, especially the sign with current convention
              * */
             Eigen::Vector3d s_value =
-                    -paramFac[f.idxPrm].jn*(BOHRS_MUB/CHARGE_ELECTRON)*paramFac[f.idxPrm].uP;
-            for(int j=0;j<Facette::N;j++)
+                    -paramTri[f.idxPrm].jn*(BOHRS_MUB/CHARGE_ELECTRON)*paramTri[f.idxPrm].uP;
+            for(int j=0;j<Triangle::N;j++)
                 { fillDirichletData(f.ind[j],s_value); }
             }
-        else if (std::isfinite(paramFac[f.idxPrm].s.norm()) &&  std::isnan(paramFac[f.idxPrm].jn))
+        else if (std::isfinite(paramTri[f.idxPrm].s.norm()) &&  std::isnan(paramTri[f.idxPrm].jn))
             {
-            Eigen::Vector3d s_value = paramFac[f.idxPrm].s;
-            for(int j=0;j<Facette::N;j++)
+            Eigen::Vector3d s_value = paramTri[f.idxPrm].s;
+            for(int j=0;j<Triangle::N;j++)
                 { fillDirichletData(f.ind[j],s_value); }
             }
         });
@@ -165,29 +165,29 @@ bool spinAcc::solve(void)
 
     /* here are the boundary conditions: either a vector s is defined on a surface, or a normal
      current density and a unit polarization vector */
-    std::for_each(msh->fac.begin(),msh->fac.end(),[this](Facette::Fac &f)
+    std::for_each(msh->tri.begin(),msh->tri.end(),[this](Triangle::Tri &f)
         {
-        std::vector<double> Le(DIM_PB*Facette::N,0.0);
-        Eigen::Vector3d s_value = paramFac[f.idxPrm].s;
+        std::vector<double> Le(DIM_PB*Triangle::N,0.0);
+        Eigen::Vector3d s_value = paramTri[f.idxPrm].s;
 
-        if (std::isfinite(paramFac[f.idxPrm].jn) && std::isfinite(paramFac[f.idxPrm].uP.norm()))
-            { s_value = -paramFac[f.idxPrm].jn*(BOHRS_MUB/CHARGE_ELECTRON)*paramFac[f.idxPrm].uP; }
+        if (std::isfinite(paramTri[f.idxPrm].jn) && std::isfinite(paramTri[f.idxPrm].uP.norm()))
+            { s_value = -paramTri[f.idxPrm].jn*(BOHRS_MUB/CHARGE_ELECTRON)*paramTri[f.idxPrm].uP; }
 
         if (std::isfinite(s_value.norm()))
             {
-            for (int npi=0; npi<Facette::NPI; npi++)
+            for (int npi=0; npi<Triangle::NPI; npi++)
                 {
                 const double w = f.weight[npi];
-                for (int ie=0; ie<Facette::N; ie++)
+                for (int ie=0; ie<Triangle::N; ie++)
                     {
-                    double ai_w = w*Facette::a[ie][npi];
+                    double ai_w = w*Triangle::a[ie][npi];
                     Le[               ie] -= s_value[IDX_X]* ai_w;
-                    Le[  Facette::N + ie] -= s_value[IDX_Y]* ai_w;
-                    Le[2*Facette::N + ie] -= s_value[IDX_Z]* ai_w;
+                    Le[  Triangle::N + ie] -= s_value[IDX_Y]* ai_w;
+                    Le[2*Triangle::N + ie] -= s_value[IDX_Z]* ai_w;
                     }
                 }
             }
-        buildVect<Facette::N>(f.ind, Le);
+        buildVect<Triangle::N>(f.ind, Le);
         });
 
     std::vector<double> Xw(DIM_PB*NOD);
