@@ -38,14 +38,14 @@ add_executable (test_ut_node ut_node.cpp)
 
 add_executable (test_ut_index ut_index.cpp)
 
-SET(SOURCES ../src/facette.cpp ../src/tetra.cpp ut_element.cpp)
+SET(SOURCES ../src/triangle.cpp ../src/tetra.cpp ut_element.cpp)
 add_executable (test_ut_element ${SOURCES})
 
-SET(SOURCES ../src/facette.cpp ut_facette.cpp)
-add_executable (test_ut_facette ${SOURCES})
+SET(SOURCES ../src/triangle.cpp ut_triangle.cpp)
+add_executable (test_ut_triangle ${SOURCES})
 
-SET(SOURCES ../src/facette.cpp ut_fac_charges.cpp)
-add_executable (test_ut_fac_charges ${SOURCES})
+SET(SOURCES ../src/triangle.cpp ut_tri_charges.cpp)
+add_executable (test_ut_tri_charges ${SOURCES})
 
 SET(SOURCES ../src/tetra.cpp ut_tetra.cpp)
 add_executable (test_ut_tetra ${SOURCES})
@@ -59,7 +59,7 @@ add_executable (test_ut_tet_lumping ${SOURCES})
 SET(SOURCES ../src/tetra.cpp ut_tet_charges.cpp)
 add_executable (test_ut_tet_charges ${SOURCES})
 
-SET(SOURCES ../src/tetra.cpp ut_energy.cpp ../src/facette.cpp)
+SET(SOURCES ../src/tetra.cpp ut_energy.cpp ../src/triangle.cpp)
 add_executable (test_ut_energy ${SOURCES})
 
 SET(SOURCES ../src/tetra.cpp ut_anisotropy.cpp)
@@ -202,16 +202,16 @@ target_link_libraries(test_ut_index
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
   )
 
-#target_compile_options(test_ut_facette PUBLIC -fsanitize=leak )
-#target_link_options(test_ut_facette PUBLIC -fsanitize=leak )
-target_link_libraries(test_ut_facette
+#target_compile_options(test_ut_triangle PUBLIC -fsanitize=leak )
+#target_link_options(test_ut_triangle PUBLIC -fsanitize=leak )
+target_link_libraries(test_ut_triangle
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
   TBB::tbb
   )
 
-target_link_libraries(test_ut_fac_charges
+target_link_libraries(test_ut_tri_charges
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
@@ -256,8 +256,8 @@ add_test (NAME ut_dukTapeParser COMMAND test_ut_dukTapeParser)
 add_test (NAME ut_node COMMAND test_ut_node)
 add_test (NAME ut_index COMMAND test_ut_index)
 add_test (NAME ut_element COMMAND test_ut_element)
-add_test (NAME ut_facette COMMAND test_ut_facette)
-add_test (NAME ut_fac_charges COMMAND test_ut_fac_charges)
+add_test (NAME ut_triangle COMMAND test_ut_triangle)
+add_test (NAME ut_tri_charges COMMAND test_ut_tri_charges)
 add_test (NAME ut_tetra COMMAND test_ut_tetra)
 add_test (NAME ut_thiele COMMAND test_ut_thiele)
 add_test (NAME ut_tet_lumping COMMAND test_ut_tet_lumping)

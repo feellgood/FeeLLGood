@@ -443,7 +443,7 @@ class Cuboid(object):
             constructor, inits nodes lists, and builds tetrahedrons and outer surface mesh of the
             cuboid in the volume defined by pt_min,pt_max
             Tet is a table containing 4 indices refering to the list of points
-            Fac is a table containing 3 indices refering to the list of points
+            Tri is a table containing 3 indices refering to the list of points
             index shift to obey gmsh file format 2.2 is performed while writing the file, except
             first column indices of points table  
         """
@@ -461,7 +461,7 @@ class Cuboid(object):
                     self.pts.append([idx,pt_min[0]+(i*dx),pt_min[1]+(j*dy),pt_min[2]+(k*dz)])
                     idx += 1
         self.Tet = []
-        self.Fac = []
+        self.Tri = []
         self.subSurf = []
         self.subSurfRegName = []
         for i in range(0,self.nbX):
@@ -483,40 +483,40 @@ class Cuboid(object):
                     self.Tet.append([F,B,G,H])
 
                     if (self.nbZ == 1): 
-                        self.Fac.append([A,B,D])
-                        self.Fac.append([B,C,D])
-                        self.Fac.append([E,F,H])
-                        self.Fac.append([F,G,H])
+                        self.Tri.append([A,B,D])
+                        self.Tri.append([B,C,D])
+                        self.Tri.append([E,F,H])
+                        self.Tri.append([F,G,H])
                     elif (k == 0):
-                        self.Fac.append([A,B,D])
-                        self.Fac.append([B,C,D])
+                        self.Tri.append([A,B,D])
+                        self.Tri.append([B,C,D])
                     elif (k == (self.nbZ-1)):
-                        self.Fac.append([E,F,H])
-                        self.Fac.append([F,G,H])
+                        self.Tri.append([E,F,H])
+                        self.Tri.append([F,G,H])
 
                     if (self.nbX == 1): 
-                        self.Fac.append([A,D,H])
-                        self.Fac.append([A,E,H])
-                        self.Fac.append([B,C,G])
-                        self.Fac.append([B,F,G])
+                        self.Tri.append([A,D,H])
+                        self.Tri.append([A,E,H])
+                        self.Tri.append([B,C,G])
+                        self.Tri.append([B,F,G])
                     elif (i == 0):
-                        self.Fac.append([A,D,H])
-                        self.Fac.append([A,E,H])
+                        self.Tri.append([A,D,H])
+                        self.Tri.append([A,E,H])
                     elif (i == (self.nbX-1)):
-                        self.Fac.append([B,C,G])
-                        self.Fac.append([B,F,G])
+                        self.Tri.append([B,C,G])
+                        self.Tri.append([B,F,G])
 
                     if (self.nbY == 1): 
-                        self.Fac.append([A,B,E])
-                        self.Fac.append([B,E,F])
-                        self.Fac.append([C,G,H])
-                        self.Fac.append([H,D,C])
+                        self.Tri.append([A,B,E])
+                        self.Tri.append([B,E,F])
+                        self.Tri.append([C,G,H])
+                        self.Tri.append([H,D,C])
                     elif (j == 0):
-                        self.Fac.append([A,B,E])
-                        self.Fac.append([B,E,F])
+                        self.Tri.append([A,B,E])
+                        self.Tri.append([B,E,F])
                     elif (j == (self.nbY-1)):
-                        self.Fac.append([C,G,H])
-                        self.Fac.append([H,D,C])
+                        self.Tri.append([C,G,H])
+                        self.Tri.append([H,D,C])
 
     def transformNodes(self,func):
         """
@@ -537,22 +537,22 @@ class Cuboid(object):
         return (str(1+self.Tet[idx][0])+"\t"+str(1+self.Tet[idx][1])+"\t"+str(1+self.Tet[idx][2])
                 +"\t"+str(1+self.Tet[idx][3]))
 
-    def stringFac(self,table,idx):
+    def stringTri(self,table,idx):
         return str(1+table[idx][0])+"\t"+str(1+table[idx][1])+"\t"+str(1+table[idx][2])
     
     def calc_idx(self,i,j,k):
         return( (self.nbZ+1)*(self.nbY+1)*i +  (self.nbZ+1)*j + k)
 
     def calc_nb_elements(self):
-        nbElem = len(self.Tet) + len(self.Fac)
+        nbElem = len(self.Tet) + len(self.Tri)
         for i in range(0,len(self.subSurf)):
             nbElem += len(self.subSurf[i])
         return(nbElem)
         
     def add_sub_surface(self,subSurfRegName,func):
         tempo_subSurf = []
-        for i in range(0,len(self.Fac)):
-            f = self.Fac[i]
+        for i in range(0,len(self.Tri)):
+            f = self.Tri[i]
             idxA = f[0]
             idxB = f[1]
             idxC = f[2]
@@ -596,13 +596,13 @@ class Cuboid(object):
             s = self.stringTet(i)
             meshFile.write( str(idx)+"\t4\t2\t" + str(volRegionTag) + "\t1\t" + s + "\n" )
             idx += 1
-        for i in range(0,len(self.Fac)):
-            s = self.stringFac(self.Fac,i)
+        for i in range(0,len(self.Tri)):
+            s = self.stringTri(self.Tri,i)
             meshFile.write( str(idx)+"\t2\t2\t" + str(surfRegionTag) + "\t1\t"+ s + "\n" )
             idx += 1
         for i in range(0,len(self.subSurf)):
             for j in range(0,len(self.subSurf[i])):
-                s = self.stringFac(self.subSurf[i],j)
+                s = self.stringTri(self.subSurf[i],j)
                 meshFile.write( str(idx)+"\t2\t2\t" + self.subSurfRegName[i] + "\t1\t"+ s + "\n" )
                 idx += 1
         meshFile.write("$EndElements\n")

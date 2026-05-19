@@ -12,14 +12,14 @@ file_basename = "twinIco"
 mesh_filename = file_basename + ".msh"
 json_filename = file_basename + ".json"
 
-# Single icosahedron mesh: nodes and faces.
+# Single icosahedron mesh: nodes and triangles.
 phi = (1 + sqrt(5)) / 2
 ico_nodes = np.array([
     [phi, 1, 0], [phi, -1, 0], [-phi, 1, 0], [-phi, -1, 0],
     [1, 0, phi], [1, 0, -phi], [-1, 0, phi], [-1, 0, -phi],
     [0, phi, 1], [0, phi, -1], [0, -phi, 1], [0, -phi, -1], [0, 0, 0]
 ])
-ico_faces = np.array([
+ico_triangles = np.array([
     [0, 8, 4], [0, 4, 1], [0, 1, 5], [0, 5, 9], [0, 9, 8],
     [8, 9, 2], [8, 2, 6], [8, 6, 4], [6, 10, 4], [6, 3, 10],
     [6, 2, 3], [10, 3, 11], [10, 11, 1], [10, 1, 4], [1, 11, 5],
@@ -44,12 +44,12 @@ particles = [
 # Arguments:
 #  - first_tag: tag of first element in the list
 #  - extra_cols: extra constant columns as a 1D array of numbers
-#  - offset_idx: offset to add to the node indices from ico_faces
+#  - offset_idx: offset to add to the node indices from ico_triangles
 def elements(first_tag, extra_cols, offset_idx):
-    column_shape = (len(ico_faces), 1)
-    tags = np.arange(len(ico_faces)).reshape(column_shape) + first_tag
+    column_shape = (len(ico_triangles), 1)
+    tags = np.arange(len(ico_triangles)).reshape(column_shape) + first_tag
     cst_cols = np.ones(column_shape, dtype=int) * extra_cols
-    return np.hstack((tags, cst_cols, ico_faces + offset_idx))
+    return np.hstack((tags, cst_cols, ico_triangles + offset_idx))
 
 # Prepare the mesh data.
 nodes = np.vstack((
@@ -84,7 +84,7 @@ for i in range(0, len(nodes)):
     meshFile.write("\t".join(map(str, [i+1]+list(nodes[i]))) + "\n")
 meshFile.write(f"""$EndNodes
 $Elements
-{4*len(ico_faces)}
+{4*len(ico_triangles)}
 """)
 for tetrahedron in tetrahedrons:
     meshFile.write("\t".join(map(str, tetrahedron)) + "\n")

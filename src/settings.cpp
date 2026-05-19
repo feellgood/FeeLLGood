@@ -198,7 +198,7 @@ void Settings::toYaml()
         std::cout << "      spin_hall: " << it->spinHall << "\n";
         }
     std::cout << "  surface_regions:\n";
-    for (auto it = paramFacette.begin(); it != paramFacette.end(); ++it)
+    for (auto it = paramTriangle.begin(); it != paramTriangle.end(); ++it)
         {
         if (it->regName == "__default__")  // skip
             continue;
@@ -429,13 +429,13 @@ void Settings::read(YAML::Node yaml)
         if (surfaces && !surfaces.IsNull())
             {
             if (!surfaces.IsMap()) error("mesh.surface_regions should be a map.");
-            int default_idx = findRegionIdx<Facette::prm>("__default__");
+            int default_idx = findRegionIdx<Triangle::prm>("__default__");
             for (auto it = surfaces.begin(); it != surfaces.end(); ++it)
                 {
                 std::string name = it->first.as<std::string>();
                 YAML::Node surface = it->second;
-                Facette::prm &p = paramFacette.emplace_back();
-                if (default_idx >= 0) p = paramFacette[default_idx];
+                Triangle::prm &p = paramTriangle.emplace_back();
+                if (default_idx >= 0) p = paramTriangle[default_idx];
                 p.regName = name;
                 assign(p.suppress_charges, surface["suppress_charges"]);
                 assign(p.Ks, surface["Ks"]);

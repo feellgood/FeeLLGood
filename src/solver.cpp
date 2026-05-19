@@ -33,14 +33,14 @@ bool LinAlgebra::solve(timing const &t_prm)
                       buildVect<Tetra::N>(my_elem.ind, Le);
                       });
 
-    std::for_each(msh->magFac.begin(), msh->magFac.end(),
+    std::for_each(msh->magTri.begin(), msh->magTri.end(),
                   [this](const int idx)
                       {
-                      Facette::Fac &my_elem = msh->fac[idx];
+                      Triangle::Tri &my_elem = msh->tri[idx];
                       double *data_start = my_elem.Lp.data();
-                      double *data_end = data_start + 2*Facette::N;
+                      double *data_end = data_start + 2*Triangle::N;
                       std::vector<double> Le(data_start, data_end);
-                      buildVect<Facette::N>(my_elem.ind, Le);
+                      buildVect<Triangle::N>(my_elem.ind, Le);
                       });
 
     /* RHS forced to zero outside mag material defined by mask, corresponding K diagonal

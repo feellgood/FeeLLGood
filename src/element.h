@@ -13,7 +13,7 @@
 #include "algebra/algebra.h"
 
 /** \class element
-\brief Template abstract class, mother class for tetraedrons and facettes.
+\brief Template abstract class, mother class for tetraedrons and triangles.
 
 template parameters are N number of sommits and NPI number of interpolation points. It contains a
 list of indices to the N nodes of the element, a reference to the full nodes vector, and index

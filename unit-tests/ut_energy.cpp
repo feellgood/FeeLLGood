@@ -5,7 +5,7 @@
 #include <random>
 
 #include "tetra.h"
-#include "facette.h"
+#include "triangle.h"
 #include "tiny.h"
 #include "ut_tools.h"
 #include "ut_config.h"
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(uniaxialAnisotropyEnergy, *boost::unit_test::tolerance(UT_T
     }
 
 /*---------------------------------------*/
-/* test: check if demag energy computed through demag field Hd gives same energy as tet+fac demag energy computed from scaler potential phi   */
+/* test: check if demag energy computed through demag field Hd gives same energy as tet+tri demag energy computed from scaler potential phi   */
 /*---------------------------------------*/
 
 BOOST_AUTO_TEST_CASE(demagEnergy, *boost::unit_test::tolerance(UT_TOL))
@@ -146,17 +146,17 @@ BOOST_AUTO_TEST_CASE(demagEnergy, *boost::unit_test::tolerance(UT_TOL))
     const int ic = t.ind[2] + 1;
     const int id = t.ind[3] + 1;
     
-    std::vector<Facette::Fac> fa;
-    fa.push_back( Facette::Fac(node, nbNod, 0, {ia, ic, ib} ));
-    fa.push_back( Facette::Fac(node, nbNod, 0, {ib, ic, id} ));
-    fa.push_back( Facette::Fac(node, nbNod, 0, {ia, id, ic} ));
-    fa.push_back( Facette::Fac(node, nbNod, 0, {ia, ib, id} ));
-    std::for_each(fa.begin(),fa.end(),[Ms](Facette::Fac &f){ f.dMs = Ms;});
+    std::vector<Triangle::Tri> fa;
+    fa.push_back( Triangle::Tri(node, nbNod, 0, {ia, ic, ib} ));
+    fa.push_back( Triangle::Tri(node, nbNod, 0, {ib, ic, id} ));
+    fa.push_back( Triangle::Tri(node, nbNod, 0, {ia, id, ic} ));
+    fa.push_back( Triangle::Tri(node, nbNod, 0, {ia, ib, id} ));
+    std::for_each(fa.begin(),fa.end(),[Ms](Triangle::Tri &f){ f.dMs = Ms;});
     
-    std::for_each(fa.begin(),fa.end(), [&result_to_test](Facette::Fac &f)
+    std::for_each(fa.begin(),fa.end(), [&result_to_test](Triangle::Tri &f)
         {
-        Eigen::Matrix<double,Facette::NPI,1> phi_fa;
-        Eigen::Matrix<double,Nodes::DIM,Facette::NPI> u_fa;
+        Eigen::Matrix<double,Triangle::NPI,1> phi_fa;
+        Eigen::Matrix<double,Nodes::DIM,Triangle::NPI> u_fa;
         f.interpolation(Nodes::get_u<Nodes::NEXT>, u_fa);
         f.interpolation(Nodes::get_phi<Nodes::NEXT>, phi_fa);
         result_to_test += f.demagEnergy(u_fa, phi_fa);

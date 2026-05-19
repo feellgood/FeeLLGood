@@ -63,9 +63,9 @@ public:
      */
     inline fmm(Mesh::mesh &msh /**< [in] */,
                std::vector<Tetra::prm> & prmTet /**< [in] */,
-               std::vector<Facette::prm> & prmFac /**< [in] */,
+               std::vector<Triangle::prm> & prmTri /**< [in] */,
                const int ScalfmmNbThreads /**< [in] */)
-        : prmTetra(prmTet), prmFacette(prmFac),
+        : prmTetra(prmTet), prmTriangle(prmTri),
           tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels(NbLevels, boxWidth, boxCenter)
         {
         omp_set_num_threads(ScalfmmNbThreads);
@@ -83,9 +83,9 @@ public:
             }
 
         insertCharges<Tetra::Tet, Tetra::NPI>(msh.tet, msh.magTet, idxPart, msh.c);
-        insertCharges<Facette::Fac, Facette::NPI>(msh.fac, msh.magFac, idxPart, msh.c);
+        insertCharges<Triangle::Tri, Triangle::NPI>(msh.tri, msh.magTri, idxPart, msh.c);
 
-        srcDen.resize( msh.magFac.size()*Facette::NPI + msh.magTet.size()*Tetra::NPI );
+        srcDen.resize( msh.magTri.size()*Triangle::NPI + msh.magTet.size()*Tetra::NPI );
         corr.resize(msh.magNode.size());
         }
 
@@ -98,14 +98,14 @@ public:
         demag(Nodes::get_v<Nodes::NEXT>, Nodes::set_phiv, msh);
         }
 
-    /** corrections associated to the nodes, contributions only due to the facets */
+    /** corrections associated to the nodes, contributions only due to the triangles */
     std::vector<double> corr;
 
     /** all volume region parameters for the tetraedrons */
     const std::vector<Tetra::prm> &prmTetra;
 
-    /** all surface region parameters for the facettes */
-    const std::vector<Facette::prm> &prmFacette;
+    /** all surface region parameters for the triangles */
+    const std::vector<Triangle::prm> &prmTriangle;
 
 private:
     /** sources: both surface and volume charges */
@@ -122,7 +122,7 @@ private:
 
     /**
     function template to insert volume or surface charges in tree for demag computation. class T is
-    Tet or Fac, it must have getPtGauss() method, second template parameter is NPI of the namespace
+    Tet or Tri, it must have getPtGauss() method, second template parameter is NPI of the namespace
     containing class T.
     idxContainer is the list of indices of the magnetic T elements stored in container.
     */
@@ -148,7 +148,7 @@ private:
                       });
         }
 
-    /** computes all charges from tetraedrons and facettes for the demag field to feed a tree in the
+    /** computes all charges from tetraedrons and triangles for the demag field to feed a tree in the
      * fast multipole algo (scalfmm)
      */
     void calc_charges(std::function<const Eigen::Vector3d(const Nodes::Node&)> getter,
@@ -166,13 +166,13 @@ private:
                 nsrc += Tetra::NPI;
                 });
         std::fill(corr.begin(),corr.end(),0);
-        std::for_each(msh.magFac.begin(),msh.magFac.end(),[this, &msh, getter, &nsrc](const int idx)
+        std::for_each(msh.magTri.begin(),msh.magTri.end(),[this, &msh, getter, &nsrc](const int idx)
                 {
-                Facette::Fac &f = msh.fac[idx];
-                Eigen::Matrix<double,Facette::NPI,1> result = f.charges(f.dMs, getter);
-                for(int i=0;i<Facette::NPI;i++)
+                Triangle::Tri &f = msh.tri[idx];
+                Eigen::Matrix<double,Triangle::NPI,1> result = f.charges(f.dMs, getter);
+                for(int i=0;i<Triangle::NPI;i++)
                     { srcDen[nsrc+i] = result(i); }
-                nsrc += Facette::NPI;
+                nsrc += Triangle::NPI;
                 f.correctionCharges(getter,result,corr);
                 });
         }

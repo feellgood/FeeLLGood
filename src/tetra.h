@@ -8,7 +8,7 @@
 
 #include <set>
 
-#include "facette.h"
+#include "triangle.h"
 #include "node.h"
 #include "time_integration.h"
 #include "element.h"

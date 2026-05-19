@@ -57,7 +57,7 @@ void mesh::checkMeshFile(Settings const &mySets)
         std::cout<<"Fatal Error: mesh file contains other 2D elements than triangles.\n";
         exit(1);
         }
-    bool o_2D = checkNamedObjects<Facette::prm>(mySets.paramFacette,DIM_OBJ_2D);
+    bool o_2D = checkNamedObjects<Triangle::prm>(mySets.paramTriangle,DIM_OBJ_2D);
     bool o_3D = checkNamedObjects<Tetra::prm>(mySets.paramTetra,DIM_OBJ_3D);
     if (!(o_2D && o_3D))
         {
@@ -162,8 +162,8 @@ void mesh::readTriangles(Settings const &mySets /**< [in] */)
                 {
                 std::string name;
                 gmsh::model::getPhysicalName(p.first, physTag, name);
-                if ( std::any_of(mySets.paramFacette.begin(),mySets.paramFacette.end(),
-                     [&name] (Facette::prm const &p) { return p.regName == name; } ) )
+                if ( std::any_of(mySets.paramTriangle.begin(),mySets.paramTriangle.end(),
+                     [&name] (Triangle::prm const &p) { return p.regName == name; } ) )
                     { //named surface region is found
                     std::vector<int> elemTypes;
                     std::vector<std::vector<std::size_t> > elemTags, elemNodeTags;
@@ -171,14 +171,14 @@ void mesh::readTriangles(Settings const &mySets /**< [in] */)
                             p.first, p.second);
                     if (all_elems_are<TYP_ELEM_TRIANGLE>(elemTypes))
                         { // all elements are triangles
-                        int idx = mySets.findRegionIdx<Facette::prm>(name);
+                        int idx = mySets.findRegionIdx<Triangle::prm>(name);
                         const int nbNod = node.size();
                         for(unsigned int i=0;i<elemNodeTags[0].size();i+=SIZE_TRIANGLE)
                             {
                             int i0 = elemNodeTags[0][i];
                             int i1 = elemNodeTags[0][i+1];
                             int i2 = elemNodeTags[0][i+2];
-                            if (idx > -1) fac.push_back(Facette::Fac(node, nbNod, idx, {i0,i1,i2}));
+                            if (idx > -1) tri.push_back(Triangle::Tri(node, nbNod, idx, {i0,i1,i2}));
                             }
                         }
                     else

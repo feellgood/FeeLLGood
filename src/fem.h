@@ -152,7 +152,7 @@ public:
     /** total energy */
     double Etot;
 
-    /** mesh object to store nodes, fac, tet, and others geometrical values related to the mesh */
+    /** mesh object to store nodes, tri, tet, and others geometrical values related to the mesh */
     Mesh::mesh msh;
 
     /** computes all the energies */

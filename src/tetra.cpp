@@ -7,7 +7,7 @@
 #include "config.h"  // to get gamma0 constant
 #include "tetra.h"
 #include "time_integration.h"
-#include "facette.h"
+#include "triangle.h"
 
 using namespace Tetra;
 using namespace Nodes;

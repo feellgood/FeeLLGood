@@ -16,21 +16,21 @@ BOOST_AUTO_TEST_SUITE(ut_element)
 
 const int idxPrmToTest = 42;
 
-BOOST_AUTO_TEST_CASE(Fac_full_constructor)
+BOOST_AUTO_TEST_CASE(Tri_full_constructor)
     {
     std::vector<Nodes::Node> node;
     std::cout << "4 param constructor" << std::endl;
     
-    Facette::Fac f(node, 0, idxPrmToTest, {0, 0, 0});
+    Triangle::Tri f(node, 0, idxPrmToTest, {0, 0, 0});
     /*
-    The constructor facette does not modify all indices to fit to zero based index convention
+    The constructor triangle does not modify all indices to fit to zero based index convention
     it's done later
     */
     const int idx = 0;
     BOOST_CHECK(f.ind[0] == idx);
     BOOST_CHECK(f.ind[1] == idx);
     BOOST_CHECK(f.ind[2] == idx);
-    BOOST_CHECK((f.getN() == Facette::N) && (f.getNPI() == Facette::NPI));
+    BOOST_CHECK((f.getN() == Triangle::N) && (f.getNPI() == Triangle::NPI));
     BOOST_CHECK(f.dMs == 0);
     BOOST_CHECK(f.idxPrm == idxPrmToTest);
     BOOST_CHECK(f.Lp.norm() == 0);

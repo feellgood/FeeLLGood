@@ -27,12 +27,12 @@ public:
             Mesh::mesh & _msh /**< [in] reference to the mesh */,
             std::vector<Tetra::prm> & _pTetra /**< [in] ref to vector of param tetra
                                                 (volume region parameters) */,
-            std::vector<Facette::prm> & _pFac /**< [in] ref to vector of param facette
+            std::vector<Triangle::prm> & _pTri /**< [in] ref to vector of param triangle
                                                 (surface region parameters) */,
             const double _tol /**< [in] cg_dir tolerance */,
             const bool v /**< [in] verbose mode for iteration monitor */,
             const int max_iter /**< [in] maximum number of iterations */):
-            solver<DIM_PB_ELEC>(_msh,_pTetra,_pFac,"cg_dir",_tol,v,max_iter) {}
+            solver<DIM_PB_ELEC>(_msh,_pTetra,_pTri,"cg_dir",_tol,v,max_iter) {}
 
     /** electrostatic potential values for boundary conditions, V.size() is the size of the vector
      * of nodes */
@@ -45,8 +45,8 @@ public:
      * coefficients,inputs from tet */
     void integrales(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Tetra::N,Tetra::N> > AE) const;
 
-    /** compute integrales for vector coefficients, input from facette */
-    void integrales(Facette::Fac const &fac, std::vector<double> &BE) const;
+    /** compute integrales for vector coefficients, input from triangle */
+    void integrales(Triangle::Tri const &tri, std::vector<double> &BE) const;
 
     /** text file (tsv) writing function for the solution V over all volume regions of the mesh,
      * node indices are zero based */
@@ -56,9 +56,9 @@ public:
     /** returns sigma of the tetraedron, (conductivity in (Ohm.m)^-1 */
     double getSigma(Tetra::Tet const &tet) const;
 
-    /** returns current density of the facette if it is defined in the boundary conditions,
+    /** returns current density of the triangle if it is defined in the boundary conditions,
      * else zero */
-    double getCurrentDensity(Facette::Fac const &fac) const;
+    double getCurrentDensity(Triangle::Tri const &tri) const;
 
     /** solves the potential and stores result in V, save to text file if needed
      * if verbose set to true, some printing are sent to terminal */

@@ -5,10 +5,10 @@
 using namespace Mesh;
 
 /** \class BasicTri
-BasicTri is a simplified version of the class Fac which contains only
+BasicTri is a simplified version of the class Tri which contains only
 the nodes, the surface region and the region.
 It is used when checking the validity of the mesh is needed but
-not all the facet elements are needed.
+not all the triangle elements are needed.
 */
 class BasicTri
     {
@@ -20,9 +20,9 @@ public:
         : nodesInd({inds[0], inds[1], inds[2]}), idRegion(idReg), isSurfaceElement(surface)
         { std::sort(nodesInd.begin(), nodesInd.end()); }
 
-    /** Constructor used to copy a surface region facette */
-    explicit BasicTri(const Facette::Fac & fac)
-        : BasicTri(fac.ind, fac.idxPrm, true)
+    /** Constructor used to copy a surface region triangle */
+    explicit BasicTri(const Triangle::Tri & tri)
+        : BasicTri(tri.ind, tri.idxPrm, true)
         {}
 
     /** Compare the nodes indice lexicographically */
@@ -44,7 +44,7 @@ void mesh::infos(void) const
     {
     std::cout << "mesh:\n";
     std::cout << "  nodes:              " << getNbNodes() << '\n';
-    std::cout << "  faces:              " << fac.size() << '\n';
+    std::cout << "  triangles:          " << tri.size() << '\n';
     std::cout << "  tetraedrons:        " << tet.size() << '\n';
     std::cout << "  total volume:       " << vol << '\n';
     }
@@ -111,7 +111,7 @@ double mesh::doOnNodes(const double init_val, const Nodes::index coord,
 
 void mesh::indexReorder()
     {
-    std::set<Facette::Fac> sf;  // implicit use of operator< redefined in class Fac
+    std::set<Triangle::Tri> sf;  // implicit use of operator< redefined in class Tri
 
     std::for_each(tet.begin(), tet.end(), [this,&sf](Tetra::Tet const &te)
                   {
@@ -120,13 +120,13 @@ void mesh::indexReorder()
                   const int ic = te.ind[2];
                   const int id = te.ind[3];
 
-                  sf.insert(Facette::Fac(node, 0, te.idxPrm, {ia, ic, ib} ));
-                  sf.insert(Facette::Fac(node, 0, te.idxPrm, {ib, ic, id} ));
-                  sf.insert(Facette::Fac(node, 0, te.idxPrm, {ia, id, ic} ));
-                  sf.insert(Facette::Fac(node, 0, te.idxPrm, {ia, ib, id} ));
+                  sf.insert(Triangle::Tri(node, 0, te.idxPrm, {ia, ic, ib} ));
+                  sf.insert(Triangle::Tri(node, 0, te.idxPrm, {ib, ic, id} ));
+                  sf.insert(Triangle::Tri(node, 0, te.idxPrm, {ia, id, ic} ));
+                  sf.insert(Triangle::Tri(node, 0, te.idxPrm, {ia, ib, id} ));
                   });  // end for_each
 
-    std::for_each(fac.begin(), fac.end(), [this, &sf](Facette::Fac &fa)
+    std::for_each(tri.begin(), tri.end(), [this, &sf](Triangle::Tri &fa)
                   {
                   int i0 = fa.ind[0], i1 = fa.ind[1], i2 = fa.ind[2];
                   auto it = sf.end();
@@ -134,7 +134,7 @@ void mesh::indexReorder()
                       {
                       for (int nrot = 0; nrot < 3; nrot++)
                           {
-                          Facette::Fac fc(node, 0, 0, {0, 0, 0} );
+                          Triangle::Tri fc(node, 0, 0, {0, 0, 0} );
                           fc.ind[(0 + nrot) % 3] = i0;
                           fc.ind[(1 + nrot) % 3] = i1;
                           fc.ind[(2 + nrot) % 3] = i2;
@@ -152,10 +152,10 @@ void mesh::indexReorder()
                           fa.dMs = std::copysign( paramTetra[it->idxPrm].Ms,
                                p0p1.dot(p0p2.cross(fa.calc_norm())) );  // carefull, calc_norm
                                                                         // computes the normal to
-                                                                        // the face before idx swap
+                                                                        // the triangle before idx swap
                           }
                       std::swap(i1, i2);  // it seems from ref archive we do not want to swap
-                                        // inner fac indices but local i1 and i2
+                                        // inner tri indices but local i1 and i2
                       fa.n = fa.calc_norm(); // update normal vector
                       }                   // end perm
                   });  // end for_each
@@ -168,7 +168,7 @@ void mesh::checkTriangles()
     std::for_each(tet.begin(), tet.end(),       // For each tetrahedron
             [this, &allTriCtnr](const Tetra::Tet &tetrahedron)
             {
-            for (int i = 0; i < Tetra::N; i++)    // For each 4 faces
+            for (int i = 0; i < Tetra::N; i++)    // For each 4 triangles
                 {
                 BasicTri curTri({tetrahedron.ind[i], tetrahedron.ind[(i+1) % Tetra::N],
                                         tetrahedron.ind[(i+2) % Tetra::N]},
@@ -176,9 +176,9 @@ void mesh::checkTriangles()
                 allTriCtnr.push_back(curTri);
                 }
             });
-    std::for_each(fac.begin(), fac.end(), [this, &allTriCtnr](const Facette::Fac &curFac)
+    std::for_each(tri.begin(), tri.end(), [this, &allTriCtnr](const Triangle::Tri &curTri)
             {   // For each surface element
-            allTriCtnr.push_back(BasicTri(curFac));
+            allTriCtnr.push_back(BasicTri(curTri));
             });
 
     if (allTriCtnr.empty())
@@ -283,20 +283,20 @@ void mesh::sortNodes(Nodes::index long_axis)
                       tetrahedron.ind[2] = node_index[tetrahedron.ind[2]];
                       tetrahedron.ind[3] = node_index[tetrahedron.ind[3]];
                   });
-    std::for_each(fac.begin(), fac.end(),
-                  [this](Facette::Fac &facette)
+    std::for_each(tri.begin(), tri.end(),
+                  [this](Triangle::Tri &triangle)
                   {
-                      facette.ind[0] = node_index[facette.ind[0]];
-                      facette.ind[1] = node_index[facette.ind[1]];
-                      facette.ind[2] = node_index[facette.ind[2]];
+                      triangle.ind[0] = node_index[triangle.ind[0]];
+                      triangle.ind[1] = node_index[triangle.ind[1]];
+                      triangle.ind[2] = node_index[triangle.ind[2]];
                   });
     }
 
-double mesh::surface(std::vector<int> &facIndices) const
+double mesh::surface(std::vector<int> &triIndices) const
     {
     double S(0);
-    std::for_each(facIndices.begin(),facIndices.end(),[this,&S](int idx)
-                  { S += fac[idx].calc_surf(); });
+    std::for_each(triIndices.begin(),triIndices.end(),[this,&S](int idx)
+                  { S += tri[idx].calc_surf(); });
     return S;
     }
 

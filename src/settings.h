@@ -15,7 +15,7 @@ output file format wanted by the user. This is done mainly with the class Settin
 #include <yaml-cpp/yaml.h>
 
 #include "expression_parser.h"
-#include "facette.h"
+#include "triangle.h"
 #include "tetra.h"
 #include "time_integration.h"
 
@@ -211,8 +211,8 @@ public:
     std::vector<Tetra::prm> paramTetra;
 
     /** \return index of the region in the corresponding container,
-     either paramTetra or paramFacette
-     T has to be Tetra::prm or Facette:prm
+     either paramTetra or paramTriangle
+     T has to be Tetra::prm or Triangle:prm
      * */
     template <typename T>
     int findRegionIdx(const std::string &name /**< [in] region name to find */) const
@@ -220,8 +220,8 @@ public:
         typename std::vector<T>::const_iterator containerBegin, containerEnd;
         if constexpr (std::is_same_v<T,Tetra::prm>)
             { containerBegin = paramTetra.begin(); containerEnd = paramTetra.end(); }
-        else if constexpr (std::is_same_v<T,Facette::prm>)
-            { containerBegin = paramFacette.begin(); containerEnd = paramFacette.end(); }
+        else if constexpr (std::is_same_v<T,Triangle::prm>)
+            { containerBegin = paramTriangle.begin(); containerEnd = paramTriangle.end(); }
 
         typename std::vector<T>::const_iterator result = std::find_if(
                 containerBegin, containerEnd,
@@ -234,8 +234,8 @@ public:
         return idx;
         }
 
-    /** this vector contains the material parameters for all regions for all the facettes */
-    std::vector<Facette::prm> paramFacette;
+    /** this vector contains the material parameters for all regions for all the triangles */
+    std::vector<Triangle::prm> paramTriangle;
 
     /** relative path for output files (to be implemented) */
     std::string r_path_output_dir;

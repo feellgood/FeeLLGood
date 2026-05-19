@@ -5,7 +5,7 @@
 \brief secondary header, it grabs altogether the linear algebra by the solver to apply fem method
 <br> It encapsulates the calls to algebra BiCGSTAB solver, the assemblage and projection of the
 matrix for all elements
-<br> projection and matrix assembly is multithreaded for tetrahedron, monothread for facette
+<br> projection and matrix assembly is multithreaded for tetrahedron, monothread for triangle
 */
 #include <random>
 #pragma GCC diagnostic push
@@ -15,7 +15,7 @@ matrix for all elements
 
 #include "config.h"
 
-#include "facette.h"
+#include "triangle.h"
 #include "settings.h"
 #include "solver.h"
 #include "meshUtils.h"
@@ -45,7 +45,7 @@ public:
     */
     LinAlgebra(Settings &s /**< [in] */, Mesh::mesh &my_msh /**< [in] */)
         : solver<DIM_PB_MAG>(
-            my_msh, s.paramTetra, s.paramFacette, "bicg_dir", s.TOL, s.verbose, s.MAXITER,
+            my_msh, s.paramTetra, s.paramTriangle, "bicg_dir", s.TOL, s.verbose, s.MAXITER,
             [this](Mesh::Edge edge){ return msh->magNode[edge.first] && msh->magNode[edge.second]; }
         ),
         verbose(s.verbose),
@@ -72,7 +72,7 @@ public:
     /** check LLG boundary conditions */
     void checkBoundaryConditions(void) const {}
 
-    /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L
+    /** computes inner data structures of tetraedrons and triangular triangles (K matrices and L
     vectors) this member function is overloaded to fit to two different situations, either if
     std::function passed to element = tetra is corresponding to the simple case of constant external
     field applied to the magnetic region or space dependant. Here is the constant space applied
@@ -81,7 +81,7 @@ public:
     void prepareElements(Eigen::Vector3d const &Hext /**< [in] applied field */,
             timing const &t_prm /**< [in] */);
 
-    /** computes inner data structures of tetraedrons and triangular facettes (K matrices and L
+    /** computes inner data structures of tetraedrons and triangular triangles (K matrices and L
     vectors) this member function is overloaded to fit to two different situations, either if
     std::function passed to element = tetra is corresponding to the simple case of constant external
     field applied to the magnetic region or space dependant. Here is the variable space applied

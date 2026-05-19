@@ -26,12 +26,12 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     spinAcc(Mesh::mesh &_msh /**< [in] ref to the mesh */,
     std::vector<Tetra::prm> & _pTetra /**< [in] ref to vector of param tetra
                                         (volume region parameters) */,
-    std::vector<Facette::prm> & _pFac /**< [in] ref to vector of param facette
+    std::vector<Triangle::prm> & _pTri /**< [in] ref to vector of param triangle
                                         (surface region parameters) */,
     const double _tol /**< [in] tolerance for bicg_dir solver */,  // _tol could be 1e-6
     const bool v /**< [in] verbose bool */,
     const int max_iter /**< [in] maximum number of iterations */):
-        solver<DIM_PB_SPIN_ACC>(_msh,_pTetra,_pFac,"bicg_dir",_tol,v,max_iter)
+        solver<DIM_PB_SPIN_ACC>(_msh,_pTetra,_pTri,"bicg_dir",_tol,v,max_iter)
         {
         valDirichlet.resize(DIM_PB*NOD);
         boundaryConditions();
@@ -66,7 +66,7 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
      * where s is given by the user to be a constant on a surface */
     std::vector<int> idxDirichlet;
 
-    /** fill valDirichlet and idxDirichlet vectors with k, a node index from fac.ind and the
+    /** fill valDirichlet and idxDirichlet vectors with k, a node index from tri.ind and the
      * corresponding spin diffusion s value*/
     void fillDirichletData(const int k, Eigen::Vector3d &s_value);
 
