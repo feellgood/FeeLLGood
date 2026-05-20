@@ -36,14 +36,14 @@ void Tri::integrales(Triangle::prm const &params)
     }
 
 double Tri::anisotropyEnergy(Triangle::prm const &param,
-                             Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> const u) const
+                             const Eigen::Ref<const Eigen::Matrix<double,DIM,NPI>> u) const
     {  // surface Neel anisotropy (uk is a uniaxial easy axis)
     Eigen::Matrix<double,NPI,1> dens = (u.transpose()*param.uk).array().square();
     return -param.Ks*weight.dot(dens);
     }
 
 Eigen::Matrix<double,NPI,1> Tri::charges(const double &dMs,
-        std::function<Eigen::Vector3d(const Nodes::Node&)> getter) const
+             const std::function<Eigen::Vector3d(const Nodes::Node&)> &getter) const
     {
     Eigen::Matrix<double,NPI,1> result;
     result.setZero();
@@ -58,9 +58,9 @@ Eigen::Matrix<double,NPI,1> Tri::charges(const double &dMs,
     return result;
     }
 
-void Tri::correctionCharges(std::function<Eigen::Vector3d(Nodes::Node)> getter,
+void Tri::correctionCharges(const std::function<Eigen::Vector3d(Nodes::Node)>& getter,
                             Eigen::Matrix<double,Triangle::NPI,1> &localCharges,
-                            std::vector<double> &corr)
+                            std::vector<double> &corr) const
     {
     Eigen::Matrix<double,DIM,NPI> gauss;
     getPtGauss(gauss);
@@ -79,13 +79,13 @@ void Tri::correctionCharges(std::function<Eigen::Vector3d(Nodes::Node)> getter,
     }
 
 double Tri::demagEnergy(Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> u,
-        Eigen::Ref<Eigen::Matrix<double,NPI,1>> phi) const
+        const Eigen::Ref<const Eigen::Matrix<double,NPI,1>> phi) const
     {
     Eigen::Matrix<double,NPI,1> dens = (u.transpose()*n).cwiseProduct(phi);
     return 0.5*mu0*dMs*dens.dot(weight);
     }
 
-double Tri::potential(std::function<Eigen::Vector3d(Nodes::Node)> getter, int i) const
+double Tri::potential(const std::function<Eigen::Vector3d(Nodes::Node)>& getter, const int i) const
     {
     int ii = (i + 1) % 3;
     int iii = (i + 2) % 3;
@@ -97,7 +97,7 @@ double Tri::potential(std::function<Eigen::Vector3d(Nodes::Node)> getter, int i)
     Eigen::Vector3d p1p2 = node2.p - node1.p;
     Eigen::Vector3d p1p3 = node3.p - node1.p;
 
-    std::function<double(double)> f = [](double x) { return sqrt(1.0 + x * x); };
+    std::function<double(double)> f = [](const double x) { return sqrt(1.0 + x * x); };
 
     double b = p1p2.norm();
     double t = p1p2.dot(p1p3) / b;  // carefull with t , if cos(p1p2,p1p3) < 0 then t < 0

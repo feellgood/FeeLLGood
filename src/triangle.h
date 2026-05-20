@@ -81,7 +81,7 @@ struct prm
     Eigen::Vector3d s;     /**< spin diffusion vector (for spin diffusion boundary conditions) */
 
     /** print the region surface parameters, optional boolean spinAcc for spin accumulation datas */
-    inline void infos(const bool spinAcc = false)
+    inline void infos(const bool spinAcc = false) const
         {
         std::cout << "surface region name = " << regName
                   << " ; suppress charges = " << suppress_charges << std::endl;
@@ -147,7 +147,7 @@ public:
     /** interpolation function on the output of the getter.
     result = vec_nod * a 
     */
-    void interpolation(std::function<Eigen::Vector3d(Nodes::Node)> getter /**< [in] */,
+    void interpolation(const std::function<Eigen::Vector3d(Nodes::Node)>& getter /**< [in] */,
                        Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result /**< [out] */) const
         {
         Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
@@ -159,7 +159,7 @@ public:
     /** interpolation function on the output of the getter,
      mind the transposition: result = transpose(scalar_nod) * a
     */
-    void interpolation(std::function<double(Nodes::Node)> getter /**< [in] */,
+    void interpolation(const std::function<double(Nodes::Node)>& getter /**< [in] */,
                        Eigen::Ref<Eigen::Matrix<double,NPI,1>> result /**< [out] */) const
         {
         Eigen::Matrix<double,N,1> scalar_nod;
@@ -174,24 +174,24 @@ public:
 
     /** anisotropy energy of the triangle */
     double anisotropyEnergy(Triangle::prm const &param /**< [in] */,
-            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> const u /**< [in] */) const;
+            const Eigen::Ref<const Eigen::Matrix<double,Nodes::DIM,NPI>> u /**< [in] */) const;
 
     /** computes surface charges, return result on NPI */
     Eigen::Matrix<double,NPI,1>  charges(const double &dMs /**< [in] */,
-            std::function<Eigen::Vector3d(const Nodes::Node&)> getter /**< [in] */) const;
+            const std::function<Eigen::Vector3d(const Nodes::Node&)> &getter /**< [in] */) const override;
 
     /** computes correction on surface charges from localCharges input, result directly stored in
      * corr */
-    void correctionCharges(std::function<Eigen::Vector3d(Nodes::Node)> getter /**< [in] */,
+    void correctionCharges(const std::function<Eigen::Vector3d(Nodes::Node)>& getter /**< [in] */,
                            Eigen::Matrix<double,Triangle::NPI,1> &localCharges /**< [in] */,
-                           std::vector<double> &corr /**< [in|out]*/);
+                           std::vector<double> &corr /**< [in|out]*/) const;
 
     /** demagnetizing energy of the triangle */
     double demagEnergy(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u /**< [in] */,
-                       Eigen::Ref<Eigen::Matrix<double,NPI,1>> phi /**< [in] */) const;
+                       const Eigen::Ref<const Eigen::Matrix<double,NPI,1>> phi /**< [in] */) const;
 
     /** computes correction on potential*/
-    double potential(std::function<Eigen::Vector3d(Nodes::Node)> getter, int i) const;
+    double potential(const std::function<Eigen::Vector3d(Nodes::Node)>& getter, int i) const;
 
     /** Compares indices on lexicographic order : ind[0] then ind[1] then ind[2]. */
     inline bool operator<(const Tri &f) const
@@ -226,7 +226,7 @@ public:
         }
 
     /** returns Gauss points in result = vec_nod*Triangle::a */
-    void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result) const
+    void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result) const override
         {
         Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
         for (int i = 0; i < N; i++)
@@ -241,7 +241,7 @@ public:
 
 private:
     /** do nothing function: orientation is done in mesh::indexReorder */
-    void orientate(void) {}
+    void orientate(void) override {}
 
     /** return normal to the triangle, not normalized */
     inline Eigen::Vector3d normal_vect() const

@@ -33,7 +33,7 @@ class element
     public:
     explicit element(const std::vector<Nodes::Node> &_p_node /**< vector of nodes */,
             const int _idx /**< index to params */,
-            std::initializer_list<int> & _i /**< indices to the nodes */
+            const std::initializer_list<int> & _i /**< indices to the nodes */
             ) : idxPrm(_idx), refNode(_p_node)
         {
         if(_i.size() == N)
@@ -97,7 +97,7 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
     virtual void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result) const = 0;
 
     /** print the vector index of the associated region and the node indices of the element */
-    void infos(void)
+    void infos(void) const
         {
         std::cout << "idxPrm: " << idxPrm << " ind: {";
         for(unsigned int i = 0; i < N-1; i++)
@@ -108,7 +108,7 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
     /** Compute the magnetic charges on the element. The first parameter is Ms on a volume element,
      * and dMs on a surface element.*/
     virtual Eigen::Matrix<double,NPI,1> charges(const double &Ms_or_dMs,
-            std::function<Eigen::Vector3d(const Nodes::Node&)> getter) const = 0;
+            const std::function<Eigen::Vector3d(const Nodes::Node&)> &getter) const = 0;
 
    /** returns true if all mesh node indices in ind are referring to existing nodes in refNode.
     * It does not test if two indices are equal, so this function does not detect degenerated
