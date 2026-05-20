@@ -148,7 +148,7 @@ public:
     */
     inline Tet(const std::vector<Nodes::Node> &_p_node /**< vector of nodes */,
                const int _idx /**< [in] region index in region vector */,
-               std::initializer_list<int> _i /**< [in] node index */)
+               const std::initializer_list<int> _i /**< [in] node index */)
         : element<N,NPI>(_p_node,_idx,_i), idx(0)
         {
         zeroBasing();
@@ -170,7 +170,7 @@ public:
                 { weight[j] = detJ * Tetra::pds[j]; }// if NPI=1 weight[0] is the tetrahedron volume
             }
         // do nothing lambda's (usefull for spin transfer torque)
-        extraField = [] ( Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> ) {};
+        extraField = [] ( const Eigen::Ref<const Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> ) {};
         }
 
     /** local hat functions matrix, initialized by constructor: da = dadu * inverse(Jacobian)
@@ -181,7 +181,7 @@ public:
      * know what part of the node you want to interpolate
      * If single Gauss point evaluates scalar at barycenter
      * */
-    inline void interpolation(std::function<double(Nodes::Node)> getter,
+    inline void interpolation(const std::function<double(Nodes::Node)>& getter,
                               Eigen::Ref<Eigen::Matrix<double,NPI,1>> result) const
         {
         Eigen::Matrix<double,N,1> scalar_nod;
@@ -191,7 +191,7 @@ public:
 
     /** interpolation for 3D vector field and a tensor : getter function is given as a parameter to
      * know what part of the node you want to interpolate */
-    inline void interpolation(std::function<Eigen::Vector3d(Nodes::Node)> getter,
+    inline void interpolation(const std::function<Eigen::Vector3d(Nodes::Node)>& getter,
                               Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result,
                               Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> Tx,
                               Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> Ty,
@@ -212,7 +212,7 @@ public:
     /** interpolation for components of a field : the getter function is given as a parameter in
      * order to know what part of the node you want to interpolate
      * Computes gradient at single Gauss point, constant for linear tetrahedron */
-    inline void interpolation_field(std::function<double(Nodes::Node)> getter,
+    inline void interpolation_field(const std::function<double(Nodes::Node)>& getter,
                                     Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> X) const
         {
         Eigen::Matrix<double,N,1> scalar_nod;
@@ -230,8 +230,8 @@ public:
 
     /** interpolation for the component idx of a field : the getter function is given as a parameter
      * in order to know what part of the node you want to interpolate */
-    inline void interpolation(std::function<double(Nodes::Node, Nodes::index)> getter,
-            Nodes::index idx, Eigen::Ref<Eigen::Matrix<double,Tetra::NPI,1>> result) const
+    inline void interpolation(const std::function<double(Nodes::Node, Nodes::index)>& getter,
+            const Nodes::index idx, Eigen::Ref<Eigen::Matrix<double,Tetra::NPI,1>> result) const
         {
         Eigen::Matrix<double,N,1> scalar_nod;
 
@@ -252,14 +252,15 @@ public:
     E is the sum of the exchange contribution and modified alpha (scheme stabilizer) on its diagonal
     X Y Z are diagonal matrices with magnetization component contributions
      */
-    void lumping(Eigen::Ref<Eigen::Matrix<double,NPI,1>> alpha_eff, double prefactor,
+    void lumping(const Eigen::Ref<const Eigen::Matrix<double,NPI,1>> alpha_eff, double prefactor,
                   Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const;
 
     /**
      * computes elementary N*N matrix block
      * returns Id⊗x + c Sum_i w_i da*transpose(da)
      * */
-    Eigen::Matrix<double,N,N> calcDiagBlock(const double c, Eigen::Matrix<double,N,1> &x) const;
+    Eigen::Matrix<double,N,N> calcDiagBlock(const double c,
+                                              const Eigen::Matrix<double,N,1> &x) const;
 
     /**
      * computes elementary diagonal elementary block (stored in a N vector)
@@ -277,7 +278,7 @@ public:
 
     /** append(+=) H_aniso for uniaxial anisotropy contribution, returns contribution to uHeff (used
      * to compute the stabilizing effective damping) */
-    Eigen::Matrix<double,NPI,1> calc_aniso_uniax(Eigen::Ref<const Eigen::Vector3d> uk,
+    Eigen::Matrix<double,NPI,1> calc_aniso_uniax(const Eigen::Ref<const Eigen::Vector3d> uk,
             const double Kbis, const double s_dt,
             Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
             Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V,
@@ -285,9 +286,9 @@ public:
 
     /** append(+=) H_aniso for cubic anisotropy contribution, returns contribution to uHeff (used to
      * compute the stabilizing effective damping) */
-    Eigen::Matrix<double,NPI,1> calc_aniso_cub(Eigen::Ref<const Eigen::Vector3d> ex,
-            Eigen::Ref<const Eigen::Vector3d> ey,
-            Eigen::Ref<const Eigen::Vector3d> ez,
+    Eigen::Matrix<double,NPI,1> calc_aniso_cub(const Eigen::Ref<const Eigen::Vector3d> ex,
+            const Eigen::Ref<const Eigen::Vector3d> ey,
+            const Eigen::Ref<const Eigen::Vector3d> ez,
             const double K3bis, const double s_dt,
             Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
             Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V,
@@ -296,50 +297,50 @@ public:
     /** computes the integral contribution of the tetrahedron to the evolution of the magnetization
      * calc_Hext is a function that returns external H field defined on gauss points
      */
-    void integrales( Tetra::prm const &param, timing const &prm_t,
-                    std::function< Eigen::Matrix<double,Nodes::DIM,NPI> (void)> calc_Hext,
+    void integrales( const Tetra::prm &param, const timing &prm_t,
+                    const std::function< Eigen::Matrix<double,Nodes::DIM,NPI> (void)>& calc_Hext,
                     Nodes::index idx_dir, double Vdrift);
 
     /** exchange energy of the tetrahedron */
-    double exchangeEnergy(Tetra::prm const &param,
+    double exchangeEnergy(const Tetra::prm &param,
                           Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudx,
                           Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudy,
                           Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudz) const;
 
     /** uniaxial anisotropy energy of the tetrahedron */
-    double uniaxialAnisotropyEnergy(Tetra::prm const &param,
+    double uniaxialAnisotropyEnergy(const Tetra::prm &param,
             Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u) const;
 
     /** cubic anisotropy energy of the tetrahedron */
-    double cubicAnisotropyEnergy(Tetra::prm const &param,
+    double cubicAnisotropyEnergy(const Tetra::prm &param,
             Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u) const;
 
     /** computes volume charges, the divergence of the magnetization, returns result */
     Eigen::Matrix<double,Tetra::NPI,1> charges(const double &Ms,
-            std::function<Eigen::Vector3d(const Nodes::Node&)> getter) const;
+            const std::function<Eigen::Vector3d(const Nodes::Node&)> &getter) const override;
 
     /** demagnetizing energy of the tetrahedron */
-    double demagEnergy(Tetra::prm const &param,
+    double demagEnergy(const Tetra::prm &param,
                        Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudx,
                        Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudy,
                        Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudz,
                        Eigen::Ref<Eigen::Matrix<double,NPI,1>> phi) const;
 
     /** zeeman energy of the tetrahedron for a constant Hext */
-    double zeemanEnergy(Tetra::prm const &param  /**< [in] */,
-            Eigen::Ref<Eigen::Vector3d> const Hext /**< [in] constant applied field */,
-            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> const u /**< [in] */) const;
+    double zeemanEnergy(const Tetra::prm &param  /**< [in] */,
+            const Eigen::Ref<const Eigen::Vector3d> Hext /**< [in] constant applied field */,
+            const Eigen::Ref<const Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> u /**< [in] */) const;
 
     /** zeeman energy of the tetrahedron for a varying Hext */
-    double zeemanEnergy(Tetra::prm const &param /**< [in] */,
+    double zeemanEnergy(const Tetra::prm &param /**< [in] */,
                         double fieldAmp /**< [in] applied field amplitude, may be time dependant */,
-                        std::vector<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> &spaceField
+                        const std::vector<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> &spaceField
                         /**< [in] space varying applied field */,
-                        Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> const u
+                        const Eigen::Ref<const Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> u
                         /**< [in] magnetization at Gauss points */) const;
 
     /** \return \f$ |J| \f$ build Jacobian \f$ J \f$ */
-    double Jacobian(Eigen::Ref<Eigen::Matrix3d> J);
+    double Jacobian(Eigen::Ref<Eigen::Matrix3d> J) const;
 
     /** returns volume of the tetrahedron ; unit test Tet_calc_vol */
     double calc_vol(void) const;
@@ -351,7 +352,7 @@ public:
     std::function<void( Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)> extraField;
 
     /** returns gauss points in result = vec_nod*Tetra::a  */
-    void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result) const
+    void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result) const override
         {
         Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
         for (int i = 0; i < N; i++)
@@ -363,7 +364,7 @@ public:
 
 private:
     /** orientation redefined through node index swaping if needed */
-    void orientate(void);
+    void orientate(void) override;
     };  // end class Tetra
 
     /** to perform some second order corrections, an effective \f$ \alpha \f$ is computed here with
@@ -372,10 +373,10 @@ private:
                                                Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff);
 
     /** returns grad(V) for tetra tet */
-    Eigen::Matrix<double,Nodes::DIM,NPI> calc_gradV(Tet const &tet,std::vector<double> &V);
+    Eigen::Matrix<double,Nodes::DIM,NPI> calc_gradV(Tet const &tet, const std::vector<double> &V);
 
     /** returns Hst field on the NPI Gauss point(s) */
-    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> calc_Hst(Tetra::Tet const &tet,
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> calc_Hst(const Tetra::Tet &tet,
                                                          const double prefactor,
                                                          std::vector<Eigen::Vector3d> &s);
 }   // end namespace Tetra
