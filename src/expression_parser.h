@@ -39,7 +39,7 @@ public:
      * "x,y,z".
      */
     void set_expressions(const std::string &parameters, const std::string &expr_x,
-                         const std::string &expr_y, const std::string &expr_z);
+                         const std::string &expr_y, const std::string &expr_z) const;
 
     /**
      * Return the number of parameters of the JavaScript function.

@@ -2,7 +2,7 @@
 
 using namespace Nodes;
 
-void Fem::energy(double const t, Settings &settings)
+void Fem::energy(const double t, Settings &settings)
     {
     std::fill(E.begin(),E.end(),0);
     Etot = 0.0;
@@ -15,10 +15,10 @@ void Fem::energy(double const t, Settings &settings)
     }
 
     std::for_each(msh.magTet.begin(), msh.magTet.end(),
-                  [this, &Hext, fieldAmp, &settings](const int &idxElem)
+                  [this, &Hext, fieldAmp, &settings](const int idxElem)
                       {
-                      Tetra::Tet const &te = msh.tet[idxElem];
-                      Tetra::prm const &param = settings.paramTetra[te.idxPrm];
+                      const Tetra::Tet &te = msh.tet[idxElem];
+                      const Tetra::prm &param = settings.paramTetra[te.idxPrm];
                       Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> u,dudx,dudy,dudz;
                       Eigen::Matrix<double,Tetra::NPI,1> phi;
 
@@ -47,10 +47,10 @@ void Fem::energy(double const t, Settings &settings)
                       });
 
     std::for_each(msh.magTri.begin(), msh.magTri.end(),
-                  [this, &settings](const int &idxElem)
+                  [this, &settings](const int idxElem)
                       {
-                      Triangle::Tri const &fa =msh.tri[idxElem];
-                      Triangle::prm const &param = settings.paramTriangle[fa.idxPrm];
+                      const Triangle::Tri &fa =msh.tri[idxElem];
+                      const Triangle::prm &param = settings.paramTriangle[fa.idxPrm];
                       Eigen::Matrix<double,Triangle::NPI,1> phi;
                       Eigen::Matrix<double,Nodes::DIM,Triangle::NPI> u;
 

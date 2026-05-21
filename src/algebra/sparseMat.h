@@ -65,7 +65,7 @@ class SparseMatrix
         /**
         Return a reference to the coefficient at index j, which must be a valid index.
         */
-        double& operator[](int j)
+        double& operator[](const int j)
             {
             auto it = std::lower_bound(indices.begin(), indices.end(), j);
             assert(it != indices.end() && *it == j);
@@ -100,7 +100,7 @@ public:
     /**
     Set the value at position (i, j), which must belong to the shape.
     */
-    void set(int i, int j, double val)
+    void set(const int i, const int j, const double val)
         {
         assert(i >= 0 && i < rows.size());
         assert(j >= 0 && j < rows.size());
@@ -111,7 +111,7 @@ public:
     Add the provided value at position (i, j), which must belong to the shape. This method is
     thread-safe.
     */
-    void add(int i, int j, double val)
+    void add(const int i, const int j, const double val)
         {
         assert(i >= 0 && i < rows.size());
         assert(j >= 0 && j < rows.size());
@@ -155,7 +155,7 @@ public:
 
     /** Y = this*X */
     template <typename T>
-    void mult(std::vector<T> const& X, std::vector<T> &Y)
+    void mult(const std::vector<T> &X, std::vector<T> &Y)
         {
         assert(X.size() == rows.size());
         assert(Y.size() == rows.size());
