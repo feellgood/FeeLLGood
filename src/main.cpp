@@ -288,12 +288,12 @@ int main(int argc, char *argv[])
     action.sa_handler = signal_handler;
     action.sa_flags = 0;
     sigemptyset(&action.sa_mask);
-    if (sigaction(SIGINT, &action, NULL) == -1)
+    if (sigaction(SIGINT, &action, nullptr) == -1)
         {
         perror("SIGINT");
         return EXIT_FAILURE;
         }
-    if (sigaction(SIGTERM, &action, NULL) == -1)
+    if (sigaction(SIGTERM, &action, nullptr) == -1)
         {
         perror("SIGTERM");
         return EXIT_FAILURE;
