@@ -43,22 +43,22 @@ public:
 
     /** compute side problem (electrostatic potential on the nodes) integrales for matrix
      * coefficients,inputs from tet */
-    void integrales(Tetra::Tet const &tet, Eigen::Ref<Eigen::Matrix<double,Tetra::N,Tetra::N> > AE) const;
+    void integrales(const Tetra::Tet &tet, Eigen::Ref<Eigen::Matrix<double,Tetra::N,Tetra::N> > AE) const;
 
     /** compute integrales for vector coefficients, input from triangle */
-    void integrales(Triangle::Tri const &tri, std::vector<double> &BE) const;
+    void integrales(const Triangle::Tri &tri, std::vector<double> &BE) const;
 
     /** text file (tsv) writing function for the solution V over all volume regions of the mesh,
      * node indices are zero based */
     bool save(const std::string& V_fileName /**< [in] output file name */,
-            std::string const &metadata /**< [in] */) const;
+            const std::string &metadata /**< [in] */) const;
 
     /** returns sigma of the tetraedron, (conductivity in (Ohm.m)^-1 */
-    double getSigma(Tetra::Tet const &tet) const;
+    double getSigma(const Tetra::Tet &tet) const;
 
     /** returns current density of the triangle if it is defined in the boundary conditions,
      * else zero */
-    double getCurrentDensity(Triangle::Tri const &tri) const;
+    double getCurrentDensity(const Triangle::Tri &tri) const;
 
     /** solves the potential and stores result in V, save to text file if needed
      * if verbose set to true, some printing are sent to terminal */

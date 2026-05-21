@@ -11,7 +11,7 @@ void electrostatSolver::checkBoundaryConditions(void) const
     {
     int nbSurfJ(0);
     int nbSurfV(0);
-    std::for_each(paramTri.begin(),paramTri.end(),[&nbSurfJ,&nbSurfV](Triangle::prm const &p)
+    std::for_each(paramTri.begin(),paramTri.end(),[&nbSurfJ,&nbSurfV](const Triangle::prm &p)
         {
         if (std::isfinite(p.jn)) nbSurfJ++;
         if (std::isfinite(p.V)) nbSurfV++;
@@ -35,7 +35,7 @@ void electrostatSolver::infos(void) const
         } );
     }
 
-void electrostatSolver::integrales(Tetra::Tet const &tet,
+void electrostatSolver::integrales(const Tetra::Tet &tet,
         Eigen::Ref<Eigen::Matrix<double,Tetra::N,Tetra::N> > AE) const
     {
     const double sigma = getSigma(tet);
@@ -60,7 +60,7 @@ void electrostatSolver::integrales(Tetra::Tet const &tet,
         }
     }
 
-void electrostatSolver::integrales(Triangle::Tri const &tri, std::vector<double> &BE) const
+void electrostatSolver::integrales(const Triangle::Tri &tri, std::vector<double> &BE) const
     {
     double J_bc = getCurrentDensity(tri);// _bc for Boundary Condition
     for (int npi = 0; npi < Triangle::NPI; npi++)
@@ -131,7 +131,7 @@ bool electrostatSolver::solve(void)
     return ( iter.status == algebra::CONVERGED);
     }
 
-bool electrostatSolver::save(const std::string& V_fileName, std::string const &metadata) const
+bool electrostatSolver::save(const std::string& V_fileName, const std::string &metadata) const
     {
     std::ofstream fout(V_fileName, std::ios::out);
     if (fout.fail())
@@ -152,10 +152,10 @@ bool electrostatSolver::save(const std::string& V_fileName, std::string const &m
     return !(fout.good());
     }
 
-double electrostatSolver::getSigma(Tetra::Tet const &tet) const
+double electrostatSolver::getSigma(const Tetra::Tet &tet) const
     { return paramTet[tet.idxPrm].sigma; }
 
-double electrostatSolver::getCurrentDensity(Triangle::Tri const &tri) const
+double electrostatSolver::getCurrentDensity(const Triangle::Tri &tri) const
     {
     double val = paramTri[tri.idxPrm].jn;
     if (!std::isfinite(val)) val = 0.0;

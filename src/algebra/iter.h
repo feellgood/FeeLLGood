@@ -84,7 +84,7 @@ class iteration
 
     public :
     /** constructor */
-    iteration(const std::string name, T r, bool _noise, int _maxiter)
+    iteration(const std::string &name, T r, const bool _noise, const int _maxiter)
             : rhsn(1.0), maxiter(_maxiter), noise(_noise), nit(0),
             res(std::numeric_limits<T>::max()), written(false), solver_name(name), resmax(r)
         { status = UNDEFINED; }

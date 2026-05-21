@@ -51,7 +51,7 @@ ExpressionParser::ExpressionParser()
 
 ExpressionParser::~ExpressionParser() { duk_destroy_heap(ctx); }
 
-void ExpressionParser::die_if_error(duk_int_t err) const
+void ExpressionParser::die_if_error(const duk_int_t err) const
     {
     if (err == DUK_ERR_NONE) return;
     std::cerr << "Script " << duk_safe_to_string(ctx, -1) << '\n';
@@ -72,13 +72,13 @@ void ExpressionParser::set_function(const std::string &js_function) const
     }
 
 void ExpressionParser::set_expressions(const std::string &parameters, const std::string &expr_x,
-                                       const std::string &expr_y, const std::string &expr_z)
+                                       const std::string &expr_y, const std::string &expr_z) const
     {
     set_function("function(" + parameters + ") { return [(" + expr_x + "), (" + expr_y + "), ("
                  + expr_z + ")]; }");
     }
 
-double ExpressionParser::get_scalar(double arg) const
+double ExpressionParser::get_scalar(const double arg) const
     {
     duk_dup(ctx, -1);                   // -> [ f f ]
     duk_push_number(ctx, arg);          // -> [ f f arg ]
@@ -89,7 +89,7 @@ double ExpressionParser::get_scalar(double arg) const
     return result;
     }
 
-double ExpressionParser::get_vector_component(int idx) const
+double ExpressionParser::get_vector_component(const int idx) const
     {
     duk_push_int(ctx, idx);                      // [ ... v ] -> [ ... v idx ]
     duk_bool_t success = duk_get_prop(ctx, -2);  //           -> [ ... v v[idx] ]
@@ -103,7 +103,7 @@ double ExpressionParser::get_vector_component(int idx) const
     return val;
     }
 
-Eigen::Vector3d ExpressionParser::compute_vector(int argument_count) const
+Eigen::Vector3d ExpressionParser::compute_vector(const int argument_count) const
     {
     duk_int_t err = duk_pcall(ctx, argument_count);  // [ f f args... ] -> [ f v ]
     die_if_error(err);
@@ -114,7 +114,7 @@ Eigen::Vector3d ExpressionParser::compute_vector(int argument_count) const
     return Eigen::Vector3d(x, y, z);
     }
 
-Eigen::Vector3d ExpressionParser::get_vector(double arg) const
+Eigen::Vector3d ExpressionParser::get_vector(const double arg) const
     {
     duk_dup(ctx, -1);           // -> [ f f ]
     duk_push_number(ctx, arg);  // -> [ f f arg ]
