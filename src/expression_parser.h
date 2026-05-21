@@ -59,12 +59,12 @@ public:
     /**
      * Compute a vector from the given vector argument.
      */
-    Eigen::Vector3d get_vector(const Eigen::Ref<Eigen::Vector3d> arg) const;
+    Eigen::Vector3d get_vector(const Eigen::Ref<const Eigen::Vector3d> arg) const;
 
     /**
      * Compute a vector from the given vector and array of strings arguments.
      */
-    Eigen::Vector3d get_vector(const Eigen::Ref<Eigen::Vector3d> position,
+    Eigen::Vector3d get_vector(const Eigen::Ref<const Eigen::Vector3d> position,
             const std::vector<std::string> &regions) const;
 
 private:

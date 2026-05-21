@@ -55,7 +55,7 @@ double mesh::thiele(const int region /** region index, or -1 for all magnetic re
             [this, region](const int idxElem)
                 {//the lambda computes sq(sum(grad(u))) on the tetrahedron indexed by idxElem
                 double val(0);
-                Tetra::Tet const &te = tet[idxElem];
+                const Tetra::Tet &te = tet[idxElem];
                 if((te.idxPrm == region) || (region == -1))
                     {
                     Eigen::Matrix<double,Nodes::DIM,Tetra::N> u_nod;
@@ -83,9 +83,9 @@ double mesh::avg(const std::function<double(Nodes::Node, Nodes::index)>& getter 
     {
     double sum = std::transform_reduce(EXEC_POL, magTet.begin(), magTet.end(), 0.0,
                                        std::plus<>(),
-                                       [this, getter, &d, region](const int &idxElem)
+                                       [this, &getter, &d, region](const int &idxElem)
                                        {
-                                       Tetra::Tet const &te = tet[idxElem];
+                                       const Tetra::Tet &te = tet[idxElem];
                                        if (te.idxPrm != region && region != -1)
                                            return 0.0;
                                        Eigen::Matrix<double,Tetra::NPI,1> val;
@@ -101,7 +101,7 @@ double mesh::doOnNodes(const double init_val, const Nodes::index coord,
     {
     double result(init_val);
     std::for_each(node.begin(), node.end(),
-                  [&result, coord, whatToDo](Nodes::Node const &n)
+                  [&result, coord, whatToDo](const Nodes::Node &n)
                   {
                   double val = n.p(coord);
                   if (whatToDo(val, result)) result = val;
@@ -113,7 +113,7 @@ void mesh::indexReorder()
     {
     std::set<Triangle::Tri> sf;  // implicit use of operator< redefined in class Tri
 
-    std::for_each(tet.begin(), tet.end(), [this,&sf](Tetra::Tet const &te)
+    std::for_each(tet.begin(), tet.end(), [this,&sf](const Tetra::Tet &te)
                   {
                   const int ia = te.ind[0];
                   const int ib = te.ind[1];
@@ -166,7 +166,7 @@ void mesh::checkTriangles()
     std::vector<BasicTri> allTriCtnr;
     // Put all triangles into allTriCtnr after doing the conversion
     std::for_each(tet.begin(), tet.end(),       // For each tetrahedron
-            [this, &allTriCtnr](const Tetra::Tet &tetrahedron)
+            [&allTriCtnr](const Tetra::Tet &tetrahedron)
             {
             for (int i = 0; i < Tetra::N; i++)    // For each 4 triangles
                 {
@@ -176,7 +176,7 @@ void mesh::checkTriangles()
                 allTriCtnr.push_back(curTri);
                 }
             });
-    std::for_each(tri.begin(), tri.end(), [this, &allTriCtnr](const Triangle::Tri &curTri)
+    std::for_each(tri.begin(), tri.end(), [&allTriCtnr](const Triangle::Tri &curTri)
             {   // For each surface element
             allTriCtnr.push_back(BasicTri(curTri));
             });
@@ -263,7 +263,7 @@ void mesh::sortNodes(Nodes::index long_axis)
     std::vector<int> permutation(node.size());
     std::iota(permutation.begin(), permutation.end(), 0);
     std::sort(permutation.begin(), permutation.end(),
-              [this, long_axis](int a, int b)
+              [this, long_axis](const int a, const int b)
               { return node[a].p(long_axis) < node[b].p(long_axis); });
     node_index.resize(node.size());
     for (size_t i = 0; i < node.size(); i++)
@@ -295,7 +295,7 @@ void mesh::sortNodes(Nodes::index long_axis)
 double mesh::surface(std::vector<int> &triIndices) const
     {
     double S(0);
-    std::for_each(triIndices.begin(),triIndices.end(),[this,&S](int idx)
+    std::for_each(triIndices.begin(),triIndices.end(),[this,&S](const int idx)
                   { S += tri[idx].calc_surf(); });
     return S;
     }
@@ -307,7 +307,7 @@ void mesh::setExtSpaceField(Settings &s /**< [in] */)
     int k(0);
     std::for_each(magTet.begin(), magTet.end(), [this,&s,&k](const int idx)
         {
-        Tetra::Tet const &t = tet[idx];
+        const Tetra::Tet &t = tet[idx];
         Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> pg;// gauss points
         t.getPtGauss(pg);
         for(int i=0;i<Tetra::NPI;i++)
