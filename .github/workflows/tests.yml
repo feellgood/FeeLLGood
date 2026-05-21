@@ -36,19 +36,36 @@ jobs:
         export PATH="/usr/lib/ccache:$PATH"
         ci-tests/install-dependencies.sh -u
 
-    - name: build
+    - name: build with 5 Gauss points
       run: |
         export PATH="/usr/lib/ccache:$PATH"
         cmake . -DENABLE_UTESTS=ON -DENABLE_DET_UTESTS=ON
         make -j $(getconf _NPROCESSORS_ONLN)
 
-    - name: show ccache stats
+    - name: show ccache stats (5 Gauss points)
       run: |
         ccache --show-stats
         ccache --zero-stats
 
-    - name: run unit tests
+    - name: run unit tests (5 Gauss points)
       run: make test
 
-    - name: run functional test
+    - name: run functional test (5 Gauss points)
+      run: ci-tests/full_test.py
+
+    - name: build with 1 Gauss point
+      run: |
+        git clean -dxf
+        cmake . -DENABLE_UTESTS=ON -DENABLE_DET_UTESTS=ON -DONE_GAUSS_POINT=ON
+        make -j $(getconf _NPROCESSORS_ONLN)
+
+    - name: show ccache stats (1 Gauss point)
+      run: |
+        ccache --show-stats
+        ccache --zero-stats
+
+    - name: run unit tests (1 Gauss point)
+      run: make test
+
+    - name: run functional test (1 Gauss point)
       run: ci-tests/full_test.py
