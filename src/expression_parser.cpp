@@ -121,7 +121,7 @@ Eigen::Vector3d ExpressionParser::get_vector(double arg) const
     return compute_vector(1);
     }
 
-Eigen::Vector3d ExpressionParser::get_vector(const Eigen::Ref<Eigen::Vector3d> arg) const
+Eigen::Vector3d ExpressionParser::get_vector(const Eigen::Ref<const Eigen::Vector3d> arg) const
     {
     duk_dup(ctx, -1);               // -> [ f f ]
     duk_push_number(ctx, arg.x());  // -> [ f f arg.x ]
@@ -130,7 +130,7 @@ Eigen::Vector3d ExpressionParser::get_vector(const Eigen::Ref<Eigen::Vector3d> a
     return compute_vector(3);
     }
 
-Eigen::Vector3d ExpressionParser::get_vector(const Eigen::Ref<Eigen::Vector3d> position,
+Eigen::Vector3d ExpressionParser::get_vector(const Eigen::Ref<const Eigen::Vector3d> position,
         const std::vector<std::string> &regions) const
     {
     duk_dup(ctx, -1);                              // -> [ f f ]

@@ -77,7 +77,7 @@ static void replace(std::string &s, const std::string &search, const std::string
     }
 
 // Stringify a boolean
-static const char *str(bool x) { return x ? "true" : "false"; }
+static const char *str(const bool x) { return x ? "true" : "false"; }
 
 // Stringify a vector
 // do NOT use std::to_string here, because cout << to_string(1e-7); does print 0.000000
@@ -92,7 +92,7 @@ static const std::string str(Eigen::Vector3d v)
 // Stringify a string: if it contains a newline, convert it to a multiline string in "literal style"
 // (introduced by '|'). Otherwise enclose it in quotes, and escape embedded quotes.
 // `level` is the indentation level of the property whose value is being stringified.
-static const std::string str(std::string s, int level = 0)
+static const std::string str(std::string s, const int level = 0)
     {
     // If it doesn't have a newline, quote it.
     if (s.find('\n') == s.npos)
@@ -117,8 +117,8 @@ static const std::string str(std::string s, int level = 0)
     return s;
     }
 
-bool isOrthogonal(Eigen::Ref<Eigen::Vector3d> a, Eigen::Ref<Eigen::Vector3d> b,
-        Eigen::Ref<Eigen::Vector3d> c, const double precision)
+bool isOrthogonal(const Eigen::Ref<const Eigen::Vector3d> a, const Eigen::Ref<const Eigen::Vector3d> b,
+        const Eigen::Ref<const Eigen::Vector3d> c, const double precision)
     {
     bool val = (fabs(a.dot(b)) < precision);
     val &= (fabs(b.dot(c)) < precision);
@@ -596,7 +596,7 @@ void Settings::read(YAML::Node yaml)
         }
     }
 
-bool Settings::read(std::string filename)
+bool Settings::read(const std::string& filename)
     {
     YAML::Node config;
     if (filename == "-")

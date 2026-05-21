@@ -75,7 +75,7 @@ public:
         totalMagVol = 0;
         // Compute the per-region volumes and the total volume.
         std::for_each(tet.begin(), tet.end(),
-                [this](Tetra::Tet const &te)
+                [this](const Tetra::Tet &te)
                     {
                     double vol_tet = te.calc_vol();
                     paramTetra[te.idxPrm].volume += vol_tet;
@@ -86,15 +86,15 @@ public:
                 std::plus<>(), [](const Tetra::prm &region){ return region.volume; });
 
         // Build the list of tetrahedrons for each region.
-        std::for_each(tet.begin(), tet.end(), [this](Tetra::Tet const &te)
+        std::for_each(tet.begin(), tet.end(), [this](const Tetra::Tet &te)
             {
             volumeRegions[te.idxPrm].push_back(te.idx);
             });
 
         // Build the list of all the mesh edges.
-        edges.reserve(tet.size() * 6);  // 6 (non unique) edges per tetrahedron
+        edges.reserve(tet.size() * 6);  // 6 (non-unique) edges per tetrahedron
         std::for_each(tet.begin(), tet.end(),
-                [this](Tetra::Tet const &te)
+                [this](const Tetra::Tet &te)
                     {
                     for (int i = 0; i < 3; ++i)
                         {
@@ -161,7 +161,7 @@ public:
     inline double getProj_eq(const int i) const {return node[i].proj_eq();}
 
     /** setter for u0 */
-    inline void set_node_u0(const int i, Eigen::Vector3d const &val)
+    inline void set_node_u0(const int i, const Eigen::Vector3d &val)
         { node[i].d[Nodes::CURRENT].u = val; }
 
     /** fix to zero node[i].v */
@@ -217,7 +217,7 @@ public:
 
     /** computes an analytical initial magnetization distribution as a starting point for the
      * simulation. If the node is not magnetic then it is set to NAN. */
-    inline void init_distrib(Settings const &mySets /**< [in] */)
+    inline void init_distrib(const Settings &mySets /**< [in] */)
         {
         for (int nodeIdx = 0; nodeIdx < int(node.size()); ++nodeIdx)
             {
@@ -250,7 +250,7 @@ public:
                 const std::vector<int> &regionTetras = volumeRegions[regIdx];
                 bool node_in_region = std::any_of(EXEC_POL,
                     regionTetras.begin(), regionTetras.end(),
-                    [this, nodeIdx](int tetIdx)
+                    [this, nodeIdx](const int tetIdx)
                     {
                     const Tetra::Tet &tetrahedron = tet[tetIdx];
                     for (int i = 0; i < Tetra::N; ++i) // node of tetrahedron tetIdx
@@ -268,7 +268,7 @@ public:
             std::vector<std::string> region_names;
             region_names.resize(nodeRegions.size());
             std::transform(nodeRegions.begin(), nodeRegions.end(), region_names.begin(),
-                [this](int regIdx){ return paramTetra[regIdx].regName; });
+                [this](const int regIdx){ return paramTetra[regIdx].regName; });
 
             n.d[Nodes::CURRENT].u = mySets.getMagnetization(n.p, region_names);
             n.d[Nodes::NEXT].u = n.d[Nodes::CURRENT].u;
@@ -294,7 +294,7 @@ public:
     double max_angle() const
         {
         double min_dot_product = std::transform_reduce(EXEC_POL, edges.begin(), edges.end(), 1.0,
-                [](double a, double b){ return std::min(a, b); },
+                [](const double a, const double b){ return std::min(a, b); },
                 [this](const Edge &edge)
                     {
                     Eigen::Vector3d m1 = getNode_u(edge.first);
@@ -311,8 +311,8 @@ public:
      * Since some volume region might be non magnetic, magnetization is undefined on those nodes and
      * nan is used */
     void savesol(const int precision /**< [in] numeric precision in .sol output text file */,
-            const std::string fileName /**< [in] */,
-             std::string const &metadata /**< [in] */,
+            const std::string& fileName /**< [in] */,
+             const std::string &metadata /**< [in] */,
              bool withSpinAcc /**< [in] */,
              std::vector<Eigen::Vector3d> &s /**< [in] spin accumulation (might be empty) */) const;
 
@@ -371,19 +371,19 @@ private:
 
     /** test if mesh file contains surfaces and regions mentionned in yaml settings and their
      * dimensions */
-    void checkMeshFile(Settings const &mySets /**< [in] */);
+    void checkMeshFile(const Settings &mySets /**< [in] */);
     
     /** read Nodes from mesh file */
-    void readNodes(Settings const &mySets /**< [in] */);
+    void readNodes(const Settings &mySets /**< [in] */);
 
     /** read tetraedrons of the settings volume regions */
-    void readTetraedrons(Settings const &mySets /**< [in] */);
+    void readTetraedrons(const Settings &mySets /**< [in] */);
 
     /** read triangles of the settings surface regions */
-    void readTriangles(Settings const &mySets /**< [in] */);
+    void readTriangles(const Settings &mySets /**< [in] */);
 
     /** reading mesh format 2.2 text file function */
-    void readMesh(Settings const &mySets /**< [in] */);
+    void readMesh(const Settings &mySets /**< [in] */);
 
     /** loop on nodes to apply predicate 'whatTodo'  */
     double doOnNodes(const double init_val /**< [in] */,
@@ -393,7 +393,8 @@ private:
     /** return the minimum of all nodes coordinate along coord axis */
     inline double minNodes(const Nodes::index coord /**< [in] */) const
         {
-        return doOnNodes(__DBL_MAX__, coord, [](double a, double b) { return a < b; });
+        return doOnNodes(__DBL_MAX__, coord, [](const double a, const double b)
+                        { return a < b; });
         }
 
     /** return the maximum of all nodes coordinate along coord axis */
@@ -434,7 +435,7 @@ private:
     bool isInMagList(std::vector<int> &idxMagList, Triangle::Tri &f) const
         {
         auto it = std::find_if(idxMagList.begin(),idxMagList.end(),
-                               [this,&f](int idx) { return (tri[idx] == f); });
+                               [this,&f](const int idx) { return (tri[idx] == f); });
         return(it != idxMagList.end());
         }
 

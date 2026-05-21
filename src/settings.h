@@ -7,8 +7,6 @@ output file format wanted by the user. This is done mainly with the class Settin
 */
 
 #include <cmath>
-#include <iostream>
-#include <map>
 #include <string>
 #include <vector>
 
@@ -17,7 +15,6 @@ output file format wanted by the user. This is done mainly with the class Settin
 #include "expression_parser.h"
 #include "triangle.h"
 #include "tetra.h"
-#include "time_integration.h"
 
 /** Specify how the initial magnetization is defined as a JavaScript function. It is either a
  * function of (x, y, z), the position coordinates of the node, or it takes a fourth parameter,
@@ -100,7 +97,7 @@ public:
     void read(YAML::Node);
 
     /** read settings from a YAML file. Returns true if a non-empty configuration is found. */
-    bool read(std::string filename);
+    bool read(const std::string& filename);
 
     /** returns numeric precision for .sol output text files */
     inline int getPrecision(void) const { return precision; }
@@ -109,16 +106,16 @@ public:
     inline std::string getFileDisplayName(void) const { return fileDisplayName; }
 
     /** setter for fileDisplayName */
-    inline void setFileDisplayName(std::string _s) { fileDisplayName = _s; }
+    inline void setFileDisplayName(const std::string &_s) { fileDisplayName = _s; }
 
     /** setter for .msh file name */
-    inline void setPbName(std::string str) { pbName = str; }
+    inline void setPbName(const std::string &str) { pbName = str; }
 
     /** getter for problem file name */
     inline std::string getPbName(void) const { return pbName; }
 
     /** setter for .sol output file name */
-    inline void setSimName(std::string str) { simName = str; }
+    inline void setSimName(const std::string &str) { simName = str; }
 
     /** getter for output file name */
     inline std::string getSimName(void) const { return simName; }
@@ -130,7 +127,7 @@ public:
     inline double getScale(void) const { return _scale; }
 
     /** maximum number of iterations setter for bicgstab */
-    inline void set_MAXITER(int i) { MAXITER = i; }
+    inline void set_MAXITER(const int i) { MAXITER = i; }
 
     /** boolean flag to mention if you want output in txt tsv file format */
     bool withTsv;
@@ -225,7 +222,7 @@ public:
 
         typename std::vector<T>::const_iterator result = std::find_if(
                 containerBegin, containerEnd,
-                [name] (T const &p) { return (p.regName == name);} );
+                [name] (const T &p) { return (p.regName == name);} );
         int idx(-2);
         if (result == containerEnd)
             { idx = -1; }
@@ -265,7 +262,7 @@ public:
      * is **not thread safe**.
      * \return reduced magnetization (unit vector)
      */
-    inline Eigen::Vector3d getMagnetization(const Eigen::Ref<Eigen::Vector3d> p) const
+    inline Eigen::Vector3d getMagnetization(const Eigen::Ref<const Eigen::Vector3d> p) const
         {
         Eigen::Vector3d tmp = mag_parser.get_vector(p);
         tmp.normalize();
@@ -276,7 +273,7 @@ public:
      * of regions this node belongs to. This method is **not thread safe**.
      * \return reduced magnetization (unit vector)
      */
-    inline Eigen::Vector3d getMagnetization(const Eigen::Ref<Eigen::Vector3d> p,
+    inline Eigen::Vector3d getMagnetization(const Eigen::Ref<const Eigen::Vector3d> p,
             const std::vector<std::string> &regions) const
         {
         Eigen::Vector3d tmp = mag_parser.get_vector(p, regions);
@@ -307,7 +304,7 @@ public:
      * is allowed only if field_type is `R4toR3`. This method is **not thread safe**.
      * \return spatial part of applied **H** field (not **B**!)
      */
-    inline Eigen::Vector3d getFieldSpace(const Eigen::Ref<Eigen::Vector3d> p) const
+    inline Eigen::Vector3d getFieldSpace(const Eigen::Ref<const Eigen::Vector3d> p) const
         { return field_space_parser.get_vector(p); }
 
     /** Evaluate the “time” part of the applied field, which is a time-dependent scalar. This is
