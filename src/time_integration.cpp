@@ -15,17 +15,17 @@ class TimeStepper
     double soft_max;       /**< too large for this specific time step */
 public:
     /** Create a TimeStepper initialized with the given initial and maximum time steps. */
-    TimeStepper(double initial, double min, double max)
+    TimeStepper(const double initial, const double min, const double max)
         : hard_min(min), hard_max(max * (1 + FLT_EPSILON)), soft_max(initial)
         {
         }
 
     /** Update soft_max to be no larger than max. */
-    void set_soft_limit(double max) { soft_max = std::min(soft_max, max); }
+    void set_soft_limit(const double max) { soft_max = std::min(soft_max, max); }
 
     /** Return a reasonable time step. `stride` is distance to the next
      * time we want to hit exactly. */
-    double operator()(double stride)
+    double operator()(const double stride)
         {
         double step = std::min(stride, soft_max);
         if (step > stride - 2 * hard_min && step < stride)
@@ -70,9 +70,9 @@ static void print_stats(const Stats &s)
 /** Periodically show the percentage of work done, together with an
  * ASCII-art spinner. End the output with CR in order to keep the cursor
  * on the same line, which then gets overwritten on the next update. */
-static void show_progress(double fraction_done)
+static void show_progress(const double fraction_done)
     {
-    const char spinner[] = "|/-\\";
+    constexpr char spinner[] = "|/-\\";
     const std::chrono::duration<double> min_period(0.5);
     static int spinner_pos = 0;
     static std::chrono::time_point<std::chrono::steady_clock> last_update;

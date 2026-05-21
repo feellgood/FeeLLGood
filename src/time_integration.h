@@ -51,7 +51,7 @@ public:
     inline double get_t() const { return t; }
 
     /** setter for t */
-    inline void set_t(double _t) { t = _t; }
+    inline void set_t(const double _t) { t = _t; }
 
 private:
     double t; /**< physical current time of the simulation */
