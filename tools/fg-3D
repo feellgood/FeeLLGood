@@ -147,7 +147,6 @@ try:
             self.setWindowTitle("FeeLLGood - 3D")
             self.showMaximized()
 
-            # Variables
             self.meshFileName = mesh_file
             self.solFileName = None
             self.magnetization_data = None
@@ -157,6 +156,7 @@ try:
             self.help = None
             self.mesh = None
             self.surf_charges = None
+            self.smooth_shading = True
             self.strLog = ""
             self.setup_ui()
             if mesh_file != None:
@@ -230,8 +230,14 @@ try:
             self.surface_charges_checkbox.setToolTip("add surface charges on the surface of the object")
             self.surface_charges_checkbox.stateChanged.connect(self.on_surface_charges_changed)
 
+            self.smooth_shading_checkbox = QCheckBox("Smooth shading")
+            self.smooth_shading_checkbox.setChecked(True)
+            self.smooth_shading_checkbox.setToolTip("smooth the 3D rendering of the mesh")
+            self.smooth_shading_checkbox.stateChanged.connect(self.on_smooth_shading_changed)
+
             magnetization_layout.addWidget(self.show_vectors_checkbox)
             magnetization_layout.addWidget(self.surface_charges_checkbox)
+            magnetization_layout.addWidget(self.smooth_shading_checkbox)
 
             scale_layout = QHBoxLayout()
             scale_layout.addWidget(QLabel("Vector Scale:"))
@@ -376,6 +382,13 @@ try:
                     self.strLog += "no mesh and/or magnetization data to compute surface charges\n"
             self.update_infos()
 
+        def on_smooth_shading_changed(self):
+            if self.smooth_shading_checkbox.isChecked():
+                self.smooth_shading = True
+            else:
+                self.smooth_shading = False
+            self.update_mesh()
+
         def on_vector_scale_changed(self):
             """Called when vector scale spinbox value changes"""
             if self.show_vectors_checkbox.isChecked():
@@ -388,11 +401,12 @@ try:
             else:
                 try:
                     self.plotter.clear_actors()
+                    s = self.smooth_shading
                     if self.surface_charges_checkbox.isChecked():
                         self.mesh.cell_data['surface charges'] = self.surf_charges
-                        self.plotter.add_mesh(self.mesh,smooth_shading=True,split_sharp_edges=True,cmap='coolwarm')
+                        self.plotter.add_mesh(self.mesh,smooth_shading=s,split_sharp_edges=True,cmap='coolwarm')
                     else:
-                        self.plotter.add_mesh(self.mesh,smooth_shading=True,split_sharp_edges=True,color="lightblue")
+                        self.plotter.add_mesh(self.mesh,smooth_shading=s,split_sharp_edges=True,color="lightblue")
                         self.add_bounding_box(self.original_points)
 
                 # Add magnetization vectors if available and enabled
