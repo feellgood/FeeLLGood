@@ -55,7 +55,7 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** check boundary conditions: mesh and settings have to define a single surface with constant
      * normal current density J, a vector polarization P and another single surface where spin
      * diffusion = 0 */
-    void checkBoundaryConditions(void) const;
+    void checkBoundaryConditions(void) const override;
 
     private:
     /** Dirichlet values of the components of s on the nodes, it is zero if the node is not in
@@ -79,25 +79,25 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     const int precision = 8;
 
     /** returns Ms */
-    double getMs(Tetra::Tet const &tet) const;
+    double getMs(const Tetra::Tet &tet) const;
 
     /** returns sigma of the tetraedron, (conductivity in (Ohm.m)^-1 */
-    double getSigma(Tetra::Tet const &tet) const;
+    double getSigma(const Tetra::Tet &tet) const;
 
     /** \f$ P \f$ is polarization rate of the current density */
-    double getPolarizationRate(Tetra::Tet const &tet) const;
+    double getPolarizationRate(const Tetra::Tet &tet) const;
 
     /** diffusion constant, units: s^-1 m^2 */
-    double getDiffusionCst(Tetra::Tet const &tet) const;
+    double getDiffusionCst(const Tetra::Tet &tet) const;
 
     /** length s-d : only in magnetic material */
-    double getLsd(Tetra::Tet const &tet) const;
+    double getLsd(const Tetra::Tet &tet) const;
 
-    /** spin flip length : exists in both non magnetic and magnetic metals */
-    double getLsf(Tetra::Tet const &tet) const;
+    /** spin flip length : exists in both non-magnetic and magnetic metals */
+    double getLsf(const Tetra::Tet &tet) const;
 
     /** spin Hall constant */
-    double getSpinHall(Tetra::Tet const &tet) const;
+    double getSpinHall(const Tetra::Tet &tet) const;
 
     /** affect extraField member function of all tetrahedrons */
     void prepareExtras(void);
@@ -108,7 +108,7 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
 
     /** computes all contributions to matrix AE from tetrahedron tet (LHS)
      * all = non magnetic metal + magnetic metal */
-    void integrales(Tetra::Tet &tet, Eigen::Matrix<double,DIM_PB*Tetra::N,DIM_PB*Tetra::N> &AE);
+    void integrales(const Tetra::Tet &tet, Eigen::Matrix<double,DIM_PB*Tetra::N,DIM_PB*Tetra::N> &AE) const;
 
     /** computes all contributions to spin diffusion from tetrahedron tet (RHS)
      * all = magnetic metal + spin Hall effect */

@@ -30,11 +30,11 @@ class solver
                                                     (volume region parameters) */,
                 std::vector<Triangle::prm> & _pTri /**< [in] ref to vector of param tri
                                                     (surface region parameters) */,
-                const std::string name /**< [in] name of the solver method */,
+                const std::string& name /**< [in] name of the solver method */,
                 const double _tol /**< [in] solver tolerance */,
                 const bool v /**< [in] verbose mode for iteration monitor */,
                 const int max_iter /**< [in] maximum number of iterations */,
-                std::function<bool(Mesh::Edge)> edge_filter = [](Mesh::Edge){ return true; }
+                const std::function<bool(Mesh::Edge)> &edge_filter = [](Mesh::Edge){ return true; }
                     /** [in] predicate for relevant mesh edges */):
                 msh(&_msh), NOD(_msh.getNbNodes()), paramTet(_pTetra),
                 paramTri(_pTri), verbose(v), iter(name,_tol,v,max_iter),
@@ -74,12 +74,12 @@ class solver
         std::vector<double> L_rhs;
 
         /** Build a matrix shape suitable for the current problem. */
-        algebra::MatrixShape build_shape(std::function<bool(Mesh::Edge)> edge_filter)
+        algebra::MatrixShape build_shape(const std::function<bool(Mesh::Edge)>& edge_filter) const
             {
             algebra::MatrixShape shape(DIM_PROBLEM * NOD);
 
             // Add a DIM_PROBLEM × DIM_PROBLEM block connecting nodes i and j.
-            auto add_block = [this, &shape](int i, int j)
+            auto add_block = [this, &shape](const int i, const int j)
                 {
                 for (int k = 0; k < DIM_PROBLEM; ++k)
                     {
