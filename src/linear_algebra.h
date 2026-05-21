@@ -15,14 +15,10 @@ matrix for all elements
 
 #include "config.h"
 
-#include "triangle.h"
 #include "settings.h"
 #include "solver.h"
-#include "meshUtils.h"
 #include "node.h"
 #include "tetra.h"
-
-#include "algebra/algebra.h"
 
 /**dimensionnality of the micromagnetic problem */
 const int DIM_PB_MAG = 2;
@@ -46,7 +42,7 @@ public:
     LinAlgebra(Settings &s /**< [in] */, Mesh::mesh &my_msh /**< [in] */)
         : solver<DIM_PB_MAG>(
             my_msh, s.paramTetra, s.paramTriangle, "bicg_dir", s.TOL, s.verbose, s.MAXITER,
-            [this](Mesh::Edge edge){ return msh->magNode[edge.first] && msh->magNode[edge.second]; }
+            [this](const Mesh::Edge edge){ return msh->magNode[edge.first] && msh->magNode[edge.second]; }
         ),
         verbose(s.verbose),
         extSpaceField(my_msh.extSpaceField)
@@ -70,7 +66,7 @@ public:
         }
 
     /** check LLG boundary conditions */
-    void checkBoundaryConditions(void) const {}
+    void checkBoundaryConditions(void) const override {}
 
     /** computes inner data structures of tetraedrons and triangular triangles (K matrices and L
     vectors) this member function is overloaded to fit to two different situations, either if
@@ -78,8 +74,8 @@ public:
     field applied to the magnetic region or space dependant. Here is the constant space applied
     field.
     */
-    void prepareElements(Eigen::Vector3d const &Hext /**< [in] applied field */,
-            timing const &t_prm /**< [in] */);
+    void prepareElements(const Eigen::Vector3d &Hext /**< [in] applied field */,
+            const timing &t_prm /**< [in] */) const;
 
     /** computes inner data structures of tetraedrons and triangular triangles (K matrices and L
     vectors) this member function is overloaded to fit to two different situations, either if
@@ -87,9 +83,9 @@ public:
     field applied to the magnetic region or space dependant. Here is the variable space applied
     field.
     */
-    void prepareElements(double const A_Hext /**< [in] amplitude applied field (might be time
+    void prepareElements(const double A_Hext /**< [in] amplitude applied field (might be time
                                                dependant)*/,
-            timing const &t_prm /**< [in] */);
+            const timing &t_prm /**< [in] */) const;
 
     /** build init guess for bicg solver */
     void buildInitGuess(std::vector<double> &G/**< [out] */) const;
@@ -97,20 +93,20 @@ public:
     /** call the solver, uses stabilized biconjugate gradient solver (bicg) with diagonal
      * preconditionner, sparse matrix and vector are filled with multiThreading. Sparse matrix is
      * row major. */
-    bool solve(timing const &t_prm /**< [in] */);
+    bool solve(const timing &t_prm /**< [in] */);
 
     /** setter for DW_dz */
-    inline void set_DW_vz(double vz /**< [in] */) { DW_vz = vz; }
+    inline void set_DW_vz(const double vz /**< [in] */) { DW_vz = vz; }
 
     /** getter for v_max */
-    inline double get_v_max(void) { return v_max; }
+    inline double get_v_max(void) const { return v_max; }
 
     /** when external applied field is of field_type R4toR3 values of field_space are stored in
      * spaceField */
     void setExtSpaceField(Settings &s /**< [in] */);
 
     /** computes local vector basis {ep,eq} in the tangeant plane for projection on the elements */
-    void base_projection();
+    void base_projection() const;
 
 private:
     /** recentering index direction if any */

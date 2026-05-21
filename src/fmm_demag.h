@@ -129,13 +129,13 @@ private:
     idxContainer is the list of indices of the magnetic T elements stored in container.
     */
     template<class T, const int NPI>
-    void insertCharges(std::vector<T> const &container, std::vector<int> const &idxContainer,
-                       FSize &idx, Eigen::Ref<Eigen::Vector3d> const c)
+    void insertCharges(const std::vector<T> &container, const std::vector<int> &idxContainer,
+                       FSize &idx, const Eigen::Ref<const Eigen::Vector3d> c)
         {
         std::for_each(idxContainer.begin(), idxContainer.end(),
-                      [this,&container, c, &idx](int const &idxElem)
+                      [this,&container, c, &idx](const int idxElem)
                       {
-                      T const &elem = container[idxElem];
+                      const T &elem = container[idxElem];
                       Eigen::Matrix<double,Nodes::DIM,NPI> gauss;
                       elem.getPtGauss(gauss);
 
@@ -153,12 +153,12 @@ private:
     /** computes all charges from tetraedrons and triangles for the demag field to feed a tree in the
      * fast multipole algo (scalfmm)
      */
-    void calc_charges(std::function<const Eigen::Vector3d(const Nodes::Node&)> getter,
+    void calc_charges(const std::function<const Eigen::Vector3d(const Nodes::Node&)>& getter,
             Mesh::mesh &msh)
         {
         int nsrc(0);
         std::fill(srcDen.begin(),srcDen.end(),0);
-        std::for_each(msh.magTet.begin(),msh.magTet.end(),[this, &msh, getter, &nsrc](const int idx)
+        std::for_each(msh.magTet.begin(),msh.magTet.end(),[this, &msh, &getter, &nsrc](const int idx)
                 {
                 Tetra::Tet &t = msh.tet[idx];
                 Eigen::Matrix<double,Tetra::NPI,1> result =
@@ -168,7 +168,7 @@ private:
                 nsrc += Tetra::NPI;
                 });
         std::fill(corr.begin(),corr.end(),0);
-        std::for_each(msh.magTri.begin(),msh.magTri.end(),[this, &msh, getter, &nsrc](const int idx)
+        std::for_each(msh.magTri.begin(),msh.magTri.end(),[this, &msh, &getter, &nsrc](const int idx)
                 {
                 Triangle::Tri &f = msh.tri[idx];
                 Eigen::Matrix<double,Triangle::NPI,1> result = f.charges(f.dMs, getter);
@@ -182,8 +182,8 @@ private:
     /**
     computes the demag field, with (getter  = u,setter = phi) or (getter = v,setter = phi_v)
     */
-    void demag(std::function<const Eigen::Vector3d(const Nodes::Node&)> getter,
-               std::function<void(Nodes::Node &, const double)> setter, Mesh::mesh &msh)
+    void demag(const std::function<const Eigen::Vector3d(const Nodes::Node&)>& getter,
+               const std::function<void(Nodes::Node &, const double)>& setter, Mesh::mesh &msh)
         {
         FmmClass algo(&tree, &kernels);
         calc_charges(getter, msh);

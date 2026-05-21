@@ -9,7 +9,7 @@
 
 namespace Mesh
     {
-void mesh::readMesh(Settings const &mySets)
+void mesh::readMesh(const Settings &mySets)
     {
     gmsh::initialize();
     if (!mySets.verbose)
@@ -32,7 +32,7 @@ void mesh::readMesh(Settings const &mySets)
     gmsh::finalize();
     }
 
-void mesh::checkMeshFile(Settings const &mySets)
+void mesh::checkMeshFile(const Settings &mySets)
     {
     using namespace tags::msh;
     gmsh::open(mySets.getPbName());
@@ -66,7 +66,7 @@ void mesh::checkMeshFile(Settings const &mySets)
         }
     }
 
-void mesh::readNodes(Settings const &mySets /**< [in] */)
+void mesh::readNodes(const Settings &mySets /**< [in] */)
     {
     double scale = mySets.getScale();
     std::vector<std::size_t> nodeTags;
@@ -87,7 +87,7 @@ void mesh::readNodes(Settings const &mySets /**< [in] */)
         }
     }
 
-void mesh::readTetraedrons(Settings const &mySets /**< [in] */)
+void mesh::readTetraedrons(const Settings &mySets /**< [in] */)
     {
     using namespace tags::msh;
 
@@ -101,7 +101,7 @@ void mesh::readTetraedrons(Settings const &mySets /**< [in] */)
                                                                  // region volume index
         std::vector<int> physicalTags;
         gmsh::model::getPhysicalGroupsForEntity(p.first, p.second, physicalTags);
-        if(physicalTags.size())
+        if(!physicalTags.empty())
             {
             for(auto physTag : physicalTags)
                 {
@@ -109,7 +109,7 @@ void mesh::readTetraedrons(Settings const &mySets /**< [in] */)
                 gmsh::model::getPhysicalName(p.first, physTag, n);
 
                 if ( std::any_of(mySets.paramTetra.begin(),mySets.paramTetra.end(),
-                     [&n] (Tetra::prm const &p) { return p.regName == n; } ) )
+                     [&n] (const Tetra::prm &p) { return p.regName == n; } ) )
                     { //named volume region is found
                     std::vector<int> elemTypes;
                     std::vector<std::vector<std::size_t> > elemTags, elemNodeTags;
@@ -142,7 +142,7 @@ void mesh::readTetraedrons(Settings const &mySets /**< [in] */)
         } );// end for_each on entities
     }
 
-void mesh::readTriangles(Settings const &mySets /**< [in] */)
+void mesh::readTriangles(const Settings &mySets /**< [in] */)
     {
     using namespace tags::msh;
 
@@ -156,14 +156,14 @@ void mesh::readTriangles(Settings const &mySets /**< [in] */)
                                                                  // region surface index
         std::vector<int> physicalTags;
         gmsh::model::getPhysicalGroupsForEntity(p.first, p.second, physicalTags);
-        if(physicalTags.size())
+        if(!physicalTags.empty())
             {
             for(auto physTag : physicalTags)
                 {
                 std::string name;
                 gmsh::model::getPhysicalName(p.first, physTag, name);
                 if ( std::any_of(mySets.paramTriangle.begin(),mySets.paramTriangle.end(),
-                     [&name] (Triangle::prm const &p) { return p.regName == name; } ) )
+                     [&name] (const Triangle::prm &p) { return p.regName == name; } ) )
                     { //named surface region is found
                     std::vector<int> elemTypes;
                     std::vector<std::vector<std::size_t> > elemTags, elemNodeTags;
@@ -193,7 +193,7 @@ void mesh::readTriangles(Settings const &mySets /**< [in] */)
         } );// end for_each on entities
     }
 
-double mesh::readSol(bool VERBOSE, const std::string fileName)
+double mesh::readSol(bool VERBOSE, const std::string& fileName)
     {
     double t(0);
     std::ifstream fin(fileName, std::ifstream::in);

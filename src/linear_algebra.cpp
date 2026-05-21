@@ -1,6 +1,6 @@
 #include "linear_algebra.h"
 
-void LinAlgebra::base_projection()
+void LinAlgebra::base_projection() const
     {
     std::mt19937 gen(rand());  // random number generator: standard Mersenne twister initialized
                                // with pseudo-random seed
@@ -23,8 +23,8 @@ void LinAlgebra::buildInitGuess(std::vector<double> &G) const
         }
     }
 
-void LinAlgebra::prepareElements(Eigen::Vector3d const &Hext /**< [in] applied field */,
-                                 timing const &t_prm /**< [in] */)
+void LinAlgebra::prepareElements(const Eigen::Vector3d &Hext /**< [in] applied field */,
+                                 const timing &t_prm /**< [in] */) const
     {
     // it might be more efficient to build calc_Hext inside lambda of the for_each
     std::function< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>(void)> calc_Hext =
@@ -51,9 +51,9 @@ void LinAlgebra::prepareElements(Eigen::Vector3d const &Hext /**< [in] applied f
                   });
     }
 
-void LinAlgebra::prepareElements(double const A_Hext /**< [in] amplitude applied field (might be
+void LinAlgebra::prepareElements(const double A_Hext /**< [in] amplitude applied field (might be
                                                        time dependant)*/,
-                                 timing const &t_prm /**< [in] */)
+                                 const timing &t_prm /**< [in] */) const
     {
     std::for_each(EXEC_POL, msh->tet.begin(), msh->tet.end(),
                   [this, &A_Hext, &t_prm](Tetra::Tet &tet)

@@ -4,24 +4,16 @@
 /** \file fem.h
 \brief principal header, contains the struct fem
 This file is called by many source files in feellgood.
-It does also contains the definition of many constants for the solver, and for scalfmm
+It does also contain the definition of many constants for the solver, and for scalfmm
 */
 #include <cassert>
 #include <cmath>
-#include <cstdlib>
 #include <fstream>
-#include <functional>
-#include <iomanip>
 #include <iostream>
 #include <list>
-#include <map>
-#include <sstream>
-#include <utility>
 #include <vector>
 
 #include <sys/times.h>
-#include <time.h>
-#include <unistd.h>
 
 #include "mesh.h"
 #include "fmm_demag.h"
@@ -156,7 +148,7 @@ public:
     Mesh::mesh msh;
 
     /** computes all the energies */
-    void energy(double const t /**< [in] time in second, used to compute zeeman contribution if
+    void energy(const double t /**< [in] time in second, used to compute zeeman contribution if
                                   applied field is time dependant */
                 ,Settings &settings /**< [in] */);
 
@@ -170,7 +162,7 @@ public:
         }
 
     /** saving function for a solution */
-    void saver(Settings &settings /**< [in] */, timing const &t_prm /**< [in] */,
+    void saver(Settings &settings /**< [in] */, const timing &t_prm /**< [in] */,
                std::ofstream &fout /**< [out] */, const int nt /**< [in] */,
                std::vector<Eigen::Vector3d> &s /**< [in] */ ) const;
 

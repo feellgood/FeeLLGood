@@ -4,9 +4,9 @@
 
 using namespace Nodes;
 
-void Fem::direction(enum index idx_dir)
+void Fem::direction(const enum index idx_dir)
     {
-    const int NPS = 1;
+    constexpr int NPS = 1;
 
     ANNidxArray nnIdx = new ANNidx[NPS];
     if (!nnIdx) SYSTEM_ERROR;
@@ -33,8 +33,8 @@ void Fem::direction(enum index idx_dir)
 
     kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
     ns = nnIdx[0];
-    double u2R = msh.getNode_u(ns)(idx_dir);
 
+    double u2R = msh.getNode_u(ns)(idx_dir);
     if (u2L * u2R > 0.)
         DW_dir = 0.0;
     else
@@ -44,7 +44,7 @@ void Fem::direction(enum index idx_dir)
     annDeallocPt(queryPt);
     }
 
-bool Fem::recenter(double thres, char recentering_direction)
+bool Fem::recenter(double thres, const char recentering_direction)
     {
     enum index idx_dir;
 
@@ -60,7 +60,7 @@ bool Fem::recenter(double thres, char recentering_direction)
     double m_i = msh.avg(Nodes::get_u_comp, idx_dir);
     if (fabs(m_i) < thres) return false;
 
-    const int NPS = 1;
+    constexpr int NPS = 1;
     int ns;
 
     ANNidxArray nnIdx = new ANNidx[NPS];
@@ -89,8 +89,8 @@ bool Fem::recenter(double thres, char recentering_direction)
 
     kdtree->annkSearch(queryPt, NPS, nnIdx, dists, 0.);
     ns = nnIdx[0];
-    double u2R = msh.getNode_u(ns)(idx_dir);
 
+    double u2R = msh.getNode_u(ns)(idx_dir);
     if (u2L * u2R > 0)
         {
         std::cout << "Error No Domain Wall" << std::endl;

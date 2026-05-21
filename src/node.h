@@ -5,7 +5,6 @@
 \brief header to define struct Node
 */
 
-//#include <memory>
 #include <iostream>
 #include <eigen3/Eigen/Dense>
 #include "config.h"
@@ -129,44 +128,44 @@ struct Node
     inline double proj_eq(void) const { return d[NEXT].v.dot(eq); }
 
     /** getter for u at step k */
-    inline const Eigen::Vector3d get_u(step k /**< [in] */) const
+    inline const Eigen::Vector3d get_u(const step k /**< [in] */) const
     { return d[k].u; }
 
     /** getter for v at step k */
-    inline const Eigen::Vector3d get_v(step k /**< [in] */) const 
+    inline const Eigen::Vector3d get_v(const step k /**< [in] */) const
     { return d[k].v; }
 
     };  // end struct node
 
 /** getter for magnetizations */
 template <step K>
-Eigen::Vector3d get_u(Node const &n /**< [in] */) { return n.d[K].u; }
+Eigen::Vector3d get_u(const Node &n /**< [in] */) { return n.d[K].u; }
 
 /** getter for speed magnetizations */
 template <step K>
-Eigen::Vector3d get_v(Node const &n /**< [in] */) { return n.d[K].v; }
+Eigen::Vector3d get_v(const Node &n /**< [in] */) { return n.d[K].v; }
 
 /** getter for phis */
 template <step K>
-double get_phi(Node const &n /**< [in] */) { return n.d[K].phi; }
+double get_phi(const Node &n /**< [in] */) { return n.d[K].phi; }
 
 /** getter for phivs */
 template <step K>
-double get_phiv(Node const &n /**< [in] */) { return n.d[K].phiv; }
+double get_phiv(const Node &n /**< [in] */) { return n.d[K].phiv; }
 
 /** getter for u component */
-inline double get_u_comp(Node const &n /**< [in] */, index idx /**< [in] */)
+inline double get_u_comp(const Node &n /**< [in] */, const index idx /**< [in] */)
     { return n.d[NEXT].u(idx); }
 
 /** getter for v component */
-inline double get_v_comp(Node const &n /**< [in] */, index idx /**< [in] */)
+inline double get_v_comp(const Node &n /**< [in] */, const index idx /**< [in] */)
     { return n.d[NEXT].v(idx); }
 
 /** setter for phi */
-inline void set_phi(Node &n, double val) { n.d[NEXT].phi = val; }
+inline void set_phi(Node &n, const double val) { n.d[NEXT].phi = val; }
 
 /** setter for phi_v */
-inline void set_phiv(Node &n, double val) { n.d[NEXT].phiv = val; }
+inline void set_phiv(Node &n, const double val) { n.d[NEXT].phiv = val; }
 
     }  // end namespace Nodes
 

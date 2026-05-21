@@ -213,7 +213,7 @@ public:
      * from that distribution, return time
      */
     double readSol(bool VERBOSE /**< [in] */,
-                   const std::string fileName /**< [in] input .sol text file */);
+                   const std::string& fileName /**< [in] input .sol text file */);
 
     /** computes an analytical initial magnetization distribution as a starting point for the
      * simulation. If the node is not magnetic then it is set to NAN. */
