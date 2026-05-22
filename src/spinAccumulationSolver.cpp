@@ -1,7 +1,6 @@
 #include "algebra/bicg.h"
 #include "spinAccumulationSolver.h"
 #include "chronometer.h" //date()
-#include "tags.h"
 
 using algebra::sq;
 using namespace Nodes;
@@ -11,7 +10,7 @@ void spinAcc::checkBoundaryConditions(void) const
     // nbVolP and nbVolN0 initialized to 1 because of __default__
     unsigned int nbVolP(1);
     unsigned int nbVolN0(1);
-    std::for_each(paramTet.begin(),paramTet.end(),[&nbVolN0,&nbVolP](Tetra::prm const &p)
+    std::for_each(paramTet.begin(),paramTet.end(),[&nbVolN0,&nbVolP](const Tetra::prm &p)
         {
         if(p.regName != "__default__")
             {
@@ -21,7 +20,7 @@ void spinAcc::checkBoundaryConditions(void) const
         });
     int nbSurfJ(0);
     int nbSurfS(0);
-    std::for_each(paramTri.begin(),paramTri.end(),[&nbSurfJ,&nbSurfS](Triangle::prm const &p)
+    std::for_each(paramTri.begin(),paramTri.end(),[&nbSurfJ,&nbSurfS](const Triangle::prm &p)
         {
         if(p.regName != "__default__")
             {
@@ -56,7 +55,7 @@ void spinAcc::fillDirichletData(const int k, Eigen::Vector3d &s_value)
 void spinAcc::boundaryConditions(void)
     {
     std::fill(valDirichlet.begin(),valDirichlet.end(),0.0);
-    std::for_each(msh->tri.begin(),msh->tri.end(),[this](Triangle::Tri &f)
+    std::for_each(msh->tri.begin(),msh->tri.end(),[this](const Triangle::Tri &f)
         {
         if (std::isnan(paramTri[f.idxPrm].s.norm()) &&  std::isfinite(paramTri[f.idxPrm].jn))
             {
@@ -79,28 +78,28 @@ void spinAcc::boundaryConditions(void)
     suppress_copies<int>(idxDirichlet);
     }
 
-double spinAcc::getMs(Tetra::Tet const &tet) const
+double spinAcc::getMs(const Tetra::Tet &tet) const
     { return paramTet[tet.idxPrm].Ms; }
 
-double spinAcc::getSigma(Tetra::Tet const &tet) const
+double spinAcc::getSigma(const Tetra::Tet &tet) const
     { return paramTet[tet.idxPrm].sigma; }
 
-double spinAcc::getDiffusionCst(Tetra::Tet const &tet) const
+double spinAcc::getDiffusionCst(const Tetra::Tet &tet) const
     {
     const double N0 = paramTet[tet.idxPrm].N0;
     return 2.0*getSigma(tet)/(sq(CHARGE_ELECTRON)*N0);
     }
 
-double spinAcc::getPolarizationRate(Tetra::Tet const &tet) const
+double spinAcc::getPolarizationRate(const Tetra::Tet &tet) const
     { return paramTet[tet.idxPrm].P; }
 
-double spinAcc::getLsd(Tetra::Tet const &tet) const
+double spinAcc::getLsd(const Tetra::Tet &tet) const
     { return paramTet[tet.idxPrm].lsd; }
 
-double spinAcc::getLsf(Tetra::Tet const &tet) const
+double spinAcc::getLsf(const Tetra::Tet &tet) const
     { return paramTet[tet.idxPrm].lsf; }
 
-double spinAcc::getSpinHall(Tetra::Tet const &tet) const
+double spinAcc::getSpinHall(const Tetra::Tet &tet) const
     { return paramTet[tet.idxPrm].spinHall; }
 
 void spinAcc::prepareExtras(void)
@@ -126,7 +125,7 @@ void spinAcc::prepareExtras(void)
 void spinAcc::preCompute(std::vector<double> &V)
     {
     s.resize(NOD);
-    std::for_each(msh->tet.begin(), msh->tet.end(), [this,&V](Tetra::Tet const &tet)
+    std::for_each(msh->tet.begin(), msh->tet.end(), [this,&V](const Tetra::Tet &tet)
                  {
                  Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _gradV = calc_gradV(tet,V);
                  gradV.push_back(_gradV);
@@ -199,10 +198,10 @@ bool spinAcc::solve(void)
     return (iter.status == algebra::CONVERGED);
     }
 
-void spinAcc::integrales(Tetra::Tet &tet,
-                         Eigen::Matrix<double,DIM_PB*Tetra::N,DIM_PB*Tetra::N> &AE)
+void spinAcc::integrales(const Tetra::Tet &tet,
+                         Eigen::Matrix<double,DIM_PB*Tetra::N,DIM_PB*Tetra::N> &AE) const
     {
-    /* non magnetic metal contribution to AE has a block diagonal structure:
+    /* non-magnetic metal contribution to AE has a block diagonal structure:
      * AE = (A 0 0)
             (0 A 0)
             (0 0 A)

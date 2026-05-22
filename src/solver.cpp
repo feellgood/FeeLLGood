@@ -3,7 +3,7 @@
 
 #include "algebra/bicg.h"
 
-bool LinAlgebra::solve(timing const &t_prm)
+bool LinAlgebra::solve(const timing &t_prm)
     {
     chronometer counter(2);
     iter.reset();
@@ -46,14 +46,14 @@ bool LinAlgebra::solve(timing const &t_prm)
     /* RHS forced to zero outside mag material defined by mask, corresponding K diagonal
      * coefficients set to 1  */
     algebra::applyMask(lvd,L_rhs);
-    std::for_each(lvd.begin(),lvd.end(),[this](int i){ K.set(i,i,1.0); });
+    std::for_each(lvd.begin(),lvd.end(),[this](const int i){ K.set(i,i,1.0); });
     if (verbose)
         {
         std::cout << "matrix assembly done in " << counter.millis() << std::endl;
         counter.reset();
         }
     /*
-     *bicg with Dirichlet boundary conditions is used to mask non magnetic mesh regions, the
+     *bicg with Dirichlet boundary conditions is used to mask non-magnetic mesh regions, the
      Dirichlet values are zeros, so a specific bicg_dir is called assuming those zeros, instead of
      the standard one.
      * */
