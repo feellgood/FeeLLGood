@@ -87,8 +87,7 @@ gmsh.model.geo.synchronize() # we have to sync before calling addPhysicalGroup
 
 surface_tag = 200 # this surface is frontier(magnetic volume)
 surf_regName = "frontier(magnet)"
-gmsh.model.addPhysicalGroup(2,[surf, out[0][1], out[2][1], out[3][1], out[4][1], out[5][1]],
-        surface_tag)
+gmsh.model.addPhysicalGroup(2,[surf, out[2][1], out[3][1], out[4][1], out[5][1]], surface_tag)
 gmsh.model.setPhysicalName(2,surface_tag,surf_regName)
 
 if not justMagnet:
