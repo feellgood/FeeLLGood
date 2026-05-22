@@ -69,18 +69,26 @@ def load_mesh(filename):
         strLog += f"✓ mesh file '{filename}' loaded, "
         points = mesh.points[:, :3]
         triangles = []
+        tetrahedrons = []
         surface_nodes = set()
+        tetra_nodes = set()
         for cell_block in mesh.cells:
             if cell_block.type == "triangle":
                 triangles.append(cell_block.data)
                 for tri in cell_block.data: # tri = triplet of node indices
                     surface_nodes.update(tri)
+            elif cell_block.type == "tetra":
+                tetrahedrons.append(cell_block.data)
+                for tet in cell_block.data:
+                    tetra_nodes.update(tet)
+
         if not triangles:
             strLog += f"✗ No triangles found in mesh '{filename}'."
             raise ValueError(f"❌ No triangles found in mesh '{filename}'.")
         triangles = np.vstack(triangles)
-        strLog += str(len(triangles)) + " triangles"
-        return strLog, surface_nodes, points, triangles
+        tetrahedrons = np.vstack(tetrahedrons)
+        strLog += str(len(triangles)) + " triangles, " + str(len(tetrahedrons)) + " tetrahedrons"
+        return strLog, surface_nodes, points, triangles, tetra_nodes, tetrahedrons
     except Exception as e:
         raise RuntimeError(f"❌ Error while loading mesh '{filename}': {e}")
 
@@ -153,6 +161,7 @@ try:
             self.surface_nodes = None
             self.original_points = None
             self.triangles = None
+            self.tetrahedrons = None
             self.help = None
             self.mesh = None
             self.surf_charges = None
@@ -160,7 +169,7 @@ try:
             self.strLog = ""
             self.setup_ui()
             if mesh_file != None:
-                msg, self.surface_nodes, self.original_points, self.triangles = load_mesh(mesh_file)
+                msg, self.surface_nodes, self.original_points, self.triangles, self.tetra_nodes, self.tetrahedrons = load_mesh(mesh_file)
                 self.strLog += msg + "\n"
                 self.mesh = create_pyvista_mesh(self.original_points, self.triangles)
                 self.update_mesh()
@@ -332,7 +341,7 @@ try:
                 os.chdir(meshInputFile.parent)
                 msg = ""
                 try:
-                    msg, self.surface_nodes, self.original_points, self.triangles = load_mesh(meshInputFile)
+                    msg, self.surface_nodes, self.original_points, self.triangles, self.tetra_nodes, self.tetrahedrons  = load_mesh(meshInputFile)
                     self.mesh = create_pyvista_mesh(self.original_points, self.triangles)
                     self.magnetization_data = None
                     self.surf_charges = None
