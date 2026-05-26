@@ -149,7 +149,7 @@ void mesh::indexReorder()
                                 
                           // fa.Ms will have the magnitude of first arg of copysign, with second arg
                           // sign
-                          fa.dMs = std::copysign( paramTetra[it->idxPrm].Ms,
+                          fa.dMs += std::copysign( paramTetra[it->idxPrm].Ms,
                                p0p1.dot(p0p2.cross(fa.calc_norm())) );  // carefull, calc_norm
                                                                         // computes the normal to
                                                                         // the triangle before idx swap
