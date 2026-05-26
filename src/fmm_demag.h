@@ -90,12 +90,17 @@ public:
         }
 
     /**
-    launch the calculation of the demag field with second order corrections
+    launch the calculation of the demagnetizing field with second order corrections if FIRST_ORDER=OFF
+    (default)
     */
     void calc_demag(Mesh::mesh &msh /**< [in] */)
         {
+#if FIRST_ORDER
+        demag(Nodes::get_u<Nodes::NEXT>, Nodes::set_phi, msh);
+#else
         demag(Nodes::get_u<Nodes::NEXT>, Nodes::set_phi, msh);
         demag(Nodes::get_v<Nodes::NEXT>, Nodes::set_phiv, msh);
+#endif
         }
 
     /** corrections associated to the nodes, contributions only due to the triangles */

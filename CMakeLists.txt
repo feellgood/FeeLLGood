@@ -28,6 +28,14 @@ endif()
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)
 
 #===========================================================================
+# cmake . -DFIRST_ORDER=ON
+# if ON only magnetization m contributions are considered to magnetization potential
+# if OFF (default): both m and dm/dt contributions
+#===========================================================================
+option(FIRST_ORDER "Use magnetization only for demagnetizating field computation" OFF)
+message( STATUS "Demagnetizing field computation: FIRST_ORDER = " ${FIRST_ORDER} )
+
+#===========================================================================
 # cmake . -DONE_GAUSS_POINT=ON
 # if ON set the number of integration points to one
 # if OFF (default): 4 points Gauss integration

@@ -39,6 +39,9 @@ const double BOHRS_MUB = CHARGE_ELECTRON * PLANCKS_HBAR / (2. * MASS_ELECTRON); 
 /** use of a single Gauss point */
 #cmakedefine01 ONE_GAUSS_POINT
 
+/** use of magnetization first order contribution to demagnetizing field */
+#cmakedefine01 FIRST_ORDER
+
 /** set execution policy */
 #cmakedefine01 ENABLE_SEQ
 

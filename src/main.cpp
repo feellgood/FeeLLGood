@@ -165,6 +165,7 @@ std::string parseOptions(Settings &settings, int argc, char *argv[], unsigned in
         std::cout << "feeLLGood " << feellgood_version << "\n";
         std::cout << "Compiled with:\n"
                   << "\tONE_GAUSS_POINT=" << (ONE_GAUSS_POINT ? "ON" : "OFF") << '\n'
+                  << "\tFIRST_ORDER=" << (FIRST_ORDER ? "ON" : "OFF") << '\n'
                   << "\tENABLE_SEQ=" << (ENABLE_SEQ ? "ON" : "OFF") << '\n';
         exit(0);
         }
@@ -213,6 +214,7 @@ int main(int argc, char *argv[])
     std::cout << "feeLLGood version: " << feellgood_version << '\n';
     std::string compile_options;
     if (ONE_GAUSS_POINT) compile_options += "ONE_GAUSS_POINT, ";
+    if (FIRST_ORDER) compile_options += "FIRST_ORDER, ";
     if (ENABLE_SEQ) compile_options += "ENABLE_SEQ, ";
     if (compile_options.empty()) compile_options = "defaults, ";
     compile_options.resize(compile_options.size() - 2);  // remove trailing ", "
