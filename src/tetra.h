@@ -114,28 +114,21 @@ struct prm
     };
 
 /** \class Tet
-Tet is a tetrahedron, containing the index references to nodes, must not be flat <br>
-indices convention is<br>
+Tet is a tetrahedron. It must not be flat. The list of its nodes is ordered in a way that enforces
+this spatial orientation:
 ```
-                        v
-                      .
-                    ,/
-                   /
-                2(ic)                                 2
-              ,/|`\                                 ,/|`\
-            ,/  |  `\                             ,/  |  `\
-          ,/    '.   `\                         ,6    '.   `5
-        ,/       |     `\                     ,/       8     `\
-      ,/         |       `\                 ,/         |       `\
-     0(ia)-------'.--------1(ib) --> u     0--------4--'.--------1
-      `\.         |      ,/                 `\.         |      ,/
-         `\.      |    ,/                      `\.      |    ,9
-            `\.   '. ,/                           `7.   '. ,/
-               `\. |/                                `\. |/
-                  `3(id)                                `3
-                     `\.
-                        ` w
+0───1
+│╲ ╱│
+│ ╲ │
+│╱ ╲│
+3───2
 ```
+The face (0, 1, 2) is oriented inwards: the nodes are arranged counterclockwise when seen from
+inside the tetrahedron. The orientation of the other faces are:
+ - (1, 2, 3): outwards
+ - (2, 3, 0): inwards
+ - (3, 0, 1): outwards
+
 */
 class Tet : public element<N,NPI>
     {
@@ -156,8 +149,7 @@ public:
 
         if (existNodes())
             {
-            orientate(); // if tetrahedron orientation is negative orientate() swap two
-                         // node indices to turn it positive
+            orientate(); // enforce the correct orientation
 
             Eigen::Matrix3d J;
             double detJ = Jacobian(J);
@@ -363,7 +355,7 @@ public:
         }
 
 private:
-    /** orientation redefined through node index swaping if needed */
+    /** Enforce the correct orientation by swapping nodes if needed. */
     void orientate(void) override;
     };  // end class Tetra
 

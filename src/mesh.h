@@ -403,29 +403,8 @@ private:
                         { return a > b; });
         }
 
-    /** redefine orientation of triangular triangles in accordance with the tetrahedron
-    * reorientation of the tetrahedrons if needed; definition of Ms on triangle elements
-    Indices and orientation convention :
-
-                        v
-                      .
-                    ,/
-                   /
-                2(ic)                                 2
-              ,/|`\                                 ,/|`\
-            ,/  |  `\                             ,/  |  `\
-          ,/    '.   `\                         ,6    '.   `5
-        ,/       |     `\                     ,/       8     `\
-      ,/         |       `\                 ,/         |       `\
-     0(ia)-------'.--------1(ib) --> u     0--------4--'.--------1
-      `\.         |      ,/                 `\.         |      ,/
-         `\.      |    ,/                      `\.      |    ,9
-            `\.   '. ,/                           `7.   '. ,/
-               `\. |/                                `\. |/
-                  `3(id)                                `3
-                     `\.
-                        ` w
-    */
+    /** Update dMs on each triangular element, with a sign that is consistent with the triangle's
+     * orientation. */
     void indexReorder();
 
     /** Sort the nodes along the longest axis of the sample. This should reduce the bandwidth of
