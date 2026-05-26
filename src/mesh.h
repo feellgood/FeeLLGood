@@ -33,7 +33,8 @@ class mesh
 public:
     /** constructor : read mesh file, reorder indices and computes some values related to the mesh :
      center and length along coordinates,full volume */
-    mesh(Settings &mySets /**< [in] */)
+    mesh(Settings &mySets /**< [in] */,
+         bool simplified = false /** Put true for testing */)
         : paramTetra(mySets.paramTetra), volumeRegions(mySets.paramTetra.size())
         {
         readMesh(mySets);
@@ -41,6 +42,11 @@ public:
 
         if (mySets.verbose)
             { std::cout << "  reindexed\n"; }
+
+        if (simplified)
+            {
+            return;
+            }
 
         double xmin = minNodes(Nodes::IDX_X);
         double xmax = maxNodes(Nodes::IDX_X);
@@ -118,7 +124,6 @@ public:
                     }
                 });
 
-        checkTriangles();
         for(unsigned int i=0;i<tri.size();i++)
             {
             if (isMagnetic(tri[i]) && !mySets.paramTriangle[tri[i].idxPrm].suppress_charges
@@ -333,6 +338,15 @@ public:
     inline bool isMagnetic(const Triangle::Tri &f)
         { return (magNode[f.ind[0]] && magNode[f.ind[1]] && magNode[f.ind[2]]); }
 
+    /** Check if each triangle verify one of the three following conditions :
+     *      - Is part of no surface region, but part of 2 tetraedrons of the same volume region
+     *      - Is part of at most one surface region, and 2 tetraedrons of differents volume region
+     *      - Is part of 1 tetraedron and at most one surface region
+     * Returns false if it finds one which is not in one of those three cases, true if 
+     * all of those are.
+     */
+    bool checkTriangles();
+
     /** Edges of all the tetrahedrons. Each edge is a sorted pair of indices.
      * The list is sorted lexicographically, as per std::pair::operator<(). */
     std::vector<Edge> edges;
@@ -412,17 +426,9 @@ private:
      * the matrix we will have to solve for. */
     void sortNodes(Nodes::index long_axis /**< [in] */);
 
-    /** Check if each triangle verify one of the three following conditions :
-     *      - Is part of no surface region, but part of 2 tetraedrons of the same volume region
-     *      - Is part of at most one surface region, and 2 tetraedrons of differents volume region
-     *      - Is part of 1 tetraedron and at most one surface region
-     * Throws an error if it finds one which is not in one of those three cases.
-     */
-    void checkTriangles();
-
-    /** Called in checkTriangles. Gives the corresponding error message if a
-     * generation error is detected. */
-    void analyzeTriangle(const int nbTotTri, const int nbSurfReg,
+    /** Called in checkTriangles. If no generation error is detected, returns true. Else, 
+     * gives the corresponding error message and returns false. */
+    bool analyzeTriangle(const int nbTotTri, const int nbSurfReg,
                          const std::pair<int,int> &pairIdVolRegs, const int idSurfReg);
 
     /** returns the surface defined by the set of triangle of indices in triIndices

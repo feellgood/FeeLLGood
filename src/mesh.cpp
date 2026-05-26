@@ -161,7 +161,7 @@ void mesh::indexReorder()
                   });  // end for_each
     }
 
-void mesh::checkTriangles()
+bool mesh::checkTriangles()
     {
     std::vector<BasicTri> allTriCtnr;
     // Put all triangles into allTriCtnr after doing the conversion
@@ -193,12 +193,13 @@ void mesh::checkTriangles()
     int idCurSurfReg = -1;
     int nbTotTri = 0;
     int nbSurfReg = 0;
+    int nbErr = 0;
 
-    for (size_t i = 0; i < allTriCtnr.size(); i++)
+    for (size_t i = 0; i < allTriCtnr.size() && nbErr < 20; i++)
         {   // For each triangle
         if (allTriCtnr[i].nodesInd != prevTri->nodesInd)
             {   // If the triangle changes
-            analyzeTriangle(nbTotTri, nbSurfReg, pairIdCurVolRegs, idCurSurfReg);
+            nbErr += analyzeTriangle(nbTotTri, nbSurfReg, pairIdCurVolRegs, idCurSurfReg);
             nbTotTri = 0;
             nbSurfReg = 0;
             idCurSurfReg = -1;
@@ -221,39 +222,48 @@ void mesh::checkTriangles()
         nbTotTri++;
         prevTri = &allTriCtnr[i];
         }
-    analyzeTriangle(nbTotTri, nbSurfReg, pairIdCurVolRegs, idCurSurfReg);
+    nbErr += analyzeTriangle(nbTotTri, nbSurfReg, pairIdCurVolRegs, idCurSurfReg);
+    return (nbErr == 0);
     }
 
-void mesh::analyzeTriangle(const int nbTotTri, const int nbSurfReg,
+bool mesh::analyzeTriangle(const int nbTotTri, const int nbSurfReg,
                            const std::pair<int,int> &pairIdVolRegs, const int idSurfReg)
     {
     if (nbSurfReg > 1)
         {
-        std::cerr << "Error: wrong mesh generation. A triangle which belongs to "
-                     "multiple surface regions has been found\n";
-        exit(1);
+        std::cerr << "Error: wrong mesh generation. Multiple instances of the "
+                     "same triangle have been found in a surface region\n";
+        return false;
         }
     else if (nbSurfReg == nbTotTri)
         {
-        std::cout << "Error: wrong mesh generation. A triangle which only belongs "
-                     "to 1 surface region has been found\n";
-        exit(1);
+        std::cerr << "Error: wrong mesh generation. A triangle which belongs "
+                     "to 1 surface region and no tetrahedron has been found\n";
+        return false;
         }
     else if (nbTotTri > 3 || (nbTotTri == 3 && nbSurfReg == 0))
         {
-        std::cout << "Error: wrong mesh generation. Three "
-                     "identical triangles have been found\n";
         if (nbSurfReg == 1)
             {
-            std::cout << "In surface region " << idSurfReg << "\n";
+            std::cerr << "Error: wrong mesh generation. Three identical triangles "
+                         "have been found in the surface region " << idSurfReg << "\n";
             }
-        exit(1);
+        else
+            {
+            std::cerr << "Error: wrong mesh generation. Three "
+                         "identical triangles have been found\n";
+            }
+        return false;
         }
     else if (nbTotTri == 3 && nbSurfReg == 1 && pairIdVolRegs.first == pairIdVolRegs.second)
         {
-        std::cout << "Error: wrong mesh generation. An internal triangle belonging "
-                     "to the surface region " << idSurfReg << " has been found\n";
-        exit(1);
+        std::cerr << "Error: wrong mesh generation. An internal triangle has been "
+                     "found in the surface region " << idSurfReg << "\n";
+        return false;
+        }
+    else
+        {
+        return true;
         }
     }
 

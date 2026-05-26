@@ -7,6 +7,7 @@
 #include <gmsh.h>
 
 #include "tags.h"
+#include "mesh.h"
 #include "ut_tools.h"
 #include "ut_config.h"
 
@@ -14,7 +15,7 @@
 
 BOOST_AUTO_TEST_SUITE(ut_readMesh)
 
-BOOST_AUTO_TEST_CASE(readMesh)
+BOOST_AUTO_TEST_CASE(read_ellipsoid)
     {
     using namespace tags::msh;
     gmsh::initialize();
@@ -73,5 +74,68 @@ BOOST_AUTO_TEST_CASE(readMesh)
     gmsh::finalize();
     }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_CASE(checkTriangles)
+    {
+    Settings shortSet;
 
+    std::cout << "Checking the correct cuboid..." << std::endl;
+    shortSet.setPbName("../examples/cuboid.msh");
+    Mesh::mesh cuboid(shortSet, true);
+    bool isCorrect = cuboid.checkTriangles();
+    BOOST_CHECK(isCorrect);
+    std::cout << "Done checking the correct cuboid" << std::endl;
+
+    std::cout << "Checking the cuboid with no triangle..." << std::endl;
+    shortSet.setPbName("../examples/bad_cuboid_1.msh");
+    Mesh::mesh badCuboid1(shortSet, true);
+    std::stringstream logOutput;
+    std::streambuf *buf = std::cerr.rdbuf(logOutput.rdbuf());
+    isCorrect = badCuboid1.checkTriangles();
+    BOOST_CHECK(!isCorrect);
+    BOOST_CHECK(logOutput.str() == "Error: not a single triangle is present in the mesh\n");
+    std::cout << "Done checking the cuboid with no triangle" << std::endl;
+
+    std::cout << "Checking the cuboid with a duplicated surface region triangle..." << std::endl;
+    shortSet.setPbName("../examples/bad_cuboid_2.msh");
+    Mesh::mesh badCuboid2(shortSet, true);
+    buf = std::cerr.rdbuf(logOutput.rdbuf());
+    isCorrect = badCuboid2.checkTriangles();
+    BOOST_CHECK(!isCorrect);
+    BOOST_CHECK(logOutput.str() == "Error: wrong mesh generation. Multiple instances of the "
+                                   "same triangle have been found in a surface region\n");
+    std::cout << "Done checking the cuboid with a duplicated surface region triangle" << std::endl;
+
+    std::cout << "Checking the cuboid with a triangle which isn't in a tetrahedron..." << std::endl;
+    shortSet.setPbName("../examples/bad_cuboid_3.msh");
+    Mesh::mesh badCuboid3(shortSet, true);
+    buf = std::cerr.rdbuf(logOutput.rdbuf());
+    isCorrect = badCuboid3.checkTriangles();
+    BOOST_CHECK(!isCorrect);
+    BOOST_CHECK(logOutput.str() == "Error: wrong mesh generation. A triangle which belongs "
+                                   "to 1 surface region and no tetrahedron has been found\n");
+    std::cout << "Done checking the cuboid with a triangle which isn't in a tetrahedron" << std::endl;
+
+    std::cout << "Checking the cuboid with 3 identical triangles..." << std::endl;
+    shortSet.setPbName("../examples/bad_cuboid_4.msh");
+    Mesh::mesh badCuboid4(shortSet, true);
+    buf = std::cerr.rdbuf(logOutput.rdbuf());
+    isCorrect = badCuboid4.checkTriangles();
+    BOOST_CHECK(!isCorrect);
+    BOOST_CHECK(logOutput.str() == "Error: wrong mesh generation. Three identical triangles "
+                                   "have been found in the surface region 200\n");
+    std::cout << "Done checking the cuboid with 3 identical triangles" << std::endl;
+
+    std::cout << "Checking the cuboid with an internal surface region triangle..." << std::endl;
+    shortSet.setPbName("../examples/bad_cuboid_5.msh");
+    Mesh::mesh badCuboid5(shortSet, true);
+    buf = std::cerr.rdbuf(logOutput.rdbuf());
+    isCorrect = badCuboid5.checkTriangles();
+    BOOST_CHECK(!isCorrect);
+    BOOST_CHECK(logOutput.str() == "Error: wrong mesh generation. An internal triangle has been "
+                                   "found in the surface region 200\n");
+    std::cout << "Done checking the cuboid with an internal surface region triangle" << std::endl;
+
+    std::cout << "Done testing checkTriangles()" << std::endl;
+    }
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -1,0 +1,22 @@
+$MeshFormat
+2.2	0	8
+$EndMeshFormat
+$PhysicalNames
+2
+2 200 "whole_surface"
+3 300 "whole_volume"
+$EndPhysicalNames
+$Nodes
+8
+1	-8.0	-8.0	-8.0
+2	-8.0	-8.0	8.0
+3	-8.0	8.0	-8.0
+4	-8.0	8.0	8.0
+5	8.0	-8.0	-8.0
+6	8.0	-8.0	8.0
+7	8.0	8.0	-8.0
+8	8.0	8.0	8.0
+$EndNodes
+$Elements
+0
+$EndElements

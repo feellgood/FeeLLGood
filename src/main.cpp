@@ -234,6 +234,8 @@ int main(int argc, char *argv[])
     create_dir_if_needed(mySettings.r_path_output_dir);
     timing t_prm = timing(mySettings.tf, mySettings.dt_min, mySettings.dt_max);
     Fem fem = Fem(mySettings, t_prm);
+    if (!fem.msh.checkTriangles())
+        { exit(1); }
 
     if (mySettings.verbose)
         {
