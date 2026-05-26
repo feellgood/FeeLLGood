@@ -369,14 +369,14 @@ try:
                 base = self.solFileName.stem
                 ext = ".vtu"
                 outputFileName = f"{base}{ext}"
-                mesh = meshio.Mesh(self.original_points, [("triangle",self.triangles)])
-                #meshio.read(self.meshFileName)
+                cells = [("triangle",self.triangles),("tetra",self.tetrahedrons)]
+                mesh = meshio.Mesh(self.original_points, cells)
                 if mesh != None:
                     mag = magDict2array(self.magnetization_data)
                     mesh.point_data = {"magnetization":mag}
                     mesh.write(outputFileName)
                     self.strLog += outputFileName
-                    self.strLog += " written, warning: only contains surface informations.\n"
+                    self.strLog += " written\n"
             self.statusBar().showMessage(outputFileName + " written")
 
         def on_surface_charges_changed(self):
