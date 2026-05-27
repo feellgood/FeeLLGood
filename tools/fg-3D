@@ -456,14 +456,15 @@ try:
                 vectors = np.array(vectors)
             
             # Create a PolyData object with points and vectors
-                vector_poly = pv.PolyData(positions)
-                vector_poly['vectors'] = vectors * vector_scale
-            
-            # Create arrows using glyphs 
                 vector_scale = self.vector_scale_spinbox.value()
-                arrows = vector_poly.glyph(orient='vectors', scale=False, factor=vector_scale,
-                    geom=pv.Arrow(tip_length=0.25, tip_radius=0.1, shaft_radius=0.05)
-                )
+                centered_positions = positions - 0.5*vectors*vector_scale
+                vector_poly = pv.PolyData(centered_positions)
+                vector_poly['vectors'] = vectors*vector_scale
+            # Create arrows using glyphs centered on the nodes
+                arrows = vector_poly.glyph(orient='vectors',
+                                           scale=False,
+                                           factor=vector_scale,
+                                           geom=pv.Arrow(tip_length=0.25, tip_radius=0.1, shaft_radius=0.05))
             
                 self.plotter.add_mesh(arrows, color='grey', opacity=0.8, show_scalar_bar=False)
                 self.statusBar().showMessage(f"✓ Magnetization vectors plotted. If nothing is visible increase vector scale.")
