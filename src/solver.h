@@ -2,13 +2,10 @@
 #define solver_h
 
 /** \file solver.h
- \brief two templates to fill matrix and vectors in various dimensionnality situations. DIM_PROBLEM
- = 1 is used for electrostatics (V) DIM_PROBLEM = 3 is used for spin accumulation (Q has three
- components)
-Warning : DIM_PROBLEM = 2 cannot be used for micromagnetic problem. The latter is solved in the
-tangent plane of the magnetization plane, leading to a different indices computation and matrix
-filling than here.
-TODO: these templates could be specialized for DIM_PROBLEM = 2 (see warning above)
+ \brief two templates to fill matrix and vectors in various dimensionnality situations.
+ DIM_PROBLEM = 1 is used for electrostatics (V)
+ DIM_PROBLEM = 2 is used for micromagnetic problem, solved in the tangent plane
+ DIM_PROBLEM = 3 is used for spin accumulation (s has three components)
 */
 
 #include <eigen3/Eigen/Dense>

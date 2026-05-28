@@ -26,10 +26,8 @@ const int DIM_PB_MAG = 2;
 /** \class LinAlgebra
 convenient class to grab altogether some part of the calculations involved using algebra::bicg
 solver at each timestep. The solver is handled by solver method, and is using algebra sparse
-matrices(Row major). The write sparse matrix is prepared in 'batch mode', to add all non zero
-coefficients with a '+=' logic. Then it is turned into a read sparse matrix before being used by
-bicg algo. Be aware of time units: when entering solver method, division by gamma0 and
-multiplication by gamma0 when ending are mandatory. The bicg algorithm is monitored by iter object.
+matrices(Row major). Be aware of time units: when entering solver method, division by
+gamma0 and multiplication by gamma0 when ending are mandatory. The bicg algorithm is monitored by iter object.
 When debugging it might be usefull to set iter verbosity differently from LinAlgebra Solver (see
 constructor list initialization)
 */
