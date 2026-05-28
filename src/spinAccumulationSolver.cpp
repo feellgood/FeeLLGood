@@ -99,9 +99,6 @@ double spinAcc::getLsd(const Tetra::Tet &tet) const
 double spinAcc::getLsf(const Tetra::Tet &tet) const
     { return paramTet[tet.idxPrm].lsf; }
 
-double spinAcc::getSpinHall(const Tetra::Tet &tet) const
-    { return paramTet[tet.idxPrm].spinHall; }
-
 void spinAcc::prepareExtras(void)
     {
     using namespace Tetra;
@@ -262,22 +259,6 @@ void spinAcc::integrales(Tetra::Tet &tet, std::vector<double> &BE)
                 BE[    ie] += tmp*m[0];
                 BE[  N+ie] += tmp*m[1];
                 BE[2*N+ie] += tmp*m[2];
-                }
-            }
-        }
-    if(paramTet[tet.idxPrm].spinHall != 0)
-        {
-        const double cst0 = getSpinHall(tet)*CHARGE_ELECTRON/MASS_ELECTRON;
-        for (size_t npi=0; npi<NPI; npi++)
-            {
-            const double cst0_w = cst0*tet.weight[npi];
-            for (size_t ie=0; ie<N; ie++)
-                {
-                Eigen::Vector3d grad_ai = tet.da.row(ie);
-                Eigen::Vector3d v = grad_ai.cross(_gradV.col(npi));
-                BE[    ie] += cst0_w*v[IDX_X];
-                BE[  N+ie] += cst0_w*v[IDX_Y];
-                BE[2*N+ie] += cst0_w*v[IDX_Z];
                 }
             }
         }

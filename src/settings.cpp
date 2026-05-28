@@ -195,7 +195,6 @@ void Settings::toYaml()
         std::cout << "      P: " << it->P << "\n";
         std::cout << "      l_sd: " << it->lsd << "\n";
         std::cout << "      l_sf: " << it->lsf << "\n";
-        std::cout << "      spin_hall: " << it->spinHall << "\n";
         }
     std::cout << "  surface_regions:\n";
     for (auto it = paramTriangle.begin(); it != paramTriangle.end(); ++it)
@@ -421,8 +420,6 @@ void Settings::read(YAML::Node yaml)
                 assign(p.P, volume["P"]);
                 assign(p.lsd, volume["l_sd"]); // exists only for magnetic material, as Ms
                 assign(p.lsf, volume["l_sf"]);
-                assign(p.spinHall, volume["spin_hall"]); // SOT contribution to spin diffusion,
-                                                         // through spin Hall effect
                 }
             }  // mesh.volume_regions
         YAML::Node surfaces = mesh["surface_regions"];

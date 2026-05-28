@@ -96,9 +96,6 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** spin flip length : exists in both non-magnetic and magnetic metals */
     double getLsf(const Tetra::Tet &tet) const;
 
-    /** spin Hall constant */
-    double getSpinHall(const Tetra::Tet &tet) const;
-
     /** affect extraField member function of all tetrahedrons */
     void prepareExtras(void);
 

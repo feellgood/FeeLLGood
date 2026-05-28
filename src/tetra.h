@@ -105,8 +105,6 @@ struct prm
                            in [Siemens per meter] = kg^-1 m^-3 s^3 A^2  */
     double lsd;          /**< diffusion length related to s-d coupling in a magnetic material m^1 */
     double lsf;          /**< spin diffusion length in a metal (magnetic or not) m^1 */
-    double spinHall;     /**< Spin Orbit Torque contribution to spin diffusion
-                           due to spin Hall effect */
 
     double volume = 0; /**< total volume of the region */
 
