@@ -301,8 +301,7 @@ double mesh::surface(std::vector<int> &triIndices) const
     }
 
 void mesh::setExtSpaceField(Settings &s /**< [in] */)
-    { // see here for ref code
-// /data/jc/st_feellgood_2024/src_Tube_scalfmm_zhang_ec_mu_oersted_spinHall_thiele_dyn20240320_dev
+    {
     extSpaceField.resize(magTet.size());
     int k(0);
     std::for_each(magTet.begin(), magTet.end(), [this,&s,&k](const int idx)

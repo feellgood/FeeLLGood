@@ -107,8 +107,7 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
      * all = non magnetic metal + magnetic metal */
     void integrales(const Tetra::Tet &tet, Eigen::Matrix<double,DIM_PB*Tetra::N,DIM_PB*Tetra::N> &AE) const;
 
-    /** computes all contributions to spin diffusion from tetrahedron tet (RHS)
-     * all = magnetic metal + spin Hall effect */
+    /** computes magnetic metal contributions to spin diffusion from tetrahedron tet (RHS) */
     void integrales(Tetra::Tet &tet,std::vector<double> &BE);
     };
 
