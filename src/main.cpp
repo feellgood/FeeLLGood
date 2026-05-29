@@ -249,30 +249,7 @@ int main(int argc, char *argv[])
     counter.reset();
     std::cout << "starting on:       " << date() << std::endl;
     LinAlgebra linAlg(mySettings, fem.msh);
-
-    spinAcc spinAcc_solver = spinAcc(fem.msh,mySettings.paramTetra,
-			                         mySettings.paramTriangle,
-                                     1e-8, mySettings.verbose, 1000);
-
-    if (mySettings.spin_acc)
-        {
-        spinAcc_solver.checkBoundaryConditions();
-        electrostatSolver pot_solver = electrostatSolver(fem.msh, mySettings.paramTetra,
-                                                     mySettings.paramTriangle,
-                                                     1e-8, mySettings.verbose, 1000);
-        pot_solver.checkBoundaryConditions();
-        std::string V_fileName("");
-        if(mySettings.V_file) V_fileName = mySettings.getSimName() + "_V.sol";
-        pot_solver.V.resize(fem.msh.getNbNodes());
-        pot_solver.compute(mySettings.verbose, V_fileName);
-        spinAcc_solver.preCompute(pot_solver.V);
-        bool succeed = spinAcc_solver.compute();
-        if(!succeed)
-            {
-            std::cout << "Error: spin diffusion solver failed.\n";
-            exit(1);
-            }
-        }
+    spinAcc spinAcc_solver(mySettings, fem.msh, 1e-8, 1000);
 
     chronometer fmm_counter(2);
     scal_fmm::fmm myFMM(fem.msh, mySettings.paramTetra, mySettings.paramTriangle,

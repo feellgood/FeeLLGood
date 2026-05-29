@@ -22,19 +22,36 @@ const int DIM_PB_SPIN_ACC = 3;
 class spinAcc : public solver<DIM_PB_SPIN_ACC>
     {
     public:
-    /** constructor */
-    spinAcc(Mesh::mesh &_msh /**< [in] ref to the mesh */,
-    std::vector<Tetra::prm> & _pTetra /**< [in] ref to vector of param tetra
-                                        (volume region parameters) */,
-    std::vector<Triangle::prm> & _pTri /**< [in] ref to vector of param triangle
-                                        (surface region parameters) */,
-    const double _tol /**< [in] tolerance for bicg_dir solver */,  // _tol could be 1e-6
-    const bool v /**< [in] verbose bool */,
-    const int max_iter /**< [in] maximum number of iterations */):
-        solver<DIM_PB_SPIN_ACC>(_msh,_pTetra,_pTri,"bicg_dir",_tol,v,max_iter)
+    /** spin accumulation constructor
+     * if mySettings.spin_acc bool is false it is a do nothing constructor
+     * */
+    spinAcc(const Settings &mySettings /**< [in] */,
+            Mesh::mesh &_msh /**< [in] ref to the mesh */,
+            const double _tol /**< [in] tolerance for bicg_dir solver */,
+            const int max_iter /**< [in] maximum number of iterations */):
+            solver<DIM_PB_SPIN_ACC>(_msh, mySettings.paramTetra, mySettings.paramTriangle,
+                                    "bicg_dir", _tol, mySettings.verbose, max_iter)
         {
-        valDirichlet.resize(DIM_PB*NOD);
-        boundaryConditions();
+        if (mySettings.spin_acc)
+            {
+            checkBoundaryConditions();
+            valDirichlet.resize(DIM_PB*NOD);
+            boundaryConditions();
+            electrostatSolver pot_solver(_msh, mySettings.paramTetra, mySettings.paramTriangle,
+                                         1e-8, mySettings.verbose, 1000);
+            pot_solver.checkBoundaryConditions();
+            pot_solver.V.resize(_msh.getNbNodes());
+            std::string V_fileName("");
+            if(mySettings.V_file)
+                V_fileName = mySettings.getSimName() + "_V.sol";
+            pot_solver.compute(mySettings.verbose, V_fileName);
+            preCompute(pot_solver.V);
+            if(!compute())
+                {
+                std::cout << "Error: spin diffusion solver(first try) failed.\n";
+                exit(1);
+                }
+            }
         }
 
     /** boundary conditions: a surface with a fixed s, and another surface with fixed normal current

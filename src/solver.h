@@ -23,9 +23,9 @@ class solver
     public:
         /** constructor */
         explicit solver(Mesh::mesh & _msh /**< [in] mesh */,
-                std::vector<Tetra::prm> & _pTetra /**< [in] ref to vector of param tet
+                const std::vector<Tetra::prm> & _pTetra /**< [in] ref to vector of param tet
                                                     (volume region parameters) */,
-                std::vector<Triangle::prm> & _pTri /**< [in] ref to vector of param tri
+                const std::vector<Triangle::prm> & _pTri /**< [in] ref to vector of param tri
                                                     (surface region parameters) */,
                 const std::string& name /**< [in] name of the solver method */,
                 const double _tol /**< [in] solver tolerance */,

@@ -25,9 +25,9 @@ public:
     /** constructor */
     electrostatSolver(
             Mesh::mesh & _msh /**< [in] reference to the mesh */,
-            std::vector<Tetra::prm> & _pTetra /**< [in] ref to vector of param tetra
+            const std::vector<Tetra::prm> & _pTetra /**< [in] ref to vector of param tetra
                                                 (volume region parameters) */,
-            std::vector<Triangle::prm> & _pTri /**< [in] ref to vector of param triangle
+            const std::vector<Triangle::prm> & _pTri /**< [in] ref to vector of param triangle
                                                 (surface region parameters) */,
             const double _tol /**< [in] cg_dir tolerance */,
             const bool v /**< [in] verbose mode for iteration monitor */,
