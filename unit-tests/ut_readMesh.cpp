@@ -80,6 +80,10 @@ BOOST_AUTO_TEST_CASE(checkTriangles)
 
     std::cout << "Checking the correct cuboid..." << std::endl;
     shortSet.setPbName("../examples/cuboid.msh");
+    Tetra::prm &volume = shortSet.paramTetra.emplace_back();
+    volume.regName = "whole_volume";
+    Triangle::prm &surface = shortSet.paramTriangle.emplace_back();
+    surface.regName = "whole_surface";
     Mesh::mesh cuboid(shortSet, true);
     bool isCorrect = cuboid.checkTriangles();
     BOOST_CHECK(isCorrect);
