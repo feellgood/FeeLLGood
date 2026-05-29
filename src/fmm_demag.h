@@ -124,8 +124,8 @@ private:
 
     /**
     function template to insert volume or surface charges in tree for demag computation. class T is
-    Tet or Tri, it must have getPtGauss() method, second template parameter is NPI of the namespace
-    containing class T.
+    Tet or Tri, it must have getPtGauss() method to get the Gauss points, second template parameter 
+    is NPI of the namespace containing class T.
     idxContainer is the list of indices of the magnetic T elements stored in container.
     */
     template<class T, const int NPI>
@@ -136,8 +136,7 @@ private:
                       [this,&container, c, &idx](const int idxElem)
                       {
                       const T &elem = container[idxElem];
-                      Eigen::Matrix<double,Nodes::DIM,NPI> gauss;
-                      elem.getPtGauss(gauss);
+                      Eigen::Matrix<double,Nodes::DIM,NPI> gauss = elem.getPtGauss();
 
                       for (int j = 0; j < NPI; j++, idx++)
                           {

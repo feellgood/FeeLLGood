@@ -341,15 +341,15 @@ public:
     /** do a += to the effective field H, to add contributions as spin transfert torque Hst */
     std::function<void( Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)> extraField;
 
-    /** returns gauss points in result = vec_nod*Tetra::a  */
-    void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result) const override
+    /** returns gauss points  */
+    Eigen::Matrix<double,Nodes::DIM,NPI> getPtGauss(void) const override
         {
         Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
         for (int i = 0; i < N; i++)
             {
             vec_nod.col(i) << getNode(i).p;
             }
-        result = vec_nod * eigen_a;
+        return vec_nod*eigen_a;
         }
 
 private:

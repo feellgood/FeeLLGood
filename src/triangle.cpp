@@ -62,8 +62,7 @@ void Tri::correctionCharges(const std::function<Eigen::Vector3d(Nodes::Node)>& g
                             Eigen::Matrix<double,Triangle::NPI,1> &localCharges,
                             std::vector<double> &corr) const
     {
-    Eigen::Matrix<double,DIM,NPI> gauss;
-    getPtGauss(gauss);
+    Eigen::Matrix<double,DIM,NPI> gauss = getPtGauss();
     // calc corr node by node
     for (int i = 0; i < N; i++)
         {

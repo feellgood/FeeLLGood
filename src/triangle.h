@@ -225,15 +225,15 @@ public:
         return _n;
         }
 
-    /** returns Gauss points in result = vec_nod*Triangle::a */
-    void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result) const override
+    /** returns Gauss points */
+    Eigen::Matrix<double,Nodes::DIM,NPI> getPtGauss(void) const override
         {
         Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
         for (int i = 0; i < N; i++)
             {
             vec_nod.col(i) << getNode(i).p;
             }
-        result = vec_nod * eigen_a;
+        return vec_nod*eigen_a;
         }
 
     /** computes surface of the triangle */

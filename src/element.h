@@ -94,7 +94,7 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
         }
 
     /** computes Gauss point of the element, return in result */
-    virtual void getPtGauss(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> result) const = 0;
+    virtual Eigen::Matrix<double,Nodes::DIM,NPI> getPtGauss(void) const = 0;
 
     /** print the vector index of the associated region and the node indices of the element */
     void infos(void) const

@@ -307,8 +307,7 @@ void mesh::setExtSpaceField(Settings &s /**< [in] */)
     std::for_each(magTet.begin(), magTet.end(), [this,&s,&k](const int idx)
         {
         const Tetra::Tet &t = tet[idx];
-        Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> pg;// gauss points
-        t.getPtGauss(pg);
+        Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> pg = t.getPtGauss();
         for(int i=0;i<Tetra::NPI;i++)
             { extSpaceField[k].col(i) = s.getFieldSpace(pg.col(i)); }
         k++;
