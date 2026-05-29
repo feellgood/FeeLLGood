@@ -110,11 +110,7 @@ void spinAcc::prepareExtras(void)
             double D0 = getDiffusionCst(t);
             double prefactor = D0/(sq(getLsd(t))*gamma0*getMs(t));
             t.extraField = [this, &t, prefactor](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)
-                        {
-                        Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _Hst =
-                                calc_Hst(t, prefactor, s);
-                        H += _Hst;
-                        };
+                        { H += calc_Hst(t, prefactor, s); };
             }
         });//end for_each
     }
