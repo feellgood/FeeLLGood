@@ -161,7 +161,7 @@ void mesh::indexReorder()
                   });  // end for_each
     }
 
-void mesh::checkTriangles()
+bool mesh::checkTriangles()
     {
     std::vector<BasicTri> allTriCtnr;
     // Put all triangles into allTriCtnr after doing the conversion
@@ -191,16 +191,17 @@ void mesh::checkTriangles()
     BasicTri *prevTri = &allTriCtnr[0];
     std::pair<int,int> pairIdCurVolRegs(-1, -1);
     int idCurSurfReg = -1;
-    int nbTotTri = 0;
-    int nbSurfReg = 0;
+    int nbTetraFaces = 0;
+    int nbSurfTri = 0;
 
     for (size_t i = 0; i < allTriCtnr.size(); i++)
         {   // For each triangle
         if (allTriCtnr[i].nodesInd != prevTri->nodesInd)
             {   // If the triangle changes
-            analyzeTriangle(nbTotTri, nbSurfReg, pairIdCurVolRegs, idCurSurfReg);
-            nbTotTri = 0;
-            nbSurfReg = 0;
+            if (findErrInTriangle(nbSurfTri, nbTetraFaces, pairIdCurVolRegs, idCurSurfReg))
+                { return false; }
+            nbTetraFaces = 0;
+            nbSurfTri = 0;
             idCurSurfReg = -1;
             pairIdCurVolRegs.first = -1;
             pairIdCurVolRegs.second = -1;
@@ -209,51 +210,63 @@ void mesh::checkTriangles()
         if (allTriCtnr[i].isSurfaceElement)
             {
             idCurSurfReg = allTriCtnr[i].idRegion;
-            nbSurfReg++;
+            nbSurfTri++;
             }
         else
             {
+            nbTetraFaces++;
             if (pairIdCurVolRegs.first == -1)
                 { pairIdCurVolRegs.first = allTriCtnr[i].idRegion; }
             else
                 { pairIdCurVolRegs.second = allTriCtnr[i].idRegion; }
             }
-        nbTotTri++;
         prevTri = &allTriCtnr[i];
         }
-    analyzeTriangle(nbTotTri, nbSurfReg, pairIdCurVolRegs, idCurSurfReg);
+
+    if (findErrInTriangle(nbSurfTri, nbTetraFaces, pairIdCurVolRegs, idCurSurfReg))
+        { return false; }
+    else
+        { return true; }
     }
 
-void mesh::analyzeTriangle(const int nbTotTri, const int nbSurfReg,
-                           const std::pair<int,int> &pairIdVolRegs, const int idSurfReg)
+bool mesh::findErrInTriangle(const int nbSurfTri, const int nbTetraFaces,
+                           const std::pair<int,int> pairIdVolRegs, const int idSurfReg)
     {
-    if (nbSurfReg > 1)
+    if (nbSurfTri > 1)
         {
-        std::cerr << "Error: wrong mesh generation. A triangle which belongs to "
-                     "multiple surface regions has been found\n";
-        exit(1);
+        std::cerr << "Error: bad mesh. " << nbSurfTri << " instances of"
+                     " the same surface triangle have been found\n";
+        return true;
         }
-    else if (nbSurfReg == nbTotTri)
+    else if (nbTetraFaces == 0)
         {
-        std::cout << "Error: wrong mesh generation. A triangle which only belongs "
-                     "to 1 surface region has been found\n";
-        exit(1);
+        std::cerr << "Error: bad mesh. A triangle which belongs to 1 "
+                     "surface region and no tetrahedron has been found\n";
+        return true;
         }
-    else if (nbTotTri > 3 || (nbTotTri == 3 && nbSurfReg == 0))
+    else if (nbTetraFaces > 2)
         {
-        std::cout << "Error: wrong mesh generation. Three "
-                     "identical triangles have been found\n";
-        if (nbSurfReg == 1)
+        if (nbSurfTri == 1)
             {
-            std::cout << "In surface region " << idSurfReg << "\n";
+            std::cerr << "Error: bad mesh. A triangular face shared by " << nbTetraFaces
+                      << " tetrahedrons has been found in the surface region " << idSurfReg << "\n";
             }
-        exit(1);
+        else
+            {
+            std::cerr << "Error: bad mesh. A triangular face shared by "
+                      << nbTetraFaces << " tetrahedrons has been found\n";
+            }
+        return true;
         }
-    else if (nbTotTri == 3 && nbSurfReg == 1 && pairIdVolRegs.first == pairIdVolRegs.second)
+    else if (nbTetraFaces == 2 && nbSurfTri == 1 && pairIdVolRegs.first == pairIdVolRegs.second)
         {
-        std::cout << "Error: wrong mesh generation. An internal triangle belonging "
-                     "to the surface region " << idSurfReg << " has been found\n";
-        exit(1);
+        std::cerr << "Error: bad mesh. An internal triangle has been "
+                     "found in the surface region " << idSurfReg << "\n";
+        return true;
+        }
+    else
+        {
+        return false;
         }
     }
 

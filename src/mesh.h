@@ -118,7 +118,8 @@ public:
                     }
                 });
 
-        checkTriangles();
+        if (!checkTriangles())
+            { exit(1); }
         for(unsigned int i=0;i<tri.size();i++)
             {
             if (isMagnetic(tri[i]) && !mySets.paramTriangle[tri[i].idxPrm].suppress_charges
@@ -412,18 +413,17 @@ private:
      * the matrix we will have to solve for. */
     void sortNodes(Nodes::index long_axis /**< [in] */);
 
-    /** Check if each triangle verify one of the three following conditions :
+    /** Check whether each triangle of tet and tri satisfies one of the three following conditions :
      *      - Is part of no surface region, but part of 2 tetraedrons of the same volume region
      *      - Is part of at most one surface region, and 2 tetraedrons of differents volume region
      *      - Is part of 1 tetraedron and at most one surface region
-     * Throws an error if it finds one which is not in one of those three cases.
+     * Returns true if all triangles in one of those three cases, false otherwise.
      */
-    void checkTriangles();
+    bool checkTriangles();
 
-    /** Called in checkTriangles. Gives the corresponding error message if a
-     * generation error is detected. */
-    void analyzeTriangle(const int nbTotTri, const int nbSurfReg,
-                         const std::pair<int,int> &pairIdVolRegs, const int idSurfReg);
+    /** Called in checkTriangles. Returns true if a generation error is detected, false otherwise. */
+    bool findErrInTriangle(const int nbSurfTri, const int nbTetraFaces,
+                         const std::pair<int,int> pairIdVolRegs, const int idSurfReg);
 
     /** returns the surface defined by the set of triangle of indices in triIndices
      * each elementary surface triangle defined by points p0,p1,p2 is computed using
