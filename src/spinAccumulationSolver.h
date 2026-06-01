@@ -28,33 +28,7 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     spinAcc(const Settings &mySettings /**< [in] */,
             Mesh::mesh &_msh /**< [in] ref to the mesh */,
             const double _tol /**< [in] tolerance for bicg_dir solver */,
-            const int max_iter /**< [in] maximum number of iterations */):
-            solver<DIM_PB_SPIN_ACC>(_msh, mySettings.paramTetra, mySettings.paramTriangle,
-                                    "bicg_dir", _tol, mySettings.verbose, max_iter)
-        {
-        if (mySettings.spin_acc)
-            {
-            checkBoundaryConditions();
-            valDirichlet.resize(DIM_PB*NOD);
-            boundaryConditions();
-            electrostatSolver pot_solver(_msh, mySettings.paramTetra, mySettings.paramTriangle,
-                                         1e-8, mySettings.verbose, 1000);
-            pot_solver.checkBoundaryConditions();
-            pot_solver.V.resize(_msh.getNbNodes());
-            std::string V_fileName("");
-            if(mySettings.V_file)
-                V_fileName = mySettings.getSimName() + "_V.sol";
-            pot_solver.compute(mySettings.verbose, V_fileName);
-            V = pot_solver.V;
-            s.resize(NOD);
-            prepareExtras();
-            if(!compute())
-                {
-                std::cout << "Error: spin diffusion solver(first try) failed.\n";
-                exit(1);
-                }
-            }
-        }
+            const int max_iter /**< [in] maximum number of iterations */);
 
     /** boundary conditions: a surface with a fixed s, and another surface with fixed normal current
      * density J and polarization vector P
@@ -111,8 +85,10 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** spin flip length : exists in both non-magnetic and magnetic metals */
     double getLsf(const Tetra::Tet &tet) const;
 
-    /** affect extraField member function of all tetrahedrons */
-    void prepareExtras(void);
+    /** affect extraField member function of all tetrahedrons
+     * extraField is computing the contribution from the spin diffusion s to llg
+     * */
+    void prepareExtraField(void);
 
     /** solver, using biconjugate stabilized gradient, with diagonal preconditionner and Dirichlet
      * boundary conditions */

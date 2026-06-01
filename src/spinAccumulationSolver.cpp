@@ -5,6 +5,36 @@
 using algebra::sq;
 using namespace Nodes;
 
+    spinAcc::spinAcc(const Settings &mySettings /**< [in] */,
+            Mesh::mesh &_msh /**< [in] ref to the mesh */,
+            const double _tol /**< [in] tolerance for bicg_dir solver */,
+            const int max_iter /**< [in] maximum number of iterations */):
+            solver<DIM_PB_SPIN_ACC>(_msh, mySettings.paramTetra, mySettings.paramTriangle,
+                                    "bicg_dir", _tol, mySettings.verbose, max_iter)
+        {
+        if (mySettings.spin_acc)
+            {
+            checkBoundaryConditions();
+            valDirichlet.resize(DIM_PB*NOD);
+            boundaryConditions();
+            electrostatSolver pot_solver(_msh, mySettings.paramTetra, mySettings.paramTriangle,
+                                         1e-8, mySettings.verbose, 1000);
+            pot_solver.checkBoundaryConditions();
+            pot_solver.V.resize(_msh.getNbNodes());
+            std::string V_fileName("");
+            if(mySettings.V_file)
+                V_fileName = mySettings.getSimName() + "_V.sol";
+            pot_solver.compute(mySettings.verbose, V_fileName);
+            V = pot_solver.V;
+            s.resize(NOD);
+            if(!compute())
+                {
+                std::cout << "Error: spin diffusion solver(first try) failed.\n";
+                exit(1);
+                }
+            }
+        }
+
 void spinAcc::checkBoundaryConditions(void) const
     {
     // nbVolP and nbVolN0 initialized to 1 because of __default__
@@ -99,12 +129,13 @@ double spinAcc::getLsd(const Tetra::Tet &tet) const
 double spinAcc::getLsf(const Tetra::Tet &tet) const
     { return paramTet[tet.idxPrm].lsf; }
 
-void spinAcc::prepareExtras(void)
+void spinAcc::prepareExtraField(void)
     {
     using namespace Tetra;
 
     std::for_each( msh->tet.begin(), msh->tet.end(), [this](Tet &t)
         {
+// this is wierd, since only mag tetrahedrons seems concerned, we should loop over magTet, not tet
         if (msh->isMagnetic(t))
             {
             double D0 = getDiffusionCst(t);
@@ -117,6 +148,7 @@ void spinAcc::prepareExtras(void)
 
 bool spinAcc::compute(void)
     {
+    prepareExtraField(); // do we have to do that once or each time we want another s computation ?
     bool has_converged = solve();
     if (!has_converged)
         {
