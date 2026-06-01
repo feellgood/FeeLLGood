@@ -88,7 +88,7 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** affect extraField member function of all tetrahedrons
      * extraField is computing the contribution from the spin diffusion s to llg
      * */
-    void prepareExtraField(void);
+    void prepareExtraField(void) const;
 
     /** solver, using biconjugate stabilized gradient, with diagonal preconditionner and Dirichlet
      * boundary conditions */

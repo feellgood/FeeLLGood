@@ -27,6 +27,7 @@ using namespace Nodes;
             pot_solver.compute(mySettings.verbose, V_fileName);
             V = pot_solver.V;
             s.resize(NOD);
+            prepareExtraField();
             if(!compute())
                 {
                 std::cout << "Error: spin diffusion solver(first try) failed.\n";
@@ -129,26 +130,21 @@ double spinAcc::getLsd(const Tetra::Tet &tet) const
 double spinAcc::getLsf(const Tetra::Tet &tet) const
     { return paramTet[tet.idxPrm].lsf; }
 
-void spinAcc::prepareExtraField(void)
+void spinAcc::prepareExtraField(void) const
     {
-    using namespace Tetra;
-
-    std::for_each( msh->tet.begin(), msh->tet.end(), [this](Tet &t)
+    std::for_each( msh->magTet.begin(), msh->magTet.end(), [this](const int idxTet)
         {
-// this is wierd, since only mag tetrahedrons seems concerned, we should loop over magTet, not tet
-        if (msh->isMagnetic(t))
-            {
-            double D0 = getDiffusionCst(t);
-            double prefactor = D0/(sq(getLsd(t))*gamma0*getMs(t));
-            t.extraField = [this, &t, prefactor](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H)
+        Tetra::Tet &t = msh->tet[idxTet];
+        double D0 = getDiffusionCst(t);
+        double prefactor = D0/(sq(getLsd(t))*gamma0*getMs(t));
+        t.extraField = [this, &t, prefactor](Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> H)
                         { H += calc_Hst(t, prefactor, s); };
-            }
         });//end for_each
     }
 
 bool spinAcc::compute(void)
     {
-    prepareExtraField(); // do we have to do that once or each time we want another s computation ?
+    //prepareExtraField(); // do we have to do that once or each time we want another s computation ?
     bool has_converged = solve();
     if (!has_converged)
         {

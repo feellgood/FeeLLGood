@@ -368,7 +368,7 @@ private:
     /** returns Hst field on the NPI Gauss point(s) */
     Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> calc_Hst(const Tetra::Tet &tet,
                                                          const double prefactor,
-                                                         std::vector<Eigen::Vector3d> &s);
+                                                         const std::vector<Eigen::Vector3d> &s);
 }   // end namespace Tetra
 
 #endif /* tetra_h */

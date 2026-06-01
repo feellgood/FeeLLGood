@@ -91,7 +91,7 @@ Eigen::Matrix<double,Nodes::DIM,NPI> Tetra::calc_gradV(Tet const &tet, const std
     }
 
 Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> Tetra::calc_Hst(const Tetra::Tet &tet,
-        const double prefactor, std::vector<Eigen::Vector3d> &s)
+        const double prefactor, const std::vector<Eigen::Vector3d> &s)
     {
     Eigen::Matrix<double,Nodes::DIM,Tetra::N> s_nod;
     for(size_t ie=0;ie<Tetra::N;ie++)
