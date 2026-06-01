@@ -39,7 +39,7 @@ jobs:
     - name: build with 5 Gauss points
       run: |
         export PATH="/usr/lib/ccache:$PATH"
-        cmake . -DENABLE_UTESTS=ON -DENABLE_DET_UTESTS=ON
+        CXXFLAGS=-Werror cmake . -DENABLE_UTESTS=ON -DENABLE_DET_UTESTS=ON
         make -j $(getconf _NPROCESSORS_ONLN)
 
     - name: show ccache stats (5 Gauss points)
@@ -56,7 +56,7 @@ jobs:
     - name: build with 1 Gauss point
       run: |
         git clean -dxf
-        cmake . -DENABLE_UTESTS=ON -DENABLE_DET_UTESTS=ON -DONE_GAUSS_POINT=ON
+        CXXFLAGS=-Werror cmake . -DENABLE_UTESTS=ON -DENABLE_DET_UTESTS=ON -DONE_GAUSS_POINT=ON
         make -j $(getconf _NPROCESSORS_ONLN)
 
     - name: show ccache stats (1 Gauss point)
