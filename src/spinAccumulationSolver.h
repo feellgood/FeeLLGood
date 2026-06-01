@@ -45,7 +45,9 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
             if(mySettings.V_file)
                 V_fileName = mySettings.getSimName() + "_V.sol";
             pot_solver.compute(mySettings.verbose, V_fileName);
-            preCompute(pot_solver.V);
+            V = pot_solver.V;
+            s.resize(NOD);
+            prepareExtras();
             if(!compute())
                 {
                 std::cout << "Error: spin diffusion solver(first try) failed.\n";
@@ -59,9 +61,6 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
      * set valDirichlet values and fill vector of indices idxDirichlet
      * */
     void boundaryConditions(void); // should be private
-
-    /** initializations: compute gradV and call prepareExtras method */
-    void preCompute(std::vector<double> &V);
 
     /** call solver and update spin diffusion solution, returns true if solver succeeded */
     bool compute(void);
@@ -87,10 +86,9 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
      * corresponding spin diffusion s value*/
     void fillDirichletData(const int k, Eigen::Vector3d &s_value);
 
-    /** table of the gradients of the potential, gradV.size() is the number of tetrahedrons
-     * [gradV] = Volt/m = kg m A^-1 s^-3
-     * */
-    std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > gradV;
+    /** electrostatic potential V on the nodes
+     * unit [V] = Volt = kg A^-1 s^-3 */
+    std::vector<double> V;
 
     /** number of digits in the optional output file */
     const int precision = 8;

@@ -115,17 +115,6 @@ void spinAcc::prepareExtras(void)
         });//end for_each
     }
 
-void spinAcc::preCompute(std::vector<double> &V)
-    {
-    s.resize(NOD);
-    std::for_each(msh->tet.begin(), msh->tet.end(), [this,&V](const Tetra::Tet &tet)
-                 {
-                 Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> _gradV = calc_gradV(tet,V);
-                 gradV.push_back(_gradV);
-                 });
-    prepareExtras();
-    }
-
 bool spinAcc::compute(void)
     {
     bool has_converged = solve();
@@ -239,7 +228,7 @@ void spinAcc::integrales(Tetra::Tet &tet, std::vector<double> &BE)
     * units: [cst0] = [sigma] m^2 = A^2 s^3 m^-1 kg^-1
     */
     const double cst0 = BOHRS_MUB*getPolarizationRate(tet)*getSigma(tet)/CHARGE_ELECTRON;
-    Eigen::Matrix<double,Nodes::DIM,NPI> &_gradV = gradV[tet.idx];
+    const Eigen::Matrix<double,Nodes::DIM,NPI> &_gradV = calc_gradV(tet,V);
 
     if(msh->isMagnetic(tet))
         {
