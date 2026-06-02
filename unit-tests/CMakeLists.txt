@@ -72,7 +72,12 @@ add_executable (test_ut_time_int ${SOURCES})
 
 add_executable (test_ut_log-stats ut_log-stats.cpp)
 
-add_executable(test_ut_readMesh ut_readMesh.cpp)
+set_source_files_properties(
+    ../src/default-settings.o
+    PROPERTIES GENERATED TRUE)
+set(SOURCES ../src/tags.cpp ../src/triangle.cpp ../src/tetra.cpp ../src/expression_parser.cpp ../src/settings.cpp
+    ../src/read.cpp  ../src/chronometer.cpp ../src/default-settings.o ../src/mesh.cpp ut_readMesh.cpp)
+add_executable(test_ut_readMesh ${SOURCES})
 
 target_link_libraries(test_ut_solver
     ${Boost_FILESYSTEM_LIBRARY}
@@ -244,6 +249,8 @@ target_link_libraries(test_ut_log-stats
 target_link_libraries(test_ut_readMesh
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
   ${GMSH_LIB}
+  yaml-cpp
+  duktape
   TBB::tbb
   )
 
