@@ -262,13 +262,12 @@ void spinAcc::integrales(Tetra::Tet &tet, std::vector<double> &BE)
         {
         for (size_t npi=0; npi<NPI; npi++)
             {
-            const double cst0_w = cst0*tet.weight[npi];
+            const Eigen::Vector3d cst0_w_gradV = cst0*tet.weight[npi]*_gradV.col(npi);
 
             for (size_t ie=0; ie<N; ie++)
                 {
                 const Eigen::Vector3d &m = msh->getNode_u(tet.ind[ie]);//magnetization
-                Eigen::Vector3d grad_ai = tet.da.row(ie);
-                double tmp = cst0_w*grad_ai.dot( _gradV.col(npi) );
+                const double tmp = cst0_w_gradV.dot(tet.da.row(ie));
                 BE[    ie] += tmp*m[0];
                 BE[  N+ie] += tmp*m[1];
                 BE[2*N+ie] += tmp*m[2];
