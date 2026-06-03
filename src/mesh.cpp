@@ -18,7 +18,17 @@ public:
     */
     BasicTri(const std::vector<int> &inds, const int idReg, const bool surface = false)
         : nodesInd({inds[0], inds[1], inds[2]}), idRegion(idReg), isSurfaceElement(surface)
-        { std::sort(nodesInd.begin(), nodesInd.end()); }
+        {
+        int inversions = 0;
+        inversions += (nodesInd[0] > nodesInd[1])
+                    + (nodesInd[1] > nodesInd[2])
+                    + (nodesInd[0] > nodesInd[2]);
+        std::sort(nodesInd.begin(), nodesInd.end());
+        inversions += (nodesInd[0] > nodesInd[1])
+                    + (nodesInd[1] > nodesInd[2])
+                    + (nodesInd[0] > nodesInd[2]);
+        isFlipped = inversions % 2;
+        }
 
     /** Constructor used to copy a surface region triangle */
     explicit BasicTri(const Triangle::Tri & tri)
@@ -37,6 +47,9 @@ public:
 
     /** If the triangle is in a surface region */
     bool isSurfaceElement;
+
+    /** Whether the index order normalization flipped the triangle. */
+    bool isFlipped;
 
     }; // class BasicTri
 
@@ -111,54 +124,31 @@ double mesh::doOnNodes(const double init_val, const Nodes::index coord,
 
 void mesh::updateDeltaMs()
     {
-    std::set<Triangle::Tri> sf;  // implicit use of operator< redefined in class Tri
+    std::vector<BasicTri> tetraFaces;           // all tetrahedral faces
+    std::for_each(tet.begin(), tet.end(),       // for each tetrahedron
+            [&tetraFaces](const Tetra::Tet &tetrahedron)
+            {
+            // Add all the faces of the tetrahedron, oriented outwards.
+            const std::vector<int>& ind = tetrahedron.ind;
+            const int region = tetrahedron.idxPrm;
+            tetraFaces.push_back(BasicTri({ind[0], ind[2], ind[1]}, region));
+            tetraFaces.push_back(BasicTri({ind[1], ind[2], ind[3]}, region));
+            tetraFaces.push_back(BasicTri({ind[2], ind[0], ind[3]}, region));
+            tetraFaces.push_back(BasicTri({ind[3], ind[0], ind[1]}, region));
+            });
+    std::sort(tetraFaces.begin(), tetraFaces.end());
 
-    std::for_each(tet.begin(), tet.end(), [this,&sf](const Tetra::Tet &te)
-                  {
-                  const int ia = te.ind[0];
-                  const int ib = te.ind[1];
-                  const int ic = te.ind[2];
-                  const int id = te.ind[3];
-
-                  sf.insert(Triangle::Tri(node, 0, te.idxPrm, {ia, ic, ib} ));
-                  sf.insert(Triangle::Tri(node, 0, te.idxPrm, {ib, ic, id} ));
-                  sf.insert(Triangle::Tri(node, 0, te.idxPrm, {ia, id, ic} ));
-                  sf.insert(Triangle::Tri(node, 0, te.idxPrm, {ia, ib, id} ));
-                  });  // end for_each
-
-    std::for_each(tri.begin(), tri.end(), [this, &sf](Triangle::Tri &fa)
-                  {
-                  int i0 = fa.ind[0], i1 = fa.ind[1], i2 = fa.ind[2];
-                  auto it = sf.end();
-                  for (int perm = 0; perm < 2; perm++)
-                      {
-                      for (int nrot = 0; nrot < 3; nrot++)
-                          {
-                          Triangle::Tri fc(node, 0, 0, {0, 0, 0} );
-                          fc.ind[(0 + nrot) % 3] = i0;
-                          fc.ind[(1 + nrot) % 3] = i1;
-                          fc.ind[(2 + nrot) % 3] = i2;
-                          it = sf.find(fc);
-                          if (it != sf.end()) break;
-                          }
-
-                      if (it != sf.end())
-                          {  // found
-                          Eigen::Vector3d p0p1 = node[it->ind[1]].p - node[it->ind[0]].p;
-                          Eigen::Vector3d p0p2 = node[it->ind[2]].p - node[it->ind[0]].p;
-                                
-                          // fa.Ms will have the magnitude of first arg of copysign, with second arg
-                          // sign
-                          fa.dMs += std::copysign( paramTetra[it->idxPrm].Ms,
-                               p0p1.dot(p0p2.cross(fa.calc_norm())) );  // carefull, calc_norm
-                                                                        // computes the normal to
-                                                                        // the triangle before idx swap
-                          }
-                      std::swap(i1, i2);  // it seems from ref archive we do not want to swap
-                                        // inner tri indices but local i1 and i2
-                      fa.n = fa.calc_norm(); // update normal vector
-                      }                   // end perm
-                  });  // end for_each
+    std::for_each(tri.begin(), tri.end(), [this, &tetraFaces](Triangle::Tri &element)
+            {
+            BasicTri triangle(element);
+            auto face = std::lower_bound(tetraFaces.begin(), tetraFaces.end(), triangle);
+            for (; face != tetraFaces.end() && face->nodesInd == triangle.nodesInd; face++)
+                {
+                double Ms = paramTetra[face->idRegion].Ms;
+                bool isFlipped = triangle.isFlipped ^ face->isFlipped;
+                element.dMs += isFlipped ? -Ms : Ms;
+                }
+            });
     }
 
 bool mesh::checkTriangles()
