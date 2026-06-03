@@ -38,7 +38,7 @@ public:
         : paramTetra(mySets.paramTetra), volumeRegions(mySets.paramTetra.size())
         {
         readMesh(mySets);
-        indexReorder();
+        updateDeltaMs();
 
         if (simplified)
             { return; }
@@ -418,7 +418,7 @@ private:
 
     /** Update dMs on each triangular element, with a sign that is consistent with the triangle's
      * orientation. */
-    void indexReorder();
+    void updateDeltaMs();
 
     /** Sort the nodes along the longest axis of the sample. This should reduce the bandwidth of
      * the matrix we will have to solve for. */

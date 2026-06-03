@@ -109,7 +109,7 @@ double mesh::doOnNodes(const double init_val, const Nodes::index coord,
     return result;
     }
 
-void mesh::indexReorder()
+void mesh::updateDeltaMs()
     {
     std::set<Triangle::Tri> sf;  // implicit use of operator< redefined in class Tri
 

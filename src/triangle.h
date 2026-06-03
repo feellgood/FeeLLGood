@@ -109,8 +109,8 @@ class Tri : public element<N,NPI>
     {
 public:
     /** constructor used by readMesh
-     Warning: mesh::indexReorder method call it with both _NOD = 0 and _p_node.size() > 0
-     TODO: get rid of _NOD and rewrite mesh::indexReorder
+     Warning: mesh::updateDeltaMs method call it with both _NOD = 0 and _p_node.size() > 0
+     TODO: get rid of _NOD and rewrite mesh::updateDeltaMs
      * */
     inline Tri(const std::vector<Nodes::Node> &_p_node /**< [in] vector of nodes */,
                const int _NOD /**< [in] it is equal to _p_node.size() except if _NOD == 0 */,
@@ -240,7 +240,7 @@ public:
     inline double calc_surf(void) const { return 0.5 * normal_vect().norm(); }
 
 private:
-    /** do nothing function: orientation is done in mesh::indexReorder */
+    /** do nothing function: the orientation of the triangles does not change */
     void orientate(void) override {}
 
     /** return normal to the triangle, not normalized */
