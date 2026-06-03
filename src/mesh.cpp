@@ -19,14 +19,10 @@ public:
     BasicTri(const std::vector<int> &inds, const int idReg, const bool surface = false)
         : nodesInd({inds[0], inds[1], inds[2]}), idRegion(idReg), isSurfaceElement(surface)
         {
-        int inversions = 0;
-        inversions += (nodesInd[0] > nodesInd[1])
-                    + (nodesInd[1] > nodesInd[2])
-                    + (nodesInd[0] > nodesInd[2]);
+        int inversions = (nodesInd[0] > nodesInd[1])
+                       + (nodesInd[1] > nodesInd[2])
+                       + (nodesInd[0] > nodesInd[2]);
         std::sort(nodesInd.begin(), nodesInd.end());
-        inversions += (nodesInd[0] > nodesInd[1])
-                    + (nodesInd[1] > nodesInd[2])
-                    + (nodesInd[0] > nodesInd[2]);
         isFlipped = inversions % 2;
         }
 
