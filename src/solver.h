@@ -103,10 +103,10 @@ class solver
             }
 
         /** function template.
-        parameter N is the number of indices of the element to build matrix from: ind.size() = N
+        parameter N is the number of indices of the element to build matrix from
          */
         template <int N>
-        void buildMat(std::vector<int> &ind, Eigen::Matrix<double,DIM_PROBLEM*N,DIM_PROBLEM*N> &Ke)
+        void buildMat(std::array<int,N> &ind, Eigen::Matrix<double,DIM_PROBLEM*N,DIM_PROBLEM*N> &Ke)
             {
             for (int ie=0; ie<N; ie++)
                 {
@@ -125,7 +125,7 @@ class solver
         parameter N is the number of indices of the element to build vector from
         */
         template <int N>
-        void buildVect(std::vector<int> &ind, std::vector<double> &Le)
+        void buildVect(std::array<int,N> &ind, std::vector<double> &Le)
             {
             for (int ie=0; ie<N; ie++)
                 {

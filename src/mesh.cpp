@@ -16,7 +16,7 @@ public:
     /** Constructor using the indices vector and the region. sRegion is false by default.
      * The nodes are sorted because it makes it easier to compare two BasicTri.
     */
-    BasicTri(const std::vector<int> &inds, const int idReg, const bool surface = false)
+    BasicTri(const std::array<int,3> &inds, const int idReg, const bool surface = false)
         : nodesInd({inds[0], inds[1], inds[2]}), idRegion(idReg), isSurfaceElement(surface)
         {
         int inversions = (nodesInd[0] > nodesInd[1])
@@ -125,7 +125,7 @@ void mesh::updateDeltaMs()
             [&tetraFaces](const Tetra::Tet &tetrahedron)
             {
             // Add all the faces of the tetrahedron, oriented outwards.
-            const std::vector<int>& ind = tetrahedron.ind;
+            const std::array<int,Tetra::N>& ind = tetrahedron.ind;
             const int region = tetrahedron.idxPrm;
             tetraFaces.push_back(BasicTri({ind[0], ind[2], ind[1]}, region));
             tetraFaces.push_back(BasicTri({ind[1], ind[2], ind[3]}, region));

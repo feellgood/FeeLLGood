@@ -37,7 +37,7 @@ class element
             ) : idxPrm(_idx), refNode(_p_node)
         {
         if(_i.size() == N)
-            { ind.assign(_i); }
+            { std::copy(_i.begin(), _i.end(), ind.begin()); }
         else
             {
             std::cerr<<"Warning: element constructor is given an init list with size() != N\n";
@@ -48,7 +48,7 @@ class element
         }
 
     /** indices to the nodes */
-    std::vector<int> ind;
+    std::array<int,N> ind;
     
     /** index of the material region of the element */
     int idxPrm;
