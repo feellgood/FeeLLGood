@@ -193,15 +193,6 @@ public:
     /** computes correction on potential*/
     double potential(const std::function<Eigen::Vector3d(Nodes::Node)>& getter, int i) const;
 
-    /** Compares indices on lexicographic order : ind[0] then ind[1] then ind[2]. */
-    inline bool operator<(const Tri &f) const
-        {
-        return (this->ind[0] < f.ind[0])
-               || ((this->ind[0] == f.ind[0])
-                   && ((this->ind[1] < f.ind[1])
-                       || ((this->ind[1] == f.ind[1]) && (this->ind[2] < f.ind[2]))));
-        }
-
     /** two triangles are equal if there exists an indices permutation where node indices are the same
      * Warning: it does not take into account orientation (direct or indirect) */
     bool operator==(const Tri &f) const

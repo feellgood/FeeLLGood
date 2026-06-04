@@ -22,48 +22,7 @@ BOOST_AUTO_TEST_SUITE(ut_triangle)
 /* first lvl tests : nested calculus,... */
 /*---------------------------------------*/
 
-BOOST_AUTO_TEST_CASE(Tri_operator_infto)
-    {
-    std::cout << "Tri operator< unit test" << std::endl;
-
-    unsigned sd = my_seed();
-    std::mt19937_64 gen(
-            sd);  // random number generator: standard Mersenne twister initialized with seed
-    std::uniform_int_distribution<int> distrib;
-
-    std::vector<Nodes::Node> node;
-    Triangle::Tri f(node, 0, 0, {0,0,0});
-    bool test_result = !(f < f);  // whatever is f, f<f must return false
-    std::cout<<" !(triangle < triangle): " << test_result << std::endl;
-
-    for (int i = 0; i < 100; i++)
-        {
-        int a = distrib(gen);
-        int b = distrib(gen);
-        int c = distrib(gen);
-        int d = distrib(gen);
-        int e = distrib(gen);
-        int f = distrib(gen);
-        
-        Triangle::Tri f1(node, 0, 0, {a,b,c} );
-        Triangle::Tri f2(node, 0, 0, {d,e,f} );
-
-        /* ref code */
-        bool val_ref = false;
-        if (f1.ind[0] < f2.ind[0])
-            val_ref = true;
-        else if ((f1.ind[0] == f2.ind[0]) && (f1.ind[1] < f2.ind[1]))
-            val_ref = true;
-        else if ((f1.ind[0] == f2.ind[0]) && (f1.ind[1] == f2.ind[1]) && (f1.ind[2] < f2.ind[2]))
-            val_ref = true;
-        /* end ref code */
-
-        test_result = test_result && ((f1 < f2) == val_ref);
-        }
-
-    if (!DET_UT) std::cout << "seed =" << sd << std::endl;
-    BOOST_CHECK(test_result);
-    }
+// Nothing to test here.
 
 /*---------------------------------------*/
 /* second lvl tests : pure mathematics   */
