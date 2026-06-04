@@ -193,19 +193,16 @@ public:
     /** computes correction on potential*/
     double potential(const std::function<Eigen::Vector3d(Nodes::Node)>& getter, int i) const;
 
-    /** two triangles are equal if there exists an indices permutation where node indices are the same
-     * Warning: it does not take into account orientation (direct or indirect) */
+    /** Two triangles are equal if they have the same set of vertices, i.e. if their lists of
+     * node indices are the same to within a permutation.
+     * Warning: two equal triangles may have different orientations. */
     bool operator==(const Tri &f) const
         {
-        const int a= this->ind[0];
-        const int b= this->ind[1];
-        const int c= this->ind[2];
-        const int i= f.ind[0];
-        const int j= f.ind[1];
-        const int k= f.ind[2];
-        return ((a==i)&&(b==j)&&(c==k))||((a==j)&&(b==i)&&(c==k))
-             ||((a==i)&&(b==k)&&(c==j))||((a==k)&&(b==i)&&(c==j))
-             ||((a==j)&&(b==k)&&(c==i))||((a==k)&&(b==j)&&(c==i));
+        /* As we rule out degenerate triangles, it is sufficient to test whether all the vertices
+         * of f are also vertices of this. */
+        return std::find(ind.begin(), ind.end(), f.ind[0]) != ind.end()
+            && std::find(ind.begin(), ind.end(), f.ind[1]) != ind.end()
+            && std::find(ind.begin(), ind.end(), f.ind[2]) != ind.end();
         }
 
     /** computes the norm to the triangle, returns a unit vector */
