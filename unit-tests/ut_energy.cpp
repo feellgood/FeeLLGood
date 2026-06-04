@@ -147,10 +147,10 @@ BOOST_AUTO_TEST_CASE(demagEnergy, *boost::unit_test::tolerance(UT_TOL))
     const int id = t.ind[3] + 1;
     
     std::vector<Triangle::Tri> fa;
-    fa.push_back( Triangle::Tri(node, nbNod, 0, {ia, ic, ib} ));
-    fa.push_back( Triangle::Tri(node, nbNod, 0, {ib, ic, id} ));
-    fa.push_back( Triangle::Tri(node, nbNod, 0, {ia, id, ic} ));
-    fa.push_back( Triangle::Tri(node, nbNod, 0, {ia, ib, id} ));
+    fa.push_back( Triangle::Tri(node, 0, {ia, ic, ib} ));
+    fa.push_back( Triangle::Tri(node, 0, {ib, ic, id} ));
+    fa.push_back( Triangle::Tri(node, 0, {ia, id, ic} ));
+    fa.push_back( Triangle::Tri(node, 0, {ia, ib, id} ));
     std::for_each(fa.begin(),fa.end(),[Ms](Triangle::Tri &f){ f.dMs = Ms;});
     
     std::for_each(fa.begin(),fa.end(), [&result_to_test](Triangle::Tri &f)

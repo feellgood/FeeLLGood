@@ -109,29 +109,21 @@ class Tri : public element<N,NPI>
     {
 public:
     /** constructor used by readMesh
-     Warning: mesh::updateDeltaMs method call it with both _NOD = 0 and _p_node.size() > 0
-     TODO: get rid of _NOD and rewrite mesh::updateDeltaMs
      * */
     inline Tri(const std::vector<Nodes::Node> &_p_node /**< [in] vector of nodes */,
-               const int _NOD /**< [in] it is equal to _p_node.size() except if _NOD == 0 */,
                const int _idx /**< [in] region index in region vector */,
                std::initializer_list<int> _i /**< [in] node index */)
-        : element<N,NPI>(_p_node,_idx,_i),dMs(0)
+        : element<N,NPI>(_p_node,_idx,_i),surf(0),dMs(0)
         {
-        if (_NOD > 0)
+        if (existNodes())
             {
-            zeroBasing();
             surf = calc_surf();
             n = calc_norm();
+            for(int i=0;i<NPI;i++)
+                { weight[i] = 2.0 * surf * Triangle::pds[i]; }
             }
         else
-            {
-            surf = 0.0;
-            n = Eigen::Vector3d(0,0,0);
-            }  // no index shift here if NOD == 0 : usefull while reordering triangle indices
-
-        for(int i=0;i<NPI;i++)
-            { weight[i] = 2.0 * surf * Triangle::pds[i]; }
+            { std::cerr<<"Error: Tri constructor has out of bound index\n"; }
         }
 
     /** surface of the element */

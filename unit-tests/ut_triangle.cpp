@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(Tri_calc_surf, *boost::unit_test::tolerance(UT_TOL))
     std::vector<Nodes::Node> node;
     dummyNodes<nbNod>(node);
 
-    Triangle::Tri f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
+    Triangle::Tri f(node, 0, {1, 2, 3});  // carefull with the index shift
 
     std::cout << "indices:" << f.ind[0] << ";" << f.ind[1] << ";" << f.ind[2] << std::endl;
 
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(Tri_interpolation_pt3D, *boost::unit_test::tolerance(UT_TOL
     node[1].d[0].u = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
     node[2].d[0].u = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
 
-    Triangle::Tri f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
+    Triangle::Tri f(node, 0, {1, 2, 3});  // carefull with the index shift
 
     Eigen::Matrix<double,DIM,Triangle::N> _vec_nod;
     for (int i = 0; i < Triangle::N; i++) _vec_nod.col(i) = node[f.ind[i]].get_u(Nodes::CURRENT);
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(Tri_interpolation_double, *boost::unit_test::tolerance(UT_T
     node[1].d[0].phi = distrib(gen);
     node[2].d[0].phi = distrib(gen);
 
-    Triangle::Tri f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
+    Triangle::Tri f(node, 0, {1, 2, 3});  // carefull with the index shift
 
     Eigen::Matrix<double,Triangle::NPI,1> _p;
     f.interpolation(Nodes::get_phi<Nodes::CURRENT>, _p);
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(Tri_potential_u, *boost::unit_test::tolerance(10*UT_TOL))
         node[i].d[1].v = Eigen::Vector3d(2*distrib(gen) - 1, 2*distrib(gen) - 1, 2*distrib(gen) - 1);
         }
     
-    Triangle::Tri f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
+    Triangle::Tri f(node, 0, {1, 2, 3});  // carefull with the index shift
     f.dMs = distrib(gen);
     int i = 0;
     int Hv = 0;
@@ -263,7 +263,7 @@ BOOST_AUTO_TEST_CASE(Tri_potential_v, *boost::unit_test::tolerance(10.0*UT_TOL))
         node[i].d[1].v = Eigen::Vector3d(2*distrib(gen) - 1, 2*distrib(gen) - 1, 2*distrib(gen) - 1);
         }
     
-    Triangle::Tri f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
+    Triangle::Tri f(node, 0, {1, 2, 3});  // carefull with the index shift
     f.dMs = distrib(gen);
 
     int i = 0;
@@ -376,7 +376,7 @@ BOOST_AUTO_TEST_CASE(Tri_Pcoeff)
         node[i].setBasis(2 * M_PI * distrib(gen));
         }
 
-    Triangle::Tri f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
+    Triangle::Tri f(node, 0, {1, 2, 3});  // carefull with the index shift
     Eigen::Matrix<double,2*N,3*N> P;
     f.buildMatP(P);
 

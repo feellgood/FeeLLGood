@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(tri_charges, *boost::unit_test::tolerance(UT_TOL))
         node[i].d[Nodes::NEXT].u = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
         }
 
-    Triangle::Tri f(node, nbNod, 0, {1, 2, 3});  // carefull with the index shift
+    Triangle::Tri f(node, 0, {1, 2, 3});  // carefull with the index shift
     double dMs = distrib(gen);
     auto getter = Nodes::get_u<Nodes::NEXT>;
 

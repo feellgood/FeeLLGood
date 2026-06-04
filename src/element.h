@@ -17,10 +17,9 @@
 
 template parameters are N number of sommits and NPI number of interpolation points. It contains a
 list of indices to the N nodes of the element, a reference to the full nodes vector, and index
-refering to the associated material parameters. All indices are zero based, derived class
-constructor should call zerobasing() if needed. It contains also the vector and matrix weight, Kp,
-Lp, P related to finite element computations. weight values are not initialized, they have to be set
-by derived class constructor.
+refering to the associated material parameters. All indices are zero based.
+It contains also the vector and matrix weight, Kp, Lp, P related to finite element computations.
+weight values are not initialized, they have to be set by derived class constructor.
 Member function getPtGauss() returns Gauss points.
 orientate() is a pure virtual function, it should manipulate indices to orientate positively the
 element.
@@ -37,10 +36,13 @@ class element
             ) : idxPrm(_idx), refNode(_p_node)
         {
         if(_i.size() == N)
-            { std::copy(_i.begin(), _i.end(), ind.begin()); }
+            { //gmsh index convention Matlab/msh (one based) -> C++ (zero based) 
+            int j(0);
+            std::for_each(_i.begin(),_i.end(), [this,&j](const int &idx){ ind[j] = idx-1;j++;});
+            }
         else
             {
-            std::cerr<<"Warning: element constructor is given an init list with size() != N\n";
+            std::cerr<<"Error: element constructor is given an init list with size() != N\n";
             SYSTEM_ERROR;
             }
         Kp.setZero();
@@ -127,10 +129,6 @@ with each block E(p|q)(x|y|z) a N*N diagonal matrix
     protected:
         /** returns reference to node at ind[i] from mesh node vector */
         inline const Nodes::Node & getNode(const int i) const { return refNode[ind[i]]; }
-
-        /** zeroBasing: index convention Matlab/msh (one based) -> C++ (zero based) */
-        inline void zeroBasing(void)
-            { std::for_each(ind.begin(),ind.end(),[](int & _i){ _i--; } ); }
 
     private:
         /** vector of nodes */

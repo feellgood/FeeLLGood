@@ -142,9 +142,6 @@ public:
                const std::initializer_list<int> _i /**< [in] node index */)
         : element<N,NPI>(_p_node,_idx,_i), idx(0)
         {
-        zeroBasing();
-        da.setZero();
-
         if (existNodes())
             {
             orientate(); // enforce the correct orientation
@@ -158,9 +155,11 @@ public:
 
             for (int j = 0; j < NPI; j++)
                 { weight[j] = detJ * Tetra::pds[j]; }// if NPI=1 weight[0] is the tetrahedron volume
+            // do nothing lambda's (usefull for spin transfer torque)
+            extraField = [] ( const Eigen::Ref<const Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> ) {};
             }
-        // do nothing lambda's (usefull for spin transfer torque)
-        extraField = [] ( const Eigen::Ref<const Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> ) {};
+        else
+            { std::cerr<<"Error: Tet constructor has out of bound index\n"; }
         }
 
     /** local hat functions matrix, initialized by constructor: da = dadu * inverse(Jacobian)

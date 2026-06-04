@@ -172,13 +172,12 @@ void mesh::readTriangles(const Settings &mySets /**< [in] */)
                     if (all_elems_are<TYP_ELEM_TRIANGLE>(elemTypes))
                         { // all elements are triangles
                         int idx = mySets.findRegionIdx<Triangle::prm>(name);
-                        const int nbNod = node.size();
                         for(unsigned int i=0;i<elemNodeTags[0].size();i+=SIZE_TRIANGLE)
                             {
                             int i0 = elemNodeTags[0][i];
                             int i1 = elemNodeTags[0][i+1];
                             int i2 = elemNodeTags[0][i+2];
-                            if (idx > -1) tri.push_back(Triangle::Tri(node, nbNod, idx, {i0,i1,i2}));
+                            if (idx > -1) tri.push_back(Triangle::Tri(node, idx, {i0,i1,i2}));
                             }
                         }
                     else
