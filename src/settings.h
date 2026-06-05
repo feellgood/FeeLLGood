@@ -254,8 +254,10 @@ public:
      */
     inline mag_exprType getMagType() const
         {
-        if (mag_parser.parameter_count() < 4) return POSITION_ONLY;
-        return POSITION_AND_REGIONS;
+        if (mag_parser.parameter_count() < 4)
+            { return POSITION_ONLY; }
+        else
+            { return POSITION_AND_REGIONS; }
         }
 
     /** Evaluate the initial magnetization vector as a function of the position vector. This method
