@@ -8,10 +8,9 @@
 
 #include "chronometer.h"
 
-using namespace std;
 using namespace Nodes;
 
-void Fem::saver(Settings &settings, const timing &t_prm, ofstream &fout, const int nt,
+void Fem::saver(Settings &settings, const timing &t_prm, std::ofstream &fout, const int nt,
         std::vector<Eigen::Vector3d> &s) const
     {
     int save_period = settings.save_period;
@@ -142,22 +141,22 @@ void Fem::saver(Settings &settings, const timing &t_prm, ofstream &fout, const i
         }
     fout << std::flush;
 
-    string baseName = settings.r_path_output_dir + '/' + settings.getSimName();
+    std::string baseName = settings.r_path_output_dir + '/' + settings.getSimName();
 
     if (save_period && (nt % save_period) == 0)
         {
-        string str = baseName + "_iter" + to_string(nt) + ".sol";
+        std::string str = baseName + "_iter" + std::to_string(nt) + ".sol";
 
         if (settings.verbose)
             {
-            cout << " " << str << endl;
+            std::cout << " " << str << "\n";
             }
 
-        string metadata = settings.solMetadata(t_prm.get_t());
+        std::string metadata = settings.solMetadata(t_prm.get_t());
         msh.savesol(settings.getPrecision(), str, metadata, settings.spin_acc, s);
         if (settings.verbose)
             {
-            cout << "all nodes written." << endl;
+            std::cout << "all nodes written.\n";
             }
         }
     }
@@ -165,10 +164,10 @@ void Fem::saver(Settings &settings, const timing &t_prm, ofstream &fout, const i
 void Mesh::mesh::savesol(const int precision, const std::string& fileName,
         const std::string &metadata, bool withSpinAcc, std::vector<Eigen::Vector3d> &s) const
     {
-    ofstream fout(fileName, ios::out);
+    std::ofstream fout(fileName, std::ios::out);
     if (fout.fail())
         {
-        std::cout << "cannot open file " << fileName << std::endl;
+        std::cerr << "cannot open file " << fileName << "\n";
         SYSTEM_ERROR;
         }
 
@@ -181,8 +180,7 @@ void Mesh::mesh::savesol(const int precision, const std::string& fileName,
         fout << i << '\t' << dn.u.format(outputSolFmt) << '\t' << dn.phi;
         if (withSpinAcc)
             { fout << '\t' << s[j].format(outputSolFmt); }
-        fout << endl;
+        fout << "\n";
         }
     fout.close();
     }
-

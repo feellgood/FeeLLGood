@@ -165,7 +165,7 @@ T bicg_dir(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x,
     {
     T rho_1(0.0), rho_2(0.0), alpha(0.0), beta(0.0), omega(0.0);
     const size_t DIM = x.size();
-    if (rhs.size()!=DIM){std::cout << "rhs size mismatch" << std::endl; exit(1);}
+    if (rhs.size()!=DIM) { std::cerr << "rhs size mismatch" << "\n"; exit(1); }
 
     std::vector<T> p(DIM), phat(DIM), shat(DIM);
     std::vector<T> r(DIM), rt(DIM), s(DIM), t(DIM), v(DIM), diag_precond(DIM), b(rhs);

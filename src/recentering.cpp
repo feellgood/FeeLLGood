@@ -93,7 +93,7 @@ bool Fem::recenter(double thres, const char recentering_direction)
     double u2R = msh.getNode_u(ns)(idx_dir);
     if (u2L * u2R > 0)
         {
-        std::cout << "Error No Domain Wall" << std::endl;
+        std::cerr << "Error No Domain Wall\n";
         SYSTEM_ERROR;
         }
 

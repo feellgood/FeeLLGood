@@ -30,7 +30,7 @@ using namespace Nodes;
             prepareExtraField();
             if(!compute())
                 {
-                std::cout << "Error: spin diffusion solver(first try) failed.\n";
+                std::cerr << "Error: spin diffusion solver(first try) failed.\n";
                 exit(1);
                 }
             }
@@ -66,7 +66,7 @@ void spinAcc::checkBoundaryConditions(void) const
 
     if (!result)
         {
-        std::cout << "Error: incorrect boundary conditions for spin diffusion solver.\n";
+        std::cerr << "Error: incorrect boundary conditions for spin diffusion solver.\n";
         exit(1);
         }
     else if (verbose)
@@ -148,7 +148,7 @@ bool spinAcc::compute(void)
     bool has_converged = solve();
     if (!has_converged)
         {
-        std::cout << "spin accumulation solver: " << iter.infos() << std::endl;
+        std::cout << "spin accumulation solver: " << iter.infos() << "\n";
         for(int i=0;i<NOD;i++)
             { s[i].setZero(); }
         }
