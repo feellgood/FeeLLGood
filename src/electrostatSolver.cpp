@@ -18,7 +18,7 @@ void electrostatSolver::checkBoundaryConditions(void) const
         });
     if (!(nbSurfJ == 1 && nbSurfV == 1))
         {
-        std::cout << "Error: incorrect boundary conditions for potential V solver.\n";
+        std::cerr << "Error: incorrect boundary conditions for potential V solver.\n";
         exit(1);
         }
     else if (verbose)
@@ -30,8 +30,8 @@ void electrostatSolver::infos(void) const
     std::cout << "Boundary conditions:\n";
     std::for_each(paramTri.begin(),paramTri.end(),[](const Triangle::prm &p)
         {
-        if (!std::isnan(p.jn)) { std::cout << "\tjn= " << p.jn << std::endl; }
-        if (!std::isnan(p.V)) { std::cout << "\tV= " << p.V << std::endl; }
+        if (!std::isnan(p.jn)) { std::cout << "\tjn= " << p.jn << "\n"; }
+        if (!std::isnan(p.V)) { std::cout << "\tV= " << p.V << "\n"; }
         } );
     }
 
@@ -75,7 +75,7 @@ void electrostatSolver::compute(const bool verbose, const std::string& V_fileNam
     {
     bool has_converged = solve();
     if (verbose)
-        { std::cout << "electrostatic solver: " << iter.infos() << std::endl; }
+        { std::cout << "electrostatic solver: " << iter.infos() << "\n"; }
     if (has_converged)
         {
         if (!V_fileName.empty())
@@ -136,7 +136,7 @@ bool electrostatSolver::save(const std::string& V_fileName, const std::string &m
     std::ofstream fout(V_fileName, std::ios::out);
     if (fout.fail())
         {
-        std::cout << "cannot open file " << V_fileName << std::endl;
+        std::cerr << "cannot open file " << V_fileName << "\n";
         SYSTEM_ERROR;
         }
 
@@ -146,7 +146,7 @@ bool electrostatSolver::save(const std::string& V_fileName, const std::string &m
     for (int i = 0; i < NOD; i++)
         {
         int _i = msh->getNodeIndex(i);
-        fout << i << '\t' << V[_i] << std::endl;
+        fout << i << '\t' << V[_i] << "\n";
         }
     fout.close();
     return !(fout.good());

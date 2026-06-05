@@ -7,7 +7,7 @@
 \brief iteration class from GMM, with some adaptations and simplifications.
 
 The Iteration object calculates if the solution has reached the desired accuracy,
- or if the maximum number of iterations has been reached.
+or if the maximum number of iterations has been reached.
 
 The method finished() checks the convergence.
 */
@@ -171,7 +171,7 @@ class iteration
             T a = (rhsn == 0) ? 1.0 : rhsn;
             converged(nr);
             std::cout << " iter " << std::setw(3) << nit
-                    << " residual " << std::setw(12) << std::fabs(nr) / a << std::endl;
+                    << " residual " << std::setw(12) << std::fabs(nr) / a << "\n";
             written = true;
             }
         return converged(nr);

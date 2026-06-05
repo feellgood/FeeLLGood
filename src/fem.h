@@ -57,10 +57,11 @@ public:
                 {
                 std::cout << "Approximate nearest neighbors:\n";
                 }
+
             pts = annAllocPts(msh.getNbNodes(), Nodes::DIM);
             if (!pts)
                 {
-                std::cout << "ANN memory error while allocating points" << std::endl;
+                std::cerr << "ANN memory error while allocating points\n";
                 SYSTEM_ERROR;
                 }
             else if (mySets.verbose)
@@ -83,7 +84,7 @@ public:
             kdtree = new ANNkd_tree(pts, msh.getNbNodes(), Nodes::DIM);
             if (!kdtree)
                 {
-                std::cout << "ANN memory error while allocating kd_tree" << std::endl;
+                std::cerr << "ANN memory error while allocating kd_tree\n";
                 SYSTEM_ERROR;
                 }
             recenter_mem = true;
@@ -140,7 +141,7 @@ public:
 
     /** initial total energy */
     double Etot0;
-    
+
     /** total energy */
     double Etot;
 
@@ -209,13 +210,13 @@ private:
             { success = true; }
         if (settings.verbose)
             {
-            std::cout << "magnetostatics done in " << fmm_counter.millis() << std::endl;
+            std::cout << "magnetostatics done in " << fmm_counter.millis() << "\n";
             if (settings.spin_acc)
                 {
                 if (success)
                     { std::cout << "spin diffusion solved.\n"; }
                 else
-                    { std::cout << "spin diffusion solver failed.\n"; }
+                    { std::cerr << "spin diffusion solver failed.\n"; }
                 }
             }
         energy(t, settings);

@@ -18,7 +18,7 @@ bool LinAlgebra::solve(const timing &t_prm)
 
     if (verbose)
         {
-        std::cout << "matrix assembly done in " << counter.millis() << std::endl;
+        std::cout << "matrix assembly done in " << counter.millis() << "\n";
         counter.reset();
         }
 
@@ -49,7 +49,7 @@ bool LinAlgebra::solve(const timing &t_prm)
     std::for_each(lvd.begin(),lvd.end(),[this](const int i){ K.set(i,i,1.0); });
     if (verbose)
         {
-        std::cout << "matrix assembly done in " << counter.millis() << std::endl;
+        std::cout << "matrix assembly done in " << counter.millis() << "\n";
         counter.reset();
         }
     /*
@@ -65,12 +65,12 @@ bool LinAlgebra::solve(const timing &t_prm)
             || (iter.get_res() > iter.resmax))
         {
         if (verbose)
-            { std::cout << "solver: " << iter.infos() << std::endl; }
+            { std::cout << "solver: " << iter.infos() << "\n"; }
         return true;
         }
 
     if (verbose)
-        { std::cout << "solver: " << iter.infos() <<  " in " << counter.millis() << std::endl; }
+        { std::cout << "solver: " << iter.infos() <<  " in " << counter.millis() << "\n"; }
 
     double v2max(0.0);
     const double dt = t_prm.get_dt();

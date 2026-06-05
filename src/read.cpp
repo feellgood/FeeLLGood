@@ -16,18 +16,18 @@ void mesh::readMesh(const Settings &mySets)
         { gmsh::option::setNumber("General.Terminal",0); } // to silent gmsh
     checkMeshFile(mySets);
     if (mySets.verbose)
-        { std::cout<< "Checking mesh file: done.\n"; }
+        { std::cout << "Checking mesh file: done.\n"; }
     readNodes(mySets);
     if (mySets.verbose)
-        { std::cout<< "Nodes loaded.\n"; }
+        { std::cout << "Nodes loaded.\n"; }
     readTetraedrons(mySets);
     for (unsigned int i = 0; i < tet.size(); i++)
         { tet[i].idx = i; }
     if (mySets.verbose)
-        { std::cout<< "Tetraedrons built.\n"; }
+        { std::cout << "Tetraedrons built.\n"; }
     readTriangles(mySets);
     if (mySets.verbose)
-        { std::cout<< "triangles built.\n"; }
+        { std::cout << "triangles built.\n"; }
     gmsh::clear();
     gmsh::finalize();
     }
@@ -36,17 +36,20 @@ void mesh::checkMeshFile(const Settings &mySets)
     {
     using namespace tags::msh;
     gmsh::open(mySets.getPbName());
-    
+
     bool msh_available = (gmsh::model::getDimension() == DIM_OBJ_3D);
     if (!msh_available)
-        { std::cout<<"Fatal Error: mesh file " << mySets.getPbName() << " is not 3D\n"; exit(1); }
+        {
+        std::cerr << "Fatal Error: mesh file " << mySets.getPbName() << " is not 3D\n";
+        exit(1);
+        }
     std::vector<int> elemTypes;
     gmsh::model::mesh::getElementTypes(elemTypes, DIM_OBJ_3D, -1);
     msh_available = msh_available && (elemTypes.size() == 1); // only one type of 3D element allowed
     msh_available = msh_available && (elemTypes[0] == TYP_ELEM_TETRAEDRON); // only Tetrahedrons
     if (!msh_available)
         {
-        std::cout<<"Fatal Error: mesh file contains other 3D elements than tetraedrons.\n";
+        std::cerr << "Fatal Error: mesh file contains other 3D elements than tetraedrons.\n";
         exit(1);
         }
     gmsh::model::mesh::getElementTypes(elemTypes, DIM_OBJ_2D, -1);
@@ -54,14 +57,14 @@ void mesh::checkMeshFile(const Settings &mySets)
     msh_available = msh_available && (elemTypes[0] == TYP_ELEM_TRIANGLE); // only Triangles
     if (!msh_available)
         {
-        std::cout<<"Fatal Error: mesh file contains other 2D elements than triangles.\n";
+        std::cerr << "Fatal Error: mesh file contains other 2D elements than triangles.\n";
         exit(1);
         }
     bool o_2D = checkNamedObjects<Triangle::prm>(mySets.paramTriangle,DIM_OBJ_2D);
     bool o_3D = checkNamedObjects<Tetra::prm>(mySets.paramTetra,DIM_OBJ_3D);
     if (!(o_2D && o_3D))
         {
-        std::cout <<"Fatal Error: mismatch between input mesh file and yaml regions.\n";
+        std::cerr << "Fatal Error: mismatch between input mesh file and yaml regions.\n";
         exit(1);
         }
     }
@@ -132,7 +135,7 @@ void mesh::readTetraedrons(const Settings &mySets /**< [in] */)
                         }
                     else
                         {
-                        std::cout << "Fatal error: "
+                        std::cerr << "Fatal error: "
                                 "a volume mesh entity contains other elements than tetraedrons.\n";
                         exit(1);
                         }
@@ -182,7 +185,7 @@ void mesh::readTriangles(const Settings &mySets /**< [in] */)
                         }
                     else
                         {
-                        std::cout << "Fatal error: "
+                        std::cerr << "Fatal error: "
                                 "a surface mesh entity contains other elements than triangles.\n";
                         exit(1);
                         }
@@ -216,13 +219,13 @@ double mesh::readSol(bool VERBOSE, const std::string& fileName)
 
     if (!flag_t)
         {
-        std::cerr << "error: no ## time: tag in input .sol file " << fileName << std::endl;
+        std::cerr << "error: no ## time: tag in input .sol file " << fileName << "\n";
         SYSTEM_ERROR;
         }
 
     if (VERBOSE)
         {
-        std::cout << ".sol file: " << fileName << " @ time t = " << t << std::endl;
+        std::cout << ".sol file: " << fileName << " @ time t = " << t << "\n";
         }
 
     for (unsigned int i = 0; i < node.size(); i++)
@@ -234,8 +237,7 @@ double mesh::readSol(bool VERBOSE, const std::string& fileName)
         node[node_idx].d[Nodes::NEXT].u = Eigen::Vector3d(mx,my,mz);
         if (i != i_)
             {
-            std::cerr << "error: mesh node index mismatch between mesh and input .sol file"
-                      << std::endl;
+            std::cerr << "error: mesh node index mismatch between mesh and input .sol file\n";
             fin.close();
             SYSTEM_ERROR;
             }
