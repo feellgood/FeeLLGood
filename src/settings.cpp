@@ -109,7 +109,8 @@ static const std::string str(std::string s, const int level = 0)
     s.insert(0, "|\n");
 
     // Remove trailing eol.
-    if (s.back() == '\n') s.resize(s.size() - 1);
+    if (s.back() == '\n')
+        { s.resize(s.size() - 1); }
 
     // Add indentation.
     replace(s, "\n", "\n" + indent);
@@ -160,15 +161,13 @@ void Settings::toYaml()
     std::cout << "  final_time: " << tf << "\n";
     std::cout << "  evol_columns:\n";
     for (auto it = evol_columns.begin(); it != evol_columns.end(); ++it)
-        {
-        std::cout << "    - " << *it << "\n";
-        }
+        { std::cout << "    - " << *it << "\n"; }
+
     std::cout << "  mag_config_every: " << save_period << "\n";
     std::cout << "  metadata:\n";
     for (auto it = userMetadata.begin(); it != userMetadata.end(); ++it)
-        {
-        std::cout << "    " << it->first << ": " << str(it->second, 2) << '\n';
-        }
+        { std::cout << "    " << it->first << ": " << str(it->second, 2) << '\n'; }
+
     std::cout << "mesh:\n";
     std::cout << "  filename: " << pbName << "\n";
     std::cout << "  length_unit: " << _scale << "\n";
@@ -176,12 +175,13 @@ void Settings::toYaml()
     for (auto it = paramTetra.begin(); it != paramTetra.end(); ++it)
         {
         if (it->regName == "__default__")  // skip
-            continue;
+            { continue; }
         std::cout << "    " << it->regName << ":\n";
         std::cout << "      Ae: " << it->A << "\n";
         std::cout << "      Ms: " << it->Ms << "\n";
         std::cout << "      K: " << it->K << "\n";
-        if (it->K != 0) std::cout << "      uk: " << str(it->uk) << "\n";
+        if (it->K != 0)
+            { std::cout << "      uk: " << str(it->uk) << "\n"; }
         std::cout << "      K3: " << it->K3 << "\n";
         if (it->K3 != 0)
             {
@@ -200,21 +200,22 @@ void Settings::toYaml()
     for (auto it = paramTriangle.begin(); it != paramTriangle.end(); ++it)
         {
         if (it->regName == "__default__")  // skip
-            continue;
+            { continue; }
         std::cout << "    " << it->regName << ":\n";
         std::cout << "      suppress_charges: " << str(it->suppress_charges) << "\n";
         std::cout << "      Ks: " << it->Ks << "\n";
-        if (it->Ks != 0) std::cout << "      uk: " << str(it->uk) << "\n";
+        if (it->Ks != 0)
+            { std::cout << "      uk: " << str(it->uk) << "\n"; }
         std::cout <<  "      J:";
         if (isnan(it->jn))
-            std::cout << "\n";
+            { std::cout << "\n"; }
         else
-            std::cout << ' ' << it->jn << '\n';
+            { std::cout << ' ' << it->jn << '\n'; }
         std::cout <<  "      V:";
         if (isnan(it->V))
-            std::cout << "\n";
+            { std::cout << "\n"; }
         else
-            std::cout << ' ' << it->V << '\n';
+            { std::cout << ' ' << it->V << '\n'; }
         if (spin_acc)
             {
             std::cout << "      uP: " << str(it->uP) << "\n";
@@ -223,16 +224,16 @@ void Settings::toYaml()
         }
     std::cout << "initial_magnetization: ";
     if (!sM.empty())
-        std::cout << str(sM) << "\n";
+        { std::cout << str(sM) << "\n"; }
     else if (restoreFileName.empty())
-        std::cout << "[\"" << sMx << "\", \"" << sMy << "\", \"" << sMz << "\"]\n";
+        { std::cout << "[\"" << sMx << "\", \"" << sMy << "\", \"" << sMz << "\"]\n"; }
     else
-        std::cout << restoreFileName << "\n";
+        { std::cout << restoreFileName << "\n"; }
     std::cout << "initial_time:";
     if (isnan(initial_time))
-        std::cout << '\n';
+        { std::cout << '\n'; }
     else
-        std::cout << ' ' << initial_time << '\n';
+        { std::cout << ' ' << initial_time << '\n'; }
     std::cout << "recentering:\n";
     std::cout << "  enable: " << str(recenter) << "\n";
     if (recenter)
@@ -249,11 +250,11 @@ void Settings::toYaml()
         }
     std::cout << "Bext: ";
     if (field_type == R4toR3)
-        std::cout << "\n  space: " << str(sB_space, 1) << "\n  time: " << str(sB_time, 1) << '\n';
+        { std::cout << "\n  space: " << str(sB_space, 1) << "\n  time: " << str(sB_time, 1) << '\n'; }
     else if (!sB.empty())
-        std::cout << str(sB) << "\n";
+        { std::cout << str(sB) << "\n"; }
     else
-        std::cout << "[\"" << sBx << "\", \"" << sBy << "\", \"" << sBz << "\"]\n";
+        { std::cout << "[\"" << sBx << "\", \"" << sBy << "\", \"" << sBz << "\"]\n"; }
     std::cout << "spin_accumulation:\n";
     std::cout << "  enable: " << str(spin_acc) << "\n";
     if (spin_acc)
@@ -272,14 +273,13 @@ void Settings::toYaml()
 std::ostringstream Settings::commonMetadata() const
     {
     std::ostringstream ss;
-    ss << tags::evol::version << ' ' << feellgood_version << std::endl;
+    ss << tags::evol::version << ' ' << feellgood_version << "\n";
     char name[HOST_NAME_MAX];
     if (gethostname(name, HOST_NAME_MAX) != ENAMETOOLONG)
-        {
-        ss << tags::evol::hostname << ' ' << name << std::endl;
-        }
-    ss << tags::evol::rw_time << ' ' << date() << std::endl;
-    ss << tags::evol::settings_file << ' ' << getFileDisplayName() << std::endl;
+        { ss << tags::evol::hostname << ' ' << name << "\n"; }
+    ss << tags::evol::rw_time << ' ' << date() << "\n";
+    ss << tags::evol::settings_file << ' ' << getFileDisplayName() << "\n";
+
     for (auto it = userMetadata.begin(); it != userMetadata.end(); ++it)
         {
         std::string value = it->second;
@@ -295,21 +295,19 @@ std::string Settings::evolMetadata() const
     std::ostringstream ss = commonMetadata();
     ss << tags::evol::columns << ' ';
     for (unsigned int i = 0; i < (evol_columns.size() - 1); i++)
-        {
-        ss << evol_columns[i] << '\t';
-        }
-    ss << evol_columns[evol_columns.size() - 1] << std::endl;
+        { ss << evol_columns[i] << '\t'; }
+    ss << evol_columns[evol_columns.size() - 1] << "\n";
     return ss.str();
     }
 
 std::string Settings::solMetadata(const double t) const
     {
     std::ostringstream ss = commonMetadata();
-    ss << tags::sol::time << ' ' << std::scientific << t << std::endl;
+    ss << tags::sol::time << ' ' << std::scientific << t << "\n";
     ss << tags::sol::columns << ' ' << tags::sol::defaultColumnsTitle;
     if (spin_acc)
-        ss << '\t' << tags::sol::sColumnsTitle;
-    ss << std::endl;
+        { ss << '\t' << tags::sol::sColumnsTitle; }
+    ss << "\n";
     return ss.str();
     }
 
@@ -318,50 +316,44 @@ void Settings::read(YAML::Node yaml)
     YAML::Node outputs = yaml["outputs"];
     if (outputs && !outputs.IsNull())
         {
-        if (!outputs.IsMap()) error("outputs should be a map.");
+        if (!outputs.IsMap())
+            { error("outputs should be a map."); }
         if (assign(r_path_output_dir, outputs["directory"]))
             {
             // Normalize directory name.
             if (r_path_output_dir.empty())
-                {
-                r_path_output_dir = ".";
-                }
+                { r_path_output_dir = "."; }
+
             if (r_path_output_dir.length() > 1 && r_path_output_dir.back() == '/')
-                {
-                r_path_output_dir.pop_back();
-                }
+                { r_path_output_dir.pop_back(); }
             }
         assign(simName, outputs["file_basename"]);
         assign(time_step, outputs["evol_time_step"]);
         assign(tf, outputs["final_time"]);
+
         YAML::Node mag_config_every = outputs["mag_config_every"];
-        if (mag_config_every.Scalar() == "true")
-            {  // catch an easy mistake
-            error("outputs.mag_config_every should be an integer or `false'.");
-            }
+        if (mag_config_every.Scalar() == "true")  // catch an easy mistake
+            { error("outputs.mag_config_every should be an integer or `false'."); }
         else if (mag_config_every.Scalar() == "false")
-            {
-            save_period = 0;
-            }
-        else
-            {
-            if (assign(save_period, mag_config_every) && save_period < 0)
-                {
-                save_period = 0;
-                }
-            }
+            { save_period = 0; }
+        else if (assign(save_period, mag_config_every) && save_period < 0)
+                { save_period = 0; }
+
         YAML::Node columns = outputs["evol_columns"];
         if (columns && !columns.IsNull())
             {
-            if (!columns.IsSequence()) error("outputs.evol_columns should be a sequence.");
+            if (!columns.IsSequence())
+                { error("outputs.evol_columns should be a sequence."); }
             evol_columns.clear();
             for (auto it = columns.begin(); it != columns.end(); ++it)
-                evol_columns.push_back(it->as<std::string>());
+                { evol_columns.push_back(it->as<std::string>()); }
             }
+
         YAML::Node metadata = outputs["metadata"];
         if (metadata && !metadata.IsNull())
             {
-            if (!metadata.IsMap()) error("outputs.metadata should be a map.");
+            if (!metadata.IsMap())
+                { error("outputs.metadata should be a map."); }
             for (auto it = metadata.begin(); it != metadata.end(); ++it)
                 {
                 // Search the key within the already known user metadata.
@@ -370,9 +362,9 @@ void Settings::read(YAML::Node yaml)
                         [key](const MetadataItem &item){ return item.first == key; });
                 MetadataItem item = {key, it->second.as<std::string>()};
                 if (pos != userMetadata.end())  // if found, replace
-                    *pos = item;
+                    { *pos = item; }
                 else  // otherwise, append to the list
-                    userMetadata.push_back(item);
+                    { userMetadata.push_back(item); }
                 }
             }
         }  // outputs
@@ -380,14 +372,16 @@ void Settings::read(YAML::Node yaml)
     YAML::Node mesh = yaml["mesh"];
     if (mesh && !mesh.IsNull())
         {
-        if (!mesh.IsMap()) error("mesh should be a map.");
+        if (!mesh.IsMap())
+            { error("mesh should be a map."); }
         assign(pbName, mesh["filename"]);
         if (assign(_scale, mesh["length_unit"]) && _scale <= 0)
-            error("mesh.length_unit should be positive.");
+            { error("mesh.length_unit should be positive."); }
         YAML::Node volumes = mesh["volume_regions"];
         if (volumes && !volumes.IsNull())
             {
-            if (!volumes.IsMap()) error("mesh.volume_regions should be a map.");
+            if (!volumes.IsMap())
+                { error("mesh.volume_regions should be a map."); }
             int default_idx = findRegionIdx<Tetra::prm>("__default__");
             for (auto it = volumes.begin(); it != volumes.end(); ++it)
                 {
@@ -395,8 +389,10 @@ void Settings::read(YAML::Node yaml)
                 std::string name = it->first.as<std::string>();
                 YAML::Node volume = it->second;
                 Tetra::prm &p = paramTetra.emplace_back();
-                if (default_idx >= 0) p = paramTetra[default_idx];
+                if (default_idx >= 0)
+                    { p = paramTetra[default_idx]; }
                 p.regName = name;
+
                 assign(p.A, volume["Ae"]);
                 if (assign(p.Ms, volume["Ms"]))
                     { has_Ms = true; }
@@ -404,7 +400,8 @@ void Settings::read(YAML::Node yaml)
                 if (assign(Js, volume["Js"]))
                     { has_Js = true; p.Ms = Js / mu0; }
                 if (has_Ms && has_Js)
-                    error("Ms and Js should not be both defined in the same region.");
+                    { error("Ms and Js should not be both defined in the same region."); }
+
                 assign(p.K, volume["K"]);
                 assign(NORMALIZE, p.uk, volume["uk"]);
                 assign(p.K3, volume["K3"]);
@@ -412,9 +409,8 @@ void Settings::read(YAML::Node yaml)
                 assign(NORMALIZE, p.ey, volume["ey"]);
                 assign(NORMALIZE, p.ez, volume["ez"]);
                 if (!isOrthogonal(p.ex, p.ey, p.ez, USER_TOL))
-                    std::cout << "Warning: (ex, ey, ez) is not orthogonal.\n";
+                    { std::cout << "Warning: (ex, ey, ez) is not orthogonal.\n"; }
                 assign(p.alpha_LLG, volume["alpha_LLG"]);
-
                 assign(p.sigma, volume["sigma"]);
                 assign(p.N0, volume["dens_state"]);
                 assign(p.P, volume["P"]);
@@ -425,14 +421,16 @@ void Settings::read(YAML::Node yaml)
         YAML::Node surfaces = mesh["surface_regions"];
         if (surfaces && !surfaces.IsNull())
             {
-            if (!surfaces.IsMap()) error("mesh.surface_regions should be a map.");
+            if (!surfaces.IsMap())
+                { error("mesh.surface_regions should be a map."); }
             int default_idx = findRegionIdx<Triangle::prm>("__default__");
             for (auto it = surfaces.begin(); it != surfaces.end(); ++it)
                 {
                 std::string name = it->first.as<std::string>();
                 YAML::Node surface = it->second;
                 Triangle::prm &p = paramTriangle.emplace_back();
-                if (default_idx >= 0) p = paramTriangle[default_idx];
+                if (default_idx >= 0)
+                    { p = paramTriangle[default_idx]; }
                 p.regName = name;
                 assign(p.suppress_charges, surface["suppress_charges"]);
                 assign(p.Ks, surface["Ks"]);
@@ -440,13 +438,13 @@ void Settings::read(YAML::Node yaml)
 
                 // J and V may be null, which we map to NAN.
                 if (!assign(p.jn, surface["jn"]))
-                    p.jn = NAN;
+                    { p.jn = NAN; }
                 if (!assign(p.V, surface["V"]))
-                    p.V = NAN;
+                    { p.V = NAN; }
                 if (!isnan(p.jn) && !isnan(p.V))
-                    error("A surface region cannot have both no-null J and V.");
+                    { error("A surface region cannot have both no-null J and V."); }
                 if (!assign(NORMALIZE, p.uP, surface["uP"]))
-                    {p.uP = Eigen::Vector3d(NAN,NAN,NAN); }
+                    { p.uP = Eigen::Vector3d(NAN,NAN,NAN); }
                 if (!assign(!NORMALIZE, p.s, surface["s"]))
                     { p.s = Eigen::Vector3d(NAN,NAN,NAN); }
                 }
@@ -460,9 +458,7 @@ void Settings::read(YAML::Node yaml)
             {
             std::string s_mag = magnetization.as<std::string>();
             if (s_mag.find("function") == std::string::npos || s_mag.find('{') == std::string::npos)
-                {
-                restoreFileName = s_mag;
-                }
+                { restoreFileName = s_mag; }
             else
                 {
                 sM = s_mag;
@@ -472,16 +468,14 @@ void Settings::read(YAML::Node yaml)
         else if (magnetization.IsSequence())
             {
             if (magnetization.size() != DIM)
-                error("initial_magnetization should have three components.");
+                { error("initial_magnetization should have three components."); }
             sMx = magnetization[0].as<std::string>();
             sMy = magnetization[1].as<std::string>();
             sMz = magnetization[2].as<std::string>();
             mag_parser.set_expressions("x,y,z", sMx, sMy, sMz);
             }
         else
-            {
-            error("initial_magnetization should be a file name or a vector of expressions.");
-            }
+            { error("initial_magnetization should be a file name or a vector of expressions."); }
         }  // initial_magnetization
 
     assign(initial_time, yaml["initial_time"]);
@@ -492,7 +486,7 @@ void Settings::read(YAML::Node yaml)
         assign(recenter, recentering["enable"]);
         std::string direction = recentering["direction"].as<std::string>("Z");
         if (direction.length() != 1 || direction[0] < 'X' || direction[0] > 'Z')
-            error("recentering.direction should be X, Y or Z.");
+            { error("recentering.direction should be X, Y or Z."); }
         switch (direction[0])
             {
             case 'X': recentering_direction = IDX_X; break;
@@ -513,7 +507,8 @@ void Settings::read(YAML::Node yaml)
             }
         else if (field.IsSequence())
             {
-            if (field.size() != DIM) error("Bext should have three components.");
+            if (field.size() != DIM)
+                { error("Bext should have three components."); }
             sBx = field[0].as<std::string>();
             sBy = field[1].as<std::string>();
             sBz = field[2].as<std::string>();
@@ -539,9 +534,11 @@ void Settings::read(YAML::Node yaml)
                 field_type = R4toR3;
                 }
             else
+                {
                 error(
                 "Bext should be a function or a vector of expressions or space & time expressions."
                 );
+                }
             }
         }  // Bext
 
@@ -560,7 +557,8 @@ void Settings::read(YAML::Node yaml)
     if (solver && !solver.IsNull())
         {
         assign(scalfmmNbTh, solver["nb_threads"]);
-        if (scalfmmNbTh <= 0) scalfmmNbTh = available_cpu_count;
+        if (scalfmmNbTh <= 0)
+            { scalfmmNbTh = available_cpu_count; }
         }  // demagnetizing_field_solver
 
     solver = yaml["finite_element_solver"];
@@ -585,11 +583,13 @@ void Settings::read(YAML::Node yaml)
 
         // Remove directory part.
         size_t pos = simName.rfind('/');
-        if (pos != simName.npos) simName.erase(0, pos + 1);
+        if (pos != simName.npos)
+            { simName.erase(0, pos + 1); }
 
         // Remove everything after last dot.
         pos = simName.rfind('.');
-        if (pos != simName.npos) simName.erase(pos);
+        if (pos != simName.npos)
+            { simName.erase(pos); }
         }
     }
 
@@ -597,7 +597,7 @@ bool Settings::read(const std::string& filename)
     {
     YAML::Node config;
     if (filename == "-")
-        config = YAML::Load(std::cin);
+        { config = YAML::Load(std::cin); }
     else
         {
         try
@@ -609,7 +609,8 @@ bool Settings::read(const std::string& filename)
             return false;
             }
         }
-    if (config.IsNull()) return false;
+    if (config.IsNull())
+        { return false; }
     read(config);
     return true;
     }
