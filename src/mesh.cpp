@@ -126,11 +126,13 @@ bool mesh::controlTriangles()
         return false;
         }
 
+    // Build a sorted list of all the triangles in the mesh: both the faces of the tetrahedrons
+    // and the (triangular) surface elements.
     std::vector<BasicTri> allTriCtnr;
-    // Put all triangles into allTriCtnr after doing the conversion
+
+    // First, add the faces of the tetrahedrons.
     for (const Tetra::Tet &tetrahedron : tet)
-        {
-        // Add all the faces of the tetrahedron, oriented outwards.
+        {  // Add the faces of this tetrahedron, oriented outwards.
         const std::array<int,Tetra::N>& ind = tetrahedron.ind;
         const int region = tetrahedron.idxPrm;
         allTriCtnr.push_back(BasicTri({ind[0], ind[2], ind[1]}, region));
@@ -139,14 +141,19 @@ bool mesh::controlTriangles()
         allTriCtnr.push_back(BasicTri({ind[3], ind[0], ind[1]}, region));
         }
 
+    // Then add the surface elements.
     for (Triangle::Tri &curTri : tri)
         { allTriCtnr.push_back(BasicTri(curTri)); }
 
+    // Then sort: triangles that are topologically the same (same set of vertices) will end up
+    // bunched together.
     std::sort(allTriCtnr.begin(), allTriCtnr.end());
+
     // Update dMs on each triangular element.
     for (Triangle::Tri &curTri : tri)
         {
         BasicTri triangle(curTri);
+        // Find the tetrahedron faces that match this surface element.
         auto face = std::lower_bound(allTriCtnr.begin(), allTriCtnr.end(), triangle);
         for (; face != allTriCtnr.end() && face->nodesInd == triangle.nodesInd; face++)
             {
@@ -158,15 +165,17 @@ bool mesh::controlTriangles()
                 }
             }
         }
-    BasicTri *prevTri = &allTriCtnr[0];
+
+    // Now walk the list of all the triangles in search for meshing errors.
+    const BasicTri *prevTri = &allTriCtnr[0];
     std::pair<int,int> pairIdCurVolRegs(-1, -1);
     int idCurSurfReg = -1;
     int nbTetraFaces = 0;
     int nbSurfTri = 0;
 
-    for (size_t i = 0; i < allTriCtnr.size(); i++)
+    for (const BasicTri &triangle : allTriCtnr)
         {   // For each triangle
-        if (allTriCtnr[i].nodesInd != prevTri->nodesInd)
+        if (triangle.nodesInd != prevTri->nodesInd)
             {   // If the triangle changes
             if (findErrInTriangle(nbSurfTri, nbTetraFaces, pairIdCurVolRegs, idCurSurfReg))
                 { return false; }
@@ -177,20 +186,20 @@ bool mesh::controlTriangles()
             pairIdCurVolRegs.second = -1;
             }
 
-        if (allTriCtnr[i].isSurfaceElement)
+        if (triangle.isSurfaceElement)
             {
-            idCurSurfReg = allTriCtnr[i].idRegion;
+            idCurSurfReg = triangle.idRegion;
             nbSurfTri++;
             }
         else
             {
             nbTetraFaces++;
             if (pairIdCurVolRegs.first == -1)
-                { pairIdCurVolRegs.first = allTriCtnr[i].idRegion; }
+                { pairIdCurVolRegs.first = triangle.idRegion; }
             else
-                { pairIdCurVolRegs.second = allTriCtnr[i].idRegion; }
+                { pairIdCurVolRegs.second = triangle.idRegion; }
             }
-        prevTri = &allTriCtnr[i];
+        prevTri = &triangle;
         }
 
     if (findErrInTriangle(nbSurfTri, nbTetraFaces, pairIdCurVolRegs, idCurSurfReg))
