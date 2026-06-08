@@ -19,6 +19,51 @@ mixed meshes are not allowed.
 #include "tetra.h"
 #include "settings.h"
 
+/** \class BasicTri
+BasicTri is a simplified version of the class Tri which contains only
+the nodes, the surface region and the region.
+It is used when checking the validity of the mesh is needed but
+not all the triangle elements are needed.
+*/
+class BasicTri
+    {
+public:
+    /** Constructor using the indices vector and the region. sRegion is false by default.
+     * The nodes are sorted because it makes it easier to compare two BasicTri.
+    */
+    inline BasicTri(const std::array<int,3> &inds, const int idReg, const bool surface = false)
+        : nodesInd({inds[0], inds[1], inds[2]}), idRegion(idReg), isSurfaceElement(surface)
+        {
+        int inversions = (nodesInd[0] > nodesInd[1])
+                       + (nodesInd[1] > nodesInd[2])
+                       + (nodesInd[0] > nodesInd[2]);
+        std::sort(nodesInd.begin(), nodesInd.end());
+        isFlipped = inversions % 2;
+        }
+
+    /** Constructor used to copy a surface region triangle */
+    inline explicit BasicTri(const Triangle::Tri & tri)
+        : BasicTri(tri.ind, tri.idxPrm, true)
+        {}
+
+    /** Compare the nodes indice lexicographically */
+    inline bool operator<(const BasicTri & o) const
+        { return this->nodesInd < o.nodesInd; }
+
+    /** The 3 node indices composing the triangle */
+    std::array<int,3> nodesInd;
+
+    /** index of the region of the triangle */
+    int idRegion;
+
+    /** If the triangle is in a surface region */
+    bool isSurfaceElement;
+
+    /** Whether the index order normalization flipped the triangle. */
+    bool isFlipped;
+
+    }; // class BasicTri
+
 namespace Mesh
     {
     /** A mesh edge is a sorted pair of adjacent node indices: first < second. */
@@ -339,8 +384,8 @@ public:
      * orientation.
      * Check whether each triangle of tet and tri satisfies one of the three following conditions :
      *      - Is part of no surface region, but part of 2 tetraedrons of the same volume region
-     *      - Is part of at most one surface region, and 2 tetraedrons of differents volume region
-     *      - Is part of 1 tetraedron and at most one surface region
+     *      - Is part of at most one surface region (create it if needed), and 2 tetraedrons of differents volume region
+     *      - Is part of 1 tetraedron and at most one surface region (create it if needed)
      * Returns true if all triangles in one of those three cases, false otherwise.
      */
     bool controlTriangles();
@@ -420,9 +465,14 @@ private:
      * the matrix we will have to solve for. */
     void sortNodes(Nodes::index long_axis /**< [in] */);
 
-    /** Called in controlTriangles. Returns true if a generation error is detected, false otherwise. */
-    bool findErrInTriangle(const int nbSurfTri, const int nbTetraFaces,
-                         const std::pair<int,int> pairIdVolRegs, const int idSurfReg);
+    /** Called in controlTriangles. If a minor generation error is detected, updates indNodTriToAdd and
+     * idxPrmTriToAdd. Returns true if no major generation error is detected, false otherwise. */
+    bool diffTriHandler(const size_t inf, const size_t sup, const std::vector<BasicTri> &allTriCtnr,
+                        std::vector<size_t> &indNodTriToAdd, std::vector<int> &idxPrmTriToAdd);
+
+    /** Called in diffTriHandler. Returns true if no generation error is detected, false otherwise. */
+    bool findNoErrInTriangle(const int nbSurfTri, const int nbTetraFaces,
+                             const std::pair<int,int> pairIdVolRegs, const int idSurfReg);
 
     /** returns the surface defined by the set of triangle of indices in triIndices
      * each elementary surface triangle defined by points p0,p1,p2 is computed using
@@ -432,6 +482,9 @@ private:
     /** when external applied field is of field_type R4toR3 values of field_space are stored in
      * spaceField */
     void setExtSpaceField(Settings &s /**< [in] */);
+
     }; // end class mesh
+
     }  // end namespace Mesh
+
 #endif
