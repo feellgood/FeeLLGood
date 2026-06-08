@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(read_ellipsoid)
     gmsh::finalize();
     }
 
-BOOST_AUTO_TEST_CASE(checkTriangles)
+BOOST_AUTO_TEST_CASE(controlTriangles)
     {
     // Init basic settings
     Settings shortSet;
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(checkTriangles)
     Mesh::mesh badCuboid1(shortSet, true);
     std::stringstream logOutput;
     std::streambuf *buf = std::cerr.rdbuf(logOutput.rdbuf());   // Capture the stderr log output
-    bool isCorrect = badCuboid1.checkTriangles();
+    bool isCorrect = badCuboid1.controlTriangles();
     BOOST_CHECK(!isCorrect);
     BOOST_CHECK(logOutput.str() == "Error: bad mesh. 2 instances of the same surface triangle have been found\n");
     std::cout << "Done checking the cuboid with a duplicated surface region triangle\n";
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(checkTriangles)
     Mesh::mesh badCuboid2(shortSet, true);
     logOutput.str("");
     buf = std::cerr.rdbuf(logOutput.rdbuf());   // Capture the stderr log output
-    isCorrect = badCuboid2.checkTriangles();
+    isCorrect = badCuboid2.controlTriangles();
     BOOST_CHECK(!isCorrect);
     BOOST_CHECK(logOutput.str() == "Error: bad mesh. A triangle which belongs "
                                    "to 1 surface region and no tetrahedron has been found\n");
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(checkTriangles)
     Mesh::mesh badCuboid3(shortSet, true);
     logOutput.str("");
     buf = std::cerr.rdbuf(logOutput.rdbuf());   // Capture the stderr log output
-    isCorrect = badCuboid3.checkTriangles();
+    isCorrect = badCuboid3.controlTriangles();
     BOOST_CHECK(!isCorrect);
     BOOST_CHECK(logOutput.str() == "Error: bad mesh. A triangular face shared by 3 tetrahedrons has been found\n");
     std::cout << "Done checking the cuboid with 3 identical triangles in the same tetrahedron\n";
@@ -117,13 +117,13 @@ BOOST_AUTO_TEST_CASE(checkTriangles)
     Mesh::mesh badCuboid4(shortSet, true);
     logOutput.str("");
     buf = std::cerr.rdbuf(logOutput.rdbuf());   // Capture the stderr log output
-    isCorrect = badCuboid4.checkTriangles();
+    isCorrect = badCuboid4.controlTriangles();
     BOOST_CHECK(!isCorrect);
     BOOST_CHECK(logOutput.str() == "Error: bad mesh. An internal triangle has been "
                                    "found in the surface region 1\n");
     std::cout << "Done checking the cuboid with an internal surface region triangle\n";
 
-    std::cout << "Done testing checkTriangles()\n";
+    std::cout << "Done testing controlTriangles()\n";
     }
 
 BOOST_AUTO_TEST_SUITE_END()

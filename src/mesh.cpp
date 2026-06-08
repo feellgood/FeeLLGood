@@ -118,62 +118,46 @@ double mesh::doOnNodes(const double init_val, const Nodes::index coord,
     return result;
     }
 
-void mesh::updateDeltaMs()
+bool mesh::controlTriangles()
     {
-    std::vector<BasicTri> tetraFaces;           // all tetrahedral faces
-    std::for_each(tet.begin(), tet.end(),       // for each tetrahedron
-            [&tetraFaces](const Tetra::Tet &tetrahedron)
-            {
-            // Add all the faces of the tetrahedron, oriented outwards.
-            const std::array<int,Tetra::N>& ind = tetrahedron.ind;
-            const int region = tetrahedron.idxPrm;
-            tetraFaces.push_back(BasicTri({ind[0], ind[2], ind[1]}, region));
-            tetraFaces.push_back(BasicTri({ind[1], ind[2], ind[3]}, region));
-            tetraFaces.push_back(BasicTri({ind[2], ind[0], ind[3]}, region));
-            tetraFaces.push_back(BasicTri({ind[3], ind[0], ind[1]}, region));
-            });
-    std::sort(tetraFaces.begin(), tetraFaces.end());
+    if (tet.empty())
+        {
+        std::cerr << "Error: not a single tetrahedron is present in the mesh\n";
+        return false;
+        }
 
-    std::for_each(tri.begin(), tri.end(), [this, &tetraFaces](Triangle::Tri &element)
+    std::vector<BasicTri> allTriCtnr;
+    // Put all triangles into allTriCtnr after doing the conversion
+    for (const Tetra::Tet &tetrahedron : tet)
+        {
+        // Add all the faces of the tetrahedron, oriented outwards.
+        const std::array<int,Tetra::N>& ind = tetrahedron.ind;
+        const int region = tetrahedron.idxPrm;
+        allTriCtnr.push_back(BasicTri({ind[0], ind[2], ind[1]}, region));
+        allTriCtnr.push_back(BasicTri({ind[1], ind[2], ind[3]}, region));
+        allTriCtnr.push_back(BasicTri({ind[2], ind[0], ind[3]}, region));
+        allTriCtnr.push_back(BasicTri({ind[3], ind[0], ind[1]}, region));
+        }
+
+    for (Triangle::Tri &curTri : tri)
+        { allTriCtnr.push_back(BasicTri(curTri)); }
+
+    std::sort(allTriCtnr.begin(), allTriCtnr.end());
+    // Update dMs on each triangular element.
+    for (Triangle::Tri &curTri : tri)
+        {
+        BasicTri triangle(curTri);
+        auto face = std::lower_bound(allTriCtnr.begin(), allTriCtnr.end(), triangle);
+        for (; face != allTriCtnr.end() && face->nodesInd == triangle.nodesInd; face++)
             {
-            BasicTri triangle(element);
-            auto face = std::lower_bound(tetraFaces.begin(), tetraFaces.end(), triangle);
-            for (; face != tetraFaces.end() && face->nodesInd == triangle.nodesInd; face++)
+            if (!face->isSurfaceElement)
                 {
                 double Ms = paramTetra[face->idRegion].Ms;
                 bool isFlipped = triangle.isFlipped ^ face->isFlipped;
-                element.dMs += isFlipped ? -Ms : Ms;
+                curTri.dMs += isFlipped ? -Ms : Ms;
                 }
-            });
-    }
-
-bool mesh::checkTriangles()
-    {
-    std::vector<BasicTri> allTriCtnr;
-    // Put all triangles into allTriCtnr after doing the conversion
-    std::for_each(tet.begin(), tet.end(),       // For each tetrahedron
-            [&allTriCtnr](const Tetra::Tet &tetrahedron)
-            {
-            for (int i = 0; i < Tetra::N; i++)    // For each 4 triangles
-                {
-                BasicTri curTri({tetrahedron.ind[i], tetrahedron.ind[(i+1) % Tetra::N],
-                                        tetrahedron.ind[(i+2) % Tetra::N]},
-                                 tetrahedron.idxPrm);
-                allTriCtnr.push_back(curTri);
-                }
-            });
-    std::for_each(tri.begin(), tri.end(), [&allTriCtnr](const Triangle::Tri &curTri)
-            {   // For each surface element
-            allTriCtnr.push_back(BasicTri(curTri));
-            });
-
-    if (allTriCtnr.empty())
-        {
-        std::cerr << "Error: not a single triangle is present in the mesh\n";
-        exit(1);
+            }
         }
-
-    std::sort(allTriCtnr.begin(), allTriCtnr.end());
     BasicTri *prevTri = &allTriCtnr[0];
     std::pair<int,int> pairIdCurVolRegs(-1, -1);
     int idCurSurfReg = -1;

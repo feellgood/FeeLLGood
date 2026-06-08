@@ -38,10 +38,11 @@ public:
         : paramTetra(mySets.paramTetra), volumeRegions(mySets.paramTetra.size())
         {
         readMesh(mySets);
-        updateDeltaMs();
-
         if (simplified)
             { return; }
+        if (!controlTriangles())
+            { exit(1); }
+
         if (mySets.verbose)
             { std::cout << "  reindexed\n"; }
 
@@ -121,8 +122,6 @@ public:
                     }
                 });
 
-        if (!checkTriangles())
-            { exit(1); }
         for(unsigned int i=0;i<tri.size();i++)
             {
             if (isMagnetic(tri[i]) && !mySets.paramTriangle[tri[i].idxPrm].suppress_charges
@@ -337,13 +336,15 @@ public:
     inline bool isMagnetic(const Triangle::Tri &f)
         { return (magNode[f.ind[0]] && magNode[f.ind[1]] && magNode[f.ind[2]]); }
 
-    /** Check whether each triangle of tet and tri satisfies one of the three following conditions :
+    /** Update dMs on each triangular element, with a sign that is consistent with the triangle's
+     * orientation.
+     * Check whether each triangle of tet and tri satisfies one of the three following conditions :
      *      - Is part of no surface region, but part of 2 tetraedrons of the same volume region
      *      - Is part of at most one surface region, and 2 tetraedrons of differents volume region
      *      - Is part of 1 tetraedron and at most one surface region
      * Returns true if all triangles in one of those three cases, false otherwise.
      */
-    bool checkTriangles();
+    bool controlTriangles();
 
     /** Edges of all the tetrahedrons. Each edge is a sorted pair of indices.
      * The list is sorted lexicographically, as per std::pair::operator<(). */
@@ -416,15 +417,11 @@ private:
                         { return a > b; });
         }
 
-    /** Update dMs on each triangular element, with a sign that is consistent with the triangle's
-     * orientation. */
-    void updateDeltaMs();
-
     /** Sort the nodes along the longest axis of the sample. This should reduce the bandwidth of
      * the matrix we will have to solve for. */
     void sortNodes(Nodes::index long_axis /**< [in] */);
 
-    /** Called in checkTriangles. Returns true if a generation error is detected, false otherwise. */
+    /** Called in controlTriangles. Returns true if a generation error is detected, false otherwise. */
     bool findErrInTriangle(const int nbSurfTri, const int nbTetraFaces,
                          const std::pair<int,int> pairIdVolRegs, const int idSurfReg);
 
