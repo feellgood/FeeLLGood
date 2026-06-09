@@ -124,8 +124,7 @@ public:
 
         for(unsigned int i=0;i<tri.size();i++)
             {
-            if (isMagnetic(tri[i]) && !mySets.paramTriangle[tri[i].idxPrm].suppress_charges
-                    && !isInMagList(magTri,tri[i]) )
+            if (isMagnetic(tri[i]) && !mySets.paramTriangle[tri[i].idxPrm].suppress_charges)
                 { magTri.push_back(i); }
             }
 
@@ -429,15 +428,6 @@ private:
      * each elementary surface triangle defined by points p0,p1,p2 is computed using
      * norm(cross(p0p1,p0p2))/2, it is always positive  */
     double surface(std::vector<int> &triIndices) const;
-
-    /**return true if triangle f is already indexed in the list idxMagList.
-     * Uses operator== for Tri. */
-    bool isInMagList(std::vector<int> &idxMagList, Triangle::Tri &f) const
-        {
-        auto it = std::find_if(idxMagList.begin(),idxMagList.end(),
-                               [this,&f](const int idx) { return (tri[idx] == f); });
-        return(it != idxMagList.end());
-        }
 
     /** when external applied field is of field_type R4toR3 values of field_space are stored in
      * spaceField */
