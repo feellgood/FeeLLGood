@@ -4,6 +4,7 @@ import os
 import sys
 import json
 import subprocess
+import signal
 from math import sqrt
 
 # Distance between two vectors of R^3.
@@ -78,7 +79,12 @@ if(val.returncode==0):
     print(f"relative error on total energy      = {e_error:.2e}")
     print(f"threshold of acceptability          = {threshold:.2e}")
 else:
-    print("feeLLGood failed: exit status = " + str(val.returncode))
+    print("feeLLGood failed: ", end="")
+    if val.returncode > 0:
+        print(f"exit status = {val.returncode}")
+    else:
+        sig = -val.returncode
+        print(f"killed by signal {sig} ({signal.strsignal(sig)})")
     success = False
 
 # Use ANSI colors if printing to a terminal.
