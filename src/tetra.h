@@ -54,9 +54,9 @@ const int N = 4;   /**< number of vertices */
     constexpr double C = 1. / 2.;                /**< constant to build hat functions */
     constexpr double D = -2. / 15.;              /**< constant to build hat functions */
     constexpr double E = 3. / 40.;               /**< constant to build hat functions */
-    constexpr double u[NPI] = {A, B, B, B, C};   /**< some constants to build hat functions */
-    constexpr double v[NPI] = {A, B, B, C, B};   /**< some constants to build hat functions */
-    constexpr double w[NPI] = {A, B, C, B, B};   /**< some constants to build hat functions */
+    constexpr double u[NPI]   = {A, B, B, B, C}; /**< some constants to build hat functions */
+    constexpr double v[NPI]   = {A, B, B, C, B}; /**< some constants to build hat functions */
+    constexpr double w[NPI]   = {A, B, C, B, B}; /**< some constants to build hat functions */
     constexpr double pds[NPI] = {D, E, E, E, E}; /**< constant weights to build hat functions */
 
     /** constant matrix \f$ j:0.. NPI-1 \f$
@@ -74,10 +74,10 @@ const int N = 4;   /**< number of vertices */
 
     /** eigen constant matrix a */
     const Eigen::Matrix<double,N,NPI> eigen_a =
-            (Eigen::MatrixXd(N,NPI) << a[0][0], a[0][1], a[0][2], a[0][3], a[0][4],
-                                       a[1][0], a[1][1], a[1][2], a[1][3], a[1][4],
-                                       a[2][0], a[2][1], a[2][2], a[2][3], a[2][4],
-                                       a[3][0], a[3][1], a[3][2], a[3][3], a[3][4] ).finished();
+            (Eigen::MatrixXd(N, NPI) << a[0][0], a[0][1], a[0][2], a[0][3], a[0][4],
+                                        a[1][0], a[1][1], a[1][2], a[1][3], a[1][4],
+                                        a[2][0], a[2][1], a[2][2], a[2][3], a[2][4],
+                                        a[3][0], a[3][1], a[3][2], a[3][3], a[3][4] ).finished();
 #endif
 
 /** \class prm
@@ -140,7 +140,7 @@ public:
     inline Tet(const std::vector<Nodes::Node> &_p_node /**< vector of nodes */,
                const int _idx /**< [in] region index in region vector */,
                const std::initializer_list<int> _i /**< [in] node index */)
-        : element<N,NPI>(_p_node,_idx,_i), idx(0)
+        : element<N,NPI>(_p_node, _idx, _i), idx(0)
         {
         if (existNodes())
             {
@@ -159,7 +159,7 @@ public:
             extraField = [] ( const Eigen::Ref<const Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>> ) {};
             }
         else
-            { std::cerr<<"Error: Tet constructor has out of bound index\n"; }
+            { std::cerr << "Error: Tet constructor has out of bound index\n"; }
         }
 
     /** local hat functions matrix, initialized by constructor: da = dadu * inverse(Jacobian)
@@ -174,7 +174,8 @@ public:
                               Eigen::Ref<Eigen::Matrix<double,NPI,1>> result) const
         {
         Eigen::Matrix<double,N,1> scalar_nod;
-        for (int i = 0; i < N; i++) scalar_nod(i) = getter(getNode(i));
+        for (int i = 0; i < N; i++)
+            { scalar_nod(i) = getter(getNode(i)); }
         result = scalar_nod.transpose() * eigen_a;
         }
 
@@ -187,15 +188,16 @@ public:
                               Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> Tz) const
         {
         Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
-        for (int i = 0; i < N; i++) vec_nod.col(i) = getter(getNode(i));
+        for (int i = 0; i < N; i++)
+            { vec_nod.col(i) = getter(getNode(i)); }
 
-        result = vec_nod * eigen_a;// interpolated value at Gauss point
+        result = vec_nod * eigen_a; // interpolated value at Gauss point
 
         //Spatial derivatives: constant for linear elements, evaluated at any point including Gauss
         //point
-        Tx = vec_nod * (da.col(Nodes::IDX_X)).replicate(1,NPI);
-        Ty = vec_nod * (da.col(Nodes::IDX_Y)).replicate(1,NPI);
-        Tz = vec_nod * (da.col(Nodes::IDX_Z)).replicate(1,NPI);
+        Tx = vec_nod * (da.col(Nodes::IDX_X)).replicate(1, NPI);
+        Ty = vec_nod * (da.col(Nodes::IDX_Y)).replicate(1, NPI);
+        Tz = vec_nod * (da.col(Nodes::IDX_Z)).replicate(1, NPI);
         }
 
     /** interpolation for components of a field : the getter function is given as a parameter in
@@ -205,15 +207,14 @@ public:
                                     Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> X) const
         {
         Eigen::Matrix<double,N,1> scalar_nod;
-        for (int i = 0; i < N; i++) scalar_nod(i) = getter(getNode(i));
+        for (int i = 0; i < N; i++)
+            { scalar_nod(i) = getter(getNode(i)); }
         
         X.setZero();
         for (int j = 0; j < NPI; j++)
             {
             for (int i = 0; i < N; i++)
-                {
-                X.col(j) -= (scalar_nod[i] * da.row(i));
-                }
+                { X.col(j) -= (scalar_nod[i] * da.row(i)); }
             }
         }
 
@@ -225,9 +226,7 @@ public:
         Eigen::Matrix<double,N,1> scalar_nod;
 
         for (int i = 0; i < N; i++)
-            {
-            scalar_nod[i] = getter(getNode(i),idx);
-            }
+            { scalar_nod[i] = getter(getNode(i), idx); }
         result = scalar_nod.transpose() * eigen_a;
         }
     
@@ -242,7 +241,7 @@ public:
     X Y Z are diagonal matrices with magnetization component contributions
      */
     void lumping(const Eigen::Ref<const Eigen::Matrix<double,NPI,1>> alpha_eff, double prefactor,
-                  Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const;
+                 Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE) const;
 
     /**
      * computes elementary N*N matrix block
@@ -260,7 +259,7 @@ public:
     /** add drift contribution due to eventual recentering to vectors BE */
     void add_drift_BE(double alpha, double s_dt, double Vdrift,
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
-                      Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V, 
+                      Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V,
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUd_,
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dVd_,
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,N>> BE) const;
@@ -268,25 +267,26 @@ public:
     /** append(+=) H_aniso for uniaxial anisotropy contribution, returns contribution to uHeff (used
      * to compute the stabilizing effective damping) */
     Eigen::Matrix<double,NPI,1> calc_aniso_uniax(const Eigen::Ref<const Eigen::Vector3d> uk,
-            const double Kbis, const double s_dt,
-            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
-            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V,
-            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H_aniso) const;
+                                                 const double Kbis, const double s_dt,
+                                                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
+                                                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V,
+                                    Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H_aniso) const;
 
     /** append(+=) H_aniso for cubic anisotropy contribution, returns contribution to uHeff (used to
      * compute the stabilizing effective damping) */
     Eigen::Matrix<double,NPI,1> calc_aniso_cub(const Eigen::Ref<const Eigen::Vector3d> ex,
-            const Eigen::Ref<const Eigen::Vector3d> ey,
-            const Eigen::Ref<const Eigen::Vector3d> ez,
-            const double K3bis, const double s_dt,
-            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
-            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V,
-            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H_aniso) const;
+                                               const Eigen::Ref<const Eigen::Vector3d> ey,
+                                               const Eigen::Ref<const Eigen::Vector3d> ez,
+                                               const double K3bis,
+                                               const double s_dt,
+                                               Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
+                                               Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V,
+                                    Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H_aniso) const;
 
     /** computes the integral contribution of the tetrahedron to the evolution of the magnetization
      * calc_Hext is a function that returns external H field defined on gauss points
      */
-    void integrales( const Tetra::prm &param, const timing &prm_t,
+    void integrales(const Tetra::prm &param, const timing &prm_t,
                     const std::function< Eigen::Matrix<double,Nodes::DIM,NPI> (void)>& calc_Hext,
                     Nodes::index idx_dir, double Vdrift);
 
@@ -345,10 +345,8 @@ public:
         {
         Eigen::Matrix<double,Nodes::DIM,N> vec_nod;
         for (int i = 0; i < N; i++)
-            {
-            vec_nod.col(i) << getNode(i).p;
-            }
-        return vec_nod*eigen_a;
+            { vec_nod.col(i) << getNode(i).p; }
+        return vec_nod * eigen_a;
         }
 
 private:
