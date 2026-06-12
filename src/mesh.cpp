@@ -4,51 +4,6 @@
 
 using namespace Mesh;
 
-/** \class BasicTri
-BasicTri is a simplified version of the class Tri which contains only
-the nodes, the surface region and the region.
-It is used when checking the validity of the mesh is needed but
-not all the triangle elements are needed.
-*/
-class BasicTri
-    {
-public:
-    /** Constructor using the indices vector and the region. sRegion is false by default.
-     * The nodes are sorted because it makes it easier to compare two BasicTri.
-    */
-    BasicTri(const std::array<int,3> &inds, const int idReg, const bool surface = false)
-        : nodesInd({inds[0], inds[1], inds[2]}), idRegion(idReg), isSurfaceElement(surface)
-        {
-        int inversions = (nodesInd[0] > nodesInd[1])
-                       + (nodesInd[1] > nodesInd[2])
-                       + (nodesInd[0] > nodesInd[2]);
-        std::sort(nodesInd.begin(), nodesInd.end());
-        isFlipped = inversions % 2;
-        }
-
-    /** Constructor used to copy a surface region triangle */
-    explicit BasicTri(const Triangle::Tri & tri)
-        : BasicTri(tri.ind, tri.idxPrm, true)
-        {}
-
-    /** Compare the nodes indice lexicographically */
-    bool operator<(const BasicTri & o) const
-        { return this->nodesInd < o.nodesInd; }
-
-    /** The 3 node indices composing the triangle */
-    std::array<int,3> nodesInd;
-
-    /** index of the region of the triangle */
-    int idRegion;
-
-    /** If the triangle is in a surface region */
-    bool isSurfaceElement;
-
-    /** Whether the index order normalization flipped the triangle. */
-    bool isFlipped;
-
-    }; // class BasicTri
-
 void mesh::infos(void) const
     {
     std::cout << "mesh:\n";
@@ -167,61 +122,90 @@ bool mesh::controlTriangles()
         }
 
     // Now walk the list of all the triangles in search for meshing errors.
-    const BasicTri *prevTri = &allTriCtnr[0];
-    std::pair<int,int> pairIdCurVolRegs(-1, -1);
+    std::vector<size_t> indNodTriToAdd;
+    std::vector<int> idxPrmTriToAdd;
+
+    size_t inf = 0;
+    // For each triangle plus one time after
+    for (size_t sup = 1; sup <= allTriCtnr.size(); sup++)
+        {
+        // If the triangle is different
+        if (sup == allTriCtnr.size() || allTriCtnr[inf].nodesInd != allTriCtnr[sup].nodesInd)
+            {
+            if (!diffTriHandler(inf, sup, allTriCtnr, indNodTriToAdd, idxPrmTriToAdd))
+                { return false; }
+
+            inf = sup;
+            }
+        }
+
+    // Creates the missings elements in tri
+    for (size_t i = 0; i + 2 < indNodTriToAdd.size(); i = i + 3)
+        {
+        int curIdxPrm = idxPrmTriToAdd[i/3];
+        int i0 = indNodTriToAdd[i];
+        int i1 = indNodTriToAdd[i+1];
+        int i2 = indNodTriToAdd[i+2];
+        tri.push_back(Triangle::Tri(node, curIdxPrm, {i0, i1, i2}));
+        }
+    return true;
+    }
+
+bool Mesh::mesh::diffTriHandler(const size_t inf, const size_t sup, const std::vector<BasicTri> &allTriCtnr,
+                                std::vector<size_t> &indNodTriToAdd, std::vector<int> &idxPrmTriToAdd)
+    {
     int idCurSurfReg = -1;
     int nbTetraFaces = 0;
     int nbSurfTri = 0;
+    std::pair<int,int> pairIdCurVolRegs(-1, -1);
 
-    for (const BasicTri &triangle : allTriCtnr)
-        {   // For each triangle
-        if (triangle.nodesInd != prevTri->nodesInd)
-            {   // If the triangle changes
-            if (findErrInTriangle(nbSurfTri, nbTetraFaces, pairIdCurVolRegs, idCurSurfReg))
-                { return false; }
-            nbTetraFaces = 0;
-            nbSurfTri = 0;
-            idCurSurfReg = -1;
-            pairIdCurVolRegs.first = -1;
-            pairIdCurVolRegs.second = -1;
-            }
-
-        if (triangle.isSurfaceElement)
+    // Gets the triangle's stats
+    for (size_t i = inf; i < sup; i++)
+        {
+        if (allTriCtnr[i].isSurfaceElement)
             {
-            idCurSurfReg = triangle.idRegion;
+            idCurSurfReg = allTriCtnr[inf].idRegion;
             nbSurfTri++;
             }
         else
             {
             nbTetraFaces++;
             if (pairIdCurVolRegs.first == -1)
-                { pairIdCurVolRegs.first = triangle.idRegion; }
+                { pairIdCurVolRegs.first = allTriCtnr[inf].idRegion; }
             else
-                { pairIdCurVolRegs.second = triangle.idRegion; }
+                { pairIdCurVolRegs.second = allTriCtnr[inf].idRegion; }
             }
-        prevTri = &triangle;
         }
 
-    if (findErrInTriangle(nbSurfTri, nbTetraFaces, pairIdCurVolRegs, idCurSurfReg))
-        { return false; }
-    else
+    if (nbSurfTri == 0 && (nbTetraFaces == 1 ||
+            (nbTetraFaces == 2 && pairIdCurVolRegs.first != pairIdCurVolRegs.second)))
+        {   // If it is an interface or a surface triangle not in tri
+        indNodTriToAdd.push_back(allTriCtnr[inf].nodesInd[0]);
+        indNodTriToAdd.push_back(allTriCtnr[inf].nodesInd[1]);
+        indNodTriToAdd.push_back(allTriCtnr[inf].nodesInd[2]);
+        idxPrmTriToAdd.push_back(allTriCtnr[inf].idRegion);
+        }
+
+    if (findNoErrInTriangle(nbSurfTri, nbTetraFaces, pairIdCurVolRegs, idCurSurfReg))
         { return true; }
+    else
+        { return false; }
     }
 
-bool mesh::findErrInTriangle(const int nbSurfTri, const int nbTetraFaces,
+bool mesh::findNoErrInTriangle(const int nbSurfTri, const int nbTetraFaces,
                            const std::pair<int,int> pairIdVolRegs, const int idSurfReg)
     {
     if (nbSurfTri > 1)
         {
         std::cerr << "Error: bad mesh. " << nbSurfTri << " instances of"
                      " the same surface triangle have been found\n";
-        return true;
+        return false;
         }
     else if (nbTetraFaces == 0)
         {
         std::cerr << "Error: bad mesh. A triangle which belongs to 1 "
                      "surface region and no tetrahedron has been found\n";
-        return true;
+        return false;
         }
     else if (nbTetraFaces > 2)
         {
@@ -235,17 +219,17 @@ bool mesh::findErrInTriangle(const int nbSurfTri, const int nbTetraFaces,
             std::cerr << "Error: bad mesh. A triangular face shared by "
                       << nbTetraFaces << " tetrahedrons has been found\n";
             }
-        return true;
+        return false;
         }
     else if (nbTetraFaces == 2 && nbSurfTri == 1 && pairIdVolRegs.first == pairIdVolRegs.second)
         {
         std::cerr << "Error: bad mesh. An internal triangle has been "
                      "found in the surface region " << idSurfReg << "\n";
-        return true;
+        return false;
         }
     else
         {
-        return false;
+        return true;
         }
     }
 
