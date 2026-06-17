@@ -99,7 +99,7 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     void integrales(const Tetra::Tet &tet, Eigen::Matrix<double,DIM_PB*Tetra::N,DIM_PB*Tetra::N> &AE) const;
 
     /** computes magnetic metal contributions to spin diffusion from tetrahedron tet (RHS) */
-    void integrales(Tetra::Tet &tet,std::vector<double> &BE);
+    void integrales(Tetra::Tet &tet, std::vector<double> &BE);
     };
 
 #endif
