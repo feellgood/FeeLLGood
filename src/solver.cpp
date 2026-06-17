@@ -22,31 +22,30 @@ bool LinAlgebra::solve(const timing &t_prm)
         counter.reset();
         }
 
-    std::fill(L_rhs.begin(),L_rhs.end(),0);
-    std::for_each(msh->magTet.begin(), msh->magTet.end(),
-                  [this](const int idx)
-                      {
-                      Tetra::Tet &my_elem = msh->tet[idx];
-                      double *data_start = my_elem.Lp.data();
-                      double *data_end = data_start + 2*Tetra::N;
-                      std::vector<double> Le(data_start, data_end);
-                      buildVect<Tetra::N>(my_elem.ind, Le);
-                      });
+    std::fill(L_rhs.begin(), L_rhs.end(), 0);
+    for (const int idx : msh->magTet)
+        {
+        Tetra::Tet &my_elem = msh->tet[idx];
+        double *data_start = my_elem.Lp.data();
+        double *data_end = data_start + 2 * Tetra::N;
+        std::vector<double> Le(data_start, data_end);
+        buildVect<Tetra::N>(my_elem.ind, Le);
+        }
 
-    std::for_each(msh->magTri.begin(), msh->magTri.end(),
-                  [this](const int idx)
-                      {
-                      Triangle::Tri &my_elem = msh->tri[idx];
-                      double *data_start = my_elem.Lp.data();
-                      double *data_end = data_start + 2*Triangle::N;
-                      std::vector<double> Le(data_start, data_end);
-                      buildVect<Triangle::N>(my_elem.ind, Le);
-                      });
+    for (const int idx : msh->magTri)
+        {
+        Triangle::Tri &my_elem = msh->tri[idx];
+        double *data_start = my_elem.Lp.data();
+        double *data_end = data_start + 2 * Triangle::N;
+        std::vector<double> Le(data_start, data_end);
+        buildVect<Triangle::N>(my_elem.ind, Le);
+        }
 
     /* RHS forced to zero outside mag material defined by mask, corresponding K diagonal
      * coefficients set to 1  */
-    algebra::applyMask(lvd,L_rhs);
-    std::for_each(lvd.begin(),lvd.end(),[this](const int i){ K.set(i,i,1.0); });
+    algebra::applyMask(lvd, L_rhs);
+    for (const int i : lvd)
+        { K.set(i, i, 1.0); }
     if (verbose)
         {
         std::cout << "matrix assembly done in " << counter.millis() << "\n";
@@ -78,14 +77,14 @@ bool LinAlgebra::solve(const timing &t_prm)
         {
         if (msh->magNode[i])
             {
-            double vp = Xw[2*i];
+            double vp = Xw[2*i  ];
             double vq = Xw[2*i+1];
             double v2 = Nodes::sq(vp) + Nodes::sq(vq);
             if (v2 > v2max)
                 { v2max = v2; }
-            msh->updateNode(i, vp, vq, dt);//gamma0 multiplication handled in updateNode
+            msh->updateNode(i, vp, vq, dt); //gamma0 multiplication handled in updateNode
             }
         }
-    v_max = gamma0*sqrt(v2max);
+    v_max = gamma0 * sqrt(v2max);
     return false;
     }
