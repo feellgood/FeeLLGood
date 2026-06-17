@@ -45,19 +45,19 @@ public:
         verbose(s.verbose),
         extSpaceField(my_msh.extSpaceField)
         {
-        Xw.resize(2*NOD);
+        Xw.resize(2 * NOD);
         base_projection();
         if (!s.recenter)
             { idx_dir = Nodes::IDX_UNDEF; }
         else
             { idx_dir = s.recentering_direction; }
 
-        for (int i=0;i<NOD;i++)
+        for (int i = 0; i < NOD; i++)
             {
             if(!my_msh.magNode[i])
                 {
-                lvd.push_back(2*i);
-                lvd.push_back(2*i+1);
+                lvd.push_back(2 * i    );
+                lvd.push_back(2 * i + 1);
                 }
             }
         lvd.shrink_to_fit();
@@ -73,7 +73,7 @@ public:
     field.
     */
     void prepareElements(const Eigen::Vector3d &Hext /**< [in] applied field */,
-            const timing &t_prm /**< [in] */) const;
+                         const timing &t_prm /**< [in] */) const;
 
     /** computes inner data structures of tetraedrons and triangular triangles (K matrices and L
     vectors) this member function is overloaded to fit to two different situations, either if
@@ -83,7 +83,7 @@ public:
     */
     void prepareElements(const double A_Hext /**< [in] amplitude applied field (might be time
                                                dependant)*/,
-            const timing &t_prm /**< [in] */) const;
+                         const timing &t_prm /**< [in] */) const;
 
     /** build init guess for bicg solver */
     void buildInitGuess(std::vector<double> &G/**< [out] */) const;
@@ -94,10 +94,12 @@ public:
     bool solve(const timing &t_prm /**< [in] */);
 
     /** setter for DW_dz */
-    inline void set_DW_vz(const double vz /**< [in] */) { DW_vz = vz; }
+    inline void set_DW_vz(const double vz /**< [in] */)
+        { DW_vz = vz; }
 
     /** getter for v_max */
-    inline double get_v_max(void) const { return v_max; }
+    inline double get_v_max(void) const
+        { return v_max; }
 
     /** when external applied field is of field_type R4toR3 values of field_space are stored in
      * spaceField */

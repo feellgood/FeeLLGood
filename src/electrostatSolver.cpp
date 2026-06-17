@@ -11,11 +11,13 @@ void electrostatSolver::checkBoundaryConditions(void) const
     {
     int nbSurfJ(0);
     int nbSurfV(0);
-    std::for_each(paramTri.begin(),paramTri.end(),[&nbSurfJ,&nbSurfV](const Triangle::prm &p)
+    for (const Triangle::prm &p : paramTri)
         {
-        if (std::isfinite(p.jn)) nbSurfJ++;
-        if (std::isfinite(p.V)) nbSurfV++;
-        });
+        if (std::isfinite(p.jn))
+            { nbSurfJ++; }
+        if (std::isfinite(p.V))
+            { nbSurfV++; }
+        }
     if (!(nbSurfJ == 1 && nbSurfV == 1))
         {
         std::cerr << "Error: incorrect boundary conditions for potential V solver.\n";
@@ -28,11 +30,13 @@ void electrostatSolver::checkBoundaryConditions(void) const
 void electrostatSolver::infos(void) const
     {
     std::cout << "Boundary conditions:\n";
-    std::for_each(paramTri.begin(),paramTri.end(),[](const Triangle::prm &p)
+    for (const Triangle::prm &p : paramTri)
         {
-        if (!std::isnan(p.jn)) { std::cout << "\tjn= " << p.jn << "\n"; }
-        if (!std::isnan(p.V)) { std::cout << "\tV= " << p.V << "\n"; }
-        } );
+        if (!std::isnan(p.jn))
+            { std::cout << "\tjn= " << p.jn << "\n"; }
+        if (!std::isnan(p.V))
+            { std::cout << "\tV= " << p.V << "\n"; }
+        }
     }
 
 void electrostatSolver::integrales(const Tetra::Tet &tet,
@@ -45,16 +49,16 @@ void electrostatSolver::integrales(const Tetra::Tet &tet,
 
         for (int ie = 0; ie < Tetra::N; ie++)
             {
-            double dai_dx = tet.da(ie,Nodes::IDX_X);
-            double dai_dy = tet.da(ie,Nodes::IDX_Y);
-            double dai_dz = tet.da(ie,Nodes::IDX_Z);
+            double dai_dx = tet.da(ie, Nodes::IDX_X);
+            double dai_dy = tet.da(ie, Nodes::IDX_Y);
+            double dai_dz = tet.da(ie, Nodes::IDX_Z);
 
             for (int je = 0; je < Tetra::N; je++)
                 {
-                double daj_dx = tet.da(je,Nodes::IDX_X);
-                double daj_dy = tet.da(je,Nodes::IDX_Y);
-                double daj_dz = tet.da(je,Nodes::IDX_Z);
-                AE(ie,je) += sigma_w*(dai_dx*daj_dx + dai_dy*daj_dy + dai_dz*daj_dz);
+                double daj_dx = tet.da(je, Nodes::IDX_X);
+                double daj_dy = tet.da(je, Nodes::IDX_Y);
+                double daj_dz = tet.da(je, Nodes::IDX_Z);
+                AE(ie, je) += sigma_w * (dai_dx * daj_dx + dai_dy * daj_dy + dai_dz * daj_dz);
                 }
             }
         }
@@ -62,10 +66,10 @@ void electrostatSolver::integrales(const Tetra::Tet &tet,
 
 void electrostatSolver::integrales(const Triangle::Tri &tri, std::vector<double> &BE) const
     {
-    double J_bc = getCurrentDensity(tri);// _bc for Boundary Condition
+    double J_bc = getCurrentDensity(tri); // _bc for Boundary Condition
     for (int npi = 0; npi < Triangle::NPI; npi++)
         {
-        double J_w = J_bc *tri.weight[npi];
+        double J_w = J_bc * tri.weight[npi];
         for (int ie = 0; ie < Triangle::N; ie++)
             { BE[ie] -= Triangle::a[ie][npi] * J_w; }
         }
@@ -80,7 +84,7 @@ void electrostatSolver::compute(const bool verbose, const std::string& V_fileNam
         {
         if (!V_fileName.empty())
             {
-            bool iznogood = save(V_fileName,"## columns: index\tV\n");
+            bool iznogood = save(V_fileName, "## columns: index\tV\n");
             if (verbose && iznogood)
                 { std::cout << "file " << V_fileName << " written.\n"; }
             }
@@ -93,45 +97,45 @@ bool electrostatSolver::solve(void)
     {
     const int NOD = msh->getNbNodes();
 
-    std::for_each( msh->tet.begin(),msh->tet.end(),[this](Tetra::Tet &elem)
+    for (Tetra::Tet &elem : msh->tet)
         {
         Eigen::Matrix<double,DIM_PB_ELEC*Tetra::N,DIM_PB_ELEC*Tetra::N> Ke;
         Ke.setZero();
-        integrales(elem,Ke);
-        buildMat<Tetra::N>(elem.ind,Ke);
-        } );
+        integrales(elem, Ke);
+        buildMat<Tetra::N>(elem.ind, Ke);
+        }
 
-    std::for_each( msh->tri.begin(), msh->tri.end(),[this](Triangle::Tri &elem)
+    for (Triangle::Tri &elem : msh->tri)
         {
-        std::vector<double> Le(DIM_PB*Triangle::N,0.0);
-        integrales(elem,Le);
-        buildVect<Triangle::N>(elem.ind,Le);
-        } );
+        std::vector<double> Le(DIM_PB * Triangle::N, 0.0);
+        integrales(elem, Le);
+        buildVect<Triangle::N>(elem.ind, Le);
+        }
 
     std::vector<int> ld; // vector of the Dirichlet Nodes
     std::vector<double> Vd(NOD); // potential values on Dirichlet nodes, zero on the others
 
-    std::for_each(msh->tri.begin(),msh->tri.end(),[this,&Vd,&ld](const Triangle::Tri &tri)
+    for (const Triangle::Tri &tri : msh->tri)
         {
         double _V = paramTri[tri.idxPrm].V;
         if (!std::isnan(_V))
             {
-            for(int ie=0; ie<Triangle::N; ie++)
+            for(int ie=0; ie < Triangle::N; ie++)
                 {
                 int i= tri.ind[ie];
                 Vd[i]= _V;
                 ld.push_back(i);
                 }
             }
-        });
+        }
     suppress_copies<int>(ld);
     iter.reset();
     algebra::cg_dir<double>(iter, K, V, L_rhs, Vd, ld);
 
-    return ( iter.status == algebra::CONVERGED);
+    return (iter.status == algebra::CONVERGED);
     }
 
-bool electrostatSolver::save(const std::string& V_fileName, const std::string &metadata) const
+bool electrostatSolver::save(const std::string &V_fileName, const std::string &metadata) const
     {
     std::ofstream fout(V_fileName, std::ios::out);
     if (fout.fail())
@@ -158,6 +162,7 @@ double electrostatSolver::getSigma(const Tetra::Tet &tet) const
 double electrostatSolver::getCurrentDensity(const Triangle::Tri &tri) const
     {
     double val = paramTri[tri.idxPrm].jn;
-    if (!std::isfinite(val)) val = 0.0;
+    if (!std::isfinite(val))
+        { val = 0.0; }
     return val;
     }

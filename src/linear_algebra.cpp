@@ -12,13 +12,13 @@ void LinAlgebra::base_projection() const
 
 void LinAlgebra::buildInitGuess(std::vector<double> &G) const
     {
-    std::fill(G.begin(),G.end(),0);
+    std::fill(G.begin(), G.end(), 0);
     for (int i = 0; i < NOD; i++)
         {
         if (msh->magNode[i])
             {
-            G[2*i] = msh->getProj_ep(i)/gamma0;
-            G[2*i+1] = msh->getProj_eq(i)/gamma0;
+            G[2*i  ] = msh->getProj_ep(i) / gamma0;
+            G[2*i+1] = msh->getProj_eq(i) / gamma0;
             }
         }
     }
@@ -27,7 +27,7 @@ void LinAlgebra::prepareElements(const Eigen::Vector3d &Hext /**< [in] applied f
                                  const timing &t_prm /**< [in] */) const
     {
     // it might be more efficient to build calc_Hext inside lambda of the for_each
-    std::function< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>(void)> calc_Hext =
+    std::function<Eigen::Matrix<double,Nodes::DIM,Tetra::NPI>(void)> calc_Hext =
                   [&Hext](void)
                       {
                       Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> H;
@@ -46,8 +46,8 @@ void LinAlgebra::prepareElements(const Eigen::Vector3d &Hext /**< [in] applied f
                   [this](Triangle::Tri &tri)
                   {
                   // the contribution to Lp computed in integrales is due to surface anisotropy
-                  if ((msh->isMagnetic(tri))&&(paramTri[tri.idxPrm].Ks != 0))
-                      { tri.integrales(paramTri[tri.idxPrm]);  }
+                  if ((msh->isMagnetic(tri)) && (paramTri[tri.idxPrm].Ks != 0))
+                      { tri.integrales(paramTri[tri.idxPrm]); }
                   });
     }
 
@@ -62,9 +62,9 @@ void LinAlgebra::prepareElements(const double A_Hext /**< [in] amplitude applied
                       {
                       Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> sp_H = extSpaceField[tet.idx];
                       std::function< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> (void)> calc_Hext =
-                      [&sp_H,&A_Hext](void)
+                      [&sp_H, &A_Hext](void)
                           {
-                          Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> H= A_Hext*sp_H;
+                          Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> H = A_Hext * sp_H;
                           return H;
                           };
                       tet.integrales(paramTet[tet.idxPrm], t_prm, calc_Hext, idx_dir, DW_vz);
@@ -75,7 +75,7 @@ void LinAlgebra::prepareElements(const double A_Hext /**< [in] amplitude applied
                   [this](Triangle::Tri &tri)
                   {
                   // the contribution to Lp computed in integrales is due to surface anisotropy
-                  if ((msh->isMagnetic(tri))&&(paramTri[tri.idxPrm].Ks != 0))
-                    { tri.integrales(paramTri[tri.idxPrm]);  }
+                  if ((msh->isMagnetic(tri)) && (paramTri[tri.idxPrm].Ks != 0))
+                      { tri.integrales(paramTri[tri.idxPrm]);  }
                   });
     }

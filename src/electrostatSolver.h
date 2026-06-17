@@ -32,7 +32,7 @@ public:
             const double _tol /**< [in] cg_dir tolerance */,
             const bool v /**< [in] verbose mode for iteration monitor */,
             const int max_iter /**< [in] maximum number of iterations */):
-            solver<DIM_PB_ELEC>(_msh,_pTetra,_pTri,"cg_dir",_tol,v,max_iter) {}
+            solver<DIM_PB_ELEC>(_msh, _pTetra, _pTri, "cg_dir", _tol, v, max_iter) {}
 
     /** electrostatic potential values for boundary conditions, V.size() is the size of the vector
      * of nodes */
@@ -50,8 +50,8 @@ public:
 
     /** text file (tsv) writing function for the solution V over all volume regions of the mesh,
      * node indices are zero based */
-    bool save(const std::string& V_fileName /**< [in] output file name */,
-            const std::string &metadata /**< [in] */) const;
+    bool save(const std::string &V_fileName /**< [in] output file name */,
+              const std::string &metadata /**< [in] */) const;
 
     /** returns sigma of the tetraedron, (conductivity in (Ohm.m)^-1 */
     double getSigma(const Tetra::Tet &tet) const;
