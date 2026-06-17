@@ -53,8 +53,9 @@ void mesh::checkMeshFile(const Settings &mySets)
         exit(1);
         }
     gmsh::model::mesh::getElementTypes(elemTypes, DIM_OBJ_2D, -1);
-    msh_available = msh_available && (elemTypes.size() == 1); // only one type of 2D element allowed
-    msh_available = msh_available && (elemTypes[0] == TYP_ELEM_TRIANGLE); // only Triangles
+    // The only type of 2D elements we allow are triangles.
+    msh_available = elemTypes.size() == 0
+            || (elemTypes.size() == 1 && elemTypes[0] == TYP_ELEM_TRIANGLE);
     if (!msh_available)
         {
         std::cerr << "Fatal Error: mesh file contains other 2D elements than triangles.\n";
