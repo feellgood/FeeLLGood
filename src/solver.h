@@ -31,10 +31,11 @@ class solver
                 const double _tol /**< [in] solver tolerance */,
                 const bool v /**< [in] verbose mode for iteration monitor */,
                 const int max_iter /**< [in] maximum number of iterations */,
-                const std::function<bool(Mesh::Edge)> &edge_filter = [](Mesh::Edge){ return true; }
+                const std::function<bool(Mesh::Edge)> &edge_filter = [](Mesh::Edge)
+                    { return true; }
                     /** [in] predicate for relevant mesh edges */):
                 msh(&_msh), NOD(_msh.getNbNodes()), paramTet(_pTetra),
-                paramTri(_pTri), verbose(v), iter(name,_tol,v,max_iter),
+                paramTri(_pTri), verbose(v), iter(name, _tol, v, max_iter),
                 K(build_shape(edge_filter)), L_rhs(DIM_PROBLEM*NOD) {}
 
         /** check boundary conditions, exit if there is a mistake in the boundary conditions */
@@ -81,7 +82,7 @@ class solver
                 for (int k = 0; k < DIM_PROBLEM; ++k)
                     {
                     for (int l = 0; l < DIM_PROBLEM; ++l)
-                        { shape[DIM_PROBLEM*i+k].insert(DIM_PROBLEM*j+l); }
+                        { shape[DIM_PROBLEM * i + k].insert(DIM_PROBLEM * j + l); }
                     }
                 };
 
@@ -106,17 +107,23 @@ class solver
         parameter N is the number of indices of the element to build matrix from
          */
         template <int N>
-        void buildMat(std::array<int,N> &ind, Eigen::Matrix<double,DIM_PROBLEM*N,DIM_PROBLEM*N> &Ke)
+        void buildMat(std::array<int,N> &ind,
+                      Eigen::Matrix<double,DIM_PROBLEM*N,DIM_PROBLEM*N> &Ke)
             {
-            for (int ie=0; ie<N; ie++)
+            for (int ie = 0; ie < N; ie++)
                 {
                 int i_ = ind[ie];
-                for (int je=0; je<N; je++)
+                for (int je = 0; je < N; je++)
                     {
                     int j_ = ind[je];
-                    for (int di=0; di<DIM_PROBLEM; di++)
-                        for (int dj=0; dj<DIM_PROBLEM; dj++)
-                            K.add(DIM_PROBLEM*i_ + di, DIM_PROBLEM*j_ + dj, Ke(di*N+ie,dj*N+je));
+                    for (int di = 0; di < DIM_PROBLEM; di++)
+                        {
+                        for (int dj = 0; dj < DIM_PROBLEM; dj++)
+                            {
+                            K.add(DIM_PROBLEM * i_ + di, DIM_PROBLEM * j_ + dj,
+                                    Ke(di * N + ie,dj * N + je));
+                            }
+                        }
                     }
                 }
             }
@@ -127,11 +134,11 @@ class solver
         template <int N>
         void buildVect(std::array<int,N> &ind, std::vector<double> &Le)
             {
-            for (int ie=0; ie<N; ie++)
+            for (int ie = 0; ie < N; ie++)
                 {
                 int i_ = ind[ie];
-                for (int di=0; di<DIM_PROBLEM; di++)
-                    { L_rhs[DIM_PROBLEM*i_ + di] += Le[di*N+ie]; }
+                for (int di = 0; di < DIM_PROBLEM; di++)
+                    { L_rhs[DIM_PROBLEM*i_+di] += Le[di*N+ie]; }
                 }
             }
     }; // end template class solver
