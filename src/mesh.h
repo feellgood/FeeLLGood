@@ -19,6 +19,8 @@ mixed meshes are not allowed.
 #include "tetra.h"
 #include "settings.h"
 
+class BasicTri;
+
 namespace Mesh
     {
     /** A mesh edge is a sorted pair of adjacent node indices: first < second. */
@@ -35,7 +37,7 @@ public:
      center and length along coordinates,full volume */
     mesh(Settings &mySets /**< [in] */,
          bool simplified = false /** pass true in the unit tests */)
-        : paramTetra(mySets.paramTetra), volumeRegions(mySets.paramTetra.size())
+        : paramTriangle(mySets.paramTriangle), paramTetra(mySets.paramTetra), volumeRegions(mySets.paramTetra.size())
         {
         readMesh(mySets);
         if (simplified)
@@ -204,6 +206,9 @@ public:
 
     /** triangle container. Contains only those on a surface region. */
     std::vector<Triangle::Tri> tri;
+
+    /** Reference to the surface regions in Settings. */
+    std::vector<Triangle::prm> &paramTriangle;
 
     /** tetrahedron container */
     std::vector<Tetra::Tet> tet;
@@ -423,6 +428,11 @@ private:
     /** Called in controlTriangles. Returns true if a generation error is detected, false otherwise. */
     bool findErrInTriangle(const int nbSurfTri, const int nbTetraFaces,
                          const std::pair<int,int> pairIdVolRegs, const int idSurfReg);
+
+    /** Called in controlTriangles. If a minor generation error is detected, updates indNodTriToAdd and
+     * regsTriToAdd. Returns true if no major generation error is detected, false otherwise. */
+    bool diffTriHandler(const size_t inf, const size_t sup, const std::vector<BasicTri> &allTriCtnr,
+                        std::vector<size_t> &indNodTriToAdd, std::vector<std::pair<int,int>> &regsTriToAdd);
 
     /** returns the surface defined by the set of triangle of indices in triIndices
      * each elementary surface triangle defined by points p0,p1,p2 is computed using
