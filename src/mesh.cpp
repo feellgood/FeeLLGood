@@ -149,23 +149,39 @@ bool mesh::controlTriangles()
     // bunched together.
     std::sort(allTriCtnr.begin(), allTriCtnr.end());
 
+    // Now walk the list of all the triangles in search for meshing errors.
     std::vector<size_t> indNodTriToAdd;
     std::vector<std::pair<int,int>> regsTriToAdd;
+
     size_t low = 0;
+    // For each triangle plus one time after
     for (size_t up = 1; up <= allTriCtnr.size(); up++)
         {
+        // If the triangle is different
         if (up == allTriCtnr.size() || allTriCtnr[up].nodesInd != allTriCtnr[low].nodesInd)
             {
             if (!diffTriHandler(low, up, allTriCtnr, indNodTriToAdd, regsTriToAdd))
                 { return false; }
+
             low = up;
             }
         }
+
+    if (paramTriangle[0].regName != "__default__")
+        {
+        std::cerr << "Internal Error: could not find default surface region.\n";
+        return false;
+        }
+
+    // Create the missing surface regions
     std::map<std::pair<int,int>,size_t> volumesToSurfaceMap;
     for (std::pair<int,int> curPair : regsTriToAdd)
         {
+        // Skip if this region pair has already been accounted for.
         if (volumesToSurfaceMap.count(curPair) > 0)
             { continue; }
+
+        // Create the base name
         std::string baseName;
         if (curPair.second == -1)
             { baseName = ("surface(" + paramTetra[curPair.first].regName) + ')'; }
@@ -174,6 +190,8 @@ bool mesh::controlTriangles()
             baseName = "interface(" + paramTetra[curPair.first].regName;
             baseName += (", " + paramTetra[curPair.second].regName) + ')';
             }
+
+        // Find a unique name for the current region
         std::string curName = baseName;
         bool isDuplicate = true;
         for (int i = 0; isDuplicate; i++)
@@ -184,12 +202,16 @@ bool mesh::controlTriangles()
             isDuplicate = std::any_of(paramTriangle.begin(), paramTriangle.end(),
                 [&curName](const Triangle::prm &region){ return region.regName == curName; });
             }
+
+        // Add the surface region into paramTriangle and volumesToSurfaceMap
         Triangle::prm curPrm = paramTriangle[0];
         curPrm.regName = curName;
         paramTriangle.push_back(curPrm);
         volumesToSurfaceMap.insert(std::make_pair(curPair, paramTriangle.size() - 1));
+        std::cout << "Info: created the surface region " << curName << "\n";
         }
 
+    // Create the missings elements in tri
     for (size_t i = 0; i < regsTriToAdd.size(); i++)
         {
         size_t curIdxPrm = volumesToSurfaceMap[regsTriToAdd[i]];
@@ -229,6 +251,7 @@ bool mesh::diffTriHandler(const size_t low, const size_t up,
     int nbSurfTri = 0;
     std::pair<int,int> pairIdCurVolRegs(-1, -1); // Sorted pair: first > second
 
+    // Get the triangle's stats
     for (size_t i = low; i < up; i++)
         {
         if (allTriCtnr[i].isSurfaceElement)

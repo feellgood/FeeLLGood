@@ -343,9 +343,12 @@ public:
     /** Update dMs on each triangular element, with a sign that is consistent with the triangle's
      * orientation.
      * Check whether each triangle of tet and tri satisfies one of the three following conditions :
-     *      - Is part of no surface region, but part of 2 tetraedrons of the same volume region
-     *      - Is part of at most one surface region, and 2 tetraedrons of differents volume region
-     *      - Is part of 1 tetraedron and at most one surface region
+     *      1. Is part of no surface region, but part of 2 tetraedrons of the same volume region.
+     *      2. Is part of at most one surface region, and 2 tetraedrons of differents volume region.
+     *      3. Is part of 1 tetraedron and at most one surface region.
+     *
+     * If any interface (case 2) or surface (case 3) triangle does not belong to a surface region,
+     * one or more surface regions will be created and the triangle will be added to it.
      * Returns true if all triangles in one of those three cases, false otherwise.
      */
     bool controlTriangles();
@@ -425,14 +428,14 @@ private:
      * the matrix we will have to solve for. */
     void sortNodes(Nodes::index long_axis /**< [in] */);
 
-    /** Called in controlTriangles. Returns true if a generation error is detected, false otherwise. */
-    bool findErrInTriangle(const int nbSurfTri, const int nbTetraFaces,
-                         const std::pair<int,int> pairIdVolRegs, const int idSurfReg);
-
     /** Called in controlTriangles. If a minor generation error is detected, updates indNodTriToAdd and
      * regsTriToAdd. Returns true if no major generation error is detected, false otherwise. */
     bool diffTriHandler(const size_t inf, const size_t sup, const std::vector<BasicTri> &allTriCtnr,
                         std::vector<size_t> &indNodTriToAdd, std::vector<std::pair<int,int>> &regsTriToAdd);
+
+    /** Called in diffTriHandler. Returns true if no generation error is detected, false otherwise. */
+    bool assertNoErrInTriangle(const int nbSurfTri, const int nbTetraFaces,
+                             const std::pair<int,int> pairIdVolRegs, const int idSurfReg);
 
     /** returns the surface defined by the set of triangle of indices in triIndices
      * each elementary surface triangle defined by points p0,p1,p2 is computed using
