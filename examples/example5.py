@@ -85,11 +85,6 @@ out = gmsh.model.geo.extrude([(2,surf)],0,0,nw.height) # 2 is the dimension of t
                                                        # refered by index surf
 gmsh.model.geo.synchronize() # we have to sync before calling addPhysicalGroup
 
-surface_tag = 200 # this surface is frontier(magnetic volume)
-surf_regName = "frontier(magnet)"
-gmsh.model.addPhysicalGroup(2,[surf, out[2][1], out[3][1], out[4][1], out[5][1]], surface_tag)
-gmsh.model.setPhysicalName(2,surface_tag,surf_regName)
-
 if not justMagnet:
     surface_tag = 202 # should be disk in z=nw.height plane :
                       # boundary condition for electrostatic problem
@@ -163,9 +158,7 @@ settings = {
             nw.name: { "Ae": 1e-11, "Ms": 800e3, "alpha_LLG": 0.05, "P": 0.7, "sigma": 1.7e7,
                        "dens_state": 1.34e47, "l_sd": 10e-9, "l_sf": 12.5e-9} #Co
             },
-        "surface_regions": {
-            surf_regName: {}
-            }
+        "surface_regions": {}
     },
     "initial_magnetization": ["-y", "x", "2e-9"],
     "Bext": [0, 0, 0],

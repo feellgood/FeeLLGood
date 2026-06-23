@@ -10,7 +10,7 @@ from gmsh import __version__ as gmshVersion
 from math import log2,floor
 from feellgood.meshMaker import Cylinder
 
-def makeSettings(mesh, surface_name, volume_name, nbThreads, final_time):
+def makeSettings(mesh, volume_name, nbThreads, final_time):
     """ returns a dictionary of settings for feellgood input """
     settings = {
         "outputs": {
@@ -22,8 +22,7 @@ def makeSettings(mesh, surface_name, volume_name, nbThreads, final_time):
         "mesh": {
             "filename": mesh,
             "length_unit": 1e-9, # we use nanometers
-            "volume_regions": { volume_name: {} },
-            "surface_regions": { surface_name: {} }
+            "volume_regions": { volume_name: {} }
         },
         "initial_magnetization": [0, 0, 1],
         "Bext": [1, 0, 1],
@@ -76,7 +75,7 @@ def bench(str_executable, outputFileName, metadata, elt_sizes, listNbThreads, fi
             mesh = Cylinder(radius, height, elt_size, surface_name, volume_name)
             mesh.make(meshFileName)
             for nbThreads in listNbThreads:
-                settings = makeSettings(meshFileName, surface_name, volume_name, nbThreads,
+                settings = makeSettings(meshFileName, volume_name, nbThreads,
                         final_time)
                 t = timeit.timeit(lambda: task2test(str_executable,settings), number=1)
                 str_t = "{:.2f}".format(t)

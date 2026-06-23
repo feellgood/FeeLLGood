@@ -30,8 +30,7 @@ settings = {
         "length_unit": 1e-9,
         "volume_regions": {
             "ellipsoid_volume": { "K": 3e5, "uk": [0, 1, 0] }
-        },
-        "surface_regions": { "ellipsoid_surface": {} }
+        }
     },
     "initial_magnetization": [0, 0, 1],
     "Bext": [1, 0, -1],

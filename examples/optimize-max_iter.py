@@ -66,8 +66,7 @@ settings = {
     },
     "mesh": {
         "filename": "cylinder.msh",
-        "volume_regions": { "volume": { "alpha_LLG": 0.05 } },
-        "surface_regions": { "surface": {} }
+        "volume_regions": { "volume": { "alpha_LLG": 0.05 } }
     },
     "initial_magnetization": [1, 0, 1],
     "demagnetizing_field_solver": { "nb_threads": 10 },

@@ -44,8 +44,6 @@ mesh:
       Ae: 1e-11
       Ms: 796e3
       alpha_LLG: 0.05
-  surface_regions:
-    ellipsoid_surface:  # use defaults
 initial_magnetization: [0, 0, 1]
 Bext: [
     $amplitude * cos(2 * PI * {FREQUENCY}e9 * (t - $duration)),

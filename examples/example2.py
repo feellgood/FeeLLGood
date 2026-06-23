@@ -34,8 +34,7 @@ simulation_settings = {
     "mesh": {
         "filename": "ellipsoid.msh",
         "length_unit": 1e-9,
-        "volume_regions": { "ellipsoid_volume": { "alpha_LLG": 0.05 } },
-        "surface_regions": { "ellipsoid_surface": {} }
+        "volume_regions": { "ellipsoid_volume": { "alpha_LLG": 0.05 } }
     },
     "initial_magnetization": [0, 0, 1],
     "Bext": None,

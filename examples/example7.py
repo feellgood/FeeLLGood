@@ -30,13 +30,11 @@ ico_triangles = np.array([
 particles = [
     {
         "center": [0, 0, 0],
-        "volume": { "name": "particle1", "tag": 300 },
-        "surface":{ "name": "surface(particle1)", "tag": 200 }
+        "volume": { "name": "particle1", "tag": 300 }
     },
     {
         "center": [4, 0, 0],
-        "volume": { "name": "particle2", "tag": 301 },
-        "surface":{ "name": "surface(particle2)", "tag": 201 }
+        "volume": { "name": "particle2", "tag": 301 }
     }
 ]
 
@@ -60,10 +58,6 @@ tetrahedrons = np.vstack((
     elements( 1, [4, 2, particles[0]["volume"]["tag"], 1, 13], 1),
     elements(21, [4, 2, particles[1]["volume"]["tag"], 2, 26], 14)
 ))
-triangles = np.vstack((
-    elements(41, [2, 2, particles[0]["surface"]["tag"], 1], 1),
-    elements(61, [2, 2, particles[1]["surface"]["tag"], 2], 14)
-))
 
 # Write out the mesh.
 meshFile = open(mesh_filename, "w")
@@ -71,9 +65,7 @@ meshFile.write(f"""$MeshFormat
 2.2\t0\t8
 $EndMeshFormat
 $PhysicalNames
-4
-2 {particles[0]["surface"]["tag"]} "{particles[0]["surface"]["name"]}"
-2 {particles[1]["surface"]["tag"]} "{particles[1]["surface"]["name"]}"
+2
 3 {particles[0]["volume"]["tag"]} "{particles[0]["volume"]["name"]}"
 3 {particles[1]["volume"]["tag"]} "{particles[1]["volume"]["name"]}"
 $EndPhysicalNames
@@ -84,12 +76,10 @@ for i in range(0, len(nodes)):
     meshFile.write("\t".join(map(str, [i+1]+list(nodes[i]))) + "\n")
 meshFile.write(f"""$EndNodes
 $Elements
-{4*len(ico_triangles)}
+{2*len(ico_triangles)}
 """)
 for tetrahedron in tetrahedrons:
     meshFile.write("\t".join(map(str, tetrahedron)) + "\n")
-for triangle in triangles:
-    meshFile.write("\t".join(map(str, triangle)) + "\n")
 meshFile.write("$EndElements\n")
 meshFile.close()
 
@@ -119,10 +109,6 @@ settings = {
                 "Ae": 1e-11,
                 "alpha_LLG": 0.1
             }
-        },
-        "surface_regions": {
-            particles[0]["surface"]["name"]: {},
-            particles[1]["surface"]["name"]: {}
         }
     },
     "initial_magnetization": [1, 0, 1],
