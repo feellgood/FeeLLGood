@@ -210,7 +210,8 @@ bool mesh::controlTriangles()
         curPrm.regName = curName;
         paramTriangle.push_back(curPrm);
         volumesToSurfaceMap.insert(std::make_pair(curPair, paramTriangle.size() - 1));
-        std::cout << "Info: created the surface region " << curName << "\n";
+        if (settings.verbose)
+            { std::cout << "Info: created the surface region ‘" << curName << "’\n"; }
         }
 
     // Create the missings elements in tri
