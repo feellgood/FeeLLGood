@@ -101,7 +101,7 @@ public:
 
         if (mySets.restoreFileName == "")
             {
-            msh.init_distrib(mySets);
+            msh.init_distrib();
             }
         else
             {

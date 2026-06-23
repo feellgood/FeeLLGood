@@ -80,7 +80,7 @@ double mesh::thiele(const int region /** region index, or -1 for all magnetic re
                 });
     double volume(totalMagVol);
     if (region != -1)
-        { volume = paramTetra[region].volume; }
+        { volume = settings.paramTetra[region].volume; }
     double cross_section = volume/l.z();//average cross-section
     return 2.0*cross_section/sum;
     }
@@ -101,7 +101,7 @@ double mesh::avg(const std::function<double(Nodes::Node, Nodes::index)>& getter 
                                        te.interpolation(getter, d, val);
                                        return te.weight.dot(val);
                                        });
-    double volume = (region == -1) ? totalMagVol : paramTetra[region].volume;
+    double volume = (region == -1) ? totalMagVol : settings.paramTetra[region].volume;
     return sum / volume;
     }
 
@@ -167,7 +167,7 @@ bool mesh::controlTriangles()
             }
         }
 
-    if (paramTriangle[0].regName != "__default__")
+    if (settings.paramTriangle[0].regName != "__default__")
         {
         std::cerr << "Internal Error: could not find default surface region.\n";
         return false;
@@ -183,6 +183,7 @@ bool mesh::controlTriangles()
 
         // Create the base name
         std::string baseName;
+        const std::vector<Tetra::prm> &paramTetra = settings.paramTetra;
         if (curPair.second == -1)
             { baseName = ("surface(" + paramTetra[curPair.first].regName) + ')'; }
         else
@@ -194,6 +195,7 @@ bool mesh::controlTriangles()
         // Find a unique name for the current region
         std::string curName = baseName;
         bool isDuplicate = true;
+        std::vector<Triangle::prm> &paramTriangle = settings.paramTriangle;
         for (int i = 0; isDuplicate; i++)
             {
             curName = baseName;
@@ -231,7 +233,7 @@ bool mesh::controlTriangles()
             {
             if (!face->isSurfaceElement)
                 {
-                double Ms = paramTetra[face->idRegion].Ms;
+                double Ms = settings.paramTetra[face->idRegion].Ms;
                 bool isFlipped = triangle.isFlipped ^ face->isFlipped;
                 curTri.dMs += isFlipped ? -Ms : Ms;
                 }
@@ -371,16 +373,16 @@ double mesh::surface(std::vector<int> &triIndices) const
     return S;
     }
 
-void mesh::setExtSpaceField(Settings &s /**< [in] */)
+void mesh::setExtSpaceField()
     {
     extSpaceField.resize(magTet.size());
     int k(0);
-    std::for_each(magTet.begin(), magTet.end(), [this,&s,&k](const int idx)
+    std::for_each(magTet.begin(), magTet.end(), [this,&k](const int idx)
         {
         const Tetra::Tet &t = tet[idx];
         Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> pg = t.getPtGauss();
         for(int i=0;i<Tetra::NPI;i++)
-            { extSpaceField[k].col(i) = s.getFieldSpace(pg.col(i)); }
+            { extSpaceField[k].col(i) = settings.getFieldSpace(pg.col(i)); }
         k++;
         });
     }

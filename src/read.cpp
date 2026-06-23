@@ -9,38 +9,38 @@
 
 namespace Mesh
     {
-void mesh::readMesh(const Settings &mySets)
+void mesh::readMesh()
     {
     gmsh::initialize();
-    if (!mySets.verbose)
+    if (!settings.verbose)
         { gmsh::option::setNumber("General.Terminal",0); } // to silent gmsh
-    checkMeshFile(mySets);
-    if (mySets.verbose)
+    checkMeshFile();
+    if (settings.verbose)
         { std::cout << "Checking mesh file: done.\n"; }
-    readNodes(mySets);
-    if (mySets.verbose)
+    readNodes();
+    if (settings.verbose)
         { std::cout << "Nodes loaded.\n"; }
-    readTetraedrons(mySets);
+    readTetraedrons();
     for (unsigned int i = 0; i < tet.size(); i++)
         { tet[i].idx = i; }
-    if (mySets.verbose)
+    if (settings.verbose)
         { std::cout << "Tetraedrons built.\n"; }
-    readTriangles(mySets);
-    if (mySets.verbose)
+    readTriangles();
+    if (settings.verbose)
         { std::cout << "triangles built.\n"; }
     gmsh::clear();
     gmsh::finalize();
     }
 
-void mesh::checkMeshFile(const Settings &mySets)
+void mesh::checkMeshFile()
     {
     using namespace tags::msh;
-    gmsh::open(mySets.getPbName());
+    gmsh::open(settings.getPbName());
 
     bool msh_available = (gmsh::model::getDimension() == DIM_OBJ_3D);
     if (!msh_available)
         {
-        std::cerr << "Fatal Error: mesh file " << mySets.getPbName() << " is not 3D\n";
+        std::cerr << "Fatal Error: mesh file " << settings.getPbName() << " is not 3D\n";
         exit(1);
         }
     std::vector<int> elemTypes;
@@ -61,8 +61,8 @@ void mesh::checkMeshFile(const Settings &mySets)
         std::cerr << "Fatal Error: mesh file contains other 2D elements than triangles.\n";
         exit(1);
         }
-    bool o_2D = checkNamedObjects<Triangle::prm>(mySets.paramTriangle,DIM_OBJ_2D);
-    bool o_3D = checkNamedObjects<Tetra::prm>(mySets.paramTetra,DIM_OBJ_3D);
+    bool o_2D = checkNamedObjects<Triangle::prm>(settings.paramTriangle,DIM_OBJ_2D);
+    bool o_3D = checkNamedObjects<Tetra::prm>(settings.paramTetra,DIM_OBJ_3D);
     if (!(o_2D && o_3D))
         {
         std::cerr << "Fatal Error: mismatch between input mesh file and yaml regions.\n";
@@ -70,9 +70,9 @@ void mesh::checkMeshFile(const Settings &mySets)
         }
     }
 
-void mesh::readNodes(const Settings &mySets /**< [in] */)
+void mesh::readNodes()
     {
-    double scale = mySets.getScale();
+    double scale = settings.getScale();
     std::vector<std::size_t> nodeTags;
     std::vector<double> nodeCoordinates;
     std::vector<double> nodeParametricCoordinates;  // unused
@@ -91,13 +91,13 @@ void mesh::readNodes(const Settings &mySets /**< [in] */)
         }
     }
 
-void mesh::readTetraedrons(const Settings &mySets /**< [in] */)
+void mesh::readTetraedrons()
     {
     using namespace tags::msh;
 
     std::vector<std::pair<int, int> > entities;
     gmsh::model::getEntities(entities,DIM_OBJ_3D);
-    std::for_each(entities.begin(),entities.end(), [this,&mySets]( std::pair<int, int> &p)
+    std::for_each(entities.begin(),entities.end(), [this]( std::pair<int, int> &p)
         {
         std::string entity_name;
         gmsh::model::getEntityName(p.first,p.second,entity_name);// warning! entity index p.second
@@ -112,7 +112,7 @@ void mesh::readTetraedrons(const Settings &mySets /**< [in] */)
                 std::string n;
                 gmsh::model::getPhysicalName(p.first, physTag, n);
 
-                if ( std::any_of(mySets.paramTetra.begin(),mySets.paramTetra.end(),
+                if ( std::any_of(settings.paramTetra.begin(),settings.paramTetra.end(),
                      [&n] (const Tetra::prm &p) { return p.regName == n; } ) )
                     { //named volume region is found
                     std::vector<int> elemTypes;
@@ -121,7 +121,7 @@ void mesh::readTetraedrons(const Settings &mySets /**< [in] */)
                             p.first, p.second);
                     if (all_elems_are<TYP_ELEM_TETRAEDRON>(elemTypes))
                         { // all elements are tetrahedrons
-                        int idx = mySets.findRegionIdx<Tetra::prm>(n);
+                        int idx = settings.findRegionIdx<Tetra::prm>(n);
                         for(unsigned int i=0;i<elemNodeTags[0].size();i+=SIZE_TETRAEDRON)
                             {
                             int i0 = elemNodeTags[0][i];
@@ -146,13 +146,13 @@ void mesh::readTetraedrons(const Settings &mySets /**< [in] */)
         } );// end for_each on entities
     }
 
-void mesh::readTriangles(const Settings &mySets /**< [in] */)
+void mesh::readTriangles()
     {
     using namespace tags::msh;
 
     std::vector<std::pair<int, int> > entities;
     gmsh::model::getEntities(entities,DIM_OBJ_2D);
-    std::for_each(entities.begin(),entities.end(), [this,&mySets]( std::pair<int, int> &p)
+    std::for_each(entities.begin(),entities.end(), [this]( std::pair<int, int> &p)
         {
         std::string entity_name;
         gmsh::model::getEntityName(p.first,p.second,entity_name);// warning! entity index p.second
@@ -166,7 +166,7 @@ void mesh::readTriangles(const Settings &mySets /**< [in] */)
                 {
                 std::string name;
                 gmsh::model::getPhysicalName(p.first, physTag, name);
-                if ( std::any_of(mySets.paramTriangle.begin(),mySets.paramTriangle.end(),
+                if ( std::any_of(settings.paramTriangle.begin(),settings.paramTriangle.end(),
                      [&name] (const Triangle::prm &p) { return p.regName == name; } ) )
                     { //named surface region is found
                     std::vector<int> elemTypes;
@@ -175,7 +175,7 @@ void mesh::readTriangles(const Settings &mySets /**< [in] */)
                             p.first, p.second);
                     if (all_elems_are<TYP_ELEM_TRIANGLE>(elemTypes))
                         { // all elements are triangles
-                        int idx = mySets.findRegionIdx<Triangle::prm>(name);
+                        int idx = settings.findRegionIdx<Triangle::prm>(name);
                         for(unsigned int i=0;i<elemNodeTags[0].size();i+=SIZE_TRIANGLE)
                             {
                             int i0 = elemNodeTags[0][i];

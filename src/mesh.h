@@ -37,15 +37,15 @@ public:
      center and length along coordinates,full volume */
     mesh(Settings &mySets /**< [in] */,
          bool simplified = false /** pass true in the unit tests */)
-        : paramTriangle(mySets.paramTriangle), paramTetra(mySets.paramTetra), volumeRegions(mySets.paramTetra.size())
+        : settings(mySets), volumeRegions(settings.paramTetra.size())
         {
-        readMesh(mySets);
+        readMesh();
         if (simplified)
             { return; }
         if (!controlTriangles())
             { exit(1); }
 
-        if (mySets.verbose)
+        if (settings.verbose)
             { std::cout << "  reindexed\n"; }
 
         double xmin = minNodes(Nodes::IDX_X);
@@ -84,11 +84,11 @@ public:
                 [this](const Tetra::Tet &te)
                     {
                     double vol_tet = te.calc_vol();
-                    paramTetra[te.idxPrm].volume += vol_tet;
+                    settings.paramTetra[te.idxPrm].volume += vol_tet;
                     if(isMagnetic(te))
                         totalMagVol += vol_tet;
                     });
-        vol = std::transform_reduce(paramTetra.begin(), paramTetra.end(), 0.0,
+        vol = std::transform_reduce(settings.paramTetra.begin(), settings.paramTetra.end(), 0.0,
                 std::plus<>(), [](const Tetra::prm &region){ return region.volume; });
 
         // Build the list of tetrahedrons for each region.
@@ -126,12 +126,12 @@ public:
 
         for(unsigned int i=0;i<tri.size();i++)
             {
-            if (isMagnetic(tri[i]) && !mySets.paramTriangle[tri[i].idxPrm].suppress_charges)
+            if (isMagnetic(tri[i]) && !settings.paramTriangle[tri[i].idxPrm].suppress_charges)
                 { magTri.push_back(i); }
             }
 
-        if(mySets.getFieldType() == R4toR3)
-            { setExtSpaceField(mySets); }
+        if(settings.getFieldType() == R4toR3)
+            { setExtSpaceField(); }
         }
 
     /** operator copy deleted */
@@ -207,14 +207,8 @@ public:
     /** triangle container. Contains only those on a surface region. */
     std::vector<Triangle::Tri> tri;
 
-    /** Reference to the surface regions in Settings. */
-    std::vector<Triangle::prm> &paramTriangle;
-
     /** tetrahedron container */
     std::vector<Tetra::Tet> tet;
-
-    /** Reference to the volume regions in Settings. */
-    std::vector<Tetra::prm> &paramTetra;
 
     /** read a solution from a file (tsv formated) and initialize fem struct to restart computation
      * from that distribution, return time
@@ -224,7 +218,7 @@ public:
 
     /** computes an analytical initial magnetization distribution as a starting point for the
      * simulation. If the node is not magnetic then it is set to NAN. */
-    inline void init_distrib(const Settings &mySets /**< [in] */)
+    inline void init_distrib()
         {
         for (int nodeIdx = 0; nodeIdx < int(node.size()); ++nodeIdx)
             {
@@ -242,9 +236,9 @@ public:
 
             // If the initial magnetization depends only on the node position, we do not need to
             // build the list of region names.
-            if (mySets.getMagType() == POSITION_ONLY)
+            if (settings.getMagType() == POSITION_ONLY)
                 {
-                n.d[Nodes::CURRENT].u = mySets.getMagnetization(n.p);
+                n.d[Nodes::CURRENT].u = settings.getMagnetization(n.p);
                 n.d[Nodes::NEXT].u = n.d[Nodes::CURRENT].u;
                 continue;
                 }
@@ -275,9 +269,9 @@ public:
             std::vector<std::string> region_names;
             region_names.resize(nodeRegions.size());
             std::transform(nodeRegions.begin(), nodeRegions.end(), region_names.begin(),
-                [this](const int regIdx){ return paramTetra[regIdx].regName; });
+                [this](const int regIdx){ return settings.paramTetra[regIdx].regName; });
 
-            n.d[Nodes::CURRENT].u = mySets.getMagnetization(n.p, region_names);
+            n.d[Nodes::CURRENT].u = settings.getMagnetization(n.p, region_names);
             n.d[Nodes::NEXT].u = n.d[Nodes::CURRENT].u;
             }
         }
@@ -334,7 +328,8 @@ public:
     inline int getNodeIndex(const int i) const { return node_index[i]; }
 
     /** return true if this tetraedron is magnetic */
-    inline bool isMagnetic(const Tetra::Tet &t) const { return (paramTetra[t.idxPrm].Ms > 0); }
+    inline bool isMagnetic(const Tetra::Tet &t) const
+        { return (settings.paramTetra[t.idxPrm].Ms > 0); }
 
     /** return true if this triangle is magnetic */
     inline bool isMagnetic(const Triangle::Tri &f)
@@ -375,6 +370,9 @@ public:
     std::vector< Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> > extSpaceField;
 
 private:
+    /** Reference to the Settings object. */
+    Settings &settings;
+
     /** node container: not initialized by constructor, but later while reading the mesh by member
      * function init_node */
     std::vector<Nodes::Node> node;
@@ -391,19 +389,19 @@ private:
 
     /** test if mesh file contains surfaces and regions mentionned in yaml settings and their
      * dimensions */
-    void checkMeshFile(const Settings &mySets /**< [in] */);
+    void checkMeshFile();
     
     /** read Nodes from mesh file */
-    void readNodes(const Settings &mySets /**< [in] */);
+    void readNodes();
 
     /** read tetraedrons of the settings volume regions */
-    void readTetraedrons(const Settings &mySets /**< [in] */);
+    void readTetraedrons();
 
     /** read triangles of the settings surface regions */
-    void readTriangles(const Settings &mySets /**< [in] */);
+    void readTriangles();
 
     /** reading mesh format 2.2 text file function */
-    void readMesh(const Settings &mySets /**< [in] */);
+    void readMesh();
 
     /** loop on nodes to apply predicate 'whatTodo'  */
     double doOnNodes(const double init_val /**< [in] */,
@@ -444,7 +442,7 @@ private:
 
     /** when external applied field is of field_type R4toR3 values of field_space are stored in
      * spaceField */
-    void setExtSpaceField(Settings &s /**< [in] */);
+    void setExtSpaceField();
     }; // end class mesh
     }  // end namespace Mesh
 #endif
