@@ -147,7 +147,7 @@ endif()
 
 # Install the python modules if we found a suitable location.
 if(DEFINED PY_MODULES_DIR)
-    install(DIRECTORY python-modules/ DESTINATION ${PY_MODULES_DIR})
+    install(DIRECTORY python-modules/ DESTINATION ${PY_MODULES_DIR} PATTERN "__pycache__" EXCLUDE)
     message(STATUS "Python modules will be installed in ${CMAKE_INSTALL_PREFIX}/${PY_MODULES_DIR}")
 else()
     message(WARNING "Python modules will not be installed.")
