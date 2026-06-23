@@ -101,10 +101,6 @@ public:
     inline double get_v_max(void) const
         { return v_max; }
 
-    /** when external applied field is of field_type R4toR3 values of field_space are stored in
-     * spaceField */
-    void setExtSpaceField(Settings &s /**< [in] */);
-
     /** computes local vector basis {ep,eq} in the tangeant plane for projection on the elements */
     void base_projection() const;
 
