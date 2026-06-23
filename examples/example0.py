@@ -12,4 +12,4 @@ mySettings["outputs"]["evol_columns"] = ["t","<Mx>","<My>","<Mz>","E_tot"]
 
 mySettings.write('mySettings.json')
 sys.stdout.flush()
-os.system("../feellgood mySettings.json")
+os.system("../src/feellgood mySettings.json")

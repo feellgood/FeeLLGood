@@ -136,7 +136,7 @@ if __name__ == '__main__':
         metadata = "# " + str_version
         metadata += "\n# " + datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         metadata += "\n# nbThreads: " + str(args.nbThreads) + '\n'
-        str_exec = "../feellgood"
+        str_exec = "../src/feellgood"
         bench(str_exec, outputFileName, metadata, args.sizes, args.nbThreads, args.final_time)
     except KeyboardInterrupt:
         print(" benchmark interrupted")

@@ -76,7 +76,7 @@ for i in range(0, nb_steps_frequency):
         json.dump(simulation_settings, settings_file, indent=4)
     print(f"\nJSON file {setting_path} generated.")
     sys.stdout.flush()
-    process = subprocess.run(["../feellgood", setting_path])
+    process = subprocess.run(["../src/feellgood", setting_path])
     if process.returncode != 0:
         print("FeeLLGood failed -- aborting.")
         sys.exit(1)

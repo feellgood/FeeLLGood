@@ -74,7 +74,7 @@ for f in $(seq -f "$f_format" $f_start $f_step $f_stop); do
 
     # Run the simulation.
     sed "s/{FREQUENCY}/$f/" settings-template.yml | \
-    ../../feellgood - > $output 2>&1
+    ../../src/feellgood - > $output 2>&1
 
     # Extract response from last line of the evolution.
     last_line=$(tail -n 1 $evol)

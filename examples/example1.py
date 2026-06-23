@@ -17,4 +17,4 @@ for B in myFields:
     print("Bext is " + str(mySettings["Bext"]))
     mySettings.write('mySettings.json')
     sys.stdout.flush()
-    os.system("../feellgood mySettings.json")
+    os.system("../src/feellgood mySettings.json")
