@@ -227,7 +227,7 @@ def write_solution_file(m, filename="sol.in"):
         np.savetxt(f, tab, fmt=["%d", "%+.7e", "%+.7e", "%+.7e", "%.7e"], delimiter="\t")
 
     print(f"✅ File '{filename}' successfully written "
-            + "({len(header_lines)} header lines and {m.shape[0]} data lines).")
+          f"({len(header_lines)} header lines and {m.shape[0]} data lines).")
 
 def get_params():
     import argparse
