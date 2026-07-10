@@ -136,7 +136,6 @@ Settings::Settings()
     precision = 7;  // precision is 7 digits : smaller digits of node::potential phi are varying due
                     // to residual errors
     verbose = 0;
-    withTsv = true;
     spin_acc = false;
     field_type = UNDEF;
     read(YAML::Load(get_default_yaml()));  // load defaults

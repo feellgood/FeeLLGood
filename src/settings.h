@@ -129,9 +129,6 @@ public:
     /** maximum number of iterations setter for bicgstab */
     inline void set_MAXITER(const int i) { MAXITER = i; }
 
-    /** boolean flag to mention if you want output in txt tsv file format */
-    bool withTsv;
-
     /** verbosity level, defaults to zero */
     int verbose;
 
