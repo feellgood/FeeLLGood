@@ -8,22 +8,21 @@ void on_fail_msg_error(const std::ifstream &f_in, const std::string& strWhat);
 
 namespace tags
     {
-    namespace sol
-        {
-        const std::string time = "## time:";
-        const std::string rw_time = "## real-world time:";
-        const std::string columns = "## columns:";
-        const std::string defaultColumnsTitle = "idx\tmx\tmy\tmz\tphi";
-        const std::string sColumnsTitle = "sx\tsy\tsz";
-        }
-    
-    namespace evol
+    // Labels common to evol and sol files
+    namespace common
         {
         const std::string version = "## feeLLGood version:";
         const std::string hostname = "## hostname:";
         const std::string rw_time = "## real-world time:";
         const std::string settings_file = "## settings file:";
         const std::string columns = "## columns:";
+        }
+
+    namespace sol
+        {
+        const std::string time = "## time:";
+        const std::string defaultColumnsTitle = "idx\tmx\tmy\tmz\tphi";
+        const std::string sColumnsTitle = "sx\tsy\tsz";
         }
 
     namespace msh

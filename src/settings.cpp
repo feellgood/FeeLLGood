@@ -272,12 +272,12 @@ void Settings::toYaml()
 std::ostringstream Settings::commonMetadata() const
     {
     std::ostringstream ss;
-    ss << tags::evol::version << ' ' << feellgood_version << "\n";
+    ss << tags::common::version << ' ' << feellgood_version << "\n";
     char name[HOST_NAME_MAX];
     if (gethostname(name, HOST_NAME_MAX) != ENAMETOOLONG)
-        { ss << tags::evol::hostname << ' ' << name << "\n"; }
-    ss << tags::evol::rw_time << ' ' << date() << "\n";
-    ss << tags::evol::settings_file << ' ' << getFileDisplayName() << "\n";
+        { ss << tags::common::hostname << ' ' << name << "\n"; }
+    ss << tags::common::rw_time << ' ' << date() << "\n";
+    ss << tags::common::settings_file << ' ' << getFileDisplayName() << "\n";
 
     for (auto it = userMetadata.begin(); it != userMetadata.end(); ++it)
         {
@@ -292,7 +292,7 @@ std::ostringstream Settings::commonMetadata() const
 std::string Settings::evolMetadata() const
     {
     std::ostringstream ss = commonMetadata();
-    ss << tags::evol::columns << ' ';
+    ss << tags::common::columns << ' ';
     for (unsigned int i = 0; i < (evol_columns.size() - 1); i++)
         { ss << evol_columns[i] << '\t'; }
     ss << evol_columns[evol_columns.size() - 1] << "\n";
@@ -303,7 +303,7 @@ std::string Settings::solMetadata(const double t) const
     {
     std::ostringstream ss = commonMetadata();
     ss << tags::sol::time << ' ' << std::scientific << t << "\n";
-    ss << tags::sol::columns << ' ' << tags::sol::defaultColumnsTitle;
+    ss << tags::common::columns << ' ' << tags::sol::defaultColumnsTitle;
     if (spin_acc)
         { ss << '\t' << tags::sol::sColumnsTitle; }
     ss << "\n";
