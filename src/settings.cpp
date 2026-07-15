@@ -594,9 +594,15 @@ void Settings::read(YAML::Node yaml)
 
 bool Settings::read(const std::string& filename)
     {
+    std::string config_src;
     YAML::Node config;
     if (filename == "-")
-        { config = YAML::Load(std::cin); }
+        {
+        std::ostringstream str_stream;
+        std::cin >> str_stream.rdbuf();
+        config_src = str_stream.str();
+        config = YAML::Load(config_src);
+        }
     else
         {
         try
