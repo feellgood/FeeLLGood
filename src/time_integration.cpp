@@ -156,14 +156,14 @@ int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /*
     int status(0);     // exit status
     double t_initial = t_prm.get_t();
     double t_step = settings.time_step;
-    int step_count = std::round((t_prm.tf - t_initial) / t_step);
+    long step_count = std::roundl((t_prm.tf - t_initial) / t_step);
     TimeStepper stepper(t_prm.get_dt(), t_prm.DTMIN, t_prm.DTMAX);
     Stats stats;
     stats.max_angle = msh.max_angle();
 
     // Loop over the visible time steps, i.e. those that will appear on the output file.
     nt = 0;
-    for (int step_nb = 0; step_nb <= step_count; step_nb++)
+    for (long step_nb = 0; step_nb <= step_count; step_nb++)
         {
         double t_target = t_initial + step_nb * t_step;
         // Loop over the integration time steps within a visible step.
