@@ -349,6 +349,9 @@ private:
 
     /** A (filename, checksum) pair for each processed settings file */
     std::vector<std::pair<std::string, std::string>> settings_checksums;
+
+    /** Checksum of the mesh file */
+    std::string mesh_checksum;
     };
 
 #endif /* settings_h */

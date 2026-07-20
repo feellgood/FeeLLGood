@@ -391,6 +391,8 @@ std::ostringstream Settings::commonMetadata() const
             ss << "## settings file[" << i << "].checksum: sha1:" << item.second << "\n";
             }
         }
+    ss << "## mesh.filename: " << pbName << "\n";
+    ss << "## mesh.checksum: sha1:" << mesh_checksum << "\n";
 
     for (auto it = userMetadata.begin(); it != userMetadata.end(); ++it)
         {
@@ -734,5 +736,7 @@ bool Settings::read(const std::string& filename)
     if (config.IsNull())
         { return false; }
     read(config);
+    if (!pbName.empty())
+        { mesh_checksum = sha1sum(pbName); }
     return true;
     }
