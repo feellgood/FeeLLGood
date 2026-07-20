@@ -347,11 +347,11 @@ private:
     /** to normalize input vector */
     const bool NORMALIZE = true;
 
-    /** A (filename, checksum) pair for each processed settings file */
+    /** A (canonical filename, checksum) pair for each processed settings file */
     std::vector<std::pair<std::string, std::string>> settings_checksums;
 
-    /** Checksum of the mesh file */
-    std::string mesh_checksum;
+    /** (canonical filename, checksum) pair for the mesh file */
+    std::pair<std::string, std::string> mesh_checksum;
     };
 
 #endif /* settings_h */

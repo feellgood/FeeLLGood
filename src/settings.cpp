@@ -2,6 +2,7 @@
 #include <string>
 #include <algorithm>
 #include <regex>
+#include <filesystem>
 #include <cmath>
 #include <unistd.h>  // sysconf(), gethostname(), pipe(), fork(), read(), write(), close()
 #include <sys/wait.h>
@@ -391,8 +392,8 @@ std::ostringstream Settings::commonMetadata() const
             ss << "## settings file[" << i << "].checksum: sha1:" << item.second << "\n";
             }
         }
-    ss << "## mesh.filename: " << pbName << "\n";
-    ss << "## mesh.checksum: sha1:" << mesh_checksum << "\n";
+    ss << "## mesh.filename: " << mesh_checksum.first << "\n";
+    ss << "## mesh.checksum: sha1:" << mesh_checksum.second << "\n";
 
     for (auto it = userMetadata.begin(); it != userMetadata.end(); ++it)
         {
@@ -722,10 +723,10 @@ bool Settings::read(const std::string& filename)
         }
     else
         {
-        file_display_name = filename;
         try
             {
             config = YAML::LoadFile(filename);
+            file_display_name = std::filesystem::canonical(filename);
             }
         catch (const YAML::BadFile &)
             {
@@ -737,6 +738,9 @@ bool Settings::read(const std::string& filename)
         { return false; }
     read(config);
     if (!pbName.empty())
-        { mesh_checksum = sha1sum(pbName); }
+        {
+        std::string mesh_filename = std::filesystem::canonical(pbName);
+        mesh_checksum = std::make_pair(mesh_filename, sha1sum(pbName));
+        }
     return true;
     }
