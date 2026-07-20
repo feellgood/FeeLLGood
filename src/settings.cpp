@@ -3,7 +3,8 @@
 #include <algorithm>
 #include <regex>
 #include <cmath>
-#include <unistd.h>  // for sysconf(), gethostname()
+#include <unistd.h>  // sysconf(), gethostname(), pipe(), fork(), read(), write(), close()
+#include <sys/wait.h>
 
 #include "tags.h"
 #include "chronometer.h"
@@ -125,6 +126,110 @@ bool isOrthogonal(const Eigen::Ref<const Eigen::Vector3d> a, const Eigen::Ref<co
     val &= (fabs(b.dot(c)) < precision);
     val &= (fabs(c.dot(a)) < precision);
     return val;
+    }
+
+// Compute the SHA1 checksum of a file or a string.
+// If `filename` is "-", the contents of `data` is checksummed. Otherwise the named file is
+// checksummed, and `data` is ignored.
+// Returns: the checksum as a 40-character hex string.
+// In case of failure, prints a message to stderr and returns the empty string.
+static std::string sha1sum(const std::string &filename, const std::string &data = {})
+    {
+    // Create a pair of pipes to communicate with the sha1sum subprocess.
+    // Pipes are named from the subprocess' perspective:
+    //   feellgood  --[1]--input--[0]->  sha1sum  --[1]--output--[0]->  feellgood
+    int input[2], output[2];
+    if (pipe(input) != 0 || pipe(output) != 0)
+        {
+        std::cerr << "pipe: " << strerror(errno) << '\n';
+        return "";
+        }
+
+    // Run the subprocess.
+    pid_t pid = fork();
+    if (pid < 0)
+        {
+        std::cerr << "fork: " << strerror(errno) << '\n';
+        return "";
+        }
+    if (pid == 0)
+        {    // We're in the child here.
+        dup2(input[0], STDIN_FILENO);
+        dup2(output[1], STDOUT_FILENO);
+        close(input[0]);
+        close(input[1]);
+        close(output[1]);
+        close(output[0]);
+        execlp("sha1sum", "sha1sum", filename.c_str(), NULL);
+        std::cerr << "execlp: " << strerror(errno) << '\n';
+        exit(1);
+        }
+
+    // We're in the parent here.
+    close(input[0]);
+    close(output[1]);
+
+    // If checksumming a string, feed the string data to the subprocess.
+    if (filename == "-")
+        for (size_t bytes_written = 0; bytes_written < data.size(); )
+            {
+            const char* p = data.c_str() + bytes_written;
+            size_t len = data.size() - bytes_written;
+            ssize_t ret = write(input[1], p, len);
+            if (ret < 0)
+                {
+                std::cerr << "write to sha1sum: " << strerror(errno) << '\n';
+                return "";
+                }
+            if (ret == 0)
+                {
+                std::cerr << "write to sha1sum: could not write any byte\n";
+                return "";
+                }
+            bytes_written += ret;
+            }
+    close(input[1]);
+
+    // Read back the subprocess output.
+    char buffer[256];
+    size_t bytes_read;
+    for (bytes_read = 0; bytes_read < sizeof buffer; )
+        {
+        char* p = buffer + bytes_read;
+        size_t len = sizeof buffer - bytes_read;
+        ssize_t ret = read(output[0], p, len);
+        if (ret < 0)
+            {
+            std::cerr << "read from sha1sum: " << strerror(errno) << '\n';
+            return "";
+            }
+        if (ret == 0)
+            {
+            break;
+            }
+        bytes_read += ret;
+        }
+    close(output[0]);
+
+    // Avoid zombies.
+    int wstatus;
+    wait(&wstatus);
+    if (!WIFEXITED(wstatus) || WEXITSTATUS(wstatus) != 0)
+        {
+        std::cerr << "sha1sum failed.\n";
+        return "";
+        }
+
+    // Sanity check.
+    std::string out_text(buffer, bytes_read);
+    if (!std::regex_match(out_text, std::regex("[0-9a-f]{40}  .*\n")))
+        {
+        std::cerr << "sha1sum: wrong output from external command: " << out_text << '\n';
+        return "";
+        }
+
+    // Remove the trailing "  <filename>\n".
+    return out_text.substr(0, 40);
     }
 
 /***********************************************************************
@@ -277,7 +382,15 @@ std::ostringstream Settings::commonMetadata() const
     if (gethostname(name, HOST_NAME_MAX) != ENAMETOOLONG)
         { ss << tags::common::hostname << ' ' << name << "\n"; }
     ss << tags::common::rw_time << ' ' << date() << "\n";
-    ss << tags::common::settings_file << ' ' << getFileDisplayName() << "\n";
+    for (size_t i = 0; i < settings_checksums.size(); ++i)
+        {
+        const auto& item = settings_checksums[i];
+        ss << "## settings file[" << i << "].filename: " << item.first << "\n";
+        if (!item.second.empty())
+            {
+            ss << "## settings file[" << i << "].checksum: sha1:" << item.second << "\n";
+            }
+        }
 
     for (auto it = userMetadata.begin(); it != userMetadata.end(); ++it)
         {
@@ -594,10 +707,12 @@ void Settings::read(YAML::Node yaml)
 
 bool Settings::read(const std::string& filename)
     {
+    std::string file_display_name;
     std::string config_src;
     YAML::Node config;
     if (filename == "-")
         {
+        file_display_name = getFileDisplayName();
         std::ostringstream str_stream;
         std::cin >> str_stream.rdbuf();
         config_src = str_stream.str();
@@ -605,6 +720,7 @@ bool Settings::read(const std::string& filename)
         }
     else
         {
+        file_display_name = filename;
         try
             {
             config = YAML::LoadFile(filename);
@@ -614,6 +730,7 @@ bool Settings::read(const std::string& filename)
             return false;
             }
         }
+    settings_checksums.push_back(std::make_pair(file_display_name, sha1sum(filename, config_src)));
     if (config.IsNull())
         { return false; }
     read(config);

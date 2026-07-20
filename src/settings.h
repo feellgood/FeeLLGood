@@ -346,6 +346,9 @@ private:
 
     /** to normalize input vector */
     const bool NORMALIZE = true;
+
+    /** A (filename, checksum) pair for each processed settings file */
+    std::vector<std::pair<std::string, std::string>> settings_checksums;
     };
 
 #endif /* settings_h */
