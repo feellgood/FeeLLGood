@@ -92,7 +92,10 @@ else()
     message(STATUS "Not found: MKL")
 endif()
 
-find_package(Eigen3 3.4 REQUIRED NO_MODULE)
+find_package(Eigen3 5.0 QUIET NO_MODULE)
+if(NOT Eigen3_FOUND)
+    find_package(Eigen3 3.4 REQUIRED NO_MODULE)
+endif()
 
 #===========================================================================
 # these parameters are used to build a config.h file 
