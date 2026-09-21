@@ -47,17 +47,20 @@ def infos(g_opt,name):
     return f"{nbNodes} nodes, {nbTetra} tetrahedra, {nbTriangles} triangles"
 
 class Hexahedron(object):
-    def __init__ (self,pt_min,pt_max,mesh_size,surfName,volName,fileFormat=4.1,verbose=False):
+    def __init__ (self,lx,ly,lz,mesh_size,surfName,volName,partitionSurface=False,
+            fileFormat=4.1,verbose=False):
         """
-        hexahedron defined by pt_min and pt_max, mesh_size average tetrahedron size
-        bool optimize is optional optimization of the mesh by relocating of the nodes.
+        hexahedron defined by lx,ly,lz the lenghs along x,y,z directions, zero centered,
+        mesh_size average tetrahedron size
+        partitionSurface split the surface in two rectangles (z=-lz/2) and (z=+lz/2) and side surface.
         by default output mesh file is written using text file format 4.1
         """
         self.msh_s = mesh_size
         self.surfName = surfName
+        self.partitionSurface = partitionSurface
         self.volName = volName
-        self.p_min = pt_min
-        self.p_max = pt_max
+        self.p_min = [-lx/2,-ly/2,-lz/2]
+        self.p_max = [lx/2,ly/2,lz/2]
         gmsh_init("hex",fileFormat,0,verbose)
         
     def make(self,meshFileName):
@@ -82,10 +85,21 @@ class Hexahedron(object):
                                                        # refered by index surf
         gmsh.model.geo.synchronize() # we have to sync before calling addPhysicalGroup
         
-        surface_tag = 200
-        gmsh.model.addPhysicalGroup(2,[surf, out[0][1], out[2][1], out[3][1], out[4][1], out[5][1]],
+        if self.partitionSurface:
+            surface_tag = 200
+            gmsh.model.addPhysicalGroup(2,[out[2][1], out[3][1], out[4][1], out[5][1]],surface_tag)
+            gmsh.model.setPhysicalName(2,surface_tag, self.surfName + "_side")
+            surface_tag = 210
+            gmsh.model.addPhysicalGroup(2,[surf],surface_tag)
+            gmsh.model.setPhysicalName(2,surface_tag, self.surfName + "_bottom")
+            surface_tag = 220
+            gmsh.model.addPhysicalGroup(2,[out[0][1]],surface_tag)
+            gmsh.model.setPhysicalName(2,surface_tag, self.surfName + "_top")
+        else:
+            surface_tag = 200
+            gmsh.model.addPhysicalGroup(2,[surf, out[0][1], out[2][1], out[3][1], out[4][1], out[5][1]],
                 surface_tag)
-        gmsh.model.setPhysicalName(2,surface_tag,self.surfName)
+            gmsh.model.setPhysicalName(2,surface_tag,self.surfName)
         
         volume_tag = 300
         gmsh.model.addPhysicalGroup(3,[out[1][1]],volume_tag)
