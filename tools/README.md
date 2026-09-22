@@ -9,7 +9,6 @@ working with feeLLGood:
 * **fg-merge-sol**: .sol tool
 * **fg-gensol**: .sol generation tool
 * **fg-plot**:plot tool
-* **fg-mesh-stat**: print statistics on a mesh
 
 These tools are documented in the [tools section][] of the feeLLGood Web
 site.
