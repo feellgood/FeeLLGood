@@ -20,13 +20,13 @@ namespace Tetra
     {
  /** this constant is defined from config.h.in, it is used to check the
                     validity of the tetrahedreon, a degeneracy test */
-const double epsilon = EPSILON;
+constexpr double epsilon = EPSILON;
 
-const int N = 4;   /**< number of vertices */
+constexpr int N = 4;   /**< number of vertices */
 
 #if ONE_GAUSS_POINT
-    const int NPI = 1; /**< number of Gauss points = 1 : single point integration at barycentre of
-                         tetrahedron */
+    constexpr int NPI = 1; /**< number of Gauss points = 1 : single point integration at barycentre
+                             of tetrahedron */
 
     constexpr double A = 1. / 4.;           /**< barycentric coordinate for single Gauss point */
     constexpr double u[NPI] = {A};          /**< u coordinate of single Gauss point at barycenter */
@@ -47,7 +47,7 @@ const int N = 4;   /**< number of vertices */
                                                                        a[2][0],
                                                                        a[3][0] ).finished();
 #else
-    const int NPI = 5; /**< number of Gauss points = 5  */
+    constexpr int NPI = 5; /**< number of Gauss points = 5  */
 
     constexpr double A = 1. / 4.;                /**< constant to build hat functions */
     constexpr double B = 1. / 6.;                /**< constant to build hat functions */

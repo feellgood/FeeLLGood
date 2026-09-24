@@ -15,11 +15,11 @@
 namespace Triangle
     {
 /** number of sommits */
-const int N = 3;
+constexpr int N = 3;
 
 #if ONE_GAUSS_POINT  // Single Gauss point at barycenter of triangle
     /** number of Gauss points */
-    const int NPI = 1;
+    constexpr int NPI = 1;
 
     /** u coordinate of single Gauss point at barycenter */
     constexpr double u[NPI] = {1. / 3.};
@@ -40,7 +40,7 @@ const int N = 3;
         (Eigen::MatrixXd(N,NPI) << a[0][0], a[1][0], a[2][0] ).finished();
 #else
     /** number of Gauss points  */
-    const int NPI = 4;
+    constexpr int NPI = 4;
 
     /** some constants to build hat functions */
     constexpr double u[NPI] = {1 / 3., 1 / 5., 3 / 5., 1 / 5.};
