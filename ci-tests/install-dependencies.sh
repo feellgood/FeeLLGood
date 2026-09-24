@@ -98,6 +98,7 @@ if [ "$ID" = "rocky" -o "$ID" = "darwin" ]; then
         target="linux-g++"
     fi
     make -C src -j $job_count $target
+    [ -d "/usr/local/lib" ] || sudo mkdir /usr/local/lib
     sudo cp lib/libANN.a /usr/local/lib/libann.a
     sudo cp --parents include/ANN/ANN.h /usr/local/
     cd ..
