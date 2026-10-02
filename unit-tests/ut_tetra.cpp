@@ -528,4 +528,43 @@ BOOST_AUTO_TEST_CASE(Tet_calc_Hst, *boost::unit_test::tolerance(UT_TOL))
             }
     }
 
+BOOST_AUTO_TEST_CASE(Tet_calc_Hst_order2)
+    {
+    /* the second order term of the spin accumulation field must be the derivative of its tangent
+     part Hst - (u.Hst) u in the direction v (v tangent to u), projected on the tangent plane:
+     P_u (f(u + eps v) - f(u - eps v))/(2 eps) = -(u.Hst) v */
+    unsigned sd = my_seed();
+    std::mt19937 gen(sd);
+    std::uniform_real_distribution<> distrib(0.0, 1.0);
+    if (!DET_UT) std::cout << "seed =" << sd << std::endl;
+
+    std::vector<Nodes::Node> node;
+    dummyNodes<4>(node);
+    Tetra::Tet t(node, 0, {1, 2, 3, 4});
+
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> Hst, U, V, H;
+    for (int npi = 0; npi < Tetra::NPI; npi++)
+        {
+        U.col(npi) = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        Eigen::Vector3d w = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        V.col(npi) = w - w.dot(U.col(npi)) * U.col(npi);  // tangent to u
+        Hst.col(npi) = (0.5 + distrib(gen)) * rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        }
+    H.setZero();
+    t.calc_Hst_order2(Hst, 1.0, U, V, H);
+
+    const double eps = 1e-6;
+    auto tangent = [](const Eigen::Vector3d &u, const Eigen::Vector3d &h)
+        { return Eigen::Vector3d(h - u.dot(h) * u); };
+    for (int npi = 0; npi < Tetra::NPI; npi++)
+        {
+        const Eigen::Vector3d u = U.col(npi), v = V.col(npi), h = Hst.col(npi);
+        Eigen::Vector3d dH_fd = (tangent(u + eps*v, h) - tangent(u - eps*v, h))/(2*eps);
+        dH_fd -= u.dot(dH_fd) * u;  // projection on the plane tangent to u
+        double err = (H.col(npi) - dH_fd).norm()/dH_fd.norm();
+        std::cout << "npi= " << npi << " relative error on Hst'[v] = " << err << std::endl;
+        BOOST_TEST( err < 1e-6, "spin accumulation: second order term is not the derivative of Hst" );
+        }
+    }
+
 BOOST_AUTO_TEST_SUITE_END()

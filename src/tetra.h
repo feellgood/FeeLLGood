@@ -283,6 +283,15 @@ public:
             Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V,
             Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H_aniso) const;
 
+    /** append(+=) to H the second order term of the spin accumulation field Hst: s_dt times the
+     * derivative of its tangent part in the direction V, -s_dt (U.Hst) V. As for the anisotropies,
+     * s_dt is theta*dt in physical time, since V is the physical velocity du/dt */
+    void calc_Hst_order2(const Eigen::Ref<const Eigen::Matrix<double,Nodes::DIM,NPI>> Hst,
+            const double s_dt,
+            const Eigen::Ref<const Eigen::Matrix<double,Nodes::DIM,NPI>> U,
+            const Eigen::Ref<const Eigen::Matrix<double,Nodes::DIM,NPI>> V,
+            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H) const;
+
     /** computes the integral contribution of the tetrahedron to the evolution of the magnetization
      * calc_Hext is a function that returns external H field defined on gauss points
      */

@@ -209,6 +209,18 @@ Eigen::Matrix<double,NPI,1> Tet::calc_aniso_cub(const Eigen::Ref<const Eigen::Ve
     return -K3bis*result;
     }
 
+void Tet::calc_Hst_order2(const Eigen::Ref<const Eigen::Matrix<double,DIM,NPI>> Hst,
+                          const double s_dt,
+                          const Eigen::Ref<const Eigen::Matrix<double,DIM,NPI>> U,
+                          const Eigen::Ref<const Eigen::Matrix<double,DIM,NPI>> V,
+                          Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> H) const
+    {
+    /* only the tangent part Hst - (u.Hst) u acts; its derivative in the direction v (tangent)
+     * is -(u.Hst) v (the term along u vanishes after projection) */
+    for(int npi = 0;npi<NPI;npi++)
+        { H.col(npi) -= s_dt * Hst.col(npi).dot(U.col(npi)) * V.col(npi); }
+    }
+
 void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
                      const std::function< Eigen::Matrix<double,DIM,NPI> (void)>& calc_Hext,
                      const Nodes::index idx_dir, double Vdrift)
@@ -289,18 +301,17 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
             add_drift_BE(alpha, s_dt, Vdrift, U, V, dUdx, dVd_dir, BE);
         }
     H += H_aniso + (s_dt / gamma0) * Hv;
-    
+    calc_Hst_order2(Hst, s_dt / gamma0, U, V, H);
+
     for (int npi = 0; npi < NPI; npi++)
         {
         const double w = weight[npi];
-        double scal_Hst_u = (Hst.col(npi)).dot(U.col(npi));
         for (int i = 0; i < N; i++)
             {
             const double ai_w = w*a[i][npi];
             BE.col(i) -= w*Abis*(da(i,0)*dUdx.col(npi) + da(i,1)*dUdy.col(npi)
                     + da(i,2)*dUdz.col(npi));// exchange
             BE.col(i) += ai_w*(H.col(npi) + Hst.col(npi) ); // Hst contribution to BE
-            BE.col(i) -= ai_w*scal_Hst_u*s_dt*V.col(npi); // spin acc second order contrib
             }
         }
 
