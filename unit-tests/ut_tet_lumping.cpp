@@ -3,6 +3,7 @@
 #include <boost/test/unit_test.hpp>
 #include <random>
 
+#include "tiny.h"
 #include "ut_tools.h"
 #include "ut_config.h"
 
@@ -234,13 +235,17 @@ BOOST_AUTO_TEST_CASE(tet_spin_diff_AE_filling, *boost::unit_test::tolerance(2.0*
     AE_to_check.block<N,N>(2*N,2*N) += diagBlock;
 
     const double invTau_sd = D0/sq(lsd); //units: [D0/sq(lsd)] = s^-1 : it is 1/tau_sd
-    diag = invTau_sd * a_w.cwiseProduct(t.calcOffDiagBlock(IDX_X));
+    // nodal magnetization, columns are the nodes (as spinAcc::calc_u_nod)
+    Eigen::Matrix<double,Nodes::DIM,N> u_nod_eig;
+    for (int ie = 0; ie < N; ie++)
+        { u_nod_eig.col(ie) = node[t.ind[ie]].d[0].u; }
+    diag = invTau_sd * a_w.cwiseProduct(u_nod_eig.row(IDX_X).transpose());
     AE_to_check.block<N,N>(N,2*N).diagonal() += diag;
     AE_to_check.block<N,N>(2*N,N).diagonal() -= diag;
-    diag = invTau_sd * a_w.cwiseProduct(t.calcOffDiagBlock(IDX_Y));
+    diag = invTau_sd * a_w.cwiseProduct(u_nod_eig.row(IDX_Y).transpose());
     AE_to_check.block<N,N>(0,2*N).diagonal() -= diag;
     AE_to_check.block<N,N>(2*N,0).diagonal() += diag;
-    diag = invTau_sd * a_w.cwiseProduct(t.calcOffDiagBlock(IDX_Z));
+    diag = invTau_sd * a_w.cwiseProduct(u_nod_eig.row(IDX_Z).transpose());
     AE_to_check.block<N,N>(0,N).diagonal() += diag;
     AE_to_check.block<N,N>(N,0).diagonal() -= diag;
 
@@ -362,23 +367,30 @@ BOOST_AUTO_TEST_CASE(tet_spin_diff_BE_filling, *boost::unit_test::tolerance(2.0*
     gradV.push_back(calc_gradV(t,V));
     Eigen::Matrix<double,Nodes::DIM,NPI> &_gradV = gradV[t.idx];
 
+    // magnetization at the Gauss points (as spinAcc::integrales)
+    Eigen::Matrix<double,Nodes::DIM,N> u_nod_eig;
+    for (size_t ie = 0; ie < N; ie++)
+        { u_nod_eig.col(ie) = node[t.ind[ie]].d[0].u; }
+    const Eigen::Matrix<double,Nodes::DIM,NPI> U = u_nod_eig * eigen_a;
     for (size_t npi=0; npi<NPI; npi++)
         {
         const double cst0_w = cst0*t.weight[npi];
 
         for (size_t ie=0; ie<N; ie++)
             {
-            const Eigen::Vector3d &m = node[t.ind[ie]].d[0].u;//magnetization
             Eigen::Vector3d grad_ai = t.da.row(ie);
             double tmp = cst0_w*grad_ai.dot( _gradV.col(npi) );
-            BE_to_check[    ie] += tmp*m[0];
-            BE_to_check[  N+ie] += tmp*m[1];
-            BE_to_check[2*N+ie] += tmp*m[2];
+            BE_to_check[    ie] += tmp*U(0,npi);
+            BE_to_check[  N+ie] += tmp*U(1,npi);
+            BE_to_check[2*N+ie] += tmp*U(2,npi);
             }
         }
     // end code to test
 
-    // start code ref (from june 2025)
+    /* start code ref (SpAcc_integrales.cc of st-feeLLGood, 2026): u at the Gauss points, the
+     former nodal u_nod[d][ie] was not a lumping since u varies in the element */
+    double u[3][NPI];
+    tiny::mult<double, 3, N, NPI>(u_nod, Tetra::a, u);
     for (size_t npi=0; npi<NPI; npi++)
         {
         double w = t.weight[npi];
@@ -389,9 +401,9 @@ BOOST_AUTO_TEST_CASE(tet_spin_diff_BE_filling, *boost::unit_test::tolerance(2.0*
             double dai_dz = t.da(ie,2);
             /* Changement de convention de signe pour le courant dans l'expression du ST tel que j = -C0 grad V */
             double Dai_DV = dai_dx * dVdx[npi] + dai_dy * dVdy[npi] + dai_dz * dVdz[npi];
-            BE[    ie] += BOHRS_MUB*beta*C0/CHARGE_ELECTRON*u_nod[0][ie]* Dai_DV *w; // lumping
-            BE[  N+ie] += BOHRS_MUB*beta*C0/CHARGE_ELECTRON*u_nod[1][ie]* Dai_DV *w; // lumping
-            BE[2*N+ie] += BOHRS_MUB*beta*C0/CHARGE_ELECTRON*u_nod[2][ie]* Dai_DV *w; // lumping
+            BE[    ie] += BOHRS_MUB*beta*C0/CHARGE_ELECTRON*u[0][npi]* Dai_DV *w;
+            BE[  N+ie] += BOHRS_MUB*beta*C0/CHARGE_ELECTRON*u[1][npi]* Dai_DV *w;
+            BE[2*N+ie] += BOHRS_MUB*beta*C0/CHARGE_ELECTRON*u[2][npi]* Dai_DV *w;
 	        }
         }
     // end code ref

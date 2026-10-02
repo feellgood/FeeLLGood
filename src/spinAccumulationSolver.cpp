@@ -91,21 +91,12 @@ void spinAcc::fillDirichletData(const int k, Eigen::Vector3d &s_value)
 
 void spinAcc::boundaryConditions(void)
     {
+    /* Dirichlet conditions only on the surfaces where s is given; the surface where the current
+     * density jn is injected carries a flux (Neumann) condition, see solve() */
     std::fill(valDirichlet.begin(), valDirichlet.end(), 0.0);
     for (const Triangle::Tri &f : msh->tri)
         {
-        if (std::isnan(paramTri[f.idxPrm].s.norm()) &&  std::isfinite(paramTri[f.idxPrm].jn))
-            {
-             /* units:
-             * [jn] = A m^-2; [BOHRS_MUB/CHARGE_ELECTRON] = m^2 ; [P] = 1 ⇒ [s_value] = A
-             * check s_value formula, especially the sign with current convention
-             * */
-            Eigen::Vector3d s_value =
-                    -paramTri[f.idxPrm].jn * (BOHRS_MUB/CHARGE_ELECTRON) * paramTri[f.idxPrm].uP;
-            for(int j = 0; j < Triangle::N; j++)
-                { fillDirichletData(f.ind[j], s_value); }
-            }
-        else if (std::isfinite(paramTri[f.idxPrm].s.norm()) &&  std::isnan(paramTri[f.idxPrm].jn))
+        if (std::isfinite(paramTri[f.idxPrm].s.norm()) &&  std::isnan(paramTri[f.idxPrm].jn))
             {
             Eigen::Vector3d s_value = paramTri[f.idxPrm].s;
             for(int j = 0; j < Triangle::N; j++)
@@ -135,6 +126,14 @@ double spinAcc::getLsd(const Tetra::Tet &tet) const
 
 double spinAcc::getLsf(const Tetra::Tet &tet) const
     { return paramTet[tet.idxPrm].lsf; }
+
+Eigen::Matrix<double,Nodes::DIM,Tetra::N> spinAcc::calc_u_nod(const Tetra::Tet &tet) const
+    {
+    Eigen::Matrix<double,Nodes::DIM,Tetra::N> u_nod;
+    for (int ie = 0; ie < Tetra::N; ie++)
+        { u_nod.col(ie) = msh->getNode_u(tet.ind[ie]); }
+    return u_nod;
+    }
 
 void spinAcc::prepareExtraField(void) const
     {
@@ -178,31 +177,29 @@ bool spinAcc::solve(void)
         buildVect<Tetra::N>(elem.ind, Le);
         }
 
-    /* here are the boundary conditions: either a vector s is defined on a surface, or a normal
-     current density and a unit polarization vector */
+    /* flux (Neumann) boundary condition on the surface where the current density jn is injected
+     * with the polarization uP: Q_n = -(mu_B/e) jn uP, contribution -int_Gamma Q_n a_i to the RHS
+     * (the surfaces where s is given are Dirichlet conditions, see boundaryConditions()) */
     for (Triangle::Tri &f : msh->tri)
         {
-        std::vector<double> Le(DIM_PB * Triangle::N, 0.0);
-        Eigen::Vector3d s_value = paramTri[f.idxPrm].s;
-
         if (std::isfinite(paramTri[f.idxPrm].jn) && std::isfinite(paramTri[f.idxPrm].uP.norm()))
-            { s_value = -paramTri[f.idxPrm].jn * (BOHRS_MUB/CHARGE_ELECTRON) * paramTri[f.idxPrm].uP; }
-
-        if (std::isfinite(s_value.norm()))
             {
+            std::vector<double> Le(DIM_PB * Triangle::N, 0.0);
+            const Eigen::Vector3d Qn =
+                    -paramTri[f.idxPrm].jn * (BOHRS_MUB/CHARGE_ELECTRON) * paramTri[f.idxPrm].uP;
             for (int npi = 0; npi < Triangle::NPI; npi++)
                 {
                 const double w = f.weight[npi];
                 for (int ie = 0; ie < Triangle::N; ie++)
                     {
                     double ai_w = w * Triangle::a[ie][npi];
-                    Le[              ie] -= s_value[IDX_X] * ai_w;
-                    Le[  Triangle::N+ie] -= s_value[IDX_Y] * ai_w;
-                    Le[2*Triangle::N+ie] -= s_value[IDX_Z] * ai_w;
+                    Le[              ie] -= Qn[IDX_X] * ai_w;
+                    Le[  Triangle::N+ie] -= Qn[IDX_Y] * ai_w;
+                    Le[2*Triangle::N+ie] -= Qn[IDX_Z] * ai_w;
                     }
                 }
+            buildVect<Triangle::N>(f.ind, Le);
             }
-        buildVect<Triangle::N>(f.ind, Le);
         }
 
     std::vector<double> Xw(DIM_PB * NOD);
@@ -243,14 +240,16 @@ void spinAcc::integrales(const Tetra::Tet &tet,
     if(msh->isMagnetic(tet))
         {
         const double invTau_sd = D0 / sq(getLsd(tet)); //units: [D0/sq(lsd)] = s^-1 : it is 1/tau_sd
+        /* nodal magnetization: the same (NEXT, the latest one) as in the RHS */
+        const Eigen::Matrix<double,Nodes::DIM,N> u_nod = calc_u_nod(tet);
 
-        diag = invTau_sd * a_w.cwiseProduct(tet.calcOffDiagBlock(IDX_X));
+        diag = invTau_sd * a_w.cwiseProduct(u_nod.row(IDX_X).transpose());
         AE.block<N,N>(    N, 2 * N).diagonal() += diag;
         AE.block<N,N>(2 * N,     N).diagonal() -= diag;
-        diag = invTau_sd * a_w.cwiseProduct(tet.calcOffDiagBlock(IDX_Y));
+        diag = invTau_sd * a_w.cwiseProduct(u_nod.row(IDX_Y).transpose());
         AE.block<N,N>(    0, 2 * N).diagonal() -= diag;
         AE.block<N,N>(2 * N,     0).diagonal() += diag;
-        diag = invTau_sd * a_w.cwiseProduct(tet.calcOffDiagBlock(IDX_Z));
+        diag = invTau_sd * a_w.cwiseProduct(u_nod.row(IDX_Z).transpose());
         AE.block<N,N>(    0,     N).diagonal() += diag;
         AE.block<N,N>(    N,     0).diagonal() -= diag;
         }
@@ -269,17 +268,19 @@ void spinAcc::integrales(Tetra::Tet &tet, std::vector<double> &BE)
 
     if(msh->isMagnetic(tet))
         {
+        /* magnetization at the Gauss points: u varies in the element, a nodal u_i would not be a
+         * lumping */
+        const Eigen::Matrix<double,Nodes::DIM,NPI> U = calc_u_nod(tet) * eigen_a;
         for (size_t npi = 0; npi < NPI; npi++)
             {
             const Eigen::Vector3d cst0_w_gradV = cst0 * tet.weight[npi] * _gradV.col(npi);
 
             for (size_t ie = 0; ie < N; ie++)
                 {
-                const Eigen::Vector3d &m = msh->getNode_u(tet.ind[ie]); //magnetization
                 const double tmp = cst0_w_gradV.dot(tet.da.row(ie));
-                BE[    ie] += tmp * m[0];
-                BE[  N+ie] += tmp * m[1];
-                BE[2*N+ie] += tmp * m[2];
+                BE[    ie] += tmp * U(0,npi);
+                BE[  N+ie] += tmp * U(1,npi);
+                BE[2*N+ie] += tmp * U(2,npi);
                 }
             }
         }

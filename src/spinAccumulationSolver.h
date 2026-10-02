@@ -14,10 +14,11 @@ const int DIM_PB_SPIN_ACC = 3;
 
 /** \class spinAcc
  container for Spin Accumulation constants, solver and related datas. The model obeys the diffusive
- spin equation. The boundary conditions are Dirichlet type. User has to provide through mesh and
- settings a surface S0 where spin diffusion vector s is a constant (zero recommended), and another
- surface S1 where current density and spin polarization is defined. This surface S1 must be the same
- as the one given to the potential solver for its own boundary conditions.
+ spin equation. User has to provide through mesh and settings a surface S0 where spin diffusion
+ vector s is a constant (zero recommended): Dirichlet boundary condition, and another surface S1
+ where current density and spin polarization is defined: flux (Neumann) boundary condition. This
+ surface S1 must be the same as the one given to the potential solver for its own boundary
+ conditions.
  */
 class spinAcc : public solver<DIM_PB_SPIN_ACC>
     {
@@ -30,8 +31,8 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
             const double _tol /**< [in] tolerance for bicg_dir solver */,
             const int max_iter /**< [in] maximum number of iterations */);
 
-    /** boundary conditions: a surface with a fixed s, and another surface with fixed normal current
-     * density J and polarization vector P
+    /** Dirichlet boundary conditions: the surface with a fixed s (the surface with fixed normal
+     * current density J and polarization vector P is a flux condition, added to the RHS in solve())
      * set valDirichlet values and fill vector of indices idxDirichlet
      * */
     void boundaryConditions(void); // should be private
@@ -84,6 +85,10 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
 
     /** spin flip length : exists in both non-magnetic and magnetic metals */
     double getLsf(const Tetra::Tet &tet) const;
+
+    /** nodal magnetization of the tetrahedron (NEXT step, the latest computed one) used by the
+     * spin diffusion problem, columns are the nodes */
+    Eigen::Matrix<double,Nodes::DIM,Tetra::N> calc_u_nod(const Tetra::Tet &tet) const;
 
     /** affect extraField member function of all tetrahedrons
      * extraField is computing the contribution from the spin diffusion s to llg
