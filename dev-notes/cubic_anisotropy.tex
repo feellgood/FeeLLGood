@@ -1,0 +1,202 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{hyperref}
+
+\lstset{basicstyle=\ttfamily\small,columns=fullflexible,frame=single}
+
+\newcommand{\bu}{\mathbf{u}}
+\newcommand{\bv}{\mathbf{v}}
+\newcommand{\bk}{\mathbf{k}}
+\newcommand{\be}{\mathbf{e}}
+\newcommand{\bH}{\mathbf{H}}
+
+\title{Cubic anisotropy in feeLLGood:\\
+derivative of the effective field with respect to the magnetization}
+\author{feeLLGood}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Context}
+
+LLG is solved with the $\theta$-scheme of
+F.~Alouges, E.~Kritsikis, J.~Steiner, J.-C.~Toussaint,
+\emph{A convergent and precise finite element scheme for Landau--Lifschitz--Gilbert
+equation}, Numer.\ Math.\ \textbf{128}(3), 407--430 (2014).
+At each step, one looks for $\bv$ in the plane tangent to $\bu^n$ such that, for every
+tangent test function $\mathbf{w}$,
+\begin{equation}
+\int (\tilde\alpha\,\bv + \bu^n\times\bv)\cdot\mathbf{w}
+ + \theta\,\delta t\,(1+R)\,a(\bv,\mathbf{w})
+ = \int \bH_{\rm eff}(\bu^n)\cdot\mathbf{w}
+ + \theta\,\delta t\int \bH'_{\rm eff}(\bu^n)[\bv^{n-1}]\cdot\mathbf{w},
+\label{eq:scheme}
+\end{equation}
+(up to the factor $\gamma_0$ between time and reduced time),
+then $\bu^{n+1}=(\bu^n+\delta t\,\bv)/|\bu^n+\delta t\,\bv|$.
+The last term is a Taylor expansion of the field at $t_n+\theta\,\delta t$:
+\[
+\bH_{\rm eff}(\bu^n+\theta\,\delta t\,\bv)
+ = \bH_{\rm eff}(\bu^n) + \theta\,\delta t\,\bH'_{\rm eff}(\bu^n)[\bv] + O(\delta t^2),
+\]
+where
+\[
+\bH'_{\rm eff}(\bu)[\bv] = \frac{\partial \bH_{\rm eff}}{\partial \bu}\,\bv
+\]
+is the derivative of the field with respect to the magnetization in the direction
+$\bv$. It is this term that makes the scheme of second order in time; it must be the
+\emph{exact} derivative of the field. In the code, the anisotropy fields are computed in
+\texttt{Tet::calc\_aniso\_uniax} and \texttt{Tet::calc\_aniso\_cub}
+(\texttt{src/tetra.cpp}), called from \texttt{Tet::integrales}: they append to
+\texttt{H\_aniso}, at each Gauss point, the field $\bH(\bu)$ plus the second order term
+\texttt{s\_dt}$\,\bH'(\bu)[\bv]$, with \texttt{s\_dt} $=\theta\,\delta t$ (\texttt{THETA}
+is defined in \texttt{config.h}).
+
+\section{Cubic anisotropy: energy and field}
+
+Let $\bk_1,\bk_2,\bk_3$ be the orthonormal cubic axes (\texttt{ex}, \texttt{ey},
+\texttt{ez} of the material in the settings file, \texttt{Tetra::prm::ex,ey,ez} in the
+code) and $a_l=\bk_l\cdot\bu$ the direction cosines, with $\sum_l a_l^2=|\bu|^2=1$.
+The energy density is (\texttt{Tet::cubicAnisotropyEnergy})
+\begin{equation}
+e(\bu) = K_3\,\bigl(a_1^2a_2^2+a_2^2a_3^2+a_3^2a_1^2\bigr).
+\end{equation}
+Since $\partial a_l/\partial\bu=\bk_l$ and $\partial e/\partial a_l = 2K_3\,a_l\sum_{m\neq l}a_m^2
+= 2K_3\,a_l(1-a_l^2)$ on the unit sphere, the field
+$\bH=-\frac{1}{\mu_0 M_s}\frac{\partial e}{\partial\bu}$ is
+\begin{equation}
+\bH(\bu) = -\frac{2K_3}{\mu_0 M_s}\sum_{l=1}^{3} a_l\,(1-a_l^2)\,\bk_l .
+\label{eq:field}
+\end{equation}
+In the code, \texttt{K3bis} $=2K_3/(\mu_0 M_s)$. This expression of the field is
+unchanged by the correction, as well as the contribution $\bu\cdot\bH$ returned by
+\texttt{calc\_aniso\_cub} (used to compute the stabilizing effective damping).
+
+\section{Exact derivative (new expression)}
+
+Differentiating \eqref{eq:field} with $\partial a_l/\partial\bu\cdot\bv=\bk_l\cdot\bv$:
+\begin{equation}
+\boxed{\;
+\bH'(\bu)[\bv] = -\frac{2K_3}{\mu_0 M_s}\sum_{l=1}^{3}(\bk_l\cdot\bv)\,\bigl(1-3a_l^2\bigr)\,\bk_l
+\;}
+\label{eq:new}
+\end{equation}
+that is, in matrix form,
+\begin{equation}
+\frac{\partial\bH}{\partial\bu}
+ = -\frac{2K_3}{\mu_0 M_s}\sum_{l=1}^{3}\bigl(1-3a_l^2\bigr)\,\bk_l\otimes\bk_l ,
+\qquad
+\Bigl(\frac{\partial H_d}{\partial u_{d'}}\Bigr)
+ = -\frac{2K_3}{\mu_0 M_s}\sum_{l}\bigl(1-3a_l^2\bigr)\,k_{l,d}\,k_{l,d'} .
+\end{equation}
+This matrix is symmetric, as it must be: up to the factor $-1/(\mu_0 M_s)$, it is the
+Hessian of the energy. In the eigenbasis $(\bk_1,\bk_2,\bk_3)$ it is diagonal, with
+eigenvalues $-\frac{2K_3}{\mu_0 M_s}(1-3a_l^2)$.
+
+\paragraph{Remark (constraint $|\bu|=1$).} Differentiating instead the unconstrained
+form $a_l\sum_{m\ne l}a_m^2$ adds the term
+$-\frac{4K_3}{\mu_0 M_s}\sum_l a_l\,(\bu\cdot\bv)\,\bk_l$, which vanishes for $\bv$ tangent
+($\bu\cdot\bv=0$), the only case used by the scheme. Both forms therefore coincide.
+
+\section{Former expression (erroneous)}
+
+The former code of \texttt{Tet::calc\_aniso\_cub}, inherited from the reference code
+(\texttt{MuMag\_integrales.cc}), was
+\begin{lstlisting}
+Eigen::Vector3d tmp = uk_v.cwiseProduct(ex);
+H_aniso.col(npi) += -K3bis * (uk_uuu(0) * ex + uk_uuu(1) * ey + uk_uuu(2) * ez
+          + s_dt * tmp.cwiseProduct( Eigen::Vector3d(1, 1, 1)
+              - 3*uk_u.cwiseProduct(uk_u) ));
+\end{lstlisting}
+with \texttt{uk\_u($l$)} $=a_{l+1}$ and \texttt{uk\_v($l$)} $=\bk_{l+1}\cdot\bv$.
+In the reference code, the same term read
+\texttt{Ht[d] = -2*K3/Js* uk$d$\_v*(1-3*uk$d$\_u*uk$d$\_u)*uk0$d$}, where
+\texttt{uk0$d$} $=k_{1,d+1}$ is component $d$ of the \emph{first} axis. Written with
+indices $d=1,2,3$:
+\begin{equation}
+H'_{\rm old,\,d}(\bu)[\bv] = -\frac{2K_3}{\mu_0 M_s}\,(\bk_d\cdot\bv)\,\bigl(1-3a_d^2\bigr)\,k_{1,d},
+\qquad
+\frac{\partial\bH_{\rm old}}{\partial\bu}
+ = -\frac{2K_3}{\mu_0 M_s}\sum_{d=1}^{3}\bigl(1-3a_d^2\bigr)\,k_{1,d}\;\be_d\otimes\bk_d .
+\label{eq:old}
+\end{equation}
+Compared with \eqref{eq:new}, two errors combine:
+\begin{enumerate}
+\item the index of the axis $l$ is identified with the Cartesian component $d$: each
+  component only keeps one axis, instead of the sum over the three axes;
+\item the component taken is the one of the first axis, $k_{1,d}$, instead of $k_{d,d}$
+  (the factor \texttt{ex}, or \texttt{uk00, uk01, uk02} in the reference code, was copied
+  from the uniaxial term, whose axis is $\bk_1$).
+\end{enumerate}
+Even for axes aligned with the Cartesian frame ($\bk_l=\be_l$), where the correct
+derivative is $H'_d=-\frac{2K_3}{\mu_0 M_s}\,v_d\,(1-3u_d^2)$, the former expression only
+keeps the component $d=1$ ($k_{1,d}=\delta_{1d}$): the second-order correction of
+components 2 and 3 is missing. For general axes, the matrix \eqref{eq:old} is not even
+symmetric.
+
+\section{Consequences and correction}
+
+The error only affects the term $\theta\,\delta t\,\bH'[\bv]$ of \eqref{eq:scheme}:
+the scheme remains consistent and stable, but the local error is $O(\delta t^2)$
+instead of $O(\delta t^3)$ for the cubic contribution, so the scheme loses its second
+order in time when $K_3\neq0$. Nothing changes when $K_3=0$.
+
+The correction (\texttt{Tet::calc\_aniso\_cub}, \texttt{src/tetra.cpp}) implements
+\eqref{eq:new}, with the cubic axes as the columns of a matrix $k=[\bk_1\ \bk_2\ \bk_3]$:
+\begin{lstlisting}
+Eigen::Matrix3d k;
+k << ex, ey, ez;
+...
+Eigen::Vector3d uk_u = k.transpose() * U.col(npi);
+Eigen::Vector3d uk_v = k.transpose() * V.col(npi);
+Eigen::Vector3d uk_uuu = uk_u.unaryExpr( [](const double x){ return x*(1.0 - x*x);} );
+Eigen::Vector3d dH = uk_v.cwiseProduct( Eigen::Vector3d(1, 1, 1)
+                                        - 3*uk_u.cwiseProduct(uk_u) );
+H_aniso.col(npi) += -K3bis * k * (uk_uuu + s_dt * dH);
+\end{lstlisting}
+
+The unit tests (\texttt{unit-tests/ut\_anisotropy.cpp}) check it in two ways:
+\begin{itemize}
+\item \texttt{anisotropy\_cubic} compares \texttt{H\_aniso} with an explicit expression
+  of $\bH+\theta\,\delta t\,\bH'[\bv]$, where the former reference expression of $\bH'$
+  has been replaced by \eqref{eq:new};
+\item \texttt{anisotropy\_cubic\_derivative} checks
+  $\bH'[\bv]=\partial\bH/\partial\bu\cdot\bv$ against a centered finite difference of the
+  field, for random axes (relative deviation $<10^{-6}$; about $10^{-10}$ in practice).
+  With the former expression, the relative deviation was of order $1$.
+\end{itemize}
+
+\section{Effect on a simulation}
+
+The following figures were obtained with st-feeLLGood, which had the same erroneous
+expression and received the same correction; they have not been reproduced with
+feeLLGood. Regression case \texttt{short\_cyl\_rich} (cylinder, $K_3=5\times10^4$
+J/m$^3$, together with uniaxial anisotropy, DMI, applied field and spin transport;
+final time $4.52$~ps). Maximum deviation of the average magnetization
+$\langle\bu\rangle$ over the 11 outputs:
+
+\begin{center}
+\begin{tabular}{lc}
+\toprule
+comparison & $\max|\Delta\langle\bu\rangle|$ \\
+\midrule
+former vs corrected $\bH'$ (default time step) & $4.6\times10^{-7}$ \\
+former vs corrected $\bH'$ (step $\div4$, $\max(\delta u)=0.005$) & $1.6\times10^{-7}$ \\
+default step vs step $\div4$ (former and corrected) & $1.3\times10^{-4}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+On this case, the correction changes the result by much less than the total time
+discretization error, which is dominated by the other terms (the cubic anisotropy is weak
+compared with the demagnetizing field): the effect of the correction is not visible on
+the global convergence. It becomes significant when the cubic anisotropy dominates the
+effective field (large $K_3$, weak shape anisotropy).
+
+\end{document}
