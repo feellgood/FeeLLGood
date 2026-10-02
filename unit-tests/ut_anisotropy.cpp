@@ -225,10 +225,19 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TO
                        * (uk0_u * (1 - uk0_u * uk0_u) * uk0_u + uk1_u * (1 - uk1_u * uk1_u) * uk1_u
                           + uk2_u * (1 - uk2_u * uk2_u) * uk2_u);
 
+        /* exact derivative of H in the direction v: H'(u)[v] = -2K3/Js sum_l (k_l.v)(1-3a_l^2) k_l
+         (the expression of MuMag_integrales.cc was erroneous: it kept only one axis per component,
+         and the components of the first axis) */
         double Ht[3];
-        Ht[0] = -2 * K3 / Js * uk0_v * (1 - 3 * uk0_u * uk0_u) * uk00;
-        Ht[1] = -2 * K3 / Js * uk1_v * (1 - 3 * uk1_u * uk1_u) * uk01;
-        Ht[2] = -2 * K3 / Js * uk2_v * (1 - 3 * uk2_u * uk2_u) * uk02;
+        Ht[0] = -2 * K3 / Js * ( uk0_v * (1 - 3 * uk0_u * uk0_u) * uk00
+                               + uk1_v * (1 - 3 * uk1_u * uk1_u) * uk10
+                               + uk2_v * (1 - 3 * uk2_u * uk2_u) * uk20 );
+        Ht[1] = -2 * K3 / Js * ( uk0_v * (1 - 3 * uk0_u * uk0_u) * uk01
+                               + uk1_v * (1 - 3 * uk1_u * uk1_u) * uk11
+                               + uk2_v * (1 - 3 * uk2_u * uk2_u) * uk21 );
+        Ht[2] = -2 * K3 / Js * ( uk0_v * (1 - 3 * uk0_u * uk0_u) * uk02
+                               + uk1_v * (1 - 3 * uk1_u * uk1_u) * uk12
+                               + uk2_v * (1 - 3 * uk2_u * uk2_u) * uk22 );
 
         double H[3];
         H[0] = -2 * K3 / Js * uk0_u * (1 - uk0_u * uk0_u) * uk00
@@ -245,8 +254,53 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TO
         std::cout << "ref H value = " << refHval << "; H_aniso=" << H_aniso.col(npi) << std::endl;
         double result = (refHval - H_aniso.col(npi)).norm();
         std::cout << "result= " << result << std::endl;
-        BOOST_TEST( (refHval - H_aniso.col(npi)).norm() == 0.0, "mismatch in cubic anisotropy field value");
+        BOOST_TEST( result < 1e-13*refHval.norm(), "mismatch in cubic anisotropy field value");
         BOOST_TEST(uHa3u == contrib_aniso(npi), "mismatch in cubic anisotropy contrib_aniso value");
+        }
+    }
+
+BOOST_AUTO_TEST_CASE(anisotropy_cubic_derivative)
+    {
+    /* check that the second order term of the cubic anisotropy is the derivative of the field
+     with respect to u: (H(u + eps v) - H(u - eps v))/(2 eps) = H'(u)[v], for random axes */
+    unsigned sd = my_seed();
+    std::mt19937 gen(sd);
+    std::uniform_real_distribution<> distrib(0.0, 1.0);
+    if (!DET_UT) std::cout << "seed =" << sd << std::endl;
+
+    std::vector<Nodes::Node> node;
+    dummyNodes<4>(node);
+    Tetra::Tet t(node, 0, {1, 2, 3, 4});
+
+    Eigen::Vector3d rand_vect = rand_vec3d( M_PI * distrib(gen), 2 * M_PI * distrib(gen) );
+    Eigen::Vector3d ex = rand_vec3d( M_PI * distrib(gen), 2 * M_PI * distrib(gen) );
+    Eigen::Vector3d ey = ex.cross(rand_vect).normalized();
+    Eigen::Vector3d ez = ex.cross(ey).normalized();
+    const double K3bis = 0.5 + distrib(gen);
+    const double eps = 1e-6;
+
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> U, V, Z, Up, Um, H0, H1, Hp, Hm;
+    for (int npi = 0; npi < Tetra::NPI; npi++)
+        {
+        U.col(npi) = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        V.col(npi) = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        }
+    Z.setZero();
+    Up = U + eps*V;
+    Um = U - eps*V;
+    // H'(u)[v] = H_aniso(s_dt = 1) - H_aniso(s_dt = 0)
+    H0.setZero(); t.calc_aniso_cub(ex, ey, ez, K3bis, 0.0, U, V, H0);
+    H1.setZero(); t.calc_aniso_cub(ex, ey, ez, K3bis, 1.0, U, V, H1);
+    Hp.setZero(); t.calc_aniso_cub(ex, ey, ez, K3bis, 0.0, Up, Z, Hp);
+    Hm.setZero(); t.calc_aniso_cub(ex, ey, ez, K3bis, 0.0, Um, Z, Hm);
+
+    for (int npi = 0; npi < Tetra::NPI; npi++)
+        {
+        Eigen::Vector3d dH = H1.col(npi) - H0.col(npi);
+        Eigen::Vector3d dH_fd = (Hp.col(npi) - Hm.col(npi))/(2*eps);
+        double err = (dH - dH_fd).norm()/dH_fd.norm();
+        std::cout << "npi= " << npi << " relative error on H'[v] = " << err << std::endl;
+        BOOST_TEST( err < 1e-6, "cubic anisotropy: second order term is not the derivative of H" );
         }
     }
 

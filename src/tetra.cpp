@@ -188,19 +188,21 @@ Eigen::Matrix<double,NPI,1> Tet::calc_aniso_cub(const Eigen::Ref<const Eigen::Ve
                            Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> V,
                            Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> H_aniso) const
     {
+    /* cubic axes k_l as columns, a_l = k_l.u ; field H = -K3bis sum_l a_l (1 - a_l^2) k_l
+     * second order term: exact derivative of H in the direction v,
+     * H'(u)[v] = -K3bis sum_l (k_l.v) (1 - 3 a_l^2) k_l */
+    Eigen::Matrix3d k;
+    k << ex, ey, ez;
     Eigen::Matrix<double,NPI,1> result;
     for(int npi = 0;npi<NPI;npi++)
         {
-        Eigen::Vector3d uk_u = Eigen::Vector3d(ex.dot(U.col(npi)),
-                ey.dot(U.col(npi)), ez.dot(U.col(npi)));
-        Eigen::Vector3d uk_v = Eigen::Vector3d(ex.dot(V.col(npi)),
-                ey.dot(V.col(npi)), ez.dot(V.col(npi)));
+        Eigen::Vector3d uk_u = k.transpose() * U.col(npi);
+        Eigen::Vector3d uk_v = k.transpose() * V.col(npi);
         Eigen::Vector3d uk_uuu = uk_u.unaryExpr( [](const double x){ return x*(1.0 - x*x);} );
-        Eigen::Vector3d tmp = uk_v.cwiseProduct(ex);
+        Eigen::Vector3d dH = uk_v.cwiseProduct( Eigen::Vector3d(1, 1, 1)
+                                                - 3*uk_u.cwiseProduct(uk_u) );
 
-        H_aniso.col(npi) += -K3bis * (uk_uuu(0) * ex + uk_uuu(1) * ey + uk_uuu(2) * ez
-                  + s_dt * tmp.cwiseProduct( Eigen::Vector3d(1, 1, 1)
-                      - 3*uk_u.cwiseProduct(uk_u) ));
+        H_aniso.col(npi) += -K3bis * k * (uk_uuu + s_dt * dH);
 
         result[npi] = uk_u.dot(uk_uuu);
         }
