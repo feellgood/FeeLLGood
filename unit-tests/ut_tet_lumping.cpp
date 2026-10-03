@@ -308,7 +308,8 @@ for (size_t npi=0; npi<NPI; npi++)
             }
     }
 
-BOOST_AUTO_TEST_CASE(tet_spin_diff_BE_filling, *boost::unit_test::tolerance(2.0*UT_TOL))
+BOOST_AUTO_TEST_CASE(tet_spin_diff_BE_filling, *boost::unit_test::tolerance(1e-13))
+    // 1e-13: the code to test and the reference sum u at the Gauss points in different orders
     {
     std::cout <<"\ttest on spin diffusion BE filling\n";
     const int nbNod = 4;
