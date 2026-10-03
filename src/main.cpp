@@ -251,7 +251,7 @@ int main(int argc, char *argv[])
     counter.reset();
     std::cout << "starting on:       " << date() << std::endl;
     LinAlgebra linAlg(mySettings, fem.msh);
-    spinAcc spinAcc_solver(mySettings, fem.msh, 1e-8, 1000);
+    spinAcc spinAcc_solver(mySettings, fem.msh, 1e-6, 5000);  // as st-feeLLGood
 
     chronometer fmm_counter(2);
     scal_fmm::fmm myFMM(fem.msh, mySettings.paramTetra, mySettings.paramTriangle,

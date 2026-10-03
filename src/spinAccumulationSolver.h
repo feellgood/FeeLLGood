@@ -14,11 +14,12 @@ const int DIM_PB_SPIN_ACC = 3;
 
 /** \class spinAcc
  container for Spin Accumulation constants, solver and related datas. The model obeys the diffusive
- spin equation. User has to provide through mesh and settings a surface S0 where spin diffusion
- vector s is a constant (zero recommended): Dirichlet boundary condition, and another surface S1
- where current density and spin polarization is defined: flux (Neumann) boundary condition. This
- surface S1 must be the same as the one given to the potential solver for its own boundary
- conditions.
+ spin equation. User has to provide through mesh and settings at least one surface where spin
+ diffusion vector s is a constant (zero recommended): Dirichlet boundary condition, and one surface
+ S1 where the current density jn is defined; if a spin polarization uP is also given on S1 (and no
+ s), the spin injection is a flux (Neumann) boundary condition. This surface S1 must be the same
+ as the one given to the potential solver for its own boundary conditions. A surface may have both
+ jn and s (s is then imposed on it).
  */
 class spinAcc : public solver<DIM_PB_SPIN_ACC>
     {
@@ -31,8 +32,9 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
             const double _tol /**< [in] tolerance for bicg_dir solver */,
             const int max_iter /**< [in] maximum number of iterations */);
 
-    /** Dirichlet boundary conditions: the surface with a fixed s (the surface with fixed normal
-     * current density J and polarization vector P is a flux condition, added to the RHS in solve())
+    /** Dirichlet boundary conditions: all the surfaces with a fixed s (the surface with fixed normal
+     * current density J and polarization vector P, without s, is a flux condition, added to the RHS
+     * in solve())
      * set valDirichlet values and fill vector of indices idxDirichlet
      * */
     void boundaryConditions(void); // should be private
@@ -44,8 +46,7 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     std::vector<Eigen::Vector3d> s;
 
     /** check boundary conditions: mesh and settings have to define a single surface with constant
-     * normal current density J, a vector polarization P and another single surface where spin
-     * diffusion = 0 */
+     * normal current density J and at least one surface where the spin diffusion s is given */
     void checkBoundaryConditions(void) const override;
 
     private:

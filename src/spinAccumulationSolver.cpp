@@ -66,7 +66,8 @@ void spinAcc::checkBoundaryConditions(void) const
             }
         }
 
-    bool result = ( (nbSurfJ == 1) && (nbSurfS == 1)
+    // one surface with jn (as the electrostatic problem), at least one surface with a given s
+    bool result = ( (nbSurfJ == 1) && (nbSurfS >= 1)
            && (nbVolN0 == paramTet.size())
            && (nbVolP == paramTet.size()) );
 
@@ -91,12 +92,13 @@ void spinAcc::fillDirichletData(const int k, Eigen::Vector3d &s_value)
 
 void spinAcc::boundaryConditions(void)
     {
-    /* Dirichlet conditions only on the surfaces where s is given; the surface where the current
-     * density jn is injected carries a flux (Neumann) condition, see solve() */
+    /* Dirichlet conditions on all the surfaces where s is given, including the surface where the
+     * current density jn is injected (as in st-feeLLGood). Where jn and uP are given and s is not,
+     * the injection is a flux (Neumann) condition, see solve() */
     std::fill(valDirichlet.begin(), valDirichlet.end(), 0.0);
     for (const Triangle::Tri &f : msh->tri)
         {
-        if (std::isfinite(paramTri[f.idxPrm].s.norm()) &&  std::isnan(paramTri[f.idxPrm].jn))
+        if (std::isfinite(paramTri[f.idxPrm].s.norm()))
             {
             Eigen::Vector3d s_value = paramTri[f.idxPrm].s;
             for(int j = 0; j < Triangle::N; j++)
