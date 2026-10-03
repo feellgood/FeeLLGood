@@ -107,9 +107,9 @@ struct Node
     inline void evolution(void) { d[step::CURRENT] = d[step::NEXT]; }
 
     /**
-    integration of the evolution of the magnetization for time step dt
+    integration of the evolution of the magnetization for (reduced) time step dt
     in a base composed of u0,ep,eq = u0*ep we have
-    \f$ v = v_p e_p + v_q e_q \f$
+    \f$ v = v_p e_p + v_q e_q \f$ (\f$ v = \partial u/\partial\tau \f$, reduced time)
     and new magnetization value is : \f$ u = u_0 + v dt \f$ after normalization
     */
 

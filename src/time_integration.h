@@ -1,8 +1,14 @@
 #ifndef time_integration_h
 #define time_integration_h
 
+#include "config.h"  // gamma0
+
 /** all timing parameters for integrating in time LLG with adaptative time-step and relaxation
- * corrections throught prefactor=f(dt) */
+ * corrections throught prefactor=f(dt)
+ * All the times (t, dt, tf, DTMIN, DTMAX, TAUR) are reduced times \f$ \tau = \gamma_0 t \f$
+ * [m/A]: LLG is solved in reduced time. The physical time \f$ t = \tau/\gamma_0 \f$ is only
+ * used by the interfaces (settings, applied field expressions, outputs), through get_t_phys() and
+ * get_dt_phys(). */
 class timing
     {
 public:
@@ -14,7 +20,7 @@ public:
         set_dt(sqrt(DTMIN * DTMAX));
         }
 
-    /** final time of the simulation */
+    /** final (reduced) time of the simulation */
     const double tf;
 
     /** minimum step time for time integrator */
@@ -29,8 +35,11 @@ public:
     /** this prefactor must be synchronized with dt value */
     double prefactor;
 
-    /** getter for time step dt */
+    /** getter for (reduced) time step dt */
     inline double get_dt() const { return dt; }
+
+    /** getter for the physical time step [s] */
+    inline double get_dt_phys() const { return dt / gamma0; }
 
     /** setter for time step dt : prefactor is computed from the new dt value to maintain
      * synchronization of dt and prefactor */
@@ -47,15 +56,18 @@ public:
     /** increment time t with time step dt */
     inline void inc_t() { t += dt; }
 
-    /** getter for t */
+    /** getter for (reduced) time t */
     inline double get_t() const { return t; }
+
+    /** getter for the physical time [s] */
+    inline double get_t_phys() const { return t / gamma0; }
 
     /** setter for t */
     inline void set_t(const double _t) { t = _t; }
 
 private:
-    double t; /**< physical current time of the simulation */
-    double dt; /**< time-step */
+    double t; /**< reduced current time of the simulation */
+    double dt; /**< reduced time-step */
     };
 
 #endif

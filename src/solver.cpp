@@ -56,7 +56,7 @@ bool LinAlgebra::solve(const timing &t_prm)
      Dirichlet values are zeros, so a specific bicg_dir is called assuming those zeros, instead of
      the standard one.
      * */
-    buildInitGuess(Xw);// gamma0 division handled by function buildInitGuess
+    buildInitGuess(Xw);
     algebra::bicg_dir<double>(iter, K, Xw, L_rhs, lvd);
 
     if ((iter.status == algebra::ITER_OVERFLOW)
@@ -82,9 +82,9 @@ bool LinAlgebra::solve(const timing &t_prm)
             double v2 = Nodes::sq(vp) + Nodes::sq(vq);
             if (v2 > v2max)
                 { v2max = v2; }
-            msh->updateNode(i, vp, vq, dt); //gamma0 multiplication handled in updateNode
+            msh->updateNode(i, vp, vq, dt);
             }
         }
-    v_max = gamma0 * sqrt(v2max);
+    v_max = sqrt(v2max);
     return false;
     }

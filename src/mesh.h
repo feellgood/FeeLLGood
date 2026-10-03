@@ -183,7 +183,7 @@ public:
 
     /** make_evol on i^th node */
     inline void updateNode(const int i, const double vp, const double vq, const double dt)
-        { node[i].make_evol(vp*gamma0, vq*gamma0, dt); }
+        { node[i].make_evol(vp, vq, dt); }
 
     /** call evolution for all the nodes */
     inline void evolution(void)

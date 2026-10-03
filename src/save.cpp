@@ -21,7 +21,7 @@ void Fem::saver(Settings &settings, const timing &t_prm, std::ofstream &fout, co
         { return col_name[0] == 'H' && col_name[1] >= 'x' && col_name[1] <= 'z'; });
     Eigen::Vector3d applied_field(NAN, NAN, NAN);
     if (field_needed)
-        { applied_field = settings.getField(t_prm.get_t()); }
+        { applied_field = settings.getField(t_prm.get_t_phys()); }
 
     for (unsigned int i = 0; i < settings.evol_columns.size(); i++)
         {
@@ -59,11 +59,11 @@ void Fem::saver(Settings &settings, const timing &t_prm, std::ofstream &fout, co
             }
         else if (keyVal == "t")
             {
-            fout << t_prm.get_t() << sep;
+            fout << t_prm.get_t_phys() << sep;
             }
         else if (keyVal == "dt")
             {
-            fout << t_prm.get_dt() << sep;
+            fout << t_prm.get_dt_phys() << sep;
             }
         else if (keyVal == "max_dm")
             {
@@ -87,15 +87,15 @@ void Fem::saver(Settings &settings, const timing &t_prm, std::ofstream &fout, co
             }
         else if (keyVal == "<dMx/dt>")
             {
-            fout << msh.avg(Nodes::get_v_comp, IDX_X, region) << sep;
+            fout << gamma0 * msh.avg(Nodes::get_v_comp, IDX_X, region) << sep;
             }
         else if (keyVal == "<dMy/dt>")
             {
-            fout << msh.avg(Nodes::get_v_comp, IDX_Y, region) << sep;
+            fout << gamma0 * msh.avg(Nodes::get_v_comp, IDX_Y, region) << sep;
             }
         else if (keyVal == "<dMz/dt>")
             {
-            fout << msh.avg(Nodes::get_v_comp, IDX_Z, region) << sep;
+            fout << gamma0 * msh.avg(Nodes::get_v_comp, IDX_Z, region) << sep;
             }
         else if (keyVal == "Thiele_length")
             {
@@ -152,7 +152,7 @@ void Fem::saver(Settings &settings, const timing &t_prm, std::ofstream &fout, co
             std::cout << " " << str << "\n";
             }
 
-        std::string metadata = settings.solMetadata(t_prm.get_t());
+        std::string metadata = settings.solMetadata(t_prm.get_t_phys());
         msh.savesol(settings.getPrecision(), str, metadata, settings.spin_acc, s);
         if (settings.verbose)
             {

@@ -113,7 +113,7 @@ static void exit_if_signal_received(const Fem &fem, const Settings &settings, co
         std::cout << ": saving the magnetization configuration...\n";
         std::string fileName =
                 settings.r_path_output_dir + '/' + settings.getSimName() + "_at_exit.sol";
-        std::string metadata = settings.solMetadata(t_prm.get_t());
+        std::string metadata = settings.solMetadata(t_prm.get_t_phys());
         fem.msh.savesol(settings.getPrecision(), fileName, metadata, settings.spin_acc, s);
         std::cout << "Magnetization configuration saved to " << fileName << "\n";
         }
@@ -137,7 +137,7 @@ int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /*
                           spinAcc &spinAcc_solver /**< [in] */,
                           scal_fmm::fmm &myFMM /**< [in] */, timing &t_prm, int &nt)
     {
-    compute_all(settings, spinAcc_solver, myFMM, t_prm.get_t());
+    compute_all(settings, spinAcc_solver, myFMM, t_prm.get_t_phys());
     std::string baseName = settings.r_path_output_dir + '/' + settings.getSimName();
     std::string str = baseName + ".evol";
     std::ofstream fout(str);
@@ -155,7 +155,7 @@ int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /*
     int nt_output(0);  // visible iteration count
     int status(0);     // exit status
     double t_initial = t_prm.get_t();
-    double t_step = settings.time_step;
+    double t_step = gamma0 * settings.time_step;  // reduced time
     long step_count = std::roundl((t_prm.tf - t_initial) / t_step);
     TimeStepper stepper(t_prm.get_dt(), t_prm.DTMIN, t_prm.DTMAX);
     Stats stats;
@@ -181,7 +181,7 @@ int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /*
                     std::cout << "  TRYING AGAIN with a smaller time step: "
                               << "retry " << flag << '\n';
                 std::cout << "evol step = " << nt_output << ", step = " << nt
-                          << ", t = " << t_prm.get_t() << ", dt = " << t_prm.get_dt() << '\n';
+                          << ", t = " << t_prm.get_t_phys() << ", dt = " << t_prm.get_dt_phys() << '\n';
                 }
 
             if (t_prm.is_dt_TooSmall())
@@ -193,12 +193,12 @@ int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /*
             linAlg.base_projection();
             if(settings.getFieldType() == RtoR3)
                 {
-                Eigen::Vector3d Hext = settings.getField(t_prm.get_t());
+                Eigen::Vector3d Hext = settings.getField(t_prm.get_t_phys());
                 linAlg.prepareElements(Hext, t_prm);
                 }
             else if(settings.getFieldType() == R4toR3)
                 {
-                double amp_field_time = settings.getFieldTime(t_prm.get_t());
+                double amp_field_time = settings.getFieldTime(t_prm.get_t_phys());
                 linAlg.prepareElements(amp_field_time,t_prm);
                 }
 
@@ -209,16 +209,16 @@ int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /*
                 {
                 flag++;
                 stepper.set_soft_limit(t_prm.get_dt() / 2);
-                stats.bad_dt.add(t_prm.get_dt());
+                stats.bad_dt.add(t_prm.get_dt_phys());
                 continue;
                 }
 
             double dumax = t_prm.get_dt() * vmax;
-            stats.good_dt.add(t_prm.get_dt());
+            stats.good_dt.add(t_prm.get_dt_phys());
             stats.good_dumax.add(dumax);
             if (settings.verbose)
                 {
-                std::cout << "  -> dumax = " << dumax << ",  vmax = " << vmax << std::endl;
+                std::cout << "  -> dumax = " << dumax << ",  vmax = " << gamma0 * vmax << std::endl;
                 }
 
             stepper.set_soft_limit((settings.DUMAX / vmax) * 0.95);
@@ -228,7 +228,7 @@ int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /*
                 continue;
                 }
 
-            compute_all(settings, spinAcc_solver, myFMM, t_prm.get_t());
+            compute_all(settings, spinAcc_solver, myFMM, t_prm.get_t_phys());
             nt++;
             flag = 0;
 

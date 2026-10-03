@@ -257,7 +257,8 @@ public:
      * */
     Eigen::Matrix<double,N,1> calcOffDiagBlock(const Nodes::index idx) const;
 
-    /** add drift contribution due to eventual recentering to vectors BE */
+    /** add drift contribution due to eventual recentering to vectors BE, Vdrift is the drift
+     * velocity in reduced time (physical velocity divided by gamma0) */
     void add_drift_BE(double alpha, double s_dt, double Vdrift,
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V, 
@@ -284,8 +285,8 @@ public:
             Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H_aniso) const;
 
     /** append(+=) to H the second order term of the spin accumulation field Hst: s_dt times the
-     * derivative of its tangent part in the direction V, -s_dt (U.Hst) V. As for the anisotropies,
-     * s_dt is theta*dt in physical time, since V is the physical velocity du/dt */
+     * derivative of its tangent part in the direction V, -s_dt (U.Hst) V; s_dt is theta*dt and V
+     * the velocity du/dtau, both in reduced time */
     void calc_Hst_order2(const Eigen::Ref<const Eigen::Matrix<double,Nodes::DIM,NPI>> Hst,
             const double s_dt,
             const Eigen::Ref<const Eigen::Matrix<double,Nodes::DIM,NPI>> U,
@@ -366,7 +367,7 @@ private:
     };  // end class Tetra
 
     /** to perform some second order corrections, an effective \f$ \alpha \f$ is computed here with
-     * a piecewise formula */
+     * a piecewise formula, dt is the reduced time step */
     Eigen::Matrix<double,NPI,1> calc_alpha_eff(const double dt, const double alpha,
                                                Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff);
 

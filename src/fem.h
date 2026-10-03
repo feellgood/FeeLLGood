@@ -105,13 +105,13 @@ public:
             }
         else
             {
-            t_prm.set_t(msh.readSol(mySets.verbose, mySets.restoreFileName));
+            t_prm.set_t(gamma0 * msh.readSol(mySets.verbose, mySets.restoreFileName));
             }
 
         /* This potentially overrides the initial time set above by msh.readSol(). */
         if (!isnan(mySets.initial_time))
             {
-            t_prm.set_t(mySets.initial_time);
+            t_prm.set_t(gamma0 * mySets.initial_time);
             }
 
         if (mySets.recenter)
@@ -199,7 +199,7 @@ private:
     void direction(enum Nodes::index idx_dir /**< [in] */);
 
     /** compute demagnetizing field, energies, and prepare for next time step quantitites
-     * at time t */
+     * at physical time t [s] (used by the applied field) */
     void compute_all(Settings &settings /**< [in] */, spinAcc &spinAcc_solver /**< [in|out] */,
                      scal_fmm::fmm &myFMM /**< [in|out] */, const double t /**< [in]*/)
         {

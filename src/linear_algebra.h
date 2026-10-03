@@ -26,8 +26,8 @@ const int DIM_PB_MAG = 2;
 /** \class LinAlgebra
 convenient class to grab altogether some part of the calculations involved using algebra::bicg
 solver at each timestep. The solver is handled by solver method, and is using algebra sparse
-matrices(Row major). Be aware of time units: when entering solver method, division by
-gamma0 and multiplication by gamma0 when ending are mandatory. The bicg algorithm is monitored by iter object.
+matrices(Row major). Times are reduced times, the unknown is the velocity du/dtau in reduced time.
+The bicg algorithm is monitored by iter object.
 When debugging it might be usefull to set iter verbosity differently from LinAlgebra Solver (see
 constructor list initialization)
 */
@@ -114,7 +114,7 @@ private:
     /** verbosity */
     const int verbose;
 
-    /** speed of the domain wall */
+    /** speed of the domain wall [m/s] */
     double DW_vz;
 
     /** maximum speed of the magnetization in the whole physical object */

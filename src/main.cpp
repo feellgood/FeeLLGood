@@ -232,7 +232,9 @@ int main(int argc, char *argv[])
     std::cout << "mesh file:         " << mySettings.getPbName() << '\n';
     std::cout << "output directory:  " << mySettings.r_path_output_dir << " ";
     create_dir_if_needed(mySettings.r_path_output_dir);
-    timing t_prm = timing(mySettings.tf, mySettings.dt_min, mySettings.dt_max);
+    // settings are in seconds, LLG is solved in reduced time tau = gamma0 t
+    timing t_prm = timing(gamma0 * mySettings.tf, gamma0 * mySettings.dt_min,
+                          gamma0 * mySettings.dt_max);
     Fem fem = Fem(mySettings, t_prm);
 
     if (mySettings.verbose)
@@ -241,8 +243,8 @@ int main(int argc, char *argv[])
         mySettings.toYaml();
         std::cout << "-- end of settings -----------------------------\n";
         std::cout << "simulation:\n";
-        std::cout << "  final time:         " << t_prm.tf << '\n';
-        std::cout << "  initial time step:  " << t_prm.get_dt() << '\n';
+        std::cout << "  final time:         " << t_prm.tf / gamma0 << '\n';
+        std::cout << "  initial time step:  " << t_prm.get_dt_phys() << '\n';
         fem.msh.infos();
         }
 

@@ -47,11 +47,10 @@ void prm::infos(void)
 Eigen::Matrix<double,NPI,1> Tetra::calc_alpha_eff(const double dt, const double alpha,
                                                       Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff)
     {
-    double reduced_dt = gamma0 * dt;
     Eigen::Matrix<double,NPI,1> a_eff;
     a_eff.setConstant(alpha);
     const double r = 0.1;  // what is that constant, where does it come from ?
-    const double M = 2. * alpha * r / reduced_dt;
+    const double M = 2. * alpha * r / dt;
 
     for(int npi=0;npi<NPI;npi++)
         {
@@ -59,16 +58,16 @@ Eigen::Matrix<double,NPI,1> Tetra::calc_alpha_eff(const double dt, const double 
         if (h > 0.)
             {
             if (h > M)
-                a_eff(npi) = alpha + reduced_dt / 2. * M;
+                a_eff(npi) = alpha + dt / 2. * M;
             else
-                a_eff(npi) = alpha + reduced_dt / 2. * h;
+                a_eff(npi) = alpha + dt / 2. * h;
             }
         else
             {
             if (h < -M)
-                a_eff(npi) = alpha / (1. + reduced_dt / (2. * alpha) * M);
+                a_eff(npi) = alpha / (1. + dt / (2. * alpha) * M);
             else
-                a_eff(npi) = alpha / (1. - reduced_dt / (2. * alpha) * h);
+                a_eff(npi) = alpha / (1. - dt / (2. * alpha) * h);
             }
         }
     return a_eff;
@@ -229,7 +228,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     const double Ms = param.Ms;
     const double Abis = 2.0 * param.A / (mu0*Ms);
     const double dt = prm_t.get_dt();
-    const double s_dt = THETA * dt * gamma0;  // theta from theta scheme in config.h.in
+    const double s_dt = THETA * dt;  // reduced time step, theta from theta scheme in config.h.in
 
     /*-------------------- INTERPOLATION --------------------*/
     Eigen::Matrix<double,DIM,NPI> U,dUdx,dUdy,dUdz;
@@ -251,12 +250,12 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     if(param.K != 0)
         {
         double Kbis = 2.0 * param.K/(mu0*Ms);
-        uHeff += calc_aniso_uniax(param.uk, Kbis, s_dt/gamma0, U, V, H_aniso);
+        uHeff += calc_aniso_uniax(param.uk, Kbis, s_dt, U, V, H_aniso);
         }
     if(param.K3 != 0)
         {
         double K3bis = 2.0 * param.K3/(mu0*Ms);
-        uHeff += calc_aniso_cub(param.ex, param.ey, param.ez, K3bis, s_dt/gamma0, U, V, H_aniso);
+        uHeff += calc_aniso_cub(param.ex, param.ey, param.ez, K3bis, s_dt, U, V, H_aniso);
         }
 
     Eigen::Matrix<double,DIM,NPI> Heff = Hd + calc_Hext();
@@ -300,8 +299,8 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
         else if (idx_dir == IDX_X)
             add_drift_BE(alpha, s_dt, Vdrift, U, V, dUdx, dVd_dir, BE);
         }
-    H += H_aniso + (s_dt / gamma0) * Hv;
-    calc_Hst_order2(Hst, s_dt / gamma0, U, V, H);
+    H += H_aniso + s_dt * Hv;
+    calc_Hst_order2(Hst, s_dt, U, V, H);
 
     for (int npi = 0; npi < NPI; npi++)
         {

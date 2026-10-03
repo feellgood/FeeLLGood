@@ -84,7 +84,8 @@ BOOST_AUTO_TEST_CASE(calc_alpha_eff, *boost::unit_test::tolerance(UT_TOL))
     // end ref code
 
     // code to check
-    Eigen::Matrix<double,Tetra::NPI,1> my_alpha = Tetra::calc_alpha_eff(dt, alpha_LLG, _uHeff);
+    // calc_alpha_eff works in reduced time
+    Eigen::Matrix<double,Tetra::NPI,1> my_alpha = Tetra::calc_alpha_eff(reduced_dt, alpha_LLG, _uHeff);
     // end code to check
 
     std::cout << "test that calc_alpha_eff gives correct effective damping parameter relatively to "
