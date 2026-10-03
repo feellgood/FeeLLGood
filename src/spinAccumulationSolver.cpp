@@ -168,6 +168,11 @@ bool spinAcc::solve(void)
     {
     iter.reset();
 
+    /* the system depends on the magnetization: it is assembled again at each call, from zero
+     * (otherwise the contributions of all the previous calls would be summed up) */
+    K.clear();
+    std::fill(L_rhs.begin(), L_rhs.end(), 0.0);
+
     for (Tetra::Tet &elem : msh->tet)
         {
         Eigen::Matrix<double,DIM_PB*Tetra::N,DIM_PB*Tetra::N> Ke;
