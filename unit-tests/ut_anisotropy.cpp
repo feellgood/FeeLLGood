@@ -254,7 +254,11 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TO
         std::cout << "ref H value = " << refHval << "; H_aniso=" << H_aniso.col(npi) << std::endl;
         double result = (refHval - H_aniso.col(npi)).norm();
         std::cout << "result= " << result << std::endl;
-        BOOST_TEST( result < 1e-13*refHval.norm(), "mismatch in cubic anisotropy field value");
+        /* the field may be close to zero (cancellation between the axes): the deviation is
+         compared with K3bis, which bounds it; evaluated as a bool, since BOOST_TEST(a < b) with a
+         tolerance fails when a and b are both tiny ("close") */
+        const bool field_ok = (result <= 1e-13 * K3bis);
+        BOOST_TEST( field_ok, "mismatch in cubic anisotropy field value");
         BOOST_TEST(uHa3u == contrib_aniso(npi), "mismatch in cubic anisotropy contrib_aniso value");
         }
     }
