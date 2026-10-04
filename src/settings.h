@@ -30,8 +30,8 @@ enum mag_exprType
 /** Specify how the applied magnetic field is defined using JavaScript functions. The choices are:
  *
  * * `RtoR3`: **B**(t), a vector function of time only, for a uniform applied field.
- * * `R4toR3`: **B**(x, y, z, t) = A(t) **f**(x, y, z), the product of a scalar function of space
- *   and a vector function of time.
+ * * `R4toR3`: **B**(x, y, z, t) = A(t) **f**(x, y, z), the product of a scalar function of time
+ *   and a vector function of space.
  *
  * It is not possible to define the field as a general function **B**(x, y, z, t), as that would
  * require an unreasonable number of evaluations.
