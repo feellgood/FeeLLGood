@@ -56,13 +56,20 @@ BOOST_AUTO_TEST_CASE(rand_sp_mat_problem_solver, *boost::unit_test::tolerance(UT
     std::mt19937 gen(my_seed());
     std::uniform_int_distribution<> distrib(0, N-1);
 
+    /* Id + symmetric ones may be singular (an isolated pair i, j gives the block ((1 1)(1 1))) and
+     then bicg may diverge: the number of ones of each row is added to its diagonal, the matrix is
+     strictly diagonally dominant, hence invertible */
+    std::vector<int> nb_ones(N, 0);
     for (int nb=0; nb<400; nb++)
         {
         int i = distrib(gen);
         int j = distrib(gen);
         coefficients.push_back({i, j, 1.0});
         coefficients.push_back({j, i, 1.0});
+        nb_ones[i]++;
+        nb_ones[j]++;
         }
+    for(int i=0;i<N;i++) { coefficients.push_back({i, i, double(nb_ones[i])}); }
 
     algebra::SparseMatrix Ar = buildSparseMat(N, coefficients);
     algebra::bicg<double>(iter,Ar,x,b);
@@ -72,8 +79,9 @@ BOOST_AUTO_TEST_CASE(rand_sp_mat_problem_solver, *boost::unit_test::tolerance(UT
     std::vector<double> y(N);
     algebra::mult(Ar,x,y);// y = Ar * x
     algebra::sub(b,y); // y -= b;
-    double err_result = algebra::norm<double>(y);
-    std::cout << "norm(Ax - b)= " << err_result << std::endl;
+    // bicg stops when norm(Ax - b) <= _TOL * norm(b): relative criterion
+    double err_result = algebra::norm<double>(y) / algebra::norm<double>(b);
+    std::cout << "norm(Ax - b)/norm(b)= " << err_result << std::endl;
     BOOST_CHECK( err_result < _TOL );
     }
 
@@ -111,8 +119,9 @@ BOOST_AUTO_TEST_CASE(rand_asym_sp_mat_problem_solver, *boost::unit_test::toleran
     std::vector<double> y(N);
     algebra::mult(Ar,x,y);// y = Ar * x
     algebra::sub(b,y); // y -= b;
-    double err_result = algebra::norm<double>(y);
-    std::cout << "norm(Ax - b)= " << err_result << std::endl;
+    // bicg stops when norm(Ax - b) <= _TOL * norm(b): relative criterion
+    double err_result = algebra::norm<double>(y) / algebra::norm<double>(b);
+    std::cout << "norm(Ax - b)/norm(b)= " << err_result << std::endl;
     BOOST_CHECK( err_result < _TOL );
     }
 

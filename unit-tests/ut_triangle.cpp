@@ -236,7 +236,12 @@ BOOST_AUTO_TEST_CASE(Tri_potential_u, *boost::unit_test::tolerance(10*UT_TOL))
     double result_to_test = f.potential(Nodes::get_u<Nodes::NEXT>, i);
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
     std::cout << "raw difference result =" << result_to_test - result_ref << std::endl;
-    BOOST_TEST(result_to_test == result_ref,
+    /* the potential is a sum of terms of both signs: the deviation is compared with the sum of
+     their absolute values (a relative test on a result close to zero would amplify it) */
+    const double scale = std::abs(dMs) * (std::abs(pot1) + std::abs(pot2) + std::abs(pot3)
+            + std::abs(h * (k * h / 2. + l) * (1 - log(h * (a + sqrt(a * a + 1)))))
+            + std::abs(k * h * h / 4.));
+    BOOST_TEST(std::abs(result_to_test - result_ref) <= 1e-13 * scale,
                "possible rounding error in potential on u corrections");
     }
 
@@ -353,7 +358,12 @@ BOOST_AUTO_TEST_CASE(Tri_potential_v, *boost::unit_test::tolerance(10.0*UT_TOL))
     double result_to_test = f.potential(Nodes::get_v<Nodes::NEXT>, i);
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
     std::cout << "raw difference result =" << result_to_test - result_ref << std::endl;
-    BOOST_TEST(result_to_test == result_ref,
+    /* the potential is a sum of terms of both signs: the deviation is compared with the sum of
+     their absolute values (a relative test on a result close to zero would amplify it) */
+    const double scale = std::abs(dMs) * (std::abs(pot1) + std::abs(pot2) + std::abs(pot3)
+            + std::abs(h * (k * h / 2. + l) * (1 - log(h * (a + sqrt(a * a + 1)))))
+            + std::abs(k * h * h / 4.));
+    BOOST_TEST(std::abs(result_to_test - result_ref) <= 1e-13 * scale,
                "possible rounding error in potential on v corrections");
     }
 

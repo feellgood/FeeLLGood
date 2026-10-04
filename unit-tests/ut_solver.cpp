@@ -82,13 +82,21 @@ BOOST_AUTO_TEST_CASE(rand_sp_mat_problem_solver, *boost::unit_test::tolerance(UT
     std::mt19937 gen(my_seed());
     std::uniform_int_distribution<> distrib(0, N-1);
 
+    /* Id + symmetric ones may be singular (an isolated pair i, j gives the block ((1 1)(1 1))) and
+     then bicgstab may diverge: the number of ones of each row is added to its diagonal, the matrix
+     is strictly diagonally dominant, hence invertible */
+    std::vector<int> nb_ones(N, 0);
     for (int nb=0; nb<400; nb++)
         {
         int i = distrib(gen);
         int j = distrib(gen);
         coeffs.push_back(Eigen::Triplet<double>(i,j,1.0) );
         coeffs.push_back(Eigen::Triplet<double>(j,i,1.0) );
+        nb_ones[i]++;
+        nb_ones[j]++;
         }
+    for(int i=0;i<N;i++)
+        { coeffs.push_back(Eigen::Triplet<double>(i,i,nb_ones[i]) ); }
     A.setFromTriplets(coeffs.begin(),coeffs.end());
     Eigen::BiCGSTAB<Eigen::SparseMatrix<double> > solver;
     solver.setMaxIterations(MAX_ITER);
@@ -99,8 +107,9 @@ BOOST_AUTO_TEST_CASE(rand_sp_mat_problem_solver, *boost::unit_test::tolerance(UT
     std::cout << "estimated error: " << solver.error()      << std::endl;
     BOOST_CHECK( solver.iterations() > 1);
     BOOST_CHECK( (x-b).norm() != 0.0 );
-    double err_result = ((A*x)-b).norm(); 
-    std::cout << "norm(Ax - b)= " << err_result << std::endl;
+    // the tolerance of Eigen::BiCGSTAB is relative: norm(Ax - b) <= _TOL * norm(b)
+    double err_result = ((A*x)-b).norm() / b.norm();
+    std::cout << "norm(Ax - b)/norm(b)= " << err_result << std::endl;
     BOOST_CHECK( err_result < _TOL );
     }
 
@@ -130,7 +139,8 @@ BOOST_AUTO_TEST_CASE(rand_asym_sp_mat_problem_solver, *boost::unit_test::toleran
     std::cout << "estimated error: " << solver.error()      << std::endl;
     BOOST_CHECK( solver.iterations() > 1);
     BOOST_CHECK( (x-b).norm() != 0.0 );
-    BOOST_CHECK( ((A*x)-b).norm() <= _TOL );
+    // the tolerance of Eigen::BiCGSTAB is relative: norm(Ax - b) <= _TOL * norm(b)
+    BOOST_CHECK( ((A*x)-b).norm() <= _TOL * b.norm() );
     }
 
 BOOST_AUTO_TEST_SUITE_END()
