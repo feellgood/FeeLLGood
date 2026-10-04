@@ -451,16 +451,23 @@ BOOST_AUTO_TEST_CASE(Tet_gradV, *boost::unit_test::tolerance(UT_TOL))
     gradVbis.row(IDX_Y) = V_nod.transpose() * dady;// V_nod^T * dady
     gradVbis.row(IDX_Z) = V_nod.transpose() * dadz;// V_nod^T * dadz
 
-    for(int i=0;i<Nodes::DIM;i++)
-        for(int j=0;j<Tetra::NPI;j++)
+    /* the two computations sum the same terms in different orders: deviations of a few 1e-15
+     relatively to the norm of grad(V), a component close to zero (cancellation) having a much
+     larger relative deviation */
+    for(int j=0;j<Tetra::NPI;j++)
+        {
+        const double scale = gradVbis.col(j).norm();
+        for(int i=0;i<Nodes::DIM;i++)
             {
             std::cout << gradV(i,j) << " should be " << gradVbis(i,j) << std::endl;
-            BOOST_TEST( gradV(i,j) == gradVbis(i,j) );
+            BOOST_TEST( std::abs(gradV(i,j) - gradVbis(i,j)) <= 1e-13 * scale );
             }
+        }
     }
 
 /* test of calc_Hst, return value Hst is a field, contribution of spin diffusion to LLG */
-BOOST_AUTO_TEST_CASE(Tet_calc_Hst, *boost::unit_test::tolerance(UT_TOL))
+BOOST_AUTO_TEST_CASE(Tet_calc_Hst, *boost::unit_test::tolerance(1e-13))
+    // 1e-13: the reference computes the prefactor with operations in a different order
     {
     using namespace Nodes;
     const int nbNod = 4;
