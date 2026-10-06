@@ -53,6 +53,9 @@ add_executable (test_ut_tri_charges ${SOURCES})
 SET(SOURCES ../src/tetra.cpp ut_tetra.cpp)
 add_executable (test_ut_tetra ${SOURCES})
 
+SET(SOURCES ../src/tetra.cpp ut_tet_spinAccumulation.cpp)
+add_executable(test_ut_tet_spinAccumulation ${SOURCES})
+
 SET(SOURCES ../src/tetra.cpp ut_thiele.cpp)
 add_executable (test_ut_thiele ${SOURCES})
 
@@ -97,6 +100,13 @@ target_link_libraries(test_ut_element
     )
 
 target_link_libraries(test_ut_tetra
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+    TBB::tbb
+    )
+
+target_link_libraries(test_ut_tet_spinAccumulation
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
     ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
@@ -150,6 +160,8 @@ if (MKL_FOUND)
     #target_compile_options(test_ut_tetra PUBLIC -fsanitize=leak )
     #target_link_options(test_ut_tetra PUBLIC -fsanitize=leak )
     target_link_libraries(test_ut_tetra PkgConfig::MKL)
+
+    target_link_libraries(test_ut_tet_spinAccumulation PkgConfig::MKL)
 
     target_link_libraries(test_ut_tet_lumping PkgConfig::MKL)
 
@@ -269,6 +281,7 @@ add_test (NAME ut_element COMMAND test_ut_element)
 add_test (NAME ut_triangle COMMAND test_ut_triangle)
 add_test (NAME ut_tri_charges COMMAND test_ut_tri_charges)
 add_test (NAME ut_tetra COMMAND test_ut_tetra)
+add_test (NAME ut_tet_spinAccumulation COMMAND test_ut_tet_spinAccumulation)
 add_test (NAME ut_thiele COMMAND test_ut_thiele)
 add_test (NAME ut_tet_lumping COMMAND test_ut_tet_lumping)
 add_test (NAME ut_tet_charges COMMAND test_ut_tet_charges)
