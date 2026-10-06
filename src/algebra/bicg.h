@@ -72,27 +72,27 @@ void bicg(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std::ve
         }
     }
 
-/** directional stabilized biconjugate gradient (mask) with diagonal preconditioner with Dirichlet
- * conditions, returns residu
+/** directional stabilized biconjugate gradient (mask) with a general preconditioner M and Dirichlet
+ * conditions
  * iter is an iteration object
  * the linear system to solve is A x = rhs
  * ld is a mask: a list of indices that will be zeroed when using applyMask(ld, vector)
  * xd is a vector containing some values on the nodes where Dirichlet applies
+ * precond(p, phat) computes phat = M p (phat has the size of p)
  */
-template<typename T>
-void bicg_dir(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std::vector<T> & rhs,
-           const std::vector<T>& xd, const std::vector<int>& ld)
+template<typename T, typename Precond>
+void bicg_dir_prec(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x,
+                   const std::vector<T> & rhs, const std::vector<T>& xd, const std::vector<int>& ld,
+                   const Precond &precond)
     {
     T rho_1(0.0), rho_2(0.0), alpha(0.0), beta(0.0), omega(0.0);
     const size_t DIM = x.size();
     std::vector<T> p(DIM), phat(DIM), shat(DIM);
-    std::vector<T> r(DIM), rt(DIM), s(DIM), t(DIM), v(DIM), diag_precond(DIM), b(rhs);
+    std::vector<T> r(DIM), rt(DIM), s(DIM), t(DIM), v(DIM), b(rhs);
 
-    A.build_diag_precond<T>(diag_precond);
     mult(A, xd, v);
     sub(v, b);      // b -= A xd; so b = rhs - A xd
     applyMask(ld,b);
-    applyMask(ld,diag_precond);
 
     iter.set_rhsnorm(norm(b));
 
@@ -121,7 +121,8 @@ void bicg_dir(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std
             add(r, p);                  // p += r; so  p = r + beta p
             }
 
-        p_direct(diag_precond, p, phat);// phat = direct_product(diag_precond, p);
+        precond(p, phat);               // phat = M p;
+        applyMask(ld,phat);
         mult(A, phat, v);               //  v = A phat;
         applyMask(ld,v);
         alpha=rho_1/dot(v, rt);         // alpha = rho_1 /(v'*rtilde);
@@ -136,7 +137,8 @@ void bicg_dir(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std
         else if ((iter.status == ITER_OVERFLOW)||(iter.status == CANNOT_CONVERGE))
             {break;}
 
-        p_direct(diag_precond, s, shat);// shat = direct_product(diag_precond, s);
+        precond(s, shat);               // shat = M s;
+        applyMask(ld,shat);
         mult(A, shat, t);               //  t = A shat;
         applyMask(ld,t);
         omega = dot(t, s)/dot(t,t);    // omega = (t'* s) / (t'*t);
@@ -151,6 +153,25 @@ void bicg_dir(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std
         ++iter;
         }
     add(xd, x);                // x += xd
+    }
+
+/** directional stabilized biconjugate gradient (mask) with diagonal preconditioner with Dirichlet
+ * conditions
+ * iter is an iteration object
+ * the linear system to solve is A x = rhs
+ * ld is a mask: a list of indices that will be zeroed when using applyMask(ld, vector)
+ * xd is a vector containing some values on the nodes where Dirichlet applies
+ */
+template<typename T>
+void bicg_dir(iteration<T> &iter, SparseMatrix& A, std::vector<T> & x, const std::vector<T> & rhs,
+           const std::vector<T>& xd, const std::vector<int>& ld)
+    {
+    std::vector<T> diag_precond(x.size());
+    A.build_diag_precond<T>(diag_precond);
+    applyMask(ld,diag_precond);
+    bicg_dir_prec(iter, A, x, rhs, xd, ld,
+                  [&diag_precond](const std::vector<T> &p, std::vector<T> &phat)
+                  { p_direct(diag_precond, p, phat); });
     }
 
 /** directional stabilized biconjugate gradient (mask is ld) with diagonal preconditioner, returns

@@ -1,4 +1,5 @@
 #include "algebra/bicg.h"
+#include "algebra/block_precond.h"
 #include "spinAccumulationSolver.h"
 #include "chronometer.h" //date()
 
@@ -210,7 +211,12 @@ bool spinAcc::solve(void)
         }
 
     std::vector<double> Xw(DIM_PB * NOD);
-    algebra::bicg_dir(iter, K, Xw, L_rhs, valDirichlet, idxDirichlet);
+    /* block diagonal preconditioner (inverse of the 3x3 block of each node), as st-feeLLGood: it
+     * captures the precession coupling s x u, local to each node, that the diagonal one misses */
+    const algebra::BlockDiagPrecond<DIM_PB> precond(K, NOD, idxDirichlet);
+    algebra::bicg_dir_prec(iter, K, Xw, L_rhs, valDirichlet, idxDirichlet,
+                           [&precond](const std::vector<double> &p, std::vector<double> &phat)
+                           { precond.apply(p, phat); });
 
     for (int i = 0; i < NOD; i++)
         {
