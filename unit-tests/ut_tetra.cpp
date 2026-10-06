@@ -434,7 +434,7 @@ BOOST_AUTO_TEST_CASE(Tet_gradV, *boost::unit_test::tolerance(UT_TOL))
     Tetra::Tet tet(node, 0, {1, 2, 3, 4});
 
     // code to test
-    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> gradV = Tetra::calc_gradV(tet,V);
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> gradV = tet.gradV(V);
 
     // ugly version
     Eigen::Matrix<double,Tetra::N,1> V_nod;

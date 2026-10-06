@@ -365,7 +365,7 @@ BOOST_AUTO_TEST_CASE(tet_spin_diff_BE_filling, *boost::unit_test::tolerance(1e-1
     const double cst0 = BOHRS_MUB*P*sigma/CHARGE_ELECTRON;
     // the three following messy lines mimic pre_compute() method
     std::vector< Eigen::Matrix<double,Nodes::DIM,NPI> > gradV;
-    gradV.push_back(calc_gradV(t,V));
+    gradV.push_back(t.gradV(V));
     Eigen::Matrix<double,Nodes::DIM,NPI> &_gradV = gradV[t.idx];
 
     // magnetization at the Gauss points (as spinAcc::integrales)

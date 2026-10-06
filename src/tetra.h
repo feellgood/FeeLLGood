@@ -356,6 +356,9 @@ public:
         return vec_nod*eigen_a;
         }
 
+    /** returns grad(V) */
+    Eigen::Matrix<double,Nodes::DIM,NPI> gradV(const std::vector<double> &V) const;
+
 private:
     /** Enforce the correct orientation by swapping nodes if needed. */
     void orientate(void) override;
@@ -365,9 +368,6 @@ private:
      * a piecewise formula, dt is the reduced time step */
     Eigen::Matrix<double,NPI,1> calc_alpha_eff(const double dt, const double alpha,
                                                Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff);
-
-    /** returns grad(V) for tetra tet */
-    Eigen::Matrix<double,Nodes::DIM,NPI> calc_gradV(Tet const &tet, const std::vector<double> &V);
 
     /** returns Hst field on the NPI Gauss point(s) */
     Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> calc_Hst(const Tetra::Tet &tet,

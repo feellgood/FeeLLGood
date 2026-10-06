@@ -271,7 +271,7 @@ void spinAcc::integrales(Tetra::Tet &tet, std::vector<double> &BE)
     * units: [cst0] = [sigma] m^2 = A^2 s^3 m^-1 kg^-1
     */
     const double cst0 = BOHRS_MUB * getPolarizationRate(tet) * getSigma(tet) / CHARGE_ELECTRON;
-    const Eigen::Matrix<double, Nodes::DIM, NPI> &_gradV = calc_gradV(tet, V);
+    Eigen::Matrix<double, Nodes::DIM, NPI> gradV = tet.gradV(V);
 
     if(msh->isMagnetic(tet))
         {
@@ -280,7 +280,7 @@ void spinAcc::integrales(Tetra::Tet &tet, std::vector<double> &BE)
         const Eigen::Matrix<double,Nodes::DIM,NPI> U = calc_u_nod(tet) * eigen_a;
         for (size_t npi = 0; npi < NPI; npi++)
             {
-            const Eigen::Vector3d cst0_w_gradV = cst0 * tet.weight[npi] * _gradV.col(npi);
+            const Eigen::Vector3d cst0_w_gradV = cst0 * tet.weight[npi] * gradV.col(npi);
 
             for (size_t ie = 0; ie < N; ie++)
                 {
