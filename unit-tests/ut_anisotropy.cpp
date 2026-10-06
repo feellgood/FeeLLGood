@@ -266,7 +266,7 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TO
         }
     }
 
-BOOST_AUTO_TEST_CASE(anisotropy_cubic_derivative)
+BOOST_AUTO_TEST_CASE(anisotropy_cubic_derivative, *boost::unit_test::tolerance(1e-6))
     {
     /* check that the second order term of the cubic anisotropy is the derivative of the field
      with respect to u: (H(u + eps v) - H(u - eps v))/(2 eps) = H'(u)[v], for random axes */
@@ -311,9 +311,9 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic_derivative)
         {
         Eigen::Vector3d dH = H1.col(npi) - H0.col(npi);
         Eigen::Vector3d dH_fd = (Hp.col(npi) - Hm.col(npi))/(2*eps);
-        double err = (dH - dH_fd).norm()/dH_fd.norm();
-        std::cout << "npi= " << npi << " relative error on H'[v] = " << err << std::endl;
-        BOOST_TEST( err < 1e-6, "cubic anisotropy: second order term is not the derivative of H" );
+        double relative_err = (dH - dH_fd).norm()/dH_fd.norm();
+        std::cout << "npi= " << npi << " relative error on H'[v] = " << relative_err << std::endl;
+        BOOST_TEST( relative_err == 0.0, "cubic anisotropy: second order term is not the derivative of H" );
         }
     }
 
