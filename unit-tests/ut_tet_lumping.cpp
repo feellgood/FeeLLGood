@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(tet_exchange_lumping, *boost::unit_test::tolerance(UT_TOL))
             }
     }
 
-BOOST_AUTO_TEST_CASE(tet_lumping, *boost::unit_test::tolerance(UT_TOL))
+BOOST_AUTO_TEST_CASE(tet_lumping)
     {
     Eigen::Matrix<double, 3*Tetra::N, 3*Tetra::N> AE_to_check;
     AE_to_check.setZero();
@@ -189,10 +189,17 @@ BOOST_AUTO_TEST_CASE(tet_lumping, *boost::unit_test::tolerance(UT_TOL))
     t.lumping(alfa, prm_t.prefactor * s_dt * Abis, AE_to_check);
     // end code to check
 
+    /* same terms summed in different orders: the deviations (a few rounding units) are compared
+     with the largest coefficient of AE */
+    double scale = 0.0;
+    for (int i = 0; i < 3*Tetra::N; i++)
+        for (int j = 0; j < 3*Tetra::N; j++)
+            { scale = std::max(scale, std::abs(AE[i][j])); }
     for (int i = 0; i < 3*Tetra::N; i++)
         for (int j = 0; j < 3*Tetra::N; j++)
             {
-            BOOST_TEST(AE_to_check(i,j) == AE[i][j]);
+            const bool AE_ok = (std::abs(AE_to_check(i,j) - AE[i][j]) <= 1e-13 * scale);
+            BOOST_TEST(AE_ok);
             }
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
     }
@@ -308,8 +315,7 @@ for (size_t npi=0; npi<NPI; npi++)
             }
     }
 
-BOOST_AUTO_TEST_CASE(tet_spin_diff_BE_filling, *boost::unit_test::tolerance(1e-13))
-    // 1e-13: the code to test and the reference sum u at the Gauss points in different orders
+BOOST_AUTO_TEST_CASE(tet_spin_diff_BE_filling)
     {
     std::cout <<"\ttest on spin diffusion BE filling\n";
     const int nbNod = 4;
@@ -408,10 +414,17 @@ BOOST_AUTO_TEST_CASE(tet_spin_diff_BE_filling, *boost::unit_test::tolerance(1e-1
 	        }
         }
     // end code ref
+    /* the code to test and the reference sum the same terms in different orders, and a component
+     of BE may be small after cancellation (sum over the Gauss points of terms of both signs): the
+     deviations are compared with the largest component of BE, not component by component */
+    double scale = 0.0;
+    for(size_t i=0;i<BE.size();i++)
+        { scale = std::max(scale, std::abs(BE[i])); }
     for(size_t i=0;i<BE.size();i++)
         {
         std::cout << BE_to_check[i] << " should be " << BE[i] << std::endl;
-        BOOST_TEST( BE_to_check[i] == BE[i]);
+        const bool BE_ok = (std::abs(BE_to_check[i] - BE[i]) <= 1e-13 * scale);
+        BOOST_TEST( BE_ok );
         }
     }
 
