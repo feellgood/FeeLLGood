@@ -86,7 +86,7 @@ iterations per solve, 1385 for the first one, on the mesh of the st-feeLLGood re
 
 The preconditioner is the inverse of the block-diagonal part of $K$:
 ```math
-M^{-1} = \operatorname{blockdiag}\big(B_1^{-1}, \dots, B_N^{-1}\big),
+M^{-1} = \text{blockdiag}\big(B_1^{-1}, \dots, B_N^{-1}\big),
 \qquad M^{-1} K = \mathrm{I} + \big(\text{coupling between nodes}\big).
 ```
 It removes exactly the node-local skew-symmetric coupling; what remains is the diffusion between
@@ -162,7 +162,7 @@ number of iterations drops from 310 (diagonal) to 43 (blocks) and 10 (ILU(0)).
 ## Remarks
 
 - The diffusion part of (2) is the same for the three components. An ILU or multigrid
-  preconditioner of the scalar matrix $S + \operatorname{diag}(\mu)$, applied to each component,
+  preconditioner of the scalar matrix $S + \text{diag}(\mu)$, applied to each component,
   could be combined with the block one if the diffusion ever became the limiting factor (fine
   meshes with $h \ll l_{sd}$).
 - When $h \ll l_{sd}$, $\nu_i/d_i \ll 1$ and the block and diagonal preconditioners become
