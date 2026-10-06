@@ -274,11 +274,12 @@ public:
 
     /** append(+=) H_aniso for cubic anisotropy contribution, returns contribution to uHeff (used to
      * compute the stabilizing effective damping) */
-    Eigen::Matrix<double,NPI,1> calc_aniso_cub(const Eigen::Ref<const Eigen::Matrix3d> e,
-            const double K3bis, const double s_dt,
-            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
-            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V,
-            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H_aniso) const;
+    Eigen::Matrix<double,NPI,1> calc_aniso_cub(const Eigen::Ref<const Eigen::Matrix3d> e /**< [in] base vectors */,
+            const double K3bis /**< [in] cubic anisotropy coefficient */,
+            const double s_dt /**< [in] THETA*dt */,
+            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U /**< [in] magnetization */,
+            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V /**< [in] */,
+            Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> H_aniso /**< [out] effective cubic anisotropy field */) const;
 
     /** append(+=) to H the second order term of the spin accumulation field Hst: s_dt times the
      * derivative of its tangent part in the direction V, -s_dt (U.Hst) V; s_dt is theta*dt and V
