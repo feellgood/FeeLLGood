@@ -204,16 +204,17 @@ Eigen::Matrix<double,NPI,1> Tet::calc_aniso_cub(const Eigen::Ref<const Eigen::Ma
     return -K3bis*result;
     }
 
-void Tet::calc_Hst_order2(const Eigen::Ref<const Eigen::Matrix<double,DIM,NPI>> Hst,
-                          const double s_dt,
+Eigen::Matrix<double,Nodes::DIM,NPI> Tet::Hst_order2_contribution(const Eigen::Ref<const Eigen::Matrix<double,DIM,NPI>> Hst,
                           const Eigen::Ref<const Eigen::Matrix<double,DIM,NPI>> U,
-                          const Eigen::Ref<const Eigen::Matrix<double,DIM,NPI>> V,
-                          Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> H) const
+                          const Eigen::Ref<const Eigen::Matrix<double,DIM,NPI>> V) const
     {
     /* only the tangent part Hst - (u.Hst) u acts; its derivative in the direction v (tangent)
      * is -(u.Hst) v (the term along u vanishes after projection) */
+    Eigen::Matrix<double,DIM,NPI> Hst_order2;
+
     for(int npi = 0;npi<NPI;npi++)
-        { H.col(npi) -= s_dt * Hst.col(npi).dot(U.col(npi)) * V.col(npi); }
+        { Hst_order2.col(npi) = -Hst.col(npi).dot(U.col(npi)) * V.col(npi); }
+    return Hst_order2;
     }
 
 void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
@@ -295,8 +296,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
         else if (idx_dir == IDX_X)
             add_drift_BE(alpha, s_dt, Vdrift, U, V, dUdx, dVd_dir, BE);
         }
-    H += H_aniso + s_dt * Hv;
-    calc_Hst_order2(Hst, s_dt, U, V, H);
+    H += H_aniso + s_dt*(Hv + Hst_order2_contribution(Hst, U, V));
 
     for (int npi = 0; npi < NPI; npi++)
         {

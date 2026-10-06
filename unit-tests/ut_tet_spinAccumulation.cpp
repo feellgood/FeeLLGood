@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(Tet_calc_Hst, *boost::unit_test::tolerance(1e-13))
             }
     }
 
-BOOST_AUTO_TEST_CASE(Tet_calc_Hst_order2,*boost::unit_test::tolerance(1e-6))
+BOOST_AUTO_TEST_CASE(Tet_Hst_order2_contribution,*boost::unit_test::tolerance(1e-6))
     {
     /* the second order term of the spin accumulation field must be the derivative of its tangent
      part Hst - (u.Hst) u in the direction v (v tangent to u), projected on the tangent plane:
@@ -103,8 +103,7 @@ BOOST_AUTO_TEST_CASE(Tet_calc_Hst_order2,*boost::unit_test::tolerance(1e-6))
         V.col(npi) = w - w.dot(U.col(npi)) * U.col(npi);  // tangent to u
         Hst.col(npi) = (0.5 + distrib(gen)) * rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
         }
-    H.setZero();
-    t.calc_Hst_order2(Hst, 1.0, U, V, H);
+    H = t.Hst_order2_contribution(Hst, U, V);
 
     const double eps = 1e-6;// eps is used to compute a directionnal derivative
     auto tangent = [](const Eigen::Vector3d &u, const Eigen::Vector3d &h)
