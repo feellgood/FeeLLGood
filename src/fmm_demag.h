@@ -24,8 +24,8 @@ to grab altogether the templates and functions using scalfmm for the computation
 namespace scal_fmm
     {
 const int P = 9;              /**< truncation of the spherical harmonics series */
-const int NbLevels = 6;       /**< number of levels in the tree */
-const int SizeSubLevels = 3;  /**< size of the sub levels  */
+const int NbLevels = 8;       /**< number of levels in the tree (as st-feeLLGood) */
+const int SizeSubLevels = 6;  /**< size of the sub levels (as st-feeLLGood) */
 
 typedef double FReal; /**< parameter of scalfmm templates, all computations are made in double
                         precision */
