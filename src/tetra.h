@@ -94,9 +94,7 @@ struct prm
     Eigen::Vector3d uk;  /**< uniaxial anisotropy axis */
 
     double K3;           /**< cubic anisotropy constant */
-    Eigen::Vector3d ex;  /**< unit vector1 (for cubic anisotropy) */
-    Eigen::Vector3d ey;  /**< unit vector2 (for cubic anisotropy) */
-    Eigen::Vector3d ez;  /**< unit vector3 (for cubic anisotropy) */
+    Eigen::Matrix3d e;   /**< base vectors for cubic anisotropy */
 
     double P;            /**< spin diffusion polarization rate, dimensionless */
     double N0;           /**< density of states at Fermi level
@@ -276,9 +274,7 @@ public:
 
     /** append(+=) H_aniso for cubic anisotropy contribution, returns contribution to uHeff (used to
      * compute the stabilizing effective damping) */
-    Eigen::Matrix<double,NPI,1> calc_aniso_cub(const Eigen::Ref<const Eigen::Vector3d> ex,
-            const Eigen::Ref<const Eigen::Vector3d> ey,
-            const Eigen::Ref<const Eigen::Vector3d> ez,
+    Eigen::Matrix<double,NPI,1> calc_aniso_cub(const Eigen::Ref<const Eigen::Matrix3d> e,
             const double K3bis, const double s_dt,
             Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
             Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V,

@@ -29,7 +29,7 @@ void prm::infos(void)
 
         if (K3 != 0)
             {
-            cout << "K3 = " << K3 << "; ex=[ " << ex << "], ey=[" << ey << "], ez=[" << ez << "]\n";
+            cout << "K3 = " << K3 << "; ex=[ " << e.col(IDX_X) << "], ey=[" << e.col(IDX_Y) << "], ez=[" << e.col(IDX_Z) << "]\n";
             }
         cout << "l_sd = " << lsd << std::endl;
         }
@@ -179,30 +179,26 @@ Eigen::Matrix<double,NPI,1> Tet::calc_aniso_uniax(const Eigen::Ref<const Eigen::
     return Kbis * (U.transpose() * uk).array().square();
     }
 
-Eigen::Matrix<double,NPI,1> Tet::calc_aniso_cub(const Eigen::Ref<const Eigen::Vector3d> ex,
-                           const Eigen::Ref<const Eigen::Vector3d> ey,
-                           const Eigen::Ref<const Eigen::Vector3d> ez,
+Eigen::Matrix<double,NPI,1> Tet::calc_aniso_cub(const Eigen::Ref<const Eigen::Matrix3d> e,
                            const double K3bis, const double s_dt,
                            Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> U,
                            Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> V,
                            Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> H_aniso) const
     {
-    /* cubic axes k_l as columns, a_l = k_l.u ; field H = -K3bis sum_l a_l (1 - a_l^2) k_l
+    /* cubic axes e_l as columns, a_l = e_l.u ; field H = -K3bis sum_l a_l (1 - a_l^2) e_l
      * second order term: exact derivative of H in the direction v,
-     * H'(u)[v] = -K3bis sum_l (k_l.v) (1 - 3 a_l^2) k_l */
-    Eigen::Matrix3d k;
-    k << ex, ey, ez;
+     * H'(u)[v] = -K3bis sum_l (e_l.v) (1 - 3 a_l^2) e_l */
+
     Eigen::Matrix<double,NPI,1> result;
     for(int npi = 0;npi<NPI;npi++)
         {
-        Eigen::Vector3d uk_u = k.transpose() * U.col(npi);
-        Eigen::Vector3d uk_v = k.transpose() * V.col(npi);
+        Eigen::Vector3d uk_u = e.transpose() * U.col(npi);
+        Eigen::Vector3d uk_v = e.transpose() * V.col(npi);
         Eigen::Vector3d uk_uuu = uk_u.unaryExpr( [](const double x){ return x*(1.0 - x*x);} );
         Eigen::Vector3d dH = uk_v.cwiseProduct( Eigen::Vector3d(1, 1, 1)
                                                 - 3*uk_u.cwiseProduct(uk_u) );
 
-        H_aniso.col(npi) += -K3bis * k * (uk_uuu + s_dt * dH);
-
+        H_aniso.col(npi) += -K3bis * e * (uk_uuu + s_dt * dH);
         result[npi] = uk_u.dot(uk_uuu);
         }
     return -K3bis*result;
@@ -255,7 +251,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     if(param.K3 != 0)
         {
         double K3bis = 2.0 * param.K3/(mu0*Ms);
-        uHeff += calc_aniso_cub(param.ex, param.ey, param.ez, K3bis, s_dt, U, V, H_aniso);
+        uHeff += calc_aniso_cub(param.e, K3bis, s_dt, U, V, H_aniso);
         }
 
     Eigen::Matrix<double,DIM,NPI> Heff = Hd + calc_Hext();
@@ -348,9 +344,9 @@ double Tet::cubicAnisotropyEnergy(const Tetra::prm &param,
         {
         Eigen::Vector3d m = u.col(npi);
         // cosinus directeurs
-        double al0 = m.dot(param.ex);
-        double al1 = m.dot(param.ey);
-        double al2 = m.dot(param.ez);
+        double al0 = m.dot(param.e.col(IDX_X));
+        double al1 = m.dot(param.e.col(IDX_Y));
+        double al2 = m.dot(param.e.col(IDX_Z));
         dens[npi] = sq(al0 * al1) + sq(al1 * al2) + sq(al2 * al0);
         }
     return param.K3*weight.dot(dens);

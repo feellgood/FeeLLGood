@@ -157,6 +157,9 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TO
     double uk21 = ez.y();
     double uk22 = ez.z();
 
+    Eigen::Matrix3d e;
+    e << ex, ey, ez;
+
     double K3 = distrib(gen);
     double Js = 0.5 + distrib(gen);  // add 0.5 to center Js around 1
 
@@ -200,7 +203,7 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic, *boost::unit_test::tolerance(10.0 * UT_TO
         H_aniso.setZero();
         Eigen::Matrix<double,Tetra::NPI,1> contrib_aniso;
         contrib_aniso.setZero();
-        contrib_aniso = t.calc_aniso_cub(ex, ey, ez, K3bis, THETA * dt, U, V, H_aniso);
+        contrib_aniso = t.calc_aniso_cub(e, K3bis, THETA * dt, U, V, H_aniso);
         // end of code to test
 
     for (int npi = 0; npi < Tetra::NPI; npi++)
@@ -267,6 +270,7 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic_derivative)
     {
     /* check that the second order term of the cubic anisotropy is the derivative of the field
      with respect to u: (H(u + eps v) - H(u - eps v))/(2 eps) = H'(u)[v], for random axes */
+    using namespace Nodes;
     unsigned sd = my_seed();
     std::mt19937 gen(sd);
     std::uniform_real_distribution<> distrib(0.0, 1.0);
@@ -277,9 +281,10 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic_derivative)
     Tetra::Tet t(node, 0, {1, 2, 3, 4});
 
     Eigen::Vector3d rand_vect = rand_vec3d( M_PI * distrib(gen), 2 * M_PI * distrib(gen) );
-    Eigen::Vector3d ex = rand_vec3d( M_PI * distrib(gen), 2 * M_PI * distrib(gen) );
-    Eigen::Vector3d ey = ex.cross(rand_vect).normalized();
-    Eigen::Vector3d ez = ex.cross(ey).normalized();
+    Eigen::Matrix3d e;
+    e.col(IDX_X) = rand_vec3d( M_PI * distrib(gen), 2 * M_PI * distrib(gen) );
+    e.col(IDX_Y) = e.col(IDX_X).cross(rand_vect).normalized();
+    e.col(IDX_Z) = e.col(IDX_X).cross(e.col(IDX_Y)).normalized();
     const double K3bis = 0.5 + distrib(gen);
     const double eps = 1e-6;
 
@@ -293,10 +298,14 @@ BOOST_AUTO_TEST_CASE(anisotropy_cubic_derivative)
     Up = U + eps*V;
     Um = U - eps*V;
     // H'(u)[v] = H_aniso(s_dt = 1) - H_aniso(s_dt = 0)
-    H0.setZero(); t.calc_aniso_cub(ex, ey, ez, K3bis, 0.0, U, V, H0);
-    H1.setZero(); t.calc_aniso_cub(ex, ey, ez, K3bis, 1.0, U, V, H1);
-    Hp.setZero(); t.calc_aniso_cub(ex, ey, ez, K3bis, 0.0, Up, Z, Hp);
-    Hm.setZero(); t.calc_aniso_cub(ex, ey, ez, K3bis, 0.0, Um, Z, Hm);
+    H0.setZero();
+    t.calc_aniso_cub(e, K3bis, 0.0, U, V, H0);
+    H1.setZero();
+    t.calc_aniso_cub(e, K3bis, 1.0, U, V, H1);
+    Hp.setZero();
+    t.calc_aniso_cub(e, K3bis, 0.0, Up, Z, Hp);
+    Hm.setZero();
+    t.calc_aniso_cub(e, K3bis, 0.0, Um, Z, Hm);
 
     for (int npi = 0; npi < Tetra::NPI; npi++)
         {

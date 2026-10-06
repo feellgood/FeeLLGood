@@ -290,9 +290,9 @@ void Settings::toYaml()
         std::cout << "      K3: " << it->K3 << "\n";
         if (it->K3 != 0)
             {
-            std::cout << "      ex: " << str(it->ex) << "\n";
-            std::cout << "      ey: " << str(it->ey) << "\n";
-            std::cout << "      ez: " << str(it->ez) << "\n";
+            std::cout << "      ex: " << str(it->e.col(IDX_X)) << "\n";
+            std::cout << "      ey: " << str(it->e.col(IDX_Y)) << "\n";
+            std::cout << "      ez: " << str(it->e.col(IDX_Z)) << "\n";
             }
         std::cout << "      alpha_LLG: " << it->alpha_LLG << "\n";
         std::cout << "      sigma: " << it->sigma << "\n";
@@ -520,10 +520,12 @@ void Settings::read(YAML::Node yaml)
                 assign(p.K, volume["K"]);
                 assign(NORMALIZE, p.uk, volume["uk"]);
                 assign(p.K3, volume["K3"]);
-                assign(NORMALIZE, p.ex, volume["ex"]);
-                assign(NORMALIZE, p.ey, volume["ey"]);
-                assign(NORMALIZE, p.ez, volume["ez"]);
-                if (!isOrthogonal(p.ex, p.ey, p.ez, USER_TOL))
+                Eigen::Vector3d ex,ey,ez;
+                assign(NORMALIZE, ex, volume["ex"]);
+                assign(NORMALIZE, ey, volume["ey"]);
+                assign(NORMALIZE, ez, volume["ez"]);
+                p.e << ex, ey, ez;
+                if (!isOrthogonal(p.e.col(IDX_X), p.e.col(IDX_Y), p.e.col(IDX_Z), USER_TOL))
                     { std::cout << "Warning: (ex, ey, ez) is not orthogonal.\n"; }
                 assign(p.alpha_LLG, volume["alpha_LLG"]);
                 assign(p.sigma, volume["sigma"]);
