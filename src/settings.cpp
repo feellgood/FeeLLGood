@@ -366,6 +366,9 @@ void Settings::toYaml()
         { std::cout << "  V_file: " << str(V_file) << "\n"; }
     std::cout << "demagnetizing_field_solver:\n";
     std::cout << "  nb_threads: " << scalfmmNbTh << "\n";
+    std::cout << "  order: " << fmmOrder << "\n";
+    std::cout << "  tree_height: " << fmmTreeHeight << "\n";
+    std::cout << "  group_size: " << fmmGroupSize << "\n";
     std::cout << "finite_element_solver:\n";
     std::cout << "  max(iter): " << MAXITER << "\n";
     std::cout << "  tolerance: " << TOL << "\n";
@@ -676,6 +679,15 @@ void Settings::read(YAML::Node yaml)
         assign(scalfmmNbTh, solver["nb_threads"]);
         if (scalfmmNbTh <= 0)
             { scalfmmNbTh = available_cpu_count; }
+        assign(fmmOrder, solver["order"]);
+        if (fmmOrder < 2)
+            { error("demagnetizing_field_solver.order should be at least 2"); }
+        assign(fmmTreeHeight, solver["tree_height"]);
+        if (fmmTreeHeight != 0 && fmmTreeHeight < 3)
+            { error("demagnetizing_field_solver.tree_height should be 0 (automatic) or at least 3"); }
+        assign(fmmGroupSize, solver["group_size"]);
+        if (fmmGroupSize < 1)
+            { error("demagnetizing_field_solver.group_size should be at least 1"); }
         }  // demagnetizing_field_solver
 
     solver = yaml["finite_element_solver"];

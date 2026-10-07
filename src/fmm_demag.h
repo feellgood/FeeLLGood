@@ -2,18 +2,16 @@
 #define FMM_DEMAG_H
 
 /** \file fmm_demag.h
-\brief this header is the interface to scalfmm. Its purpose is to prepare an octree for the
-application of the fast multipole algorithm, and to compute the scalar magnetic potential and the
-demagnetizing field.
+\brief this header is the interface to scalfmm 3. Its purpose is to prepare a source tree and a
+target tree for the application of the fast multipole algorithm, and to compute the scalar magnetic
+potential and the demagnetizing field.
+scalfmm 3 headers define non inline functions, hence they must be included in a single translation
+unit: they are only included by fmm_demag.cpp, and class fmm hides them behind a pointer to its
+implementation.
 */
 
-#include "Components/FParticleType.hpp"
-#include "Components/FTypedLeaf.hpp"
-#include "Containers/FOctree.hpp"
-#include "Core/FFmmAlgorithmThreadTsm.hpp"
-#include "Kernels/P2P/FP2PParticleContainerIndexed.hpp"
-#include "Kernels/Rotation/FRotationCell.hpp"
-#include "Kernels/Rotation/FRotationKernel.hpp"
+#include <memory>
+#include <vector>
 
 #include "mesh.h"
 
@@ -23,205 +21,42 @@ to grab altogether the templates and functions using scalfmm for the computation
 
 namespace scal_fmm
     {
-const int P = 9;              /**< truncation of the spherical harmonics series */
-const int NbLevels = 6;       /**< number of levels in the tree */
-const int SizeSubLevels = 3;  /**< size of the sub levels  */
-
-typedef double FReal; /**< parameter of scalfmm templates, all computations are made in double
-                        precision */
-
-typedef FTypedRotationCell<FReal, P>
-        CellClass; /**< convenient typedef for the definition of cell type in scalfmm  */
-
-typedef FP2PParticleContainerIndexed<FReal>
-        ContainerClass; /**< convenient typedef for the definition of container for scalfmm */
-
-typedef FTypedLeaf<FReal, ContainerClass>
-        LeafClass; /**< convenient typedef for the definition of leaf for scalfmm  */
-
-typedef FOctree<FReal, CellClass, ContainerClass, LeafClass>
-        OctreeClass; /**< convenient typedef for the definition of the octree for scalfmm */
-
-typedef FRotationKernel<FReal, CellClass, ContainerClass, P>
-        KernelClass; /**< convenient typedef for the kernel for scalfmm */
-
-typedef FFmmAlgorithmThreadTsm<OctreeClass, CellClass, ContainerClass, KernelClass, LeafClass>
-        FmmClass; /**< convenient typedef for handling altogether the differents scalfmm object
-                     templates used in feellgood  */
-
-const double boxWidth = 2.01;              /**< bounding box max dimension */
-const FPoint<FReal> boxCenter(0., 0., 0.); /**< center of the bounding box */
-
 /** \class fmm
-to initialize a tree and a kernel for the computation of the demagnetizing field, and launch the
-computation easily with calc_demag public member
+to initialize the trees and the operators for the computation of the demagnetizing field, and launch
+the computation easily with calc_demag public member
 */
 class fmm
     {
 public:
-    /** constructor, initialize memory for tree, kernel, sources corrections, initialize all sources
+    /** constructor, initialize memory for trees, operators, sources corrections, initialize all
+     * sources and targets
      */
-    inline fmm(Mesh::mesh &msh /**< [in] */,
-               std::vector<Tetra::prm> & prmTet /**< [in] */,
-               std::vector<Triangle::prm> & prmTri /**< [in] */,
-               const int ScalfmmNbThreads /**< [in] */)
-        : prmTetra(prmTet), prmTriangle(prmTri),
-          tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels(NbLevels, boxWidth, boxCenter)
-        {
-        omp_set_num_threads(ScalfmmNbThreads);
-        norm = 2. / msh.l.maxCoeff();
+    fmm(Mesh::mesh &msh /**< [in] */,
+        std::vector<Tetra::prm> & prmTet /**< [in] */,
+        std::vector<Triangle::prm> & prmTri /**< [in] */,
+        const int ScalfmmNbThreads /**< [in] */,
+        const int order /**< [in] order of the interpolation polynomials of the far field */,
+        const int treeHeight /**< [in] height of the trees, 0 means automatic */,
+        const int groupSize /**< [in] number of leaves and cells per group in the trees */);
 
-        FSize idxPart = 0;
-        for (idxPart = 0; idxPart < (FSize)msh.magNode.size(); ++idxPart)
-            {
-            if (msh.magNode[idxPart])
-                {
-                Eigen::Vector3d pTarget = norm*(msh.getNode_p(idxPart) - msh.c);
-                tree.insert(FPoint<FReal>(pTarget.x(), pTarget.y(), pTarget.z()),
-                            FParticleType::FParticleTypeTarget, idxPart);
-                }
-            }
-
-        insertCharges<Tetra::Tet, Tetra::NPI>(msh.tet, msh.magTet, idxPart, msh.c);
-        insertCharges<Triangle::Tri, Triangle::NPI>(msh.tri, msh.magTri, idxPart, msh.c);
-
-        srcDen.resize( msh.magTri.size()*Triangle::NPI + msh.magTet.size()*Tetra::NPI );
-        corr.resize(msh.magNode.size());
-        }
+    /** destructor, defined where the implementation is complete */
+    ~fmm();
 
     /**
     Compute the demagnetizing field. Include the second order corrections if FIRST_ORDER=OFF
     (which is the default).
     */
-    void calc_demag(Mesh::mesh &msh /**< [in] */)
-        {
-        demag(Nodes::get_u<Nodes::NEXT>, Nodes::set_phi, msh);
-        if (!FIRST_ORDER)
-            { demag(Nodes::get_v<Nodes::NEXT>, Nodes::set_phiv, msh); }
-        }
+    void calc_demag(Mesh::mesh &msh /**< [in] */);
 
-    /** corrections associated to the nodes, contributions only due to the triangles */
-    std::vector<double> corr;
-
-    /** all volume region parameters for the tetraedrons */
-    const std::vector<Tetra::prm> &prmTetra;
-
-    /** all surface region parameters for the triangles */
-    const std::vector<Triangle::prm> &prmTriangle;
+    /** height of the trees, root included (useful when it is computed automatically) */
+    int treeHeight() const;
 
 private:
-    /** sources: both surface and volume charges */
-    std::vector<double> srcDen;
+    /** implementation, see fmm_demag.cpp */
+    struct impl;
 
-    /** tree initialized by constructor */
-    OctreeClass tree;
-
-    /** kernel initialized by constructor */
-    KernelClass kernels;
-
-    /** normalization coefficient */
-    double norm;
-
-    /**
-    function template to insert volume or surface charges in tree for demag computation. class T is
-    Tet or Tri, it must have getPtGauss() method to get the Gauss points, second template parameter 
-    is NPI of the namespace containing class T.
-    idxContainer is the list of indices of the magnetic T elements stored in container.
-    */
-    template<class T, const int NPI>
-    void insertCharges(const std::vector<T> &container, const std::vector<int> &idxContainer,
-                       FSize &idx, const Eigen::Ref<const Eigen::Vector3d> c)
-        {
-        std::for_each(idxContainer.begin(), idxContainer.end(),
-                      [this,&container, c, &idx](const int idxElem)
-                      {
-                      const T &elem = container[idxElem];
-                      Eigen::Matrix<double,Nodes::DIM,NPI> gauss = elem.getPtGauss();
-
-                      for (int j = 0; j < NPI; j++, idx++)
-                          {
-                          double x = norm*(gauss(0,j) - c.x());
-                          double y = norm*(gauss(1,j) - c.y());
-                          double z = norm*(gauss(2,j) - c.z());
-                          tree.insert(FPoint<FReal>(x,y,z), FParticleType::FParticleTypeSource,
-                                  idx, 0.0);
-                          }
-                      });
-        }
-
-    /** computes all charges from tetraedrons and triangles for the demag field to feed a tree in the
-     * fast multipole algo (scalfmm)
-     */
-    void calc_charges(const std::function<const Eigen::Vector3d(const Nodes::Node&)>& getter,
-            Mesh::mesh &msh)
-        {
-        int nsrc(0);
-        std::fill(srcDen.begin(),srcDen.end(),0);
-        std::for_each(msh.magTet.begin(),msh.magTet.end(),[this, &msh, &getter, &nsrc](const int idx)
-                {
-                Tetra::Tet &t = msh.tet[idx];
-                Eigen::Matrix<double,Tetra::NPI,1> result =
-                        t.charges(prmTetra[t.idxPrm].Ms, getter);
-                for(int i=0;i<Tetra::NPI;i++)
-                    { srcDen[nsrc+i] = result(i); }
-                nsrc += Tetra::NPI;
-                });
-        std::fill(corr.begin(),corr.end(),0);
-        std::for_each(msh.magTri.begin(),msh.magTri.end(),[this, &msh, &getter, &nsrc](const int idx)
-                {
-                Triangle::Tri &f = msh.tri[idx];
-                Eigen::Matrix<double,Triangle::NPI,1> result = f.charges(f.dMs, getter);
-                for(int i=0;i<Triangle::NPI;i++)
-                    { srcDen[nsrc+i] = result(i); }
-                nsrc += Triangle::NPI;
-                f.correctionCharges(getter,result,corr);
-                });
-        }
-
-    /**
-    computes the demag field, with (getter  = u,setter = phi) or (getter = v,setter = phi_v)
-    */
-    void demag(const std::function<const Eigen::Vector3d(const Nodes::Node&)>& getter,
-               const std::function<void(Nodes::Node &, const double)>& setter, Mesh::mesh &msh)
-        {
-        FmmClass algo(&tree, &kernels);
-        calc_charges(getter, msh);
-
-        auto nbMagNodes = msh.magNode.size();
-        // reset potentials and forces - physicalValues[idxPart] = Q
-        tree.forEachLeaf(
-                [this,&nbMagNodes](LeafClass *leaf)
-                {
-                    const int nbParticlesInLeaf = leaf->getSrc()->getNbParticles();
-                    const auto &indexes = leaf->getSrc()->getIndexes();
-                    FReal *const physicalValues = leaf->getSrc()->getPhysicalValues();
-                    for (int idxPart = 0; idxPart < nbParticlesInLeaf; ++idxPart)
-                        {
-                        physicalValues[idxPart] = srcDen[indexes[idxPart] - nbMagNodes];
-                        }
-
-                    std::fill_n(leaf->getTargets()->getPotentials(),
-                                leaf->getTargets()->getNbParticles(), 0);
-                });
-
-        tree.forEachCell([](CellClass *cell) { cell->resetToInitialState(); });
-
-        algo.execute();
-
-        tree.forEachLeaf(
-                [this, &msh, setter](LeafClass *leaf)
-                {
-                    const FReal *const potentials = leaf->getTargets()->getPotentials();
-                    const int nbParticlesInLeaf = leaf->getTargets()->getNbParticles();
-                    const auto &indexes = leaf->getTargets()->getIndexes();
-                    for (int idxPart = 0; idxPart < nbParticlesInLeaf; ++idxPart)
-                        {
-                        const int indexPartOrig = indexes[idxPart];
-                        msh.set(indexPartOrig, setter,
-                                (potentials[idxPart] * norm + corr[indexPartOrig]) / (4 * M_PI));
-                        }
-                });
-        }
+    /** pointer to implementation */
+    std::unique_ptr<impl> pImpl;
     };  // end class fmm
 
     }  // namespace scal_fmm

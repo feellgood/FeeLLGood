@@ -76,9 +76,10 @@ Now, the feeLLGood dependencies can be installed by running
 
 If a directory named “dl” exists as a sibling of the test-vm script, it
 will be used as a download cache: its content will be copied to
-`/home/user/src` on the VM. Putting there the tarball of ScalFMM will
-prevent it from being downloaded by install-dependencies.sh running
-inside the VM.
+`/home/user/src` on the VM. Putting there the tarballs of ANN and GMSH
+will prevent them from being downloaded by install-dependencies.sh
+running inside the VM (ScalFMM is always cloned with git, together with
+its submodules).
 
 Finally,
 

@@ -45,6 +45,7 @@ job_count=$(getconf _NPROCESSORS_ONLN)
 packages="unzip make cmake git"
 if [ "$ID" = "rocky" ]; then
     packages="$packages tar wget gcc-c++ eigen3-devel tbb-devel yaml-cpp-devel duktape-devel"
+    packages="$packages fftw-devel openblas-devel lapack-devel pkgconf"
     sudo dnf check-update -q || true
     sudo dnf install -y 'dnf-command(config-manager)'
     sudo dnf config-manager --set-enabled devel crb
@@ -59,6 +60,7 @@ if [ "$ID" = "rocky" ]; then
 else  # Debian-like OS
     packages="$packages wget g++ libeigen3-dev libtbb-dev libyaml-cpp-dev duktape-dev"
     packages="$packages libann-dev libgmsh-dev"
+    packages="$packages libfftw3-dev libopenblas-dev liblapack-dev pkg-config"
     sudo apt-get update -q
     if [ "$unit_tests" = "true" ]; then
         packages="$packages libboost-system-dev libboost-filesystem-dev libboost-test-dev"
@@ -104,19 +106,13 @@ if [ "$ID" = "rocky" ]; then
     cd ../..
 fi
 
-# Download, patch and install ScalFMM.
-# Use the tip of the branch maintenance/scalfmm-1.5 as of 2021-09-20.
-scalfmm_sha1=22b9e4f6cf4ea721d71198a71e3f5d2c5ae5e7cc
-rm -rf ScalFMM-$scalfmm_sha1/
-if [ ! -f "ScalFMM-$scalfmm_sha1.tar.gz" ]; then
-    wget -nv https://gitlab.inria.fr/solverstack/ScalFMM/-/archive/$scalfmm_sha1/ScalFMM-$scalfmm_sha1.tar.gz
-fi
-tar xzf ScalFMM-$scalfmm_sha1.tar.gz
-cd ScalFMM-$scalfmm_sha1/
-sed -i 's/memcpy/if (nbParticles != 0) memcpy/' Src/Components/FBasicParticleContainer.hpp
-sed -Ei 's/(required .VERSION) 2.8.3/\1 3.5/' CMakeLists.txt
-sed -i 's/OPENMP_CXX_FOUND/OPENMP_FOUND OR OPENMP_CXX_FOUND/' CMakeLists.txt
-cd Build
-cmake .. -DSCALFMM_BUILD_EXAMPLES=OFF
-make -j $job_count
-sudo make install
+# Download and install ScalFMM 3 (header only library). The --recursive option fetches its
+# submodules (xtensor, xsimd, xtl, xtensor-blas, cpp_tools).
+scalfmm_tag=V3.1.1
+rm -rf ScalFMM/
+git clone --depth 1 --branch $scalfmm_tag --recursive --shallow-submodules \
+    https://gitlab.inria.fr/solverstack/ScalFMM.git
+cmake -S ScalFMM -B ScalFMM/build -DCMAKE_BUILD_TYPE=Release \
+    -Dscalfmm_BUILD_TOOLS=OFF -Dscalfmm_BUILD_EXAMPLES=OFF \
+    -Dscalfmm_BUILD_CHECK=OFF -Dscalfmm_BUILD_UNITS=OFF
+sudo cmake --install ScalFMM/build

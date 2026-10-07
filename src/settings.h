@@ -150,6 +150,16 @@ public:
     /** nb of threads for the computation of the demag field with scalfmm */
     int scalfmmNbTh;
 
+    /** order of the interpolation polynomials of the far field in scalfmm */
+    int fmmOrder;
+
+    /** height of the scalfmm trees, root included. 0 means automatic, computed from the number of
+     * particles */
+    int fmmTreeHeight;
+
+    /** number of leaves and cells per group in the scalfmm trees */
+    int fmmGroupSize;
+
     /** if true creates an output file of the solution of the electrostatic problem  */
     bool V_file;
 

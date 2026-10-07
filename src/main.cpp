@@ -255,11 +255,15 @@ int main(int argc, char *argv[])
 
     chronometer fmm_counter(2);
     scal_fmm::fmm myFMM(fem.msh, mySettings.paramTetra, mySettings.paramTriangle,
-            mySettings.scalfmmNbTh);
+            mySettings.scalfmmNbTh, mySettings.fmmOrder, mySettings.fmmTreeHeight,
+            mySettings.fmmGroupSize);
     if (mySettings.verbose)
             {
             std::cout << "Magnetostatics: particles inserted, using " << mySettings.scalfmmNbTh
                       << " threads, in " << fmm_counter.millis() << std::endl;
+            std::cout << "Magnetostatics: order " << mySettings.fmmOrder << ", tree height "
+                      << myFMM.treeHeight() << ", group size " << mySettings.fmmGroupSize
+                      << std::endl;
             }
 
     // Catch SIGINT and SIGTERM.

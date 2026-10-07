@@ -98,6 +98,17 @@ if(NOT Eigen3_FOUND)
 endif()
 
 #===========================================================================
+# ScalFMM 3 (header only), for the computation of the demagnetizing field.
+# If it is not installed in a standard location:
+# cmake . -Dscalfmm_DIR=<scalfmm install prefix>/lib/cmake/scalfmm
+# The config file looks for the dependencies BLAS, LAPACK, FFTW and OpenMP, and defines the
+# targets BLAS::BLAS, LAPACK::LAPACK and PkgConfig::FFTW used below.
+#===========================================================================
+find_package(scalfmm 3 CONFIG REQUIRED)
+message(STATUS "Found scalfmm ${scalfmm_VERSION}")
+set(SCALFMM_TARGETS scalfmm::scalfmm-headers PkgConfig::FFTW BLAS::BLAS LAPACK::LAPACK)
+
+#===========================================================================
 # these parameters are used to build a config.h file 
 #===========================================================================
 

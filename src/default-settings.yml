@@ -232,6 +232,19 @@ demagnetizing_field_solver:
   # sysconf(_SC_NPROCESSORS_ONLN).
   nb_threads: 0
 
+  # Order of the interpolation polynomials of the far field (uniform
+  # interpolation, FFT accelerated). The larger, the more accurate and the
+  # slower.
+  order: 7
+
+  # Height of the trees of the fast multipole method, root included. The
+  # value 0 means automatic: the height is computed from the number of
+  # particles (Gauss points of the sources and magnetic nodes).
+  tree_height: 0
+
+  # Number of leaves and cells per group in the trees.
+  group_size: 64
+
 # Parameters of the solver.
 finite_element_solver:
 

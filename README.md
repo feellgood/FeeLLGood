@@ -13,9 +13,24 @@ We recommand to use branch master, other branches are experimental or work in pr
 * [yaml-cpp][]
 * [ANN][] 1.1.2
 * [Duktape][] 2.7.0
-* [ScalFMM][] revision [22b9e4f6cf][ScalFMM-rev] (it should also work with V1.5.1)
+* [ScalFMM][] 3 (tested with V3.1.1), which requires [FFTW][], BLAS and LAPACK
 * [Eigen][] ≥ 3.3
 * [GMSH][] ≥ 4.8
+
+ScalFMM 3 is a header only library, its submodules must be fetched with it:
+
+```shell
+git clone --branch V3.1.1 --recursive https://gitlab.inria.fr/solverstack/ScalFMM.git
+cmake -S ScalFMM -B ScalFMM/build -DCMAKE_BUILD_TYPE=Release -Dscalfmm_BUILD_TOOLS=OFF \
+      -Dscalfmm_BUILD_EXAMPLES=OFF -Dscalfmm_BUILD_CHECK=OFF -Dscalfmm_BUILD_UNITS=OFF
+sudo cmake --install ScalFMM/build
+```
+
+If ScalFMM is installed elsewhere (`-DCMAKE_INSTALL_PREFIX=<prefix>`), configure feeLLGood with
+`cmake . -Dscalfmm_DIR=<prefix>/lib/cmake/scalfmm`.
+
+The parameters of the fast multipole method (interpolation order, tree height, group size) can be
+set in the section `demagnetizing_field_solver` of the settings, see `feellgood --print-defaults`.
 
 ### License
 
@@ -35,6 +50,6 @@ The libraries used by feeLLGood are distributed under different licenses, and th
 [ANN]: https://www.cs.umd.edu/~mount/ANN/
 [Duktape]: https://duktape.org/
 [ScalFMM]: https://gitlab.inria.fr/solverstack/ScalFMM/
-[ScalFMM-rev]: https://gitlab.inria.fr/solverstack/ScalFMM/-/archive/22b9e4f6cf4ea721d71198a71e3f5d2c5ae5e7cc/ScalFMM-22b9e4f6cf4ea721d71198a71e3f5d2c5ae5e7cc.tar.gz
+[FFTW]: https://www.fftw.org/
 [Eigen]: https://eigen.tuxfamily.org/
 [GMSH]: http://gmsh.info/

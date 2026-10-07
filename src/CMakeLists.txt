@@ -1,10 +1,10 @@
 SET(HEADERS config.h node.h expression_parser.h mesh.h electrostatSolver.h
         spinAccumulationSolver.h time_integration.h settings.h tetra.h
-        triangle.h linear_algebra.h log-stats.h tags.h chronometer.h element.h)
+        triangle.h fmm_demag.h linear_algebra.h log-stats.h tags.h chronometer.h element.h)
 
 SET(SOURCES settings.cpp time_integration.cpp solver.cpp electrostatSolver.cpp
         spinAccumulationSolver.cpp read.cpp save.cpp linear_algebra.cpp recentering.cpp tetra.cpp
-        energy.cpp triangle.cpp expression_parser.cpp chronometer.cpp
+        energy.cpp triangle.cpp expression_parser.cpp chronometer.cpp fmm_demag.cpp
         tags.cpp mesh.cpp)
 
 configure_file(config.h.in ./config.h)
@@ -42,8 +42,8 @@ if (MKL_FOUND)
     # not sure we really need it since --no-as-needed is default value, though there might be
     # a --as-needed before
     TARGET_LINK_LIBRARIES(feellgood yaml-cpp duktape ann OpenMP::OpenMP_CXX ${TBB_LINK}
-            Eigen3::Eigen ${MKL_TARGET} ${GMSH_LIB})
+            Eigen3::Eigen ${MKL_TARGET} ${GMSH_LIB} ${SCALFMM_TARGETS})
 else()
     TARGET_LINK_LIBRARIES(feellgood yaml-cpp duktape ann OpenMP::OpenMP_CXX ${TBB_LINK}
-            Eigen3::Eigen ${GMSH_LIB})
+            Eigen3::Eigen ${GMSH_LIB} ${SCALFMM_TARGETS})
 endif()
