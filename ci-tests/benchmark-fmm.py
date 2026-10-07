@@ -87,7 +87,7 @@ def ompEnv():
     values (one thread per physical core) unless they are already set """
     env = dict(os.environ)
     env.setdefault("OMP_MAX_TASK_PRIORITY", "11") # needed by the task priorities of scalfmm 3
-    env.setdefault("OMP_PROC_BIND", "close")
+    env.setdefault("OMP_PROC_BIND", "true") # as recommended by the scalfmm developers
     env.setdefault("OMP_PLACES", "cores")
     return env
 
@@ -206,7 +206,7 @@ def get_params():
         a given mesh, on 1 and 8 threads
 
     tree height 0 means automatic. OMP_MAX_TASK_PRIORITY, OMP_PROC_BIND and OMP_PLACES default to
-    11, close and cores if they are not set: with at most as many threads as physical cores, two
+    11, true and cores if they are not set: with at most as many threads as physical cores, two
     threads never share a core. All OMP_*, GOMP_* and KMP_* variables are written in the header of
     the output file.
     '''
