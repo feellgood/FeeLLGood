@@ -34,6 +34,12 @@ Summary of tested items:
   * `-d`: install doxygen, which is needed to build the docs
 * `full_test.py`: minimal toy problem for checking that feeLLGood runs
   correctly
+* `benchmark.py`: timing of whole simulations, varying the mesh size and
+  the number of threads
+* `benchmark-fmm.py`: accuracy and timing of the computation of the
+  demagnetizing field, varying the mesh, the parameters of the fast
+  multipole method (order, tree height, group size) and the number of
+  threads. Run `./benchmark-fmm.py -h` for the options.
 
 The script `full_test.py` uses the mesh `ellipsoid.msh` (167&nbsp;nodes
 and 773&nbsp;elements), which is expected to be in the directory
