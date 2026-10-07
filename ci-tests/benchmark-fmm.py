@@ -60,10 +60,21 @@ def makeSettings(mesh, volume_name, surface_name, out_dir, nbThreads, final_time
         settings["mesh"]["surface_regions"] = { surface_name: {} }
     return settings
 
+def nbPhysicalCores():
+    """ number of physical cores (hyperthreads not counted), from lscpu, else os.cpu_count() """
+    try:
+        out = subprocess.run(["lscpu", "-p=Core,Socket"], text=True, capture_output=True).stdout
+        cores = {line for line in out.splitlines() if line and not line.startswith('#')}
+        if cores:
+            return len(cores)
+    except OSError:
+        pass
+    return os.cpu_count()
+
 def makeListNbThreads():
-    """ powers of two from nproc/4 to nproc """
-    nproc = os.cpu_count()
-    maxNbThreads = 2**floor(log2(nproc))
+    """ powers of two from ncores/4 to ncores, ncores being the number of physical cores, so that
+    with OMP_PLACES=cores two threads never share a core """
+    maxNbThreads = 2**floor(log2(nbPhysicalCores()))
     listNbThreads = []
     nb = maxNbThreads
     while nb >= max(1, maxNbThreads//4):
@@ -71,12 +82,18 @@ def makeListNbThreads():
         nb = nb // 2
     return listNbThreads
 
-def run(executable, settings):
-    """ runs feellgood in verbose mode with seed=2 for being deterministic, returns stdout """
+def ompEnv():
+    """ environment of the runs: OMP_MAX_TASK_PRIORITY, OMP_PROC_BIND and OMP_PLACES get default
+    values (one thread per physical core) unless they are already set """
     env = dict(os.environ)
     env.setdefault("OMP_MAX_TASK_PRIORITY", "11") # needed by the task priorities of scalfmm 3
     env.setdefault("OMP_PROC_BIND", "close")
     env.setdefault("OMP_PLACES", "cores")
+    return env
+
+def run(executable, settings):
+    """ runs feellgood in verbose mode with seed=2 for being deterministic, returns stdout """
+    env = ompEnv()
     val = subprocess.run([executable, "-v", "--seed", "2", "-"], input=json.dumps(settings),
                          text=True, capture_output=True, env=env)
     if val.returncode != 0:
@@ -164,9 +181,10 @@ def metadata(args):
     lines = ["feellgood: " + (version[0] if version else "?"),
              "date: " + datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
              "host: " + socket.gethostname(),
-             "cpu: " + cpu + " (nproc = " + str(os.cpu_count()) + ")",
-             "OMP_PROC_BIND=" + os.environ.get("OMP_PROC_BIND", "close")
-                 + " OMP_PLACES=" + os.environ.get("OMP_PLACES", "cores"),
+             "cpu: " + cpu + " (nproc = " + str(os.cpu_count()) + ", physical cores = "
+                 + str(nbPhysicalCores()) + ")",
+             "environment: " + ' '.join(k + '=' + v for k, v in sorted(ompEnv().items())
+                                        if k.startswith(("OMP_", "GOMP_", "KMP_"))),
              "reference: order " + str(args.ref_order) + ", tree height " + str(args.ref_height)
                  + ", group size " + str(args.ref_group_size),
              "final_time: " + str(args.final_time)]
@@ -188,7 +206,9 @@ def get_params():
         a given mesh, on 1 and 8 threads
 
     tree height 0 means automatic. OMP_MAX_TASK_PRIORITY, OMP_PROC_BIND and OMP_PLACES default to
-    11, close and cores if they are not set.
+    11, close and cores if they are not set: with at most as many threads as physical cores, two
+    threads never share a core. All OMP_*, GOMP_* and KMP_* variables are written in the header of
+    the output file.
     '''
     parser = argparse.ArgumentParser(description=description, epilog=epilogue,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
