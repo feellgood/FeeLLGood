@@ -27,7 +27,8 @@ add_custom_command(
 # -fsanitize=address leak null undefined # both compiler and linker
 #===========================================================================
 
-include_directories (${CMAKE_SOURCE_DIR} ${GMSH_INC})
+# config.h is generated in the build directory
+include_directories (${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR} ${GMSH_INC})
 
 ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES}
         ${CMAKE_CURRENT_BINARY_DIR}/default-settings.o)

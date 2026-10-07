@@ -19,7 +19,9 @@ if(NOT GMSH_INC)
   message(FATAL_ERROR "Could not find gmsh.h")
 endif()
 
-include_directories (${CMAKE_SOURCE_DIR}/src ${Boost_INCLUDE_DIRS} ${GMSH_INC})
+# config.h and ut_config.h are generated in the build directory
+include_directories (${CMAKE_BINARY_DIR}/src ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR}/src
+        ${Boost_INCLUDE_DIRS} ${GMSH_INC})
 
 set( BOOST_TEST_LOG_LEVEL "all" )
 
