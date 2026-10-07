@@ -11,9 +11,13 @@ configure_file(config.h.in ./config.h)
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
 
+# ld runs in the source directory so that the symbols are named after the bare file name
+# (_binary_default_settings_yml_start), the object file is written in the build directory.
 add_custom_command(
-    OUTPUT default-settings.o
-    COMMAND ld -r -b binary -z noexecstack default-settings.yml -o default-settings.o
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/default-settings.o
+    COMMAND ld -r -b binary -z noexecstack default-settings.yml
+            -o ${CMAKE_CURRENT_BINARY_DIR}/default-settings.o
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS default-settings.yml)
 
 #===========================================================================
@@ -25,7 +29,8 @@ add_custom_command(
 
 include_directories (${CMAKE_SOURCE_DIR} ${GMSH_INC})
 
-ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES} default-settings.o)
+ADD_EXECUTABLE(feellgood main.cpp ${HEADERS} ${SOURCES}
+        ${CMAKE_CURRENT_BINARY_DIR}/default-settings.o)
 target_compile_options( feellgood PUBLIC -Wall -Wextra -O3 -march=native ${MKL_CFLAGS} )
 target_compile_definitions(feellgood PUBLIC
         -DNDEBUG -DTBB_SUPPRESS_DEPRECATED_MESSAGES ${EIGEN_MKL_CFLAGS} )
