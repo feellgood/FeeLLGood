@@ -268,22 +268,23 @@ void spinAcc::integrales(const Tetra::Tet &tet,
         }
     }
 
-void spinAcc::integrales(Tetra::Tet &tet, std::vector<double> &BE)
+void spinAcc::integrales(const Tetra::Tet &tet, std::vector<double> &BE) const
     {
     using namespace Tetra;
-
-    /* constant cst0 in a magnetic region is the only RHS parameter involved in the diffusion
-    * equation for magnetic contribution
-    * units: [cst0] = [sigma] m^2 = A^2 s^3 m^-1 kg^-1
-    */
-    const double cst0 = BOHRS_MUB * getPolarizationRate(tet) * getSigma(tet) / CHARGE_ELECTRON;
-    Eigen::Matrix<double, Nodes::DIM, NPI> gradV = tet.gradV(V);
 
     if(msh->isMagnetic(tet))
         {
         /* magnetization at the Gauss points: u varies in the element, a nodal u_i would not be a
          * lumping */
         const Eigen::Matrix<double,Nodes::DIM,NPI> U = calc_u_nod(tet) * eigen_a;
+
+        /* constant cst0 in a magnetic region is the only RHS parameter involved in the diffusion
+        * equation for magnetic contribution
+        * units: [cst0] = [sigma] m^2 = A^2 s^3 m^-1 kg^-1
+        */
+        const double cst0 = BOHRS_MUB * getPolarizationRate(tet) * getSigma(tet) / CHARGE_ELECTRON;
+        const Eigen::Matrix<double, Nodes::DIM, NPI> gradV = tet.gradV(V);
+
         for (size_t npi = 0; npi < NPI; npi++)
             {
             const Eigen::Vector3d cst0_w_gradV = cst0 * tet.weight[npi] * gradV.col(npi);
@@ -291,9 +292,9 @@ void spinAcc::integrales(Tetra::Tet &tet, std::vector<double> &BE)
             for (size_t ie = 0; ie < N; ie++)
                 {
                 const double tmp = cst0_w_gradV.dot(tet.da.row(ie));
-                BE[    ie] += tmp * U(0,npi);
-                BE[  N+ie] += tmp * U(1,npi);
-                BE[2*N+ie] += tmp * U(2,npi);
+                BE[    ie] += tmp * U(IDX_X,npi);
+                BE[  N+ie] += tmp * U(IDX_Y,npi);
+                BE[2*N+ie] += tmp * U(IDX_Z,npi);
                 }
             }
         }
