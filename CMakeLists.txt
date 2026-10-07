@@ -64,32 +64,43 @@ if(NOT ${ENABLE_SEQ})
     endif()
 endif()
 
-# Use the Intel MKL library if we can find it.
-# First, try find_package(), which should work on a oneAPI environment.
-set(MKL_INTERFACE lp64)
-set(MKL_THREADING intel_thread)
-find_package(MKL QUIET)
-if(MKL_FOUND)
-    message(STATUS "Found MKL with find_package(), MKL_CFLAGS= " ${MKL_CFLAGS})
-    set(MKL_TARGET "MKL::MKL")
-else()
-    # As find_package() failed to find MKL, try pkg-config.
-    find_package(PkgConfig)
-    if(PKG_CONFIG_FOUND)
-        pkg_check_modules(MKL QUIET IMPORTED_TARGET mkl-dynamic-lp64-iomp)
-        if(MKL_FOUND)
-            message(STATUS "Found MKL with pkg-config, MKL_CFLAGS= " ${MKL_CFLAGS})
-            set(MKL_TARGET "PkgConfig::MKL")
-        endif()
-    else()
-        message(STATUS "Not found: PkgConfig, needed for MKL")
-    endif()
-endif()
+#===========================================================================
+# cmake . -DENABLE_MKL=ON
+# if ON, use the Intel MKL library (through Eigen) if it can be found
+# if OFF (default): MKL is not used. The MKL cblas header, included by Eigen when it uses MKL, is
+# incompatible with the cblas header of xflens, used by scalfmm 3.
+#===========================================================================
+option(ENABLE_MKL "Use the Intel MKL library if it can be found" OFF)
+message( STATUS "Use Intel MKL: ENABLE_MKL = " ${ENABLE_MKL} )
 
-if(MKL_FOUND)
-    set(EIGEN_MKL_CFLAGS "-DEIGEN_USE_MKL_ALL -DMKL_DIRECT_CALL") # -DEIGEN_MKL_NO_DIRECT_CALL
-else()
-    message(STATUS "Not found: MKL")
+if(${ENABLE_MKL})
+    # Use the Intel MKL library if we can find it.
+    # First, try find_package(), which should work on a oneAPI environment.
+    set(MKL_INTERFACE lp64)
+    set(MKL_THREADING intel_thread)
+    find_package(MKL QUIET)
+    if(MKL_FOUND)
+        message(STATUS "Found MKL with find_package(), MKL_CFLAGS= " ${MKL_CFLAGS})
+        set(MKL_TARGET "MKL::MKL")
+    else()
+        # As find_package() failed to find MKL, try pkg-config.
+        find_package(PkgConfig)
+        if(PKG_CONFIG_FOUND)
+            pkg_check_modules(MKL QUIET IMPORTED_TARGET mkl-dynamic-lp64-iomp)
+            if(MKL_FOUND)
+                message(STATUS "Found MKL with pkg-config, MKL_CFLAGS= " ${MKL_CFLAGS})
+                set(MKL_TARGET "PkgConfig::MKL")
+            endif()
+        else()
+            message(STATUS "Not found: PkgConfig, needed for MKL")
+        endif()
+    endif()
+
+    if(MKL_FOUND)
+        set(EIGEN_MKL_CFLAGS "-DEIGEN_USE_MKL_ALL -DMKL_DIRECT_CALL") # -DEIGEN_MKL_NO_DIRECT_CALL
+    else()
+        message(STATUS "Not found: MKL")
+    endif()
 endif()
 
 find_package(Eigen3 5.0 QUIET NO_MODULE)
@@ -104,6 +115,30 @@ endif()
 # The config file looks for the dependencies BLAS, LAPACK, FFTW and OpenMP, and defines the
 # targets BLAS::BLAS, LAPACK::LAPACK and PkgConfig::FFTW used below.
 #===========================================================================
+# The scalfmm config file sets BLA_VENDOR to All, which may select MKL as BLAS. Unless MKL is enabled,
+# select a BLAS and a LAPACK first (OpenBLAS, else the generic reference ones, or the vendor given by
+# -DBLA_VENDOR=...): the targets BLAS::BLAS and LAPACK::LAPACK are then not redefined by scalfmm.
+if(NOT ${ENABLE_MKL})
+    if(DEFINED BLA_VENDOR)
+        set(FG_BLAS_VENDORS ${BLA_VENDOR})
+    else()
+        set(FG_BLAS_VENDORS OpenBLAS Generic)
+    endif()
+    foreach(vendor IN LISTS FG_BLAS_VENDORS)
+        set(BLA_VENDOR ${vendor})
+        find_package(BLAS QUIET)
+        if(BLAS_FOUND)
+            find_package(LAPACK QUIET)
+        endif()
+        if(BLAS_FOUND AND LAPACK_FOUND)
+            message(STATUS "BLAS and LAPACK vendor: ${vendor}")
+            break()
+        endif()
+    endforeach()
+    if(NOT (BLAS_FOUND AND LAPACK_FOUND))
+        message(FATAL_ERROR "Could not find BLAS and LAPACK among: ${FG_BLAS_VENDORS}")
+    endif()
+endif()
 find_package(scalfmm 3 CONFIG REQUIRED)
 message(STATUS "Found scalfmm ${scalfmm_VERSION}")
 set(SCALFMM_TARGETS scalfmm::scalfmm-headers PkgConfig::FFTW BLAS::BLAS LAPACK::LAPACK)

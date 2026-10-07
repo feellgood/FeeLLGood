@@ -29,6 +29,10 @@ sudo cmake --install ScalFMM/build
 If ScalFMM is installed elsewhere (`-DCMAKE_INSTALL_PREFIX=<prefix>`), configure feeLLGood with
 `cmake . -Dscalfmm_DIR=<prefix>/lib/cmake/scalfmm`.
 
+Intel MKL is not used by default: when Eigen uses MKL, the MKL cblas header conflicts with the one
+of xflens, used by ScalFMM 3. feeLLGood selects OpenBLAS, else the generic BLAS and LAPACK; another
+vendor can be chosen with `-DBLA_VENDOR=...`.
+
 The parameters of the fast multipole method (interpolation order, tree height, group size) can be
 set in the section `demagnetizing_field_solver` of the settings, see `feellgood --print-defaults`.
 
