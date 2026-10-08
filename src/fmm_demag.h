@@ -18,7 +18,7 @@ demagnetizing field.
 #include "mesh.h"
 
 /** \namespace scal_fmm
-to grab altogether the templates and functions using scalfmm for the computation of the demag field
+to grab altogether the templates and functions using scalFMMlight for the computation of the demag field
 */
 
 namespace scal_fmm
