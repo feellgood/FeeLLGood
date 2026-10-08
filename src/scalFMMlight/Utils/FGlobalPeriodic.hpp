@@ -10,6 +10,8 @@
  * @brief The PeriodicCondition enum
  * To be able to chose the direction of the periodicity.
  */
+
+
 enum PeriodicCondition {
     DirNone     = 0,
 
@@ -33,8 +35,9 @@ enum PeriodicCondition {
  * @param testConditions
  * @return true if the direction is in the condition
  */
-inline bool TestPeriodicCondition(const int conditions, const PeriodicCondition testConditions) {
-    return (conditions & testConditions) == testConditions;
-}
+
+
+inline bool TestPeriodicCondition(const int conditions, const PeriodicCondition testConditions)
+    { return (conditions & testConditions) == testConditions; }
 
 #endif // FGLOBALPERIODIC_HPP

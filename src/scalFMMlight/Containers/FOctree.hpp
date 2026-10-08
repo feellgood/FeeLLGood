@@ -7,7 +7,6 @@
 #include "./FSubOctree.hpp"
 #include "./FTreeCoordinate.hpp"
 #include "../Utils/FGlobal.hpp"
-#include "../Utils/FGlobalPeriodic.hpp"
 #include "../Utils/FPoint.hpp"
 #include "../Utils/FAssert.hpp"
 #include "./FCoordinateComputer.hpp"
@@ -790,7 +789,6 @@ public:
         return idxNeighbors;
     }
 
-
     /** This function return an address of cell array from a morton index and a level
      * @param inIndex the index of the desired cell array has to contains
      * @param inLevel the level of the desired cell (cannot be inferred from the index)
@@ -821,7 +819,6 @@ public:
         const MortonIndex treeLeafMask = ~(~0ULL << (3 * (levelInTree + 1 ) ));
         return &workingTree.tree->cellsAt(levelInTree)[treeLeafMask & inIndex];
     }
-
 
     /** This function fill an array with the distant neighbors of a cell
      * @param inNeighbors the array to store the elements
@@ -880,8 +877,7 @@ public:
                 }
             }
         }
-
-        return idxNeighbors;
+    return idxNeighbors;
     }
 
     /** This function fill an array with the distant neighbors of a cell
@@ -946,8 +942,7 @@ public:
                 }
             }
         }
-
-        return idxNeighbors;
+    return idxNeighbors;
     }
 
     /** This function fills an array with all the neighbors of a cell,
@@ -1067,208 +1062,8 @@ public:
                 }
             }
         }
-
         return idxNeighbors;
     }
-
-    /** This function fill an array with the distant neighbors of a cell
-     * it respects the periodic condition and will give the relative distance
-     * between the working cell and the neighbors
-     * @param inNeighbors the array to store the elements
-     * @param workingCell the index of the element we want the neighbors
-     * @param inLevel the level of the element
-     * @param inDirection
-     * @return the number of neighbors
-     */
-    int getPeriodicInteractionNeighbors(const CellClass* inNeighbors[343],
-                                        const FTreeCoordinate& workingCell,
-                                        const int inLevel, const int inDirection) const
-        {
-        const int neighSeparation = 1;
-        // Then take each child of the parent's neighbors if not in directNeighbors
-        // Father coordinate
-        const FTreeCoordinate parentCell(workingCell.getX()>>1,workingCell.getY()>>1,workingCell.getZ()>>1);
-
-        // Limit at parent level number of box (split by 2 by level)
-        const int boxLimite = FMath::pow2(inLevel-1);
-
-        // This is not on a border we can use normal interaction list method
-        if( !(parentCell.getX() == 0 || parentCell.getY() == 0 || parentCell.getZ() == 0 ||
-              parentCell.getX() == boxLimite - 1 || parentCell.getY() == boxLimite - 1 || parentCell.getZ() == boxLimite - 1 ) ) {
-            return getInteractionNeighbors( inNeighbors, workingCell, inLevel);
-        }
-        else{
-            // reset
-            memset(inNeighbors, 0, sizeof(CellClass*) * 343);
-
-            const int startX =  (TestPeriodicCondition(inDirection, DirMinusX) || parentCell.getX() != 0 ?-1:0);
-            const int endX =    (TestPeriodicCondition(inDirection, DirPlusX)  || parentCell.getX() != boxLimite - 1 ?1:0);
-            const int startY =  (TestPeriodicCondition(inDirection, DirMinusY) || parentCell.getY() != 0 ?-1:0);
-            const int endY =    (TestPeriodicCondition(inDirection, DirPlusY)  || parentCell.getY() != boxLimite - 1 ?1:0);
-            const int startZ =  (TestPeriodicCondition(inDirection, DirMinusZ) || parentCell.getZ() != 0 ?-1:0);
-            const int endZ =    (TestPeriodicCondition(inDirection, DirPlusZ)  || parentCell.getZ() != boxLimite - 1 ?1:0);
-
-            int idxNeighbors = 0;
-            // We test all cells around
-            for(int idxX = startX ; idxX <= endX ; ++idxX){
-                for(int idxY = startY ; idxY <= endY ; ++idxY){
-                    for(int idxZ = startZ ; idxZ <= endZ ; ++idxZ){
-                        // if we are not on the current cell
-                        if(neighSeparation<1 || idxX || idxY || idxZ ){
-
-                            const FTreeCoordinate otherParent(parentCell.getX() + idxX,parentCell.getY() + idxY,parentCell.getZ() + idxZ);
-                            FTreeCoordinate otherParentInBox(otherParent);
-                            // periodic
-                            if( otherParentInBox.getX() < 0 ){
-                                otherParentInBox.setX( otherParentInBox.getX() + boxLimite );
-                            }
-                            else if( boxLimite <= otherParentInBox.getX() ){
-                                otherParentInBox.setX( otherParentInBox.getX() - boxLimite );
-                            }
-
-                            if( otherParentInBox.getY() < 0 ){
-                                otherParentInBox.setY( otherParentInBox.getY() + boxLimite );
-                            }
-                            else if( boxLimite <= otherParentInBox.getY() ){
-                                otherParentInBox.setY( otherParentInBox.getY() - boxLimite );
-                            }
-
-                            if( otherParentInBox.getZ() < 0 ){
-                                otherParentInBox.setZ( otherParentInBox.getZ() + boxLimite );
-                            }
-                            else if( boxLimite <= otherParentInBox.getZ() ){
-                                otherParentInBox.setZ( otherParentInBox.getZ() - boxLimite );
-                            }
-
-
-                            const MortonIndex mortonOtherParent = otherParentInBox.getMortonIndex() << 3;
-                            // Get child
-                            CellClass** const cells = getCellPt(mortonOtherParent, inLevel);
-
-                            // If there is one or more child
-                            if(cells){
-                                // For each child
-                                for(int idxCousin = 0 ; idxCousin < 8 ; ++idxCousin){
-                                    if(cells[idxCousin]){
-                                        const int xdiff  = ((otherParent.getX()<<1) | ( (idxCousin>>2) & 1)) - workingCell.getX();
-                                        const int ydiff  = ((otherParent.getY()<<1) | ( (idxCousin>>1) & 1)) - workingCell.getY();
-                                        const int zdiff  = ((otherParent.getZ()<<1) | (idxCousin&1))         - workingCell.getZ();
-
-                                        // Test if it is a direct neighbor
-                                        if(abs(xdiff) > neighSeparation || abs(ydiff) > neighSeparation || abs(zdiff) > neighSeparation){
-                                            // add to neighbors
-                                            inNeighbors[ (((xdiff+3) * 7) + (ydiff+3)) * 7 + zdiff + 3] = cells[idxCousin];
-                                            ++idxNeighbors;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return idxNeighbors;
-        }
-    }
-
-    /** This function fill an array with the distant neighbors of a cell
-     * it respects the periodic condition and will give the relative distance
-     * between the working cell and the neighbors
-     * @param inNeighbors the array to store the elements
-     * @param inNeighborPositions
-     * @param workingCell the index of the element we want the neighbors
-     * @param inLevel the level of the element
-     * @param inDirection
-     * @return the number of neighbors
-     */
-    int getPeriodicInteractionNeighbors(const CellClass* inNeighbors[342], int inNeighborPositions[342],
-                                        const FTreeCoordinate& workingCell,
-                                        const int inLevel, const int inDirection) const
-        {
-        const int neighSeparation = 1;
-        // Then take each child of the parent's neighbors if not in directNeighbors
-        // Father coordinate
-        const FTreeCoordinate parentCell(workingCell.getX()>>1,workingCell.getY()>>1,workingCell.getZ()>>1);
-
-        // Limite at parent level number of box (split by 2 by level)
-        const int boxLimite = FMath::pow2(inLevel-1);
-
-        // This is not on a border we can use normal interaction list method
-        if( !(parentCell.getX() == 0 || parentCell.getY() == 0 || parentCell.getZ() == 0 ||
-              parentCell.getX() == boxLimite - 1 || parentCell.getY() == boxLimite - 1 || parentCell.getZ() == boxLimite - 1 ) ) {
-            return getInteractionNeighbors( inNeighbors, inNeighborPositions, workingCell, inLevel);
-        }
-        else{
-            const int startX =  (TestPeriodicCondition(inDirection, DirMinusX) || parentCell.getX() != 0 ?-1:0);
-            const int endX =    (TestPeriodicCondition(inDirection, DirPlusX)  || parentCell.getX() != boxLimite - 1 ?1:0);
-            const int startY =  (TestPeriodicCondition(inDirection, DirMinusY) || parentCell.getY() != 0 ?-1:0);
-            const int endY =    (TestPeriodicCondition(inDirection, DirPlusY)  || parentCell.getY() != boxLimite - 1 ?1:0);
-            const int startZ =  (TestPeriodicCondition(inDirection, DirMinusZ) || parentCell.getZ() != 0 ?-1:0);
-            const int endZ =    (TestPeriodicCondition(inDirection, DirPlusZ)  || parentCell.getZ() != boxLimite - 1 ?1:0);
-
-            int idxNeighbors = 0;
-            // We test all cells around
-            for(int idxX = startX ; idxX <= endX ; ++idxX){
-                for(int idxY = startY ; idxY <= endY ; ++idxY){
-                    for(int idxZ = startZ ; idxZ <= endZ ; ++idxZ){
-                        // if we are not on the current cell
-                        if( idxX || idxY || idxZ )
-                            {
-                            const FTreeCoordinate otherParent(parentCell.getX() + idxX,parentCell.getY() + idxY,parentCell.getZ() + idxZ);
-                            FTreeCoordinate otherParentInBox(otherParent);
-                            // periodic
-                            if( otherParentInBox.getX() < 0 ){
-                                otherParentInBox.setX( otherParentInBox.getX() + boxLimite );
-                            }
-                            else if( boxLimite <= otherParentInBox.getX() ){
-                                otherParentInBox.setX( otherParentInBox.getX() - boxLimite );
-                            }
-
-                            if( otherParentInBox.getY() < 0 ){
-                                otherParentInBox.setY( otherParentInBox.getY() + boxLimite );
-                            }
-                            else if( boxLimite <= otherParentInBox.getY() ){
-                                otherParentInBox.setY( otherParentInBox.getY() - boxLimite );
-                            }
-
-                            if( otherParentInBox.getZ() < 0 ){
-                                otherParentInBox.setZ( otherParentInBox.getZ() + boxLimite );
-                            }
-                            else if( boxLimite <= otherParentInBox.getZ() ){
-                                otherParentInBox.setZ( otherParentInBox.getZ() - boxLimite );
-                            }
-
-                            const MortonIndex mortonOtherParent = otherParentInBox.getMortonIndex() << 3;
-                            // Get child
-                            CellClass** const cells = getCellPt(mortonOtherParent, inLevel);
-
-                            // If there is one or more child
-                            if(cells){
-                                // For each child
-                                for(int idxCousin = 0 ; idxCousin < 8 ; ++idxCousin){
-                                    if(cells[idxCousin]){
-                                        const int xdiff  = ((otherParent.getX()<<1) | ( (idxCousin>>2) & 1)) - workingCell.getX();
-                                        const int ydiff  = ((otherParent.getY()<<1) | ( (idxCousin>>1) & 1)) - workingCell.getY();
-                                        const int zdiff  = ((otherParent.getZ()<<1) | (idxCousin&1))         - workingCell.getZ();
-
-                                        // Test if it is a direct neighbor
-                                        if(abs(xdiff) > neighSeparation || abs(ydiff) > neighSeparation || abs(zdiff) > neighSeparation){
-                                            // add to neighbors
-                                            inNeighbors[idxNeighbors] = cells[idxCousin];
-                                            inNeighborPositions[idxNeighbors] = (((xdiff+3) * 7) + (ydiff+3)) * 7 + zdiff + 3;
-                                            ++idxNeighbors;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return idxNeighbors;
-        }
-    }
-
 
     /** This function return a cell (if it exists) from a morton index and a level
      * @param inIndex the index of the desired cell
@@ -1458,188 +1253,6 @@ public:
         }
         return idxNeighbors;
     }
-
-
-    /** This function fill an array with the neighbors of a cell
-     * @param inNeighbors the array to store the elements
-     * @param outOffsets
-     * @param isPeriodic
-     * @param center
-     * @param inLevel
-     * @param inDirection
-     * @return the number of neighbors
-     */
-    int getPeriodicLeafsNeighbors(ContainerClass* inNeighbors[27], FTreeCoordinate outOffsets[27], bool*const isPeriodic,
-                const FTreeCoordinate& center, const int inLevel, const int inDirection)
-        {
-        const int boxLimite = FMath::pow2(inLevel);
-
-        if( center.getX() != 0 && center.getY() != 0 && center.getZ() != 0 &&
-                center.getX() != boxLimite - 1 && center.getY() != boxLimite - 1 && center.getZ() != boxLimite - 1 ){
-            (*isPeriodic) = false;
-            return getLeafsNeighbors(inNeighbors, center, inLevel);
-        }
-        (*isPeriodic) = true;
-        memset(inNeighbors , 0 , 27 * sizeof(ContainerClass*));
-        int idxNeighbors(0);
-        const int startX = (TestPeriodicCondition(inDirection, DirMinusX) || center.getX() != 0 ?-1:0);
-        const int endX = (TestPeriodicCondition(inDirection, DirPlusX) || center.getX() != boxLimite - 1 ?1:0);
-        const int startY = (TestPeriodicCondition(inDirection, DirMinusY) || center.getY() != 0 ?-1:0);
-        const int endY = (TestPeriodicCondition(inDirection, DirPlusY) || center.getY() != boxLimite - 1 ?1:0);
-        const int startZ = (TestPeriodicCondition(inDirection, DirMinusZ) || center.getZ() != 0 ?-1:0);
-        const int endZ = (TestPeriodicCondition(inDirection, DirPlusZ) || center.getZ() != boxLimite - 1 ?1:0);
-        int otherX,otherY,otherZ;
-        FTreeCoordinate other;
-
-        int xoffset = 0, yoffset = 0, zoffset = 0;
-        // We test all cells around
-        for(int idxX = startX ; idxX <= endX ; ++idxX){
-            otherX = center.getX() + idxX ; xoffset = 0 ;
-            if( otherX < 0 ){
-                otherX += boxLimite ;
-                xoffset = -1;
-            }
-            else if( boxLimite <= otherX ){
-                otherX -= boxLimite ;
-                xoffset = 1;
-            }
-            other.setX(otherX);
-            for(int idxY = startY ; idxY <= endY ; ++idxY){
-                otherY = center.getY() + idxY ;
-                yoffset = 0 ;
-                if( otherY < 0 ){
-                    otherY += boxLimite ;
-                    yoffset = -1;
-                }
-                else if( boxLimite <= otherY ){
-                    otherY -= boxLimite ;
-                    yoffset = 1;
-                }
-                other.setY(otherY);
-                for(int idxZ = startZ ; idxZ <= endZ ; ++idxZ){
-                    zoffset = 0 ;
-                    // if we are not on the current cell
-                    if( idxX || idxY || idxZ ){ //  !( idxX !=0  && idxY != 0  &&idxZ != 0  )
-                        otherZ = center.getZ() + idxZ ;
-
-                        if( otherZ < 0 ){
-                            otherZ += boxLimite ;
-                            zoffset = -1;
-                        }
-                        else if( boxLimite <= otherZ ){
-                            otherZ -= boxLimite ;
-                            zoffset = 1;
-                        }
-                        other.setZ(otherZ);
-
-                        const MortonIndex mortonOther = other.getMortonIndex();
-                        // get cell
-                        ContainerClass* const leaf = getLeafSrc(mortonOther);
-                        // add to list if not null
-                        if(leaf){
-                            const int index = (((idxX + 1) * 3) + (idxY +1)) * 3 + idxZ + 1;
-                            inNeighbors[index] = leaf;
-                            outOffsets[index].setPosition(xoffset,yoffset,zoffset);
-
-                            ++idxNeighbors;
-                        }  // if(leaf)
-                    } // if( idxX || idxY || idxZ )
-                }
-            }
-        }
-
-        return idxNeighbors;
-    }
-
-    /** This function fill an array with the neighbors of a cell
-     * @param inNeighbors the array to store the elements
-     * @param inNeighborPositions
-     * @param outOffsets
-     * @param isPeriodic
-     * @param center
-     * @param inLevel the level of the element
-     * @param inDirection
-     * @return the number of neighbors
-     */
-    int getPeriodicLeafsNeighbors(ContainerClass* inNeighbors[26], int inNeighborPositions[26], FTreeCoordinate outOffsets[26], bool*const isPeriodic,
-    const FTreeCoordinate& center, const int inLevel, const int inDirection)
-        {
-        const int boxLimite = FMath::pow2(inLevel);
-        if( center.getX() != 0 && center.getY() != 0 && center.getZ() != 0 &&
-                center.getX() != boxLimite - 1 && center.getY() != boxLimite - 1 && center.getZ() != boxLimite - 1 ){
-            (*isPeriodic) = false;
-            return getLeafsNeighbors(inNeighbors, inNeighborPositions, center, inLevel);
-            }
-        (*isPeriodic) = true;
-        int idxNeighbors(0);
-        const int startX = (TestPeriodicCondition(inDirection, DirMinusX) || center.getX() != 0 ?-1:0);
-        const int endX = (TestPeriodicCondition(inDirection, DirPlusX) || center.getX() != boxLimite - 1 ?1:0);
-        const int startY = (TestPeriodicCondition(inDirection, DirMinusY) || center.getY() != 0 ?-1:0);
-        const int endY = (TestPeriodicCondition(inDirection, DirPlusY) || center.getY() != boxLimite - 1 ?1:0);
-        const int startZ = (TestPeriodicCondition(inDirection, DirMinusZ) || center.getZ() != 0 ?-1:0);
-        const int endZ = (TestPeriodicCondition(inDirection, DirPlusZ) || center.getZ() != boxLimite - 1 ?1:0);
-        int otherX,otherY,otherZ;
-        FTreeCoordinate other;
-
-        int xoffset = 0, yoffset = 0, zoffset = 0;
-        // We test all cells around
-        for(int idxX = startX ; idxX <= endX ; ++idxX){
-            otherX = center.getX() + idxX ; xoffset = 0 ;
-            if( otherX < 0 ){
-                otherX += boxLimite ;
-                xoffset = -1;
-            }
-            else if( boxLimite <= otherX ){
-                otherX -= boxLimite ;
-                xoffset = 1;
-            }
-            other.setX(otherX);
-            for(int idxY = startY ; idxY <= endY ; ++idxY){
-                otherY = center.getY() + idxY ;
-                yoffset = 0 ;
-                if( otherY < 0 ){
-                    otherY += boxLimite ;
-                    yoffset = -1;
-                }
-                else if( boxLimite <= otherY ){
-                    otherY -= boxLimite ;
-                    yoffset = 1;
-                }
-                other.setY(otherY);
-                for(int idxZ = startZ ; idxZ <= endZ ; ++idxZ){
-                    zoffset = 0 ;
-                    // if we are not on the current cell
-                    if( idxX || idxY || idxZ ){ //  !( idxX !=0  && idxY != 0  &&idxZ != 0  )
-                        otherZ = center.getZ() + idxZ ;
-
-                        if( otherZ < 0 ){
-                            otherZ += boxLimite ;
-                            zoffset = -1;
-                        }
-                        else if( boxLimite <= otherZ ){
-                            otherZ -= boxLimite ;
-                            zoffset = 1;
-                        }
-                        other.setZ(otherZ);
-
-                        const MortonIndex mortonOther = other.getMortonIndex();
-                        // get cell
-                        ContainerClass* const leaf = getLeafSrc(mortonOther);
-                        // add to list if not null
-                        if(leaf){
-                            inNeighbors[idxNeighbors] = leaf;
-                            outOffsets[idxNeighbors].setPosition(xoffset,yoffset,zoffset);
-                            inNeighborPositions[idxNeighbors] = (((idxX + 1) * 3) + (idxY +1)) * 3 + idxZ + 1;
-
-                            ++idxNeighbors;
-                        }  // if(leaf)
-                    } // if( idxX || idxY || idxZ )
-                }
-            }
-        }
-        return idxNeighbors;
-    }
-
 
     /////////////////////////////////////////////////////////
     // Lambda function to apply to all member
