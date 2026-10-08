@@ -38,8 +38,8 @@ public:
     template<typename... Args>
     void push(const FPoint<FReal>& inParticlePosition, const FParticleType type, Args ... args)
         {
-        if(type == FParticleType::FParticleTypeTarget) targets.push(inParticlePosition, FParticleType::FParticleTypeTarget, args...);
-        else sources.push(inParticlePosition, FParticleType::FParticleTypeSource, args...);
+        if(type == FParticleType::FParticleTypeTarget) targets.push(inParticlePosition, args...);
+        else sources.push(inParticlePosition, args...);
         }
 
     /**

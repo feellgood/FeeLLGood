@@ -119,12 +119,10 @@ public:
     FReal* const* getPositions() { return positions; }
 
     /** Push to fill both position and corresponding index, called by FSimpleLeaf
-     * Should have a particle position, type, index and followed by attributes 
+     * Should have a particle position, index and followed by attributes
      */
     template<typename... Args>
-    void push(const FPoint<FReal>& inParticlePosition,
-              const FParticleType particleType,
-              const FSize index, Args... args)
+    void push(const FPoint<FReal>& inParticlePosition, const FSize index, Args... args)
         {
         increaseSizeIfNeeded();
 
