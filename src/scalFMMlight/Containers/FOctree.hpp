@@ -84,6 +84,12 @@ protected:
     int getTreeCoordinate(const FReal inRelativePosition) const
         { return FCoordinateComputer::GetTreeCoordinate<FReal>(inRelativePosition, this->boxWidth, this->boxWidthAtLevel[this->leafIndex], height); }
 
+    /**
+     * true if inValue is in [inMin,inMax[
+     * */
+    bool Between(const FReal inValue, const FReal inMin, const FReal inMax) const
+        { return ( inMin <= inValue && inValue < inMax ); }
+
 public:
     /**
      * Constructor
@@ -758,13 +764,13 @@ public:
 
         // We test all cells around
         for(int idxX = -1 ; idxX <= 1 ; ++idxX){
-            if(!FMath::Between(center.getX() + idxX,0,boxLimite)) continue;
+            if(!Between(center.getX() + idxX,0,boxLimite)) continue;
 
             for(int idxY = -1 ; idxY <= 1 ; ++idxY){
-                if(!FMath::Between(center.getY() + idxY,0,boxLimite)) continue;
+                if(!Between(center.getY() + idxY,0,boxLimite)) continue;
 
                 for(int idxZ = -1 ; idxZ <= 1 ; ++idxZ){
-                    if(!FMath::Between(center.getZ() + idxZ,0,boxLimite)) continue;
+                    if(!Between(center.getZ() + idxZ,0,boxLimite)) continue;
 
                     // if we are not on the current cell
                     if( !(!idxX && !idxY && !idxZ) ){
@@ -836,13 +842,13 @@ public:
         int idxNeighbors(0);
         // We test all cells around
         for(int idxX = -1 ; idxX <= 1 ; ++idxX){
-            if(!FMath::Between(parentCell.getX() + idxX,0,boxLimite)) continue;
+            if(!Between(parentCell.getX() + idxX,0,boxLimite)) continue;
 
             for(int idxY = -1 ; idxY <= 1 ; ++idxY){
-                if(!FMath::Between(parentCell.getY() + idxY,0,boxLimite)) continue;
+                if(!Between(parentCell.getY() + idxY,0,boxLimite)) continue;
 
                 for(int idxZ = -1 ; idxZ <= 1 ; ++idxZ){
-                    if(!FMath::Between(parentCell.getZ() + idxZ,0,boxLimite)) continue;
+                    if(!Between(parentCell.getZ() + idxZ,0,boxLimite)) continue;
 
                     // if we are not on the current cell
                     if( idxX || idxY || idxZ )//( neighSeparation<1 || idxX || idxY || idxZ )
@@ -901,13 +907,13 @@ public:
         int idxNeighbors = 0;
         // We test all cells around
         for(int idxX = -1 ; idxX <= 1 ; ++idxX){
-            if(!FMath::Between(parentCell.getX() + idxX,0,boxLimite)) continue;
+            if(!Between(parentCell.getX() + idxX,0,boxLimite)) continue;
 
             for(int idxY = -1 ; idxY <= 1 ; ++idxY){
-                if(!FMath::Between(parentCell.getY() + idxY,0,boxLimite)) continue;
+                if(!Between(parentCell.getY() + idxY,0,boxLimite)) continue;
 
                 for(int idxZ = -1 ; idxZ <= 1 ; ++idxZ){
-                    if(!FMath::Between(parentCell.getZ() + idxZ,0,boxLimite)) continue;
+                    if(!Between(parentCell.getZ() + idxZ,0,boxLimite)) continue;
 
                     // if we are not on the current cell
                     if( idxX || idxY || idxZ )
@@ -969,13 +975,13 @@ public:
         int idxNeighbors = 0;
         // We test all cells around
         for(int idxX = -1 ; idxX <= 1 ; ++idxX){
-            if(!FMath::Between(parentCell.getX() + idxX,0,boxLimite)) continue;
+            if(!Between(parentCell.getX() + idxX,0,boxLimite)) continue;
 
             for(int idxY = -1 ; idxY <= 1 ; ++idxY){
-                if(!FMath::Between(parentCell.getY() + idxY,0,boxLimite)) continue;
+                if(!Between(parentCell.getY() + idxY,0,boxLimite)) continue;
 
                 for(int idxZ = -1 ; idxZ <= 1 ; ++idxZ){
-                    if(!FMath::Between(parentCell.getZ() + idxZ,0,boxLimite)) continue;
+                    if(!Between(parentCell.getZ() + idxZ,0,boxLimite)) continue;
 
                     const FTreeCoordinate otherParent(parentCell.getX() + idxX,parentCell.getY() + idxY,parentCell.getZ() + idxZ);
                     const MortonIndex mortonOtherParent = otherParent.getMortonIndex() << 3;
@@ -1029,13 +1035,13 @@ public:
         int idxNeighbors = 0;
         // We test all cells around
         for(int idxX = -1 ; idxX <= 1 ; ++idxX){
-            if(!FMath::Between(parentCell.getX() + idxX,0,boxLimite)) continue;
+            if(!Between(parentCell.getX() + idxX,0,boxLimite)) continue;
 
             for(int idxY = -1 ; idxY <= 1 ; ++idxY){
-                if(!FMath::Between(parentCell.getY() + idxY,0,boxLimite)) continue;
+                if(!Between(parentCell.getY() + idxY,0,boxLimite)) continue;
 
                 for(int idxZ = -1 ; idxZ <= 1 ; ++idxZ){
-                    if(!FMath::Between(parentCell.getZ() + idxZ,0,boxLimite)) continue;
+                    if(!Between(parentCell.getZ() + idxZ,0,boxLimite)) continue;
 
                     const FTreeCoordinate otherParent(parentCell.getX() + idxX,parentCell.getY() + idxY,parentCell.getZ() + idxZ);
                     const MortonIndex mortonOtherParent = otherParent.getMortonIndex() << 3;
@@ -1301,13 +1307,13 @@ public:
 
         // We test all cells around
         for(int idxX = -1 ; idxX <= 1 ; ++idxX){
-            if(!FMath::Between(center.getX() + idxX,0,boxLimite)) continue;
+            if(!Between(center.getX() + idxX,0,boxLimite)) continue;
 
             for(int idxY = -1 ; idxY <= 1 ; ++idxY){
-                if(!FMath::Between(center.getY() + idxY,0,boxLimite)) continue;
+                if(!Between(center.getY() + idxY,0,boxLimite)) continue;
 
                 for(int idxZ = -1 ; idxZ <= 1 ; ++idxZ){
-                    if(!FMath::Between(center.getZ() + idxZ,0,boxLimite)) continue;
+                    if(!Between(center.getZ() + idxZ,0,boxLimite)) continue;
 
                     // if we are not on the current cell
                     if( idxX || idxY || idxZ ){
@@ -1342,13 +1348,13 @@ public:
         int idxNeighbors(0);
         // We test all cells around
         for(int idxX = -1 ; idxX <= 1 ; ++idxX){
-            if(!FMath::Between(center.getX() + idxX,0,boxLimite)) continue;
+            if(!Between(center.getX() + idxX,0,boxLimite)) continue;
 
             for(int idxY = -1 ; idxY <= 1 ; ++idxY){
-                if(!FMath::Between(center.getY() + idxY,0,boxLimite)) continue;
+                if(!Between(center.getY() + idxY,0,boxLimite)) continue;
 
                 for(int idxZ = -1 ; idxZ <= 1 ; ++idxZ){
-                    if(!FMath::Between(center.getZ() + idxZ,0,boxLimite)) continue;
+                    if(!Between(center.getZ() + idxZ,0,boxLimite)) continue;
 
                     // if we are not on the current cell
                     if( idxX || idxY || idxZ ){
@@ -1383,13 +1389,13 @@ public:
         int idxNeighbors(0);
         // We test all cells around
         for(int idxX = -1 ; idxX <= 1 ; ++idxX){
-            if(!FMath::Between(center.getX() + idxX,0,boxLimite)) continue;
+            if(!Between(center.getX() + idxX,0,boxLimite)) continue;
 
             for(int idxY = -1 ; idxY <= 1 ; ++idxY){
-                if(!FMath::Between(center.getY() + idxY,0,boxLimite)) continue;
+                if(!Between(center.getY() + idxY,0,boxLimite)) continue;
 
                 for(int idxZ = -1 ; idxZ <= 1 ; ++idxZ){
-                    if(!FMath::Between(center.getZ() + idxZ,0,boxLimite)) continue;
+                    if(!Between(center.getZ() + idxZ,0,boxLimite)) continue;
 
                     // if we are not on the current cell
                     if( idxX || idxY || idxZ ){
@@ -1425,13 +1431,13 @@ public:
 
         // We test all cells around
         for(int idxX = -1 ; idxX <= 1 ; ++idxX){
-            if(!FMath::Between(center.getX() + idxX,0,boxLimite)) continue;
+            if(!Between(center.getX() + idxX,0,boxLimite)) continue;
 
             for(int idxY = -1 ; idxY <= 1 ; ++idxY){
-                if(!FMath::Between(center.getY() + idxY,0,boxLimite)) continue;
+                if(!Between(center.getY() + idxY,0,boxLimite)) continue;
 
                 for(int idxZ = -1 ; idxZ <= 1 ; ++idxZ){
-                    if(!FMath::Between(center.getZ() + idxZ,0,boxLimite)) continue;
+                    if(!Between(center.getZ() + idxZ,0,boxLimite)) continue;
 
                     // if we are not on the current cell
                     if( idxX || idxY || idxZ ){
