@@ -35,12 +35,6 @@ namespace FMath
     static bool Between(const NumType inValue, const NumType inMin, const NumType inMax) 
         { return ( inMin <= inValue && inValue < inMax ); }
 
-    /** sqrt (double version) */
-    static double Sqrt(const double inValue) { return sqrt(inValue); }
-
-    /** atan2 (double version), return value is given in radians and is in [-pi,pi], inclusive. */
-    static double Atan2(const double inValue1,const double inValue2) { return atan2(inValue1,inValue2); }
-
 } // end namespace
 
 #endif //FMATH_HPP
