@@ -4,7 +4,6 @@
 
 #include <vector>
 
-#include "../../Utils/FGlobal.hpp"
 #include "../../Utils/FAlignedMemory.hpp"
 #include "../../Utils/FPoint.hpp"
 #include "../../Components/FParticleType.hpp"
@@ -17,7 +16,7 @@ class FP2PParticleContainerIndexed
 {
 protected:
     /** size of a chunck to align memory */
-    static const FSize MemoryAlignement = FP2PDefaultAlignement;
+    static const FSize MemoryAlignement = 64;
 
     /** the indices of the particles */
     std::vector<FSize> indexes;
