@@ -41,11 +41,6 @@ namespace FMath
     /** atan2 (double version), return value is given in radians and is in [-pi,pi], inclusive. */
     static double Atan2(const double inValue1,const double inValue2) { return atan2(inValue1,inValue2); }
 
-    /** sinus (double version) */
-    static double Sin(const double inValue) { return sin(inValue); }
-
-    /** cosinus (double version) */
-    static double Cos(const double inValue) { return cos(inValue); }
 } // end namespace
 
 #endif //FMATH_HPP

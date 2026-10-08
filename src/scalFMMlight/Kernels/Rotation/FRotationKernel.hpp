@@ -306,8 +306,8 @@ class FRotationKernel
                 int index_lm = index_P0;
                 for(int m = 0 ; m <= P ; ++m, ++index_lm ){
                     const FReal mphi = (phi + FReal(M_PI_2)) * FReal(m);
-                    const FReal c_mphi = FMath::Cos(mphi);
-                    const FReal s_mphi = FMath::Sin(mphi);
+                    const FReal c_mphi = cos(mphi);
+                    const FReal s_mphi = sin(mphi);
                     // O_{l,m}( \alpha, \beta + \phi ) = e^{-i \phi m} O_{l,m}( \alpha, \beta )
                     rotationExpMinusImPhi[idxChild][index_lm].setRealImag(c_mphi, -s_mphi);
                     // M_{l,m}( \alpha, \beta + \phi ) = e^{i \phi m} M_{l,m}( \alpha, \beta )
@@ -398,8 +398,8 @@ class FRotationKernel
                             int index_lm = index_P0;
                             for(int m = 0 ; m <= P ; ++m, ++index_lm ){
                                 const FReal mphi = (phi + FReal(M_PI_2)) * FReal(m);
-                                const FReal c_mphi = FMath::Cos(mphi);
-                                const FReal s_mphi = FMath::Sin(mphi);
+                                const FReal c_mphi = cos(mphi);
+                                const FReal s_mphi = sin(mphi);
                                 // O_{l,m}( \alpha, \beta + \phi ) = e^{-i \phi m} O_{l,m}( \alpha, \beta )
                                 rotationM2LExpMinusImPhi[position][index_lm].setRealImag(c_mphi, -s_mphi);
                                 // M_{l,m}( \alpha, \beta + \phi ) = e^{i \phi m} M_{l,m}( \alpha, \beta )
@@ -912,8 +912,8 @@ public:
                     { // We need to compute the angles to use in the "m" loop
                     // So we can compute only the one needed after "l" inc
                     const FReal angle = fl*phi + i_pow_m[l & 0x3];
-                    angles[l][0] = FMath::Cos(angle);
-                    angles[l][1] = FMath::Sin(angle);
+                    angles[l][0] = cos(angle);
+                    angles[l][1] = sin(angle);
                     }
                 for(int m = 0 ; m <= l ; ++m, ++index_l_m)
                     {
@@ -1231,8 +1231,8 @@ public:
                     { // there might be a numerical problem here,error is bigger if multiplication by coeff is factorized in magnitude += formula
                     const FReal coef =  (minus_r_pow_l / factorials[l+m]) * legendre[index_lm];
                     const FReal m_phi_i_pow_m = FReal(m)*phi + i_pow_m[m & 0x3];
-                    const FReal C_cos_m_phi_i_pow_m = coef * FMath::Cos(m_phi_i_pow_m);
-                    const FReal C_sin_m_phi_i_pow_m = coef * FMath::Sin(m_phi_i_pow_m);
+                    const FReal C_cos_m_phi_i_pow_m = coef * cos(m_phi_i_pow_m);
+                    const FReal C_sin_m_phi_i_pow_m = coef * sin(m_phi_i_pow_m);
                     magnitude += ( u[index_lm].getReal() * C_cos_m_phi_i_pow_m - u[index_lm].getImag() * C_sin_m_phi_i_pow_m );
                     }
                 minus_r_pow_l *= -r;
