@@ -4,7 +4,6 @@
 #define FP2PR_HPP
 
 #include "../../Utils/FGlobal.hpp"
-#include "../../Utils/FMath.hpp"
 
 /**
  * @brief FullRemote template function
@@ -41,7 +40,7 @@ static void FullRemote(ContainerClass* const FRestrict inTargets, const Containe
                     FReal dx = tx - sourcesX[idxSource];
                     FReal dy = ty - sourcesY[idxSource];
                     FReal dz = tz - sourcesZ[idxSource];
-                    tpo += sourcesPhysicalValues[idxSource] / FMath::Sqrt(dx*dx + dy*dy + dz*dz);
+                    tpo += sourcesPhysicalValues[idxSource] / sqrt(dx*dx + dy*dy + dz*dz);
                     }
                 targetsPotentials[idxTarget] += tpo;
                 }
