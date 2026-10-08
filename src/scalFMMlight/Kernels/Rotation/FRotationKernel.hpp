@@ -299,13 +299,13 @@ class FRotationKernel
             const FReal y = FReal((idxChild&2)? -boxWidth : boxWidth);
             // compute azimuth
             FReal phi = FMath::Atan2(y,x);
-            if (phi < 0) phi += FMath::FTwoPi<FReal>();
+            if (phi < 0) phi += FReal(2.0*M_PI);
             // First compute azimuth rotation
             // compute the last part with l == P
             {
                 int index_lm = index_P0;
                 for(int m = 0 ; m <= P ; ++m, ++index_lm ){
-                    const FReal mphi = (phi + FMath::FPiDiv2<FReal>()) * FReal(m);
+                    const FReal mphi = (phi + FReal(M_PI_2)) * FReal(m);
                     const FReal c_mphi = FMath::Cos(mphi);
                     const FReal s_mphi = FMath::Sin(mphi);
                     // O_{l,m}( \alpha, \beta + \phi ) = e^{-i \phi m} O_{l,m}( \alpha, \beta )
@@ -391,13 +391,13 @@ class FRotationKernel
                         // Build relative position between target and source
                         const int position = ((( (idxX+3) * 7) + (idxY+3))) * 7 + idxZ + 3;
                         FReal phi = FMath::Atan2(-FReal(idxY)*boxWidth,-FReal(idxX)*boxWidth);
-                        if (phi < 0) phi += FMath::FTwoPi<FReal>();
+                        if (phi < 0) phi += FReal(2.0*M_PI);
                         // Compute azimuth rotation vector
                         // first compute the last part with l == P
                         {
                             int index_lm = index_P0;
                             for(int m = 0 ; m <= P ; ++m, ++index_lm ){
-                                const FReal mphi = (phi + FMath::FPiDiv2<FReal>()) * FReal(m);
+                                const FReal mphi = (phi + FReal(M_PI_2)) * FReal(m);
                                 const FReal c_mphi = FMath::Cos(mphi);
                                 const FReal s_mphi = FMath::Sin(mphi);
                                 // O_{l,m}( \alpha, \beta + \phi ) = e^{-i \phi m} O_{l,m}( \alpha, \beta )
@@ -835,7 +835,7 @@ class FRotationKernel
     }
 
     /** frequently used angles */
-    static constexpr FReal i_pow_m[4] = {0, FMath::FPiDiv2<FReal>(), FMath::FPi<FReal>(), -FMath::FPiDiv2<FReal>()};
+    static constexpr FReal i_pow_m[4] = {0, FReal(M_PI_2), FReal(M_PI), -FReal(M_PI_2)};
 
 public:
 
