@@ -892,8 +892,8 @@ public:
              (a,theta,phi) is (x,y,z) in spherical coordinates.
              theta is not computed, but Cos(theta) and Sin(theta) are computed, to feed legendre[1,2], mind the minus for legendre[2]
             */
-            const FReal x2y2 = FMath::Sq(x) + FMath::Sq(y);
-            const FReal a = FMath::Sqrt(x2y2 + FMath::Sq(z)); // The distance between the SH and the particle
+            const FReal x2y2 = x*x + y*y;
+            const FReal a = FMath::Sqrt(x2y2 + z*z); // The distance between the SH and the particle
             const FReal phi = FMath::Atan2(y,x);
 
             // Compute the associated legendre polynomial
@@ -1207,8 +1207,8 @@ public:
              (r,theta,phi) is (x,y,z) in spherical coordinates.
              theta is not computed, but Cos(theta) and Sin(theta) are computed, to feed legendre[1,2], mind the minus for legendre[2]
             */
-            const FReal x2y2 = FMath::Sq(x) + FMath::Sq(y);
-            const FReal r = FMath::Sqrt(x2y2 + FMath::Sq(z)); // The distance between the SH and the particle
+            const FReal x2y2 = x*x + y*y;
+            const FReal r = FMath::Sqrt(x2y2 + z*z); // The distance between the SH and the particle
             const FReal phi = FMath::Atan2(y,x);
 
             // Compute the associated legendre polynomial
