@@ -2,18 +2,18 @@
 #define FMM_DEMAG_H
 
 /** \file fmm_demag.h
-\brief this header is the interface to scalfmm. Its purpose is to prepare an octree for the
+\brief this header is the interface to scalFMMlight. Its purpose is to prepare an octree for the
 application of the fast multipole algorithm, and to compute the scalar magnetic potential and the
 demagnetizing field.
 */
 
-#include "Components/FParticleType.hpp"
-#include "Components/FTypedLeaf.hpp"
-#include "Containers/FOctree.hpp"
-#include "Core/FFmmAlgorithmThreadTsm.hpp"
-#include "Kernels/P2P/FP2PParticleContainerIndexed.hpp"
-#include "Kernels/Rotation/FRotationCell.hpp"
-#include "Kernels/Rotation/FRotationKernel.hpp"
+#include "scalFMMlight/Components/FParticleType.hpp"
+#include "scalFMMlight/Components/FTypedLeaf.hpp"
+#include "scalFMMlight/Containers/FOctree.hpp"
+#include "scalFMMlight/Core/FFmmAlgorithmThreadTsm.hpp"
+#include "scalFMMlight/Kernels/P2P/FP2PParticleContainerIndexed.hpp"
+#include "scalFMMlight/Kernels/Rotation/FRotationCell.hpp"
+#include "scalFMMlight/Kernels/Rotation/FRotationKernel.hpp"
 
 #include "mesh.h"
 
