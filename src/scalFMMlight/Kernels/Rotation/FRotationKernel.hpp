@@ -438,8 +438,8 @@ class FRotationKernel
                             }
                             // else we take the right indexes
                             else {
-                                dx = FMath::Max(FMath::Abs(idxX),FMath::Abs(idxY));
-                                dy = FMath::Min(FMath::Abs(idxX),FMath::Abs(idxY));
+                                dx = FMath::Max(abs(idxX),abs(idxY));
+                                dy = FMath::Min(abs(idxX),abs(idxY));
                                 dz = -idxZ;
                             }
 

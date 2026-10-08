@@ -9,7 +9,6 @@
 #include "../Utils/FGlobal.hpp"
 #include "../Utils/FGlobalPeriodic.hpp"
 #include "../Utils/FPoint.hpp"
-#include "../Utils/FMath.hpp"
 #include "../Utils/FAssert.hpp"
 #include "./FCoordinateComputer.hpp"
 
@@ -863,7 +862,7 @@ public:
                                     const int zdiff  = ((otherParent.getZ()<<1) | (idxCousin&1)) - workingCell.getZ();
 
                                     // Test if it is a direct neighbor
-                                    if(FMath::Abs(xdiff) > neighSeparation || FMath::Abs(ydiff) > neighSeparation || FMath::Abs(zdiff) > neighSeparation){
+                                    if(abs(xdiff) > neighSeparation || abs(ydiff) > neighSeparation || abs(zdiff) > neighSeparation){
                                         // add to neighbors
                                         inNeighbors[ (((xdiff+3) * 7) + (ydiff+3)) * 7 + zdiff + 3] = cells[idxCousin];
                                         ++idxNeighbors;
@@ -928,7 +927,7 @@ public:
                                     const int zdiff  = ((otherParent.getZ()<<1) | (idxCousin&1)) - workingCell.getZ();
 
                                     // Test if it is a direct neighbor
-                                    if(FMath::Abs(xdiff) > neighSeparation || FMath::Abs(ydiff) > neighSeparation || FMath::Abs(zdiff) > neighSeparation){
+                                    if(abs(xdiff) > neighSeparation || abs(ydiff) > neighSeparation || abs(zdiff) > neighSeparation){
                                         // add to neighbors
                                         inNeighbors[idxNeighbors] = cells[idxCousin];
                                         inNeighborPositions[idxNeighbors] = (((xdiff+3) * 7) + (ydiff+3)) * 7 + zdiff + 3;
@@ -1150,7 +1149,7 @@ public:
                                         const int zdiff  = ((otherParent.getZ()<<1) | (idxCousin&1))         - workingCell.getZ();
 
                                         // Test if it is a direct neighbor
-                                        if(FMath::Abs(xdiff) > neighSeparation || FMath::Abs(ydiff) > neighSeparation || FMath::Abs(zdiff) > neighSeparation){
+                                        if(abs(xdiff) > neighSeparation || abs(ydiff) > neighSeparation || abs(zdiff) > neighSeparation){
                                             // add to neighbors
                                             inNeighbors[ (((xdiff+3) * 7) + (ydiff+3)) * 7 + zdiff + 3] = cells[idxCousin];
                                             ++idxNeighbors;
@@ -1247,7 +1246,7 @@ public:
                                         const int zdiff  = ((otherParent.getZ()<<1) | (idxCousin&1))         - workingCell.getZ();
 
                                         // Test if it is a direct neighbor
-                                        if(FMath::Abs(xdiff) > neighSeparation || FMath::Abs(ydiff) > neighSeparation || FMath::Abs(zdiff) > neighSeparation){
+                                        if(abs(xdiff) > neighSeparation || abs(ydiff) > neighSeparation || abs(zdiff) > neighSeparation){
                                             // add to neighbors
                                             inNeighbors[idxNeighbors] = cells[idxCousin];
                                             inNeighborPositions[idxNeighbors] = (((xdiff+3) * 7) + (ydiff+3)) * 7 + zdiff + 3;
