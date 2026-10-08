@@ -15,14 +15,6 @@
 /** namespace to grab altogether indirections to STL math */
 namespace FMath
 {
-    /** To get max between 2 values */
-    template <class NumType>
-    static NumType Max(const NumType inV1, const NumType inV2) { return (inV1 > inV2 ? inV1 : inV2); }
-
-    /** To get min between 2 values */
-    template <class NumType>
-    static NumType Min(const NumType inV1, const NumType inV2) { return (inV1 < inV2 ? inV1 : inV2); }
-
     /** To get pow of 2 */
     static int pow2(const int power) { return (1 << power); }
 

@@ -5,7 +5,6 @@
 #include "../Utils/FGlobal.hpp"
 #include "../Utils/FPoint.hpp"
 #include "../Utils/FAssert.hpp"
-#include "../Utils/FMath.hpp"
 #include "./FTreeCoordinate.hpp"
 
 /**
@@ -501,7 +500,7 @@ public:
         if( !this->subleafs[arrayIndex] ){
             // We need to create leaf sub octree
             const int nextSubOctreePosition = this->subOctreePosition + this->subOctreeHeight;
-            const int nextSubOctreeHeight = FMath::Min(inTreeHeight - nextSubOctreePosition, this->subOctreeHeight);
+            const int nextSubOctreeHeight = std::min(inTreeHeight - nextSubOctreePosition, this->subOctreeHeight);
 
             // Next suboctree is a middle suboctree
             if(inTreeHeight > nextSubOctreeHeight + nextSubOctreePosition){
@@ -538,7 +537,7 @@ public:
         if( !this->subleafs[arrayIndex] ){
             // We need to create leaf sub octree
             const int nextSubOctreePosition = this->subOctreePosition + this->subOctreeHeight;
-            const int nextSubOctreeHeight = FMath::Min(inTreeHeight - nextSubOctreePosition, this->subOctreeHeight);
+            const int nextSubOctreeHeight = std::min(inTreeHeight - nextSubOctreePosition, this->subOctreeHeight);
 
             // Next suboctree is a middle suboctree
             if(inTreeHeight > nextSubOctreeHeight + nextSubOctreePosition){
