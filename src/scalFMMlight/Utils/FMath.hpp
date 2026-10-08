@@ -15,18 +15,6 @@
 /** namespace to grab altogether indirections to STL math */
 namespace FMath
 {
-    /** return pi */
-    template <class FReal>
-    constexpr static FReal FPi(){ return FReal(M_PI); }
-
-    /** return 2*pi */
-    template <class FReal>
-    constexpr static FReal FTwoPi(){ return FReal(2.0*M_PI); }
-
-    /** return pi/2 */
-    template <class FReal>
-    constexpr static FReal FPiDiv2(){ return FReal(M_PI_2); }
-
     /** To get absolute value */
     template <class NumType>
     static NumType Abs(const NumType inV){ return (inV < 0 ? -inV : inV); }
