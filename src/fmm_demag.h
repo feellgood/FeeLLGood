@@ -37,7 +37,8 @@ public:
         const int ScalfmmNbThreads /**< [in] */,
         const int order /**< [in] order of the interpolation polynomials of the far field */,
         const int treeHeight /**< [in] height of the trees, 0 means automatic */,
-        const int groupSize /**< [in] number of leaves and cells per group in the trees */);
+        const int groupSize /**< [in] number of leaves and cells per group, 0 means automatic */,
+        const bool verbose /**< [in] if true, print the durations of the steps */);
 
     /** destructor, defined where the implementation is complete */
     ~fmm();
@@ -50,6 +51,12 @@ public:
 
     /** height of the trees, root included (useful when it is computed automatically) */
     int treeHeight() const;
+
+    /** group size of the source tree (useful when it is computed automatically) */
+    int sourceGroupSize() const;
+
+    /** group size of the target tree (useful when it is computed automatically) */
+    int targetGroupSize() const;
 
 private:
     /** implementation, see fmm_demag.cpp */

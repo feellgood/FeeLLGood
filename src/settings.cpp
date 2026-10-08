@@ -686,8 +686,8 @@ void Settings::read(YAML::Node yaml)
         if (fmmTreeHeight != 0 && fmmTreeHeight < 3)
             { error("demagnetizing_field_solver.tree_height should be 0 (automatic) or at least 3"); }
         assign(fmmGroupSize, solver["group_size"]);
-        if (fmmGroupSize < 1)
-            { error("demagnetizing_field_solver.group_size should be at least 1"); }
+        if (fmmGroupSize < 0)
+            { error("demagnetizing_field_solver.group_size should be 0 (automatic) or positive"); }
         }  // demagnetizing_field_solver
 
     solver = yaml["finite_element_solver"];

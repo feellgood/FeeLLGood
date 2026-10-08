@@ -157,7 +157,8 @@ public:
      * particles */
     int fmmTreeHeight;
 
-    /** number of leaves and cells per group in the scalfmm trees */
+    /** number of leaves and cells per group in the scalfmm trees. 0 means automatic, computed from
+     * the number of non empty leaves and the number of threads */
     int fmmGroupSize;
 
     /** if true creates an output file of the solution of the electrostatic problem  */

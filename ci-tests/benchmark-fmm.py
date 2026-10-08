@@ -101,19 +101,31 @@ def run(executable, settings):
     return val.stdout
 
 def parse_log(log):
-    """ returns the durations of the magnetostatics (ms), the tree height and the number of nodes """
+    """ returns the durations of the magnetostatics (ms), the durations of its steps (dictionary of
+    lists, empty with a feellgood version that does not print them), the tree height, the group
+    sizes (sources/targets) and the number of nodes """
     durations = []
+    steps = {}
     height = None
+    group_sizes = None
     nb_nodes = None
     for line in log.splitlines():
         words = line.split()
         if line.startswith("magnetostatics done in"):
             durations.append(float(words[3]))
+        elif line.startswith("fmm steps (ms):"):
+            # fmm steps (ms): charges 1.2, inputs 0.3, reset 0.1, algo 10.5, outputs 0.2
+            for item in line.split(':', 1)[1].split(','):
+                name, value = item.split()
+                steps.setdefault(name, []).append(float(value))
         elif line.startswith("Magnetostatics: order"):
             height = int(words[words.index("height") + 1].rstrip(','))
+            if "(sources)" in words:
+                i = words.index("size")
+                group_sizes = words[i + 1] + '/' + words[i + 3]
         elif line.strip().startswith("nodes:"):
             nb_nodes = int(words[1])
-    return durations, height, nb_nodes
+    return durations, steps, height, group_sizes, nb_nodes
 
 def read_phi(sol_file):
     """ returns the list of phi values (last column) of a .sol file """
@@ -155,13 +167,22 @@ def bench_mesh(f, args, mesh, volume_name, surface_name, mesh_label):
                         settings = makeSettings(mesh, volume_name, surface_name, out_dir, nbThreads,
                                                 args.final_time, order, height, group_size)
                         log = run(args.executable, settings)
-                    durations, used_height, nb_nodes = parse_log(log)
+                    durations, steps, used_height, used_group_sizes, nb_nodes = parse_log(log)
                     # the first computation builds the interaction lists, it is not counted
-                    timed = durations[1:] if len(durations) > 1 else durations
+                    first = 1 if len(durations) > 1 else 0
+                    timed = durations[first:]
+                    def median_step(names):
+                        """ median of the sum of the durations of some steps, - if unknown """
+                        if not all(name in steps for name in names):
+                            return '-'
+                        sums = [sum(v) for v in zip(*(steps[name][first:] for name in names))]
+                        return "{:.2f}".format(statistics.median(sums))
                     line = [mesh_label, nb_nodes, order, height, used_height, group_size,
-                            nbThreads, len(timed), "{:.2f}".format(statistics.median(timed)),
+                            used_group_sizes or '-', nbThreads, len(timed),
+                            "{:.2f}".format(statistics.median(timed)),
                             "{:.2f}".format(min(timed)), "{:.2f}".format(max(timed)),
-                            "{:.3e}".format(err)]
+                            median_step(["algo"]), median_step(["charges"]),
+                            median_step(["inputs", "reset", "outputs"]), "{:.3e}".format(err)]
                     f.write('\t'.join(str(x) for x in line) + '\n')
                     f.flush()
                     print('\t'.join(str(x) for x in line))
@@ -188,8 +209,9 @@ def metadata(args):
              "reference: order " + str(args.ref_order) + ", tree height " + str(args.ref_height)
                  + ", group size " + str(args.ref_group_size),
              "final_time: " + str(args.final_time)]
-    columns = ["mesh", "nodes", "order", "height", "used_height", "group_size", "threads",
-               "n_calls", "median_ms", "min_ms", "max_ms", "err_phi"]
+    columns = ["mesh", "nodes", "order", "height", "used_height", "group_size",
+               "used_group_size", "threads", "n_calls", "median_ms", "min_ms", "max_ms", "algo_ms",
+               "charges_ms", "other_ms", "err_phi"]
     return ''.join("# " + l + '\n' for l in lines) + '\t'.join(columns) + '\n'
 
 def get_params():
@@ -205,7 +227,9 @@ def get_params():
             --surface ellipsoid_surface -n 1 8
         a given mesh, on 1 and 8 threads
 
-    tree height 0 means automatic. OMP_MAX_TASK_PRIORITY, OMP_PROC_BIND and OMP_PLACES default to
+    tree height 0 and group size 0 mean automatic. Columns algo_ms, charges_ms and other_ms are the
+    medians of the durations of the scalfmm algorithm, of the computation of the charges, and of
+    the other steps (inputs, reset, outputs). OMP_MAX_TASK_PRIORITY, OMP_PROC_BIND and OMP_PLACES default to
     11, true and cores if they are not set: with at most as many threads as physical cores, two
     threads never share a core. All OMP_*, GOMP_* and KMP_* variables are written in the header of
     the output file.
@@ -223,8 +247,8 @@ def get_params():
                         help='interpolation orders')
     parser.add_argument('-H', '--heights', type=int, nargs='+', default=[0],
                         help='tree heights, 0 means automatic')
-    parser.add_argument('-g', '--group_sizes', type=int, nargs='+', default=[64],
-                        help='group sizes')
+    parser.add_argument('-g', '--group_sizes', type=int, nargs='+', default=[0],
+                        help='group sizes, 0 means automatic')
     parser.add_argument('-n', '--nbThreads', type=int, nargs='+', default=makeListNbThreads(),
                         help='numbers of threads')
     parser.add_argument('-t', '--final_time', type=float, default=1e-11,
@@ -232,7 +256,7 @@ def get_params():
     parser.add_argument('--ref_order', type=int, default=10, help='order of the reference')
     parser.add_argument('--ref_height', type=int, default=0,
                         help='tree height of the reference, 0 means automatic')
-    parser.add_argument('--ref_group_size', type=int, default=64,
+    parser.add_argument('--ref_group_size', type=int, default=0,
                         help='group size of the reference')
     parser.add_argument('-f', '--output', help='output file (default: benchmark-fmm-<host>.txt)')
     parser.add_argument('--version', action='version', version=__version__,

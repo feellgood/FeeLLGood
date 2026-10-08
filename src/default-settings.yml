@@ -242,8 +242,10 @@ demagnetizing_field_solver:
   # particles (Gauss points of the sources and magnetic nodes).
   tree_height: 0
 
-  # Number of leaves and cells per group in the trees.
-  group_size: 64
+  # Number of leaves and cells per group in the trees. Each group is a task
+  # of the parallel algorithm. The value 0 means automatic: about four groups
+  # of leaves per thread.
+  group_size: 0
 
 # Parameters of the solver.
 finite_element_solver:
