@@ -144,7 +144,7 @@ protected:
             ++numberOfLeafs;
         } while(octreeIterator.moveRight());
 
-        const int chunkSize = FMath::Max(1 , numberOfLeafs/(omp_get_max_threads()*omp_get_max_threads())); // if not specified to schedule(), default chunksize is 1
+        const int chunkSize = std::max(1 , numberOfLeafs/(omp_get_max_threads()*omp_get_max_threads())); // if not specified to schedule(), default chunksize is 1
         #pragma omp parallel num_threads(MaxThreads) //create the openMP parallel region with MaxThreads threads
         {
             KernelClass * const myThreadkernels = kernels[omp_get_thread_num()];
@@ -179,7 +179,7 @@ protected:
         typename OctreeClass::Iterator avoidGotoLeftIterator(octreeIterator);
 
         // for each levels
-        for(int idxLevel = FMath::Min(OctreeHeight - 2, lowerWorkingLevel - 1) ; idxLevel >= upperWorkingLevel ; --idxLevel ) 
+        for(int idxLevel = std::min(OctreeHeight - 2, lowerWorkingLevel - 1) ; idxLevel >= upperWorkingLevel ; --idxLevel)
             {
             int numberOfCells = 0;
             // for each cells
@@ -190,7 +190,7 @@ protected:
             avoidGotoLeftIterator.moveUp();
             octreeIterator = avoidGotoLeftIterator;// equal octreeIterator.moveUp(); octreeIterator.gotoLeft();
 
-            const int chunkSize = FMath::Max(1 , numberOfCells/(omp_get_max_threads()*omp_get_max_threads()));
+            const int chunkSize = std::max(1 , numberOfCells/(omp_get_max_threads()*omp_get_max_threads()));
             #pragma omp parallel num_threads(MaxThreads)  //create the openMP parallel region with MaxThreads threads
             {
                 KernelClass * const myThreadkernels = kernels[omp_get_thread_num()];
@@ -245,7 +245,7 @@ protected:
                 avoidGotoLeftIterator.moveDown();
                 octreeIterator = avoidGotoLeftIterator;
 
-                const int chunkSize = FMath::Max(1 , numberOfCells/(omp_get_max_threads()*omp_get_max_threads()));
+                const int chunkSize = std::max(1 , numberOfCells/(omp_get_max_threads()*omp_get_max_threads()));
                 #pragma omp parallel num_threads(MaxThreads)  //create the openMP parallel region with MaxThreads threads
                 {
                     KernelClass * const myThreadkernels = kernels[omp_get_thread_num()];
@@ -299,7 +299,7 @@ protected:
                 avoidGotoLeftIterator.moveDown();
                 octreeIterator = avoidGotoLeftIterator;
 
-                const int chunkSize = FMath::Max(1 , numberOfCells/(omp_get_max_threads()*omp_get_max_threads()));
+                const int chunkSize = std::max(1 , numberOfCells/(omp_get_max_threads()*omp_get_max_threads()));
                 #pragma omp parallel num_threads(MaxThreads)  //create the openMP parallel region with MaxThreads threads
                 {
                     KernelClass * const myThreadkernels = kernels[omp_get_thread_num()];
@@ -339,7 +339,7 @@ protected:
                 } while(octreeIterator.moveRight());
         }
 
-        const int chunkSize = FMath::Max(1 , numberOfLeafs/(omp_get_max_threads()*omp_get_max_threads()));
+        const int chunkSize = std::max(1 , numberOfLeafs/(omp_get_max_threads()*omp_get_max_threads()));
         const int heightMinusOne = OctreeHeight - 1;
         #pragma omp parallel num_threads(MaxThreads)  //create the openMP parallel region with MaxThreads threads
         {
