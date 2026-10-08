@@ -4,7 +4,6 @@
 
 #include "../../Utils/FComplex.hpp"
 #include "../../Utils/FGlobal.hpp"
-#include "../../Utils/FMath.hpp"
 #include "../../Utils/FAssert.hpp"
 #include "../P2P/FP2PR.hpp"
 
@@ -127,7 +126,7 @@ class FRotationKernel
             for( int idxLevel = 0 ; idxLevel < treeHeight - 1 ; ++idxLevel)
                 {
                 // b is the parent-child distance = norm( vec(widthAtLevel,widthAtLevel,widthAtLevel))
-                const FReal b = FMath::Sqrt(widthAtLevel*widthAtLevel*3);
+                const FReal b = sqrt(widthAtLevel*widthAtLevel*3);
                 // we compute b^idx iteratively
                 FReal bPowIdx = 1.0;
                 // we compute -1^idx iteratively
@@ -166,7 +165,7 @@ class FRotationKernel
                                 // this is the position in the index system from 0 to 343
                                 const int position = ((( (idxX+3) * 7) + (idxY+3))) * 7 + idxZ + 3;
                                 // b is the distance between the two cells
-                                const FReal b = FMath::Sqrt(FReal(idxX*idxX + idxY*idxY + idxZ*idxZ))*boxWidthAtLevel;
+                                const FReal b = sqrt(FReal(idxX*idxX + idxY*idxY + idxZ*idxZ))*boxWidthAtLevel;
                                 // compute b^idx+1 iteratively
                                 FReal bPowIdx1 = b;
                                 for(int idx = 0 ; idx <= P ; ++idx)
@@ -249,7 +248,7 @@ class FRotationKernel
         FReal sqrtDoubleFactorials[P+1][P+1];
         for(int l = 0 ; l <= P ; ++l ){
             for(int m = 0 ; m <= l ; ++m )
-                { sqrtDoubleFactorials[l][m] = FMath::Sqrt(factorials[l-m]*factorials[l+m]); }
+                { sqrtDoubleFactorials[l][m] = sqrt(factorials[l-m]*factorials[l+m]); }
         }
 
         // We compute the rotation matrix, we do not need 343 matrix
@@ -275,9 +274,9 @@ class FRotationKernel
             for(int y = 0 ; y <= x ; ++y){
                 for(int z = 1 ; z <= 3 ; ++z){
                     const FReal x2y2 = FReal(x*x + y*y);
-                    const FReal pr = FMath::Sqrt( x2y2 + FReal(z*z) );
+                    const FReal pr = sqrt( x2y2 + FReal(z*z) );
                     // FReal(z)/pr,Sqrt(x2y2)/pr = cos(Theta),sin(Theta) of (x,y,z) in spherical coordinates
-                    DlmkBuild(dlmkMatrix[x+3][y][z+3], FReal(z)/pr, FMath::Sqrt(x2y2)/pr);
+                    DlmkBuild(dlmkMatrix[x+3][y][z+3], FReal(z)/pr, sqrt(x2y2)/pr);
                     // For inclinaison between ]pi/2;pi[
                     DlmkZNegative(dlmkMatrix[x+3][y][(-z)+3],dlmkMatrix[x+3][y][z+3]);
                     // For inclinaison between ]pi;3pi/2[
@@ -298,7 +297,7 @@ class FRotationKernel
             const FReal x = FReal((idxChild&4)? -boxWidth : boxWidth);
             const FReal y = FReal((idxChild&2)? -boxWidth : boxWidth);
             // compute azimuth
-            FReal phi = FMath::Atan2(y,x);
+            FReal phi = atan2(y,x);
             if (phi < 0) phi += FReal(2.0*M_PI);
             // First compute azimuth rotation
             // compute the last part with l == P
@@ -390,7 +389,7 @@ class FRotationKernel
                     if( idxX < -1 || 1 < idxX || idxY < -1 || 1 < idxY || idxZ < -1 || 1 < idxZ ){
                         // Build relative position between target and source
                         const int position = ((( (idxX+3) * 7) + (idxY+3))) * 7 + idxZ + 3;
-                        FReal phi = FMath::Atan2(-FReal(idxY)*boxWidth,-FReal(idxX)*boxWidth);
+                        FReal phi = atan2(-FReal(idxY)*boxWidth,-FReal(idxX)*boxWidth);
                         if (phi < 0) phi += FReal(2.0*M_PI);
                         // Compute azimuth rotation vector
                         // first compute the last part with l == P
@@ -647,7 +646,7 @@ class FRotationKernel
                 int index_l0 = 1;
                 FReal fl = F1;
                 for(int l = 1; l <= P ; ++l, ++fl ){
-                    g[index_l0] = FMath::Sqrt((fl*F2-F1)/(fl*F2)) * g[index_l0-l];
+                    g[index_l0] = sqrt((fl*F2-F1)/(fl*F2)) * g[index_l0-l];
                     index_l0 += l + 1;
                 }
             }
@@ -658,7 +657,7 @@ class FRotationKernel
                 for(int l = 1; l <= P ; ++l, ++fl ){
                     FReal fm = F1;
                     for(int m = 1; m <= l ; ++m, ++index_lm, ++fm ){
-                        g[index_lm] = FMath::Sqrt((fl-fm+F1)/(fl+fm)) * g[index_lm-1];
+                        g[index_lm] = sqrt((fl-fm+F1)/(fl+fm)) * g[index_lm-1];
                     }
                     ++index_lm;
                 }
@@ -697,13 +696,13 @@ class FRotationKernel
                     FReal fm = F0;
                     for(int m = 0 ; m < l ; ++m, ++fm){
                         dlmk[l][P+m][P+k-1] =
-                                (FMath::Sqrt((fl*(fl+F1)-fm*(fm+F1))/(fl*(fl+F1)-fk*(fk-F1))) * dlmk[l][P+m+1][P+k])
-                                + ((fm+fk)*sinTheta*dlmk[l][P+m][P+k]/(FMath::Sqrt(fl*(fl+F1)-fk*(fk-F1))*(F1+cosTheta)));
+                                (sqrt((fl*(fl+F1)-fm*(fm+F1))/(fl*(fl+F1)-fk*(fk-F1))) * dlmk[l][P+m+1][P+k])
+                                + ((fm+fk)*sinTheta*dlmk[l][P+m][P+k]/(sqrt(fl*(fl+F1)-fk*(fk-F1))*(F1+cosTheta)));
                     }
                     // Equ 26
                     // For l > 0, -l < k <= l, cos(theta) >= 0
                     // d{l,l,k-1} = (l+k) sin(theta) d{l,l,k} / sqrt(l(l+1)-k(k-1)) (1+cos(theta))
-                    dlmk[l][P+l][P+k-1] = (fl+fk)*sinTheta*dlmk[l][P+l][P+k]/(FMath::Sqrt(fl*(fl+F1)-fk*(fk-F1))*(F1+cosTheta));
+                    dlmk[l][P+l][P+k-1] = (fl+fk)*sinTheta*dlmk[l][P+l][P+k]/(sqrt(fl*(fl+F1)-fk*(fk-F1))*(F1+cosTheta));
                 }
                 // Equ 27
                 // d{l,m,k} = -1^(m+k) d{l,-m,-k}  , For l > 0, -l <= m < 0, -l <= k <= l
@@ -893,13 +892,13 @@ public:
              theta is not computed, but Cos(theta) and Sin(theta) are computed, to feed legendre[1,2], mind the minus for legendre[2]
             */
             const FReal x2y2 = x*x + y*y;
-            const FReal a = FMath::Sqrt(x2y2 + z*z); // The distance between the SH and the particle
-            const FReal phi = FMath::Atan2(y,x);
+            const FReal a = sqrt(x2y2 + z*z); // The distance between the SH and the particle
+            const FReal phi = atan2(y,x);
 
             // Compute the associated legendre polynomial
             legendre[0] = 1.0;                  // P_0,0 = 1
             legendre[1] = z/a;                  // P_1,0 = cos(theta)
-            legendre[2] = -FMath::Sqrt(x2y2)/a; // P_1,1 = -sin(theta)
+            legendre[2] = -sqrt(x2y2)/a; // P_1,1 = -sin(theta)
             computeLegendre(legendre);
 
             const FReal q = physicalValues[idxPart];// The physical value (charge)
@@ -1208,14 +1207,14 @@ public:
              theta is not computed, but Cos(theta) and Sin(theta) are computed, to feed legendre[1,2], mind the minus for legendre[2]
             */
             const FReal x2y2 = x*x + y*y;
-            const FReal r = FMath::Sqrt(x2y2 + z*z); // The distance between the SH and the particle
-            const FReal phi = FMath::Atan2(y,x);
+            const FReal r = sqrt(x2y2 + z*z); // The distance between the SH and the particle
+            const FReal phi = atan2(y,x);
 
             // Compute the associated legendre polynomial
             FReal legendre[SizeArray];
             legendre[0] = 1.0;                  // P_0,0 = 1
             legendre[1] = z/r;                  // P_1,0 = cos(theta)
-            legendre[2] = -FMath::Sqrt(x2y2)/r; // P_1,1 = -sin(theta)
+            legendre[2] = -sqrt(x2y2)/r; // P_1,1 = -sin(theta)
             computeLegendre(legendre);
 
             // compute the potential = sum( l = 0:P, sum(m = -l:l, u{l,m} ))

@@ -7,8 +7,6 @@
 #include <iterator>
 #include <ostream>
 
-#include "./FMath.hpp"
-
 /** 3-dimensional cartesian coordinates
  *
  * \author Berenger Bramas <berenger.bramas@inria.fr>, Quentin Khan <quentin.khan@inria.fr>
@@ -161,7 +159,7 @@ public:
     /** \brief Compute the distance to the origin
      * \return the norm of the FPoint
      */
-    FReal norm() const { return FMath::Sqrt(norm2()); }
+    FReal norm() const { return sqrt(norm2()); }
 
     /** \brief Compute the distance to the origin
      * \return the square norm of the FPoint
