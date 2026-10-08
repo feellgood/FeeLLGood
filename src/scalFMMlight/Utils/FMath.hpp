@@ -2,17 +2,12 @@
 #ifndef FMATH_HPP
 #define FMATH_HPP
 
-#include <cmath>
-
 /**
  * @author Berenger Bramas (berenger.bramas@inria.fr)
  * Please read the license
- *
- * indirections to std math.
- * some specialized templates for FReal == float | double
  */
 
-/** namespace to grab altogether indirections to STL math */
+/** namespace to grab altogether convenient extra functions */
 namespace FMath
 {
     /** To get pow of 2 */
