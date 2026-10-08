@@ -6,7 +6,6 @@
 
 #include "../../Utils/FGlobal.hpp"
 #include "../../Utils/FAlignedMemory.hpp"
-#include "../../Utils/FMath.hpp"
 #include "../../Utils/FPoint.hpp"
 #include "../../Components/FParticleType.hpp"
 
@@ -58,7 +57,7 @@ protected:
         if( nbParticles >= allocatedParticles )
             {
             // allocate memory
-            allocatedParticles = (FMath::Max(DefaultNbParticles,FSize( FReal(nbParticles+1)*1.5 )) + DefaultNbParticles - 1) & ~(DefaultNbParticles-1);
+            allocatedParticles = (std::max(DefaultNbParticles,FSize( FReal(nbParticles+1)*1.5 )) + DefaultNbParticles - 1) & ~(DefaultNbParticles-1);
             // init with 0
             const size_t allocatedBytes = sizeof(FReal)*(3 + NbAttributesPerParticle)*allocatedParticles;
             FReal (*newData)[allocatedParticles] = reinterpret_cast<FReal (*)[allocatedParticles]>(FAlignedMemory::AllocateBytes<MemoryAlignement>(allocatedBytes));
