@@ -1153,12 +1153,10 @@ public:
                 magnitude += FReal(0.5)*std::real(u[index_lm]) *  (minus_r_pow_l / factorials[l]) * legendre[index_lm];
                 ++index_lm;
                 for(int m = 1 ; m <= l ; ++m, ++index_lm )
-                    { // there might be a numerical problem here,error is bigger if multiplication by coeff is factorized in magnitude += formula
-                    const FReal coef =  (minus_r_pow_l / factorials[l+m]) * legendre[index_lm];
+                    {
+                    const FReal coef = (minus_r_pow_l / factorials[l+m]) * legendre[index_lm];
                     const FReal m_phi_i_pow_m = FReal(m)*phi + i_pow_m[m & 0x3];
-                    const FReal C_cos_m_phi_i_pow_m = coef * cos(m_phi_i_pow_m);
-                    const FReal C_sin_m_phi_i_pow_m = coef * sin(m_phi_i_pow_m);
-                    magnitude += ( std::real(u[index_lm]) * C_cos_m_phi_i_pow_m - std::imag(u[index_lm]) * C_sin_m_phi_i_pow_m );
+                    magnitude += coef*( std::real(u[index_lm]) * cos(m_phi_i_pow_m) - std::imag(u[index_lm]) * sin(m_phi_i_pow_m) );
                     }
                 minus_r_pow_l *= -r;
                 }
