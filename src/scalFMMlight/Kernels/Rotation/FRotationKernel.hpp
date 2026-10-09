@@ -2,7 +2,8 @@
 #ifndef FROTATIONKERNEL_HPP
 #define FROTATIONKERNEL_HPP
 
-#include "../../Utils/FComplex.hpp"
+#include <complex>
+
 #include "../../Utils/FGlobal.hpp"
 #include "../../Utils/FAssert.hpp"
 #include "../P2P/FP2PR.hpp"
@@ -72,13 +73,16 @@ class FRotationKernel
 
     ///////////// Rotation    /////////////////////////////
     /** vector for the rotation around z for the M2M (multipole) */
-    FComplex<FReal> rotationExpMinusImPhi[8][SizeArray];
+    std::complex<FReal> rotationExpMinusImPhi[8][SizeArray];
+
     /**vector for the rotation around z for the L2L (taylor) */
-    FComplex<FReal> rotationExpImPhi[8][SizeArray];
+    std::complex<FReal> rotationExpImPhi[8][SizeArray];
+
     /** vector for the rotation around z for the M2L (multipole) */
-    FComplex<FReal> rotationM2LExpMinusImPhi[343][SizeArray];
+    std::complex<FReal> rotationM2LExpMinusImPhi[343][SizeArray];
+
     /** vector for the rotation around z for the M2L (taylor) */
-    FComplex<FReal> rotationM2LExpImPhi[343][SizeArray];
+    std::complex<FReal> rotationM2LExpImPhi[343][SizeArray];
 
     ///////////// Rotation    /////////////////////////////
     /** size of the \f$ d_{l,m,k} \f$ matrix */
@@ -308,9 +312,10 @@ class FRotationKernel
                     const FReal c_mphi = cos(mphi);
                     const FReal s_mphi = sin(mphi);
                     // O_{l,m}( \alpha, \beta + \phi ) = e^{-i \phi m} O_{l,m}( \alpha, \beta )
-                    rotationExpMinusImPhi[idxChild][index_lm].setRealImag(c_mphi, -s_mphi);
+                    rotationExpMinusImPhi[idxChild][index_lm] = std::complex<FReal> {c_mphi, -s_mphi};
+
                     // M_{l,m}( \alpha, \beta + \phi ) = e^{i \phi m} M_{l,m}( \alpha, \beta )
-                    rotationExpImPhi[idxChild][index_lm].setRealImag(c_mphi, s_mphi);
+                    rotationExpImPhi[idxChild][index_lm] = std::complex<FReal> {c_mphi, s_mphi};
                 }
             }
             // Then for l < P it just a copy of the previous computed vector
@@ -400,9 +405,9 @@ class FRotationKernel
                                 const FReal c_mphi = cos(mphi);
                                 const FReal s_mphi = sin(mphi);
                                 // O_{l,m}( \alpha, \beta + \phi ) = e^{-i \phi m} O_{l,m}( \alpha, \beta )
-                                rotationM2LExpMinusImPhi[position][index_lm].setRealImag(c_mphi, -s_mphi);
+                                rotationM2LExpMinusImPhi[position][index_lm] = std::complex<FReal> {c_mphi, -s_mphi};
                                 // M_{l,m}( \alpha, \beta + \phi ) = e^{i \phi m} M_{l,m}( \alpha, \beta )
-                                rotationM2LExpImPhi[position][index_lm].setRealImag(c_mphi, s_mphi);
+                                rotationM2LExpImPhi[position][index_lm] = std::complex<FReal> {c_mphi, s_mphi};
                             }
                         }
                         // Then for l < P copy the subpart of the previous vector
@@ -771,11 +776,12 @@ class FRotationKernel
     /** This function use a d_lmk vector to rotate the vec multipole or local vector.
       * The result is copied in vec.
       * Please see the structure of dlmk to understand this function.
-      * Warning we cast the vec FComplex<FReal> array into a FReal array
+      * Warning vec std::complex<FReal> array is cast into a FReal array
       */
-    static void RotationYWithDlmk(FComplex<FReal> vec[], const FReal* dlmkCoef){
+    static void RotationYWithDlmk(std::complex<FReal> vec[], const FReal* dlmkCoef)
+        {
         FReal originalVec[2*SizeArray];
-        copyall((FComplex<FReal>*)originalVec,vec,SizeArray);
+        copyall((std::complex<FReal>*)originalVec,vec,SizeArray);
         // index_lm == atLm(l,m) but progress iteratively to write the result
         int index_lm = 0;
         for(int l = 0 ; l <= P ; ++l){
@@ -797,15 +803,15 @@ class FRotationKernel
                     res_lkm_imag += (*dlmkCoef++) * (*iterOrignalVec++);
                 }
                 // save the result
-                vec[index_lm].setRealImag(res_lkm_real, res_lkm_imag);
+                vec[index_lm] = std::complex<FReal> {res_lkm_real, res_lkm_imag};
             }
         }
     }
 
-    /** This function is computing dest[:] *= src[:] using FComplex<FReal>::operator*= */
-    static void RotationZVectorsMul(FComplex<FReal>* FRestrict dest, const FComplex<FReal>* FRestrict src)
+    /** This function is computing dest[:] *= src[:] using std::complex<FReal>::operator*= */
+    static void RotationZVectorsMul(std::complex<FReal>* FRestrict dest, const std::complex<FReal>* FRestrict src)
         {
-        const FComplex<FReal>*const FRestrict lastElement = dest + SizeArray;
+        const std::complex<FReal>*const FRestrict lastElement = dest + SizeArray;
         for(; dest != lastElement ;) { (*dest++) *= (*src++); }
         }
 
@@ -869,12 +875,12 @@ public:
       */
     void P2M(CellClass* const inPole, const ContainerClass* const inParticles)
         {
-        FComplex<FReal>* FRestrict const w = inPole->getMultipole(); // w is the multipole moment
+        std::complex<FReal>* FRestrict const w = inPole->getMultipole(); // w is the multipole moment
 
         // Copying the position is faster than using cell position
         const FPoint<FReal> cellPosition = getLeafCenter(inPole->getCoordinate());
         FReal legendre[SizeArray];
-        FReal angles[P+1][2];
+        std::complex<FReal> angles[P+1];
 
         // For all particles in the leaf box
         const FReal*const physicalValues = inParticles->getPhysicalValues();
@@ -911,14 +917,12 @@ public:
                     { // We need to compute the angles to use in the "m" loop
                     // So we can compute only the one needed after "l" inc
                     const FReal angle = fl*phi + i_pow_m[l & 0x3];
-                    angles[l][0] = cos(angle);
-                    angles[l][1] = sin(angle);
+                    angles[l] = std::complex<FReal> {cos(angle), sin(angle)};
                     }
                 for(int m = 0 ; m <= l ; ++m, ++index_l_m)
                     {
                     const FReal magnitude = q_aPowL * legendre[index_l_m] / factorials[l+m];
-                    w[index_l_m].incReal(magnitude * angles[m][0]);
-                    w[index_l_m].incImag(magnitude * angles[m][1]);
+                    w[index_l_m] += magnitude * angles[m];
                     }
                 q_aPowL *= a;
                 }
@@ -947,7 +951,7 @@ public:
         {
         // Get the translation coef for this level (same for all child)
         const auto & coef = M2MTranslationCoef[inLevel];
-        FComplex<FReal> source_w[SizeArray]; // buffer to copy the source w allocated once
+        std::complex<FReal> source_w[SizeArray]; // buffer to copy the source w allocated once
         // For all children
         for(int idxChild = 0 ; idxChild < 8 ; ++idxChild)
             {
@@ -961,24 +965,22 @@ public:
                 RotationYWithDlmk(source_w,DlmkCoefOTheta[idxChild]);
 
                 // Translate it
-                FComplex<FReal> target_w[SizeArray];
+                std::complex<FReal> target_w[SizeArray];
                 int index_lm = 0;
                 for(int l = 0 ; l <= P ; ++l )
                     {
                     for(int m = 0 ; m <= l ; ++m, ++index_lm )
                         {
                         // w{l,m}(a+b) = sum(j=m:l, b^(l-j)/(l-j)! w{j,m}(a)
-                        FReal w_lm_real = 0.0;
-                        FReal w_lm_imag = 0.0;
+                        std::complex<FReal> w_lm(0.,0.);
                         int index_jm = atLm(m,m);   // get atLm(l,m)
                         int index_l_minus_j = l-m;  // get l-j continuously
                         for(int j = m ; j <= l ; ++j, --index_l_minus_j, index_jm += j )
                             {
                             //const coef = (b^l-j) / (l-j)!;
-                            w_lm_real += coef[index_l_minus_j] * source_w[index_jm].getReal();
-                            w_lm_imag += coef[index_l_minus_j] * source_w[index_jm].getImag();
+                            w_lm += coef[index_l_minus_j] * source_w[index_jm];
                             }
-                        target_w[index_lm].setRealImag(w_lm_real,w_lm_imag);
+                        target_w[index_lm] = w_lm;
                         }
                     }
                 // Rotate it back
@@ -1017,7 +1019,7 @@ public:
       */
     void M2L(CellClass* const FRestrict inLocal, const CellClass* inInteractions[], const int /*inSize*/, const int inLevel)
         {
-        FComplex<FReal> source_w[SizeArray];// To copy the multipole data allocated once
+        std::complex<FReal> source_w[SizeArray];// To copy the multipole data allocated once
         for(int idxNeigh = 0 ; idxNeigh < 343 ; ++idxNeigh) // For all children
             {
             if(inInteractions[idxNeigh]) // if interaction exits
@@ -1030,7 +1032,7 @@ public:
                 RotationYWithDlmk(source_w,DlmkCoefM2LOTheta[idxNeigh]);
 
                 // Transfer to u
-                FComplex<FReal> target_u[SizeArray];
+                std::complex<FReal> target_u[SizeArray];
                 int index_lm = 0;
                 for(int l = 0 ; l <= P ; ++l )
                     {
@@ -1066,7 +1068,7 @@ public:
     void M2L(CellClass* const FRestrict inLocal, const CellClass* inInteractions[], const int neighborPositions[], const int inSize, const int inLevel)
         {
         // To copy the multipole data allocated once
-        FComplex<FReal> source_w[SizeArray];
+        std::complex<FReal> source_w[SizeArray];
         // For all children
         for(int idxExistingNeigh = 0 ; idxExistingNeigh < inSize ; ++idxExistingNeigh)
             {
@@ -1081,7 +1083,7 @@ public:
             RotationYWithDlmk(source_w,DlmkCoefM2LOTheta[idxNeigh]);
 
             // Transfer to u
-            FComplex<FReal> target_u[SizeArray];
+            std::complex<FReal> target_u[SizeArray];
             int index_lm = 0;
             for(int l = 0 ; l <= P ; ++l )
                 {
@@ -1089,17 +1091,15 @@ public:
                 for(int m = 0 ; m <= l ; ++m, ++index_lm )
                     {
                     // u{l,m}(a-b) = sum(j=|m|:P-l, (j+l)!/b^(j+l+1) w{j,-m}(a)
-                    FReal u_lm_real = 0.0;
-                    FReal u_lm_imag = 0.0;
+                    std::complex<FReal> u_lm = std::complex<FReal> {0.,0.};
                     int index_jl = m + l;       // get j+l
                     int index_jm = atLm(m,m);   // get atLm(l,m)
                     for(int j = m ; j <= P-l ; ++j, ++index_jl, index_jm += j )
                         {
                         // coef = (j+l)!/b^(j+l+1), because {l,-m} => {l,m} conjugate -1^m with -i
-                        u_lm_real += minus_1_pow_m * coef[index_jl] * source_w[index_jm].getReal();
-                        u_lm_imag -= minus_1_pow_m * coef[index_jl] * source_w[index_jm].getImag();
+                        u_lm += minus_1_pow_m * coef[index_jl] * std::conj(source_w[index_jm]);
                         }
-                    target_u[index_lm].setRealImag(u_lm_real,u_lm_imag);
+                    target_u[index_lm] = u_lm;
                     minus_1_pow_m = -minus_1_pow_m;
                     }
                 }
@@ -1132,7 +1132,7 @@ public:
     void L2L(const CellClass* const FRestrict inLocal, CellClass* FRestrict *const FRestrict  inChildren, const int inLevel)
         {
         const auto & coef = L2LTranslationCoef[inLevel]; //Get the translation coef for this level (same for all child)
-        FComplex<FReal> source_u[SizeArray]; // To copy the source local allocated once
+        std::complex<FReal> source_u[SizeArray]; // To copy the source local allocated once
         // For all children
         for(int idxChild = 0 ; idxChild < 8 ; ++idxChild)
             {
@@ -1146,22 +1146,20 @@ public:
                 RotationYWithDlmk(source_u,DlmkCoefMTheta[idxChild]);
 
                 // Translate
-                FComplex<FReal> target_u[SizeArray];
+                std::complex<FReal> target_u[SizeArray];
                 for(int l = 0 ; l <= P ; ++l )
                     {
                     for(int m = 0 ; m <= l ; ++m )
                         {
                         // u{l,m}(r-b) = sum(j=0:P, b^(j-l)/(j-l)! u{j,m}(r);
-                        FReal u_lm_real = 0.0;
-                        FReal u_lm_imag = 0.0;
+                        std::complex<FReal> u_lm = std::complex<FReal> {0.,0.};
                         int index_jm = atLm(l,m);   // get atLm(j,m)
                         int index_j_minus_l = 0;    // get l-j continously
                         for(int j = l ; j <= P ; ++j, ++index_j_minus_l, index_jm += j)
                             {// coef = b^j-l/j-l!
-                            u_lm_real += coef[index_j_minus_l] * source_u[index_jm].getReal();
-                            u_lm_imag += coef[index_j_minus_l] * source_u[index_jm].getImag();
+                            u_lm += coef[index_j_minus_l] * source_u[index_jm];
                             }
-                        target_u[atLm(l,m)].setRealImag(u_lm_real,u_lm_imag);
+                        target_u[atLm(l,m)] = u_lm;
                         }
                     }
                 // Rotate then sum in child
@@ -1186,7 +1184,7 @@ public:
     void L2P(const CellClass* const inLocal, ContainerClass* const inParticles)
         {
         // Take the local value from the cell
-        const FComplex<FReal>* FRestrict const u = inLocal->getLocal();
+        const std::complex<FReal>* FRestrict const u = inLocal->getLocal();
 
         // Copying the position is faster than using cell position
         const FPoint<FReal> cellPosition = getLeafCenter(inLocal->getCoordinate());
@@ -1212,8 +1210,8 @@ public:
 
             // Compute the associated legendre polynomial
             FReal legendre[SizeArray];
-            legendre[0] = 1.0;                  // P_0,0 = 1
-            legendre[1] = z/r;                  // P_1,0 = cos(theta)
+            legendre[0] = 1.0;           // P_0,0 = 1
+            legendre[1] = z/r;           // P_1,0 = cos(theta)
             legendre[2] = -sqrt(x2y2)/r; // P_1,1 = -sin(theta)
             computeLegendre(legendre);
 
@@ -1224,7 +1222,7 @@ public:
             for(int l = 0 ; l <= P ; ++l )
                 {
                 //for m == 0 ; (l-|m|)! * P{l,0} / r^(l+1)
-                magnitude += FReal(0.5)*u[index_lm].getReal() *  (minus_r_pow_l / factorials[l]) * legendre[index_lm];
+                magnitude += FReal(0.5)*std::real(u[index_lm]) *  (minus_r_pow_l / factorials[l]) * legendre[index_lm];
                 ++index_lm;
                 for(int m = 1 ; m <= l ; ++m, ++index_lm )
                     { // there might be a numerical problem here,error is bigger if multiplication by coeff is factorized in magnitude += formula
@@ -1232,7 +1230,7 @@ public:
                     const FReal m_phi_i_pow_m = FReal(m)*phi + i_pow_m[m & 0x3];
                     const FReal C_cos_m_phi_i_pow_m = coef * cos(m_phi_i_pow_m);
                     const FReal C_sin_m_phi_i_pow_m = coef * sin(m_phi_i_pow_m);
-                    magnitude += ( u[index_lm].getReal() * C_cos_m_phi_i_pow_m - u[index_lm].getImag() * C_sin_m_phi_i_pow_m );
+                    magnitude += ( std::real(u[index_lm]) * C_cos_m_phi_i_pow_m - std::imag(u[index_lm]) * C_sin_m_phi_i_pow_m );
                     }
                 minus_r_pow_l *= -r;
                 }
