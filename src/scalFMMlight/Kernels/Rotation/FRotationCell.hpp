@@ -2,9 +2,10 @@
 #ifndef FROTATIONCELL_HPP
 #define FROTATIONCELL_HPP
 
+#include <complex>
+
 #include "../../Utils/FGlobal.hpp"
 #include "../../Containers/FTreeCoordinate.hpp"
-#include "../../Utils/FComplex.hpp"
 #include "../../Extensions/FExtendCellType.hpp"
 
 /** This class is a cell used for the rotation based kernel
@@ -26,10 +27,10 @@ protected:
     static const int LocalSize = ((P+2)*(P+1))/2;
 
     /** Multipole vector (static memory) for multipole extension */
-    FComplex<FReal> multipole_exp[MultipoleSize];
+    std::complex<FReal> multipole_exp[MultipoleSize];
 
     /** Local vector (static memory) for local extension */
-    FComplex<FReal> local_exp[LocalSize];
+    std::complex<FReal> local_exp[LocalSize];
 
     /** Morton index (need by most elements) */
     MortonIndex mortonIndex;
@@ -78,22 +79,24 @@ public:
     }
 
     /** Get Multipole array */
-    const FComplex<FReal>* getMultipole() const { return multipole_exp; }
+    const std::complex<FReal>* getMultipole() const { return multipole_exp; }
 
     /** Get Local array */
-    const FComplex<FReal>* getLocal() const { return local_exp; }
+    const std::complex<FReal>* getLocal() const { return local_exp; }
 
     /** Get Multipole array */
-    FComplex<FReal>* getMultipole() { return multipole_exp; }
+    std::complex<FReal>* getMultipole() { return multipole_exp; }
 
     /** Get Local array */
-    FComplex<FReal>* getLocal() { return local_exp; }
+    std::complex<FReal>* getLocal() { return local_exp; }
 
     /** Reset all values to zero */
     void resetToInitialState()
         {
-        for(int idx = 0 ; idx < MultipoleSize ; ++idx) { multipole_exp[idx].setToZero(); }
-        for(int idx = 0 ; idx < LocalSize ; ++idx) { local_exp[idx].setToZero(); }
+        for(int idx = 0 ; idx < MultipoleSize ; ++idx)
+            { multipole_exp[idx] = std::complex<FReal> {0.,0.}; }
+        for(int idx = 0 ; idx < LocalSize ; ++idx)
+            { local_exp[idx] = std::complex<FReal> {0.,0.}; }
         }
 };
 
