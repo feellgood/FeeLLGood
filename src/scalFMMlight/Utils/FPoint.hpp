@@ -5,14 +5,13 @@
 
 #include <array>
 #include <iterator>
-#include <ostream>
 
 /** 3-dimensional cartesian coordinates
  *
  * \author Berenger Bramas <berenger.bramas@inria.fr>, Quentin Khan <quentin.khan@inria.fr>
  *
  * Fixed size array that represents coordinates in space. This class adds a few convenience 
- * operations such as addition, scalar multiplication and division and formated stream output.
+ * operations such as addition, scalar multiplication and division.
  *
  * @param _Real The floating number type
  **/
@@ -49,23 +48,6 @@ public:
     /** Copy constructor */
     FPoint(const FPoint&) = default;
 
-    /** Copy constructor from other point type */
-    template<typename A, must_be_arithmetic<A> = nullptr>
-    FPoint(const FPoint<A>& other)
-        {
-        this->data()[0] = other.data()[0];
-        this->data()[1] = other.data()[1];
-        this->data()[2] = other.data()[2];
-        }
-
-    /** Constructor from array */
-    FPoint(const FReal array_[Dim])
-        {
-        this->data()[0] = array_[0];
-        this->data()[1] = array_[1];
-        this->data()[2] = array_[2];
-        }
-
     /** Constructor from 3 FReals */
     template<typename FReal>
     FPoint(const FReal& X, const FReal& Y, const FReal& Z)
@@ -76,6 +58,7 @@ public:
         }
 
     /** Additive constructor, same as FPoint(other + add_value) */
+
     FPoint(const FPoint& other, const FReal add_value)
         {
         this->data()[0] = other.data()[0] + add_value;
@@ -91,15 +74,6 @@ public:
         this->copy(other);
         return *this;
     }
-
-    /** Sets the point value */
-    template<typename FReal>
-    void setPosition(const FReal& X, const FReal& Y, const FReal& Z)
-        {
-        this->data()[0] = X;
-        this->data()[1] = Y;
-        this->data()[2] = Z;
-        }
 
     /** \brief Get x
      * \return this->data()[0]
@@ -293,13 +267,6 @@ public:
         {
         lhs /= val;
         return lhs;
-        }
-
-    /** Formated output stream operator */
-    friend std::ostream& operator<<(std::ostream& os, const FPoint<FReal>& pos)
-        {
-        os << "[" << pos->data()[0] << ", " << pos->data()[1] << ", " << pos->data()[2] << "]";
-        return os;
         }
 };
 
