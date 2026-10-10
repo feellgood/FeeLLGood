@@ -1057,6 +1057,25 @@ public:
         return idxNeighbors;
     }
 
+    /**
+     * reset to initial state all cells
+     */
+    void resetAllCells(void)
+        {
+        if(isEmpty()){ return; }
+
+        Iterator octreeIterator(this);
+        octreeIterator.gotoBottomLeft();
+        Iterator avoidGoLeft(octreeIterator);
+
+        for(int idx = this->height-1 ; idx >= 1 ; --idx )
+            {
+            do { octreeIterator.getCurrentCell()->resetToInitialState(); } while(octreeIterator.moveRight());
+            avoidGoLeft.moveUp();
+            octreeIterator = avoidGoLeft;
+            }
+        }
+
     /////////////////////////////////////////////////////////
     // Lambda function to apply to all Leaf|Cell
     /////////////////////////////////////////////////////////
