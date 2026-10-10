@@ -1133,7 +1133,6 @@ public:
                 }
             }
         }
-
         return idxNeighbors;
     }
 
@@ -1175,95 +1174,11 @@ public:
                 }
             }
         }
-
-        return idxNeighbors;
-    }
-
-
-    /** This function fill an array with the neighbors of a cell
-     * @param inNeighbors the array to store the elements
-     * @param center
-     * @param inLevel the level of the element
-     * @return the number of neighbors
-     */
-    int getLeafsNeighbors(const CellClass*  inNeighbors[27], const FTreeCoordinate& center, const int inLevel){
-        memset( inNeighbors, 0 , 27 * sizeof(CellClass*));
-        const int boxLimite = FMath::pow2(inLevel);
-        int idxNeighbors(0);
-        // We test all cells around
-        for(int idxX = -1 ; idxX <= 1 ; ++idxX){
-            if(!Between(center.getX() + idxX,0,boxLimite)) continue;
-
-            for(int idxY = -1 ; idxY <= 1 ; ++idxY){
-                if(!Between(center.getY() + idxY,0,boxLimite)) continue;
-
-                for(int idxZ = -1 ; idxZ <= 1 ; ++idxZ){
-                    if(!Between(center.getZ() + idxZ,0,boxLimite)) continue;
-
-                    // if we are not on the current cell
-                    if( idxX || idxY || idxZ ){
-                        const FTreeCoordinate other(center.getX() + idxX,center.getY() + idxY,center.getZ() + idxZ);
-                        const MortonIndex mortonOther = other.getMortonIndex();
-                        // get cell
-                        CellClass** const leaf = getCellPt(mortonOther, inLevel);
-
-                        // add to list if not null
-                        if(leaf){
-                            inNeighbors[(((idxX + 1) * 3) + (idxY +1)) * 3 + idxZ + 1] = leaf;
-                            ++idxNeighbors;
-                        }
-                    }
-                }
-            }
-        }
-        return idxNeighbors;
-    }
-
-    /** This function fill an array with the neighbors of a cell
-     * @param inNeighbors the array to store the elements
-     * @param inNeighborPositions
-     * @param center
-     * @param inLevel the level of the element
-     * @return the number of neighbors
-     */
-    int getLeafsNeighbors(const CellClass*  inNeighbors[26], int inNeighborPositions[26],
-                          const FTreeCoordinate& center, const int inLevel)
-        {
-        const int boxLimite = FMath::pow2(inLevel);
-        int idxNeighbors(0);
-
-        // We test all cells around
-        for(int idxX = -1 ; idxX <= 1 ; ++idxX){
-            if(!Between(center.getX() + idxX,0,boxLimite)) continue;
-
-            for(int idxY = -1 ; idxY <= 1 ; ++idxY){
-                if(!Between(center.getY() + idxY,0,boxLimite)) continue;
-
-                for(int idxZ = -1 ; idxZ <= 1 ; ++idxZ){
-                    if(!Between(center.getZ() + idxZ,0,boxLimite)) continue;
-
-                    // if we are not on the current cell
-                    if( idxX || idxY || idxZ ){
-                        const FTreeCoordinate other(center.getX() + idxX,center.getY() + idxY,center.getZ() + idxZ);
-                        const MortonIndex mortonOther = other.getMortonIndex();
-                        // get cell
-                        CellClass** const leaf = getCellPt(mortonOther, inLevel);
-
-                        // add to list if not null
-                        if(leaf){
-                            inNeighbors[idxNeighbors] = leaf;
-                            inNeighborPositions[idxNeighbors] = (((idxX + 1) * 3) + (idxY +1)) * 3 + idxZ + 1;
-                            ++idxNeighbors;
-                        }
-                    }
-                }
-            }
-        }
         return idxNeighbors;
     }
 
     /////////////////////////////////////////////////////////
-    // Lambda function to apply to all member
+    // Lambda function to apply to all Leaf|Cell
     /////////////////////////////////////////////////////////
 
     /**
@@ -1280,7 +1195,7 @@ public:
         }
 
     /**
-     * @brief forEachLeaf iterate on the cell and apply the function
+     * @brief forEachCell iterate on the cell and apply the function
      * @param function
      */
     void forEachCell(std::function<void(CellClass*)> function)
@@ -1298,39 +1213,6 @@ public:
             octreeIterator = avoidGoLeft;
             }
         }
-
-    /**
-     * @brief forEachLeaf iterate on the cell and apply the function
-     * @param function
-     */
-    void forEachCellWithLevel(std::function<void(CellClass*,const int)> function)
-        {
-        if(isEmpty()) { return; }
-
-        Iterator octreeIterator(this);
-        octreeIterator.gotoBottomLeft();
-        Iterator avoidGoLeft(octreeIterator);
-        for(int idx = this->height-1 ; idx >= 1 ; --idx )
-            {
-            do { function(octreeIterator.getCurrentCell(),idx); } while(octreeIterator.moveRight());
-            avoidGoLeft.moveUp();
-            octreeIterator = avoidGoLeft;
-            }
-        }
-
-    /**
-     * @brief forEachLeaf iterate on the cell and apply the function
-     * @param function
-     */
-    void forEachCellLeaf(std::function<void(CellClass*,LeafClass*)> function){
-        if(isEmpty()){ return; }
-
-        Iterator octreeIterator(this);
-        octreeIterator.gotoBottomLeft();
-
-        do{ function(octreeIterator.getCurrentCell(),octreeIterator.getCurrentLeaf());}
-        while(octreeIterator.moveRight());
-    }
 };
 
 #endif //FOCTREE_HPP
