@@ -204,8 +204,7 @@ private:
                                 leaf->getTargets()->getNbParticles(), 0);
                 });
 
-        tree.forEachCell([](CellClass *cell) { cell->resetToInitialState(); });
-
+        tree.resetAllCells();
         algo.execute();
 
         tree.forEachLeaf(
