@@ -2,8 +2,6 @@
 #ifndef FTREECOORDINATE_HPP
 #define FTREECOORDINATE_HPP
 
-#include "../Utils/FPoint.hpp"
-
 /**
  * @author Berenger Bramas (berenger.bramas@inria.fr)
  * @class FTreeCoordinate
@@ -12,10 +10,14 @@
  * This class represents tree coordinate. It is used to save the position in "box unit" (not system/space unit!).
  * It is directly related to morton index, as interleaves bits from this coordinate make the morton index
  */
-class FTreeCoordinate : public FPoint<int> {
+class FTreeCoordinate
+{
+private:
+    std::array<int,3> ind;
+
 public:
     /** Default constructor (position = {0,0,0})*/
-    FTreeCoordinate(): FPoint<int>() {}
+    FTreeCoordinate() { ind = {0}; }
 
     /** constructor from Morton index  */
     explicit FTreeCoordinate(const MortonIndex mindex) { setPositionFromMorton(mindex); }
@@ -25,7 +27,7 @@ public:
      * @param inY the y
      * @param inZ the z
      */
-    explicit FTreeCoordinate(const int inX,const int inY,const int inZ): FPoint<int>(inX, inY, inZ){}
+    explicit FTreeCoordinate(const int inX,const int inY,const int inZ) { ind = {inX,inY,inZ}; }
 
     /** default copy constructor */
     FTreeCoordinate(const FTreeCoordinate&) = default;
@@ -37,6 +39,15 @@ public:
      */
     FTreeCoordinate& operator=(const FTreeCoordinate& other) = default;
 
+    int getX(void) const {return ind[0];}
+    int getY(void) const {return ind[1];}
+    int getZ(void) const {return ind[2];}
+
+    void setX(const int inX) {ind[0] = inX;}
+    void setY(const int inY) {ind[1] = inY;}
+    void setZ(const int inZ) {ind[2] = inZ;}
+
+
     /**
      * To get the morton index of the current position
      * @param inLevel the level of the component
@@ -47,9 +58,9 @@ public:
         MortonIndex index = 0x0LL;
         MortonIndex mask = 0x1LL;
         // the order is xyz.xyz...
-        MortonIndex mx = FPoint<int>::data()[0] << 2;
-        MortonIndex my = FPoint<int>::data()[1] << 1;
-        MortonIndex mz = FPoint<int>::data()[2];
+        MortonIndex mx = ind[0] << 2;
+        MortonIndex my = ind[1] << 1;
+        MortonIndex mz = ind[2];
 
         while( (mask <= mz) || ((mask << 1) <= my) || ((mask << 2) <= mx))
             {
@@ -73,17 +84,16 @@ public:
      */
     void setPositionFromMorton(MortonIndex inIndex) {
         MortonIndex mask = 0x1LL;
-
-        FPoint<int>::data()[0] = 0;
-        FPoint<int>::data()[1] = 0;
-        FPoint<int>::data()[2] = 0;
+        ind[0]=0;
+        ind[1]=0;
+        ind[2]=0;
 
         while(inIndex >= mask) {
-            FPoint<int>::data()[2] |= int(inIndex & mask);
+            ind[2] |= int(inIndex & mask);
             inIndex >>= 1;
-            FPoint<int>::data()[1] |= int(inIndex & mask);
+            ind[1] |= int(inIndex & mask);
             inIndex >>= 1;
-            FPoint<int>::data()[0] |= int(inIndex & mask);
+            ind[0] |= int(inIndex & mask);
 
             mask <<= 1;
         }
