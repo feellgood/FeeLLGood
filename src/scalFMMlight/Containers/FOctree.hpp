@@ -8,8 +8,8 @@
 #include "./FTreeCoordinate.hpp"
 #include "../Utils/FGlobal.hpp"
 #include "../Utils/FPoint.hpp"
+#include "../Utils/FMath.hpp"
 #include "../Utils/FAssert.hpp"
-#include "./FCoordinateComputer.hpp"
 
 /**
  * @author Berenger Bramas (berenger.bramas@inria.fr)
@@ -66,22 +66,30 @@ protected:
     /** the space system width */
     const FReal boxWidth;
 
+    /** return coordinate index */
+    static inline int GetTreeCoordinate(const FReal inRelativePosition, const FReal boxWidth,
+                                        const FReal boxWidthAtLeafLevel, const int treeHeight)
+        {
+        FAssertLF( (inRelativePosition >= 0 && inRelativePosition <= boxWidth), "inRelativePosition : ",inRelativePosition, " boxWidth ", boxWidth );
+        if(inRelativePosition == boxWidth) { return FMath::pow2(treeHeight-1)-1; }
+        const FReal indexFReal = inRelativePosition / boxWidthAtLeafLevel;
+        return static_cast<int>(indexFReal);
+        }
+
     /**
      * Get morton index from a position for the leaf level
      * @param inPosition position to compute
      * @return the morton index
      */
     FTreeCoordinate getCoordinateFromPosition(const FPoint<FReal>& inPosition) const
-        { return FCoordinateComputer::GetCoordinateFromPositionAndCorner<FReal>(this->boxCorner, this->boxWidth, height, inPosition); }
-
-    /**
-     * Get the box number from a position
-     * at a position POS with a leaf level box width of WI, the position is RELATIVE_TO_CORNER(POS)/WI
-     * @param inRelativePosition a position from the corner of the box
-     * @return the box num at the leaf level that contains inRelativePosition
-     */
-    int getTreeCoordinate(const FReal inRelativePosition) const
-        { return FCoordinateComputer::GetTreeCoordinate<FReal>(inRelativePosition, this->boxWidth, this->boxWidthAtLevel[this->leafIndex], height); }
+        {
+        const FReal boxWidthAtLeafLevel(boxWidth/FReal(1<<(height-1)));
+        // position has to be relative to corner not center
+        const FReal x = GetTreeCoordinate( inPosition.getX() - boxCorner.getX(), boxWidth, boxWidthAtLeafLevel, height);
+        const FReal y = GetTreeCoordinate( inPosition.getY() - boxCorner.getY(), boxWidth, boxWidthAtLeafLevel, height);
+        const FReal z = GetTreeCoordinate( inPosition.getZ() - boxCorner.getZ(), boxWidth, boxWidthAtLeafLevel, height);
+        return FTreeCoordinate(x,y,z);
+        }
 
     /**
      * true if inValue is in [inMin,inMax[
