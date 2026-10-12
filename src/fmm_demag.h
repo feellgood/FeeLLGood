@@ -187,21 +187,22 @@ private:
         FmmClass algo(&tree, &kernels);
         calc_charges(getter, msh);
 
-        auto nbMagNodes = msh.magNode.size();
+        const size_t nbMagNodes = msh.magNode.size();
         // reset potentials and forces - physicalValues[idxPart] = Q
         tree.forEachLeaf(
                 [this,&nbMagNodes](LeafClass *leaf)
                 {
-                    const int nbParticlesInLeaf = leaf->getSrc()->getNbParticles();
-                    const auto &indexes = leaf->getSrc()->getIndexes();
-                    FReal *const physicalValues = leaf->getSrc()->getPhysicalValues();
+                    ContainerClass *sources = leaf->getSrc();
+                    const int nbParticlesInLeaf = sources->getNbParticles();
+                    const auto &indexes = sources->getIndexes();
+                    FReal *const physicalValues = sources->getPhysicalValues();
                     for (int idxPart = 0; idxPart < nbParticlesInLeaf; ++idxPart)
                         {
                         physicalValues[idxPart] = srcDen[indexes[idxPart] - nbMagNodes];
                         }
-
-                    std::fill_n(leaf->getTargets()->getPotentials(),
-                                leaf->getTargets()->getNbParticles(), 0);
+                    ContainerClass *targets = leaf->getTargets();
+                    const int nbParticlesInTargets = targets->getNbParticles();
+                    std::fill_n(targets->getPotentials(), nbParticlesInTargets, 0);
                 });
 
         tree.resetAllCells();
