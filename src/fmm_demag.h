@@ -15,6 +15,7 @@ demagnetizing field.
 #include "scalFMMlight/Kernels/Rotation/FRotationCell.hpp"
 #include "scalFMMlight/Kernels/Rotation/FRotationKernel.hpp"
 
+#include "config.h"
 #include "mesh.h"
 
 /** \namespace scal_fmm
@@ -23,9 +24,9 @@ to grab altogether the templates and functions using scalFMMlight for the comput
 
 namespace scal_fmm
     {
-const int P = 9;              /**< truncation of the spherical harmonics series */
-const int NbLevels = 6;       /**< number of levels in the tree */
-const int SizeSubLevels = 3;  /**< size of the sub levels  */
+const int P = 9;                                           /**< truncation of the spherical harmonics series */
+const int NbLevels = scalFMM_settings::NbLevels;           /**< number of levels in the tree */
+const int SizeSubLevels = scalFMM_settings::SizeSubLevels; /**< size of the sub levels  */
 
 typedef double FReal; /**< parameter of scalfmm templates, all computations are made in double
                         precision */
@@ -69,6 +70,9 @@ public:
           tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels(NbLevels, boxWidth, boxCenter)
         {
         omp_set_num_threads(ScalfmmNbThreads);
+        if ((NbLevels != scalFMM_settings::default_nb_levels) ||
+            (SizeSubLevels != scalFMM_settings::default_size_sub_levels))
+        std::cout << "Warning: NbLevels, SizeSubLevels = " << NbLevels << ", " << SizeSubLevels << std::endl;
         norm = 2. / msh.l.maxCoeff();
 
         FSize idxPart = 0;
