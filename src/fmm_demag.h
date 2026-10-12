@@ -17,6 +17,7 @@ demagnetizing field.
 
 #include <memory>
 
+#include "config.h"
 #include "mesh.h"
 #include "octree_height.h"
 
