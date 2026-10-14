@@ -150,6 +150,12 @@ public:
     /** nb of threads for the computation of the demag field with scalfmm */
     int scalfmmNbTh;
 
+    /** number of octree levels */
+    int NbLevels;
+
+    /** size of each sub levels in octree and related fast multipole kernel */
+    int SizeSubLevels;
+
     /** if true creates an output file of the solution of the electrostatic problem  */
     bool V_file;
 

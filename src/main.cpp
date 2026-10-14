@@ -254,8 +254,14 @@ int main(int argc, char *argv[])
     spinAcc spinAcc_solver(mySettings, fem.msh, 1e-6, 5000);  // as st-feeLLGood
 
     chronometer fmm_counter(2);
-    scal_fmm::fmm myFMM(fem.msh, mySettings.paramTetra, mySettings.paramTriangle,
-            mySettings.scalfmmNbTh);
+    if ((mySettings.NbLevels == 0)||(mySettings.SizeSubLevels == 0))
+        {
+        mySettings.NbLevels = scal_fmm::defaultNbLevels;
+        mySettings.SizeSubLevels = scal_fmm::defaultSizeSubLevels;
+        }
+
+    scal_fmm::settings fastMultipoleSettings = scal_fmm::settings{mySettings.scalfmmNbTh,mySettings.NbLevels,mySettings.SizeSubLevels};
+    scal_fmm::fmm myFMM(fem.msh, mySettings.paramTetra, mySettings.paramTriangle, fastMultipoleSettings);
     if (mySettings.verbose)
             {
             std::cout << "Magnetostatics: particles inserted, using " << mySettings.scalfmmNbTh

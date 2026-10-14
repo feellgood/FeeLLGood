@@ -28,32 +28,6 @@ endif()
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)
 
 #===========================================================================
-# cmake . -DNB_LEVELS=9
-# fix NbLevels of the scalFMM_settings::NbLevels
-# if not set (default): will be 6
-#===========================================================================
-option(NB_LEVELS "scalFMM NbLevels" 6)
-if(NB_LEVELS STREQUAL "OFF")
-  set(NB_LEVELS 6)
-elseif( NOT NB_LEVELS MATCHES "[4-9]" )
-  message(FATAL_ERROR "NbLevels out of range: should be in [4-9], is " ${NB_LEVELS})
-endif()
-message( STATUS "scalFMM_settings::NbLevels fixed to " ${NB_LEVELS})
-
-#===========================================================================
-# cmake . -DSIZE_SUB_LEVELS=4
-# fix NbLevels of the scalFMM_settings::SizeSubLevels
-# if not set (default): will be 3
-#===========================================================================
-option(SIZE_SUB_LEVELS "scalFMM SizeSubLevels" 3)
-if( SIZE_SUB_LEVELS STREQUAL "OFF")
-  set(SIZE_SUB_LEVELS 3)
-elseif( NOT SIZE_SUB_LEVELS MATCHES "[3-6]" )
-  message(FATAL_ERROR "SizeSubLevels out of range: should be in [3-6], is " ${SIZE_SUB_LEVELS})
-endif()
-message( STATUS "scalFMM_settings::SizeSubLevels fixed to " ${SIZE_SUB_LEVELS})
-
-#===========================================================================
 # cmake . -DFIRST_ORDER=ON
 # if ON only magnetization m contributions are considered to magnetization potential
 # if OFF (default): both m and dm/dt contributions

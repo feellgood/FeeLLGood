@@ -24,9 +24,16 @@ to grab altogether the templates and functions using scalFMMlight for the comput
 
 namespace scal_fmm
     {
-const int P = 9;                                           /**< truncation of the spherical harmonics series */
-const int NbLevels = scalFMM_settings::NbLevels;           /**< number of levels in the tree */
-const int SizeSubLevels = scalFMM_settings::SizeSubLevels; /**< size of the sub levels  */
+const int P = 9; /**< truncation of the spherical harmonics series */
+const int defaultNbLevels = 6; /**< default number of levels in the tree */
+const int defaultSizeSubLevels = 3; /**< default size of the sub levels  */
+
+struct settings
+    {
+    int NbThreads; /**< nb threads for openmp fast multipole computations */
+    int NbLevels; /**< octree depth */
+    int SizeSubLevels; /**< size */
+    };
 
 typedef double FReal; /**< parameter of scalfmm templates, all computations are made in double
                         precision */
@@ -65,14 +72,15 @@ public:
     inline fmm(Mesh::mesh &msh /**< [in] */,
                std::vector<Tetra::prm> & prmTet /**< [in] */,
                std::vector<Triangle::prm> & prmTri /**< [in] */,
-               const int ScalfmmNbThreads /**< [in] */)
+               const settings &s /**< [in] */ )
         : prmTetra(prmTet), prmTriangle(prmTri),
-          tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels(NbLevels, boxWidth, boxCenter)
+          tree(s.NbLevels, s.SizeSubLevels, boxWidth, boxCenter), kernels(s.NbLevels, boxWidth, boxCenter)
         {
-        omp_set_num_threads(ScalfmmNbThreads);
-        if ((NbLevels != scalFMM_settings::default_nb_levels) ||
-            (SizeSubLevels != scalFMM_settings::default_size_sub_levels))
-        std::cout << "Warning: NbLevels, SizeSubLevels = " << NbLevels << ", " << SizeSubLevels << std::endl;
+        omp_set_num_threads(s.NbThreads);
+        if ((s.NbLevels != defaultNbLevels) || (s.SizeSubLevels != defaultSizeSubLevels))
+            {
+            std::cout << "Warning: NbLevels, SizeSubLevels = " << s.NbLevels << ", " << s.SizeSubLevels << std::endl;
+            }
         norm = 2. / msh.l.maxCoeff();
 
         FSize idxPart = 0;

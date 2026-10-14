@@ -366,6 +366,8 @@ void Settings::toYaml()
         { std::cout << "  V_file: " << str(V_file) << "\n"; }
     std::cout << "demagnetizing_field_solver:\n";
     std::cout << "  nb_threads: " << scalfmmNbTh << "\n";
+    std::cout << "  nb_levels: " << NbLevels << "\n";
+    std::cout << "  size_sub_levels: " << SizeSubLevels << "\n";
     std::cout << "finite_element_solver:\n";
     std::cout << "  max(iter): " << MAXITER << "\n";
     std::cout << "  tolerance: " << TOL << "\n";
@@ -676,6 +678,12 @@ void Settings::read(YAML::Node yaml)
         assign(scalfmmNbTh, solver["nb_threads"]);
         if (scalfmmNbTh <= 0)
             { scalfmmNbTh = available_cpu_count; }
+        assign(NbLevels, solver["nb_levels"]);
+        if (NbLevels <= 0)
+            { NbLevels = 0; }
+        assign(SizeSubLevels, solver["size_sub_levels"]);
+        if (SizeSubLevels <= 0)
+            { SizeSubLevels = 0; }
         }  // demagnetizing_field_solver
 
     solver = yaml["finite_element_solver"];
