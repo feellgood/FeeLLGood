@@ -4,17 +4,18 @@
 
 #include <complex>
 
-#include "../../Utils/FGlobal.hpp"
 #include "../../Containers/FTreeCoordinate.hpp"
-#include "../../Extensions/FExtendCellType.hpp"
 
-/** This class is a cell used for the rotation based kernel
-  * The size of the multipole and local vector are based on a template
+/** This template class is a cell used for the rotation based kernel
+  * The size of the multipole and local vector are based on template parameter P.
   * User should choose this parameter P carefully to match with the P of the kernel.
   *
   * Multipole/Local vectors contain value as:
   * {0,0}{1,0}{1,1}...{P,P-1}{P,P}
   * So the size of such vector is (P+2)*(P+1)/2
+  *
+  * Because cells may have child that contains only sources or targets (in Tsm system) then it is important
+  * to compute only when needed, using containsTargets/containsSources bool.
   */
 template <class FReal, int P>
 class FRotationCell
@@ -41,23 +42,33 @@ protected:
     /** Level in tree */
     std::size_t level;
 
+    /** Current type = targets */
+    bool containsTargets;
+
+    /** Current type = sources */
+    bool containsSources;
+
 public:
     /** default constructor */
-    FRotationCell() : mortonIndex(0) {}
+    FRotationCell() : mortonIndex(0),containsTargets(false), containsSources(false) {}
 
-    /** Copy constructor: Copy the value in the vectors */
-    FRotationCell(const FRotationCell& other) { (*this) = other; }
+    /** Copy constructor is deleted */
+    FRotationCell(const FRotationCell& other) = delete;
 
-    /** Default destructor */
-    virtual ~FRotationCell() {}
+    /** Copy operator is deleted */
+    FRotationCell& operator=(const FRotationCell& other) = delete;
 
-    /** Copy operator: copies only the value in the vectors */
-    FRotationCell& operator=(const FRotationCell& other)
-        {
-        for(int idx = MultipoleSize; 0 < idx ; --idx) { multipole_exp[idx] = other.multipole_exp[idx]; }
-        for(int idx = LocalSize; 0 < idx ; --idx) { local_exp[idx] = other.local_exp[idx]; }
-        return *this;
-        }
+    /** To know if a cell has sources */
+    bool hasSrcChild() const { return containsSources; }
+
+    /** To know if a cell has targets */
+    bool hasTargetsChild() const { return containsTargets; }
+
+    /** To set cell as sources container */
+    void setSrcChildTrue() { containsSources = true; }
+
+    /** To set cell as targets container */
+    void setTargetsChildTrue() { containsTargets = true; }
 
     /** set the level */
     void setLevel(std::size_t inLevel) { this->level = inLevel; }
@@ -97,17 +108,9 @@ public:
             { multipole_exp[idx] = std::complex<FReal> {0.,0.}; }
         for(int idx = 0 ; idx < LocalSize ; ++idx)
             { local_exp[idx] = std::complex<FReal> {0.,0.}; }
+        containsTargets = false;
+        containsSources = false;
         }
-};
-
-template <class FReal, int P>
-class FTypedRotationCell : public FRotationCell<FReal, P>, public FExtendCellType {
-public:
-    /** Reset to initial state the cell */
-    void resetToInitialState(){
-        FRotationCell<FReal, P>::resetToInitialState();
-        FExtendCellType::resetToInitialState();
-    }
 };
 
 #endif // FROTATIONCELL_HPP

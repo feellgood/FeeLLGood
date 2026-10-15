@@ -38,24 +38,22 @@ struct settings
 typedef double FReal; /**< parameter of scalfmm templates, all computations are made in double
                         precision */
 
-typedef FTypedRotationCell<FReal, P>
-        CellClass; /**< convenient typedef for the definition of cell type in scalfmm  */
+typedef FRotationCell<FReal,P> CellClass; /**< convenient typedef for the definition of cell type */
 
 typedef FP2PParticleContainerIndexed<FReal>
-        ContainerClass; /**< convenient typedef for the definition of container for scalfmm */
+        ContainerClass; /**< convenient typedef for the definition of container */
 
 typedef FTypedLeaf<FReal, ContainerClass>
-        LeafClass; /**< convenient typedef for the definition of leaf for scalfmm  */
+        LeafClass; /**< convenient typedef for the definition of leaf  */
 
 typedef FOctree<FReal, CellClass, ContainerClass, LeafClass>
-        OctreeClass; /**< convenient typedef for the definition of the octree for scalfmm */
+        OctreeClass; /**< convenient typedef for the definition of the octree */
 
 typedef FRotationKernel<FReal, CellClass, ContainerClass, P>
-        KernelClass; /**< convenient typedef for the kernel for scalfmm */
+        KernelClass; /**< convenient typedef for the kernel */
 
 typedef FFmmAlgorithmThreadTsm<OctreeClass, CellClass, ContainerClass, KernelClass, LeafClass>
-        FmmClass; /**< convenient typedef for handling altogether the differents scalfmm object
-                     templates used in feellgood  */
+        FmmClass; /**< convenient typedef for the algorithm */
 
 const double boxWidth = 2.01;              /**< bounding box max dimension */
 const FPoint<FReal> boxCenter(0., 0., 0.); /**< center of the bounding box */
