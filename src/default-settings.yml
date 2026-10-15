@@ -233,11 +233,11 @@ demagnetizing_field_solver:
   nb_threads: 0
 
   # Number of levels of the octree. The value 0 means it will be computed,
-  # typical values should be in the range [5..10[.
+  # typical values should be in the range [5, 10).
   nb_levels: 0
 
   # Size of the sub-levels. The value 0 means it will be computed,
-  # typical values should be in the range [3..7[.
+  # typical values should be in the range [3, 7).
   size_sub_levels: 0
 
 # Parameters of the solver.
