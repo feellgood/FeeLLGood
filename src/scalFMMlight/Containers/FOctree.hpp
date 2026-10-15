@@ -711,7 +711,7 @@ public:
         /** To get the tree coordinate of the current working cell
          *
          */
-        const FTreeCoordinate& getCurrentGlobalCoordinate() const
+        const std::array<int,3>& getCurrentGlobalCoordinate() const
             { return this->current.tree->cellsAt(this->currentLocalLevel)[this->currentLocalIndex]->getCoordinate(); }
     };
 
@@ -835,30 +835,32 @@ public:
      * @return the number of neighbors
      */
     int getInteractionNeighbors(const CellClass* inNeighbors[343],
-                                const FTreeCoordinate& workingCell,
+                                const std::array<int,3>& workingCell,
                                 const int inLevel) const
         {
         const int neighSeparation = 1;
         memset(inNeighbors, 0, sizeof(CellClass*) * 343);// reset
         // Then take each child of the parent's neighbors if not in directNeighbors
-        const FTreeCoordinate parentCell(workingCell.getX()>>1,workingCell.getY()>>1,workingCell.getZ()>>1);// Father coordinate
+        const int parentCellX = workingCell[0]>>1;
+        const int parentCellY = workingCell[1]>>1;
+        const int parentCellZ = workingCell[2]>>1;
         // Limit at parent level number of box (split by 2 by level)
         const int boxLimite = FMath::pow2(inLevel-1);
         int idxNeighbors(0);
         // We test all cells around
         for(int idxX = -1 ; idxX <= 1 ; ++idxX){
-            if(!Between(parentCell.getX() + idxX,0,boxLimite)) continue;
+            if(!Between(parentCellX + idxX,0,boxLimite)) continue;
 
             for(int idxY = -1 ; idxY <= 1 ; ++idxY){
-                if(!Between(parentCell.getY() + idxY,0,boxLimite)) continue;
+                if(!Between(parentCellY + idxY,0,boxLimite)) continue;
 
                 for(int idxZ = -1 ; idxZ <= 1 ; ++idxZ){
-                    if(!Between(parentCell.getZ() + idxZ,0,boxLimite)) continue;
+                    if(!Between(parentCellZ + idxZ,0,boxLimite)) continue;
 
                     // if we are not on the current cell
                     if( idxX || idxY || idxZ )//( neighSeparation<1 || idxX || idxY || idxZ )
                         {
-                        const FTreeCoordinate otherParent(parentCell.getX() + idxX,parentCell.getY() + idxY,parentCell.getZ() + idxZ);
+                        const FTreeCoordinate otherParent(parentCellX + idxX,parentCellY + idxY,parentCellZ + idxZ);
                         const MortonIndex mortonOtherParent = otherParent.getMortonIndex() << 3;
                         // Get child
                         CellClass** const cells = getCellPt(mortonOtherParent, inLevel);
@@ -868,9 +870,9 @@ public:
                             // For each child
                             for(int idxCousin = 0 ; idxCousin < 8 ; ++idxCousin){
                                 if(cells[idxCousin]){
-                                    const int xdiff  = ((otherParent.getX()<<1) | ( (idxCousin>>2) & 1)) - workingCell.getX();
-                                    const int ydiff  = ((otherParent.getY()<<1) | ( (idxCousin>>1) & 1)) - workingCell.getY();
-                                    const int zdiff  = ((otherParent.getZ()<<1) | (idxCousin&1)) - workingCell.getZ();
+                                    const int xdiff = ((otherParent.getX()<<1) | ( (idxCousin>>2) & 1)) - workingCell[0];
+                                    const int ydiff = ((otherParent.getY()<<1) | ( (idxCousin>>1) & 1)) - workingCell[1];
+                                    const int zdiff = ((otherParent.getZ()<<1) | (idxCousin&1)) - workingCell[2];
 
                                     // Test if it is a direct neighbor
                                     if(abs(xdiff) > neighSeparation || abs(ydiff) > neighSeparation || abs(zdiff) > neighSeparation){
@@ -897,32 +899,33 @@ public:
      */
     int getInteractionNeighbors(const CellClass* inNeighbors[342],
                                 int inNeighborPositions[343],
-                                const FTreeCoordinate& workingCell,
+                                const std::array<int,3>& workingCell,
                                 const int inLevel) const
         {
         const int neighSeparation = 1;
         // Then take each child of the parent's neighbors if not in directNeighbors
         // Father coordinate
-        const FTreeCoordinate parentCell(workingCell.getX()>>1,workingCell.getY()>>1,workingCell.getZ()>>1);
-
-        // Limite at parent level number of box (split by 2 by level)
+        const int parentCellX = workingCell[0]>>1;
+        const int parentCellY = workingCell[1]>>1;
+        const int parentCellZ = workingCell[2]>>1;
+        // Limit at parent level number of box (split by 2 by level)
         const int boxLimite = FMath::pow2(inLevel-1);
 
         int idxNeighbors = 0;
         // We test all cells around
         for(int idxX = -1 ; idxX <= 1 ; ++idxX){
-            if(!Between(parentCell.getX() + idxX,0,boxLimite)) continue;
+            if(!Between(parentCellX + idxX,0,boxLimite)) continue;
 
             for(int idxY = -1 ; idxY <= 1 ; ++idxY){
-                if(!Between(parentCell.getY() + idxY,0,boxLimite)) continue;
+                if(!Between(parentCellY + idxY,0,boxLimite)) continue;
 
                 for(int idxZ = -1 ; idxZ <= 1 ; ++idxZ){
-                    if(!Between(parentCell.getZ() + idxZ,0,boxLimite)) continue;
+                    if(!Between(parentCellZ + idxZ,0,boxLimite)) continue;
 
                     // if we are not on the current cell
                     if( idxX || idxY || idxZ )
                         {
-                        const FTreeCoordinate otherParent(parentCell.getX() + idxX,parentCell.getY() + idxY,parentCell.getZ() + idxZ);
+                        const FTreeCoordinate otherParent(parentCellX + idxX,parentCellY + idxY,parentCellZ + idxZ);
                         const MortonIndex mortonOtherParent = otherParent.getMortonIndex() << 3;
                         // Get child
                         CellClass** const cells = getCellPt(mortonOtherParent, inLevel);
@@ -932,9 +935,9 @@ public:
                             // For each child
                             for(int idxCousin = 0 ; idxCousin < 8 ; ++idxCousin){
                                 if(cells[idxCousin]){
-                                    const int xdiff  = ((otherParent.getX()<<1) | ( (idxCousin>>2) & 1)) - workingCell.getX();
-                                    const int ydiff  = ((otherParent.getY()<<1) | ( (idxCousin>>1) & 1)) - workingCell.getY();
-                                    const int zdiff  = ((otherParent.getZ()<<1) | (idxCousin&1)) - workingCell.getZ();
+                                    const int xdiff = ((otherParent.getX()<<1) | ( (idxCousin>>2) & 1)) - workingCell[0];
+                                    const int ydiff = ((otherParent.getY()<<1) | ( (idxCousin>>1) & 1)) - workingCell[1];
+                                    const int zdiff = ((otherParent.getZ()<<1) | (idxCousin&1)) - workingCell[2];
 
                                     // Test if it is a direct neighbor
                                     if(abs(xdiff) > neighSeparation || abs(ydiff) > neighSeparation || abs(zdiff) > neighSeparation){
@@ -982,7 +985,7 @@ public:
      * @param inLevel the level of the element
      * @return the number of neighbors
      */
-    int getLeafsNeighbors(ContainerClass* inNeighbors[27], const FTreeCoordinate& center, const int inLevel){
+    int getLeafsNeighbors(ContainerClass* inNeighbors[27], const std::array<int,3>& center, const int inLevel){
         memset( inNeighbors, 0 , 27 * sizeof(ContainerClass*));
         const int boxLimite = FMath::pow2(inLevel);
 
@@ -990,17 +993,17 @@ public:
 
         // We test all cells around
         for(int idxX = -1 ; idxX <= 1 ; ++idxX){
-            if(!Between(center.getX() + idxX,0,boxLimite)) continue;
+            if(!Between(center[0] + idxX,0,boxLimite)) continue;
 
             for(int idxY = -1 ; idxY <= 1 ; ++idxY){
-                if(!Between(center.getY() + idxY,0,boxLimite)) continue;
+                if(!Between(center[1] + idxY,0,boxLimite)) continue;
 
                 for(int idxZ = -1 ; idxZ <= 1 ; ++idxZ){
-                    if(!Between(center.getZ() + idxZ,0,boxLimite)) continue;
+                    if(!Between(center[2] + idxZ,0,boxLimite)) continue;
 
                     // if we are not on the current cell
                     if( idxX || idxY || idxZ ){
-                        const FTreeCoordinate other(center.getX() + idxX,center.getY() + idxY,center.getZ() + idxZ);
+                        const FTreeCoordinate other(center[0] + idxX,center[1] + idxY,center[2] + idxZ);
                         const MortonIndex mortonOther = other.getMortonIndex();
                         // get cell
                         ContainerClass* const leaf = getLeafSrc(mortonOther);
@@ -1024,23 +1027,23 @@ public:
      * @return the number of neighbors
      */
     int getLeafsNeighbors(ContainerClass* inNeighbors[26], int inNeighborPositions[26],
-                          const FTreeCoordinate& center, const int inLevel)
+                          const std::array<int,3>& center, const int inLevel)
         {
         const int boxLimite = FMath::pow2(inLevel);
         int idxNeighbors(0);
         // We test all cells around
         for(int idxX = -1 ; idxX <= 1 ; ++idxX){
-            if(!Between(center.getX() + idxX,0,boxLimite)) continue;
+            if(!Between(center[0] + idxX,0,boxLimite)) continue;
 
             for(int idxY = -1 ; idxY <= 1 ; ++idxY){
-                if(!Between(center.getY() + idxY,0,boxLimite)) continue;
+                if(!Between(center[1] + idxY,0,boxLimite)) continue;
 
                 for(int idxZ = -1 ; idxZ <= 1 ; ++idxZ){
-                    if(!Between(center.getZ() + idxZ,0,boxLimite)) continue;
+                    if(!Between(center[2] + idxZ,0,boxLimite)) continue;
 
                     // if we are not on the current cell
                     if( idxX || idxY || idxZ ){
-                        const FTreeCoordinate other(center.getX() + idxX,center.getY() + idxY,center.getZ() + idxZ);
+                        const FTreeCoordinate other(center[0] + idxX,center[1] + idxY,center[2] + idxZ);
                         const MortonIndex mortonOther = other.getMortonIndex();
                         // get cell
                         ContainerClass* const leaf = getLeafSrc(mortonOther);
