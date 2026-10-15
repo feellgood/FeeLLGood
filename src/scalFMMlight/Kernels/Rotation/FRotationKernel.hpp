@@ -820,11 +820,18 @@ class FRotationKernel
     /** Return the position of a leaf from its tree coordinate
       * This is used only for the leaf
       */
+    /*
     FPoint<FReal> getLeafCenter(const FTreeCoordinate coordinate) const {
         return FPoint<FReal>(
                     FReal(coordinate.getX()) * widthAtLeafLevel + widthAtLeafLevelDiv2 + boxCorner.getX(),
                     FReal(coordinate.getY()) * widthAtLeafLevel + widthAtLeafLevelDiv2 + boxCorner.getY(),
                     FReal(coordinate.getZ()) * widthAtLeafLevel + widthAtLeafLevelDiv2 + boxCorner.getZ());
+    }*/
+    FPoint<FReal> getLeafCenter(const std::array<int,3> coordinate) const {
+        return FPoint<FReal>(
+                    FReal(coordinate[0]) * widthAtLeafLevel + widthAtLeafLevelDiv2 + boxCorner.getX(),
+                    FReal(coordinate[1]) * widthAtLeafLevel + widthAtLeafLevelDiv2 + boxCorner.getY(),
+                    FReal(coordinate[2]) * widthAtLeafLevel + widthAtLeafLevelDiv2 + boxCorner.getZ());
     }
 
     /** Return position in the array of the l,m couple
@@ -1176,19 +1183,17 @@ public:
       * position of the neighbor given by:
       * (((idxX + 1) * 3) + (idxY +1)) * 3 + idxZ + 1   with idxX, idxY, and idxZ from -1 to 1.
       *
-      * @param inPosition tree coordinate of the leaf (number of boxes in x, y and z)
       * @param inTargets current box targets particles
       * @param inSources current box sources particles (can be == to targets)
       * @param inNeighbors the particles from direct neighbors (max length = 26)
-      * @param neighborPositions the relative position of the neighbors (between O and 25, max length = 26)
       * @param inSize the number of direct neighbors
       * This function proceed the P2P using particlesMutualInteraction
       * The computation is done for interactions with index <= 13. (13 means current leaf (x;y;z) = (0;0;0)).
       * Calling this method in multithread should be done carefully.
       */
-    void P2P([[maybe_unused]] const FTreeCoordinate& inPosition,
-             ContainerClass* const FRestrict inTargets, const ContainerClass* const FRestrict inSources,
-             ContainerClass* const inNeighbors[], [[maybe_unused]] const int neighborPositions[],
+    void P2P(ContainerClass* const FRestrict inTargets,
+             const ContainerClass* const FRestrict inSources,
+             ContainerClass* const inNeighbors[],
              const int inSize) 
         {
         const ContainerClass* const srcPtr[1] = {inSources};
@@ -1197,10 +1202,7 @@ public:
         }
 
     /** Use mutual even if it is not useful and call particlesMutualInteraction */
-    void P2PRemote(const FTreeCoordinate& /*inPosition*/,
-                   ContainerClass* const FRestrict inTargets, const ContainerClass* const FRestrict /*inSources*/,
-                   const ContainerClass* const inNeighbors[], [[maybe_unused]] const int neighborPositions[],
-                   const int inSize)
+    void P2PRemote(ContainerClass* const FRestrict inTargets, const ContainerClass* const inNeighbors[], const int inSize)
         { FullRemote<FReal,ContainerClass>(inTargets,inNeighbors,inSize); }
 };
 

@@ -4,8 +4,6 @@
 
 #include <complex>
 
-#include "../../Containers/FTreeCoordinate.hpp"
-
 /** This template class is a cell used for the rotation based kernel
   * The size of the multipole and local vector are based on template parameter P.
   * User should choose this parameter P carefully to match with the P of the kernel.
@@ -37,7 +35,7 @@ protected:
     MortonIndex mortonIndex;
 
     /** The position */
-    FTreeCoordinate coordinate;
+    std::array<int,3> ind;
 
     /** Level in tree */
     std::size_t level;
@@ -80,14 +78,10 @@ public:
     void setMortonIndex(const MortonIndex inMortonIndex) { this->mortonIndex = inMortonIndex; }
 
     /** To get the position */
-    const FTreeCoordinate& getCoordinate() const { return this->coordinate; }
+    const std::array<int,3> & getCoordinate() const { return this->ind; }
 
     /** To set the position from 3 indices */
-    void setCoordinate(const int inX, const int inY, const int inZ) {
-        this->coordinate.setX(inX);
-        this->coordinate.setY(inY);
-        this->coordinate.setZ(inZ);
-    }
+    void setCoordinate(const int inX, const int inY, const int inZ) { this->ind = {inX,inY,inZ}; }
 
     /** Get Multipole array */
     const std::complex<FReal>* getMultipole() const { return multipole_exp; }
