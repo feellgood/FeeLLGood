@@ -132,6 +132,9 @@ public:
 
         if(settings.getFieldType() == R4toR3)
             { setExtSpaceField(); }
+
+        if (settings.absorb.enable)
+            { setAbsorbingEnds(); }
         }
 
     /** operator copy deleted */
@@ -443,6 +446,11 @@ private:
     /** when external applied field is of field_type R4toR3 values of field_space are stored in
      * spaceField */
     void setExtSpaceField();
+
+    /** absorbing ends: resolve the selected volume regions, compute their extent along the axis,
+     * check that the two zones do not overlap, and copy the absorbing ends in the parameters of the
+     * selected regions */
+    void setAbsorbingEnds();
     }; // end class mesh
     }  // end namespace Mesh
 #endif

@@ -8,6 +8,7 @@
 
 #include <set>
 
+#include "absorbing_ends.h"
 #include "triangle.h"
 #include "node.h"
 #include "time_integration.h"
@@ -105,6 +106,9 @@ struct prm
     double lsf;          /**< spin diffusion length in a metal (magnetic or not) m^1 */
 
     double volume = 0; /**< total volume of the region */
+
+    /** absorbing ends: enabled only for the regions selected in absorbing_ends, set by the mesh */
+    AbsorbingEnds absorb;
 
     void infos(void);  /**< print the struct parameters */
     };
