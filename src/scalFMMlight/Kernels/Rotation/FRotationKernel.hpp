@@ -820,13 +820,6 @@ class FRotationKernel
     /** Return the position of a leaf from its tree coordinate
       * This is used only for the leaf
       */
-    /*
-    FPoint<FReal> getLeafCenter(const FTreeCoordinate coordinate) const {
-        return FPoint<FReal>(
-                    FReal(coordinate.getX()) * widthAtLeafLevel + widthAtLeafLevelDiv2 + boxCorner.getX(),
-                    FReal(coordinate.getY()) * widthAtLeafLevel + widthAtLeafLevelDiv2 + boxCorner.getY(),
-                    FReal(coordinate.getZ()) * widthAtLeafLevel + widthAtLeafLevelDiv2 + boxCorner.getZ());
-    }*/
     FPoint<FReal> getLeafCenter(const std::array<int,3> coordinate) const {
         return FPoint<FReal>(
                     FReal(coordinate[0]) * widthAtLeafLevel + widthAtLeafLevelDiv2 + boxCorner.getX(),
