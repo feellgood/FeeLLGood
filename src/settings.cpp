@@ -353,6 +353,24 @@ void Settings::toYaml()
             }
         std::cout << "  threshold: " << threshold << "\n";
         }
+    std::cout << "absorbing_ends:\n";
+    std::cout << "  enable: " << str(absorb.enable) << "\n";
+    if (absorb.enable)
+        {
+        std::cout << "  axis: " << "XYZ"[absorb.axis] << "\n";
+        std::cout << "  length: " << absorb.length << "\n";
+        std::cout << "  alpha_max: " << absorb.alpha_max << "\n";
+        std::cout << "  regions:";
+        if (absorb.regions.empty())
+            { std::cout << '\n'; }
+        else
+            {
+            std::cout << " [";
+            for (unsigned int i = 0; i < absorb.regions.size(); i++)
+                { std::cout << (i ? ", " : "") << absorb.regions[i]; }
+            std::cout << "]\n";
+            }
+        }
     std::cout << "Bext: ";
     if (field_type == R4toR3)
         { std::cout << "\n  space: " << str(sB_space, 1) << "\n  time: " << str(sB_time, 1) << '\n'; }
@@ -612,6 +630,44 @@ void Settings::read(YAML::Node yaml)
             }
         assign(threshold, recentering["threshold"]);
         }  // recentering
+
+    YAML::Node absorbing = yaml["absorbing_ends"];
+    if (absorbing && !absorbing.IsNull())
+        {
+        if (!absorbing.IsMap())
+            { error("absorbing_ends should be a map."); }
+        // the section is enabled by its presence, unless enable is given
+        if (!assign(absorb.enable, absorbing["enable"]))
+            { absorb.enable = true; }
+        if (absorbing["axis"])
+            {
+            std::string axis = absorbing["axis"].as<std::string>();
+            if (axis == "X" || axis == "x")
+                { absorb.axis = IDX_X; }
+            else if (axis == "Y" || axis == "y")
+                { absorb.axis = IDX_Y; }
+            else if (axis == "Z" || axis == "z")
+                { absorb.axis = IDX_Z; }
+            else
+                { error("absorbing_ends.axis should be X, Y or Z."); }
+            }
+        assign(absorb.length, absorbing["length"]);
+        assign(absorb.alpha_max, absorbing["alpha_max"]);
+        YAML::Node regions = absorbing["regions"];
+        if (regions)
+            {
+            absorb.regions.clear();
+            if (!regions.IsNull())
+                {
+                if (!regions.IsSequence())
+                    { error("absorbing_ends.regions should be a sequence of volume regions."); }
+                for (auto it = regions.begin(); it != regions.end(); ++it)
+                    { absorb.regions.push_back(it->as<std::string>()); }
+                }
+            }
+        if (absorb.enable && !(absorb.length > 0))
+            { error("absorbing_ends.length should be positive."); }
+        }  // absorbing_ends
 
     YAML::Node field = yaml["Bext"];
     if (field && !field.IsNull())

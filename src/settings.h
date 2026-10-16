@@ -12,6 +12,7 @@ output file format wanted by the user. This is done mainly with the class Settin
 
 #include <yaml-cpp/yaml.h>
 
+#include "absorbing_ends.h"
 #include "expression_parser.h"
 #include "triangle.h"
 #include "tetra.h"
@@ -146,6 +147,10 @@ public:
 
     /** threshold value to recenter or not versus avg(M_recentering_direction) */
     double threshold;
+
+    /** absorbing ends: damping increasing up to alpha_max at the ends of the volume regions. The
+     * bounds of the regions along the axis are set from the mesh */
+    AbsorbingEnds absorb;
 
     /** nb of threads for the computation of the demag field with scalfmm */
     int scalfmmNbTh;
