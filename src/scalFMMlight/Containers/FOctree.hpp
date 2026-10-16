@@ -75,16 +75,16 @@ protected:
 
     /**
      * @param inPosition position to compute
-     * @return a FTreeCoordinate object corresponding to inPosition position in real space
+     * @return an array of three indices corresponding to inPosition position in real space
      */
-    FTreeCoordinate getCoordinateFromPosition(const FPoint<FReal>& inPosition) const
+    std::array<int,3> getCoordinateFromPosition(const FPoint<FReal>& inPosition) const
         {
         const FReal boxWidthAtLeafLevel(boxWidth/FReal(1<<(height-1)));
         // position has to be relative to corner not center
         const int x = GetTreeCoordinate( inPosition.getX() - boxCorner.getX(), boxWidth, boxWidthAtLeafLevel, height);
         const int y = GetTreeCoordinate( inPosition.getY() - boxCorner.getY(), boxWidth, boxWidthAtLeafLevel, height);
         const int z = GetTreeCoordinate( inPosition.getZ() - boxCorner.getZ(), boxWidth, boxWidthAtLeafLevel, height);
-        return FTreeCoordinate(x,y,z);
+        return std::array<int,3>({x,y,z});
         }
 
     /**
@@ -220,33 +220,31 @@ public:
      * algorithm is :
      * Compute morton index for the particle
      * ask node to insert this particle
-     * @param inParticlePosition the position of the particle to insert (must inherit from FAbstractParticle)
+     * @param inParticlePosition the position of the particle to insert
      * @param args
      */
     template<typename... Args>
-    void insert(const FPoint<FReal>& inParticlePosition, Args... args){
-        const FTreeCoordinate host = getCoordinateFromPosition( inParticlePosition );
-        const MortonIndex particleIndex = host.getMortonIndex();
-        if(root->isLeafPart()){
-            ((SubOctreeWithLeaves*)root)->insert( particleIndex, host, this->height, inParticlePosition, args... );
+    void insert(const FPoint<FReal>& inParticlePosition, Args... args)
+        {
+        const std::array<int,3> host = getCoordinateFromPosition( inParticlePosition );
+        const MortonIndex particleIndex = computeMortonIndex(host[0],host[1],host[2]);
+        if(root->isLeafPart())
+            {  ((SubOctreeWithLeaves*)root)->insert( particleIndex, host, this->height, inParticlePosition, args... ); }
+        else
+            { ((SubOctree*)root)->insert( particleIndex, host, this->height, inParticlePosition, args... ); }
         }
-        else{
-            ((SubOctree*)root)->insert( particleIndex, host, this->height, inParticlePosition, args... );
-        }
-    }
 
     /** create a leaf from its morton index
      * @param indexToCreate the index of the leaf to create
      */
-    LeafClass* createLeaf(const MortonIndex indexToCreate ){
-        const FTreeCoordinate host(indexToCreate);
-        if(root->isLeafPart()){
-            return ((SubOctreeWithLeaves*)root)->createLeaf( indexToCreate, host, this->height );
+    LeafClass* createLeaf(const MortonIndex indexToCreate )
+        {
+        const std::array<int,3> host = getCoordinateFromPosition(indexToCreate);
+        if(root->isLeafPart())
+            { return ((SubOctreeWithLeaves*)root)->createLeaf( indexToCreate, host, this->height ); }
+        else
+            { return ((SubOctree*)root)->createLeaf( indexToCreate, host, this->height ); }
         }
-        else{
-            return ((SubOctree*)root)->createLeaf( indexToCreate, host, this->height );
-        }
-    }
 
     /** Remove a leaf from its morton index
      * @param indexToRemove the index of the leaf to remove
