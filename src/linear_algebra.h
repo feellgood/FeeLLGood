@@ -43,7 +43,8 @@ public:
             [this](const Mesh::Edge edge){ return msh->magNode[edge.first] && msh->magNode[edge.second]; }
         ),
         verbose(s.verbose),
-        extSpaceField(my_msh.extSpaceField)
+        extSpaceField(my_msh.extSpaceField),
+        absorb(s.absorb)
         {
         Xw.resize(2 * NOD);
         base_projection();
@@ -125,5 +126,8 @@ private:
 
     /** list of the Dirichlet indices where (vp,vq) are zero, initialized by constructor */
     std::vector<int> lvd;
+
+    /** absorbing ends of the settings, used for the regions marked as absorbing */
+    const AbsorbingEnds &absorb;
     };// end class linAlgebra
 #endif
