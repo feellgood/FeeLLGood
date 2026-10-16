@@ -8,6 +8,7 @@
 
 #include <set>
 
+#include "absorbing_ends.h"
 #include "triangle.h"
 #include "node.h"
 #include "time_integration.h"
@@ -105,6 +106,10 @@ struct prm
     double lsf;          /**< spin diffusion length in a metal (magnetic or not) m^1 */
 
     double volume = 0; /**< total volume of the region */
+
+    /** true if the region is selected in absorbing_ends (set by the mesh): its damping is then
+     * modified by the absorbing ends of the settings, passed to Tet::integrales */
+    bool absorbing = false;
 
     void infos(void);  /**< print the struct parameters */
     };
