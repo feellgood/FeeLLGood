@@ -5,7 +5,6 @@
 #include "../Utils/FGlobal.hpp"
 #include "../Utils/FPoint.hpp"
 #include "../Utils/FAssert.hpp"
-#include "./FTreeCoordinate.hpp"
 
 /**
  * @author Berenger Bramas (berenger.bramas@inria.fr)
@@ -78,21 +77,20 @@ protected:
      * It is used after inserting a new leaf to have cells from leaf to root when computing
      * @param arrayIndex the index at the leaf index of the new element
      * @param inLeafCellIndex
-     * @param treePosition
+     * @param i_X integer index along X
+     * @param i_Y integer index along Y
+     * @param i_Z integer index along Z
      */
-    void createPreviousCells(MortonIndex arrayIndex, MortonIndex inLeafCellIndex, const FTreeCoordinate& treePosition){
+    void createPreviousCells(MortonIndex arrayIndex, MortonIndex inLeafCellIndex, const int i_X, const int i_Y, const int i_Z)
+        {
         int indexLevel = this->subOctreeHeight - 1;
         int bottomToTop = 0;
-        while(indexLevel >= 0 && !this->cells[indexLevel][arrayIndex]){
+        while(indexLevel >= 0 && !this->cells[indexLevel][arrayIndex])
+            {
             CellClass* const newNode = new CellClass();
             newNode->setMortonIndex(inLeafCellIndex);
-
-            newNode->setCoordinate(treePosition.getX() >> bottomToTop,
-                                   treePosition.getY() >> bottomToTop,
-                                   treePosition.getZ() >> bottomToTop);
-
+            newNode->setCoordinate(i_X >> bottomToTop, i_Y >> bottomToTop, i_Z >> bottomToTop);
             newNode->setLevel(this->subOctreePosition + indexLevel);
-
             this->cells[indexLevel][arrayIndex] = newNode;
 
             --indexLevel;
@@ -100,22 +98,23 @@ protected:
 
             arrayIndex >>= 3;
             inLeafCellIndex >>= 3;
+            }
         }
-    }
 
     /**
       * This function is initializing variables when a new leaf is inserted in the tree
       * for example it updates the leaf array marges and calls createPreviousCells()
       * @param arrayIndex the position of the new leaf in the leafs array
       * @param inLeafCellIndex
-      * @param host
+      * @param host : integer indices 
       */
-    void newLeafInserted(const int arrayIndex, const MortonIndex inLeafCellIndex, const FTreeCoordinate& host){
-        createPreviousCells(arrayIndex,inLeafCellIndex, host);
+    void newLeafInserted(const int arrayIndex, const MortonIndex inLeafCellIndex, const std::array<int,3>& host)
+        {
+        createPreviousCells(arrayIndex,inLeafCellIndex, host[0], host[1], host[2]);
         // Update if this is the bottom left
         if(arrayIndex < this->leftLeafIndex) this->leftLeafIndex = arrayIndex;
         if(arrayIndex > this->rightLeafIndex) this->rightLeafIndex = arrayIndex;
-    }
+        }
 
     /** Remove every cells from the array index
       * the leaf cell is removed, then we go upper and test,
@@ -347,23 +346,24 @@ public:
     * Refer to FAbstractSubOctree::insert
     */
     template<typename... Args>
-    void insert(const MortonIndex index, const FTreeCoordinate& host, const int inTreeHeight, const FPoint<FReal>& inParticlePosition,
-                        Args... args){
+    void insert(const MortonIndex index, const std::array<int,3> & host, const int inTreeHeight, const FPoint<FReal>& inParticlePosition, Args... args)
+        {
         // Get the morton index for the leaf level
         const MortonIndex arrayIndex = Parent::getLeafIndex(index,inTreeHeight);
         // is there already a leaf?
-        if( !this->leafs[arrayIndex] ){
+        if( !this->leafs[arrayIndex] )
+            {
             this->leafs[arrayIndex] = new LeafClass();
             Parent::newLeafInserted( int(arrayIndex) , index, host);
-        }
+            }
         // add particle to leaf list
         this->leafs[arrayIndex]->push(inParticlePosition, args... );
-    }
+        }
 
     /**
     create a leaf
     */
-    LeafClass* createLeaf(const MortonIndex index, const FTreeCoordinate& host, const int inTreeHeight){
+    LeafClass* createLeaf(const MortonIndex index, const std::array<int,3> & host, const int inTreeHeight){
         // Get the morton index for the leaf level
         const MortonIndex arrayIndex = Parent::getLeafIndex(index,inTreeHeight);
         // is there already a leaf?
@@ -477,7 +477,7 @@ public:
             {
             const int cellsAtLeafLevel = 1 << (3 * inSubOctreeHeight);
             this->subleafs = new Parent*[cellsAtLeafLevel];
-            FAssertLF(this->subleafs, "Allocation failled");
+            FAssertLF(this->subleafs, "Allocation failed");
             memset(subleafs, 0, sizeof(Parent**) * cellsAtLeafLevel);
             }
 
@@ -491,7 +491,7 @@ public:
 
     /** inserter */
     template<typename... Args>
-    void insert(const MortonIndex index, const FTreeCoordinate& host, const int inTreeHeight, const FPoint<FReal>& inParticlePosition,
+    void insert(const MortonIndex index, const std::array<int,3>& host, const int inTreeHeight, const FPoint<FReal>& inParticlePosition,
                         Args... args){
         // We need the morton index at the bottom level of this sub octree
         // so we remove the right side
@@ -503,33 +503,27 @@ public:
             const int nextSubOctreeHeight = std::min(inTreeHeight - nextSubOctreePosition, this->subOctreeHeight);
 
             // Next suboctree is a middle suboctree
-            if(inTreeHeight > nextSubOctreeHeight + nextSubOctreePosition){
-                this->subleafs[arrayIndex] = new FSubOctree(this,int(arrayIndex),nextSubOctreeHeight,nextSubOctreePosition);
-            }
-            // Or next suboctree contains the reail leaf!
-            else{
-                this->subleafs[arrayIndex] = new SubOctreeWithLeaf(this,int(arrayIndex),nextSubOctreeHeight,nextSubOctreePosition);
-            }
+            if(inTreeHeight > nextSubOctreeHeight + nextSubOctreePosition)
+                { this->subleafs[arrayIndex] = new FSubOctree(this,int(arrayIndex),nextSubOctreeHeight,nextSubOctreePosition); }
+            else // Or next suboctree contains the reail leaf!
+                { this->subleafs[arrayIndex] = new SubOctreeWithLeaf(this,int(arrayIndex),nextSubOctreeHeight,nextSubOctreePosition); }
 
-            const FTreeCoordinate hostAtLevel(
-                        host.getX() >> (inTreeHeight - nextSubOctreePosition ),
-                        host.getY() >> (inTreeHeight - nextSubOctreePosition ),
-                        host.getZ() >> (inTreeHeight - nextSubOctreePosition ));
+            const std::array<int,3> hostAtLevel = {host[0] >> (inTreeHeight - nextSubOctreePosition ),
+                                                   host[1] >> (inTreeHeight - nextSubOctreePosition ),
+                                                   host[2] >> (inTreeHeight - nextSubOctreePosition )};
 
             // We need to inform parent class
             Parent::newLeafInserted( int(arrayIndex), index >> (3 * (inTreeHeight-nextSubOctreePosition) ), hostAtLevel);
         }
         // Ask next suboctree to insert the particle
-        if(this->subleafs[arrayIndex]->isLeafPart()){
-            ((SubOctreeWithLeaf*)this->subleafs[arrayIndex])->insert( index, host, inTreeHeight, inParticlePosition, args... );
-        }
-        else{
-            ((FSubOctree*)this->subleafs[arrayIndex])->insert( index, host, inTreeHeight, inParticlePosition, args... );
-        }
+        if(this->subleafs[arrayIndex]->isLeafPart())
+            { ((SubOctreeWithLeaf*)this->subleafs[arrayIndex])->insert( index, host, inTreeHeight, inParticlePosition, args... ); }
+        else
+            { ((FSubOctree*)this->subleafs[arrayIndex])->insert( index, host, inTreeHeight, inParticlePosition, args... ); }
     }
 
     /** create a leaf and returns a ptr to the created leaf */
-    LeafClass* createLeaf(const MortonIndex index, const FTreeCoordinate& host, const int inTreeHeight){
+    LeafClass* createLeaf(const MortonIndex index, const std::array<int,3>& host, const int inTreeHeight){
         // We need the morton index at the bottom level of this sub octree
         // so we remove the right side
         const MortonIndex arrayIndex = Parent::getLeafIndex(index,inTreeHeight);
@@ -540,19 +534,13 @@ public:
             const int nextSubOctreeHeight = std::min(inTreeHeight - nextSubOctreePosition, this->subOctreeHeight);
 
             // Next suboctree is a middle suboctree
-            if(inTreeHeight > nextSubOctreeHeight + nextSubOctreePosition){
-                this->subleafs[arrayIndex] = new FSubOctree(this,int(arrayIndex),nextSubOctreeHeight,nextSubOctreePosition);
-            }
-            // Or next suboctree contains the real leaf!
-            else{
-                this->subleafs[arrayIndex] = new SubOctreeWithLeaf(this,int(arrayIndex),nextSubOctreeHeight,nextSubOctreePosition);
-            }
-
-            const FTreeCoordinate hostAtLevel(
-                        host.getX() >> (inTreeHeight - nextSubOctreePosition ),
-                        host.getY() >> (inTreeHeight - nextSubOctreePosition ),
-                        host.getZ() >> (inTreeHeight - nextSubOctreePosition ));
-
+            if(inTreeHeight > nextSubOctreeHeight + nextSubOctreePosition)
+                { this->subleafs[arrayIndex] = new FSubOctree(this,int(arrayIndex),nextSubOctreeHeight,nextSubOctreePosition); }
+            else// Or next suboctree contains the real leaf!
+                { this->subleafs[arrayIndex] = new SubOctreeWithLeaf(this,int(arrayIndex),nextSubOctreeHeight,nextSubOctreePosition); }
+            const std::array<int,3> hostAtLevel = { host[0] >> (inTreeHeight - nextSubOctreePosition ),
+                                                    host[1] >> (inTreeHeight - nextSubOctreePosition ),
+                                                    host[2] >> (inTreeHeight - nextSubOctreePosition )};
             // We need to inform parent class
             Parent::newLeafInserted( int(arrayIndex), index >> (3 * (inTreeHeight-nextSubOctreePosition) ), hostAtLevel);
         }
