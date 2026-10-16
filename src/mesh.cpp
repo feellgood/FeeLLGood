@@ -387,3 +387,77 @@ void mesh::setExtSpaceField()
         k++;
         });
     }
+
+void mesh::setAbsorbingEnds()
+    {
+    AbsorbingEnds &ab = settings.absorb;
+    const int nbRegions = settings.paramTetra.size();
+
+    // selected regions: the listed ones, or all the volume regions
+    std::vector<bool> selected(nbRegions, ab.regions.empty());
+    for (const std::string &name : ab.regions)
+        {
+        auto it = std::find_if(settings.paramTetra.begin(), settings.paramTetra.end(),
+                               [&name](const Tetra::prm &p) { return p.regName == name; });
+        if (it == settings.paramTetra.end())
+            {
+            std::cerr << "Error: region \"" << name
+                      << "\" of absorbing_ends.regions is not a volume region.\n";
+            exit(1);
+            }
+        selected[it - settings.paramTetra.begin()] = true;
+        }
+
+    // extent of the union of the selected regions along the axis: the zones are at the ends of this
+    // union, not at the ends of each region
+    ab.lo = INFINITY;
+    ab.hi = -INFINITY;
+    for (int r = 0; r < nbRegions; r++)
+        {
+        if (!selected[r])
+            { continue; }
+        for (const int idx : volumeRegions[r])
+            {
+            for (int i = 0; i < Tetra::N; i++)
+                {
+                const double x = getNode_p(tet[idx].ind[i])(ab.axis);
+                ab.lo = std::min(ab.lo, x);
+                ab.hi = std::max(ab.hi, x);
+                }
+            }
+        }
+    if (!(ab.lo <= ab.hi))
+        {
+        std::cerr << "Error: absorbing_ends: the selected regions have no tetrahedron.\n";
+        exit(1);
+        }
+    if (2 * ab.length > ab.hi - ab.lo)
+        {
+        std::cerr << "Error: absorbing_ends: the two zones overlap (2 x length = " << 2 * ab.length
+                  << " m > extent of the regions along the axis = " << ab.hi - ab.lo << " m).\n";
+        exit(1);
+        }
+
+    std::string regionNames;
+    for (int r = 0; r < nbRegions; r++)
+        {
+        if (!selected[r] || volumeRegions[r].empty())
+            { continue; }
+        Tetra::prm &p = settings.paramTetra[r];
+        if (p.Ms > 0 && p.alpha_LLG > ab.alpha_max)
+            {
+            std::cerr << "Warning: absorbing_ends: alpha_max = " << ab.alpha_max
+                      << " < alpha_LLG = " << p.alpha_LLG << " of region " << p.regName
+                      << " (damping decreasing towards the ends).\n";
+            }
+        p.absorbing = true;
+        regionNames += (regionNames.empty() ? "" : ", ") + p.regName;
+        }
+    if (settings.verbose)
+        {
+        const char axis = "XYZ"[ab.axis];
+        std::cout << "absorbing ends:    " << axis << " in [" << ab.lo << ", " << ab.lo + ab.length
+                  << "] and [" << ab.hi - ab.length << ", " << ab.hi << "] m, alpha up to "
+                  << ab.alpha_max << " (regions " << regionNames << ")\n";
+        }
+    }
