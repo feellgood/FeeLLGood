@@ -74,22 +74,21 @@ protected:
         }
 
     /**
-     * Get morton index from a position for the leaf level
      * @param inPosition position to compute
-     * @return the morton index
+     * @return a FTreeCoordinate object corresponding to inPosition position in real space
      */
     FTreeCoordinate getCoordinateFromPosition(const FPoint<FReal>& inPosition) const
         {
         const FReal boxWidthAtLeafLevel(boxWidth/FReal(1<<(height-1)));
         // position has to be relative to corner not center
-        const FReal x = GetTreeCoordinate( inPosition.getX() - boxCorner.getX(), boxWidth, boxWidthAtLeafLevel, height);
-        const FReal y = GetTreeCoordinate( inPosition.getY() - boxCorner.getY(), boxWidth, boxWidthAtLeafLevel, height);
-        const FReal z = GetTreeCoordinate( inPosition.getZ() - boxCorner.getZ(), boxWidth, boxWidthAtLeafLevel, height);
+        const int x = GetTreeCoordinate( inPosition.getX() - boxCorner.getX(), boxWidth, boxWidthAtLeafLevel, height);
+        const int y = GetTreeCoordinate( inPosition.getY() - boxCorner.getY(), boxWidth, boxWidthAtLeafLevel, height);
+        const int z = GetTreeCoordinate( inPosition.getZ() - boxCorner.getZ(), boxWidth, boxWidthAtLeafLevel, height);
         return FTreeCoordinate(x,y,z);
         }
 
     /**
-     * true if inValue is in [inMin,inMax[
+     * true if inValue is in [inMin,inMax)
      * */
     bool Between(const FReal inValue, const FReal inMin, const FReal inMax) const
         { return ( inMin <= inValue && inValue < inMax ); }
@@ -123,7 +122,7 @@ protected:
         }
 
     /**
-     * compute positions from Morton index
+     * compute integer positions from Morton index
      * */
     void computePositionsFromMorton(const MortonIndex inIndex,int &i_X,int &i_Y,int &i_Z)
         {
@@ -1067,7 +1066,7 @@ public:
     /** This function fill an array with the neighbors of a cell
      * @param inNeighbors the array to store the elements
      * @param inNeighborPositions
-     * @param center
+     * @param center indices
      * @param inLevel the level of the element
      * @return the number of neighbors
      */
