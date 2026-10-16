@@ -7,7 +7,6 @@
 #include "./FSubOctree.hpp"
 #include "../Utils/FGlobal.hpp"
 #include "../Utils/FPoint.hpp"
-#include "../Utils/FMath.hpp"
 #include "../Utils/FAssert.hpp"
 
 /**
@@ -68,7 +67,7 @@ protected:
                                         const FReal boxWidthAtLeafLevel, const int treeHeight)
         {
         FAssertLF( (inRelativePosition >= 0 && inRelativePosition <= boxWidth), "inRelativePosition : ",inRelativePosition, " boxWidth ", boxWidth );
-        if(inRelativePosition == boxWidth) { return FMath::pow2(treeHeight-1)-1; }
+        if(inRelativePosition == boxWidth) { return (1 << (treeHeight-1))-1; }
         const FReal indexFReal = inRelativePosition / boxWidthAtLeafLevel;
         return static_cast<int>(indexFReal);
         }
@@ -806,18 +805,18 @@ public:
     int getNeighborsNoBrothers(CellClass* inNeighbors[26], const MortonIndex inIndex, const int inLevel) const {
         int c_X,c_Y,c_Z;//center
         computePositionsFromMorton(inIndex,c_X,c_Y,c_Z);
-        const int boxLimite = FMath::pow2(inLevel);
+        const int boxLimit(1<<inLevel);
         int idxNeighbors = 0;
 
         // We test all cells around
         for(int idxX = -1 ; idxX <= 1 ; ++idxX){
-            if(!Between(c_X + idxX,0,boxLimite)) continue;
+            if(!Between(c_X + idxX,0,boxLimit)) continue;
 
             for(int idxY = -1 ; idxY <= 1 ; ++idxY){
-                if(!Between(c_Y + idxY,0,boxLimite)) continue;
+                if(!Between(c_Y + idxY,0,boxLimit)) continue;
 
                 for(int idxZ = -1 ; idxZ <= 1 ; ++idxZ){
-                    if(!Between(c_Z + idxZ,0,boxLimite)) continue;
+                    if(!Between(c_Z + idxZ,0,boxLimit)) continue;
 
                     // if we are not on the current cell
                     if( !(!idxX && !idxY && !idxZ) ){
@@ -884,17 +883,17 @@ public:
         const int parentCellY = workingCell[1]>>1;
         const int parentCellZ = workingCell[2]>>1;
         // Limit at parent level number of box (split by 2 by level)
-        const int boxLimite = FMath::pow2(inLevel-1);
+        const int boxLimit(1 << (inLevel-1));
         int idxNeighbors(0);
         // We test all cells around
         for(int idxX = -1 ; idxX <= 1 ; ++idxX){
-            if(!Between(parentCellX + idxX,0,boxLimite)) continue;
+            if(!Between(parentCellX + idxX,0,boxLimit)) continue;
 
             for(int idxY = -1 ; idxY <= 1 ; ++idxY){
-                if(!Between(parentCellY + idxY,0,boxLimite)) continue;
+                if(!Between(parentCellY + idxY,0,boxLimit)) continue;
 
                 for(int idxZ = -1 ; idxZ <= 1 ; ++idxZ){
-                    if(!Between(parentCellZ + idxZ,0,boxLimite)) continue;
+                    if(!Between(parentCellZ + idxZ,0,boxLimit)) continue;
 
                     // if we are not on the current cell
                     if( idxX || idxY || idxZ )//( neighSeparation<1 || idxX || idxY || idxZ )
@@ -950,18 +949,18 @@ public:
         const int parentCellY = workingCell[1]>>1;
         const int parentCellZ = workingCell[2]>>1;
         // Limit at parent level number of box (split by 2 by level)
-        const int boxLimite = FMath::pow2(inLevel-1);
+        const int boxLimit(1 << (inLevel-1));
 
         int idxNeighbors = 0;
         // We test all cells around
         for(int idxX = -1 ; idxX <= 1 ; ++idxX){
-            if(!Between(parentCellX + idxX,0,boxLimite)) continue;
+            if(!Between(parentCellX + idxX,0,boxLimit)) continue;
 
             for(int idxY = -1 ; idxY <= 1 ; ++idxY){
-                if(!Between(parentCellY + idxY,0,boxLimite)) continue;
+                if(!Between(parentCellY + idxY,0,boxLimit)) continue;
 
                 for(int idxZ = -1 ; idxZ <= 1 ; ++idxZ){
-                    if(!Between(parentCellZ + idxZ,0,boxLimite)) continue;
+                    if(!Between(parentCellZ + idxZ,0,boxLimit)) continue;
 
                     // if we are not on the current cell
                     if( idxX || idxY || idxZ )
@@ -1030,19 +1029,19 @@ public:
      */
     int getLeafsNeighbors(ContainerClass* inNeighbors[27], const std::array<int,3>& center, const int inLevel){
         memset( inNeighbors, 0 , 27 * sizeof(ContainerClass*));
-        const int boxLimite = FMath::pow2(inLevel);
+        const int boxLimit(1 << inLevel);
 
         int idxNeighbors = 0;
 
         // We test all cells around
         for(int idxX = -1 ; idxX <= 1 ; ++idxX){
-            if(!Between(center[0] + idxX,0,boxLimite)) continue;
+            if(!Between(center[0] + idxX,0,boxLimit)) continue;
 
             for(int idxY = -1 ; idxY <= 1 ; ++idxY){
-                if(!Between(center[1] + idxY,0,boxLimite)) continue;
+                if(!Between(center[1] + idxY,0,boxLimit)) continue;
 
                 for(int idxZ = -1 ; idxZ <= 1 ; ++idxZ){
-                    if(!Between(center[2] + idxZ,0,boxLimite)) continue;
+                    if(!Between(center[2] + idxZ,0,boxLimit)) continue;
 
                     // if we are not on the current cell
                     if( idxX || idxY || idxZ ){
@@ -1071,17 +1070,17 @@ public:
     int getLeafsNeighbors(ContainerClass* inNeighbors[26], int inNeighborPositions[26],
                           const std::array<int,3>& center, const int inLevel)
         {
-        const int boxLimite = FMath::pow2(inLevel);
+        const int boxLimit(1 << inLevel);
         int idxNeighbors(0);
         // We test all cells around
         for(int idxX = -1 ; idxX <= 1 ; ++idxX){
-            if(!Between(center[0] + idxX,0,boxLimite)) continue;
+            if(!Between(center[0] + idxX,0,boxLimit)) continue;
 
             for(int idxY = -1 ; idxY <= 1 ; ++idxY){
-                if(!Between(center[1] + idxY,0,boxLimite)) continue;
+                if(!Between(center[1] + idxY,0,boxLimit)) continue;
 
                 for(int idxZ = -1 ; idxZ <= 1 ; ++idxZ){
-                    if(!Between(center[2] + idxZ,0,boxLimite)) continue;
+                    if(!Between(center[2] + idxZ,0,boxLimit)) continue;
 
                     // if we are not on the current cell
                     if( idxX || idxY || idxZ ){
