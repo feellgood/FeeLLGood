@@ -42,6 +42,21 @@ static void error(const char *message)
     exit(1);
     }
 
+// Read an axis: X, Y or Z (default Z if the node is undefined). The key is used in the error
+// message.
+static Nodes::index readAxis(const YAML::Node &node, const std::string &key)
+    {
+    std::string axis = node.as<std::string>("Z");
+    if (axis.length() != 1 || axis[0] < 'X' || axis[0] > 'Z')
+        { error((key + " should be X, Y or Z.").c_str()); }
+    switch (axis[0])
+        {
+        case 'X': return Nodes::IDX_X;
+        case 'Y': return Nodes::IDX_Y;
+        default: return Nodes::IDX_Z;
+        }
+    }
+
 // Conditionally assign a variable if the node is defined and scalar.
 template<typename T>
 static bool assign(T &var, const YAML::Node &node)
@@ -353,6 +368,24 @@ void Settings::toYaml()
             }
         std::cout << "  threshold: " << threshold << "\n";
         }
+    std::cout << "absorbing_ends:\n";
+    std::cout << "  enable: " << str(absorb.enable) << "\n";
+    if (absorb.enable)
+        {
+        std::cout << "  axis: " << "XYZ"[absorb.axis] << "\n";
+        std::cout << "  length: " << absorb.length << "\n";
+        std::cout << "  alpha_max: " << absorb.alpha_max << "\n";
+        std::cout << "  regions:";
+        if (absorb.regions.empty())
+            { std::cout << '\n'; }
+        else
+            {
+            std::cout << " [";
+            for (unsigned int i = 0; i < absorb.regions.size(); i++)
+                { std::cout << (i ? ", " : "") << absorb.regions[i]; }
+            std::cout << "]\n";
+            }
+        }
     std::cout << "Bext: ";
     if (field_type == R4toR3)
         { std::cout << "\n  space: " << str(sB_space, 1) << "\n  time: " << str(sB_time, 1) << '\n'; }
@@ -601,17 +634,41 @@ void Settings::read(YAML::Node yaml)
     if (recentering && !recentering.IsNull())
         {
         assign(recenter, recentering["enable"]);
-        std::string direction = recentering["direction"].as<std::string>("Z");
-        if (direction.length() != 1 || direction[0] < 'X' || direction[0] > 'Z')
-            { error("recentering.direction should be X, Y or Z."); }
-        switch (direction[0])
-            {
-            case 'X': recentering_direction = IDX_X; break;
-            case 'Y': recentering_direction = IDX_Y; break;
-            case 'Z': recentering_direction = IDX_Z; break;
-            }
+        recentering_direction = readAxis(recentering["direction"], "recentering.direction");
         assign(threshold, recentering["threshold"]);
         }  // recentering
+
+    YAML::Node absorbing = yaml["absorbing_ends"];
+    if (absorbing && !absorbing.IsNull())
+        {
+        if (!absorbing.IsMap())
+            { error("absorbing_ends should be a map."); }
+        // the section is enabled by its presence, unless enable is given
+        if (!assign(absorb.enable, absorbing["enable"]))
+            { absorb.enable = true; }
+        absorb.axis = readAxis(absorbing["axis"], "absorbing_ends.axis");
+        assign(absorb.length, absorbing["length"]);
+        assign(absorb.alpha_max, absorbing["alpha_max"]);
+        YAML::Node regions = absorbing["regions"];
+        if (regions)
+            {
+            absorb.regions.clear();
+            if (regions.IsScalar())  // a single region, as a sequence of one element
+                { absorb.regions.push_back(regions.as<std::string>()); }
+            else if (!regions.IsNull())
+                {
+                if (!regions.IsSequence())
+                    {
+                    error("absorbing_ends.regions should be a volume region or a sequence of "
+                          "volume regions.");
+                    }
+                for (auto it = regions.begin(); it != regions.end(); ++it)
+                    { absorb.regions.push_back(it->as<std::string>()); }
+                }
+            }
+        if (absorb.enable && !(absorb.length > 0))
+            { error("absorbing_ends.length should be positive."); }
+        }  // absorbing_ends
 
     YAML::Node field = yaml["Bext"];
     if (field && !field.IsNull())
