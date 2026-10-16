@@ -47,13 +47,21 @@ void prm::infos(void)
 Eigen::Matrix<double,NPI,1> Tetra::calc_alpha_eff(const double dt, const double alpha,
                                                       Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff)
     {
+    return calc_alpha_eff(dt, Eigen::Matrix<double,NPI,1>::Constant(alpha), uHeff);
+    }
+
+Eigen::Matrix<double,NPI,1> Tetra::calc_alpha_eff(const double dt,
+                                                      const Eigen::Ref<const Eigen::Matrix<double,NPI,1>> alpha_g,
+                                                      Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff)
+    {
     Eigen::Matrix<double,NPI,1> a_eff;
-    a_eff.setConstant(alpha);
     const double r = 0.1;  // what is that constant, where does it come from ?
-    const double M = 2. * alpha * r / dt;
 
     for(int npi=0;npi<NPI;npi++)
         {
+        const double alpha = alpha_g(npi);
+        const double M = 2. * alpha * r / dt;
+        a_eff(npi) = alpha;
         double h = uHeff(npi);
         if (h > 0.)
             {
@@ -145,7 +153,8 @@ Eigen::Matrix<double,N,1> Tet::calcOffDiagBlock(const Nodes::index idx) const
     return result;
     }
 
-void Tet::add_drift_BE(const double alpha, const double s_dt, const double Vdrift,
+void Tet::add_drift_BE(const Eigen::Ref<const Eigen::Matrix<double,NPI,1>> alpha,
+                       const double s_dt, const double Vdrift,
                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> U,
                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> V, 
                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUd_,
@@ -158,8 +167,8 @@ void Tet::add_drift_BE(const double alpha, const double s_dt, const double Vdrif
         {
         for (int i = 0; i < N; i++)
             {
-            interim.col(i) = a[i][npi]*( alpha*dUd_.col(npi) + U.col(npi).cross(dUd_.col(npi))
-                    + s_dt*(alpha*dVd_.col(npi) + U.col(npi).cross(dVd_.col(npi))
+            interim.col(i) = a[i][npi]*( alpha(npi)*dUd_.col(npi) + U.col(npi).cross(dUd_.col(npi))
+                    + s_dt*(alpha(npi)*dVd_.col(npi) + U.col(npi).cross(dVd_.col(npi))
                         + V.col(npi).cross(dUd_.col(npi))) );
             }
         BE += Vdrift*weight[npi]*interim;
@@ -220,11 +229,20 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
                      const std::function< Eigen::Matrix<double,DIM,NPI> (void)>& calc_Hext,
                      const Nodes::index idx_dir, double Vdrift)
     {
-    const double alpha = param.alpha_LLG;
     const double Ms = param.Ms;
     const double Abis = 2.0 * param.A / (mu0*Ms);
     const double dt = prm_t.get_dt();
     const double s_dt = THETA * dt;  // reduced time step, theta from theta scheme in config.h.in
+
+    // damping at the Gauss points: alpha_LLG of the region, increased in the absorbing ends
+    Eigen::Matrix<double,NPI,1> alpha;
+    alpha.setConstant(param.alpha_LLG);
+    if (param.absorb.enable)
+        {
+        const Eigen::Matrix<double,DIM,NPI> gauss = getPtGauss();
+        for (int npi = 0; npi < NPI; npi++)
+            { alpha(npi) = param.absorb.alpha(param.alpha_LLG, gauss(param.absorb.axis, npi)); }
+        }
 
     /*-------------------- INTERPOLATION --------------------*/
     Eigen::Matrix<double,DIM,NPI> U,dUdx,dUdy,dUdz;
