@@ -5,7 +5,6 @@
 #include <functional>
 
 #include "./FSubOctree.hpp"
-#include "./FTreeCoordinate.hpp"
 #include "../Utils/FGlobal.hpp"
 #include "../Utils/FPoint.hpp"
 #include "../Utils/FMath.hpp"
@@ -24,8 +23,6 @@
  * @endcode
  *
  * Particles and cells has to respect the Abstract class definition.
- * Particle must extend {FExtendPosition}
- * Cell must extend to proposes accessors to FTreeCoordinate and MortonIndex.
  * If the octree as an height H, then it goes from 0 to H-1
  * at level 0 the space is not split
  */
@@ -96,6 +93,54 @@ protected:
      * */
     bool Between(const FReal inValue, const FReal inMin, const FReal inMax) const
         { return ( inMin <= inValue && inValue < inMax ); }
+
+    /**
+     * return morton index from i_X,i_Y,i_Z  indices
+     * */
+    MortonIndex computeMortonIndex(const int i_X,const int i_Y,const int i_Z) const
+        {
+        MortonIndex index = 0x0LL;
+        MortonIndex mask = 0x1LL;
+        // the order is xyz.xyz...
+        MortonIndex mx = i_X << 2;
+        MortonIndex my = i_Y << 1;
+        MortonIndex mz = i_Z;
+
+        while( (mask <= mz) || ((mask << 1) <= my) || ((mask << 2) <= mx))
+            {
+            index |= (mz & mask);
+            mask <<= 1;
+            index |= (my & mask);
+            mask <<= 1;
+            index |= (mx & mask);
+            mask <<= 1;
+
+            mz <<= 2;
+            my <<= 2;
+            mx <<= 2;
+            }
+        return index;
+        }
+
+    /**
+     * compute positions from Morton index
+     * */
+    void computePositionsFromMorton(const MortonIndex inIndex,int &i_X,int &i_Y,int &i_Z)
+        {
+        MortonIndex mask = 0x1LL;
+        i_X=0;
+        i_Y=0;
+        i_Z=0;
+        MortonIndex idx(inIndex);
+        while(idx >= mask) {
+            i_Z |= int(idx & mask);
+            idx >>= 1;
+            i_Y |= int(idx & mask);
+            idx >>= 1;
+            i_X |= int(idx & mask);
+            mask <<= 1;
+        }
+    }
 
 public:
     /**
@@ -762,27 +807,24 @@ public:
      * @return the number of neighbors
      */
     int getNeighborsNoBrothers(CellClass* inNeighbors[26], const MortonIndex inIndex, const int inLevel) const {
-        FTreeCoordinate center;
-        center.setPositionFromMorton(inIndex);
-
+        int c_X,c_Y,c_Z;//center
+        computePositionsFromMorton(inIndex,c_X,c_Y,c_Z);
         const int boxLimite = FMath::pow2(inLevel);
-
         int idxNeighbors = 0;
 
         // We test all cells around
         for(int idxX = -1 ; idxX <= 1 ; ++idxX){
-            if(!Between(center.getX() + idxX,0,boxLimite)) continue;
+            if(!Between(c_X + idxX,0,boxLimite)) continue;
 
             for(int idxY = -1 ; idxY <= 1 ; ++idxY){
-                if(!Between(center.getY() + idxY,0,boxLimite)) continue;
+                if(!Between(c_Y + idxY,0,boxLimite)) continue;
 
                 for(int idxZ = -1 ; idxZ <= 1 ; ++idxZ){
-                    if(!Between(center.getZ() + idxZ,0,boxLimite)) continue;
+                    if(!Between(c_Z + idxZ,0,boxLimite)) continue;
 
                     // if we are not on the current cell
                     if( !(!idxX && !idxY && !idxZ) ){
-                        const FTreeCoordinate other(center.getX() + idxX,center.getY() + idxY,center.getZ() + idxZ);
-                        const MortonIndex mortonOther = other.getMortonIndex();
+                        const MortonIndex mortonOther = computeMortonIndex(c_X + idxX,c_Y + idxY,c_Z + idxZ);
                         // if not a brother
                         if( mortonOther>>3 != inIndex>>3 ){
                             // get cell
@@ -860,8 +902,10 @@ public:
                     // if we are not on the current cell
                     if( idxX || idxY || idxZ )//( neighSeparation<1 || idxX || idxY || idxZ )
                         {
-                        const FTreeCoordinate otherParent(parentCellX + idxX,parentCellY + idxY,parentCellZ + idxZ);
-                        const MortonIndex mortonOtherParent = otherParent.getMortonIndex() << 3;
+                        int p_X = parentCellX + idxX;
+                        int p_Y = parentCellY + idxY;
+                        int p_Z = parentCellZ + idxZ;
+                        const MortonIndex mortonOtherParent = computeMortonIndex(p_X,p_Y,p_Z) << 3;
                         // Get child
                         CellClass** const cells = getCellPt(mortonOtherParent, inLevel);
 
@@ -870,9 +914,9 @@ public:
                             // For each child
                             for(int idxCousin = 0 ; idxCousin < 8 ; ++idxCousin){
                                 if(cells[idxCousin]){
-                                    const int xdiff = ((otherParent.getX()<<1) | ( (idxCousin>>2) & 1)) - workingCell[0];
-                                    const int ydiff = ((otherParent.getY()<<1) | ( (idxCousin>>1) & 1)) - workingCell[1];
-                                    const int zdiff = ((otherParent.getZ()<<1) | (idxCousin&1)) - workingCell[2];
+                                    const int xdiff = ((p_X<<1) | ( (idxCousin>>2) & 1)) - workingCell[0];
+                                    const int ydiff = ((p_Y<<1) | ( (idxCousin>>1) & 1)) - workingCell[1];
+                                    const int zdiff = ((p_Z<<1) | (idxCousin&1)) - workingCell[2];
 
                                     // Test if it is a direct neighbor
                                     if(abs(xdiff) > neighSeparation || abs(ydiff) > neighSeparation || abs(zdiff) > neighSeparation){
@@ -925,8 +969,10 @@ public:
                     // if we are not on the current cell
                     if( idxX || idxY || idxZ )
                         {
-                        const FTreeCoordinate otherParent(parentCellX + idxX,parentCellY + idxY,parentCellZ + idxZ);
-                        const MortonIndex mortonOtherParent = otherParent.getMortonIndex() << 3;
+                        int p_X = parentCellX + idxX;
+                        int p_Y = parentCellY + idxY;
+                        int p_Z = parentCellZ + idxZ;
+                        const MortonIndex mortonOtherParent = computeMortonIndex(p_X,p_Y,p_Z) << 3;
                         // Get child
                         CellClass** const cells = getCellPt(mortonOtherParent, inLevel);
 
@@ -935,9 +981,9 @@ public:
                             // For each child
                             for(int idxCousin = 0 ; idxCousin < 8 ; ++idxCousin){
                                 if(cells[idxCousin]){
-                                    const int xdiff = ((otherParent.getX()<<1) | ( (idxCousin>>2) & 1)) - workingCell[0];
-                                    const int ydiff = ((otherParent.getY()<<1) | ( (idxCousin>>1) & 1)) - workingCell[1];
-                                    const int zdiff = ((otherParent.getZ()<<1) | (idxCousin&1)) - workingCell[2];
+                                    const int xdiff = ((p_X<<1) | ( (idxCousin>>2) & 1)) - workingCell[0];
+                                    const int ydiff = ((p_Y<<1) | ( (idxCousin>>1) & 1)) - workingCell[1];
+                                    const int zdiff = ((p_Z<<1) | (idxCousin&1)) - workingCell[2];
 
                                     // Test if it is a direct neighbor
                                     if(abs(xdiff) > neighSeparation || abs(ydiff) > neighSeparation || abs(zdiff) > neighSeparation){
@@ -1003,8 +1049,7 @@ public:
 
                     // if we are not on the current cell
                     if( idxX || idxY || idxZ ){
-                        const FTreeCoordinate other(center[0] + idxX,center[1] + idxY,center[2] + idxZ);
-                        const MortonIndex mortonOther = other.getMortonIndex();
+                        const MortonIndex mortonOther = computeMortonIndex(center[0] + idxX,center[1] + idxY,center[2] + idxZ);
                         // get cell
                         ContainerClass* const leaf = getLeafSrc(mortonOther);
                         // add to list if not null
@@ -1043,8 +1088,7 @@ public:
 
                     // if we are not on the current cell
                     if( idxX || idxY || idxZ ){
-                        const FTreeCoordinate other(center[0] + idxX,center[1] + idxY,center[2] + idxZ);
-                        const MortonIndex mortonOther = other.getMortonIndex();
+                        const MortonIndex mortonOther = computeMortonIndex(center[0] + idxX,center[1] + idxY,center[2] + idxZ);
                         // get cell
                         ContainerClass* const leaf = getLeafSrc(mortonOther);
                         // add to list if not null
