@@ -6,19 +6,19 @@ The main idea is to introduce an absorbing region in which the damping factor of
 varies from its physical value $\alpha_0 = 0.05$ to its overcritical value $\alpha_{\max} = 1$
 according to
 ```math
-\alpha(z) = \alpha_0 + (\alpha_{\max} - \alpha_0)\,
-  \sin^2\!\left(\frac{\pi}{2}\,\frac{z - z_0}{L_{\text{abs}}}\right),
+\alpha(z) = \alpha_0 + (\alpha_{\max} - \alpha_0)
+  \sin^2\!\left(\frac{\pi}{2}\frac{z - z_0}{L_{\text{abs}}}\right),
 ```
 where $z_0$ is the position at which the absorbing region begins and $L_{\text{abs}}$ is its width.
 Note that the slope $d\alpha/dz$ vanishes at $z_0$ and at $z_0 + L_{\text{abs}}$.
 
 To qualitatively examine possible reflections caused by the absorbing region, I performed two
-simulations on wires with a diameter of $8\,\mathrm{nm}$ and lengths $L = 400\,\mathrm{nm}$ and
-$L = 800\,\mathrm{nm}$, taking $L_{\text{abs}} = 50\,\mathrm{nm}$ at each end. At long times I
+simulations on wires with a diameter of 8 nm and lengths $L = 400$ nm and
+$L = 800$ nm, taking $L_{\text{abs}} = 50$ nm at each end. At long times I
 observe the following distributions.
 
 The initial configuration was a sharp step-like profile: $m_z = 1$ everywhere except for
-$z \in [-100\,\mathrm{nm}, 100\,\mathrm{nm}]$, where $m_x = 1$. The other components were initially
+$z \in [-100, 100]$ nm, where $m_x = 1$. The other components were initially
 set to zero.
 
 Good news: according to the figures below, the profiles seem to overlap in the non-absorbing
@@ -34,40 +34,40 @@ It would also be worth studying the effect of the absorption length $L_{\text{ab
 
 ### Figures
 
-The profiles are averaged over slices of $2\,\mathrm{nm}$ along $z$ ($z > 0$; they are symmetric).
-Grey: absorbing zone of the $400\,\mathrm{nm}$ wire.
+The profiles are averaged over slices of 2 nm along $z$ ($z > 0$; they are symmetric).
+Grey: absorbing zone of the 400 nm wire.
 
 ![mx, iteration 55000](figures/absorbing_mx_iter55000.png)
 
-*$x$ component of magnetization for the wires of lengths $L = 400\,\mathrm{nm}$ and
-$L = 800\,\mathrm{nm}$.*
+*$`x`$ component of magnetization for the wires of lengths $`L = 400`$ nm and
+$`L = 800`$ nm.*
 
 ![my, iteration 55000](figures/absorbing_my_iter55000.png)
 
-*$y$ component of magnetization for the wires of lengths $L = 400\,\mathrm{nm}$ and
-$L = 800\,\mathrm{nm}$.*
+*$`y`$ component of magnetization for the wires of lengths $`L = 400`$ nm and
+$`L = 800`$ nm.*
 
 ![mz, iteration 55000](figures/absorbing_mz_iter55000.png)
 
-*$z$ component of magnetization for the wires of lengths $L = 400\,\mathrm{nm}$ and
-$L = 800\,\mathrm{nm}$.*
+*$`z`$ component of magnetization for the wires of lengths $`L = 400`$ nm and
+$`L = 800`$ nm.*
 
 Even at long times, no qualitative reflection of spin waves at the wire ends is observed.
 
 ![mx, iteration 120000](figures/absorbing_mx_iter120000.png)
 
-*$x$ component of magnetization for the wires of lengths $L = 400\,\mathrm{nm}$ and
-$L = 800\,\mathrm{nm}$.*
+*$`x`$ component of magnetization for the wires of lengths $`L = 400`$ nm and
+$`L = 800`$ nm.*
 
 ![my, iteration 120000](figures/absorbing_my_iter120000.png)
 
-*$y$ component of magnetization for the wires of lengths $L = 400\,\mathrm{nm}$ and
-$L = 800\,\mathrm{nm}$.*
+*$`y`$ component of magnetization for the wires of lengths $`L = 400`$ nm and
+$`L = 800`$ nm.*
 
 ![mz, iteration 120000](figures/absorbing_mz_iter120000.png)
 
-*$z$ component of magnetization for the wires of lengths $L = 400\,\mathrm{nm}$ and
-$L = 800\,\mathrm{nm}$.*
+*$`z`$ component of magnetization for the wires of lengths $`L = 400`$ nm and
+$`L = 800`$ nm.*
 
 ## Implementation in feeLLGood
 
@@ -88,8 +88,8 @@ of each of them: if $[z_{\min}, z_{\max}]$ is the extent of this union along the
 the nodes of the tetrahedrons of the selected regions, the zones are
 $[z_{\min}, z_{\min} + L_{\text{abs}}]$ and $[z_{\max} - L_{\text{abs}}, z_{\max}]$, and in each one
 ```math
-\alpha = \alpha_0 + (\alpha_{\max} - \alpha_0)\,
-  \sin^2\!\left(\frac{\pi}{2}\,\frac{s}{L_{\text{abs}}}\right),
+\alpha = \alpha_0 + (\alpha_{\max} - \alpha_0)
+  \sin^2\!\left(\frac{\pi}{2}\frac{s}{L_{\text{abs}}}\right),
 ```
 in the selected regions only, where $s$ is the depth in the zone ($s = 0$ at its inner boundary,
 $s = L_{\text{abs}}$ at the end of the union) and $\alpha_0$ the `alpha_LLG` of the region. The zones and their bounds are printed
@@ -104,21 +104,21 @@ those obtained before this feature.
 
 ### Validation
 
-The study above was repeated with feeLLGood on wires of diameter $8\,\mathrm{nm}$ and lengths
-$L = 400\,\mathrm{nm}$ and $L = 800\,\mathrm{nm}$ (mesh size $2.5\,\mathrm{nm}$, $J_s = 1.0053$ T,
+The study above was repeated with feeLLGood on wires of diameter 8 nm and lengths
+$L = 400$ nm and $L = 800$ nm (mesh size 2.5 nm, $J_s = 1.0053$ T,
 $A = 1.3 \times 10^{-11}$ J/m, $\alpha_0 = 0.05$, `suppress_charges` on the end faces), with
-$L_{\text{abs}} = 50\,\mathrm{nm}$ and $\alpha_{\max} = 1$, and on the $400\,\mathrm{nm}$ wire
+$L_{\text{abs}} = 50$ nm and $\alpha_{\max} = 1$, and on the 400 nm wire
 without absorbing ends. The initial magnetization is the step-like profile of the study.
-The profiles are averaged over slices of $2.5\,\mathrm{nm}$ along $z$.
+The profiles are averaged over slices of 2.5 nm along $z$.
 
 ![mx, feeLLGood](figures/absorbing_feellgood_mx.png)
 
-*$x$ component of magnetization along the wires at $t = 0.1$ ns and $t = 0.3$ ns ($z > 0$; the
-profiles are symmetric). Grey: absorbing zone of the $400\,\mathrm{nm}$ wire.*
+*$`x`$ component of magnetization along the wires at $`t = 0.1`$ ns and $`t = 0.3`$ ns ($`z > 0`$; the
+profiles are symmetric). Grey: absorbing zone of the 400 nm wire.*
 
-Between the core and the absorbing zone of the short wire ($100 < |z| < 150\,\mathrm{nm}$), the
+Between the core and the absorbing zone of the short wire ($100 < |z| < 150$ nm), the
 reflected waves make the short wire differ from the long one. The rms difference to the
-$800\,\mathrm{nm}$ wire, $\sqrt{\langle |\mathbf{m} - \mathbf{m}_{800}|^2 \rangle}$, is:
+800 nm wire, $\sqrt{\langle |\mathbf{m} - \mathbf{m}_{800}|^2 \rangle}$, is:
 
 | $t$ (ns) | $L = 400$ nm, absorbing ends | $L = 400$ nm, no absorbing ends |
 |---|---|---|
@@ -128,8 +128,8 @@ $800\,\mathrm{nm}$ wire, $\sqrt{\langle |\mathbf{m} - \mathbf{m}_{800}|^2 \rangl
 | 0.4 | 0.009 | 0.016 |
 | 0.5 | 0.012 | 0.017 |
 
-The absorbing ends divide the difference by 1.4 to 3. At later times, both $400\,\mathrm{nm}$
-wires drift away from the $800\,\mathrm{nm}$ one in the core ($|z| < 100\,\mathrm{nm}$), with or
+The absorbing ends divide the difference by 1.4 to 3. At later times, both 400 nm
+wires drift away from the 800 nm one in the core ($|z| < 100$ nm), with or
 without absorbing ends: this drift of the central dynamics, insensitive to the ends, is not a
 reflection.
 
