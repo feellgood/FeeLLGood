@@ -39,7 +39,8 @@ void LinAlgebra::prepareElements(const Eigen::Vector3d &Hext /**< [in] applied f
                   [this, &calc_Hext, &t_prm](Tetra::Tet &tet)
                   {
                   if (msh->isMagnetic(tet))
-                      { tet.integrales(paramTet[tet.idxPrm], t_prm, calc_Hext, idx_dir, DW_vz/gamma0); }
+                      { tet.integrales(paramTet[tet.idxPrm], t_prm, calc_Hext, idx_dir, DW_vz/gamma0,
+                                     absorb); }
                   });
 
     std::for_each(EXEC_POL, msh->tri.begin(), msh->tri.end(),
@@ -67,7 +68,8 @@ void LinAlgebra::prepareElements(const double A_Hext /**< [in] amplitude applied
                           Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> H = A_Hext * sp_H;
                           return H;
                           };
-                      tet.integrales(paramTet[tet.idxPrm], t_prm, calc_Hext, idx_dir, DW_vz/gamma0);
+                      tet.integrales(paramTet[tet.idxPrm], t_prm, calc_Hext, idx_dir, DW_vz/gamma0,
+                                     absorb);
                       }
                   });
 

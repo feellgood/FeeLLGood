@@ -450,7 +450,7 @@ void mesh::setAbsorbingEnds()
                       << " < alpha_LLG = " << p.alpha_LLG << " of region " << p.regName
                       << " (damping decreasing towards the ends).\n";
             }
-        p.absorb = ab;
+        p.absorbing = true;
         regionNames += (regionNames.empty() ? "" : ", ") + p.regName;
         }
     if (settings.verbose)

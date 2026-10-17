@@ -107,8 +107,9 @@ struct prm
 
     double volume = 0; /**< total volume of the region */
 
-    /** absorbing ends: enabled only for the regions selected in absorbing_ends, set by the mesh */
-    AbsorbingEnds absorb;
+    /** true if the region is selected in absorbing_ends (set by the mesh): its damping is then
+     * modified by the absorbing ends of the settings, passed to Tet::integrales */
+    bool absorbing = false;
 
     void infos(void);  /**< print the struct parameters */
     };
@@ -295,11 +296,12 @@ public:
             const Eigen::Ref<const Eigen::Matrix<double,Nodes::DIM,NPI>> V/**< [in] */) const;
 
     /** computes the integral contribution of the tetrahedron to the evolution of the magnetization
-     * calc_Hext is a function that returns external H field defined on gauss points
+     * calc_Hext is a function that returns external H field defined on gauss points, absorb are
+     * the absorbing ends of the settings, used if param.absorbing is true
      */
     void integrales( const Tetra::prm &param, const timing &prm_t,
                     const std::function< Eigen::Matrix<double,Nodes::DIM,NPI> (void)>& calc_Hext,
-                    Nodes::index idx_dir, double Vdrift);
+                    Nodes::index idx_dir, double Vdrift, const AbsorbingEnds &absorb);
 
     /** exchange energy of the tetrahedron */
     double exchangeEnergy(const Tetra::prm &param,

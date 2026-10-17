@@ -227,7 +227,7 @@ Eigen::Matrix<double,Nodes::DIM,NPI> Tet::Hst_order2_contribution(const Eigen::R
 
 void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
                      const std::function< Eigen::Matrix<double,DIM,NPI> (void)>& calc_Hext,
-                     const Nodes::index idx_dir, double Vdrift)
+                     const Nodes::index idx_dir, double Vdrift, const AbsorbingEnds &absorb)
     {
     const double Ms = param.Ms;
     const double Abis = 2.0 * param.A / (mu0*Ms);
@@ -237,11 +237,11 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     // damping at the Gauss points: alpha_LLG of the region, increased in the absorbing ends
     Eigen::Matrix<double,NPI,1> alpha;
     alpha.setConstant(param.alpha_LLG);
-    if (param.absorb.enable)
+    if (param.absorbing)
         {
         const Eigen::Matrix<double,DIM,NPI> gauss = getPtGauss();
         for (int npi = 0; npi < NPI; npi++)
-            { alpha(npi) = param.absorb.alpha(param.alpha_LLG, gauss(param.absorb.axis, npi)); }
+            { alpha(npi) = absorb.alpha(param.alpha_LLG, gauss(absorb.axis, npi)); }
         }
 
     /*-------------------- INTERPOLATION --------------------*/

@@ -449,8 +449,7 @@ private:
 
     /** absorbing ends: resolve the selected volume regions, compute the extent of their union along
      * the axis (the zones are at the ends of this union, not at the ends of each region),
-     * check that the two zones do not overlap, and copy the absorbing ends in the parameters of the
-     * selected regions */
+     * check that the two zones do not overlap, and mark the selected regions as absorbing */
     void setAbsorbingEnds();
     }; // end class mesh
     }  // end namespace Mesh
