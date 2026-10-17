@@ -65,8 +65,8 @@ class Settings(object):
         }
 
     ## \brief define absorbing ends
-    # along axis ("X", "Y" or "Z"), over length (in meters) at each end of the volume regions
-    # (default: all of them), the damping increases up to alpha_max
+    # along axis ("X", "Y" or "Z"), over length (in meters) at each end of the union of the
+    # selected volume regions (default: all of them), the damping increases up to alpha_max
     def absorbingEnds(self,axis,length,alpha_max=1.0,regions=None):
         self.mySets["absorbing_ends"] = {
             "enable": True,

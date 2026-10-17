@@ -408,7 +408,8 @@ void mesh::setAbsorbingEnds()
         selected[it - settings.paramTetra.begin()] = true;
         }
 
-    // extent of the selected regions along the axis
+    // extent of the union of the selected regions along the axis: the zones are at the ends of this
+    // union, not at the ends of each region
     ab.lo = INFINITY;
     ab.hi = -INFINITY;
     for (int r = 0; r < nbRegions; r++)

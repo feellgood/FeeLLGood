@@ -14,11 +14,12 @@ them (settings: absorbing_ends, see dev-notes/spin_waves_absorbing_damping_facto
 #include "node.h"
 
 /** \struct AbsorbingEnds
-Along an axis, over a length \f$ L \f$ at each end of the selected volume regions, the damping goes
-from the physical value \f$ \alpha_0 \f$ of the region to \f$ \alpha_{\max} \f$:
+Along an axis, over a length \f$ L \f$ at each end of the union of the selected volume regions (not
+at the ends of each of them), the damping goes from the physical value \f$ \alpha_0 \f$ of the region
+to \f$ \alpha_{\max} \f$:
 \f$ \alpha = \alpha_0 + (\alpha_{\max}-\alpha_0) \sin^2\left(\frac{\pi}{2}\frac{s}{L}\right) \f$,
 where \f$ s \f$ is the depth in the zone (0 at its inner boundary, \f$ L \f$ at the end of the
-regions), so that \f$ d\alpha/ds = 0 \f$ at both boundaries of the zone. The damping is evaluated at
+union), so that \f$ d\alpha/ds = 0 \f$ at both boundaries of the zone. The damping is evaluated at
 the Gauss points of the LLG assembly.
 */
 struct AbsorbingEnds
@@ -32,16 +33,18 @@ struct AbsorbingEnds
     /** length of each absorbing zone, in meters */
     double length = 0;
 
-    /** damping at the ends of the regions */
+    /** damping at the two ends of the union of the selected regions */
     double alpha_max = 1;
 
     /** names of the selected volume regions (empty: all the volume regions) */
     std::vector<std::string> regions;
 
-    /** lower bound of the selected regions along the axis, in meters (set from the mesh) */
+    /** lower bound of the union of the selected regions along the axis, in meters (set from the
+     * mesh) */
     double lo = 0;
 
-    /** upper bound of the selected regions along the axis, in meters (set from the mesh) */
+    /** upper bound of the union of the selected regions along the axis, in meters (set from the
+     * mesh) */
     double hi = 0;
 
     /** damping at the coordinate x (along the axis, in meters) of a region of damping alpha0 */

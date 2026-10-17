@@ -46,15 +46,16 @@ absorbing_ends:
 ```
 In Python, `Settings.absorbingEnds(axis, length, alpha_max, regions)` fills this section.
 
-The zones are placed at the ends of the selected volume regions: if $[z_{\min}, z_{\max}]$ is their
-extent along the axis, computed from the nodes of their tetrahedrons, the zones are
+The zones are placed at the two ends of the union of the selected volume regions, not at the ends
+of each of them: if $[z_{\min}, z_{\max}]$ is the extent of this union along the axis, computed from
+the nodes of the tetrahedrons of the selected regions, the zones are
 $[z_{\min}, z_{\min} + L_{\text{abs}}]$ and $[z_{\max} - L_{\text{abs}}, z_{\max}]$, and in each one
 ```math
 \alpha = \alpha_0 + (\alpha_{\max} - \alpha_0)\,
   \sin^2\!\left(\frac{\pi}{2}\,\frac{s}{L_{\text{abs}}}\right),
 ```
-where $s$ is the depth in the zone ($s = 0$ at its inner boundary, $s = L_{\text{abs}}$ at the end
-of the regions) and $\alpha_0$ the `alpha_LLG` of the region. The zones and their bounds are printed
+in the selected regions only, where $s$ is the depth in the zone ($s = 0$ at its inner boundary,
+$s = L_{\text{abs}}$ at the end of the union) and $\alpha_0$ the `alpha_LLG` of the region. The zones and their bounds are printed
 at start-up; feeLLGood stops if a listed region is unknown or if the two zones overlap
 ($2L_{\text{abs}} > z_{\max} - z_{\min}$), and warns if $\alpha_{\max} < \alpha_0$.
 

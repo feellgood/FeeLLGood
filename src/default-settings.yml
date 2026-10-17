@@ -210,7 +210,8 @@ recentering:
 
 # Absorbing ends, to absorb the spin waves reaching the ends of a wire
 # instead of reflecting them. Along ‘axis’, over ‘length’ at each end of
-# the volume regions, alpha_LLG increases up to alpha_max with the profile
+# the union of the selected volume regions (not at the ends of each of
+# them), alpha_LLG increases up to alpha_max with the profile
 #   alpha = alpha_LLG + (alpha_max - alpha_LLG) sin^2(pi/2 s/length),
 # s being the depth in the zone, so that the slope vanishes at both
 # boundaries of the zone. See dev-notes/spin_waves_absorbing_damping_factor.md.
@@ -226,11 +227,12 @@ absorbing_ends:
   # Length of each absorbing zone, in meters. Required when enabled.
   length:
 
-  # Damping at the ends of the regions.
+  # Damping at the two ends of the union of the selected regions.
   alpha_max: 1
 
-  # Volume regions whose ends absorb, and whose extent along the axis
-  # defines the zones. Empty means all the volume regions.
+  # Selected volume regions: the zones are at the two ends of their union
+  # along the axis, and the damping is modified in these regions only.
+  # Empty means all the volume regions.
   regions: []
 
 # Expressions of the applied field, as a function of t, the time in
