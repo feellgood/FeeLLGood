@@ -232,7 +232,8 @@ absorbing_ends:
 
   # Selected volume regions: the zones are at the two ends of their union
   # along the axis, and the damping is modified in these regions only.
-  # Empty means all the volume regions.
+  # Either a single region or a sequence of regions. Empty means all the
+  # volume regions.
   regions: []
 
 # Expressions of the applied field, as a function of t, the time in

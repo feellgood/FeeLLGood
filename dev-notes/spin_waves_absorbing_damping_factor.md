@@ -79,7 +79,7 @@ absorbing_ends:
   axis: Z            # axis of the wire: X, Y or Z
   length: 50e-9      # length L_abs of each absorbing zone, in meters
   alpha_max: 1       # damping at the ends of the regions (default 1)
-  regions: []        # volume regions whose ends absorb (default: all of them)
+  regions: []        # a volume region or a sequence of volume regions (default: all of them)
   enable: true       # default true when the section is present
 ```
 In Python, `Settings.absorbingEnds(axis, length, alpha_max, regions)` fills this section.

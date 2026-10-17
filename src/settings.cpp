@@ -42,7 +42,8 @@ static void error(const char *message)
     exit(1);
     }
 
-// Read an axis: X, Y or Z (default Z if the node is undefined). The key is used in the error message.
+// Read an axis: X, Y or Z (default Z if the node is undefined). The key is used in the error
+// message.
 static Nodes::index readAxis(const YAML::Node &node, const std::string &key)
     {
     std::string axis = node.as<std::string>("Z");
@@ -652,10 +653,15 @@ void Settings::read(YAML::Node yaml)
         if (regions)
             {
             absorb.regions.clear();
-            if (!regions.IsNull())
+            if (regions.IsScalar())  // a single region, as a sequence of one element
+                { absorb.regions.push_back(regions.as<std::string>()); }
+            else if (!regions.IsNull())
                 {
                 if (!regions.IsSequence())
-                    { error("absorbing_ends.regions should be a sequence of volume regions."); }
+                    {
+                    error("absorbing_ends.regions should be a volume region or a sequence of "
+                          "volume regions.");
+                    }
                 for (auto it = regions.begin(); it != regions.end(); ++it)
                     { absorb.regions.push_back(it->as<std::string>()); }
                 }

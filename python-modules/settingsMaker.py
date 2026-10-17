@@ -73,7 +73,7 @@ class Settings(object):
             "axis": axis,
             "length": length,
             "alpha_max": alpha_max,
-            "regions": regions if regions else []
+            "regions": regions if regions else []  # a region name or a list of region names
         }
 
     ## \brief create a new volume region
