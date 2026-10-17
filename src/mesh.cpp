@@ -453,8 +453,11 @@ void mesh::setAbsorbingEnds()
         p.absorb = ab;
         regionNames += (regionNames.empty() ? "" : ", ") + p.regName;
         }
-    const char axis = "XYZ"[ab.axis];
-    std::cout << "absorbing ends:    " << axis << " in [" << ab.lo << ", " << ab.lo + ab.length
-              << "] and [" << ab.hi - ab.length << ", " << ab.hi << "] m, alpha up to "
-              << ab.alpha_max << " (regions " << regionNames << ")\n";
+    if (settings.verbose)
+        {
+        const char axis = "XYZ"[ab.axis];
+        std::cout << "absorbing ends:    " << axis << " in [" << ab.lo << ", " << ab.lo + ab.length
+                  << "] and [" << ab.hi - ab.length << ", " << ab.hi << "] m, alpha up to "
+                  << ab.alpha_max << " (regions " << regionNames << ")\n";
+        }
     }

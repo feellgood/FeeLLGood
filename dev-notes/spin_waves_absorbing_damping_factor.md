@@ -93,7 +93,7 @@ $[z_{\min}, z_{\min} + L_{\text{abs}}]$ and $[z_{\max} - L_{\text{abs}}, z_{\max
 ```
 in the selected regions only, where $s$ is the depth in the zone ($s = 0$ at its inner boundary,
 $s = L_{\text{abs}}$ at the end of the union) and $\alpha_0$ the `alpha_LLG` of the region. The zones and their bounds are printed
-at start-up; feeLLGood stops if a listed region is unknown or if the two zones overlap
+at start-up in verbose mode; feeLLGood stops if a listed region is unknown or if the two zones overlap
 ($2L_{\text{abs}} > z_{\max} - z_{\min}$), and warns if $\alpha_{\max} < \alpha_0$.
 
 The damping is evaluated at each Gauss point of the LLG assembly (`Tet::integrales`), in the
