@@ -32,6 +32,43 @@ larger diameter, it will probably be necessary to use a diagonal damping tensor 
 
 It would also be worth studying the effect of the absorption length $L_{\text{abs}}$.
 
+### Figures
+
+The profiles are averaged over slices of $2\,\mathrm{nm}$ along $z$ ($z > 0$; they are symmetric).
+Grey: absorbing zone of the $400\,\mathrm{nm}$ wire.
+
+![mx, iteration 55000](figures/absorbing_mx_iter55000.png)
+
+*$x$ component of magnetization for the wires of lengths $L = 400\,\mathrm{nm}$ and
+$L = 800\,\mathrm{nm}$.*
+
+![my, iteration 55000](figures/absorbing_my_iter55000.png)
+
+*$y$ component of magnetization for the wires of lengths $L = 400\,\mathrm{nm}$ and
+$L = 800\,\mathrm{nm}$.*
+
+![mz, iteration 55000](figures/absorbing_mz_iter55000.png)
+
+*$z$ component of magnetization for the wires of lengths $L = 400\,\mathrm{nm}$ and
+$L = 800\,\mathrm{nm}$.*
+
+Even at long times, no qualitative reflection of spin waves at the wire ends is observed.
+
+![mx, iteration 120000](figures/absorbing_mx_iter120000.png)
+
+*$x$ component of magnetization for the wires of lengths $L = 400\,\mathrm{nm}$ and
+$L = 800\,\mathrm{nm}$.*
+
+![my, iteration 120000](figures/absorbing_my_iter120000.png)
+
+*$y$ component of magnetization for the wires of lengths $L = 400\,\mathrm{nm}$ and
+$L = 800\,\mathrm{nm}$.*
+
+![mz, iteration 120000](figures/absorbing_mz_iter120000.png)
+
+*$z$ component of magnetization for the wires of lengths $L = 400\,\mathrm{nm}$ and
+$L = 800\,\mathrm{nm}$.*
+
 ## Implementation in feeLLGood
 
 The absorbing ends are enabled by the section `absorbing_ends` of the settings, with the same keys
@@ -95,40 +132,6 @@ The absorbing ends divide the difference by 1.4 to 3. At later times, both $400\
 wires drift away from the $800\,\mathrm{nm}$ one in the core ($|z| < 100\,\mathrm{nm}$), with or
 without absorbing ends: this drift of the central dynamics, insensitive to the ends, is not a
 reflection.
-
-## Figures
-
-![mx](figures/absorbing_mx_color.png)
-
-*$x$ component of magnetization for the wires of lengths $L = 400\,\mathrm{nm}$ and
-$L = 800\,\mathrm{nm}$.*
-
-![my](figures/absorbing_my_color.png)
-
-*$y$ component of magnetization for the wires of lengths $L = 400\,\mathrm{nm}$ and
-$L = 800\,\mathrm{nm}$.*
-
-![mz](figures/absorbing_mz_color.png)
-
-*$z$ component of magnetization for the wires of lengths $L = 400\,\mathrm{nm}$ and
-$L = 800\,\mathrm{nm}$.*
-
-Even at long times, no qualitative reflection of spin waves at the wire ends is observed.
-
-![mx at long times](figures/absorbing_mx120000_color.png)
-
-*$x$ component of magnetization for the wires of lengths $L = 400\,\mathrm{nm}$ and
-$L = 800\,\mathrm{nm}$.*
-
-![my at long times](figures/absorbing_my120000_color.png)
-
-*$y$ component of magnetization for the wires of lengths $L = 400\,\mathrm{nm}$ and
-$L = 800\,\mathrm{nm}$.*
-
-![mz at long times](figures/absorbing_mz120000_color.png)
-
-*$z$ component of magnetization for the wires of lengths $L = 400\,\mathrm{nm}$ and
-$L = 800\,\mathrm{nm}$.*
 
 ## References
 
