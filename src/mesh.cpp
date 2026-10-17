@@ -446,7 +446,7 @@ void mesh::setAbsorbingEnds()
         Tetra::prm &p = settings.paramTetra[r];
         if (p.Ms > 0 && p.alpha_LLG > ab.alpha_max)
             {
-            std::cout << "Warning: absorbing_ends: alpha_max = " << ab.alpha_max
+            std::cerr << "Warning: absorbing_ends: alpha_max = " << ab.alpha_max
                       << " < alpha_LLG = " << p.alpha_LLG << " of region " << p.regName
                       << " (damping decreasing towards the ends).\n";
             }
