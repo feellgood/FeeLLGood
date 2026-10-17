@@ -8,6 +8,7 @@
 
 #include <set>
 
+#include "absorbing_ends.h"
 #include "triangle.h"
 #include "node.h"
 #include "time_integration.h"
@@ -105,6 +106,10 @@ struct prm
     double lsf;          /**< spin diffusion length in a metal (magnetic or not) m^1 */
 
     double volume = 0; /**< total volume of the region */
+
+    /** true if the region is selected in absorbing_ends (set by the mesh): its damping is then
+     * modified by the absorbing ends of the settings, passed to Tet::integrales */
+    bool absorbing = false;
 
     void infos(void);  /**< print the struct parameters */
     };
@@ -256,8 +261,10 @@ public:
     Eigen::Matrix<double,N,1> calcOffDiagBlock(const Nodes::index idx) const;
 
     /** add drift contribution due to eventual recentering to vectors BE, Vdrift is the drift
-     * velocity in reduced time (physical velocity divided by gamma0) */
-    void add_drift_BE(double alpha, double s_dt, double Vdrift,
+     * velocity in reduced time (physical velocity divided by gamma0), alpha is the damping at the
+     * Gauss points */
+    void add_drift_BE(const Eigen::Ref<const Eigen::Matrix<double,NPI,1>> alpha, double s_dt,
+                      double Vdrift,
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> V, 
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUd_,
@@ -289,11 +296,12 @@ public:
             const Eigen::Ref<const Eigen::Matrix<double,Nodes::DIM,NPI>> V/**< [in] */) const;
 
     /** computes the integral contribution of the tetrahedron to the evolution of the magnetization
-     * calc_Hext is a function that returns external H field defined on gauss points
+     * calc_Hext is a function that returns external H field defined on gauss points, absorb are
+     * the absorbing ends of the settings, used if param.absorbing is true
      */
     void integrales( const Tetra::prm &param, const timing &prm_t,
                     const std::function< Eigen::Matrix<double,Nodes::DIM,NPI> (void)>& calc_Hext,
-                    Nodes::index idx_dir, double Vdrift);
+                    Nodes::index idx_dir, double Vdrift, const AbsorbingEnds &absorb);
 
     /** exchange energy of the tetrahedron */
     double exchangeEnergy(const Tetra::prm &param,
@@ -367,6 +375,11 @@ private:
     /** to perform some second order corrections, an effective \f$ \alpha \f$ is computed here with
      * a piecewise formula, dt is the reduced time step */
     Eigen::Matrix<double,NPI,1> calc_alpha_eff(const double dt, const double alpha,
+                                               Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff);
+
+    /** same as above, with a damping alpha depending on the Gauss point (absorbing ends) */
+    Eigen::Matrix<double,NPI,1> calc_alpha_eff(const double dt,
+                                               const Eigen::Ref<const Eigen::Matrix<double,NPI,1>> alpha,
                                                Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff);
 
     /** returns Hst field on the NPI Gauss point(s) */
