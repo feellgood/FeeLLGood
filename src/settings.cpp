@@ -559,7 +559,7 @@ void Settings::read(YAML::Node yaml)
                 assign(NORMALIZE, ez, volume["ez"]);
                 p.e << ex, ey, ez;
                 if (!isOrthogonal(p.e.col(IDX_X), p.e.col(IDX_Y), p.e.col(IDX_Z), USER_TOL))
-                    { std::cout << "Warning: (ex, ey, ez) is not orthogonal.\n"; }
+                    { std::cerr << "Warning: (ex, ey, ez) is not orthogonal.\n"; }
                 assign(p.alpha_LLG, volume["alpha_LLG"]);
                 assign(p.sigma, volume["sigma"]);
                 assign(p.N0, volume["dens_state"]);
