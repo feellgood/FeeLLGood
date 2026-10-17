@@ -72,7 +72,8 @@ $`L = 800`$ nm.*
 ## Implementation in feeLLGood
 
 The absorbing ends are enabled by the section `absorbing_ends` of the settings, with the same keys
-as in st-feeLLGood:
+as in st-feeLLGood (but, as everywhere in the settings of feeLLGood, `axis` is case-sensitive:
+`X`, `Y` or `Z`):
 ```yaml
 absorbing_ends:
   axis: Z            # axis of the wire: X, Y or Z
