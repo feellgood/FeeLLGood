@@ -32,7 +32,9 @@ void electrostatSolver::infos(void) const
     std::cout << "Boundary conditions:\n";
     for (const Triangle::prm &p : paramTri)
         {
-        if (!std::isnan(p.jn))
+        if (p.jn_current_density)
+            { std::cout << "\tjn= current_density (reference 1 A/m^2)\n"; }
+        else if (!std::isnan(p.jn))
             { std::cout << "\tjn= " << p.jn << "\n"; }
         if (!std::isnan(p.V))
             { std::cout << "\tV= " << p.V << "\n"; }

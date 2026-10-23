@@ -42,6 +42,14 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** call solver and update spin diffusion solution, returns true if solver succeeded */
     bool compute(void);
 
+    /** factor of the electric sources at the time of the solve: current_density(t) if a surface
+     * region has `jn: current_density` (its jn being the reference 1 A/m^2), 1 otherwise. The
+     * electrokinetics being linear, the potential V0 is solved once with the jn of the settings,
+     * and grad V = jn_factor grad V0, jn -> jn_factor jn (the constant imposed V does not change
+     * grad V). It multiplies the source terms (polarized current, injection through the surface
+     * with jn and uP), not the imposed s */
+    double jn_factor = 1.0;
+
     /** solution of the spin diffusion vector s over the nodes */
     std::vector<Eigen::Vector3d> s;
 
@@ -62,7 +70,8 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
      * corresponding spin diffusion s value*/
     void fillDirichletData(const int k, Eigen::Vector3d &s_value);
 
-    /** electrostatic potential V on the nodes
+    /** electrostatic potential V0 on the nodes, solved once with the jn of the settings (1 A/m^2
+     * for `jn: current_density`): grad V = jn_factor grad V0 at time t
      * unit [V] = Volt = kg A^-1 s^-3 */
     std::vector<double> V;
 

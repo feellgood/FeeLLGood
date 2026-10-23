@@ -329,6 +329,8 @@ void Settings::toYaml()
         std::cout <<  "      J:";
         if (isnan(it->jn))
             { std::cout << "\n"; }
+        else if (it->jn_current_density)
+            { std::cout << " current_density\n"; }
         else
             { std::cout << ' ' << it->jn << '\n'; }
         std::cout <<  "      V:";
@@ -393,6 +395,11 @@ void Settings::toYaml()
         { std::cout << str(sB) << "\n"; }
     else
         { std::cout << "[\"" << sBx << "\", \"" << sBy << "\", \"" << sBz << "\"]\n"; }
+    std::cout << "current_density:";
+    if (hasCurrentDensity())
+        { std::cout << ' ' << str(sCurrentDensity) << '\n'; }
+    else
+        { std::cout << '\n'; }
     std::cout << "spin_accumulation:\n";
     std::cout << "  enable: " << str(spin_acc) << "\n";
     if (spin_acc)
@@ -586,8 +593,16 @@ void Settings::read(YAML::Node yaml)
                 assign(p.Ks, surface["Ks"]);
                 assign(NORMALIZE, p.uk, surface["uk"]);
 
-                // J and V may be null, which we map to NAN.
-                if (!assign(p.jn, surface["jn"]))
+                // J and V may be null, which we map to NAN. jn may also be the function
+                // current_density(t) of the settings: jn is then the reference 1 A/m^2.
+                YAML::Node jn = surface["jn"];
+                p.jn_current_density = false;
+                if (jn && jn.IsScalar() && jn.as<std::string>() == "current_density")
+                    {
+                    p.jn = 1.0;
+                    p.jn_current_density = true;
+                    }
+                else if (!assign(p.jn, jn))
                     { p.jn = NAN; }
                 if (!assign(p.V, surface["V"]))
                     { p.V = NAN; }
@@ -715,6 +730,22 @@ void Settings::read(YAML::Node yaml)
                 }
             }
         }  // Bext
+
+    YAML::Node current_density = yaml["current_density"];
+    if (current_density && !current_density.IsNull())
+        {
+        if (!current_density.IsScalar())
+            { error("current_density should be a function of t or an expression of t."); }
+        sCurrentDensity = current_density.as<std::string>();
+        const bool is_function = std::regex_search(sCurrentDensity,
+                                                   std::regex("^\\s*function\\b"));
+        const std::string js_current_density = is_function
+                ? sCurrentDensity : "function(t) { return (" + sCurrentDensity + "); }";
+        current_density_parser.set_function(js_current_density);
+        // the time functions of the applied field can call current_density(t)
+        field_parser.define_global_function("current_density", js_current_density);
+        field_time_parser.define_global_function("current_density", js_current_density);
+        }  // current_density
 
     YAML::Node spAcc = yaml["spin_accumulation"];
     if (spAcc && !spAcc.IsNull())

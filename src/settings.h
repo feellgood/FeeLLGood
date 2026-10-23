@@ -6,6 +6,7 @@
 output file format wanted by the user. This is done mainly with the class Settings.
 */
 
+#include <algorithm>
 #include <cmath>
 #include <string>
 #include <vector>
@@ -63,7 +64,8 @@ enum field_exprType
  *
  * Javascript expressions (initial magnetization and applied field) are stored both in source form
  * (sM* and sB* members) and as private ExpressionParser instances. This class provides methods for
- * evaluating those expressions: getMagnetization(), getField(), getFieldSpace() and getFieldTime().
+ * evaluating those expressions: getMagnetization(), getField(), getFieldSpace(), getFieldTime() and
+ * getCurrentDensity().
  * All these methods temporarily modify their corresponding ExpressionParser instances, it is thus
  * **not safe** to call them from multiple threads simultaneously.
  */
@@ -190,6 +192,11 @@ public:
 
     /** string for a JavaScript function defining B time, (t) -> real */
     std::string sB_time;
+
+    /** string for a JavaScript function, or an expression of t, defining the normal current
+     * density current_density(t) [A/m^2] of the surface region with `jn: current_density`;
+     * empty if not defined */
+    std::string sCurrentDensity;
 
     /** input file name for continuing a calculation (sol.in) */
     std::string restoreFileName;
@@ -318,6 +325,31 @@ public:
     inline double getFieldTime(const double t_val) const
         { return (field_time_parser.get_scalar(t_val))/mu0; }
 
+    /** true if the function current_density(t) is defined (key current_density) */
+    inline bool hasCurrentDensity(void) const
+        { return !sCurrentDensity.empty(); }
+
+    /** true if a surface region has `jn: current_density` */
+    inline bool usesCurrentDensity(void) const
+        {
+        return std::any_of(paramTriangle.begin(), paramTriangle.end(),
+                           [](const Triangle::prm &p) { return p.jn_current_density; });
+        }
+
+    /** Evaluate the normal current density current_density(t) [A/m^2], j.n with the outward
+     * normal, as a function of the time t_val in seconds. Only meaningful if hasCurrentDensity().
+     * This method is **not thread safe**.
+     */
+    inline double getCurrentDensity(const double t_val) const
+        { return current_density_parser.get_scalar(t_val); }
+
+    /** Factor of the electric sources at the time t_val in seconds: current_density(t) if a
+     * surface region has `jn: current_density` (its jn being the reference 1 A/m^2), 1
+     * otherwise (constant jn). This method is **not thread safe**.
+     */
+    inline double jnFactor(const double t_val) const
+        { return usesCurrentDensity() ? getCurrentDensity(t_val) : 1.0; }
+
 private:
     using MetadataItem = std::pair<std::string, std::string>;  /**< type of userMetadata items */
 
@@ -345,6 +377,10 @@ private:
 
     /** parser for the field space dependant vector expressions */
     ExpressionParser field_space_parser;
+
+    /** parser for the normal current density R->R, also defined as the global function
+     * current_density(t) in field_parser and field_time_parser */
+    ExpressionParser current_density_parser;
 
     /** Metadata common to .evol and .sol files */
     std::ostringstream commonMetadata() const;

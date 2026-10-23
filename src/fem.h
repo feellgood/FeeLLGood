@@ -199,13 +199,15 @@ private:
     void direction(enum Nodes::index idx_dir /**< [in] */);
 
     /** compute demagnetizing field, energies, and prepare for next time step quantitites
-     * at physical time t [s] (used by the applied field) */
+     * at physical time t [s] (used by the applied field and the current density) */
     void compute_all(Settings &settings /**< [in] */, spinAcc &spinAcc_solver /**< [in|out] */,
                      scal_fmm::fmm &myFMM /**< [in|out] */, const double t /**< [in]*/)
         {
         bool success(false);
         chronometer fmm_counter(2);
         myFMM.calc_demag(msh);
+        if (settings.spin_acc)
+            { spinAcc_solver.jn_factor = settings.jnFactor(t); }
         if (settings.spin_acc && spinAcc_solver.compute())
             { success = true; }
         if (settings.verbose)
