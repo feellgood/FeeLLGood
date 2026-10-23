@@ -47,4 +47,27 @@ BOOST_AUTO_TEST_CASE(dukTape_VectorParser, *boost::unit_test::tolerance(UT_TOL))
     BOOST_TEST( result[2] == -1.0);
     }
 
+/*-----------------------------------------------------*/
+/* test ExpressionParser calling a global function current_density(t), defined before and */
+/* after the function that calls it (as Bext calling the current density) */
+/*-----------------------------------------------------*/
+
+BOOST_AUTO_TEST_CASE(dukTape_GlobalFunction, *boost::unit_test::tolerance(UT_TOL))
+    {
+    std::string str_jn("function(t) {return t < 1 ? t : 1;}");
+    ExpressionParser time_parser;
+    time_parser.define_global_function("current_density", str_jn);
+    time_parser.set_function("function(t) {return 2*current_density(t);}");
+    BOOST_TEST( time_parser.get_scalar(0.25) == 0.5);
+    BOOST_TEST( time_parser.get_scalar(3.0) == 2.0);
+
+    ExpressionParser field_parser;
+    field_parser.set_expressions("t", "current_density(t)", "0", "-current_density(t)");
+    field_parser.define_global_function("current_density", str_jn);
+    Eigen::Vector3d result = field_parser.get_vector(0.5);
+    BOOST_TEST( result[0] == 0.5);
+    BOOST_TEST( result[1] == 0.0);
+    BOOST_TEST( result[2] == -0.5);
+    }
+
 BOOST_AUTO_TEST_SUITE_END()

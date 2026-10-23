@@ -42,6 +42,14 @@ public:
                          const std::string &expr_y, const std::string &expr_z) const;
 
     /**
+     * Define, in the global object of the interpreter, a function named `name` from the provided
+     * JavaScript function expression, so that the function given to set_function() or
+     * set_expressions() can call it. It may be called before or after them. Preserve the stack
+     * state.
+     */
+    void define_global_function(const std::string &name, const std::string &js_function) const;
+
+    /**
      * Return the number of parameters of the JavaScript function.
      */
     int parameter_count() const { return duk_get_length(ctx, -1); }
