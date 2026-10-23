@@ -228,7 +228,6 @@ int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /*
                 continue;
                 }
 
-            compute_all(settings, spinAcc_solver, myFMM, t_prm.get_t_phys());
             nt++;
             flag = 0;
 
@@ -237,6 +236,9 @@ int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /*
                 t_prm.set_t(t_target);
             else
                 t_prm.inc_t();
+
+            // at the time of the new magnetization (applied field, current density, energies)
+            compute_all(settings, spinAcc_solver, myFMM, t_prm.get_t_phys());
 
             if (settings.recenter) recenter(settings.threshold, settings.recentering_direction);
             if (!settings.verbose) show_progress(t_prm.get_t() / t_prm.tf);
