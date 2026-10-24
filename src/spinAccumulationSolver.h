@@ -52,8 +52,9 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     double jn_factor = 1.0;
 
     /** electrostatic potential on the nodes at the time of the last solve [V], indexed as s:
-     * V_D + jn_factor (V0 - V_D), V_D being the potential imposed on the surface with V (the
-     * electrokinetics being linear, the potential at time t follows the current density) */
+     * V_D + jn_factor V_ref with jn: current_density (V_ref: reference potential for
+     * j_ref = 1 A/m^2 and V = 0 on the surface with V, V_D the imposed V: the electrokinetics
+     * being linear, the potential at time t follows the current density), V0 otherwise */
     std::vector<double> potential(void) const;
 
     /** solution of the spin diffusion vector s over the nodes */
@@ -76,15 +77,19 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
      * corresponding spin diffusion s value*/
     void fillDirichletData(const int k, Eigen::Vector3d &s_value);
 
-    /** electrostatic potential V0 on the nodes, solved once with the jn of the settings (the
-     * reference j_ref = 1 A/m^2 for `jn: current_density`): grad V = jn_factor grad V0 at time t,
-     * jn_factor being dimensionless
+    /** electrostatic potential on the nodes, solved once: V0 for the jn and V of the settings, or,
+     * with `jn: current_density`, the reference potential V_ref for j_ref = 1 A/m^2 and V = 0 on
+     * the surface with V; grad V = jn_factor grad V at time t, jn_factor being dimensionless
      * unit [V] = Volt = kg A^-1 s^-3 */
     std::vector<double> V;
 
     /** potential imposed on the surface with V (Dirichlet condition of the electrostatic
      * problem) [V] */
     double V_D = 0.0;
+
+    /** true with `jn: current_density`: V is the reference potential V_ref (V = 0 imposed), the
+     * potential being V_D + jn_factor V_ref */
+    bool reference_potential = false;
 
     /** number of digits in the optional output file */
     const int precision = 8;

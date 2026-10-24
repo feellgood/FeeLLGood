@@ -40,6 +40,7 @@ using namespace Nodes;
                 if (std::isfinite(p.V))
                     { V_D = p.V; }
                 }
+            reference_potential = mySettings.usesCurrentDensity();
             pot_solver.V.resize(_msh.getNbNodes());
             std::string V_fileName("");
             if(mySettings.V_file)
@@ -170,11 +171,11 @@ void spinAcc::prepareExtraField(void) const
 
 std::vector<double> spinAcc::potential(void) const
     {
-    if (jn_factor == 1.0)
-        { return V; }  // exactly V0 (constant jn)
+    if (!reference_potential)
+        { return V; }  // V0 for the jn of the settings, V_D included (jn_factor = 1)
     std::vector<double> Vt(V.size());
     std::transform(V.begin(), V.end(), Vt.begin(),
-                   [this](const double v0) { return V_D + jn_factor*(v0 - V_D); });
+                   [this](const double v_ref) { return V_D + jn_factor*v_ref; });
     return Vt;
     }
 

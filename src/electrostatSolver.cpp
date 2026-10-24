@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include "chronometer.h" // date()
@@ -117,6 +118,13 @@ bool electrostatSolver::solve(void)
     std::vector<int> ld; // vector of the Dirichlet Nodes
     std::vector<double> Vd(NOD); // potential values on Dirichlet nodes, zero on the others
 
+    /* with jn: current_density, reference problem: jn = j_ref = 1 A/m^2 and V = 0 on the surface
+     * with V, the imposed V being added afterwards (spinAcc::potential); solving with the imposed
+     * V and subtracting it would drown the reference potential (about 1e-13 V) in the error of the
+     * solve around V */
+    const bool reference_problem = std::any_of(paramTri.begin(), paramTri.end(),
+                                   [](const Triangle::prm &p) { return p.jn_current_density; });
+
     for (const Triangle::Tri &tri : msh->tri)
         {
         double _V = paramTri[tri.idxPrm].V;
@@ -125,7 +133,7 @@ bool electrostatSolver::solve(void)
             for(int ie=0; ie < Triangle::N; ie++)
                 {
                 int i= tri.ind[ie];
-                Vd[i]= _V;
+                Vd[i]= reference_problem ? 0.0 : _V;
                 ld.push_back(i);
                 }
             }

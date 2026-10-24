@@ -115,15 +115,16 @@ The electrostatic problem still requires a single surface with `jn` (a number or
 - `.sol` (with the spin accumulation): the columns are `idx mx my mz phi sx sy sz V`. The spin
   accumulation is the one of the time of the file, thus with the current of that time, and the
   last column `V` is the electrostatic potential at that time,
-  $`V(t) = V_D + (j_n(t)/j_{\text{ref}})(V_0 - V_D)`$ (see the hypotheses), in V; with a numeric
-  `jn` it is
-  $V_0$. It costs no solve: $V_0$ is kept from the start. When a `.sol` file is used as the
+  $`V(t) = V_D + (j_n(t)/j_{\text{ref}})V_{\text{ref}}`$ (see the hypotheses), in V; with a
+  numeric `jn` it is $V_0$. It costs no solve: $`V_{\text{ref}}`$ (or $V_0$) is kept from the
+  start. When a `.sol` file is used as the
   initial magnetization (restart), the columns after `phi` are skipped: the spin accumulation and
   the potential are computed again at the start.
-- `spin_accumulation.V_file`: the potential $V_0$ solved at the start, i.e. with jn = +1 A/m^2 on
-  the surface with `jn: current_density` (see the hypotheses), written once in
-  `<file_basename>_V.sol` of the current directory. For a current injected through that surface
-  ($j_n < 0$), $V_0$ has the opposite sign of the actual potential.
+- `spin_accumulation.V_file`: the potential solved at the start, written once in
+  `<file_basename>_V.sol` of the current directory: $V_0$ for a numeric `jn`, the reference
+  potential $`V_{\text{ref}}`$ for `jn: current_density`, i.e. with jn = +1 A/m^2 on that surface
+  and V = 0 on the surface with `V` (see the hypotheses). For a current injected through the
+  surface ($j_n < 0$), $`V_{\text{ref}}`$ has the opposite sign of the actual potential.
 - At start-up, the settings printed in verbose mode show the key `current_density`, and `J:
   current_density` for the surface region.
 
@@ -151,19 +152,24 @@ mySettings["mesh"]["surface_regions"]["inlet"]["jn"] = "current_density"
    magnetoresistance), on the current or on the temperature (no Joule heating), and the current
    follows $j_n(t)$ instantaneously (no capacitive or inductive effect). The problem being linear,
    ```math
-   V(t) = V_D + j_n(t)\,G,\qquad G = \frac{V_0 - V_D}{j_{\text{ref}}},
+   V(t) = V_D + j_n(t)\,G,\qquad G = \frac{V_{\text{ref}}}{j_{\text{ref}}},
    ```
-   where $V_0$ is the solution for the reference current density $`j_{\text{ref}} = 1`$ A/m^2 on
-   the surface with `jn: current_density`: $G$, in V m^2/A, is the potential per unit normal
-   current density. $V_0$ is solved once, at the start, and never solved again. The factor
+   where $`V_{\text{ref}}`$ is the solution of the reference problem: the reference current
+   density $`j_{\text{ref}} = 1`$ A/m^2 on the surface with `jn: current_density` and **V = 0** on
+   the surface with `V`. $G$, in V m^2/A, is the potential per unit normal current density.
+   $`V_{\text{ref}}`$ is solved once, at the start, and never solved again. The factor
    $`j_n(t)/j_{\text{ref}}`$ is dimensionless, and numerically equal to the value of $j_n(t)$ in
    A/m^2 since $`j_{\text{ref}} = 1`$ A/m^2:
    ```math
-   V(t) = V_D + \frac{j_n(t)}{j_{\text{ref}}}(V_0 - V_D),\qquad
-   \nabla V(t) = \frac{j_n(t)}{j_{\text{ref}}}\nabla V_0,
+   V(t) = V_D + \frac{j_n(t)}{j_{\text{ref}}}V_{\text{ref}},\qquad
+   \nabla V(t) = \frac{j_n(t)}{j_{\text{ref}}}\nabla V_{\text{ref}}.
    ```
-   the imposed potential $V_D$ being constant on a single surface. Only $\nabla V$ enters the spin
-   accumulation.
+   Only $\nabla V$ enters the spin accumulation. The imposed potential $V_D$, a constant on a
+   single surface, only shifts the potential: it is added afterwards, and the results do not
+   depend on it. Solving the reference problem with $V = V_D$ instead of 0, and subtracting
+   $V_D$, would not do: the reference potential (about 5e-14 V for 1 A/m^2 in a cylinder of
+   200 nm with $\sigma$ = 4e6 S/m) would be drowned in the error of the solve around $V_D$ (about
+   3e-8 V for $V_D$ = 1 V), giving tens of kV instead of 0.05 V once multiplied by 1e12.
 
 3. **Quasi-static spin accumulation.** The spin accumulation is solved at each time step, with
    the current magnetization and the current of that time: its diffusion and relaxation times are
@@ -177,7 +183,7 @@ mySettings["mesh"]["surface_regions"]["inlet"]["jn"] = "current_density"
    ```math
    -\int_\Gamma Q_n a_i,\qquad Q_n = -\frac{\mu_B}{e}j_n\mathbf{u}_P.
    ```
-   Both are linear in $(\nabla V, j_n)$: they are computed with $\nabla V_0$ and
+   Both are linear in $(\nabla V, j_n)$: they are computed with $`\nabla V_{\text{ref}}`$ and
    $`j_{\text{ref}} = 1`$ A/m^2, multiplied by the dimensionless factor $`j_n(t)/j_{\text{ref}}`$
    (`spinAcc::jn_factor`; 1 for a numeric `jn`, whose results are thus unchanged).
 
@@ -213,6 +219,8 @@ mySettings["mesh"]["surface_regions"]["inlet"]["jn"] = "current_density"
   `Settings::usesCurrentDensity()` (a surface has `jn: current_density`), and
   `Settings::jnFactor(t)`, the dimensionless factor $`j_n(t)/j_{\text{ref}}`$ if a surface has
   `jn: current_density`, 1 otherwise.
+- `electrostatSolver::solve` solves the reference problem (V = 0 on the surface with `V`) when a
+  surface has `jn: current_density`; `spinAcc::potential()` adds $V_D$.
 - `Fem::compute_all` sets `spinAcc::jn_factor` before every solve of the spin accumulation; it is
   called after the time increment, at the time of the new magnetization.
 
