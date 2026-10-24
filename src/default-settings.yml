@@ -271,7 +271,12 @@ spin_accumulation:
   # Whether to enable computation of spin accumulation contribution.
   enable: false
 
-  # Output a .tsv file of the electric potentials.
+  # Output, at the start, the electric potential V0 solved once, for the
+  # jn of the settings (1 A/m^2 for jn: current_density), in the file
+  # <file_basename>_V.sol of the current directory. With the spin
+  # accumulation, the .sol files have, after sx, sy, sz, a last column V,
+  # the potential at the time of the file: V_D + current_density(t)
+  # (V0 - V_D) for jn: current_density, V_D being the imposed V.
   V_file: false
 
 # Parameters for the computation of the demagnetizing field.

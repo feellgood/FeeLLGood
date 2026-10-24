@@ -165,7 +165,7 @@ public:
     /** saving function for a solution */
     void saver(Settings &settings /**< [in] */, const timing &t_prm /**< [in] */,
                std::ofstream &fout /**< [out] */, const int nt /**< [in] */,
-               std::vector<Eigen::Vector3d> &s /**< [in] */ ) const;
+               const spinAcc &spinAcc_solver /**< [in] spin accumulation and potential */) const;
 
     /** recentering algorithm for the study of the motion of a domain wall.
 

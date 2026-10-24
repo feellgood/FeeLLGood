@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "algebra/bicg.h"
 #include "algebra/block_precond.h"
 #include "spinAccumulationSolver.h"
@@ -33,6 +35,11 @@ using namespace Nodes;
             electrostatSolver pot_solver(_msh, mySettings.paramTetra, mySettings.paramTriangle,
                                          1e-8, mySettings.verbose, 1000);
             pot_solver.checkBoundaryConditions();
+            for (const Triangle::prm &p : mySettings.paramTriangle)
+                {
+                if (std::isfinite(p.V))
+                    { V_D = p.V; }
+                }
             pot_solver.V.resize(_msh.getNbNodes());
             std::string V_fileName("");
             if(mySettings.V_file)
@@ -159,6 +166,16 @@ void spinAcc::prepareExtraField(void) const
         t.extraField = [this, &t, prefactor](Eigen::Ref<Eigen::Matrix<double, Nodes::DIM, Tetra::NPI>> H)
                         { H += calc_Hst(t, prefactor, s); };
         }
+    }
+
+std::vector<double> spinAcc::potential(void) const
+    {
+    if (jn_factor == 1.0)
+        { return V; }  // exactly V0 (constant jn)
+    std::vector<double> Vt(V.size());
+    std::transform(V.begin(), V.end(), Vt.begin(),
+                   [this](const double v0) { return V_D + jn_factor*(v0 - V_D); });
+    return Vt;
     }
 
 bool spinAcc::compute(void)

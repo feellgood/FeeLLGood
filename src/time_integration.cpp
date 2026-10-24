@@ -99,7 +99,7 @@ static void show_progress(const double fraction_done)
 /** Check whether we received a signal politely asking us to terminate.
  * If so, then save the current state and exit. */
 static void exit_if_signal_received(const Fem &fem, const Settings &settings, const timing &t_prm,
-                                    const Stats &stats, std::vector<Eigen::Vector3d> &s)
+                                    const Stats &stats, const spinAcc &spinAcc_solver)
     {
     extern volatile sig_atomic_t received_signal;  // set by signal_handler() in main.cpp
     if (!received_signal) return;
@@ -114,7 +114,11 @@ static void exit_if_signal_received(const Fem &fem, const Settings &settings, co
         std::string fileName =
                 settings.r_path_output_dir + '/' + settings.getSimName() + "_at_exit.sol";
         std::string metadata = settings.solMetadata(t_prm.get_t_phys());
-        fem.msh.savesol(settings.getPrecision(), fileName, metadata, settings.spin_acc, s);
+        std::vector<double> V;
+        if (settings.spin_acc)
+            { V = spinAcc_solver.potential(); }
+        fem.msh.savesol(settings.getPrecision(), fileName, metadata, settings.spin_acc,
+                        spinAcc_solver.s, V);
         std::cout << "Magnetization configuration saved to " << fileName << "\n";
         }
     else
@@ -169,7 +173,7 @@ int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /*
         // Loop over the integration time steps within a visible step.
         while (t_prm.get_t() < t_target)
             {
-            exit_if_signal_received(*this, settings, t_prm, stats, spinAcc_solver.s);
+            exit_if_signal_received(*this, settings, t_prm, stats, spinAcc_solver);
 
             t_prm.set_dt(stepper(t_target - t_prm.get_t()));
             bool last_step = (t_prm.get_dt() == t_target - t_prm.get_t());
@@ -245,7 +249,7 @@ int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /*
 
             stats.max_angle = std::max(stats.max_angle, msh.max_angle());
             }  // endwhile
-        saver(settings, t_prm, fout, nt_output++, spinAcc_solver.s);
+        saver(settings, t_prm, fout, nt_output++, spinAcc_solver);
         }                                       // end for
     if (!settings.verbose) show_progress(1.0);  // show we are done
 

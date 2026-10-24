@@ -112,9 +112,17 @@ The electrostatic problem still requires a single surface with `jn` (a number or
   `current_density(t)` [A/m^2] at the time of the line (NaN if it is not defined). The columns
   `Hx`, `Hy`, `Hz` give the applied field including the current (form `Bext` function of `t` or
   three expressions only).
-- `spin_accumulation.V_file`: the potential $V_0$ solved at the start, i.e. with jn = 1 A/m^2 on
-  the surface with `jn: current_density` (see the hypotheses).
-- `.sol`: the spin accumulation at the time of the file, thus with the current of that time.
+- `.sol` (with the spin accumulation): the columns are `idx mx my mz phi sx sy sz V`. The spin
+  accumulation is the one of the time of the file, thus with the current of that time, and the
+  last column `V` is the electrostatic potential at that time,
+  $`V(t) = V_D + j_n(t)(V_0 - V_D)`$ (see the hypotheses), in V; with a numeric `jn` it is
+  $V_0$. It costs no solve: $V_0$ is kept from the start. When a `.sol` file is used as the
+  initial magnetization (restart), the columns after `phi` are skipped: the spin accumulation and
+  the potential are computed again at the start.
+- `spin_accumulation.V_file`: the potential $V_0$ solved at the start, i.e. with jn = +1 A/m^2 on
+  the surface with `jn: current_density` (see the hypotheses), written once in
+  `<file_basename>_V.sol` of the current directory. For a current injected through that surface
+  ($j_n < 0$), $V_0$ has the opposite sign of the actual potential.
 - At start-up, the settings printed in verbose mode show the key `current_density`, and `J:
   current_density` for the surface region.
 
