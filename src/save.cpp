@@ -11,7 +11,7 @@
 using namespace Nodes;
 
 void Fem::saver(Settings &settings, const timing &t_prm, std::ofstream &fout, const int nt,
-        std::vector<Eigen::Vector3d> &s) const
+        const spinAcc &spinAcc_solver) const
     {
     int save_period = settings.save_period;
 
@@ -133,6 +133,11 @@ void Fem::saver(Settings &settings, const timing &t_prm, std::ofstream &fout, co
             {
             fout << applied_field.z() << sep;
             }
+        else if (keyVal == "current_density")
+            {
+            fout << (settings.hasCurrentDensity() ? settings.getCurrentDensity(t_prm.get_t_phys())
+                                                  : NAN) << sep;
+            }
         else
             {
             std::cerr << "Error: invalid column name '" << keyVal << "'\n";
@@ -153,7 +158,11 @@ void Fem::saver(Settings &settings, const timing &t_prm, std::ofstream &fout, co
             }
 
         std::string metadata = settings.solMetadata(t_prm.get_t_phys());
-        msh.savesol(settings.getPrecision(), str, metadata, settings.spin_acc, s);
+        // potential at the time of the file (it follows the current density)
+        std::vector<double> V;
+        if (settings.spin_acc)
+            { V = spinAcc_solver.potential(); }
+        msh.savesol(settings.getPrecision(), str, metadata, settings.spin_acc, spinAcc_solver.s, V);
         if (settings.verbose)
             {
             std::cout << "all nodes written.\n";
@@ -162,7 +171,8 @@ void Fem::saver(Settings &settings, const timing &t_prm, std::ofstream &fout, co
     }
 
 void Mesh::mesh::savesol(const int precision, const std::string& fileName,
-        const std::string &metadata, bool withSpinAcc, std::vector<Eigen::Vector3d> &s) const
+        const std::string &metadata, bool withSpinAcc, const std::vector<Eigen::Vector3d> &s,
+        const std::vector<double> &V) const
     {
     std::ofstream fout(fileName, std::ios::out);
     if (fout.fail())
@@ -179,7 +189,7 @@ void Mesh::mesh::savesol(const int precision, const std::string& fileName,
         const dataNode &dn = node[j].d[Nodes::NEXT];
         fout << i << '\t' << dn.u.format(outputSolFmt) << '\t' << dn.phi;
         if (withSpinAcc)
-            { fout << '\t' << s[j].format(outputSolFmt); }
+            { fout << '\t' << s[j].format(outputSolFmt) << '\t' << V[j]; }
         fout << "\n";
         }
     fout.close();

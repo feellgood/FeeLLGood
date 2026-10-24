@@ -76,6 +76,10 @@ struct prm
                              sub-problem) */
     double jn;             /**< \f$ j \dot \hat{n} \f$ normal current density (boundary condition
                              for electrostatic and spin diffusion sub-problems) */
+    bool jn_current_density = false; /**< true if jn is the function current_density(t) of the
+                             settings (`jn: current_density`): jn is then 1 A/m^2, the reference
+                             of the electrostatic problem, and the normal current density at
+                             time t is current_density(t) */
     Eigen::Vector3d uP;    /**< Polarization spin accumulation orientation (unit vector
                              for spin diffusion problem) */
     Eigen::Vector3d s;     /**< spin diffusion vector (for spin diffusion boundary conditions) */
@@ -95,7 +99,12 @@ struct prm
 
         if (spinAcc)
             {
-            std::cout<< "V= " << V << "; jn= " << jn << "; uP= " << uP << "; s= " << s << std::endl;
+            std::cout << "V= " << V << "; jn= ";
+            if (jn_current_density)
+                { std::cout << "current_density"; }
+            else
+                { std::cout << jn; }
+            std::cout << "; uP= " << uP << "; s= " << s << std::endl;
             }
         };
     };

@@ -15,11 +15,11 @@ const int DIM_PB_SPIN_ACC = 3;
 /** \class spinAcc
  container for Spin Accumulation constants, solver and related datas. The model obeys the diffusive
  spin equation. User has to provide through mesh and settings at least one surface where spin
- diffusion vector s is a constant (zero recommended): Dirichlet boundary condition, and one surface
- S1 where the current density jn is defined; if a spin polarization uP is also given on S1 (and no
- s), the spin injection is a flux (Neumann) boundary condition. This surface S1 must be the same
- as the one given to the potential solver for its own boundary conditions. A surface may have both
- jn and s (s is then imposed on it).
+ diffusion vector s is a constant (zero recommended): Dirichlet boundary condition, and at least
+ one surface where the current density jn is defined; if a spin polarization uP is also given on
+ such a surface (and no s), the spin injection is a flux (Neumann) boundary condition. These
+ surfaces are the ones given to the potential solver for its own boundary conditions. A surface may
+ have both jn and s (s is then imposed on it).
  */
 class spinAcc : public solver<DIM_PB_SPIN_ACC>
     {
@@ -42,11 +42,26 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** call solver and update spin diffusion solution, returns true if solver succeeded */
     bool compute(void);
 
+    /** dimensionless factor of the electric sources at the time of the solve:
+     * current_density(t)/j_ref if a surface region has `jn: current_density`, its jn being the
+     * reference j_ref = 1 A/m^2, 1 otherwise. The electrokinetics being linear, the potential V0
+     * is solved once with the jn of the settings, and grad V = jn_factor grad V0,
+     * jn -> jn_factor jn (the constant imposed V does not change grad V). It multiplies the
+     * source terms (polarized current, injection through the surface with jn and uP), not the
+     * imposed s */
+    double jn_factor = 1.0;
+
+    /** electrostatic potential on the nodes at the time of the last solve [V], indexed as s:
+     * V_D + jn_factor V, V being solved with V = 0 on the surface with V and V_D the imposed V
+     * (the electrokinetics being linear, the potential at time t follows the current density;
+     * jn_factor = 1 for a numeric jn) */
+    std::vector<double> potential(void) const;
+
     /** solution of the spin diffusion vector s over the nodes */
     std::vector<Eigen::Vector3d> s;
 
-    /** check boundary conditions: mesh and settings have to define a single surface with constant
-     * normal current density J and at least one surface where the spin diffusion s is given */
+    /** check boundary conditions: mesh and settings have to define at least one surface with a
+     * normal current density jn and at least one surface where the spin diffusion s is given */
     void checkBoundaryConditions(void) const override;
 
     private:
@@ -62,9 +77,16 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
      * corresponding spin diffusion s value*/
     void fillDirichletData(const int k, Eigen::Vector3d &s_value);
 
-    /** electrostatic potential V on the nodes
+    /** electrostatic potential on the nodes, solved once with V = 0 on the surface with V (V_D
+     * is added by potential()), for the jn of the settings, or, with `jn: current_density`, for
+     * the reference j_ref = 1 A/m^2 (V_ref); grad V = jn_factor grad V at time t, jn_factor being
+     * dimensionless
      * unit [V] = Volt = kg A^-1 s^-3 */
     std::vector<double> V;
+
+    /** potential imposed on the surface with V (Dirichlet condition of the electrostatic
+     * problem) [V] */
+    double V_D = 0.0;
 
     /** number of digits in the optional output file */
     const int precision = 8;

@@ -21,7 +21,7 @@ namespace tags
         {
         const std::string time = "## time:";
         const std::string defaultColumnsTitle = "idx\tmx\tmy\tmz\tphi";
-        const std::string sColumnsTitle = "sx\tsy\tsz";
+        const std::string sColumnsTitle = "sx\tsy\tsz\tV";
         }
 
     namespace msh

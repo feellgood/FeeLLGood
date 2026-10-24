@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "algebra/bicg.h"
 #include "algebra/block_precond.h"
 #include "spinAccumulationSolver.h"
@@ -15,6 +17,17 @@ using namespace Nodes;
         {
         if (mySettings.spin_acc)
             {
+            if (mySettings.usesCurrentDensity() && !mySettings.hasCurrentDensity())
+                {
+                std::cerr << "Error: a surface region has jn: current_density, but the function "
+                             "current_density is not defined.\n";
+                exit(1);
+                }
+            if (mySettings.hasCurrentDensity() && !mySettings.usesCurrentDensity())
+                {
+                std::cerr << "Warning: current_density is defined, but no surface region has "
+                             "jn: current_density: it only acts through Bext.\n";
+                }
             checkBoundaryConditions();
             valDirichlet.resize(DIM_PB * NOD);
             boundaryConditions();
@@ -22,6 +35,11 @@ using namespace Nodes;
             electrostatSolver pot_solver(_msh, mySettings.paramTetra, mySettings.paramTriangle,
                                          1e-8, mySettings.verbose, 1000);
             pot_solver.checkBoundaryConditions();
+            for (const Triangle::prm &p : mySettings.paramTriangle)
+                {
+                if (std::isfinite(p.V))
+                    { V_D = p.V; }
+                }
             pot_solver.V.resize(_msh.getNbNodes());
             std::string V_fileName("");
             if(mySettings.V_file)
@@ -67,8 +85,8 @@ void spinAcc::checkBoundaryConditions(void) const
             }
         }
 
-    // one surface with jn (as the electrostatic problem), at least one surface with a given s
-    bool result = ( (nbSurfJ == 1) && (nbSurfS >= 1)
+    // at least one surface with jn (as the electrostatic problem), at least one with a given s
+    bool result = ( (nbSurfJ >= 1) && (nbSurfS >= 1)
            && (nbVolN0 == paramTet.size())
            && (nbVolP == paramTet.size()) );
 
@@ -150,6 +168,14 @@ void spinAcc::prepareExtraField(void) const
         }
     }
 
+std::vector<double> spinAcc::potential(void) const
+    {
+    std::vector<double> Vt(V.size());
+    std::transform(V.begin(), V.end(), Vt.begin(),
+                   [this](const double v_ref) { return V_D + jn_factor*v_ref; });
+    return Vt;
+    }
+
 bool spinAcc::compute(void)
     {
     //prepareExtraField(); // do we have to do that once or each time we want another s computation ?
@@ -187,14 +213,15 @@ bool spinAcc::solve(void)
 
     /* flux (Neumann) boundary condition on the surface where the current density jn is injected
      * with the polarization uP: Q_n = -(mu_B/e) jn uP, contribution -int_Gamma Q_n a_i to the RHS
-     * (the surfaces where s is given are Dirichlet conditions, see boundaryConditions()) */
+     * (the surfaces where s is given are Dirichlet conditions, see boundaryConditions());
+     * time-dependent current density: jn -> jn_factor jn */
     for (Triangle::Tri &f : msh->tri)
         {
         if (std::isfinite(paramTri[f.idxPrm].jn) && std::isfinite(paramTri[f.idxPrm].uP.norm()))
             {
             std::vector<double> Le(DIM_PB * Triangle::N, 0.0);
-            const Eigen::Vector3d Qn =
-                    -paramTri[f.idxPrm].jn * (BOHRS_MUB/CHARGE_ELECTRON) * paramTri[f.idxPrm].uP;
+            const Eigen::Vector3d Qn = -jn_factor * paramTri[f.idxPrm].jn
+                                       * (BOHRS_MUB/CHARGE_ELECTRON) * paramTri[f.idxPrm].uP;
             for (int npi = 0; npi < Triangle::NPI; npi++)
                 {
                 const double w = f.weight[npi];
@@ -281,8 +308,10 @@ void spinAcc::integrales(const Tetra::Tet &tet, std::vector<double> &BE) const
         /* constant cst0 in a magnetic region is the only RHS parameter involved in the diffusion
         * equation for magnetic contribution
         * units: [cst0] = [sigma] m^2 = A^2 s^3 m^-1 kg^-1
+        * time-dependent current density: grad V = jn_factor grad V0
         */
-        const double cst0 = BOHRS_MUB * getPolarizationRate(tet) * getSigma(tet) / CHARGE_ELECTRON;
+        const double cst0 = jn_factor * BOHRS_MUB * getPolarizationRate(tet) * getSigma(tet)
+                            / CHARGE_ELECTRON;
         const Eigen::Matrix<double, Nodes::DIM, NPI> gradV = tet.gradV(V);
 
         for (size_t npi = 0; npi < NPI; npi++)

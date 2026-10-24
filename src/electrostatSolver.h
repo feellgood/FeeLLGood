@@ -34,8 +34,8 @@ public:
             const int max_iter /**< [in] maximum number of iterations */):
             solver<DIM_PB_ELEC>(_msh, _pTetra, _pTri, "cg_dir", _tol, v, max_iter) {}
 
-    /** electrostatic potential values for boundary conditions, V.size() is the size of the vector
-     * of nodes */
+    /** electrostatic potential on the nodes, solved with V = 0 on the surface with V (the imposed
+     * V is added afterwards), V.size() is the size of the vector of nodes */
     std::vector<double> V;
 
     /** basic informations on boundary conditions */
@@ -65,14 +65,21 @@ public:
     void compute(bool verbose /**< [in] */,
             const std::string& V_fileName /**< [in] output file name for V solution */);
 
-    /** check boundary conditions: mesh and settings have to define a single surface
-     * with constant current density J (normal componant to the surface) and another single surface
-     * with constant potential V */
+    /** check boundary conditions: mesh and settings have to define at least one surface with a
+     * normal current density jn, either all numeric or all `jn: current_density`, and a single
+     * surface with constant potential V */
     void checkBoundaryConditions(void) const override;
 
 private:
     /** number of digits in the optional output file */
     const int precision = 8;
+
+    /** potential imposed on the surface with V [V], added to V in the output file */
+    double V_D = 0.0;
+
+    /** true if a surface has jn: current_density: V is then the reference potential V_ref (for
+     * j_ref = 1 A/m^2), written as is in the output file */
+    bool reference_problem = false;
 
     /** solver, using conjugate gradient with masking, with diagonal preconditionner
      * and Dirichlet boundary conditions, returns true if has converged */

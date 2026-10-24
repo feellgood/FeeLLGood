@@ -78,6 +78,14 @@ void ExpressionParser::set_expressions(const std::string &parameters, const std:
                  + expr_z + ")]; }");
     }
 
+void ExpressionParser::define_global_function(const std::string &name,
+                                              const std::string &js_function) const
+    {
+    duk_int_t err = duk_pcompile_string(ctx, DUK_COMPILE_FUNCTION, js_function.c_str());
+    die_if_error(err);                         // [ ... ] -> [ ... g ]
+    duk_put_global_string(ctx, name.c_str());  //         -> [ ... ]
+    }
+
 double ExpressionParser::get_scalar(const double arg) const
     {
     duk_dup(ctx, -1);                   // -> [ f f ]

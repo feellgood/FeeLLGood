@@ -1,5 +1,6 @@
 #include <fstream>
 #include <algorithm>
+#include <limits>
 #include <gmsh.h>
 
 #include "settings.h"
@@ -235,6 +236,8 @@ double mesh::readSol(bool VERBOSE, const std::string& fileName)
         unsigned int i_;
         int node_idx = node_index[i];
         fin >> i_ >> mx >> my >> mz >> node[node_idx].d[Nodes::NEXT].phi;
+        // skip the other columns (spin accumulation and potential, recomputed at the start)
+        fin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         node[node_idx].d[Nodes::NEXT].u = Eigen::Vector3d(mx,my,mz);
         if (i != i_)
             {
