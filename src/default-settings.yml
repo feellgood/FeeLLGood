@@ -274,7 +274,8 @@ spin_accumulation:
   # Whether to enable computation of spin accumulation contribution.
   enable: false
 
-  # Output, at the start, the electric potential solved once, in the file
+  # Output, at the start, the electric potential solved once (with V = 0
+  # on the surface with V, the imposed V_D being added), in the file
   # <file_basename>_V.sol of the current directory: V0 for the jn and V
   # of the settings, or the reference potential V_ref for
   # jn: current_density (jn = j_ref = 1 A/m^2 and V = 0). With the spin

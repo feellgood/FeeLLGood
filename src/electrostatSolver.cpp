@@ -118,22 +118,23 @@ bool electrostatSolver::solve(void)
     std::vector<int> ld; // vector of the Dirichlet Nodes
     std::vector<double> Vd(NOD); // potential values on Dirichlet nodes, zero on the others
 
-    /* with jn: current_density, reference problem: jn = j_ref = 1 A/m^2 and V = 0 on the surface
-     * with V, the imposed V being added afterwards (spinAcc::potential); solving with the imposed
-     * V and subtracting it would drown the reference potential (about 1e-13 V) in the error of the
-     * solve around V */
-    const bool reference_problem = std::any_of(paramTri.begin(), paramTri.end(),
-                                   [](const Triangle::prm &p) { return p.jn_current_density; });
+    /* the potential is solved with V = 0 on the surface with V, the imposed V_D being added
+     * afterwards (spinAcc::potential, save): the potential is defined up to a constant, and
+     * solving around V_D != 0 would add an error of the order of the tolerance times V_D (it
+     * drowned the reference potential of jn: current_density, about 5e-14 V for 1 A/m^2) */
+    reference_problem = std::any_of(paramTri.begin(), paramTri.end(),
+                                    [](const Triangle::prm &p) { return p.jn_current_density; });
 
     for (const Triangle::Tri &tri : msh->tri)
         {
         double _V = paramTri[tri.idxPrm].V;
         if (!std::isnan(_V))
             {
+            V_D = _V;
             for(int ie=0; ie < Triangle::N; ie++)
                 {
                 int i= tri.ind[ie];
-                Vd[i]= reference_problem ? 0.0 : _V;
+                Vd[i]= 0.0;
                 ld.push_back(i);
                 }
             }
@@ -156,11 +157,13 @@ bool electrostatSolver::save(const std::string &V_fileName, const std::string &m
 
     fout << tags::common::rw_time << ' ' << date() << '\n' << metadata << std::scientific
          << std::setprecision(precision);
+    // V0 = V_D + V for a numeric jn; reference potential V_ref = V for jn: current_density
+    const double offset = reference_problem ? 0.0 : V_D;
     const int NOD = msh->getNbNodes();
     for (int i = 0; i < NOD; i++)
         {
         int _i = msh->getNodeIndex(i);
-        fout << i << '\t' << V[_i] << "\n";
+        fout << i << '\t' << offset + V[_i] << "\n";
         }
     fout.close();
     return !(fout.good());

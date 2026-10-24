@@ -171,6 +171,11 @@ mySettings["mesh"]["surface_regions"]["inlet"]["jn"] = "current_density"
    200 nm with $\sigma$ = 4e6 S/m) would be drowned in the error of the solve around $V_D$ (about
    3e-8 V for $V_D$ = 1 V), giving tens of kV instead of 0.05 V once multiplied by 1e12.
 
+   A numeric `jn` follows the same path, with the factor 1: the potential is solved with the
+   `jn` of the settings and V = 0, and $V_D$ is added, $V_0 = V_D + V$. Solving around
+   $V_D \neq 0$ also degraded it, less severely: with $V_D$ = 1 V on the domain wall case, the
+   error of about 1e-8 V on $V - V_D$ gave 6.6e-4 (relative) on the spin accumulation.
+
 3. **Quasi-static spin accumulation.** The spin accumulation is solved at each time step, with
    the current magnetization and the current of that time: its diffusion and relaxation times are
    assumed much shorter than the time scales of the current and of the magnetization. In the weak
@@ -219,8 +224,9 @@ mySettings["mesh"]["surface_regions"]["inlet"]["jn"] = "current_density"
   `Settings::usesCurrentDensity()` (a surface has `jn: current_density`), and
   `Settings::jnFactor(t)`, the dimensionless factor $`j_n(t)/j_{\text{ref}}`$ if a surface has
   `jn: current_density`, 1 otherwise.
-- `electrostatSolver::solve` solves the reference problem (V = 0 on the surface with `V`) when a
-  surface has `jn: current_density`; `spinAcc::potential()` adds $V_D$.
+- `electrostatSolver::solve` always solves with V = 0 on the surface with `V` (reference problem
+  for `jn: current_density`); `spinAcc::potential()` adds $V_D$, as `electrostatSolver::save`
+  for a numeric `jn` ($V_0$ in `_V.sol`).
 - `Fem::compute_all` sets `spinAcc::jn_factor` before every solve of the spin accumulation; it is
   called after the time increment, at the time of the new magnetization.
 
