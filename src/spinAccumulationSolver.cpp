@@ -85,8 +85,8 @@ void spinAcc::checkBoundaryConditions(void) const
             }
         }
 
-    // one surface with jn (as the electrostatic problem), at least one surface with a given s
-    bool result = ( (nbSurfJ == 1) && (nbSurfS >= 1)
+    // at least one surface with jn (as the electrostatic problem), at least one with a given s
+    bool result = ( (nbSurfJ >= 1) && (nbSurfS >= 1)
            && (nbVolN0 == paramTet.size())
            && (nbVolP == paramTet.size()) );
 

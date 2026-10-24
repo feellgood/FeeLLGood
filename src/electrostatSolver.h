@@ -65,9 +65,9 @@ public:
     void compute(bool verbose /**< [in] */,
             const std::string& V_fileName /**< [in] output file name for V solution */);
 
-    /** check boundary conditions: mesh and settings have to define a single surface
-     * with constant current density J (normal componant to the surface) and another single surface
-     * with constant potential V */
+    /** check boundary conditions: mesh and settings have to define at least one surface with a
+     * normal current density jn, either all numeric or all `jn: current_density`, and a single
+     * surface with constant potential V */
     void checkBoundaryConditions(void) const override;
 
 private:

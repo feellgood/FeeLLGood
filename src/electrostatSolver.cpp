@@ -11,17 +11,29 @@
 void electrostatSolver::checkBoundaryConditions(void) const
     {
     int nbSurfJ(0);
+    int nbSurfJ_current_density(0);
     int nbSurfV(0);
     for (const Triangle::prm &p : paramTri)
         {
         if (std::isfinite(p.jn))
             { nbSurfJ++; }
+        if (p.jn_current_density)
+            { nbSurfJ_current_density++; }
         if (std::isfinite(p.V))
             { nbSurfV++; }
         }
-    if (!(nbSurfJ == 1 && nbSurfV == 1))
+    /* at least one surface with jn, all numeric or all jn: current_density (the potential is then
+     * proportional to the single factor current_density(t)/j_ref), and a single surface with V */
+    if (!(nbSurfJ >= 1 && nbSurfV == 1))
         {
-        std::cerr << "Error: incorrect boundary conditions for potential V solver.\n";
+        std::cerr << "Error: incorrect boundary conditions for potential V solver: at least one "
+                     "surface with jn and a single surface with V are required.\n";
+        exit(1);
+        }
+    if (nbSurfJ_current_density != 0 && nbSurfJ_current_density != nbSurfJ)
+        {
+        std::cerr << "Error: incorrect boundary conditions for potential V solver: the surfaces "
+                     "with jn cannot mix jn: current_density and numeric jn.\n";
         exit(1);
         }
     else if (verbose)

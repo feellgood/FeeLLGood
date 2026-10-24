@@ -1,8 +1,8 @@
 # Time-dependent current density
 
 The key `current_density` of the settings gives the normal current density $j_n(t)$, in A/m^2, of
-the surface region that declares `jn: current_density`, $t$ being the time in seconds. It replaces
-the constant value of `jn` of that surface. In st-feeLLGood, the same current is
+the surface regions that declare `jn: current_density`, $t$ being the time in seconds. It replaces
+the constant value of `jn` of those surfaces. In st-feeLLGood, the same current is
 `pulse(t)` × `J_n`, `pulse(t)` being a dimensionless factor defined in the case library
 (`pulse.cc`). Here it is a JavaScript function given in the settings, like `Bext`, and the
 functions of `Bext` can call it.
@@ -103,8 +103,11 @@ With the spin accumulation enabled:
 - the key `current_density` defined while no surface region has `jn: current_density` gives a
   warning on std::cerr: the function then only acts through `Bext`.
 
-The electrostatic problem still requires a single surface with `jn` (a number or
-`current_density`) and a single surface with `V`.
+The electrostatic problem requires at least one surface with `jn` and a single surface with `V`.
+Several surfaces may have `jn`, either all numeric (each with its value) or all
+`jn: current_density` (the same function for all of them); mixing them stops the run:
+`Error: incorrect boundary conditions for potential V solver: the surfaces with jn cannot mix
+jn: current_density and numeric jn.`
 
 ### Outputs
 
@@ -122,7 +125,7 @@ The electrostatic problem still requires a single surface with `jn` (a number or
   the potential are computed again at the start.
 - `spin_accumulation.V_file`: the potential solved at the start, written once in
   `<file_basename>_V.sol` of the current directory: $V_0$ for a numeric `jn`, the reference
-  potential $`V_{\text{ref}}`$ for `jn: current_density`, i.e. with jn = +1 A/m^2 on that surface
+  potential $`V_{\text{ref}}`$ for `jn: current_density`, i.e. with jn = +1 A/m^2 on those surfaces
   and V = 0 on the surface with `V` (see the hypotheses). For a current injected through the
   surface ($j_n < 0$), $`V_{\text{ref}}`$ has the opposite sign of the actual potential.
 - At start-up, the settings printed in verbose mode show the key `current_density`, and `J:
@@ -138,9 +141,12 @@ mySettings["mesh"]["surface_regions"]["inlet"]["jn"] = "current_density"
 
 ## Hypotheses
 
-1. **A single surface with jn.** As before, the electric problem has a single surface with `jn`
-   and a single surface with `V`: `current_density(t)` is the normal current density of that
-   surface.
+1. **A single time profile.** One or several surfaces may have `jn: current_density`: the same
+   function `current_density(t)` is then their normal current density, so that the potential is
+   proportional to the single factor $`j_n(t)/j_{\text{ref}}`$. Surfaces with independent
+   profiles, or a mix of numeric `jn` and `jn: current_density`, would need one reference solve
+   per profile (superposition) and are not possible. The electric problem has a single surface
+   with `V`.
 
 2. **Linear and quasi-static electrokinetics.** The potential is the solution of
    ```math
@@ -155,7 +161,7 @@ mySettings["mesh"]["surface_regions"]["inlet"]["jn"] = "current_density"
    V(t) = V_D + j_n(t)\,G,\qquad G = \frac{V_{\text{ref}}}{j_{\text{ref}}},
    ```
    where $`V_{\text{ref}}`$ is the solution of the reference problem: the reference current
-   density $`j_{\text{ref}} = 1`$ A/m^2 on the surface with `jn: current_density` and **V = 0** on
+   density $`j_{\text{ref}} = 1`$ A/m^2 on the surfaces with `jn: current_density` and **V = 0** on
    the surface with `V`. $G$, in V m^2/A, is the potential per unit normal current density.
    $`V_{\text{ref}}`$ is solved once, at the start, and never solved again. The factor
    $`j_n(t)/j_{\text{ref}}`$ is dimensionless, and numerically equal to the value of $j_n(t)$ in
@@ -213,7 +219,7 @@ mySettings["mesh"]["surface_regions"]["inlet"]["jn"] = "current_density"
 
 ## Implementation
 
-- `Triangle::prm::jn_current_density` marks the surface with `jn: current_density`, whose `jn` is
+- `Triangle::prm::jn_current_density` marks the surfaces with `jn: current_density`, whose `jn` is
   then the reference 1 A/m^2.
 - `ExpressionParser::define_global_function` defines `current_density` as a global JavaScript
   function in the interpreters of the time functions of the field (`field_parser`,
@@ -257,3 +263,10 @@ Ellipsoid of `examples/ellipsoid.msh`, **spin accumulation disabled**,
 
 The two checks: `jn: current_density` without the key stops the run with the error above; the
 key with a numeric `jn` gives the warning and the run goes on.
+
+Several surfaces: cylinder of `simulations/cyl_oersted_current_density_ramp1ns` with the spin
+accumulation, the current injected through the bottom face and the lateral surface: both with
+`jn: current_density` and `current_density: -1e12`, or both with `jn: -1e12`, give the same
+potential (to the 7 digits of the `.sol`, 0.2532 V on the bottom face, the 1D estimate
+$`(j/\sigma)(L + L^2/R)`$ giving 0.25 V), the same spin accumulation (1e-6, relative) and the same
+magnetization after one step (1e-12); mixing them stops the run with the error above.

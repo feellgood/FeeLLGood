@@ -15,11 +15,11 @@ const int DIM_PB_SPIN_ACC = 3;
 /** \class spinAcc
  container for Spin Accumulation constants, solver and related datas. The model obeys the diffusive
  spin equation. User has to provide through mesh and settings at least one surface where spin
- diffusion vector s is a constant (zero recommended): Dirichlet boundary condition, and one surface
- S1 where the current density jn is defined; if a spin polarization uP is also given on S1 (and no
- s), the spin injection is a flux (Neumann) boundary condition. This surface S1 must be the same
- as the one given to the potential solver for its own boundary conditions. A surface may have both
- jn and s (s is then imposed on it).
+ diffusion vector s is a constant (zero recommended): Dirichlet boundary condition, and at least
+ one surface where the current density jn is defined; if a spin polarization uP is also given on
+ such a surface (and no s), the spin injection is a flux (Neumann) boundary condition. These
+ surfaces are the ones given to the potential solver for its own boundary conditions. A surface may
+ have both jn and s (s is then imposed on it).
  */
 class spinAcc : public solver<DIM_PB_SPIN_ACC>
     {
@@ -60,8 +60,8 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** solution of the spin diffusion vector s over the nodes */
     std::vector<Eigen::Vector3d> s;
 
-    /** check boundary conditions: mesh and settings have to define a single surface with constant
-     * normal current density J and at least one surface where the spin diffusion s is given */
+    /** check boundary conditions: mesh and settings have to define at least one surface with a
+     * normal current density jn and at least one surface where the spin diffusion s is given */
     void checkBoundaryConditions(void) const override;
 
     private:

@@ -246,13 +246,14 @@ absorbing_ends:
 Bext: [0, 0, 0]
 
 # Time-dependent normal current density current_density(t), in A/m^2, j.n
-# with the outward normal, of the surface region with
-# ‘jn: current_density’, function of t, the time in seconds, given either
-# as a JavaScript function, e.g.
+# with the outward normal, of the surface regions with
+# ‘jn: current_density’ (one or several, the same function for all),
+# function of t, the time in seconds, given either as a JavaScript
+# function, e.g.
 #   current_density: "function(t) { return t < 1e-9 ? 0 : -1e12; }"
 # or as an expression of t, e.g. "-1e12*min(t/1e-10, 1)". Any shape and
 # any sign. The electrokinetics being linear, a reference potential
-# V_ref is solved once, with jn = j_ref = 1 A/m^2 on that surface and
+# V_ref is solved once, with jn = j_ref = 1 A/m^2 on those surfaces and
 # V = 0 on the surface with V, then V = V_D + (current_density(t)/j_ref)
 # V_ref, V_D being the imposed V, and grad V = (current_density(t)/j_ref)
 # grad V_ref, the factor current_density(t)/j_ref being dimensionless.
@@ -267,8 +268,9 @@ current_density:
 
 # Parameters for simulating a coupling to spin accumulation. The
 # boundary conditions of the electrostatic problem are a constant
-# potential on one surface, and a normal current density on another
-# surface. The material parameters are defined in mesh.volume_regions.
+# potential on one surface, and a normal current density on one or
+# several other surfaces, all numeric or all ‘jn: current_density’. The
+# material parameters are defined in mesh.volume_regions.
 spin_accumulation:
 
   # Whether to enable computation of spin accumulation contribution.
