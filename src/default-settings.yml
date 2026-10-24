@@ -251,9 +251,11 @@ Bext: [0, 0, 0]
 # as a JavaScript function, e.g.
 #   current_density: "function(t) { return t < 1e-9 ? 0 : -1e12; }"
 # or as an expression of t, e.g. "-1e12*min(t/1e-10, 1)". Any shape and
-# any sign. The electrokinetics being linear, the potential is solved
-# once with jn = 1 A/m^2 on that surface (V0), then grad V =
-# current_density(t) grad V0 (the imposed V is constant). The source terms
+# any sign. The electrokinetics being linear, the potential V0 is solved
+# once with the reference jn = j_ref = 1 A/m^2 on that surface, then
+# grad V = (current_density(t)/j_ref) grad V0, the factor
+# current_density(t)/j_ref being dimensionless (the imposed V is
+# constant). The source terms
 # of the spin accumulation (current polarized by the magnetization, spin
 # injection through the surface with jn and uP) follow current_density(t);
 # the imposed spin accumulation (key s of the surface regions) does not.
@@ -272,11 +274,12 @@ spin_accumulation:
   enable: false
 
   # Output, at the start, the electric potential V0 solved once, for the
-  # jn of the settings (1 A/m^2 for jn: current_density), in the file
-  # <file_basename>_V.sol of the current directory. With the spin
-  # accumulation, the .sol files have, after sx, sy, sz, a last column V,
-  # the potential at the time of the file: V_D + current_density(t)
-  # (V0 - V_D) for jn: current_density, V_D being the imposed V.
+  # jn of the settings (the reference j_ref = 1 A/m^2 for
+  # jn: current_density), in the file <file_basename>_V.sol of the
+  # current directory. With the spin accumulation, the .sol files have,
+  # after sx, sy, sz, a last column V, the potential at the time of the
+  # file: V_D + (current_density(t)/j_ref) (V0 - V_D) for
+  # jn: current_density, V_D being the imposed V.
   V_file: false
 
 # Parameters for the computation of the demagnetizing field.

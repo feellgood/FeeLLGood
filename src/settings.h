@@ -343,9 +343,10 @@ public:
     inline double getCurrentDensity(const double t_val) const
         { return current_density_parser.get_scalar(t_val); }
 
-    /** Factor of the electric sources at the time t_val in seconds: current_density(t) if a
-     * surface region has `jn: current_density` (its jn being the reference 1 A/m^2), 1
-     * otherwise (constant jn). This method is **not thread safe**.
+    /** Dimensionless factor of the electric sources at the time t_val in seconds:
+     * current_density(t)/j_ref if a surface region has `jn: current_density`, its jn being the
+     * reference j_ref = 1 A/m^2 (the value of current_density(t) in A/m^2), 1 otherwise
+     * (constant jn). This method is **not thread safe**.
      */
     inline double jnFactor(const double t_val) const
         { return usesCurrentDensity() ? getCurrentDensity(t_val) : 1.0; }
