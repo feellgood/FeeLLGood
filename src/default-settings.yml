@@ -180,16 +180,20 @@ mesh:
       # Spin injection through a polarizer stack F1 / thin spacer N (/ F2),
       # not meshed, instead of uP (Robin boundary condition, see
       # src/slonczewskiInterface.h). It requires jn, and excludes uP and s, on
-      # the same surface. The conductances are in the units of the spin
-      # diffusion problem, m/s. Example:
+      # the same surface. An interface is given by its resistance-area product
+      # AR (Ohm m^2), its asymmetry gamma (Valet-Fert) and its mixing
+      # conductance Gr, Gi (S/m^2); they are converted with the dens_state of
+      # the volume region bordering the surface. Example:
       # slonczewski:
       #   p: [0, 0, 1]   # magnetization of F1
-      #   F1: {sigma: 4e6, dens_state: 1.344e47, P: 0.3, l_sf: 10e-9,
-      #        thickness: 10e-9}  # optional bulk of F1, thickness default .inf
-      #   F1N: {P: 0.7, Gpar: 5e5, Gr: 5e5, Gi: 0}  # interface F1/N, Gi optional
-      #   NF2: {P: 0.7, Gpar: 5e5, Gr: 5e5, Gi: 0}  # optional interface N/F2,
-      #        # the surface being then magnetic; without it, the condition
-      #        # does not depend on the magnetization (meshed spacer)
+      #   F1: {sigma: 4e6, P: 0.3, l_sf: 10e-9, thickness: 10e-9}  # optional
+      #        # bulk of F1, thickness default .inf
+      #   F1N: {AR: 0.5e-15, gamma: 0.75, Gr: 5e14, Gi: 0}  # interface F1/N,
+      #        # Gi optional
+      #   NF2: {AR: 0.3e-15, gamma: 0.6, Gr: 5e14, Gi: 0}   # optional
+      #        # interface N/F2, the surface being then magnetic; without it,
+      #        # the condition does not depend on the magnetization (meshed
+      #        # spacer)
 
 # The initial magnetization can be provided as either:
 # - the name of a file in feeLLGood’s format (‘.sol’ file)

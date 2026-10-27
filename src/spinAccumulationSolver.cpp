@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <array>
+#include <map>
 
 #include "algebra/bicg.h"
 #include "algebra/block_precond.h"
@@ -29,16 +31,7 @@ using namespace Nodes;
                              "jn: current_density: it only acts through Bext.\n";
                 }
             checkBoundaryConditions();
-            for (const Triangle::Tri &f : _msh.tri)
-                {
-                const Triangle::prm &p = paramTri[f.idxPrm];
-                if (p.slonczewski && p.stack.hasNF2 && !_msh.isMagnetic(f))
-                    {
-                    std::cerr << "Error: surface region " << p.regName << " has a polarizer stack "
-                                 "with a N/F2 interface, it should be on a magnetic region.\n";
-                    exit(1);
-                    }
-                }
+            makeStacks();
             valDirichlet.resize(DIM_PB * NOD);
             boundaryConditions();
 
@@ -107,6 +100,79 @@ void spinAcc::checkBoundaryConditions(void) const
         }
     else if (verbose)
         { std::cout << "spin diffusion problem boundary conditions Ok.\n"; }
+    }
+
+void spinAcc::makeStacks(void)
+    {
+    stacks.resize(paramTri.size());
+    /* triangles of the surfaces with a polarizer stack, by their sorted node indices, to find the
+     * tetrahedron on the side of the sample, hence its density of states */
+    std::map<std::array<int,Triangle::N>, int> faces;
+    for (size_t k = 0; k < msh->tri.size(); k++)
+        {
+        const Triangle::Tri &f = msh->tri[k];
+        if (!paramTri[f.idxPrm].slonczewski)
+            { continue; }
+        if (paramTri[f.idxPrm].stack.hasNF2 && !msh->isMagnetic(msh->tri[k]))
+            {
+            std::cerr << "Error: surface region " << paramTri[f.idxPrm].regName << " has a "
+                         "polarizer stack with a N/F2 interface, it should be on a magnetic region.\n";
+            exit(1);
+            }
+        std::array<int,Triangle::N> key = f.ind;
+        std::sort(key.begin(), key.end());
+        faces[key] = k;
+        }
+    if (faces.empty())
+        { return; }
+
+    std::vector<double> N0(paramTri.size(), NAN);
+    for (const Tetra::Tet &tet : msh->tet)
+        {
+        for (int omit = 0; omit < Tetra::N; omit++)  // the face without the node omit
+            {
+            std::array<int,Triangle::N> key;
+            for (int ie = 0, j = 0; ie < Tetra::N; ie++)
+                {
+                if (ie != omit)
+                    { key[j++] = tet.ind[ie]; }
+                }
+            std::sort(key.begin(), key.end());
+            const auto found = faces.find(key);
+            if (found == faces.end())
+                { continue; }
+            const int idx = msh->tri[found->second].idxPrm;
+            const double n0 = paramTet[tet.idxPrm].N0;
+            if (std::isnan(N0[idx]))
+                { N0[idx] = n0; }
+            else if (N0[idx] != n0)
+                {
+                std::cerr << "Error: surface region " << paramTri[idx].regName << " has a polarizer "
+                             "stack and borders volume regions of different dens_state.\n";
+                exit(1);
+                }
+            }
+        }
+
+    for (size_t idx = 0; idx < paramTri.size(); idx++)
+        {
+        if (!paramTri[idx].slonczewski)
+            { continue; }
+        stacks[idx] = Slonczewski::makeStack(paramTri[idx].stack, N0[idx]);
+        if (verbose)
+            {
+            const Slonczewski::Stack &s = stacks[idx];
+            std::cout << "polarizer stack of " << paramTri[idx].regName << " (dens_state " << N0[idx]
+                      << "), in m/s: F1N (renormalized by F1) P = " << s.P1 << ", Gpar = "
+                      << s.G1par << ", Gr = " << s.G1r << ", Gi = " << s.G1i;
+            if (s.hasNF2)
+                {
+                std::cout << "; NF2 P = " << s.P2 << ", Gpar = " << s.G2par << ", Gr = " << s.G2r
+                          << ", Gi = " << s.G2i;
+                }
+            std::cout << "\n";
+            }
+        }
     }
 
 void spinAcc::fillDirichletData(const int k, Eigen::Vector3d &s_value)
@@ -288,7 +354,7 @@ void spinAcc::stackBoundaryCondition(Triangle::Tri &f)
             { m0 += a[ie][npi] * msh->getNode_u(f.ind[ie]); }
         if (m0.norm() > 0)
             { m0.normalize(); }
-        const Slonczewski::BC bc = param.stack.bc(m0);
+        const Slonczewski::BC bc = stacks[f.idxPrm].bc(m0);
 
         for (int ie = 0; ie < N; ie++)
             {

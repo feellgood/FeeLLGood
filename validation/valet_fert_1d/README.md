@@ -8,13 +8,15 @@ The stack is F1 (bulk, thickness $t_1$, reservoir on its far side) / interface F
 zero thickness / interface N/F2 / F2, F2 being the meshed wire (`wire.geo`, 10 × 10 × 300 nm,
 h = 1 nm). The magnetizations are along $z$, F1 parallel (P) or antiparallel (AP) to F2.
 
-It fixes the conversion of the interface resistance-area product $AR^*$ (Ω·m²) into the
-longitudinal conductance of the spin diffusion problem:
+It checks the conversion, done by feeLLGood (`Slonczewski::makeStack`), of the interface
+resistance-area product $AR^*$ (Ω·m²) of the settings into the longitudinal conductance of the spin
+diffusion problem:
 ```math
 G_\parallel = \frac{2}{e^2N_0\,AR^*}\quad[\mathrm{m/s}],
 ```
-with $s = \mu_B N_0\,(\mu_+ - \mu_-)/2$ (A/m), $N_0$ being the same in all the layers (feeLLGood
-takes $s$ continuous). The polarization `P` of an interface is the asymmetry $\gamma$ of Valet–Fert.
+with $s = \mu_B N_0\,(\mu_+ - \mu_-)/2$ (A/m), $N_0$ being the density of states of F2 (the
+volume region bordering the surface): the stack is not meshed, all its conductances are converted
+with it. The asymmetry `gamma` of an interface is the one of Valet–Fert.
 
 ## Usage
 

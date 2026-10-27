@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <algorithm>
 #include <regex>
@@ -91,15 +92,16 @@ static double readRequired(YAML::Node node, const std::string &key, const std::s
     return node[key].as<double>();
     }
 
-// Read the polarizer stack of a surface region (key `slonczewski`), see slonczewskiInterface.h:
-// the F1/N interface (required), the bulk of F1 (optional, folded into F1/N) and the N/F2 interface
-// (optional). The conductances are in the units of the spin diffusion problem, m/s.
+// Read the polarizer stack of a surface region (key `slonczewski`), in physical units, see
+// slonczewskiInterface.h: the F1/N interface (required), the bulk of F1 (optional, folded into F1/N
+// by spinAcc) and the N/F2 interface (optional). An interface is given by its resistance-area
+// product AR (Ohm m^2), its asymmetry gamma and its mixing conductance Gr, Gi (S/m^2).
 // The nodes are taken by value: operator[] of a const YAML::Node throws on a missing key.
-static Slonczewski::Stack readStack(YAML::Node node, const std::string &where)
+static Slonczewski::StackSettings readStack(YAML::Node node, const std::string &where)
     {
     if (!node.IsMap())
         { error((where + " should be a map.").c_str()); }
-    Slonczewski::Stack st;
+    Slonczewski::StackSettings st;
     if (!node["p"] || node["p"].IsNull())
         { error((where + ".p is required.").c_str()); }
     st.p = { node["p"][0].as<double>(), node["p"][1].as<double>(), node["p"][2].as<double>() };
@@ -107,25 +109,24 @@ static Slonczewski::Stack readStack(YAML::Node node, const std::string &where)
         { error((where + ".p should not be zero.").c_str()); }
     st.p.normalize();
 
-    // an interface N/F: polarization, longitudinal and mixing conductances
-    auto readInterface = [&where](YAML::Node itf, const std::string &key, double &P,
-                                  double &Gpar, double &Gr, double &Gi)
+    auto readInterface = [&where](YAML::Node itf, const std::string &key)
         {
         const std::string w = where + "." + key;
         if (!itf.IsMap())
             { error((w + " should be a map.").c_str()); }
-        P = readRequired(itf, "P", w);
-        Gpar = readRequired(itf, "Gpar", w);
-        Gr = readRequired(itf, "Gr", w);
-        Gi = 0;
-        assign(Gi, itf["Gi"]);
-        if (std::abs(P) > 1 || Gpar <= 0 || Gr < 0)
-            { error((w + ": |P| <= 1, Gpar > 0 and Gr >= 0 are required.").c_str()); }
+        Slonczewski::Interface i;
+        i.AR = readRequired(itf, "AR", w);
+        i.gamma = readRequired(itf, "gamma", w);
+        i.Gr = readRequired(itf, "Gr", w);
+        assign(i.Gi, itf["Gi"]);
+        if (i.AR <= 0 || std::abs(i.gamma) > 1 || i.Gr < 0)
+            { error((w + ": AR > 0, |gamma| <= 1 and Gr >= 0 are required.").c_str()); }
+        return i;
         };
 
     if (!node["F1N"])
         { error((where + ".F1N is required.").c_str()); }
-    readInterface(node["F1N"], "F1N", st.P1, st.G1par, st.G1r, st.G1i);
+    st.F1N = readInterface(node["F1N"], "F1N");
 
     YAML::Node F1 = node["F1"];
     if (F1 && !F1.IsNull())
@@ -133,26 +134,20 @@ static Slonczewski::Stack readStack(YAML::Node node, const std::string &where)
         const std::string w = where + ".F1";
         if (!F1.IsMap())
             { error((w + " should be a map.").c_str()); }
-        const double sigma = readRequired(F1, "sigma", w);
-        const double N0 = readRequired(F1, "dens_state", w);
-        const double P = readRequired(F1, "P", w);
-        const double lsf = readRequired(F1, "l_sf", w);
-        double thickness = INFINITY;
-        assign(thickness, F1["thickness"]);
-        if (sigma <= 0 || N0 <= 0 || lsf <= 0 || thickness <= 0 || P < 0 || P >= 1)
-            { error((w + ": sigma, dens_state, l_sf, thickness > 0 and 0 <= P < 1 are required.").c_str()); }
-        const double D0 = 2.0 * sigma / (CHARGE_ELECTRON * CHARGE_ELECTRON * N0);
-        const double gF = Slonczewski::bulkConductance(D0, P, lsf, thickness);
-        const Slonczewski::F1prm r = Slonczewski::renormalizeF1(P, gF, {st.P1, st.G1par});
-        st.P1 = r.P;
-        st.G1par = r.Gpar;
+        st.hasF1 = true;
+        st.sigma1 = readRequired(F1, "sigma", w);
+        st.P1bulk = readRequired(F1, "P", w);
+        st.lsf1 = readRequired(F1, "l_sf", w);
+        assign(st.t1, F1["thickness"]);
+        if (st.sigma1 <= 0 || st.lsf1 <= 0 || st.t1 <= 0 || st.P1bulk < 0 || st.P1bulk >= 1)
+            { error((w + ": sigma, l_sf, thickness > 0 and 0 <= P < 1 are required.").c_str()); }
         }
 
     YAML::Node NF2 = node["NF2"];
     if (NF2 && !NF2.IsNull())
         {
         st.hasNF2 = true;
-        readInterface(NF2, "NF2", st.P2, st.G2par, st.G2r, st.G2i);
+        st.NF2 = readInterface(NF2, "NF2");
         }
     return st;
     }
@@ -418,16 +413,24 @@ void Settings::toYaml()
             std::cout << "      s: " << str(it->s) << "\n";
             if (it->slonczewski)
                 {
-                const Slonczewski::Stack &st = it->stack;
+                const Slonczewski::StackSettings &st = it->stack;
+                auto itf = [](const Slonczewski::Interface &i)
+                    {
+                    std::ostringstream o;
+                    o << "{AR: " << i.AR << ", gamma: " << i.gamma << ", Gr: " << i.Gr
+                      << ", Gi: " << i.Gi << "}";
+                    return o.str();
+                    };
                 std::cout << "      slonczewski:\n";
                 std::cout << "        p: " << str(st.p) << "\n";
-                std::cout << "        F1N (renormalized by F1): {P: " << st.P1 << ", Gpar: "
-                          << st.G1par << ", Gr: " << st.G1r << ", Gi: " << st.G1i << "}\n";
-                if (st.hasNF2)
+                if (st.hasF1)
                     {
-                    std::cout << "        NF2: {P: " << st.P2 << ", Gpar: " << st.G2par
-                              << ", Gr: " << st.G2r << ", Gi: " << st.G2i << "}\n";
+                    std::cout << "        F1: {sigma: " << st.sigma1 << ", P: " << st.P1bulk
+                              << ", l_sf: " << st.lsf1 << ", thickness: " << st.t1 << "}\n";
                     }
+                std::cout << "        F1N: " << itf(st.F1N) << "\n";
+                if (st.hasNF2)
+                    { std::cout << "        NF2: " << itf(st.NF2) << "\n"; }
                 }
             }
         }

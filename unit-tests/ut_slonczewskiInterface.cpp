@@ -46,10 +46,10 @@ BOOST_AUTO_TEST_CASE(conductance)
 
 BOOST_AUTO_TEST_CASE(bulkConductance, *boost::unit_test::tolerance(1e-14))
     {
-    const double D0 = 2.3e-3, P = 0.4, lsf = 10e-9;
-    const double thick = D0 * (1 - P * P) / lsf;
-    BOOST_TEST( Slonczewski::bulkConductance(D0, P, lsf, INFINITY) == thick );
-    BOOST_TEST( Slonczewski::bulkConductance(D0, P, lsf, 2 * lsf) == thick / std::tanh(2.0) );
+    const double sigma = 4e6, P = 0.4, lsf = 10e-9;
+    const double thick = sigma * (1 - P * P) / lsf;
+    BOOST_TEST( Slonczewski::bulkConductance(sigma, P, lsf, INFINITY) == thick );
+    BOOST_TEST( Slonczewski::bulkConductance(sigma, P, lsf, 2 * lsf) == thick / std::tanh(2.0) );
     }
 
 BOOST_AUTO_TEST_CASE(renormalizeF1)
@@ -198,6 +198,42 @@ BOOST_AUTO_TEST_CASE(stack)
             Slonczewski::conductance(m0, st.G2par, st.G2r, st.G2i), st.P2, m0);
     BOOST_TEST( rel_err(bcA.Peff, bc.Peff) < 1e-15 );
     BOOST_TEST( rel_err(bcA.Gs, bc.Gs) < 1e-15 );
+    }
+
+BOOST_AUTO_TEST_CASE(makeStack)
+    {
+    /* conversion into the units of the spin diffusion problem with k = 2/(e^2 N0): Gpar = k/AR,
+     Gr = k Gr[S/m^2]; the bulk of F1 renormalizes F1/N with gF = k sigma (1 - P^2)/lsf coth(t/lsf) */
+    Slonczewski::StackSettings st;
+    st.p = Eigen::Vector3d(0, 1, 0);
+    st.F1N = {0.5e-15, 0.75, 5e14, 1e13};
+    st.hasNF2 = true;
+    st.NF2 = {0.3e-15, 0.6, 4e14, 0};
+    const double N0 = 1.344e47;
+    const double k = 2.0 / (CHARGE_ELECTRON * CHARGE_ELECTRON * N0);
+
+    Slonczewski::Stack s = Slonczewski::makeStack(st, N0);
+    BOOST_TEST( s.p == st.p );
+    BOOST_TEST( std::abs(s.P1 - 0.75) < 1e-15 );
+    BOOST_TEST( std::abs(s.G1par * 0.5e-15 / k - 1) < 1e-14 );
+    BOOST_TEST( std::abs(s.G1r / (k * 5e14) - 1) < 1e-14 );
+    BOOST_TEST( std::abs(s.G1i / (k * 1e13) - 1) < 1e-14 );
+    BOOST_TEST( s.hasNF2 );
+    BOOST_TEST( std::abs(s.P2 - 0.6) < 1e-15 );
+    BOOST_TEST( std::abs(s.G2par * 0.3e-15 / k - 1) < 1e-14 );
+    BOOST_TEST( std::abs(s.G2r / (k * 4e14) - 1) < 1e-14 );
+
+    st.hasF1 = true;
+    st.sigma1 = 2e6;
+    st.P1bulk = 0.5;
+    st.lsf1 = 20e-9;
+    st.t1 = 15e-9;
+    s = Slonczewski::makeStack(st, N0);
+    const double gF = k * st.sigma1 * (1 - 0.25) / (st.lsf1 * std::tanh(st.t1 / st.lsf1));
+    const Slonczewski::F1prm r = Slonczewski::renormalizeF1(0.5, gF, {0.75, k / 0.5e-15});
+    BOOST_TEST( std::abs(s.P1 / r.P - 1) < 1e-14 );
+    BOOST_TEST( std::abs(s.G1par / r.Gpar - 1) < 1e-14 );
+    BOOST_TEST( std::abs(s.G1r / (k * 5e14) - 1) < 1e-14 );  // mixing conductance unchanged
     }
 
 BOOST_AUTO_TEST_SUITE_END()

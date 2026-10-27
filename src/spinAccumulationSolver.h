@@ -124,6 +124,15 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
      * boundary conditions */
     bool solve(void);
 
+    /** polarizer stacks in the units of the spin diffusion problem, indexed as paramTri (only the
+     * surfaces with slonczewski are set) */
+    std::vector<Slonczewski::Stack> stacks;
+
+    /** converts the polarizer stacks of the settings (physical units) with the density of states
+     * of the volume region bordering each surface; checks that a surface with a N/F2 interface is
+     * magnetic */
+    void makeStacks(void);
+
     /** Robin boundary condition of the triangle f, on a surface with a polarizer stack
      * (slonczewski): adds the term in s to the matrix K and the source to the RHS L_rhs */
     void stackBoundaryCondition(Triangle::Tri &f);

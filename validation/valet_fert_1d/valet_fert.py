@@ -18,8 +18,10 @@ s = mu_B N0 e phi/2 (in A/m), so that the bulk equations are the ones of feeLLGo
 beta = beta' = P, D0 = 2 sigma/(e^2 N0), and the interface conductances, in the units of the spin
 diffusion problem, are
     Gpar = 2/(e^2 N0 AR)    [m/s]
-which is the conversion checked here. N0 is the same in all the layers (feeLLGood takes s
-continuous).
+which is the conversion checked here (done by feeLLGood, src/slonczewskiInterface.h: the settings
+give AR and gamma). N0 is the density of states of F2: the stack being not meshed, all its
+conductances (interfaces and bulk of F1) are converted with it, the density of states of F1 does
+not enter.
 
 Usage: valet_fert.py [path to feellgood], from any directory; the mesh is built with gmsh if
 missing. Exit status 0 if the relative error is below the tolerance in both configurations.
@@ -41,16 +43,11 @@ TOL = 1e-2                           # relative tolerance on the spin accumulati
 L = 300e-9
 F2 = {"sigma": 4e6, "N0": 1.344e47, "beta": 0.3, "lsf": 10e-9, "lsd": 1e-9}
 # polarizer stack
-F1 = {"sigma": 2e6, "N0": F2["N0"], "beta": 0.5, "lsf": 20e-9, "t": 15e-9}
+F1 = {"sigma": 2e6, "beta": 0.5, "lsf": 20e-9, "t": 15e-9}
 ITF1 = {"AR": 0.5e-15, "gamma": 0.75}   # F1/N, AR in Ohm m^2
 ITF2 = {"AR": 0.3e-15, "gamma": 0.6}    # N/F2
 JN = 1e12                            # A/m^2, normal current density on the inlet (outward
                                      # normal -z): electrons flowing from F1 to F2
-
-
-def g_par(itf):
-    """longitudinal conductance of an interface in the units of the spin diffusion problem"""
-    return 2.0 / (E**2 * F2["N0"] * itf["AR"])
 
 
 def valet_fert(sign_F1, z):
@@ -87,10 +84,9 @@ def valet_fert(sign_F1, z):
 def settings(sign_F1, name):
     stack = {
         "p": [0, 0, sign_F1],
-        "F1": {"sigma": F1["sigma"], "dens_state": F1["N0"], "P": F1["beta"],
-               "l_sf": F1["lsf"], "thickness": F1["t"]},
-        "F1N": {"P": ITF1["gamma"], "Gpar": g_par(ITF1), "Gr": g_par(ITF1)},
-        "NF2": {"P": ITF2["gamma"], "Gpar": g_par(ITF2), "Gr": g_par(ITF2)}}
+        "F1": {"sigma": F1["sigma"], "P": F1["beta"], "l_sf": F1["lsf"], "thickness": F1["t"]},
+        "F1N": {"AR": ITF1["AR"], "gamma": ITF1["gamma"], "Gr": 5e14},
+        "NF2": {"AR": ITF2["AR"], "gamma": ITF2["gamma"], "Gr": 5e14}}
     return {
         "outputs": {"file_basename": name, "final_time": 1e-13, "evol_time_step": 1e-12,
                     "mag_config_every": 10},
@@ -138,7 +134,6 @@ def main():
     z = read_mesh_nodes("wire.msh")[:, 2] * 1e-9
 
     ok = True
-    print(f"Gpar(F1/N) = {g_par(ITF1):.4e} m/s, Gpar(N/F2) = {g_par(ITF2):.4e} m/s")
     for sign_F1, name in [(1, "P"), (-1, "AP")]:
         subprocess.run([feellgood, "-"], input=json.dumps(settings(sign_F1, name)), text=True,
                        check=True, stdout=subprocess.DEVNULL)
