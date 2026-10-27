@@ -11,10 +11,15 @@ p = (sin theta, 0, cos theta).
 Reference:
 - interfaces, circuit theory of Brataas et al. (Phys. Rep. 427, 157, 2006), per unit area, in the
   variables of Valet-Fert (charge current density j along +z, spin accumulation phi = mu_s/e in
-  volts, mu_s = (mu+ - mu-)/2); the spin current from L to R through an interface of magnetization
-  u is
-      j_s = gamma j u + (1/AR) u (u.(phi_R - phi_L)) + 2 G_up,down (phi_R - phi_L)_perp
-  (Im G_up,down = 0), the moment flux being -(mu_B/e) j_s;
+  volts, mu_s = (mu+ - mu-)/2, + being the majority spin, along the magnetization); the spin
+  current from L to R through an interface of magnetization u is
+      j_s = gamma j u + (1/AR) u (u.(phi_R - phi_L)) + 2 Re G_up,down (phi_R - phi_L)_perp
+            + 2 Im G_up,down (phi_R - phi_L) x u,
+  the moment flux being -(mu_B/e) j_s. This is the equation of Brataas et al. for the transverse
+  spin current from N into F, 2 Re G_up,down m x (V_S x m) + 2 Im G_up,down V_S x m, with
+  G_up,down = (e^2/h) [M - sum r_up r_down^*] (up: majority spin, along m) and V_S = -phi
+  (mu = -e V); the sign of the term in Im G_up,down also follows from the scattering of a single
+  channel: the transverse polarization absorbed is 1 - r_up^* r_down = conj(G_up,down);
 - F2, equations of feeLLGood (beta = beta' = P, D0 = 2 sigma/(e^2 N0)), 1D, solved exactly by the
   eigenmodes of D0 (I - P^2 m m^T) s'' = [D0 (1 - P^2)/l_sf^2] s + (D0/l_sd^2) s x m;
 - s = mu_B N0 e phi/2 (validation/valet_fert_1d).
@@ -42,8 +47,11 @@ TOL = 2e-2                           # relative tolerance
 
 T2 = 3e-9                            # thickness of F2 (m), as in thin_layer.geo
 F2 = {"sigma": 4e6, "N0": 1.344e47, "P": 0.5, "lsf": 5e-9, "lsd": 1e-9}
-ITF1 = {"AR": 0.5e-15, "gamma": 0.75, "Gr": 0.55e15}   # F1/N, Gr = Re G_up,down (S/m^2)
-ITF2 = {"AR": 0.5e-15, "gamma": 0.75, "Gr": 0.55e15}   # N/F2
+# F1/N and N/F2, Gr + i Gi = G_up,down (S/m^2); Im G_up,down is large here, so that its sign matters
+ITF1 = {"AR": 0.5e-15, "gamma": 0.75, "Gr": 0.55e15, "Gi": 0.15e15}
+ITF2 = {"AR": 0.5e-15, "gamma": 0.75, "Gr": 0.55e15, "Gi": 0.25e15}
+IM_SIGN = 1                          # sign of the term in Im G_up,down of the reference (-1: checks
+                                     # that the test fails with the opposite sign)
 JN = 1e12                            # A/m^2 on the inlet (outward normal -z): electrons from F1 to F2
 ANGLES = [0, 30, 60, 90, 120, 150, 180]
 
@@ -68,7 +76,9 @@ def reference(theta, z):
 
     def contact(u, itf):
         """j_s = gamma j u + K (phi_R - phi_L)"""
-        K = np.outer(u, u) / itf["AR"] + 2 * itf["Gr"] * (I3 - np.outer(u, u))
+        Cu = np.array([[0, u[2], -u[1]], [-u[2], 0, u[0]], [u[1], -u[0], 0]])  # Cu w = w x u
+        K = (np.outer(u, u) / itf["AR"] + 2 * itf["Gr"] * (I3 - np.outer(u, u))
+             + IM_SIGN * 2 * itf["Gi"] * Cu)
         return itf["gamma"] * j * u, K
 
     b1, K1 = contact(p, ITF1)                    # L = F1 (phi = 0), R = N
@@ -88,7 +98,7 @@ def reference(theta, z):
 
 def settings(theta, name):
     p = [float(np.sin(np.radians(theta))), 0.0, float(np.cos(np.radians(theta)))]
-    itf = lambda d: {"AR": d["AR"], "gamma": d["gamma"], "Gr": d["Gr"]}
+    itf = lambda d: {"AR": d["AR"], "gamma": d["gamma"], "Gr": d["Gr"], "Gi": d["Gi"]}
     return {
         "outputs": {"file_basename": name, "final_time": 1e-13, "evol_time_step": 1e-12,
                     "mag_config_every": 10},

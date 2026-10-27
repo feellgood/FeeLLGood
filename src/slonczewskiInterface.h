@@ -141,8 +141,9 @@ struct Interface
     double AR = 0;    /**< resistance-area product, Ohm m^2 */
     double gamma = 0; /**< asymmetry of the interface resistance (polarization), |gamma| <= 1 */
     double Gr = 0;    /**< real part of the mixing conductance G_up,down of Brataas et al., S/m^2 */
-    double Gi = 0;    /**< imaginary part of the mixing conductance G_up,down, S/m^2 (its sign is not
-                         checked by the validations) */
+    double Gi = 0;    /**< imaginary part of the mixing conductance G_up,down, S/m^2, with
+                         G_up,down = (e^2/h) [M - sum r_up r_down^*], up being the majority spin
+                         (sign checked by validation/slonczewski_angle) */
     };
 
 /** \struct StackSettings
