@@ -15,10 +15,15 @@ the magnetization of F2 on the interface and \f$ \mathbf{s}_F \f$ its spin accum
 of F1 is folded into the F1/N interface (renormalizeF1()), so that \f$ \mathbf{s}_{F1} = 0 \f$.
 
 The settings (StackSettings) give the stack in physical units: resistance-area products AR
-(Ohm m^2) and asymmetries gamma of the interfaces (Valet-Fert), mixing conductances (S/m^2),
-conductivity of F1. makeStack() converts them into the conductances of the spin diffusion problem
-(m/s, Stack) with the factor 2/(e^2 N0) of spinFactor(), N0 being the density of states of the
-sample on the surface: s = mu_B N0 (mu+ - mu-)/2 (validation/valet_fert_1d).
+(Ohm m^2) and asymmetries gamma of the interfaces (Valet-Fert), mixing conductances G_up,down of
+Brataas et al. (S/m^2), conductivity of F1. makeStack() converts them into the conductances of the
+spin diffusion problem (m/s, Stack) with the factor k = 2/(e^2 N0) of spinFactor(), N0 being the
+density of states of the sample on the surface. With D0 = 2 sigma/(e^2 N0), the spin accumulation of
+feeLLGood is s = mu_B N0 mu_s/2, mu_s = (mu+ - mu-)/2 being the spin accumulation of Valet-Fert and
+of Brataas et al. (validation/valet_fert_1d). The spin current through an interface being
+(1 - gamma^2)(G_up + G_down) mu_s = mu_s/AR along u and 2 G_up,down mu_s across u (circuit theory),
+Gpar = k/AR and Gr + i Gi = 2 k G_up,down: for a non-magnetic interface (gamma = 0,
+G_up = G_down = G_up,down), the conductance is isotropic.
 */
 
 #include <cmath>
@@ -44,8 +49,8 @@ inline Eigen::Matrix3d conductance(const Eigen::Vector3d &u /**< [in] magnetizat
     return Gpar * uuT + Gr * (Eigen::Matrix3d::Identity() - uuT) - Gi * u_cross;
     }
 
-/** factor converting a conductance per unit area (S/m^2) into a conductance of the spin diffusion
- * problem (m/s), the spin accumulation being s = mu_B N0 (mu+ - mu-)/2: 2/(e^2 N0) */
+/** factor converting a conductance per unit area (S/m^2), relating the spin current to mu_s, into a
+ * conductance of the spin diffusion problem (m/s), s = mu_B N0 mu_s/2: 2/(e^2 N0) */
 inline double spinFactor(const double N0 /**< [in] density of states of the sample, J^-1 m^-3 */)
     { return 2.0 / (CHARGE_ELECTRON * CHARGE_ELECTRON * N0); }
 
@@ -135,9 +140,9 @@ struct Interface
     {
     double AR = 0;    /**< resistance-area product, Ohm m^2 */
     double gamma = 0; /**< asymmetry of the interface resistance (polarization), |gamma| <= 1 */
-    double Gr = 0;    /**< real part of the mixing conductance, S/m^2, converted as 1/AR (the factor
-                         of the convention of G_up,down, not checked by the collinear validation) */
-    double Gi = 0;    /**< imaginary part of the mixing conductance, S/m^2 */
+    double Gr = 0;    /**< real part of the mixing conductance G_up,down of Brataas et al., S/m^2 */
+    double Gi = 0;    /**< imaginary part of the mixing conductance G_up,down, S/m^2 (its sign is not
+                         checked by the validations) */
     };
 
 /** \struct StackSettings
@@ -156,8 +161,8 @@ struct StackSettings
     };
 
 /** stack in the units of the spin diffusion problem (m/s), N0 being the density of states of the
- * sample on the surface: the longitudinal conductance of an interface is 2/(e^2 N0 AR), the bulk
- * of F1 is folded into the F1/N interface */
+ * sample on the surface, k = 2/(e^2 N0): the longitudinal conductance of an interface is k/AR, its
+ * mixing conductance 2 k G_up,down; the bulk of F1 is folded into the F1/N interface */
 inline Stack makeStack(const StackSettings &st /**< [in] */,
                        const double N0 /**< [in] density of states of the sample, J^-1 m^-3 */)
     {
@@ -166,8 +171,8 @@ inline Stack makeStack(const StackSettings &st /**< [in] */,
     s.p = st.p;
     s.P1 = st.F1N.gamma;
     s.G1par = k / st.F1N.AR;
-    s.G1r = k * st.F1N.Gr;
-    s.G1i = k * st.F1N.Gi;
+    s.G1r = 2 * k * st.F1N.Gr;
+    s.G1i = 2 * k * st.F1N.Gi;
     if (st.hasF1)
         {
         const double gF = k * bulkConductance(st.sigma1, st.P1bulk, st.lsf1, st.t1);
@@ -180,8 +185,8 @@ inline Stack makeStack(const StackSettings &st /**< [in] */,
         {
         s.P2 = st.NF2.gamma;
         s.G2par = k / st.NF2.AR;
-        s.G2r = k * st.NF2.Gr;
-        s.G2i = k * st.NF2.Gi;
+        s.G2r = 2 * k * st.NF2.Gr;
+        s.G2i = 2 * k * st.NF2.Gi;
         }
     return s;
     }

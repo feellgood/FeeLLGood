@@ -181,9 +181,10 @@ mesh:
       # not meshed, instead of uP (Robin boundary condition, see
       # src/slonczewskiInterface.h). It requires jn, and excludes uP and s, on
       # the same surface. An interface is given by its resistance-area product
-      # AR (Ohm m^2), its asymmetry gamma (Valet-Fert) and its mixing
-      # conductance Gr, Gi (S/m^2); they are converted with the dens_state of
-      # the volume region bordering the surface. Example:
+      # AR (Ohm m^2), its asymmetry gamma (Valet-Fert) and the real and
+      # imaginary parts Gr, Gi of its mixing conductance G_up,down (Brataas et
+      # al., S/m^2, e.g. about 0.5e15 for Co/Cu); they are converted with the
+      # dens_state of the volume region bordering the surface. Example:
       # slonczewski:
       #   p: [0, 0, 1]   # magnetization of F1
       #   F1: {sigma: 4e6, P: 0.3, l_sf: 10e-9, thickness: 10e-9}  # optional

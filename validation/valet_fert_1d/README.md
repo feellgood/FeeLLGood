@@ -14,7 +14,7 @@ diffusion problem:
 ```math
 G_\parallel = \frac{2}{e^2N_0\,AR^*}\quad[\mathrm{m/s}],
 ```
-with $s = \mu_B N_0\,(\mu_+ - \mu_-)/2$ (A/m), $N_0$ being the density of states of F2 (the
+with $s = \mu_B N_0\,\mu_s/2$ (A/m), $\mu_s = (\mu_+ - \mu_-)/2$, $N_0$ being the density of states of F2 (the
 volume region bordering the surface): the stack is not meshed, all its conductances are converted
 with it. The asymmetry `gamma` of an interface is the one of Valet–Fert.
 

@@ -203,7 +203,8 @@ BOOST_AUTO_TEST_CASE(stack)
 BOOST_AUTO_TEST_CASE(makeStack)
     {
     /* conversion into the units of the spin diffusion problem with k = 2/(e^2 N0): Gpar = k/AR,
-     Gr = k Gr[S/m^2]; the bulk of F1 renormalizes F1/N with gF = k sigma (1 - P^2)/lsf coth(t/lsf) */
+     Gr + i Gi = 2 k G_up,down; the bulk of F1 renormalizes F1/N with
+     gF = k sigma (1 - P^2)/lsf coth(t/lsf) */
     Slonczewski::StackSettings st;
     st.p = Eigen::Vector3d(0, 1, 0);
     st.F1N = {0.5e-15, 0.75, 5e14, 1e13};
@@ -216,12 +217,12 @@ BOOST_AUTO_TEST_CASE(makeStack)
     BOOST_TEST( s.p == st.p );
     BOOST_TEST( std::abs(s.P1 - 0.75) < 1e-15 );
     BOOST_TEST( std::abs(s.G1par * 0.5e-15 / k - 1) < 1e-14 );
-    BOOST_TEST( std::abs(s.G1r / (k * 5e14) - 1) < 1e-14 );
-    BOOST_TEST( std::abs(s.G1i / (k * 1e13) - 1) < 1e-14 );
+    BOOST_TEST( std::abs(s.G1r / (2 * k * 5e14) - 1) < 1e-14 );
+    BOOST_TEST( std::abs(s.G1i / (2 * k * 1e13) - 1) < 1e-14 );
     BOOST_TEST( s.hasNF2 );
     BOOST_TEST( std::abs(s.P2 - 0.6) < 1e-15 );
     BOOST_TEST( std::abs(s.G2par * 0.3e-15 / k - 1) < 1e-14 );
-    BOOST_TEST( std::abs(s.G2r / (k * 4e14) - 1) < 1e-14 );
+    BOOST_TEST( std::abs(s.G2r / (2 * k * 4e14) - 1) < 1e-14 );
 
     st.hasF1 = true;
     st.sigma1 = 2e6;
@@ -233,7 +234,25 @@ BOOST_AUTO_TEST_CASE(makeStack)
     const Slonczewski::F1prm r = Slonczewski::renormalizeF1(0.5, gF, {0.75, k / 0.5e-15});
     BOOST_TEST( std::abs(s.P1 / r.P - 1) < 1e-14 );
     BOOST_TEST( std::abs(s.G1par / r.Gpar - 1) < 1e-14 );
-    BOOST_TEST( std::abs(s.G1r / (k * 5e14) - 1) < 1e-14 );  // mixing conductance unchanged
+    BOOST_TEST( std::abs(s.G1r / (2 * k * 5e14) - 1) < 1e-14 );  // mixing conductance unchanged
+    }
+
+BOOST_AUTO_TEST_CASE(makeStack_isotropic)
+    {
+    /* a non-magnetic interface (gamma = 0, G_up = G_down = G_up,down = G) carries the spin current
+     (G_up + G_down) mu_s = 2 G mu_s in every direction: 1/AR = 2 G, and the conductance matrix is
+     isotropic, whatever the direction u */
+    unsigned sd = my_seed();
+    std::mt19937 gen(sd);
+    if (!DET_UT) std::cout << "seed =" << sd << std::endl;
+
+    const double G = 0.55e15, N0 = 1.344e47;
+    Slonczewski::StackSettings st;
+    st.F1N = {1.0 / (2 * G), 0, G, 0};
+    const Slonczewski::Stack s = Slonczewski::makeStack(st, N0);
+    const Eigen::Matrix3d M = Slonczewski::conductance(rand_unit(gen), s.G1par, s.G1r, s.G1i);
+    const Eigen::Matrix3d iso = s.G1par * Eigen::Matrix3d::Identity();
+    BOOST_TEST( rel_err(M, iso) < 1e-14 );
     }
 
 BOOST_AUTO_TEST_SUITE_END()
