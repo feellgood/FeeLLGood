@@ -1,0 +1,35 @@
+# Spin injection through a polarizer stack: 1D validation against Valet–Fert
+
+`valet_fert.py` checks the Robin boundary condition of the surface key `slonczewski`
+(`src/slonczewskiInterface.h`, `spinAcc::stackBoundaryCondition`) on a collinear 1D case, against
+the analytic solution of Valet and Fert (Phys. Rev. B **48**, 7099, 1993).
+
+The stack is F1 (bulk, thickness $t_1$, reservoir on its far side) / interface F1/N / spacer N of
+zero thickness / interface N/F2 / F2, F2 being the meshed wire (`wire.geo`, 10 × 10 × 300 nm,
+h = 1 nm). The magnetizations are along $z$, F1 parallel (P) or antiparallel (AP) to F2.
+
+It fixes the conversion of the interface resistance-area product $AR^*$ (Ω·m²) into the
+longitudinal conductance of the spin diffusion problem:
+```math
+G_\parallel = \frac{2}{e^2N_0\,AR^*}\quad[\mathrm{m/s}],
+```
+with $s = \mu_B N_0\,(\mu_+ - \mu_-)/2$ (A/m), $N_0$ being the same in all the layers (feeLLGood
+takes $s$ continuous). The polarization `P` of an interface is the asymmetry $\gamma$ of Valet–Fert.
+
+## Usage
+
+```
+./valet_fert.py [path to feellgood]    # default ../../src/feellgood
+```
+The mesh is built with `gmsh` if missing. The exit status is 0 if the maximum error on $s_z$,
+relative to $\max|s_z|$, is below 1 % in both configurations.
+
+## Results (branch slonczewski)
+
+| mesh   | P: $s_z$(inlet) feeLLGood / Valet–Fert | AP: $s_z$(inlet) feeLLGood / Valet–Fert | max error |
+|--------|-----------------------------------------|------------------------------------------|-----------|
+| h = 2 nm | 45.690 / 45.858 A/m                   | −163.994 / −164.596 A/m                  | 8.2e-3    |
+| h = 1 nm | 45.811 / 45.858 A/m                   | −164.427 / −164.596 A/m                  | 2.6e-3    |
+
+The error decreases as $h^2$ (P1 elements). With the factor 1 instead of 2 in $G_\parallel$, the
+error is 8.5 % (P configuration): the test fails.
