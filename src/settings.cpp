@@ -95,7 +95,8 @@ static double readRequired(YAML::Node node, const std::string &key, const std::s
 // Read the polarizer stack of a surface region (key `slonczewski`), in physical units, see
 // slonczewskiInterface.h: the F1/N interface (required), the bulk of F1 (optional, folded into F1/N
 // by spinAcc) and the N/F2 interface (optional). An interface is given by its resistance-area
-// product AR (Ohm m^2), its asymmetry gamma and its mixing conductance Gr, Gi (S/m^2).
+// product AR (Ohm m^2), its asymmetry gamma and its mixing conductance Gr, Gi (S/m^2); N/F2 may
+// also give the model of its transverse spin current, transverse: sink (default) or series.
 // The nodes are taken by value: operator[] of a const YAML::Node throws on a missing key.
 static Slonczewski::StackSettings readStack(YAML::Node node, const std::string &where)
     {
@@ -148,6 +149,17 @@ static Slonczewski::StackSettings readStack(YAML::Node node, const std::string &
         {
         st.hasNF2 = true;
         st.NF2 = readInterface(NF2, "NF2");
+        YAML::Node transverse = NF2["transverse"];
+        if (transverse && !transverse.IsNull())
+            {
+            const std::string model = transverse.as<std::string>();
+            if (model == "sink")
+                { st.transverseSink = true; }
+            else if (model == "series")
+                { st.transverseSink = false; }
+            else
+                { error((where + ".NF2.transverse should be sink or series.").c_str()); }
+            }
         }
     return st;
     }
@@ -430,7 +442,10 @@ void Settings::toYaml()
                     }
                 std::cout << "        F1N: " << itf(st.F1N) << "\n";
                 if (st.hasNF2)
-                    { std::cout << "        NF2: " << itf(st.NF2) << "\n"; }
+                    {
+                    std::cout << "        NF2: " << itf(st.NF2) << ", transverse: "
+                              << (st.transverseSink ? "sink" : "series") << "\n";
+                    }
                 }
             }
         }

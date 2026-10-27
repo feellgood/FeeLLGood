@@ -20,6 +20,9 @@ Reference:
   G_up,down = (e^2/h) [M - sum r_up r_down^*] (up: majority spin, along m) and V_S = -phi
   (mu = -e V); the sign of the term in Im G_up,down also follows from the scattering of a single
   channel: the transverse polarization absorbed is 1 - r_up^* r_down = conj(G_up,down);
+  through N/F2, two models of the transverse spin current (key transverse of NF2): sink (default),
+  it depends on the spin accumulation of the spacer only (circuit theory, phi_F replaced by
+  m (m.phi_F) in N/F2), series, it depends on phi_F - phi_N;
 - F2, equations of feeLLGood (beta = beta' = P, D0 = 2 sigma/(e^2 N0)), 1D, solved exactly by the
   eigenmodes of D0 (I - P^2 m m^T) s'' = [D0 (1 - P^2)/l_sf^2] s + (D0/l_sd^2) s x m;
 - s = mu_B N0 e phi/2 (validation/valet_fert_1d).
@@ -56,8 +59,9 @@ JN = 1e12                            # A/m^2 on the inlet (outward normal -z): e
 ANGLES = [0, 30, 60, 90, 120, 150, 180]
 
 
-def reference(theta, z):
-    """spin accumulation s (A/m), rows at the positions z (m) of F2, for the angle theta (deg)"""
+def reference(theta, z, model="sink"):
+    """spin accumulation s (A/m), rows at the positions z (m) of F2, for the angle theta (deg) and
+    the model of the transverse spin current through N/F2 (sink or series)"""
     p = np.array([np.sin(np.radians(theta)), 0, np.cos(np.radians(theta))])
     m = np.array([0.0, 0.0, 1.0])
     j = -JN                                        # charge current density along +z
@@ -83,10 +87,12 @@ def reference(theta, z):
 
     b1, K1 = contact(p, ITF1)                    # L = F1 (phi = 0), R = N
     b2, K2 = contact(m, ITF2)                    # L = N, R = F2
-    # unknowns X = (c, phiN); j_s1 = b1 + K1 phiN, j_s2 = b2 + K2 (to_phi S0 c - phiN)
+    # unknowns X = (c, phiN); j_s1 = b1 + K1 phiN, j_s2 = b2 + K2 (Pm to_phi S0 c - phiN),
+    # Pm = m m^T for the sink (only the longitudinal part of phi_F acts on N/F2)
+    Pm = np.outer(m, m) if model == "sink" else I3
     Z = np.zeros((3, 3))
     js1 = np.hstack([Z, K1])
-    js2 = np.hstack([K2 @ (to_phi * S0), -K2])
+    js2 = np.hstack([K2 @ Pm @ (to_phi * S0), -K2])
     # moment flux in F2 at z = 0 (A includes D0): -A s'(0) - (mu_B/e) P j m = -(mu_B/e) j_s2
     Qx = np.hstack([-A @ dS0, Z])
     lhs = np.vstack([js1 - js2, Qx + (MU_B / E) * js2])
@@ -96,9 +102,10 @@ def reference(theta, z):
     return s.real
 
 
-def settings(theta, name):
+def settings(theta, name, model):
     p = [float(np.sin(np.radians(theta))), 0.0, float(np.cos(np.radians(theta)))]
     itf = lambda d: {"AR": d["AR"], "gamma": d["gamma"], "Gr": d["Gr"], "Gi": d["Gi"]}
+    NF2 = dict(itf(ITF2), transverse=model)
     return {
         "outputs": {"file_basename": name, "final_time": 1e-13, "evol_time_step": 1e-12,
                     "mag_config_every": 10},
@@ -111,8 +118,7 @@ def settings(theta, name):
                 "l_sd": F2["lsd"], "l_sf": F2["lsf"]}},
             "surface_regions": {
                 "outlet": {"V": 0.0, "s": [0, 0, 0]},
-                "inlet": {"jn": JN, "slonczewski": {"p": p, "F1N": itf(ITF1),
-                                                    "NF2": itf(ITF2)}}}},
+                "inlet": {"jn": JN, "slonczewski": {"p": p, "F1N": itf(ITF1), "NF2": NF2}}}},
         "initial_magnetization": [0, 0, 1],
         "spin_accumulation": {"enable": True},
         "time_integration": {"max(du)": 0.02, "min(dt)": 5e-20, "max(dt)": 5e-13}}
@@ -165,29 +171,32 @@ def main():
     xyz, tets = read_mesh("thin_layer.msh")
 
     ok = True
-    rows = []
-    print(" theta | damping-like, int s_y dz [A]: feeLLGood  ref | "
-          "field-like, int s_x dz [A]: feeLLGood  ref | max err s")
-    for theta in ANGLES:
-        name = f"theta{theta}"
-        subprocess.run([feellgood, "-"], input=json.dumps(settings(theta, name)), text=True,
-                       check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        s = read_s(name + "_iter0.sol")
-        s_ref = reference(theta, xyz[:, 2])
-        err = np.abs(s - s_ref).max() / np.abs(s_ref).max()
-        I, I_ref = thickness_integral(xyz, tets, s), thickness_integral(xyz, tets, s_ref)
-        print(f" {theta:5d} | {I[1]:29.4e} {I_ref[1]:11.4e} | {I[0]:27.4e} {I_ref[0]:11.4e} | "
-              f"{err:.2e}")
-        ok = ok and err < TOL
-        rows.append((theta, I_ref[1]))
+    for model in ["sink", "series"]:
+        rows = []
+        print(f"transverse spin current through N/F2: {model}")
+        print(" theta | damping-like, int s_y dz [A]: feeLLGood  ref | "
+              "field-like, int s_x dz [A]: feeLLGood  ref | max err s")
+        for theta in ANGLES:
+            name = f"{model}_theta{theta}"
+            subprocess.run([feellgood, "-"], input=json.dumps(settings(theta, name, model)),
+                           text=True, check=True, stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL)
+            s = read_s(name + "_iter0.sol")
+            s_ref = reference(theta, xyz[:, 2], model)
+            err = np.abs(s - s_ref).max() / np.abs(s_ref).max()
+            I, I_ref = thickness_integral(xyz, tets, s), thickness_integral(xyz, tets, s_ref)
+            print(f" {theta:5d} | {I[1]:29.4e} {I_ref[1]:11.4e} | {I[0]:27.4e} {I_ref[0]:11.4e} | "
+                  f"{err:.2e}")
+            ok = ok and err < TOL
+            rows.append((theta, I_ref[1]))
 
-    # damping-like torque: sin(theta)/int s_y = alpha + beta cos(theta), Slonczewski's form
-    th = np.radians([r[0] for r in rows if 0 < r[0] < 180])
-    y = np.sin(th) / np.array([r[1] for r in rows if 0 < r[0] < 180])
-    beta, alpha = np.polyfit(np.cos(th), y, 1)
-    resid = np.abs(np.polyval([beta, alpha], np.cos(th)) - y).max() / np.abs(y).max()
-    print(f"damping-like torque (reference): Lambda^2 = {(alpha + beta)/(alpha - beta):.4f}, "
-          f"deviation from the form of Slonczewski {resid:.1e}")
+        # damping-like torque: sin(theta)/int s_y = alpha + beta cos(theta), Slonczewski's form
+        th = np.radians([r[0] for r in rows if 0 < r[0] < 180])
+        y = np.sin(th) / np.array([r[1] for r in rows if 0 < r[0] < 180])
+        beta, alpha = np.polyfit(np.cos(th), y, 1)
+        resid = np.abs(np.polyval([beta, alpha], np.cos(th)) - y).max() / np.abs(y).max()
+        print(f"damping-like torque (reference): Lambda^2 = {(alpha + beta)/(alpha - beta):.4f}, "
+              f"deviation from the form of Slonczewski {resid:.1e}")
     print("OK" if ok else "FAILED")
     return 0 if ok else 1
 

@@ -74,7 +74,8 @@ BOOST_AUTO_TEST_CASE(renormalizeF1)
 
     // a bulk much more conducting than the interface: s_F1 = 0, the interface is unchanged
     const Slonczewski::F1prm r_inf = Slonczewski::renormalizeF1(beta, 1e12, itf);
-    BOOST_TEST( r_inf.P == itf.P, boost::test_tools::tolerance(1e-10) );
+    // absolute error on P (|P| <= 1, itf.P may be small): the deviation is about Gpar/gF
+    BOOST_TEST( std::abs(r_inf.P - itf.P) < 1e-10 );
     BOOST_TEST( r_inf.Gpar == itf.Gpar, boost::test_tools::tolerance(1e-10) );
     }
 
@@ -164,8 +165,9 @@ BOOST_AUTO_TEST_CASE(effectiveBC_collinear)
 
 BOOST_AUTO_TEST_CASE(stack)
     {
-    /* without N/F2, Peff = P1 p and Gs = G1; with a N/F2 interface much more conducting than F1/N,
-     the condition tends to the one without N/F2 */
+    /* without N/F2, Peff = P1 p and Gs = G1; with a N/F2 interface much more conducting than F1/N
+     and the transverse spin current of N/F2 depending on s_N - s_F (transverse: series), the
+     condition tends to the one without N/F2, and it is the one of effectiveBC */
     unsigned sd = my_seed();
     std::mt19937 gen(sd);
     std::uniform_real_distribution<> distrib(0.0, 1.0);
@@ -185,6 +187,7 @@ BOOST_AUTO_TEST_CASE(stack)
     BOOST_TEST( rel_err(bcB.Gs, G1) < 1e-15 );
 
     st.hasNF2 = true;
+    st.transverseSink = false;
     st.P2 = distrib(gen);
     st.G2par = 1e8 * (0.5 + distrib(gen));
     st.G2r = 1e8 * (0.5 + distrib(gen));
@@ -198,6 +201,45 @@ BOOST_AUTO_TEST_CASE(stack)
             Slonczewski::conductance(m0, st.G2par, st.G2r, st.G2i), st.P2, m0);
     BOOST_TEST( rel_err(bcA.Peff, bc.Peff) < 1e-15 );
     BOOST_TEST( rel_err(bcA.Gs, bc.Gs) < 1e-15 );
+    }
+
+BOOST_AUTO_TEST_CASE(stack_transverse_sink)
+    {
+    /* with the transverse sink, the spin current through N/F2 is the one of the explicit solution of
+     the spacer node where only the longitudinal part of s_F acts on N/F2:
+     P1 K p - G1 sN = P2 K m0 + G2 (sN - m0 (m0.sF)), q = P2 K m0 + G2 (sN - m0 (m0.sF));
+     with transverse: series, q = P2 K m0 + G2 (sN - sF) */
+    unsigned sd = my_seed();
+    std::mt19937 gen(sd);
+    std::uniform_real_distribution<> distrib(0.0, 1.0);
+    if (!DET_UT) std::cout << "seed =" << sd << std::endl;
+
+    Slonczewski::Stack st;
+    st.p = rand_unit(gen);
+    st.P1 = distrib(gen);
+    st.G1par = 0.5 + distrib(gen);
+    st.G1r = 0.5 + distrib(gen);
+    st.G1i = 0.2 * distrib(gen);
+    st.hasNF2 = true;
+    st.P2 = distrib(gen);
+    st.G2par = 0.5 + distrib(gen);
+    st.G2r = 0.5 + distrib(gen);
+    st.G2i = 0.2 * distrib(gen);
+    const Eigen::Vector3d m0 = rand_unit(gen);
+    const double K = distrib(gen);
+    const Eigen::Vector3d sF(distrib(gen), distrib(gen), distrib(gen));
+    const Eigen::Matrix3d G1 = Slonczewski::conductance(st.p, st.G1par, st.G1r, st.G1i);
+    const Eigen::Matrix3d G2 = Slonczewski::conductance(m0, st.G2par, st.G2r, st.G2i);
+
+    for (const bool sink : {true, false})
+        {
+        st.transverseSink = sink;
+        const Eigen::Vector3d sF2 = sink ? Eigen::Vector3d(m0 * m0.dot(sF)) : sF;
+        const Eigen::Vector3d sN = (G1 + G2).lu().solve(K * (st.P1 * st.p - st.P2 * m0) + G2 * sF2);
+        const Eigen::Vector3d q_ref = st.P2 * K * m0 + G2 * (sN - sF2);
+        const Slonczewski::BC bc = st.bc(m0);
+        BOOST_TEST( rel_err(Eigen::Vector3d(K * bc.Peff - bc.Gs * sF), q_ref) < 1e-12 );
+        }
     }
 
 BOOST_AUTO_TEST_CASE(makeStack)

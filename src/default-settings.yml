@@ -196,10 +196,16 @@ mesh:
       #        # bulk of F1, thickness default .inf
       #   F1N: {AR: 0.5e-15, gamma: 0.75, Gr: 5e14, Gi: 0}  # interface F1/N,
       #        # Gi optional
-      #   NF2: {AR: 0.3e-15, gamma: 0.6, Gr: 5e14, Gi: 0}   # optional
-      #        # interface N/F2, the surface being then magnetic; without it,
-      #        # the condition does not depend on the magnetization (meshed
-      #        # spacer)
+      #   NF2: {AR: 0.3e-15, gamma: 0.6, Gr: 5e14, Gi: 0, transverse: sink}
+      #        # optional interface N/F2, the surface being then magnetic;
+      #        # without it, the condition does not depend on the magnetization
+      #        # (meshed spacer). transverse: sink (default), the transverse
+      #        # spin current through N/F2 depends on the spin accumulation of
+      #        # the spacer only (circuit theory): G_up,down describes the whole
+      #        # absorption, the sample only spreads it over l_sd; series, it
+      #        # depends on s_N - s_F, the interface and the bulk of the sample
+      #        # being two absorption resistances in series (G_up,down should
+      #        # then be the part of the interface only)
 
 # The initial magnetization can be provided as either:
 # - the name of a file in feeLLGood’s format (‘.sol’ file)

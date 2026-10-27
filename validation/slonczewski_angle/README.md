@@ -48,10 +48,40 @@ $k = 2/(e^2N_0)$, consistent with $G_\parallel = k/AR^*$: for a non-magnetic int
 The mesh is built with `gmsh` if missing. The exit status is 0 if the maximum error on
 $\mathbf{s}$, relative to $\max|\mathbf{s}|$, is below 2 % at every angle (about 15 s).
 
+## Transverse spin current through N/F2
+
+The key `transverse` of `NF2` chooses its model:
+- `sink` (default): the transverse spin current through N/F2 depends on the spin accumulation of
+  the spacer only, as in the circuit theory (on the F side, it vanishes within the dephasing length,
+  on the interface). $G_{\uparrow\downarrow}$ describes the whole absorption, and the diffusion of
+  the sample only spreads the absorbed spin current over $l_{sd}$. In the elimination of the spacer,
+  $s_F$ acts on N/F2 through its longitudinal part $\mathbf{m}(\mathbf{m}\cdot\mathbf{s}_F)$ only.
+- `series`: it depends on $\mathbf{s}_N - \mathbf{s}_F$; the interface ($1/G_{r2}$) and the bulk of
+  the sample ($1/g_\perp$, $g_\perp = D_0\kappa$, $\kappa^2 = (1-P^2)/l_{sf}^2 - i/l_{sd}^2$) are two
+  absorption resistances in series, and $G_{\uparrow\downarrow}$ should then be the part of the
+  interface only (Petitjean et al., PRL **109**, 117204, 2012); with an ab initio
+  $G_{\uparrow\downarrow}$, the absorption is counted twice.
+
+Here $|2kG_{\uparrow\downarrow}| = 0.70\cdot10^6$ m/s and $|g_\perp| = 2.32\cdot10^6$ m/s: with
+`series`, the damping-like torque is 15 to 17 % smaller than with `sink`. The reference follows
+the same two models.
+
 ## Results (branch slonczewski)
 
 The torque on F2 is proportional to $\mathbf{m}\times\mathbf{s}$: $s_y$ gives the damping-like
 torque, $s_x$ the field-like one.
+
+`transverse: sink` (default):
+
+| θ (°) | damping-like $\int s_y\,dz$, feeLLGood / ref (A) | field-like $\int s_x\,dz$, feeLLGood / ref (A) | max error |
+|-----|-----------------------|-----------------------|---------|
+| 30  | 4.7941e-9 / 4.7930e-9 | 1.5079e-9 / 1.5266e-9 | 4.6e-3 |
+| 60  | 7.9075e-9 / 7.9065e-9 | 2.2985e-9 / 2.3291e-9 | 1.1e-2 |
+| 90  | 8.1529e-9 / 8.1531e-9 | 2.0235e-9 / 2.0547e-9 | 5.2e-3 |
+| 120 | 5.9018e-9 / 5.9031e-9 | 1.1078e-9 / 1.1300e-9 | 2.3e-3 |
+| 150 | 2.8398e-9 / 2.8410e-9 | 3.5261e-10 / 3.6310e-10 | 1.0e-3 |
+
+`transverse: series`:
 
 | θ (°) | damping-like $\int s_y\,dz$, feeLLGood / ref (A) | field-like $\int s_x\,dz$, feeLLGood / ref (A) | max error |
 |-----|-----------------------|-----------------------|---------|
@@ -62,18 +92,18 @@ torque, $s_x$ the field-like one.
 | 150 | 2.4700e-9 / 2.4694e-9 | 5.3402e-10 / 5.4143e-10 | 7.6e-4 |
 
 At 0 and 180°, the transverse accumulation vanishes. The error decreases as $h^2$ (1.1e-2 at
-h = 0.2 nm, 2.7e-3 at h = 0.1 nm, checked with $\mathrm{Im}\,G_{\uparrow\downarrow} = 0$). The
-test fails if the conversion or the sign is wrong:
+h = 0.2 nm, 2.7e-3 at h = 0.1 nm, checked with `series` and $\mathrm{Im}\,G_{\uparrow\downarrow} = 0$).
+The test fails if the conversion, the sign or the model is wrong:
 - with the former conversion $k\,G_{\uparrow\downarrow}$ instead of $2k\,G_{\uparrow\downarrow}$
-  ($\mathrm{Im}\,G_{\uparrow\downarrow} = 0$): error 170 %;
+  (`series`, $\mathrm{Im}\,G_{\uparrow\downarrow} = 0$): error 170 %;
 - with the opposite sign of the term in $\mathrm{Im}\,G_{\uparrow\downarrow}$ in the reference
-  (`IM_SIGN = -1`): error 13 %, the field-like accumulation differing by a factor 2 at 150°.
+  (`IM_SIGN = -1`, `series`): error 13 %, the field-like accumulation differing by a factor 2 at
+  150°;
+- the two models differ by 15 to 17 % on the damping-like torque.
 
 The damping-like torque of this asymmetric structure follows the form of Slonczewski,
 $\varepsilon(\theta)\sin\theta$ with $\varepsilon = C/[(\Lambda^2+1)+(\Lambda^2-1)\cos\theta]$, within
-5 %, with $\Lambda^2 \approx 0.54$ (0.42 with $\mathrm{Im}\,G_{\uparrow\downarrow} = 0$): larger
-torque near the parallel configuration. Without $\mathrm{Im}\,G_{\uparrow\downarrow}$, the ratio of
-the field-like to the damping-like accumulation is independent of $\theta$ (about 0.31): it comes
-from the precession of the transverse spin accumulation in F2, over $l_{sd}$.
+5 %, with $\Lambda^2 \approx 0.53$ (`sink`), 0.54 (`series`): larger torque near the parallel
+configuration.
 
-Not covered: different densities of states between the layers.
+Not covered: different densities of states between the layers (see `validation/two_regions_1d`).

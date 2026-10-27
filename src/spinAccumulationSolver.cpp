@@ -204,7 +204,8 @@ void spinAcc::makeStacks(void)
             if (s.hasNF2)
                 {
                 std::cout << "; NF2 P = " << s.P2 << ", Gpar = " << s.G2par << ", Gr = " << s.G2r
-                          << ", Gi = " << s.G2i;
+                          << ", Gi = " << s.G2i << ", transverse: "
+                          << (s.transverseSink ? "sink" : "series");
                 }
             std::cout << "\n";
             }

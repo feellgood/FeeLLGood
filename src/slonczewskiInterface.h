@@ -86,7 +86,8 @@ inline F1prm renormalizeF1(const double beta /**< [in] bulk polarization rate of
     }
 
 /** \struct BC
-effective boundary condition: entering spin current q = K Peff + Gs (s_F1 - s_F) */
+effective boundary condition: entering spin current q = K Peff + Gs (s_F1 - s_F) (effectiveBC()),
+or q = K Peff - Gs s_F with s_F1 = 0 (Stack::bc()) */
 struct BC
     {
     Eigen::Vector3d Peff; /**< effective polarization vector, dimensionless */
@@ -111,7 +112,18 @@ inline BC effectiveBC(const Eigen::Matrix3d &G1 /**< [in] F1/N conductance, G(p)
 parameters of the polarizer stack of a surface: the F1/N interface (renormalized by the bulk of F1,
 see renormalizeF1()) and, optionally, the N/F2 interface. Without N/F2 (spacer meshed, or perfect
 N/F2 interface), the condition does not depend on the magnetization of the sample: Peff = P1 p and
-Gs = G1 */
+Gs = G1.
+
+With N/F2, the transverse spin current through it is, by default (transverseSink), the one of the
+circuit theory of Brataas et al.: it depends on the spin accumulation of the spacer only, the
+mixing conductance G_up,down describing the whole absorption of the transverse spin current by F2
+(within the dephasing length, on the interface). The spin accumulation s_F of the sample only acts
+through its longitudinal part m0 (m0.s_F): Gs is replaced by Gs m0 m0^T. The diffusion of the
+sample then only spreads the absorbed transverse spin current over l_sd, without counting its
+absorption twice. Otherwise (transverse: series in the settings), the transverse spin current
+depends on s_N - s_F: the interface and the bulk of the sample are two absorption resistances in
+series, and G_up,down should then be the part of the interface only (Petitjean et al., PRL 109,
+117204, 2012). */
 struct Stack
     {
     Eigen::Vector3d p = Eigen::Vector3d(0, 0, 1); /**< magnetization of F1, unit vector */
@@ -124,15 +136,20 @@ struct Stack
     double G2par = 0;  /**< longitudinal conductance of N/F2 */
     double G2r = 0;    /**< real part of the mixing conductance of N/F2 */
     double G2i = 0;    /**< imaginary part of the mixing conductance of N/F2 */
+    bool transverseSink = true; /**< with N/F2, true if its transverse spin current depends on the
+                                   spin accumulation of the spacer only (circuit theory) */
 
     /** effective boundary condition for the magnetization m0 of the sample on the interface (unit
-     * vector, not used without N/F2) */
+     * vector, not used without N/F2): q = K Peff - Gs s_F */
     BC bc(const Eigen::Vector3d &m0) const
         {
         const Eigen::Matrix3d G1 = conductance(p, G1par, G1r, G1i);
         if (!hasNF2)
             { return {P1 * p, G1}; }
-        return effectiveBC(G1, P1, p, conductance(m0, G2par, G2r, G2i), P2, m0);
+        BC b = effectiveBC(G1, P1, p, conductance(m0, G2par, G2r, G2i), P2, m0);
+        if (transverseSink)
+            { b.Gs = b.Gs * (m0 * m0.transpose()); }  // s_F replaced by m0 (m0.s_F) in N/F2
+        return b;
         }
     };
 
@@ -160,6 +177,8 @@ struct StackSettings
     double t1 = INFINITY;     /**< thickness of F1, m */
     Interface F1N;            /**< interface F1/N */
     bool hasNF2 = false;      /**< true if the interface N/F2 is given */
+    bool transverseSink = true; /**< transverse spin current of N/F2 from the spacer only (see
+                                   Stack) */
     Interface NF2;            /**< interface N/F2 */
     };
 
@@ -184,6 +203,7 @@ inline Stack makeStack(const StackSettings &st /**< [in] */,
         s.G1par = r.Gpar;
         }
     s.hasNF2 = st.hasNF2;
+    s.transverseSink = st.transverseSink;
     if (st.hasNF2)
         {
         s.P2 = st.NF2.gamma;
