@@ -268,15 +268,22 @@ void spinAcc::integrales(const Tetra::Tet &tet,
     const double lsf = getLsf(tet);
     const double D0 = getDiffusionCst(tet);
 
+    /* 1/tau_sf, units s^-1: l_sf is the spin diffusion length, longitudinal in a ferromagnet, where
+     * the longitudinal diffusion is D0 (1 - P^2) (beta = beta' = P, see the anisotropic diffusion
+     * below): 1/tau_sf = D0 (1 - P^2)/l_sf^2, D0/l_sf^2 in a non-magnetic metal */
+    double invTau_sf = D0 / sq(lsf);
+    if (msh->isMagnetic(tet))
+        { invTau_sf *= 1.0 - sq(getPolarizationRate(tet)); }
+
     Eigen::Matrix<double,N,1> a_w = eigen_a * tet.weight;
-    Eigen::Matrix<double,N,1> diag = (D0 / sq(lsf)) * a_w; // units: [D0/sq(lsf)] = s^-1 :
-                                                       // it is 1/tau_sf
+    Eigen::Matrix<double,N,1> diag = invTau_sf * a_w;
     Eigen::Matrix<double,N,N> diagBlock = tet.calcDiagBlock(D0, diag);
     AE.block<N,N>(    0,     0) += diagBlock;
     AE.block<N,N>(    N,     N) += diagBlock;
     AE.block<N,N>(2 * N, 2 * N) += diagBlock;
 
-//here is the magnetic contribution to AE, it is also block diagonal, and antisymmetric
+/* here is the magnetic contribution to AE: the precession, block diagonal and antisymmetric, and
+ * the anisotropic diffusion, symmetric with full blocks */
     if(msh->isMagnetic(tet))
         {
         const double invTau_sd = D0 / sq(getLsd(tet)); //units: [D0/sq(lsd)] = s^-1 : it is 1/tau_sd
@@ -292,6 +299,11 @@ void spinAcc::integrales(const Tetra::Tet &tet,
         diag = invTau_sd * a_w.cwiseProduct(u_nod.row(IDX_Z).transpose());
         AE.block<N,N>(    0,     N).diagonal() += diag;
         AE.block<N,N>(    N,     0).diagonal() -= diag;
+
+        /* anisotropic diffusion (beta = beta' = P): -D0 P^2 (u.grad s):(u.grad w), symmetric, it
+         * couples the three components; magnetization at the Gauss points, as in the RHS */
+        const Eigen::Matrix<double,Nodes::DIM,NPI> U = u_nod * eigen_a;
+        tet.add_spinDiffusionAniso(D0 * sq(getPolarizationRate(tet)), U, AE);
         }
     }
 

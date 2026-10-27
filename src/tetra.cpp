@@ -153,6 +153,18 @@ Eigen::Matrix<double,N,1> Tet::calcOffDiagBlock(const Nodes::index idx) const
     return result;
     }
 
+void Tet::add_spinDiffusionAniso(const double c,
+                                 const Eigen::Ref<const Eigen::Matrix<double,DIM,NPI>> U,
+                                 Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE) const
+    {
+    // the gradients da being constant in the element, only u u^T is integrated
+    const Eigen::Matrix3d uuT_w = U * weight.asDiagonal() * U.transpose();
+    const Eigen::Matrix<double,N,N> dadaT = da * da.transpose();
+    for (int k = 0; k < DIM; k++)
+        for (int l = 0; l < DIM; l++)
+            { AE.block<N,N>(k*N, l*N) -= (c * uuT_w(k,l)) * dadaT; }
+    }
+
 void Tet::add_drift_BE(const Eigen::Ref<const Eigen::Matrix<double,NPI,1>> alpha,
                        const double s_dt, const double Vdrift,
                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> U,

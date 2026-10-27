@@ -131,13 +131,16 @@ mesh:
       # Density of states.
       dens_state: 0
 
-      # polarization rate.
+      # Polarization rate, in [0, 1): beta = beta' = P in the spin current of
+      # Zhang-Levy-Fert, the longitudinal spin diffusion being D0 (1 - P^2).
       P: 0
 
       # Diffusion length related to s-d coupling in a magnetic material.
       l_sd: 0
 
-      # Spin diffusion length in a metal, magnetic or not.
+      # Spin diffusion length in a metal, magnetic or not (longitudinal in a
+      # ferromagnet): 1/tau_sf = D0 (1 - P^2)/l_sf^2 in a magnetic material,
+      # D0/l_sf^2 otherwise.
       l_sf: 0
 
   # Material parameters of the surface regions defined by the mesh.

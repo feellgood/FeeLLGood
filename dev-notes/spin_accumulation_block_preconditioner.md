@@ -57,6 +57,22 @@ that is, the sum of
 - a _node-diagonal, skew-symmetric_ part (precession), coupling the three components at the same
   node only.
 
+**Anisotropic diffusion.** In the ferromagnet, the diffusion of the spin current of
+Zhang–Levy–Fert, $`-D_0\left[\partial_i s_j - \beta\beta'\,u_j\,(u_k\,\partial_i s_k)\right]`$,
+with $\beta = \beta' = P$, adds to the weak form
+```math
+-\int D_0P^2\,(\mathbf{u}\cdot\partial_i\mathbf{s})\,(\mathbf{u}\cdot\partial_i\mathbf{w}),
+\qquad\text{that is}\qquad
+K_{ij} \mathrel{-}= \int D_0P^2\,(\nabla a_i\cdot\nabla a_j)\,\mathbf{u}\mathbf{u}^T
+```
+(`Tet::add_spinDiffusionAniso`, $\mathbf{u}$ at the Gauss points): the longitudinal diffusion is
+$D_0(1-P^2)$, the transverse one $D_0$. So that $l_{sf}$ stays the (longitudinal) spin diffusion
+length of Zhang–Levy–Fert, $\lambda_{sf}^2 = D_0(1-\beta\beta')\,\tau_{sf}$, the relaxation is
+$1/\tau_{sf} = D_0(1-P^2)/l_{sf}^2$ in the ferromagnet: $\mu_i$ is multiplied by $1-P^2$ there.
+This part is symmetric, couples neighbouring nodes _and_ the
+three components; it stays positive since $P < 1$. The block preconditioner below reads the
+assembled $3\times3$ blocks: it includes the node-local part of this term without any change.
+
 $K$ is not symmetric, hence the use of BiCGStab.
 
 ## Why the diagonal preconditioner fails

@@ -260,6 +260,16 @@ public:
      * */
     Eigen::Matrix<double,N,1> calcOffDiagBlock(const Nodes::index idx) const;
 
+    /**
+     * adds to AE the anisotropic part of the spin diffusion (beta = beta' = P):
+     * -c (u.grad s):(u.grad w), c = D0 P^2, U being the magnetization at the Gauss points.
+     * The longitudinal diffusion is then D0 (1 - P^2), the transverse one D0. It couples the three
+     * components of s: AE is indexed by blocks of components (c N + i)
+     * */
+    void add_spinDiffusionAniso(const double c,
+                                const Eigen::Ref<const Eigen::Matrix<double,Nodes::DIM,NPI>> U,
+                                Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE) const;
+
     /** add drift contribution due to eventual recentering to vectors BE, Vdrift is the drift
      * velocity in reduced time (physical velocity divided by gamma0), alpha is the damping at the
      * Gauss points */

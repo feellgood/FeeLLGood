@@ -119,4 +119,59 @@ BOOST_AUTO_TEST_CASE(Tet_Hst_order2_contribution,*boost::unit_test::tolerance(1e
         }
     }
 
+BOOST_AUTO_TEST_CASE(Tet_spinDiffusionAniso, *boost::unit_test::tolerance(1e-12))
+    {
+    /* with a uniform unit magnetization u, the anisotropic diffusion -c (u.grad s):(u.grad w)
+     acts on a longitudinal field s = g u as -c S g (S = int grad a_i.grad a_j), and does not act
+     on a transverse field s = g t, t orthogonal to u */
+    unsigned sd = my_seed();
+    std::mt19937 gen(sd);
+    std::uniform_real_distribution<> distrib(0.0, 1.0);
+    if (!DET_UT) std::cout << "seed =" << sd << std::endl;
+
+    std::vector<Nodes::Node> node;
+    const int nbNod = 4;
+    dummyNodes<nbNod>(node);
+    for (int i = 0; i < nbNod; i++)
+        {
+        node[i].p[0] += distrib(gen)/10.0;
+        node[i].p[1] += distrib(gen)/10.0;
+        node[i].p[2] += distrib(gen)/10.0;
+        }
+    Tetra::Tet t(node, 0, {1, 2, 3, 4});
+    const int N = Tetra::N;
+
+    const Eigen::Vector3d u = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+    Eigen::Vector3d w = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+    const Eigen::Vector3d tr = (w - w.dot(u) * u).normalized();
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> U;
+    for (int npi = 0; npi < Tetra::NPI; npi++)
+        { U.col(npi) = u; }
+    const double c = 0.5 + distrib(gen);
+
+    Eigen::Matrix<double,3*N,3*N> AE = Eigen::Matrix<double,3*N,3*N>::Zero();
+    t.add_spinDiffusionAniso(c, U, AE);
+
+    Eigen::Matrix<double,N,1> g;
+    for (int i = 0; i < N; i++)
+        { g[i] = distrib(gen); }
+    const Eigen::Matrix<double,N,1> Sg = t.weight.sum() * t.da * t.da.transpose() * g;
+    Eigen::Matrix<double,3*N,1> s_long, s_trans;
+    for (int k = 0; k < Nodes::DIM; k++)
+        {
+        s_long.segment<N>(k*N) = u[k] * g;
+        s_trans.segment<N>(k*N) = tr[k] * g;
+        }
+    const Eigen::Matrix<double,3*N,1> r_long = AE * s_long, r_trans = AE * s_trans;
+    // the tolerance is relative: the reference of the transverse part is c |S g|, not 0
+    const double scale = c * Sg.norm();
+    for (int k = 0; k < Nodes::DIM; k++)
+        for (int i = 0; i < N; i++)
+            {
+            BOOST_TEST( r_long[k*N+i] / scale == -u[k] * Sg[i] / Sg.norm() );
+            BOOST_TEST( std::abs(r_trans[k*N+i]) / scale == 0.0 );
+            }
+    BOOST_TEST( (AE - AE.transpose()).norm() / AE.norm() == 0.0 );
+    }
+
 BOOST_AUTO_TEST_SUITE_END()
