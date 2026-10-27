@@ -83,6 +83,80 @@ static bool assign(const bool _NORMALIZE, Eigen::Vector3d &var, const YAML::Node
     return false;
     }
 
+// Read a required number of the map `node`, the key path `where` is used in the error message.
+static double readRequired(YAML::Node node, const std::string &key, const std::string &where)
+    {
+    if (!node[key] || !node[key].IsScalar())
+        { error((where + "." + key + " is required.").c_str()); }
+    return node[key].as<double>();
+    }
+
+// Read the polarizer stack of a surface region (key `slonczewski`), see slonczewskiInterface.h:
+// the F1/N interface (required), the bulk of F1 (optional, folded into F1/N) and the N/F2 interface
+// (optional). The conductances are in the units of the spin diffusion problem, m/s.
+// The nodes are taken by value: operator[] of a const YAML::Node throws on a missing key.
+static Slonczewski::Stack readStack(YAML::Node node, const std::string &where)
+    {
+    if (!node.IsMap())
+        { error((where + " should be a map.").c_str()); }
+    Slonczewski::Stack st;
+    if (!node["p"] || node["p"].IsNull())
+        { error((where + ".p is required.").c_str()); }
+    st.p = { node["p"][0].as<double>(), node["p"][1].as<double>(), node["p"][2].as<double>() };
+    if (st.p.norm() == 0)
+        { error((where + ".p should not be zero.").c_str()); }
+    st.p.normalize();
+
+    // an interface N/F: polarization, longitudinal and mixing conductances
+    auto readInterface = [&where](YAML::Node itf, const std::string &key, double &P,
+                                  double &Gpar, double &Gr, double &Gi)
+        {
+        const std::string w = where + "." + key;
+        if (!itf.IsMap())
+            { error((w + " should be a map.").c_str()); }
+        P = readRequired(itf, "P", w);
+        Gpar = readRequired(itf, "Gpar", w);
+        Gr = readRequired(itf, "Gr", w);
+        Gi = 0;
+        assign(Gi, itf["Gi"]);
+        if (std::abs(P) > 1 || Gpar <= 0 || Gr < 0)
+            { error((w + ": |P| <= 1, Gpar > 0 and Gr >= 0 are required.").c_str()); }
+        };
+
+    if (!node["F1N"])
+        { error((where + ".F1N is required.").c_str()); }
+    readInterface(node["F1N"], "F1N", st.P1, st.G1par, st.G1r, st.G1i);
+
+    YAML::Node F1 = node["F1"];
+    if (F1 && !F1.IsNull())
+        {
+        const std::string w = where + ".F1";
+        if (!F1.IsMap())
+            { error((w + " should be a map.").c_str()); }
+        const double sigma = readRequired(F1, "sigma", w);
+        const double N0 = readRequired(F1, "dens_state", w);
+        const double P = readRequired(F1, "P", w);
+        const double lsf = readRequired(F1, "l_sf", w);
+        double thickness = INFINITY;
+        assign(thickness, F1["thickness"]);
+        if (sigma <= 0 || N0 <= 0 || lsf <= 0 || thickness <= 0 || P < 0 || P >= 1)
+            { error((w + ": sigma, dens_state, l_sf, thickness > 0 and 0 <= P < 1 are required.").c_str()); }
+        const double D0 = 2.0 * sigma / (CHARGE_ELECTRON * CHARGE_ELECTRON * N0);
+        const double gF = Slonczewski::bulkConductance(D0, P, lsf, thickness);
+        const Slonczewski::F1prm r = Slonczewski::renormalizeF1(P, gF, {st.P1, st.G1par});
+        st.P1 = r.P;
+        st.G1par = r.Gpar;
+        }
+
+    YAML::Node NF2 = node["NF2"];
+    if (NF2 && !NF2.IsNull())
+        {
+        st.hasNF2 = true;
+        readInterface(NF2, "NF2", st.P2, st.G2par, st.G2r, st.G2i);
+        }
+    return st;
+    }
+
 // Replace, within `s', all occurrences of `search' by `replacement'.
 static void replace(std::string &s, const std::string &search, const std::string &replacement)
     {
@@ -342,6 +416,19 @@ void Settings::toYaml()
             {
             std::cout << "      uP: " << str(it->uP) << "\n";
             std::cout << "      s: " << str(it->s) << "\n";
+            if (it->slonczewski)
+                {
+                const Slonczewski::Stack &st = it->stack;
+                std::cout << "      slonczewski:\n";
+                std::cout << "        p: " << str(st.p) << "\n";
+                std::cout << "        F1N (renormalized by F1): {P: " << st.P1 << ", Gpar: "
+                          << st.G1par << ", Gr: " << st.G1r << ", Gi: " << st.G1i << "}\n";
+                if (st.hasNF2)
+                    {
+                    std::cout << "        NF2: {P: " << st.P2 << ", Gpar: " << st.G2par
+                              << ", Gr: " << st.G2r << ", Gi: " << st.G2i << "}\n";
+                    }
+                }
             }
         }
     std::cout << "initial_magnetization: ";
@@ -612,6 +699,18 @@ void Settings::read(YAML::Node yaml)
                     { p.uP = Eigen::Vector3d(NAN,NAN,NAN); }
                 if (!assign(!NORMALIZE, p.s, surface["s"]))
                     { p.s = Eigen::Vector3d(NAN,NAN,NAN); }
+                p.slonczewski = false;
+                YAML::Node stack = surface["slonczewski"];
+                if (stack && !stack.IsNull())
+                    {
+                    const std::string where = "mesh.surface_regions." + name + ".slonczewski";
+                    p.slonczewski = true;
+                    p.stack = readStack(stack, where);
+                    if (isnan(p.jn))
+                        { error((where + " requires jn on the same surface.").c_str()); }
+                    if (std::isfinite(p.s.norm()) || std::isfinite(p.uP.norm()))
+                        { error((where + " excludes s and uP on the same surface.").c_str()); }
+                    }
                 }
             }  // mesh.surface_regions
         }      // mesh

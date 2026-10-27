@@ -89,6 +89,35 @@ inline BC effectiveBC(const Eigen::Matrix3d &G1 /**< [in] F1/N conductance, G(p)
     const Eigen::PartialPivLU<Eigen::Matrix3d> A(G1 + G2);
     return {G2 * A.solve(P1 * p) + G1 * A.solve(P2 * m0), G2 * A.solve(G1)};
     }
+
+/** \struct Stack
+parameters of the polarizer stack of a surface: the F1/N interface (renormalized by the bulk of F1,
+see renormalizeF1()) and, optionally, the N/F2 interface. Without N/F2 (spacer meshed, or perfect
+N/F2 interface), the condition does not depend on the magnetization of the sample: Peff = P1 p and
+Gs = G1 */
+struct Stack
+    {
+    Eigen::Vector3d p = Eigen::Vector3d(0, 0, 1); /**< magnetization of F1, unit vector */
+    double P1 = 0;     /**< polarization of F1/N */
+    double G1par = 0;  /**< longitudinal conductance of F1/N */
+    double G1r = 0;    /**< real part of the mixing conductance of F1/N */
+    double G1i = 0;    /**< imaginary part of the mixing conductance of F1/N */
+    bool hasNF2 = false; /**< true if the N/F2 interface is given */
+    double P2 = 0;     /**< polarization of N/F2 */
+    double G2par = 0;  /**< longitudinal conductance of N/F2 */
+    double G2r = 0;    /**< real part of the mixing conductance of N/F2 */
+    double G2i = 0;    /**< imaginary part of the mixing conductance of N/F2 */
+
+    /** effective boundary condition for the magnetization m0 of the sample on the interface (unit
+     * vector, not used without N/F2) */
+    BC bc(const Eigen::Vector3d &m0) const
+        {
+        const Eigen::Matrix3d G1 = conductance(p, G1par, G1r, G1i);
+        if (!hasNF2)
+            { return {P1 * p, G1}; }
+        return effectiveBC(G1, P1, p, conductance(m0, G2par, G2r, G2i), P2, m0);
+        }
+    };
     }  // namespace Slonczewski
 
 #endif

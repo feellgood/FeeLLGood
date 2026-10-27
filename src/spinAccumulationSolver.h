@@ -17,7 +17,9 @@ const int DIM_PB_SPIN_ACC = 3;
  spin equation. User has to provide through mesh and settings at least one surface where spin
  diffusion vector s is a constant (zero recommended): Dirichlet boundary condition, and at least
  one surface where the current density jn is defined; if a spin polarization uP is also given on
- such a surface (and no s), the spin injection is a flux (Neumann) boundary condition. These
+ such a surface (and no s), the spin injection is a flux (Neumann) boundary condition. If a polarizer
+ stack (slonczewski) is given instead, the injection is a Robin boundary condition, see
+ slonczewskiInterface.h. These
  surfaces are the ones given to the potential solver for its own boundary conditions. A surface may
  have both jn and s (s is then imposed on it).
  */
@@ -121,6 +123,10 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** solver, using biconjugate stabilized gradient, with diagonal preconditionner and Dirichlet
      * boundary conditions */
     bool solve(void);
+
+    /** Robin boundary condition of the triangle f, on a surface with a polarizer stack
+     * (slonczewski): adds the term in s to the matrix K and the source to the RHS L_rhs */
+    void stackBoundaryCondition(Triangle::Tri &f);
 
     /** computes all contributions to matrix AE from tetrahedron tet (LHS)
      * all = non magnetic metal + magnetic metal */

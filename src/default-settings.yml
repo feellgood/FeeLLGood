@@ -177,6 +177,20 @@ mesh:
       # spin diffusion vector for spin diffusion problem boundary condition.
       s:
 
+      # Spin injection through a polarizer stack F1 / thin spacer N (/ F2),
+      # not meshed, instead of uP (Robin boundary condition, see
+      # src/slonczewskiInterface.h). It requires jn, and excludes uP and s, on
+      # the same surface. The conductances are in the units of the spin
+      # diffusion problem, m/s. Example:
+      # slonczewski:
+      #   p: [0, 0, 1]   # magnetization of F1
+      #   F1: {sigma: 4e6, dens_state: 1.344e47, P: 0.3, l_sf: 10e-9,
+      #        thickness: 10e-9}  # optional bulk of F1, thickness default .inf
+      #   F1N: {P: 0.7, Gpar: 5e5, Gr: 5e5, Gi: 0}  # interface F1/N, Gi optional
+      #   NF2: {P: 0.7, Gpar: 5e5, Gr: 5e5, Gi: 0}  # optional interface N/F2,
+      #        # the surface being then magnetic; without it, the condition
+      #        # does not depend on the magnetization (meshed spacer)
+
 # The initial magnetization can be provided as either:
 # - the name of a file in feeLLGood’s format (‘.sol’ file)
 # - an array of three expression depending on the Cartesian spatial

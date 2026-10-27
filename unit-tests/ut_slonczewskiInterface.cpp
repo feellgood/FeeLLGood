@@ -162,4 +162,42 @@ BOOST_AUTO_TEST_CASE(effectiveBC_collinear)
     BOOST_TEST( rel_err(Gs_p, Eigen::Vector3d(Gs * p)) < 1e-13 );
     }
 
+BOOST_AUTO_TEST_CASE(stack)
+    {
+    /* without N/F2, Peff = P1 p and Gs = G1; with a N/F2 interface much more conducting than F1/N,
+     the condition tends to the one without N/F2 */
+    unsigned sd = my_seed();
+    std::mt19937 gen(sd);
+    std::uniform_real_distribution<> distrib(0.0, 1.0);
+    if (!DET_UT) std::cout << "seed =" << sd << std::endl;
+
+    Slonczewski::Stack st;
+    st.p = rand_unit(gen);
+    st.P1 = distrib(gen);
+    st.G1par = 0.5 + distrib(gen);
+    st.G1r = 0.5 + distrib(gen);
+    st.G1i = 0.2 * distrib(gen);
+    const Eigen::Vector3d m0 = rand_unit(gen);
+    const Eigen::Matrix3d G1 = Slonczewski::conductance(st.p, st.G1par, st.G1r, st.G1i);
+
+    const Slonczewski::BC bcB = st.bc(m0);
+    BOOST_TEST( rel_err(bcB.Peff, Eigen::Vector3d(st.P1 * st.p)) < 1e-15 );
+    BOOST_TEST( rel_err(bcB.Gs, G1) < 1e-15 );
+
+    st.hasNF2 = true;
+    st.P2 = distrib(gen);
+    st.G2par = 1e8 * (0.5 + distrib(gen));
+    st.G2r = 1e8 * (0.5 + distrib(gen));
+    st.G2i = 0;
+    const Slonczewski::BC bcA = st.bc(m0);
+    BOOST_TEST( (bcA.Peff - bcB.Peff).norm() < 1e-6 );
+    BOOST_TEST( rel_err(bcA.Gs, bcB.Gs) < 1e-6 );
+
+    // and with N/F2, the condition is the one of effectiveBC
+    const Slonczewski::BC bc = Slonczewski::effectiveBC(G1, st.P1, st.p,
+            Slonczewski::conductance(m0, st.G2par, st.G2r, st.G2i), st.P2, m0);
+    BOOST_TEST( rel_err(bcA.Peff, bc.Peff) < 1e-15 );
+    BOOST_TEST( rel_err(bcA.Gs, bc.Gs) < 1e-15 );
+    }
+
 BOOST_AUTO_TEST_SUITE_END()

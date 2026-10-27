@@ -29,6 +29,16 @@ using namespace Nodes;
                              "jn: current_density: it only acts through Bext.\n";
                 }
             checkBoundaryConditions();
+            for (const Triangle::Tri &f : _msh.tri)
+                {
+                const Triangle::prm &p = paramTri[f.idxPrm];
+                if (p.slonczewski && p.stack.hasNF2 && !_msh.isMagnetic(f))
+                    {
+                    std::cerr << "Error: surface region " << p.regName << " has a polarizer stack "
+                                 "with a N/F2 interface, it should be on a magnetic region.\n";
+                    exit(1);
+                    }
+                }
             valDirichlet.resize(DIM_PB * NOD);
             boundaryConditions();
 
@@ -214,10 +224,13 @@ bool spinAcc::solve(void)
     /* flux (Neumann) boundary condition on the surface where the current density jn is injected
      * with the polarization uP: Q_n = -(mu_B/e) jn uP, contribution -int_Gamma Q_n a_i to the RHS
      * (the surfaces where s is given are Dirichlet conditions, see boundaryConditions());
-     * time-dependent current density: jn -> jn_factor jn */
+     * time-dependent current density: jn -> jn_factor jn. On a surface with a polarizer stack
+     * (slonczewski), the flux is replaced by a Robin condition, see stackBoundaryCondition() */
     for (Triangle::Tri &f : msh->tri)
         {
-        if (std::isfinite(paramTri[f.idxPrm].jn) && std::isfinite(paramTri[f.idxPrm].uP.norm()))
+        if (paramTri[f.idxPrm].slonczewski)
+            { stackBoundaryCondition(f); }
+        else if (std::isfinite(paramTri[f.idxPrm].jn) && std::isfinite(paramTri[f.idxPrm].uP.norm()))
             {
             std::vector<double> Le(DIM_PB * Triangle::N, 0.0);
             const Eigen::Vector3d Qn = -jn_factor * paramTri[f.idxPrm].jn
@@ -251,6 +264,46 @@ bool spinAcc::solve(void)
             { s[i][j] = Xw[DIM_PB*i+j]; }
         }
     return (iter.status == algebra::CONVERGED);
+    }
+
+void spinAcc::stackBoundaryCondition(Triangle::Tri &f)
+    {
+    /* the spin current entering the sample through the polarizer stack is
+     * q = (mu_B/e) jn Peff(m0) - Gs s (jn > 0: electrons entering the sample, flowing from F1 to F2),
+     * that is Q_n = -q: contribution -int_Gamma Q_n a_i = int_Gamma q a_i, the source to the RHS
+     * and the term in s to the matrix; time-dependent current density: jn -> jn_factor jn */
+    using namespace Triangle;
+    const prm &param = paramTri[f.idxPrm];
+    const double K = jn_factor * param.jn * BOHRS_MUB / CHARGE_ELECTRON;
+
+    Eigen::Matrix<double,DIM_PB*N,DIM_PB*N> Ke;
+    Ke.setZero();
+    std::vector<double> Le(DIM_PB * N, 0.0);
+    for (int npi = 0; npi < NPI; npi++)
+        {
+        /* magnetization of the sample at the Gauss point (NEXT, as in the volume terms),
+         * normalized; only used with a N/F2 interface, the surface being then magnetic */
+        Eigen::Vector3d m0 = Eigen::Vector3d::Zero();
+        for (int ie = 0; ie < N; ie++)
+            { m0 += a[ie][npi] * msh->getNode_u(f.ind[ie]); }
+        if (m0.norm() > 0)
+            { m0.normalize(); }
+        const Slonczewski::BC bc = param.stack.bc(m0);
+
+        for (int ie = 0; ie < N; ie++)
+            {
+            const double ai_w = f.weight[npi] * a[ie][npi];
+            for (int di = 0; di < DIM_PB; di++)
+                {
+                Le[di*N + ie] += K * bc.Peff[di] * ai_w;
+                for (int je = 0; je < N; je++)
+                    for (int dj = 0; dj < DIM_PB; dj++)
+                        { Ke(di*N + ie, dj*N + je) += ai_w * a[je][npi] * bc.Gs(di,dj); }
+                }
+            }
+        }
+    buildMat<N>(f.ind, Ke);
+    buildVect<N>(f.ind, Le);
     }
 
 void spinAcc::integrales(const Tetra::Tet &tet,

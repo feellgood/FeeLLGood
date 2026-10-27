@@ -8,6 +8,7 @@
  */
 
 #include "element.h"
+#include "slonczewskiInterface.h"
 
 /** \namespace Triangle
  to grab altogether some constants and calculation functions for class Tri
@@ -83,6 +84,9 @@ struct prm
     Eigen::Vector3d uP;    /**< Polarization spin accumulation orientation (unit vector
                              for spin diffusion problem) */
     Eigen::Vector3d s;     /**< spin diffusion vector (for spin diffusion boundary conditions) */
+    bool slonczewski = false; /**< true if the spin is injected through the polarizer stack `stack`
+                             (Robin condition, see spinAcc::solve()) instead of the flux with uP */
+    Slonczewski::Stack stack; /**< polarizer stack F1 / N (/ F2), if slonczewski is true */
 
     /** print the region surface parameters, optional boolean spinAcc for spin accumulation datas */
     inline void infos(const bool spinAcc = false) const
