@@ -22,6 +22,13 @@ const int DIM_PB_SPIN_ACC = 3;
  slonczewskiInterface.h. These
  surfaces are the ones given to the potential solver for its own boundary conditions. A surface may
  have both jn and s (s is then imposed on it).
+
+ The spin accumulation s is continuous between the volume regions, as is the spin current. With
+ s = mu_B N0 mu_s/2 (mu_s = (mu+ - mu-)/2, validation/valet_fert_1d), this is the continuity of the
+ spin chemical potential mu_s of Valet-Fert if the regions have the same density of states N0
+ (dens_state); otherwise, it imposes N0_A mu_s,A = N0_B mu_s,B on the interface between the regions
+ A and B (validation/two_regions_1d). In verbose mode, a warning lists the neighbouring regions of
+ different dens_state (checkDensityOfStates()).
  */
 class spinAcc : public solver<DIM_PB_SPIN_ACC>
     {
@@ -127,6 +134,10 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** polarizer stacks in the units of the spin diffusion problem, indexed as paramTri (only the
      * surfaces with slonczewski are set) */
     std::vector<Slonczewski::Stack> stacks;
+
+    /** in verbose mode, warns about the neighbouring volume regions (sharing a face) of different
+     * dens_state: s being continuous, mu_s is not continuous between them */
+    void checkDensityOfStates(void) const;
 
     /** converts the polarizer stacks of the settings (physical units) with the density of states
      * of the volume region bordering each surface; checks that a surface with a N/F2 interface is

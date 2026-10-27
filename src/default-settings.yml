@@ -128,7 +128,12 @@ mesh:
       # Conductivity.
       sigma: 0
 
-      # Density of states.
+      # Density of states at the Fermi level, J^-1 m^-3: D0 = 2 sigma/(e^2 N0).
+      # The spin accumulation s = mu_B N0 mu_s/2 being continuous between the
+      # regions, the spin chemical potential mu_s is continuous only between
+      # regions of the same dens_state (otherwise N0 mu_s is): give the same
+      # dens_state to all the regions to have the continuity of mu_s of
+      # Valet-Fert.
       dens_state: 0
 
       # Polarization rate, in [0, 1): beta = beta' = P in the spin current of

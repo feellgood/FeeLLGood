@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <array>
 #include <map>
+#include <set>
+#include <utility>
 
 #include "algebra/bicg.h"
 #include "algebra/block_precond.h"
@@ -31,6 +33,7 @@ using namespace Nodes;
                              "jn: current_density: it only acts through Bext.\n";
                 }
             checkBoundaryConditions();
+            checkDensityOfStates();
             makeStacks();
             valDirichlet.resize(DIM_PB * NOD);
             boundaryConditions();
@@ -100,6 +103,39 @@ void spinAcc::checkBoundaryConditions(void) const
         }
     else if (verbose)
         { std::cout << "spin diffusion problem boundary conditions Ok.\n"; }
+    }
+
+void spinAcc::checkDensityOfStates(void) const
+    {
+    if (!verbose)
+        { return; }
+    // volume region of the first tetrahedron found with each face, by its sorted node indices
+    std::map<std::array<int,Triangle::N>, int> faceRegion;
+    std::set<std::pair<int,int>> pairs;  // neighbouring regions of different dens_state
+    for (const Tetra::Tet &tet : msh->tet)
+        {
+        for (int omit = 0; omit < Tetra::N; omit++)  // the face without the node omit
+            {
+            std::array<int,Triangle::N> key;
+            for (int ie = 0, j = 0; ie < Tetra::N; ie++)
+                {
+                if (ie != omit)
+                    { key[j++] = tet.ind[ie]; }
+                }
+            std::sort(key.begin(), key.end());
+            const auto [it, inserted] = faceRegion.emplace(key, tet.idxPrm);
+            if (!inserted && it->second != tet.idxPrm
+                && paramTet[it->second].N0 != paramTet[tet.idxPrm].N0)
+                { pairs.insert(std::minmax(it->second, tet.idxPrm)); }
+            }
+        }
+    for (const auto &[a, b] : pairs)
+        {
+        std::cout << "Warning: the volume regions " << paramTet[a].regName << " and "
+                  << paramTet[b].regName << " have different dens_state (" << paramTet[a].N0
+                  << ", " << paramTet[b].N0 << "): the spin accumulation s being continuous, the "
+                     "spin chemical potential is not (N0 mu_s is).\n";
+        }
     }
 
 void spinAcc::makeStacks(void)

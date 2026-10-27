@@ -23,7 +23,9 @@ feeLLGood is s = mu_B N0 mu_s/2, mu_s = (mu+ - mu-)/2 being the spin accumulatio
 of Brataas et al. (validation/valet_fert_1d). The spin current through an interface being
 (1 - gamma^2)(G_up + G_down) mu_s = mu_s/AR along u and 2 G_up,down mu_s across u (circuit theory),
 Gpar = k/AR and Gr + i Gi = 2 k G_up,down: for a non-magnetic interface (gamma = 0,
-G_up = G_down = G_up,down), the conductance is isotropic.
+G_up = G_down = G_up,down), the conductance is isotropic. The stack being not meshed, all its
+conductances are converted with the N0 of the volume region bordering the surface, whose s it
+relates to the spin current (s is continuous between the meshed regions, see spinAcc).
 */
 
 #include <cmath>
