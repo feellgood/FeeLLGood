@@ -50,7 +50,7 @@ $\mathbf{m}_0$ being the magnetization of F2 on the face, at its Gauss points. W
 `transverse: sink`, the transverse spin current through N/F2 depends on the spin accumulation of
 the spacer only (circuit theory): the mixing conductance describes the whole absorption, and the
 diffusion in F2 spreads the absorbed spin current over $l_{sd}$. See the note
-`slonczewski_polarisation.tex` and the validations `validation/valet_fert_1d`,
+`dev-notes/slonczewski_polarisation.tex` and the validations `validation/valet_fert_1d`,
 `validation/slonczewski_angle`.
 
 **Sign.** `current_density(t)` is $\mathbf{j}\cdot\mathbf{n}$ on the bottom face, $\mathbf{n}$

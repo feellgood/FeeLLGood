@@ -1,0 +1,896 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{bm}
+\usepackage{booktabs,array}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{hyperref}
+
+\newcommand{\vm}{\bm{m}}
+\newcommand{\vp}{\bm{p}}
+\newcommand{\vs}{\bm{s}}
+\newcommand{\vv}{\bm{v}}
+\newcommand{\vq}{\bm{q}}
+\newcommand{\mG}{\mathsf{G}}
+\newcommand{\mA}{\mathsf{A}}
+\newcommand{\Id}{\mathsf{I}}
+
+\title{Polarisation du courant de spin dans le modèle de Slonczewski}
+\author{}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\part{Couche libre mince : le modèle de Slonczewski}
+
+\section{Le cadre}
+
+On considère une tricouche F1 / espaceur non magnétique / F2 :
+\begin{itemize}
+  \item F1 : couche de référence, d'aimantation fixe $\vp$ (le
+    \og polariseur \fg) ;
+  \item F2 : couche libre, d'aimantation $\vm$ ;
+  \item $\theta$ : angle entre $\vp$ et $\vm$, avec $\cos\theta = \vm\cdot\vp$.
+\end{itemize}
+Un courant de charge traverse l'empilement. Les électrons sortent de F1
+avec une polarisation de spin, traversent l'espaceur, puis arrivent sur F2.
+
+\section{Ce qui ne dépend pas de l'aimantation : \texorpdfstring{$P$}{P}}
+
+$P$ est une propriété du matériau et de l'interface. Il vient de
+l'asymétrie entre les électrons majoritaires et minoritaires : densité
+d'états au niveau de Fermi, transmission dépendante du spin.
+
+Par contre, $P$ n'a de sens que par rapport à un axe. Dans un ferro,
+l'axe de quantification du spin est l'aimantation locale. Dire
+\og le courant est polarisé à $P$\,\% \fg{} sous-entend donc
+\og le long de $\vm$ à cet endroit \fg.
+
+\section{Pourquoi c'est l'aimantation \emph{à l'interface} qui compte}
+
+Quand un électron polarisé selon $\vp$ arrive sur F2, on décompose son
+spin dans la base de $\vm$ :
+\begin{itemize}
+  \item \textbf{La composante parallèle à $\vm$} est majoritaire ou
+    minoritaire dans F2. Elle est transmise ou réfléchie selon les
+    coefficients de F2, et elle se propage sans problème.
+  \item \textbf{La composante transverse à $\vm$} n'est pas un état propre
+    dans F2. Elle disparaît en quelques couches atomiques, à cause de trois
+    mécanismes :
+    \begin{enumerate}
+      \item le filtrage en spin à l'interface (réflexion et transmission
+        différentes) ;
+      \item la précession autour du champ d'échange, à des vitesses
+        différentes selon les électrons ;
+      \item le déphasage quand on moyenne sur la surface de Fermi, qui fait
+        que ces précessions se compensent.
+    \end{enumerate}
+\end{itemize}
+
+Ce moment angulaire transverse perdu est transféré à l'aimantation :
+c'est le couple de transfert de spin, de forme
+\begin{equation}
+  \bm{\tau} \propto \vm\times(\vm\times\vp).
+\end{equation}
+
+Comme tout se passe sur environ $1\,\mathrm{nm}$, c'est \textbf{un effet
+d'interface}. Seule l'orientation de $\vm$ juste à l'interface intervient.
+C'est le sens de \og la polarisation dépend de l'aimantation à
+l'interface \fg{} : la décomposition du spin entre composante absorbée et
+composante transmise se fait sur l'aimantation locale de l'interface, pas
+sur l'aimantation moyenne de la couche.
+
+\section{Pourquoi l'efficacité dépend de \texorpdfstring{$\theta$}{θ}}
+
+On pourrait croire que le courant de spin dans l'espaceur vaut simplement
+$P\,J/e$ selon $\vp$. \textbf{C'est faux}, à cause des \textbf{réflexions
+multiples} :
+\begin{itemize}
+  \item les électrons réfléchis par F2 reviennent avec une polarisation
+    liée à $\vm$ ;
+  \item ils sont à nouveau filtrés par F1, et ainsi de suite.
+\end{itemize}
+
+Le courant de spin qui arrive à l'interface de F2 dépend donc à la fois de
+$\vp$ et de $\vm$. Slonczewski (1996) en tire une polarisation effective
+qui dépend de l'angle :
+\begin{equation}
+  g(\theta) = \left[-4 + \frac{(1+P)^3\,(3+\cos\theta)}{4\,P^{3/2}}\right]^{-1}.
+  \label{eq:g}
+\end{equation}
+Cette fonction est \textbf{asymétrique} : $g(\pi) > g(0)$. Il faut moins
+de courant pour basculer depuis l'état antiparallèle que depuis l'état
+parallèle.
+
+Dans les codes micromagnétiques (mumax3, OOMMF), on utilise souvent la
+forme généralisée :
+\begin{equation}
+  \varepsilon(\theta) = \frac{P\,\Lambda^2}
+  {(\Lambda^2+1) + (\Lambda^2-1)\,(\vm\cdot\vp)}.
+  \label{eq:eps}
+\end{equation}
+Avec $\Lambda = 1$, l'asymétrie disparaît et $\varepsilon = P/2$.
+
+\section{Le couple final}
+
+\begin{equation}
+  \bm{\tau} = \frac{\gamma\hbar J}{2e\,\mu_0 M_s\,d}\;
+  \varepsilon(\theta)\;\vm\times(\vm\times\vp).
+  \label{eq:tau}
+\end{equation}
+
+Le facteur $1/d$ ($d$ = épaisseur de la couche libre) traduit le fait
+qu'un couple déposé à l'interface est partagé sur toute la couche. Cela
+suppose $\vm$ uniforme dans l'épaisseur (approximation macrospin dans
+l'épaisseur). C'est pour ça qu'on confond \og $\vm$ à l'interface \fg{}
+et \og $\vm$ de la couche \fg.
+
+\section*{En une phrase}
+
+\begin{quote}
+  $P$ est fixée par le matériau. \textbf{L'axe} selon lequel on la mesure,
+  et donc ce qui est absorbé, est fixé par $\vm$ à l'interface.
+  \textbf{L'amplitude effective} dépend de l'angle entre $\vm$ et $\vp$, à
+  cause des réflexions multiples entre les deux couches.
+\end{quote}
+
+\part{Couche libre épaisse : LLG et diffusion de spin}
+
+\section{Le modèle de départ et ses limites}
+
+On suppose maintenant F2 épaisse. L'aimantation $\vm(\bm{r},t)$ suit
+l'équation LLG et l'accumulation de spin $\vs(\bm{r},t)$ suit l'équation
+de diffusion de spin de Zhang--Levy--Fert (ZLF) :
+\begin{equation}
+  \partial_t \vs + \nabla\cdot\mathcal{J}_s
+  = -\frac{\vs}{\tau_{sf}} - \frac{\vs\times\vm}{\tau_J}.
+  \label{eq:zlf}
+\end{equation}
+On écrit le courant de spin comme un tenseur $\mathcal{J}_{ij}$, avec
+$i$ l'indice d'espace (direction de l'écoulement) et $j$ l'indice de spin :
+\begin{equation}
+  \mathcal{J}_{ij} = \beta\frac{\mu_B}{e}\,J_i\,m_j
+  - 2D_0\left[\partial_i s_j - \beta\beta'\,m_j\,(m_k\,\partial_i s_k)\right].
+  \label{eq:courant}
+\end{equation}
+Le couple sur l'aimantation est $\bm{\tau}\propto\vm\times\vs$. Dans
+FeeLLGood, $\beta=\beta'=P$ : la diffusion longitudinale vaut
+$2D_0(1-P^2)$ et la diffusion transverse $2D_0$ (voir
+section~\ref{sec:F1-feellgood}).
+
+On note $\Gamma$ l'interface espaceur/F2, $\bm{n}$ la normale sortante de
+F2 et $\vq = -(\bm{n}\cdot\mathcal{J}_s)|_\Gamma$ le courant de spin qui
+\emph{entre} dans F2. Le modèle de départ impose un flux (condition de
+Neumann) :
+\begin{equation}
+  \vq = P\,\frac{\mu_B}{e}\,J\,\vp.
+  \label{eq:neumann}
+\end{equation}
+Ce flux ne dépend ni de $\vm_0 = \vm|_\Gamma$, ni de $\vs|_\Gamma$. Le
+modèle oublie donc trois choses :
+\begin{itemize}
+  \item \textbf{le filtrage par l'interface F2} : la partie du courant de
+    spin portée par le courant de charge est polarisée selon $\vm_0$, pas
+    selon $\vp$ ;
+  \item \textbf{le retour de spin} (\emph{backflow}) : l'accumulation de
+    spin qui se forme dans F2 renvoie du spin vers l'espaceur, ce qui
+    modifie le flux injecté ;
+  \item \textbf{les réflexions multiples entre F1 et F2}, qui donnent la
+    dépendance en angle de type $g(\theta)$ ou $\varepsilon(\theta)$.
+\end{itemize}
+
+\section{Condition d'interface issue de la théorie des circuits}
+
+\subsection{Conductances d'interface}
+
+On décrit une interface N/F d'aimantation $\bm{u}$ par :
+\begin{itemize}
+  \item $G_\uparrow$, $G_\downarrow$ : conductances de spin par unité de surface ;
+  \item $G_{\uparrow\downarrow} = G_r + iG_i$ : conductance de mélange
+    (\emph{spin-mixing conductance}) ;
+  \item $P_I = (G_\uparrow-G_\downarrow)/(G_\uparrow+G_\downarrow)$ :
+    polarisation d'interface.
+\end{itemize}
+On les regroupe dans une matrice $3\times3$ qui dépend de $\bm{u}$ :
+\begin{equation}
+  \mG(\bm{u}) = G_\parallel\,\bm{u}\bm{u}^{\mathsf{T}}
+  + G_r\left(\Id-\bm{u}\bm{u}^{\mathsf{T}}\right)
+  - G_i\,[\bm{u}]_\times,
+  \qquad [\bm{u}]_\times\,\bm{w} = \bm{u}\times\bm{w},
+  \label{eq:G}
+\end{equation}
+avec $G_\parallel\propto(1-P_I^2)(G_\uparrow+G_\downarrow)$. Les trois
+termes correspondent, dans l'ordre, à la diffusion longitudinale, à
+l'absorption transverse et à la précession dans le champ d'échange
+d'interface. Les conductances sont ici converties dans les unités de $\vs$,
+et les facteurs de convention y sont absorbés.
+
+\subsection{Courant de spin à travers l'interface}
+
+On note $\vs_N$ l'accumulation de spin dans l'espaceur et
+$\vs_F = \vs|_\Gamma$ celle dans F2 au bord. On élimine la chute de
+potentiel de charge à l'aide de $J$ et on obtient :
+\begin{equation}
+  \boxed{\;
+  \vq = P_I\,\frac{\mu_B}{e}\,J\,\vm_0
+  + \mG(\vm_0)\,\left(\vs_N-\vs_F\right)
+  \;}
+  \label{eq:robin}
+\end{equation}
+Trois remarques :
+\begin{itemize}
+  \item La polarisation portée par le courant de charge est \textbf{selon
+    $\vm_0$}. L'information sur $\vp$ n'arrive que par $\vs_N$,
+    l'accumulation créée par F1 dans l'espaceur.
+  \item La condition \eqref{eq:robin} est \textbf{linéaire en $\vs$} : c'est
+    une condition de Robin. Ses coefficients dépendent de $\vm_0$.
+  \item La théorie des circuits suppose un ferro fort : la partie
+    transverse de $\vs_F$ est nulle à l'interface, et le courant transverse
+    ne dépend que de $\vs_N$. Dans le modèle ZLF, $\vs_F$ a une composante
+    transverse qui décroît sur $\lambda_J=\sqrt{2\hbar D_0/J_{sd}}$. Écrire le
+    terme de mélange avec $\vs_N-\vs_F$ met alors en série l'absorption de
+    l'interface et celle du volume de F2, et compte deux fois l'absorption
+    si $G_{\uparrow\downarrow}$ la décrit déjà entièrement (valeur \emph{ab
+    initio}). FeeLLGood suit par défaut la théorie des circuits (section
+    \ref{sec:transverse}) ; l'écriture en série reste possible, avec un
+    $G_r$ qui ne représente que la partie interfaciale (Petitjean
+    \emph{et al.}).
+\end{itemize}
+
+\section{Le nœud espaceur : d'où vient la dépendance en \texorpdfstring{$\vm_0$}{m0}}
+
+\subsection{Conservation du spin dans l'espaceur}
+
+On suppose l'espaceur assez fin pour que $\vs_N$ y soit uniforme dans
+l'épaisseur. Il est en revanche épais devant la maille latérale, donc on
+écrit la relation en chaque point de $\Gamma$. On néglige la relaxation
+dans N. Le spin qui entre dans N depuis F1 ressort vers F2 :
+\begin{equation}
+  \underbrace{P_1\frac{\mu_B}{e}J\,\vp + \mG_1(\vp)\,(\vs_{F1}-\vs_N)}_{\text{F1}\,\to\,\text{N}}
+  \;=\;
+  \underbrace{P_2\frac{\mu_B}{e}J\,\vm_0 + \mG_2(\vm_0)\,(\vs_N-\vs_F)}_{\text{N}\,\to\,\text{F2}}.
+  \label{eq:noeud}
+\end{equation}
+Ici $J>0$ correspond à des électrons qui vont de F1 vers F2. Les indices 1
+et 2 désignent les interfaces F1/N et N/F2, et $\vs_{F1}$ est
+l'accumulation dans F1 à son interface. La section~\ref{sec:sF1} explique
+comment l'obtenir.
+
+On pose $\mG_1 = \mG_1(\vp)$, $\mG_2 = \mG_2(\vm_0)$ et
+$\mA = \mG_1 + \mG_2$. L'équation \eqref{eq:noeud} est un système linéaire
+$3\times3$ pour $\vs_N$ :
+\begin{equation}
+  \mA\,\vs_N = \frac{\mu_B}{e}J\left(P_1\vp - P_2\vm_0\right)
+  + \mG_1\vs_{F1} + \mG_2\vs_F.
+\end{equation}
+
+\subsection{Élimination de \texorpdfstring{$\vs_N$}{sN} : une condition de Robin effective}
+
+On reporte $\vs_N$ dans \eqref{eq:robin}. On utilise les identités
+$\Id-\mG_2\mA^{-1} = \mG_1\mA^{-1}$ et
+$\mG_2\mA^{-1}\mG_1 = \mG_1\mA^{-1}\mG_2$, et on obtient :
+\begin{equation}
+  \boxed{\;
+  \vq = \frac{\mu_B}{e}\,J\,\bm{P}_{\!\mathrm{eff}}(\vm_0)
+  + \mG_s\,\left(\vs_{F1}-\vs_F\right)
+  \;}
+  \label{eq:robin-eff}
+\end{equation}
+avec :
+\begin{align}
+  \bm{P}_{\!\mathrm{eff}}(\vm_0) &= \mG_2\mA^{-1}\,P_1\,\vp
+  + \mG_1\mA^{-1}\,P_2\,\vm_0,
+  \label{eq:Peff}\\
+  \mG_s &= \mG_2\,\mA^{-1}\,\mG_1
+  \quad\text{(conductance série des deux interfaces).}
+\end{align}
+
+C'est la réponse directe à la question de départ. La polarisation injectée
+dans F2 n'est plus le vecteur fixe $P\vp$ : c'est un \textbf{vecteur
+$\bm{P}_{\!\mathrm{eff}}$ qui dépend de $\vm_0$}, à la fois en direction et
+en amplitude. Il interpole entre les deux polariseurs, avec un poids
+donné par les conductances.
+
+\subsection{Cas limites}
+
+\begin{itemize}
+  \item \textbf{Interface F1/N très résistive}
+    ($\mG_1\ll\mG_2$) : $\mA\approx\mG_2$, donc
+    $\bm{P}_{\!\mathrm{eff}}\to P_1\vp$ et $\mG_s\approx\mG_1\to0$.
+    On retrouve exactement le modèle de départ \eqref{eq:neumann}.
+    Celui-ci est donc la limite d'un polariseur résistif.
+  \item \textbf{Interface N/F2 très résistive}
+    ($\mG_2\ll\mG_1$) : $\bm{P}_{\!\mathrm{eff}}\to P_2\vm_0$. Le
+    filtrage par F2 domine et le couple devient faible.
+  \item \textbf{Configuration colinéaire} ($\vm_0=\pm\vp$) : toutes les
+    matrices sont diagonales dans la même base, et on retrouve la formule
+    scalaire de deux résistances en série (Valet--Fert).
+  \item \textbf{F2 mince et absorption transverse totale} : la moyenne du
+    couple sur l'épaisseur redonne la forme $\varepsilon(\theta)$ de
+    l'équation~\eqref{eq:eps}, avec un $\Lambda$ fonction des conductances
+    (Slonczewski 2002).
+\end{itemize}
+
+\section{Accès à l'accumulation dans F1}
+\label{sec:sF1}
+
+Les formules \eqref{eq:robin-eff}--\eqref{eq:Peff} font intervenir
+$\vs_{F1}$, l'accumulation de spin dans F1 juste à son interface avec
+l'espaceur. Il y a trois façons de l'obtenir, de la plus simple à la plus
+complète.
+
+\subsection{Option 1 : poser \texorpdfstring{$\vs_{F1}=0$}{sF1 = 0}}
+
+C'est une approximation. Elle n'est valable que si la conductance de spin du
+volume de F1, notée $g_F$ et définie plus bas, est grande devant la
+conductance de l'interface : $g_F\gg G_{\parallel1}$. En général,
+l'accumulation à l'interface n'est pas nulle : comme chez Valet--Fert, elle
+décroît dans F1 sur la longueur $\lambda_{sf}$.
+
+\subsection{Option 2 : élimination analytique (recommandée si F1 est fixe et uniforme)}
+
+F1 a une aimantation fixe $\vp$, et sa composante transverse s'amortit sur
+$\lambda_J\sim1\,\mathrm{nm}$. On peut donc écrire
+\begin{equation}
+  \vs_{F1} = s_{F1}\,\vp :
+\end{equation}
+il ne reste qu'\textbf{une inconnue scalaire}, et le problème dans F1 est une
+diffusion 1D colinéaire.
+
+On place F1 en $-t_1<x<0$, avec un contact réservoir ($s=0$) en $x=-t_1$.
+On note $\beta_1$ la polarisation de volume de F1. En régime stationnaire,
+la composante de spin selon $\vp$ vérifie :
+\begin{equation}
+  j_s(x) = \beta_1\frac{\mu_B}{e}J - 2D_1\,s'(x),
+  \qquad s'' = \frac{s}{\lambda_1^2},
+  \qquad D_1 = D_0(1-\beta\beta'),\quad \lambda_1^2 = 2D_1\tau_{sf}.
+  \label{eq:F1-1D}
+\end{equation}
+Seule la diffusion \emph{longitudinale} $D_1 = D_0(1-\beta\beta')$
+intervient, car $\vs_{F1}$ est parallèle à $\vp$ : c'est elle, et non $D_0$,
+qui fixe la conductance de spin du volume de F1. $\lambda_1$ est la longueur
+de diffusion de spin longitudinale, celle que l'on mesure.
+La solution est
+\begin{equation}
+  s(x) = s_{F1}\,\frac{\sinh\!\big((x+t_1)/\lambda_1\big)}{\sinh(t_1/\lambda_1)},
+\end{equation}
+et le courant de spin qui sort de F1 vaut :
+\begin{equation}
+  j_s(0^-) = \beta_1\frac{\mu_B}{e}J - g_F\,s_{F1},
+  \qquad
+  g_F = \frac{2D_1}{\lambda_1}\coth\frac{t_1}{\lambda_1}
+  \;\xrightarrow{\;t_1\gg\lambda_1\;}\; \frac{2D_1}{\lambda_1}.
+  \label{eq:gF}
+\end{equation}
+On écrit la continuité avec la composante longitudinale du courant à
+l'interface F1/N :
+\begin{equation}
+  \beta_1\frac{\mu_B}{e}J - g_F\,s_{F1}
+  = P_1\frac{\mu_B}{e}J + G_{\parallel1}\,\big(s_{F1} - \vs_N\cdot\vp\big),
+\end{equation}
+d'où
+\begin{equation}
+  s_{F1} = \frac{(\beta_1-P_1)\,\frac{\mu_B}{e}J + G_{\parallel1}\,\vs_N\cdot\vp}
+  {g_F + G_{\parallel1}}.
+\end{equation}
+On remplace $s_{F1}$ dans le courant F1$\to$N. Le résultat a
+\textbf{exactement la même forme qu'avec $\vs_{F1}=0$}, mais avec deux
+paramètres renormalisés :
+\begin{equation}
+  \boxed{\;
+  P_1^* = \frac{\beta_1\,G_{\parallel1} + P_1\,g_F}{g_F + G_{\parallel1}},
+  \qquad
+  G_{\parallel1}^* = \frac{g_F\,G_{\parallel1}}{g_F + G_{\parallel1}}
+  \;}
+  \label{eq:renorm}
+\end{equation}
+$G_{r1}$ et $G_{i1}$ ne changent pas.
+\begin{itemize}
+  \item $P_1^*$ est une moyenne de la polarisation de volume $\beta_1$ et de
+    la polarisation d'interface $P_1$, pondérée par les conductances.
+  \item $G_{\parallel1}^*$ est la conductance de l'interface et celle du
+    volume mises en série.
+\end{itemize}
+En pratique, \textbf{on garde toutes les formules précédentes avec
+$\vs_{F1}=0$, en remplaçant $P_1\to P_1^*$ et
+$G_{\parallel1}\to G_{\parallel1}^*$} dans $\mG_1(\vp)$. On n'a rien à
+simuler dans F1. Dans la limite $g_F\gg G_{\parallel1}$, on retrouve
+$P_1^*\to P_1$, $G_{\parallel1}^*\to G_{\parallel1}$ et l'option~1. Le signe
+du terme en $\beta_1$ dépend de la convention choisie pour le sens de $J$,
+comme dans le reste du document.
+
+\subsection{Paramètres de F1 dans FeeLLGood}
+\label{sec:F1-feellgood}
+
+FeeLLGood utilise le modèle ZLF avec $\beta = \beta' = P$, et écrit le flux
+de diffusion $D_0\nabla\vs$, avec $D_0 = 2\sigma/(e^2N_0)$ (le facteur 2 du
+modèle ZLF est inclus dans $D_0$). Dans les régions magnétiques :
+\begin{itemize}
+  \item la diffusion longitudinale vaut $D_0(1-P^2)$, la diffusion
+    transverse $D_0$ (terme $-D_0P^2\,(\vm\cdot\partial_i\vs)
+    (\vm\cdot\partial_i\bm{w})$ de la forme faible) ;
+  \item la relaxation vaut $1/\tau_{sf} = D_0(1-P^2)/l_{sf}^2$, de sorte
+    que $l_{sf}$ est la longueur de diffusion de spin longitudinale.
+\end{itemize}
+Ces deux points sont implémentés dans la branche \texttt{slonczewski}
+(commit \texttt{ef95723}). Sur un cylindre aimanté uniformément, avec une
+injection de spin selon $\vm$, la décroissance longitudinale mesurée vaut
+$l_{sf}$ pour $P=0{,}3$ et $P=0{,}7$, et l'amplitude à l'entrée suit
+$1/(1+P)$, comme le prévoit la théorie 1D.
+
+Les paramètres de F1 sont $\sigma_1$, $P_{F1}$, $l_{sf,1}$ et $t_1$, et
+les grandeurs de l'option~2 deviennent :
+\begin{equation}
+  \boxed{\;
+  \beta_1 = P_{F1},\qquad
+  \lambda_1 = l_{sf,1},\qquad
+  g_F = \frac{2}{e^2N_0}\,
+        \frac{\sigma_1\,(1-P_{F1}^2)}{l_{sf,1}}\,
+        \coth\frac{t_1}{l_{sf,1}}
+  \;}
+  \label{eq:gF-feellgood}
+\end{equation}
+Ici $N_0$ est la densité d'états de l'\emph{échantillon} F2, et non celle
+de F1 (voir la section~\ref{sec:conversion}) : la densité d'états de F1
+n'intervient pas.
+
+Il n'y a donc pas de paramètre $\beta_1$ séparé : c'est le $P$ de volume de
+F1. Il ne faut pas le confondre avec $P_1$, la polarisation de
+l'\emph{interface} F1/N ($\gamma_1$ en CPP-GMR), qui reste un paramètre à
+part.
+
+\subsection{Option 3 : simuler F1}
+
+Cette option est nécessaire si F1 n'est pas uniforme, si la géométrie est
+réellement 3D (courant non uniforme, F1 de taille latérale finie) ou si F1
+est une structure plus complexe, par exemple un antiferromagnétique
+synthétique.
+
+On résout alors l'équation ZLF \eqref{eq:zlf} dans F1 comme dans F2.
+$\vs_{F1}$ est la trace de cette solution sur l'interface F1/N. La relation
+du nœud espaceur \eqref{eq:noeud} devient une condition qui relie les deux
+domaines, et on résout les deux d'un seul bloc. Une variante consiste à
+mailler tout l'empilement F1/N/F2 avec des paramètres qui changent selon la
+couche (approche d'Abert \emph{et al.}).
+
+\section{Mise en œuvre par éléments finis}
+
+\subsection{Forme faible}
+
+La diffusion de spin relaxe en $\tau_{sf}\sim\mathrm{ps}$, alors que
+l'aimantation évolue en $\mathrm{ns}$. On résout donc la version
+stationnaire de \eqref{eq:zlf} à $\vm$ fixé. Soit $\Omega$ le domaine F2
+et $\vv$ une fonction test. On intègre par parties et on utilise
+$\bm{n}\cdot\mathcal{J}_s = -\vq$ sur $\Gamma$. On suppose un flux nul sur
+les bords latéraux et une condition de réservoir ($\vs=0$) ou de flux nul
+à la sortie. On obtient :
+\begin{multline}
+  2D_0\int_\Omega\left[\partial_i s_j
+    - \beta\beta'\,m_j\,m_k\,\partial_i s_k\right]\partial_i v_j
+  + \int_\Omega\left(\frac{\vs}{\tau_{sf}}
+    + \frac{\vs\times\vm}{\tau_J}\right)\cdot\vv
+  + \int_\Gamma\left(\mG_s\,\vs\right)\cdot\vv
+  \\
+  = \int_\Omega\beta\frac{\mu_B}{e}\,J_i\,m_j\,\partial_i v_j
+  + \int_\Gamma\left[\frac{\mu_B}{e}J\,\bm{P}_{\!\mathrm{eff}}(\vm_0)
+    + \mG_s\,\vs_{F1}\right]\cdot\vv.
+  \label{eq:faible}
+\end{multline}
+Avec l'option~2 de la section~\ref{sec:sF1}, on prend $\vs_{F1}=0$ et
+le dernier terme disparaît. Par rapport au modèle de départ, il y a deux
+changements :
+\begin{enumerate}
+  \item un \textbf{terme de masse de bord}
+    $\int_\Gamma(\mG_s\vs)\cdot\vv$ dans la matrice ;
+  \item un \textbf{second membre de bord} qui dépend de $\vm_0$, au lieu
+    du flux constant $P\frac{\mu_B}{e}J\vp$.
+\end{enumerate}
+$\mG_s$ a une partie symétrique positive (termes $G_\parallel$ et $G_r$),
+ce qui renforce la coercivité. Sa partie antisymétrique (terme $G_i$) ne
+contribue pas à l'énergie.
+
+\subsection{Couplage avec LLG}
+
+À chaque pas de temps de LLG :
+\begin{enumerate}
+  \item lire $\vm$, et en particulier sa trace $\vm_0$ sur $\Gamma$ ;
+  \item calculer en chaque point de $\Gamma$ les matrices
+    $\mG_1(\vp)$ (avec $P_1^*$ et $G_{\parallel1}^*$ de
+    \eqref{eq:renorm}, à faire une seule fois puisque $\vp$ est fixe),
+    $\mG_2(\vm_0)$, $\mA^{-1}$, puis $\mG_s$ et
+    $\bm{P}_{\!\mathrm{eff}}(\vm_0)$ (inversions $3\times3$ locales) ;
+  \item réassembler les termes de bord de \eqref{eq:faible} et les termes
+    de volume qui dépendent de $\vm$ ;
+  \item résoudre le problème stationnaire pour $\vs$ ;
+  \item calculer le couple $\bm{\tau}\propto\vm\times\vs$ et avancer LLG.
+\end{enumerate}
+Dans cette formulation, tout le courant $\vq$ entre dans F2, et le couple
+vient entièrement du terme de volume $\vm\times\vs$. Pour décrire en plus
+une absorption localisée à l'interface, il faut distinguer le courant côté N
+du courant côté F2 : leur différence donne un couple surfacique (voir
+Petitjean \emph{et al.}).
+
+\subsection{Tests de validation}
+
+\begin{itemize}
+  \item Limite $\mG_1\ll\mG_2$ : retrouver les résultats du modèle de
+    départ. \emph{Fait} (section~\ref{sec:validation}).
+  \item F2 mince, $G_r$ grand : le couple moyenné sur l'épaisseur doit
+    suivre $\varepsilon(\theta)\,\vm\times(\vm\times\vp)$, avec le
+    $\Lambda$ correspondant aux conductances. \emph{Fait}
+    (section~\ref{sec:validation}) : ce test fixe la conversion des
+    conductances de mélange.
+  \item Configuration colinéaire : comparer à la solution analytique de
+    Valet--Fert. \emph{Fait} (section~\ref{sec:validation}).
+  \item Renormalisation de F1 : simuler F1 explicitement (option~3) et
+    vérifier que l'on retrouve le résultat obtenu avec $P_1^*$ et
+    $G_{\parallel1}^*$ (option~2). \emph{Couvert indirectement} par le cas
+    Valet--Fert, dont la solution analytique résout F1 explicitement.
+\end{itemize}
+
+\section{Implémentation dans FeeLLGood}
+\label{sec:implementation}
+
+L'option~2 est implémentée dans la branche \texttt{slonczewski} de
+FeeLLGood, créée à partir de \texttt{normal\_current\_density}.
+
+\subsection{Commits}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{>{\ttfamily}l>{\raggedright\arraybackslash}p{11.5cm}}
+  \toprule
+  \textrm{Commit} & Contenu \\
+  \midrule
+  ef95723 & Diffusion anisotrope ($\beta=\beta'=P$) et relaxation
+            $D_0(1-P^2)/l_{sf}^2$ dans les régions magnétiques. \\
+  2ba96f0 & \texttt{src/slonczewskiInterface.h} : fonctions pures
+            (matrice de conductance, renormalisation de F1, condition
+            effective) et leurs tests unitaires. \\
+  7c28c12 & Condition de Robin dans \texttt{spinAcc::solve()}
+            (\texttt{stackBoundaryCondition}) et lecture du bloc
+            \texttt{slonczewski} des surfaces. \\
+  a7c409f & Cas de validation \texttt{validation/valet\_fert\_1d}. \\
+  5887bbe & Interfaces données par $AR$ et $\gamma$, conversion faite par
+            FeeLLGood avec la densité d'états de l'échantillon. \\
+  3bc3af0 & Conductances de mélange converties en
+            $2k\,G_{\uparrow\downarrow}$ (le facteur 2 manquait). \\
+  d98d496 & Cas de validation angulaire
+            \texttt{validation/slonczewski\_angle}. \\
+  807fad5 & Signe de $\mathrm{Im}\,G_{\uparrow\downarrow}$ validé dans le cas
+            angulaire. \\
+  5a85673 & Continuité de $\vs$ entre régions de densités d'états
+            différentes : documentation, avertissement en mode verbeux et
+            cas de validation \texttt{validation/two\_regions\_1d}. \\
+  cdc8f86 & Courant transverse à travers N/F2 : puits de la
+            théorie des circuits par défaut, \texttt{transverse: series}
+            en option. \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Réglages}
+
+Le bloc \texttt{slonczewski} remplace \texttt{uP} sur la surface
+d'injection. Il exige \texttt{jn} sur la même surface et y exclut
+\texttt{uP} et \texttt{s} :
+\begin{verbatim}
+inlet:
+  jn: 1e12            # jn > 0 : électrons de F1 vers F2
+  slonczewski:
+    p: [0, 0, 1]
+    F1:  {sigma: 2e6, P: 0.5, l_sf: 20e-9, thickness: 15e-9}  # facultatif
+    F1N: {AR: 0.5e-15, gamma: 0.75, Gr: 5e14, Gi: 0}  # AR en Ohm.m^2, Gr, Gi :
+    NF2: {AR: 0.3e-15, gamma: 0.6,  Gr: 5e14,         # G_updown en S/m^2
+          transverse: sink}                           # ou series (§ 11.3)
+\end{verbatim}
+\begin{itemize}
+  \item \textbf{Avec \texttt{NF2}} (variante complète) : la condition
+    dépend de $\vm_0$, et la surface doit être magnétique.
+  \item \textbf{Sans \texttt{NF2}} (espaceur maillé, ou interface N/F2
+    parfaite) : $\bm{P}_{\!\mathrm{eff}} = P_1^*\vp$ et
+    $\mG_s = \mG_1(\vp)$, indépendants de l'aimantation.
+  \item \textbf{Sans \texttt{F1}} : $\vs_{F1}=0$, sans renormalisation
+    (option~1).
+\end{itemize}
+
+\subsection{Conversion des conductances}
+\label{sec:conversion}
+
+L'accumulation de spin de FeeLLGood (en A/m) est reliée à l'accumulation
+de spin $\mu_s = (\mu_+-\mu_-)/2$ de Valet--Fert et de Brataas \emph{et
+al.} par
+\begin{equation}
+  \vs = \mu_B\,N_0\,\frac{\mu_s}{2} = \mu_B\,N_0\,\frac{\mu_+-\mu_-}{4}.
+\end{equation}
+Avec cette relation, les équations de volume de Valet--Fert sont exactement
+celles de FeeLLGood ($\beta=\beta'=P$, $D_0 = 2\sigma/(e^2N_0)$). Le
+facteur $1/2$ vient de ce $D_0$, qui vaut deux fois le coefficient $D$ de
+la relation d'Einstein $\sigma = e^2N_0D$ (c'est le \og $2D_0$ \fg{} du
+modèle ZLF) : $\vs$ vaut la moitié de l'aimantation physique
+$\mu_BN_0\mu_s$. Cela ne change aucun résultat, mais il faut s'en
+souvenir pour interpréter \texttt{dens\_state}. Une
+interface de produit résistance--surface $AR^*$ et d'asymétrie $\gamma$
+($r_{\pm} = 2AR^*(1\mp\gamma)$) transporte le courant de spin
+$\gamma\,J + [\mu_s]/(e\,AR^*)$ le long de son aimantation $\bm{u}$,
+puisque $(1-\gamma^2)(G_\uparrow+G_\downarrow) = 1/AR^*$. En théorie des
+circuits, le courant de spin transverse vaut
+$2\,G_{\uparrow\downarrow}\,[\mu_s]_\perp/e$, où $G_{\uparrow\downarrow}$
+est la conductance de mélange tabulée (par exemple
+$\mathrm{Re}\,G_{\uparrow\downarrow}\approx0{,}5\cdot10^{15}$\,S/m² pour
+Co/Cu). D'où les conductances en unités du problème de diffusion (m/s),
+avec $k = 2/(e^2N_0)$ :
+\begin{equation}
+  \boxed{\;
+  G_\parallel = \frac{k}{AR^*},\qquad
+  P = \gamma,\qquad
+  G_r + iG_i = 2k\,G_{\uparrow\downarrow}
+  \;}
+  \label{eq:conversion}
+\end{equation}
+Le facteur 2 de la partie transverse se vérifie sur une interface non
+magnétique ($\gamma=0$, $G_\uparrow = G_\downarrow = G_{\uparrow\downarrow}
+= G$) : le courant de spin y vaut $2G\,[\mu_s]/e$ dans toutes les
+directions, donc $1/AR^* = 2G$, et la matrice de conductance doit être
+isotrope, $G_\parallel = G_r$. C'est le test unitaire
+\texttt{makeStack\_isotropic}.
+$N_0$ est la densité d'états de la région de volume voisine de la surface,
+c'est-à-dire de l'échantillon F2. L'empilement n'étant pas maillé, toutes
+ses conductances (les deux interfaces et le volume de F1, éq.
+\eqref{eq:gF-feellgood}) s'expriment d'abord en potentiel chimique, puis se
+convertissent avec ce seul $N_0$. FeeLLGood fait cette conversion une seule
+fois, à la construction du solveur (\texttt{spinAcc::makeStacks}) : il
+retrouve le tétraèdre voisin de chaque triangle de la surface, et refuse
+une surface qui borde des régions de densités d'états différentes.
+
+\paragraph{Continuité de $\vs$ entre régions maillées.} FeeLLGood garde
+$\vs$ continu entre les régions de volume, comme le courant de spin. Avec
+$\vs = \mu_BN_0\,\mu_s/2$, c'est la continuité de $\mu_s$ de Valet--Fert
+seulement si les régions ont la même \texttt{dens\_state} ; sinon, cela
+impose à l'interface entre deux régions A et B
+\begin{equation}
+  N_{0,A}\,\mu_{s,A} = N_{0,B}\,\mu_{s,B},
+  \label{eq:s-continu}
+\end{equation}
+sans résistance d'interface (le flux reste continu). C'est un choix de
+modèle : pour retrouver la continuité de $\mu_s$ de Valet--Fert, on donne la
+même \texttt{dens\_state} à toutes les régions, et chacune garde son propre
+$\sigma$, donc son propre $D_0$. En mode verbeux, FeeLLGood signale les
+régions voisines de \texttt{dens\_state} différentes
+(\texttt{spinAcc::checkDensityOfStates}). Ce modèle est documenté dans la
+classe \texttt{spinAcc}, dans \texttt{default-settings.yml} (clé
+\texttt{dens\_state}) et dans \texttt{slonczewskiInterface.h}.
+
+\paragraph{Courant transverse à travers N/F2.}
+\label{sec:transverse}
+La clé \texttt{transverse} de \texttt{NF2} choisit entre deux modèles :
+\begin{itemize}
+  \item \texttt{sink} (défaut), le \og puits \fg{} de la théorie des
+    circuits : le courant transverse à travers N/F2 ne dépend que de
+    $\vs_N$. $G_{\uparrow\downarrow}$ décrit toute l'absorption, et la
+    diffusion dans F2 ne fait que répartir le couple sur $l_{sd}$. Dans
+    l'élimination de l'espaceur, $\vs_F$ n'agit sur N/F2 que par sa partie
+    longitudinale $\vm_0(\vm_0\cdot\vs_F)$ : la matrice de bord devient
+    $\mG_s\,\vm_0\vm_0^{\mathsf T}$ (non symétrique ; le solveur BiCGStab
+    l'accepte).
+  \item \texttt{series} : le courant transverse dépend de
+    $\vs_N-\vs_F$. L'interface ($1/G_{r2}$) et le volume de F2
+    ($1/g_\perp$, avec $g_\perp = D_0\kappa$ et
+    $\kappa^2 = (1-P^2)/l_{sf}^2 - i/l_{sd}^2$) sont deux résistances
+    d'absorption en série ; $G_{\uparrow\downarrow}$ ne doit alors
+    représenter que la partie interfaciale.
+\end{itemize}
+Dans le cas angulaire, $|2kG_{\uparrow\downarrow}| = 0{,}70\cdot10^6$\,m/s
+et $|g_\perp| = 2{,}32\cdot10^6$\,m/s : le volume ajoute environ $30\,\%$
+de résistance d'absorption, et le couple de type amortissement est de 15 à
+$17\,\%$ plus faible avec \texttt{series} qu'avec \texttt{sink}.
+
+\paragraph{Signe de la partie imaginaire.} La conductance de mélange est
+celle de Brataas \emph{et al.} (Phys.\ Rep.\ \textbf{427}, 157, éq.~2) :
+\begin{equation}
+  G_{\uparrow\downarrow} = \frac{e^2}{h}\Big[M - \sum_{nm} r_\uparrow^{nm}
+  \big(r_\downarrow^{nm}\big)^*\Big],
+\end{equation}
+où ↑ désigne le spin majoritaire, aligné sur $\vm$ (leur figure~2), comme le
+canal majoritaire de FeeLLGood. Le courant de spin transverse de N vers F,
+du côté N, vaut
+$2\,\mathrm{Re}\,G_{\uparrow\downarrow}\,\vm\times(\bm{V}_S\times\vm)
++ 2\,\mathrm{Im}\,G_{\uparrow\downarrow}\,\bm{V}_S\times\vm$, avec
+$\bm{V}_S = -\bm{\mu}_s/e$ puisque $\mu = -eV$. Dans les variables de
+FeeLLGood, le terme imaginaire devient donc
+$+2\,\mathrm{Im}\,G_{\uparrow\downarrow}\,
+(\bm{\mu}_{s,F}-\bm{\mu}_{s,N})\times\vm/e$, et c'est le signe de
+$\mG = \ldots - G_i[\vm]_\times$ dans \eqref{eq:G}. Le même signe se
+retrouve à partir de la diffusion d'un seul canal : un spin transverse
+$(|{\uparrow}\rangle+|{\downarrow}\rangle)/\sqrt2$ est réfléchi en
+$(r_\uparrow, r_\downarrow)/\sqrt2$, et la polarisation transverse absorbée
+vaut $1 - r_\uparrow^*r_\downarrow = \overline{G_{\uparrow\downarrow}}$. Le
+cas angulaire le vérifie numériquement (section~\ref{sec:validation}).
+
+\subsection{Validation}
+\label{sec:validation}
+
+\paragraph{Diffusion anisotrope.} Cylindre de 1000\,nm aimanté
+uniformément, injection de spin selon $\vm$, $l_{sf}=10$\,nm : la
+décroissance mesurée vaut $10{,}07$\,nm pour $P=0{,}3$ et $P=0{,}7$, et
+l'amplitude à l'entrée suit $1/(1+P)$ (rapport $1{,}3077$ entre les deux
+cas, exactement la valeur théorique).
+
+\paragraph{Non-régression.} Avec $P_1=1$ et des conductances quasi nulles,
+la condition de Robin redonne l'accumulation de l'injection \texttt{uP} à
+$5\cdot10^{-8}$ près sur tout le maillage.
+
+\paragraph{Valet--Fert 1D.} Le script
+\texttt{validation/valet\_fert\_1d/valet\_fert.py} compare l'accumulation
+de spin d'un fil F2 de $10\times10\times300$\,nm à la solution analytique
+de Valet--Fert pour l'empilement F1 ($t_1=15$\,nm, $\beta_1=0{,}5$,
+$\lambda_1=20$\,nm) / F1/N ($AR^*=0{,}5$\,f$\Omega$m², $\gamma=0{,}75$) /
+espaceur d'épaisseur nulle / N/F2 ($0{,}3$\,f$\Omega$m², $\gamma=0{,}6$) /
+F2 ($\beta=0{,}3$, $\lambda=10$\,nm), aimantations parallèles (P) ou
+antiparallèles (AP) selon $z$. La solution analytique est écrite
+indépendamment du code (système linéaire $5\times5$, par canal).
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lccc}
+  \toprule
+  & \multicolumn{2}{c}{$s_z$ à l'entrée, FeeLLGood / Valet--Fert} & \\
+  Maillage & P & AP & Erreur max \\
+  \midrule
+  $h=2$\,nm & $45{,}69$ / $45{,}86$\,A/m & $-163{,}99$ / $-164{,}60$\,A/m & $0{,}82\,\%$ \\
+  $h=1$\,nm & $45{,}81$ / $45{,}86$\,A/m & $-164{,}43$ / $-164{,}60$\,A/m & $0{,}26\,\%$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+L'erreur décroît à peu près comme $h^2$ (éléments P1). Avec le facteur 1
+au lieu de 2 dans \eqref{eq:conversion}, l'erreur monte à $8{,}5\,\%$ en
+configuration parallèle : le test échoue, il fixe donc bien la conversion.
+Il couvre aussi la renormalisation de F1, la mise en série des interfaces,
+les signes de $j_n$ et des polarisations, la diffusion anisotrope et la
+relaxation dans F2. Il ne couvre ni les conductances de mélange (sans effet
+en colinéaire), ni des densités d'états différentes entre couches.
+
+\paragraph{Cas angulaire sur F2 mince.} Dans le répertoire
+\texttt{validation/slonczewski\_angle}, le script
+\texttt{slonczewski\_angle.py} traite une
+couche F2 de $2\times2\times3$\,nm maillée avec $h=0{,}2$\,nm (pour
+résoudre $l_{sd}=1$\,nm), d'aimantation $\vm=\hat z$ et $P=0{,}5$, suivie
+d'un réservoir. Le polariseur vaut $\vp = (\sin\theta, 0, \cos\theta)$,
+avec deux interfaces de même $AR^*=0{,}5$\,f$\Omega$m², $\gamma=0{,}75$ et
+$\mathrm{Re}\,G_{\uparrow\downarrow}=0{,}55\cdot10^{15}$\,S/m², et
+$\mathrm{Im}\,G_{\uparrow\downarrow} = 0{,}15\cdot10^{15}$ (F1/N) et
+$0{,}25\cdot10^{15}$\,S/m² (N/F2), valeurs plus grandes que d'habitude pour
+que le signe compte. La référence est indépendante du code : les interfaces
+sont écrites avec les formules de Brataas \emph{et al.} en $\mu_s$, terme
+imaginaire compris, et les équations 1D de F2 sont résolues exactement par
+modes propres ; elle suit les deux modèles du courant transverse à travers
+N/F2. Le couple $\vm\times\vs$ est de type amortissement pour $s_y$
+(direction $\vm\times(\vm\times\vp)$) et de type champ pour $s_x$. Avec
+\texttt{transverse: sink} (défaut) :
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{rccc}
+  \toprule
+  $\theta$ & Amortissement $\int s_y\,dz$ & Champ $\int s_x\,dz$ & Erreur max \\
+  & FeeLLGood / référence ($10^{-9}$\,A) & FeeLLGood / référence ($10^{-9}$\,A) & sur $\vs$ \\
+  \midrule
+  30° & $4{,}7941$ / $4{,}7930$ & $1{,}5079$ / $1{,}5266$ & $0{,}46\,\%$ \\
+  60° & $7{,}9075$ / $7{,}9065$ & $2{,}2985$ / $2{,}3291$ & $1{,}1\,\%$ \\
+  90° & $8{,}1529$ / $8{,}1531$ & $2{,}0235$ / $2{,}0547$ & $0{,}52\,\%$ \\
+  120° & $5{,}9018$ / $5{,}9031$ & $1{,}1078$ / $1{,}1300$ & $0{,}23\,\%$ \\
+  150° & $2{,}8398$ / $2{,}8410$ & $0{,}3526$ / $0{,}3631$ & $0{,}10\,\%$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+Avec \texttt{transverse: series}, les résultats sont ceux d'avant ce choix
+(erreur maximale $1{,}1\,\%$), par exemple à 90° :
+$6{,}8434$ / $6{,}8403\cdot10^{-9}$\,A pour le couple d'amortissement. Le
+couple d'amortissement diffère de 15 à $17\,\%$ entre les deux modèles :
+le test les distingue. L'accumulation transverse s'annule à 0 et 180°.
+L'erreur décroît comme $h^2$ ($1{,}1\,\%$ avec $h=0{,}2$\,nm,
+$0{,}27\,\%$ avec $h=0{,}1$\,nm, vérifié avec \texttt{series} et
+$\mathrm{Im}\,G_{\uparrow\downarrow}=0$). Le test échoue aussi si la
+conversion ou le signe est faux :
+\begin{itemize}
+  \item avec l'ancienne conversion $k\,G_{\uparrow\downarrow}$ au lieu de
+    $2k\,G_{\uparrow\downarrow}$ ($\mathrm{Im}\,G_{\uparrow\downarrow}=0$),
+    l'erreur atteint $170\,\%$ ;
+  \item avec le signe opposé du terme en $\mathrm{Im}\,G_{\uparrow\downarrow}$
+    dans la référence, l'erreur atteint $13\,\%$, et le couple de champ
+    diffère d'un facteur 2 à 150°.
+\end{itemize}
+Le couple de type amortissement suit la forme de Slonczewski
+$\varepsilon(\theta)\sin\theta$ à $5\,\%$ près, avec
+$\Lambda^2\approx0{,}53$ (\texttt{sink}) ou $0{,}54$ (\texttt{series}) : le
+couple est plus fort près de la configuration parallèle pour cette
+structure asymétrique.
+
+\paragraph{Deux régions de densités d'états différentes.} Le script
+\texttt{two\_regions.py}, dans le répertoire
+\texttt{validation/}\allowbreak\texttt{two\_regions\_1d}, traite un fil de
+$4\times4\times300$\,nm ($h=1$\,nm) : un espaceur N non magnétique maillé
+($0<z<40$\,nm, $\sigma=6\cdot10^7$\,S/m, \texttt{dens\_state}
+$0{,}6\cdot10^{47}$\,J$^{-1}$m$^{-3}$, $l_{sf}=50$\,nm), puis F2
+($\sigma=4\cdot10^6$\,S/m, \texttt{dens\_state} $1{,}344\cdot10^{47}$,
+$P=0{,}5$, $l_{sf}=10$\,nm), puis un réservoir. Le spin est injecté en
+$z=0$ par un empilement sans interface N/F2 (l'espaceur étant maillé) :
+F1 réservoir / F1/N ($AR^*=0{,}5$\,f$\Omega$m², $\gamma=0{,}75$),
+aimantations parallèles (P) ou antiparallèles (AP) selon $z$. La référence
+est écrite dans les variables de Valet--Fert avec la règle d'interface
+\eqref{eq:s-continu}.
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lccc}
+  \toprule
+  & \multicolumn{2}{c}{$\vs$ continu (FeeLLGood)} & $\mu_s$ continu \\
+  & $s_z$ à l'interface, FeeLLGood / modèle & Erreur max & $s_N$ / $s_F$ à l'interface \\
+  \midrule
+  P  & $-7{,}130$ / $-7{,}131$\,A/m & $0{,}14\,\%$ & $-6{,}40$ / $-14{,}34$\,A/m \\
+  AP & $-23{,}365$ / $-23{,}369$\,A/m & $0{,}14\,\%$ & $-20{,}98$ / $-47{,}00$\,A/m \\
+  \bottomrule
+\end{tabular}
+\end{center}
+FeeLLGood suit le modèle à $\vs$ continu à $0{,}14\,\%$ près. Avec des
+\texttt{dens\_state} égales, les deux modèles coïncident ($10^{-15}$). Ici
+($N_{0,F}/N_{0,N}=2{,}24$), ils diffèrent de $100\,\%$ de $\max|\vs|$, du
+côté F2 de l'interface : avec $\mu_s$ continu, $\vs$ y saute d'un facteur
+$2{,}24$, et l'accumulation dans F2 à l'interface est environ deux fois
+celle du modèle de FeeLLGood. Le couple dans F2 en dépend directement.
+
+\subsection{Points ouverts}
+
+\begin{enumerate}
+  \item \textbf{Résolution transverse} : l'absorption transverse dans F2 se
+    fait sur $l_{sd}\sim1$\,nm ; un maillage plus grossier ne la résout pas.
+\end{enumerate}
+
+\section*{Synthèse}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\raggedright}p{3.2cm}>{\raggedright}p{4.8cm}>{\raggedright\arraybackslash}p{5.6cm}}
+  \toprule
+  & \textbf{Modèle de départ} & \textbf{Modèle généralisé} \\
+  \midrule
+  Condition sur $\Gamma$ & Neumann : $\vq = P\frac{\mu_B}{e}J\vp$
+    & Robin : $\vq = \frac{\mu_B}{e}J\bm{P}_{\!\mathrm{eff}}(\vm_0)
+      + \mG_s(\vs_{F1}-\vs_F)$ \\
+  Rôle de $\vp$ & direction du flux & source de $\vs_N$ (nœud espaceur) \\
+  Dépendance angulaire & aucune
+    & apparaît d'elle-même (retour de spin, réflexions) \\
+  Paramètres & $P$
+    & $AR^*$, $\gamma$, $G_r$, $G_i$ pour F1/N et N/F2 ;
+      $\sigma_1$, $P_{F1}$, $l_{sf,1}$, $t_1$ pour F1
+      (sections~\ref{sec:F1-feellgood} et~\ref{sec:conversion}) \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Références}
+
+\begin{itemize}
+  \item J.\,C.~Slonczewski, \emph{Current-driven excitation of magnetic
+    multilayers}, J.~Magn.\ Magn.\ Mater.\ \textbf{159}, L1 (1996).
+  \item J.\,C.~Slonczewski, \emph{Currents and torques in metallic magnetic
+    multilayers}, J.~Magn.\ Magn.\ Mater.\ \textbf{247}, 324 (2002) :
+    origine de la formule à paramètre $\Lambda$.
+  \item T.~Valet, A.~Fert, Phys.\ Rev.\ B \textbf{48}, 7099 (1993) :
+    magnétorésistance géante en géométrie CPP, modèle de diffusion
+    colinéaire.
+  \item S.~Zhang, P.\,M.~Levy, A.~Fert, Phys.\ Rev.\ Lett.\ \textbf{88},
+    236601 (2002) : modèle de diffusion ZLF.
+  \item A.~Brataas, G.\,E.\,W.~Bauer, P.\,J.~Kelly, Phys.\ Rep.\
+    \textbf{427}, 157 (2006) : théorie des circuits magnéto-électroniques.
+  \item C.~Petitjean, D.~Luc, X.~Waintal, Phys.\ Rev.\ Lett.\
+    \textbf{109}, 117204 (2012) : courants transverses en dérive-diffusion
+    et conditions d'interface cohérentes.
+  \item C.~Abert \emph{et al.}, Sci.\ Rep.\ \textbf{5}, 14855 (2015) :
+    diffusion de spin 3D dans tout l'empilement en micromagnétisme.
+\end{itemize}
+
+\end{document}
