@@ -60,7 +60,7 @@ $\mathbf{m}$ parallel to $\mathbf{p}$: F2, close to $+z$ (antiparallel to $\math
 switches towards $-z$ (AP → P) above the critical current density. The current density along $z$
 is $j_z(t) = -$`current_density(t)`.
 
-**Oersted field.** As in `cyl_oersted_current_density_ramp1ns`,
+**Oersted field.** The current being uniform, Ampère's law gives
 $\mathbf{B} = \frac{\mu_0 j_z}{2}(-y, x, 0)$ inside the pillar, given in `Bext` (feeLLGood does not
 compute it): 0.025 T at the edge at the end of the ramp, small compared with the anisotropy field.
 
