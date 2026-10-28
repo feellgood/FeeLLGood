@@ -1,0 +1,86 @@
+# pillar_slonczewski_current_density_ramp1ns: spin-transfer switching of the free layer F2 of a
+# perpendicular spin valve pillar, the spin being injected through the polarizer stack
+# F1 / Cu spacer / F2 (key slonczewski of the bottom face), the current density being a linear ramp
+# from 0 at t = 0 to 2e12 A/m^2 at the end of the simulation (1 ns). Needs a feeLLGood built from
+# the branch slonczewski (keys slonczewski, current_density).
+#
+#     gmsh -3 pillar.geo -o pillar.msh
+#     feellgood settings.yml
+#
+# Stack, from bottom to top: reservoir / F1 (reference layer, 10 nm, magnetization p = -z, not
+# meshed) / interface F1/N / Cu spacer N (thin, not meshed) / interface N/F2 / F2 (meshed: disk of
+# radius 20 nm and thickness 4 nm, perpendicular anisotropy) / Cu cap (reservoir, s = 0 on the top
+# face). The interfaces are Co/Cu-like (Valet-Fert AR and gamma, mixing conductance of Xia et al.).
+#
+# Current: in feeLLGood jn = j.n with n the OUTWARD normal. On the bottom face (n = -ez),
+# current_density(t) > 0 means a current leaving the sample, i.e. flowing along -z: the electrons
+# flow along +z, from F1 into F2. The spin transfer torque then favours m parallel to p: starting
+# from m close to +z, antiparallel to p = -z, F2 switches towards -z (AP -> P) above the critical
+# current density. jz(t) = -current_density(t) is the current density along z.
+#
+# The Oersted field of the current, B = mu0 jz/2 (-y, x, 0) inside the pillar (0.025 T at the edge
+# for 2e12 A/m^2), is given in Bext: feeLLGood does not compute it.
+
+outputs:
+  file_basename: pillar
+  final_time: 1e-9
+  evol_time_step: 1e-12
+  mag_config_every: 50          # one .sol file every 50 ps
+  evol_columns: [t, dt, max_dm, <Mx>, <My>, <Mz>, E_ex, E_aniso, E_demag, E_zeeman, E_tot,
+                current_density]
+
+mesh:
+  filename: pillar.msh
+  length_unit: 1e-9
+  volume_regions:
+    F2:                         # CoFeB-like free layer with perpendicular anisotropy
+      Ms: 1.0e6                 # A/m
+      Ae: 2.0e-11               # J/m
+      alpha_LLG: 0.02
+      K: 8.0e5                  # J/m^3, uniaxial along uk: mu0 H_K,eff = 2K/Ms - mu0 Ms = 0.34 T
+      uk: [0, 0, 1]
+      # spin transport
+      sigma: 2.0e6              # (Ohm m)^-1
+      dens_state: 1.344e47      # J^-1 m^-3
+      P: 0.5                    # beta = beta' = P
+      l_sd: 1.0e-9              # m, not resolved by the 2 nm mesh (see the README)
+      l_sf: 5.0e-9              # m, longitudinal spin diffusion length
+  surface_regions:
+    pillar_bottom:              # current inlet, polarizer stack
+      jn: current_density       # j.n = current_density(t), outward normal -ez
+      slonczewski:
+        p: [0, 0, -1]           # magnetization of the reference layer F1
+        F1: {sigma: 2.0e6, P: 0.5, l_sf: 5.0e-9, thickness: 10.0e-9}
+        F1N: {AR: 0.5e-15, gamma: 0.75, Gr: 0.55e15, Gi: 0}   # AR in Ohm m^2, Gr, Gi in S/m^2
+        NF2: {AR: 0.5e-15, gamma: 0.75, Gr: 0.55e15, Gi: 0, transverse: sink}
+    pillar_top:                 # outlet: Cu cap, reservoir
+      V: 0.0
+      s: [0, 0, 0]
+    pillar_side: {}             # free surface
+
+# close to +z, tilted by 5 degrees towards +x (the torque vanishes for m exactly antiparallel to p)
+initial_magnetization: [0.0871557, 0, 0.9961947]
+
+# normal current density of the bottom face [A/m^2]: linear ramp from 0 (t = 0) to 2e12 A/m^2
+# (t = final_time = 1 ns), electrons from F1 into F2; the macrospin critical current density
+# (stack_torque.py) is about 3.5e11 A/m^2, reached at 0.18 ns
+current_density: "2e12*t/1e-9"
+
+# Oersted field of j = jz ez, in T, x and y in m: mu0 jz/2 = 2 pi 1e-7 jz, jz = -current_density(t)
+Bext:
+  space: "function(x, y, z) { return [-y, x, 0]; }"
+  time: "function(t) { return -2*PI*1e-7*current_density(t); }"
+
+spin_accumulation:
+  enable: true
+
+demagnetizing_field_solver:
+  nb_threads: 0                 # all the hardware threads
+
+finite_element_solver:
+  max(iter): 2000               # the default 700 makes the LLG solver fail and divide the time step
+
+time_integration:
+  max(du): 0.02
+  min(dt): 1e-18
+  max(dt): 5e-13
