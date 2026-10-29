@@ -41,8 +41,17 @@ pillar_bottom:
 feeLLGood converts the stack once (verbose mode: `polarizer stack of pillar_bottom ... in m/s`)
 with the `dens_state` of F2, $k = 2/(e^2N_0)$: $G_\parallel = k/AR^*$,
 $G_r + iG_i = 2k\,G_{\uparrow\downarrow}$, the bulk of F1 being folded into F1/N
-($P_1^* = 0.534$, $G_{\parallel1}^* = 1.56e5$ m/s), the spacer being eliminated. At each time
-step, the spin current entering F2 through the bottom face is
+($P_1^* = 0.534$, $G_{\parallel1}^* = 1.56e5$ m/s), the spacer being eliminated.
+
+In F2, the spin current is the tensor $Q$ of components $Q_{i\alpha}$, $i$ being the index of space
+and $\alpha$ the index of spin (Latin indices for space, Greek indices for spin, summation over the
+repeated indices); with $\beta = \beta' = P$,
+```math
+Q_{i\alpha} = -P\,\frac{\mu_B}{e}\,j_i\,m_\alpha - D_0\left[\partial_i s_\alpha - P^2\,m_\alpha\,(\mathbf{m}\cdot\partial_i\mathbf{s})\right],
+\qquad D_0 = \frac{2\sigma}{e^2N_0}.
+```
+At each time step, the spin current entering F2 through the bottom face,
+$q_\alpha = -n_iQ_{i\alpha}$ ($\mathbf{n}$ the outward normal), is
 ```math
 \mathbf{q} = \frac{\mu_B}{e}\,j_n\,\mathbf{P}_{\mathrm{eff}}(\mathbf{m}_0) - \mathsf{G}_s(\mathbf{m}_0)\,\mathbf{s},
 ```
