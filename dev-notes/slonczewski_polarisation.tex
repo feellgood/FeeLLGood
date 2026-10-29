@@ -148,15 +148,18 @@ On suppose maintenant F2 épaisse. L'aimantation $\vm(\bm{r},t)$ suit
 l'équation LLG et l'accumulation de spin $\vs(\bm{r},t)$ suit l'équation
 de diffusion de spin de Zhang--Levy--Fert (ZLF) :
 \begin{equation}
-  \partial_t \vs + \nabla\cdot\mathcal{J}_s
+  \partial_t \vs + \nabla\cdot Q
   = -\frac{\vs}{\tau_{sf}} - \frac{\vs\times\vm}{\tau_J}.
   \label{eq:zlf}
 \end{equation}
-On écrit le courant de spin comme un tenseur $\mathcal{J}_{ij}$, avec
-$i$ l'indice d'espace (direction de l'écoulement) et $j$ l'indice de spin :
+On écrit le courant de spin comme un tenseur $Q$ de composantes
+$Q_{i\alpha}$, avec $i$ l'indice d'espace (direction de l'écoulement) et
+$\alpha$ l'indice de spin. Les indices latins désignent l'espace, les
+indices grecs le spin, et on somme sur les indices répétés :
 \begin{equation}
-  \mathcal{J}_{ij} = -\beta\frac{\mu_B}{|e|}\,j_{e,i}\,m_j
-  - 2D_0\left[\partial_i s_j - \beta\beta'\,m_j\,(m_k\,\partial_i s_k)\right],
+  Q_{i\alpha} = -\beta\frac{\mu_B}{|e|}\,j_{e,i}\,m_\alpha
+  - 2D_0\left[\partial_i s_\alpha - \beta\beta'\,m_\alpha\,(\vm\cdot\partial_i\vs)\right],
+  \qquad (\nabla\cdot Q)_\alpha = \partial_i Q_{i\alpha},
   \label{eq:courant}
 \end{equation}
 où $\bm{j}_e = \sigma\bm{E}$ est la densité de courant de charge. Le signe
@@ -170,7 +173,8 @@ $2D_0(1-P^2)$ et la diffusion transverse $2D_0$ (voir
 section~\ref{sec:F1-feellgood}).
 
 On note $\Gamma$ l'interface espaceur/F2, $\bm{n}$ la normale sortante de
-F2 et $\vq = -(\bm{n}\cdot\mathcal{J}_s)|_\Gamma$ le courant de spin qui
+F2 et $\vq = -(\bm{n}\cdot Q)|_\Gamma$, de composantes $q_\alpha = -n_iQ_{i\alpha}$,
+le courant de spin qui
 \emph{entre} dans F2. Le modèle de départ impose un flux (condition de
 Neumann) :
 \begin{equation}
@@ -472,17 +476,17 @@ La diffusion de spin relaxe en $\tau_{sf}\sim\mathrm{ps}$, alors que
 l'aimantation évolue en $\mathrm{ns}$. On résout donc la version
 stationnaire de \eqref{eq:zlf} à $\vm$ fixé. Soit $\Omega$ le domaine F2
 et $\vv$ une fonction test. On intègre par parties et on utilise
-$\bm{n}\cdot\mathcal{J}_s = -\vq$ sur $\Gamma$. On suppose un flux nul sur
+$\bm{n}\cdot Q = -\vq$ sur $\Gamma$. On suppose un flux nul sur
 les bords latéraux et une condition de réservoir ($\vs=0$) ou de flux nul
 à la sortie. On obtient :
 \begin{multline}
-  2D_0\int_\Omega\left[\partial_i s_j
-    - \beta\beta'\,m_j\,m_k\,\partial_i s_k\right]\partial_i v_j
+  2D_0\int_\Omega\left[\partial_i s_\alpha
+    - \beta\beta'\,m_\alpha\,(\vm\cdot\partial_i\vs)\right]\partial_i v_\alpha
   + \int_\Omega\left(\frac{\vs}{\tau_{sf}}
     + \frac{\vs\times\vm}{\tau_J}\right)\cdot\vv
   + \int_\Gamma\left(\mG_s\,\vs\right)\cdot\vv
   \\
-  = -\int_\Omega\beta\frac{\mu_B}{|e|}\,j_{e,i}\,m_j\,\partial_i v_j
+  = -\int_\Omega\beta\frac{\mu_B}{|e|}\,j_{e,i}\,m_\alpha\,\partial_i v_\alpha
   + \int_\Gamma\left[\frac{\mu_B}{e}J\,\bm{P}_{\!\mathrm{eff}}(\vm_0)
     + \mG_s\,\vs_{F1}\right]\cdot\vv.
   \label{eq:faible}
