@@ -155,11 +155,16 @@ de diffusion de spin de Zhang--Levy--Fert (ZLF) :
 On écrit le courant de spin comme un tenseur $\mathcal{J}_{ij}$, avec
 $i$ l'indice d'espace (direction de l'écoulement) et $j$ l'indice de spin :
 \begin{equation}
-  \mathcal{J}_{ij} = \beta\frac{\mu_B}{e}\,J_i\,m_j
-  - 2D_0\left[\partial_i s_j - \beta\beta'\,m_j\,(m_k\,\partial_i s_k)\right].
+  \mathcal{J}_{ij} = -\beta\frac{\mu_B}{|e|}\,j_{e,i}\,m_j
+  - 2D_0\left[\partial_i s_j - \beta\beta'\,m_j\,(m_k\,\partial_i s_k)\right],
   \label{eq:courant}
 \end{equation}
-Le couple sur l'aimantation est $\bm{\tau}\propto\vm\times\vs$. Dans
+où $\bm{j}_e = \sigma\bm{E}$ est la densité de courant de charge. Le signe
+moins vient de ce que le spin est transporté par les électrons, qui se
+déplacent en sens inverse de $\bm{j}_e$. Sur les interfaces, on utilise plus
+loin le scalaire $J$, positif pour des électrons qui vont de F1 vers F2 :
+c'est le flux d'électrons, $J = -\bm{j}_e\cdot\hat{\bm{x}}$, l'axe
+$\hat{\bm{x}}$ étant orienté de F1 vers F2. Le couple sur l'aimantation est $\bm{\tau}\propto\vm\times\vs$. Dans
 FeeLLGood, $\beta=\beta'=P$ : la diffusion longitudinale vaut
 $2D_0(1-P^2)$ et la diffusion transverse $2D_0$ (voir
 section~\ref{sec:F1-feellgood}).
@@ -477,7 +482,7 @@ les bords latéraux et une condition de réservoir ($\vs=0$) ou de flux nul
     + \frac{\vs\times\vm}{\tau_J}\right)\cdot\vv
   + \int_\Gamma\left(\mG_s\,\vs\right)\cdot\vv
   \\
-  = \int_\Omega\beta\frac{\mu_B}{e}\,J_i\,m_j\,\partial_i v_j
+  = -\int_\Omega\beta\frac{\mu_B}{|e|}\,j_{e,i}\,m_j\,\partial_i v_j
   + \int_\Gamma\left[\frac{\mu_B}{e}J\,\bm{P}_{\!\mathrm{eff}}(\vm_0)
     + \mG_s\,\vs_{F1}\right]\cdot\vv.
   \label{eq:faible}
