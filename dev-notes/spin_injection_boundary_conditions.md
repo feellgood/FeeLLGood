@@ -54,11 +54,17 @@ $`\mathrm{Re}\,G_{\uparrow\downarrow}`$ about 0.5e15 S/m².
 
 ### 1.3 The spin diffusion problem solved by feeLLGood
 
-The spin current is a tensor $`\mathcal{J}_{ij}`$: $`i`$ is the direction of flow in space, $`j`$
-the component of the spin. In the model of Zhang, Levy and Fert, with $`\beta = \beta' = P`$, it is
+The spin current is a tensor $`Q`$ of components $`Q_{i\alpha}`$: $`i`$ is the direction of flow
+in space, $`\alpha`$ the component of the spin. Latin indices denote space, Greek indices the
+spin, and the repeated indices are summed. In the model of Zhang, Levy and Fert, with
+$`\beta = \beta' = P`$, it is
 ```math
-\mathcal{J}_{ij} = -P\,\frac{\mu_B}{e}\,J_i\,m_j - D_0\left[\partial_i s_j - P^2\,m_j\,(m_k\,\partial_i s_k)\right].
+Q_{i\alpha} = -P\,\frac{\mu_B}{e}\,J_i\,m_\alpha - D_0\left[\partial_i s_\alpha - P^2\,m_\alpha\,(\mathbf{m}\cdot\partial_i\mathbf{s})\right].
 ```
+$`D_0 = 2\sigma/(e^2N_0)`$ is the diffusion constant of the code: it includes the factor 2 that
+Zhang, Levy and Fert, and `dev-notes/slonczewski_polarisation.tex`, write in front of their
+$`D_0`$ ($`2D_0`$ there); the note also writes the polarized term with
+$`\mathbf{j}_e = \mathbf{J}`$ and $`|e|`$.
 The first term is the spin carried by the charge current, polarized along $`\mathbf{m}`$ (it flows
 with the electrons, opposite to $`\mathbf{J}`$); the second one is the diffusion of the spin
 accumulation, with the diffusion constant $`D_0(1-P^2)`$ for the component of $`\mathbf{s}`$ along
@@ -67,19 +73,20 @@ $`\mathbf{m}`$ (longitudinal) and $`D_0`$ for the transverse ones. In a normal m
 The spin accumulation relaxes in picoseconds, while the magnetization evolves in nanoseconds:
 feeLLGood solves the **steady state** at each time step, the magnetization being frozen,
 ```math
-\partial_i\mathcal{J}_{ij} + \frac{s_j}{\tau_{sf}} + \frac{(\mathbf{s}\times\mathbf{m})_j}{\tau_{sd}} = 0,
+\partial_i Q_{i\alpha} + \frac{s_\alpha}{\tau_{sf}} + \frac{(\mathbf{s}\times\mathbf{m})_\alpha}{\tau_{sd}} = 0,
 ```
 the last term being present in the ferromagnets only. The spin-transfer torque enters LLG as an
 extra effective field proportional to the spin accumulation,
 $`\mathbf{H}_{st} = \frac{D_0}{l_{sd}^2\,\gamma_0 M_s}\,\mathbf{s}`$ (`Tetra::calc_Hst`), i.e. a
 torque $`\propto\mathbf{m}\times\mathbf{s}`$.
 
-**Weak form.** With a test function $`\mathbf{w}`$ and $`\mathbf{q} = -\mathbf{n}\cdot\mathcal{J}`$
-the spin current **entering** the sample through its boundary $`\partial\Omega`$:
+**Weak form.** With a test function $`\mathbf{w}`$ and $`\mathbf{q} = -\mathbf{n}\cdot Q`$
+($`q_\alpha = -n_iQ_{i\alpha}`$) the spin current **entering** the sample through its boundary
+$`\partial\Omega`$:
 ```math
-\int_\Omega D_0\left[\partial_i s_j - P^2 m_j m_k\partial_i s_k\right]\partial_i w_j
+\int_\Omega D_0\left[\partial_i s_\alpha - P^2 m_\alpha\,(\mathbf{m}\cdot\partial_i\mathbf{s})\right]\partial_i w_\alpha
 + \int_\Omega\left(\frac{\mathbf{s}}{\tau_{sf}} + \frac{\mathbf{s}\times\mathbf{m}}{\tau_{sd}}\right)\cdot\mathbf{w}
-= \int_\Omega \frac{\mu_B}{e}P\sigma\,(\nabla V\cdot\nabla w_j)\,m_j
+= \int_\Omega \frac{\mu_B}{e}P\sigma\,(\nabla V\cdot\nabla w_\alpha)\,m_\alpha
 + \int_{\partial\Omega}\mathbf{q}\cdot\mathbf{w}.
 ```
 Code: `spinAcc::integrales` (diffusion, relaxation, precession, polarized current),
@@ -97,8 +104,9 @@ through each surface. feeLLGood had three kinds of surfaces:
   ```math
   \mathbf{q} = \frac{\mu_B}{e}\,j_n\,\mathbf{u}_P,
   ```
-  $`\mathbf{u}_P`$ being a fixed vector (its norm is the polarization) describing a polarizer
-  outside the mesh;
+  $`\mathbf{u}_P`$ being a fixed unit vector describing a polarizer outside the mesh: `uP` is
+  normalized when the settings are read, so that the injected spin current is always 100 %
+  polarized;
 - **free surface** (nothing given): $`\mathbf{q} = 0`$.
 
 The injection condition is the limit of a very resistive polarizer. It ignores three effects that
@@ -133,7 +141,7 @@ longitudinal conduction, absorption of the transverse spin (real part of the mix
 precession in the exchange field of the interface (imaginary part). The spin current from N into F
 is then
 ```math
-\mathbf{q} = P_I\,\frac{\mu_B}{e}\,j\,\mathbf{u} + \mathsf{G}(\mathbf{u})\,(\mathbf{s}_N - \mathbf{s}_F),
+\mathbf{q} = P_I\,\frac{\mu_B}{e}\,j_n\,\mathbf{u} + \mathsf{G}(\mathbf{u})\,(\mathbf{s}_N - \mathbf{s}_F),
 ```
 $`P_I = \gamma`$ being the polarization of the interface and $`\mathbf{s}_N`$, $`\mathbf{s}_F`$ the
 spin accumulations on each side. This is linear in $`\mathbf{s}_F`$: a **Robin condition**, whose
@@ -145,8 +153,8 @@ The spacer N is thin (a few nm of Cu): its spin accumulation $`\mathbf{s}_N`$ is
 thickness and does not relax. The spin current entering N from F1 thus leaves it into F2, at each
 point of the surface:
 ```math
-P_1\frac{\mu_B}{e}j\,\mathbf{p} + \mathsf{G}_1(\mathbf{p})\,(\mathbf{s}_{F1} - \mathbf{s}_N)
-= P_2\frac{\mu_B}{e}j\,\mathbf{m}_0 + \mathsf{G}_2(\mathbf{m}_0)\,(\mathbf{s}_N - \mathbf{s}_F),
+P_1\frac{\mu_B}{e}j_n\,\mathbf{p} + \mathsf{G}_1(\mathbf{p})\,(\mathbf{s}_{F1} - \mathbf{s}_N)
+= P_2\frac{\mu_B}{e}j_n\,\mathbf{m}_0 + \mathsf{G}_2(\mathbf{m}_0)\,(\mathbf{s}_N - \mathbf{s}_F),
 ```
 indices 1 and 2 denoting the interfaces F1/N and N/F2. This 3×3 linear system gives
 $`\mathbf{s}_N`$. Substituting it, with $`\mathsf{A} = \mathsf{G}_1 + \mathsf{G}_2`$, the spin
@@ -293,8 +301,10 @@ surface borders regions of different `dens_state`.
 - **Transverse length**: the transverse spin accumulation of F2 decays over $`l_{sd}`$ of about
   1 nm. With `sink`, the transverse spin current entering F2 is set on the surface whatever the
   mesh, but where it is absorbed over the thickness, hence the field-like torque, needs a mesh of
-  the order of $`l_{sd}`$ (`examples/pillar_slonczewski_current_density_ramp1ns`: damping-like
-  torque within 3 %, field-like torque overestimated by 29 % with a 2 nm mesh).
+  the order of $`l_{sd}`$. On a free layer of 4 nm with the parameters of
+  `examples/pillar_slonczewski_current_density_ramp1ns`, against the exact 1D solution (reference
+  of `validation/slonczewski_angle`, θ = 90°, `sink`), a 2 nm mesh gives the damping-like torque
+  within 3 % and overestimates the field-like torque by 29 % (see the README of the example).
 - **Bulk torque only**: the whole spin current $`\mathbf{q}`$ enters F2 and the torque comes from
   $`\mathbf{m}\times\mathbf{s}`$ in the volume; a torque localized on the interface would need the
   spin currents on both sides of it (Petitjean et al.).
