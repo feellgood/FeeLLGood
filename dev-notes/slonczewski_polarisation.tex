@@ -1017,6 +1017,107 @@ celle du modèle de FeeLLGood. Le couple dans F2 en dépend directement.
 \end{tabular}
 \end{center}
 
+\section*{Correspondance avec les notations de Baltz}
+\label{sec:baltz}
+
+Le livre de V.~Baltz (chapitres 3 et 4, exercice 6.3) expose la physique
+sur laquelle repose ce modèle : modèle à deux courants, diffusion de spin de
+Valet--Fert, résistances d'interface, transfert de spin et théorie des
+circuits. Ses conventions diffèrent des nôtres sur trois points :
+\begin{itemize}
+  \item il prend $e<0$ ;
+  \item ses flèches $\uparrow,\downarrow$ désignent l'orientation du
+    \emph{moment} ($\uparrow$ = majoritaire, comme le $+$ de Valet--Fert et
+    de Brataas), mais il définit accumulation et courant de spin par
+    rapport au \emph{spin}, opposé au moment :
+    $\mu_s^{\mathrm{B}} = \mu^\Uparrow-\mu^\Downarrow = -(\mu^\uparrow-\mu^\downarrow)$
+    et $J_s^{\mathrm{B}} = -(j^\uparrow-j^\downarrow)$ ;
+  \item ses conductances sont en S (et non par unité de surface) et ses
+    couples en J/m$^3$.
+\end{itemize}
+L'exposant B désigne ses grandeurs ; $k = 2/(e^2N_0)$ comme en
+section~\ref{sec:conversion}.
+
+\begin{center}
+\renewcommand{\arraystretch}{1.35}
+\small
+\begin{tabular}{>{\raggedright}p{2.6cm}>{\raggedright}p{4.0cm}>{\raggedright}p{2.6cm}>{\raggedright\arraybackslash}p{5.0cm}}
+  \toprule
+  \textbf{Grandeur} & \textbf{Baltz} & \textbf{Ici / FeeLLGood}
+    & \textbf{Relation} \\
+  \midrule
+  Polarisation en volume
+    & $\beta = (\alpha-1)/(\alpha+1)$, $\alpha=\rho^\downarrow/\rho^\uparrow$ (§2.4)
+    & $P$ ($\beta=\beta'=P$) & $P=\beta$ \\
+  Résistivités
+    & $\rho^{\uparrow(\downarrow)} = 2\rho^*(1\mp\beta)$
+    & $\sigma$, $P$ & $\rho^* = 1/\left(\sigma(1-P^2)\right)$ \\
+  Longueur de diffusion
+    & $l_{sf}^*$, $1/l_{sf}^{*2} = 1/l_{sf}^{\uparrow2}+1/l_{sf}^{\downarrow2}$ (§3.1)
+    & $l_{sf}$
+    & $l_{sf} = l_{sf}^*$ ; $1/\tau_{sf} = D_0(1-P^2)/l_{sf}^2$ \\
+  Résistance de spin
+    & $\rho^*l_{sf}^*$ en $\Omega\,$m$^2$ (§3.2)
+    & $g_F$ (F1)
+    & $g_F = k\coth(t_1/l_{sf})/(\rho_{F1}^*\,l_{sf,1})$ \\
+  Interface
+    & $r^{\uparrow(\downarrow)} = 2r^*(1\mp\gamma)$, éq.~(40)
+    & \texttt{AR}, \texttt{gamma}
+    & $AR^* = r^*$, $P=\gamma$, $G_\parallel = k/r^*$ \\
+  Perte de mémoire de spin
+    & $\delta$ (§3.4) & --- & non prise en compte \\
+  Accumulation de spin
+    & $\bm{\mu}_s^{\mathrm{B}}$, selon le spin
+    & $\vs$, $\mu_s = (\mu_+-\mu_-)/2$
+    & $s_\alpha = -\mu_BN_0\,\mu^{\mathrm{B}}_{s,\alpha}/4$,
+      soit $\mu_s = -\mu_s^{\mathrm{B}}/2$ \\
+  Courant de spin
+    & $J_s^{\mathrm{B}}$ en A/m$^2$, tenseur en 3D (§4.3)
+    & $Q_{i\alpha}$
+    & $Q_{i\alpha} = \dfrac{\mu_B}{|e|}\,J^{\mathrm{B}}_{s,i\alpha}$ \\
+  Courant de moment cinétique
+    & $\mathcal{Q}^{\mathrm{B}} = \dfrac{\hbar}{2e}J_s^{\mathrm{B}}$
+    & $Q$ & $Q = -\dfrac{2\mu_B}{\hbar}\,\mathcal{Q}^{\mathrm{B}}$ \\
+  Absorption transverse
+    & $l_{sd} = \sqrt{\hbar D/J_{sd}}$ (§4.3)
+    & $\lambda_J = \sqrt{2\hbar D_0/J_{sd}}$
+    & même rôle ; comparer les longueurs, $D$ et $J_{sd}$ étant définis
+      différemment \\
+  Conductance de mélange
+    & $G^{\uparrow\downarrow} = G_r^{\uparrow\downarrow}+iG_i^{\uparrow\downarrow}$ en S ;
+      $g^{\uparrow\downarrow} = AG^{\uparrow\downarrow}/(G_0/2)$ en m$^{-2}$,
+      $G_0 = 2e^2/h$ (§4.6)
+    & \texttt{Gr}, \texttt{Gi} en S/m$^2$
+    & $\texttt{Gr}+i\,\texttt{Gi} = G^{\uparrow\downarrow}/A
+      = (e^2/h)\,g^{\uparrow\downarrow}$ ;
+      dans le code, $G_r+iG_i = 2k\,(\texttt{Gr}+i\,\texttt{Gi})$ \\
+  Couple
+    & $\bm{T}$ en J/m$^3$, $\dot{\bm{M}} = -|\gamma|\bm{T}$, éq.~(65)
+    & $\bm{\tau}\propto\vm\times\vs$ & --- \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Signes.} Les relations pour $\vs$ et $Q$ sont fixées par les
+résultats physiques du livre plutôt que par ses équations
+intermédiaires. Loin de l'interface, dans F, $J_s^{\mathrm{B}} = -\beta
+J_e$ (éq.~(34)), alors qu'ici $Q = -P\frac{\mu_B}{|e|}j_e\,\vm$ : d'où
+$Q = \frac{\mu_B}{|e|}J_s^{\mathrm{B}}$. Un excès d'électrons majoritaires
+donne $\mu_s^{\mathrm{B}}<0$ (p.~38) et $\vs\cdot\vm>0$ : d'où le signe
+moins de $s_\alpha$. Les deux relations sont cohérentes avec la diffusion :
+avec le $D_0 = 2\sigma/(e^2N_0)$ de FeeLLGood, $-D_0\nabla\vs$ redonne
+$\frac{\mu_B}{|e|}J_s^{\mathrm{B}}$ pour la loi d'Ohm
+$j = \sigma\nabla\mu/|e|$. L'éq.~(22) du livre, $j = \sigma\nabla\mu/e$,
+donnerait le signe opposé avec $e<0$ : il faut y lire $|e|$.
+
+\paragraph{Conductance de mélange.} $G^{\uparrow\downarrow}$ a la même
+définition (éq.~(80) du livre, $\uparrow$ = majoritaire) que chez Brataas.
+Le courant transverse (77)--(78) est linéaire en l'accumulation : passer de
+la convention spin à la convention moment change le signe des deux termes
+à la fois, sans changer le rapport entre couple damping-like ($G_r$) et
+field-like ($G_i$). Le signe de $G_i$ utilisé ici a été vérifié contre
+Brataas (\texttt{validation/slonczewski\_angle}).
+
 \section*{Références}
 
 \begin{itemize}
@@ -1037,6 +1138,9 @@ celle du modèle de FeeLLGood. Le couple dans F2 en dépend directement.
     et conditions d'interface cohérentes.
   \item C.~Abert \emph{et al.}, Sci.\ Rep.\ \textbf{5}, 14855 (2015) :
     diffusion de spin 3D dans tout l'empilement en micromagnétisme.
+  \item V.~Baltz, \emph{The Basics of Electron Transport in Spintronics},
+    EDP Sciences (2023) : manuel pédagogique, chapitres 3 et 4 (voir la
+    correspondance des notations p.~\pageref{sec:baltz}).
 \end{itemize}
 
 \end{document}
