@@ -344,39 +344,104 @@ décroît dans F1 sur la longueur $\lambda_{sf}$.
 
 \subsection{Option 2 : élimination analytique (recommandée si F1 est fixe et uniforme)}
 
-F1 a une aimantation fixe $\vp$, et sa composante transverse s'amortit sur
-$\lambda_J\sim1\,\mathrm{nm}$. On peut donc écrire
+\paragraph{Pourquoi une seule inconnue.} L'aimantation de F1 est uniforme
+et fixe : $\vm = \vp$ dans tout F1. Décomposons $\vs$ en une partie
+longitudinale $s\,\vp$ et une partie transverse $\vs_\perp$
+($\vs_\perp\cdot\vp = 0$). Dans \eqref{eq:zlf}, la partie transverse
+précesse autour de $\vp$ (terme $\vs\times\vm/\tau_J$) et se déphase : elle
+s'amortit sur la longueur $\lambda_J = \sqrt{2\hbar D_0/J_{sd}}\sim1$\,nm
+à partir de l'interface F1/N. Le courant transverse qui arrive de
+l'espaceur est donc absorbé par F1 en quelques couches atomiques, et c'est
+la conductance de mélange $G_{r1}$, $G_{i1}$ de l'interface F1/N qui en rend
+compte. Au-delà de $\lambda_J$, il ne reste que la partie longitudinale :
 \begin{equation}
-  \vs_{F1} = s_{F1}\,\vp :
+  \vs_{F1} = s_{F1}\,\vp,
 \end{equation}
-il ne reste qu'\textbf{une inconnue scalaire}, et le problème dans F1 est une
-diffusion 1D colinéaire.
+avec $s_{F1}$ la valeur de $s$ à l'interface. Il ne reste qu'\textbf{une
+inconnue scalaire}, et le problème dans F1 est une diffusion colinéaire.
+On suppose en outre F1 uniforme dans son plan : le problème est 1D.
 
-On place F1 en $-t_1<x<0$, avec un contact réservoir ($s=0$) en $x=-t_1$.
-On note $\beta_1$ la polarisation de volume de F1. En régime stationnaire,
-la composante de spin selon $\vp$ vérifie :
+\paragraph{Géométrie.} On place F1 en $-t_1<x<0$, l'interface F1/N en
+$x=0$ et l'axe $\hat{\bm{x}}$ orienté de F1 vers F2. La face $x=-t_1$ est
+en contact avec un réservoir (un métal épais, ou l'électrode), où
+l'accumulation de spin est nulle : $s(-t_1)=0$. On note $\beta_1$, $\beta'_1$
+les polarisations de volume de F1.
+
+\paragraph{Courant de spin longitudinal.} Avec $\vm=\vp$ uniforme et
+$\vs = s(x)\,\vp$, on a $\partial_i\vs = \vp\,\partial_i s$ et
+$\vm\cdot\partial_i\vs = \partial_i s$. Le courant de spin
+\eqref{eq:courant} devient
+\begin{equation}
+  Q_{i\alpha} = p_\alpha\left[-\beta_1\frac{\mu_B}{|e|}\,j_{e,i}
+    - 2D_0\,(1-\beta_1\beta'_1)\,\partial_i s\right] :
+\end{equation}
+le spin transporté est partout parallèle à $\vp$. Sa composante utile est
+le flux, selon $+\hat{\bm{x}}$, du spin projeté sur $\vp$,
+$j_s(x) = Q_{x\alpha}\,p_\alpha$. Avec $J = -\bm{j}_e\cdot\hat{\bm{x}}$
+(positif pour des électrons qui vont de F1 vers F2) et en notant $e=|e|$
+comme dans le reste du document :
 \begin{equation}
   j_s(x) = \beta_1\frac{\mu_B}{e}J - 2D_1\,s'(x),
-  \qquad s'' = \frac{s}{\lambda_1^2},
-  \qquad D_1 = D_0(1-\beta\beta'),\quad \lambda_1^2 = 2D_1\tau_{sf}.
+  \qquad D_1 = D_0(1-\beta_1\beta'_1).
   \label{eq:F1-1D}
 \end{equation}
-Seule la diffusion \emph{longitudinale} $D_1 = D_0(1-\beta\beta')$
-intervient, car $\vs_{F1}$ est parallèle à $\vp$ : c'est elle, et non $D_0$,
-qui fixe la conductance de spin du volume de F1. $\lambda_1$ est la longueur
-de diffusion de spin longitudinale, celle que l'on mesure.
-La solution est
+Le premier terme est le spin porté par le courant de charge (dérive) ; il
+est uniforme, car $J$ ne dépend pas de $x$ (conservation de la charge en
+1D). Le second est la diffusion, avec le coefficient \emph{longitudinal}
+$2D_1 = 2D_0(1-\beta_1\beta'_1)$, et non $2D_0$ : c'est lui qui fixe la
+conductance de spin du volume de F1.
+
+\paragraph{Équation de conservation.} En régime stationnaire,
+\eqref{eq:zlf} projetée sur $\vp$ donne
+$\partial_x j_s = -s/\tau_{sf}$, le terme de précession étant nul
+($\vs\times\vm = s\,\vp\times\vp = \bm{0}$). Le terme de dérive étant
+uniforme, il ne reste que la diffusion :
 \begin{equation}
-  s(x) = s_{F1}\,\frac{\sinh\!\big((x+t_1)/\lambda_1\big)}{\sinh(t_1/\lambda_1)},
+  2D_1\,s'' = \frac{s}{\tau_{sf}}
+  \qquad\Longleftrightarrow\qquad
+  s'' = \frac{s}{\lambda_1^2},
+  \qquad \lambda_1^2 = 2D_1\,\tau_{sf}.
 \end{equation}
-et le courant de spin qui sort de F1 vaut :
+$\lambda_1$ est la longueur de diffusion de spin \emph{longitudinale} de F1,
+celle que l'on mesure (expériences de CPP-GMR, par exemple) : c'est elle,
+et non $\sqrt{2D_0\tau_{sf}}$, qu'il faut donner comme paramètre.
+
+\paragraph{Résolution.} La solution générale est
+$s(x) = A\sinh\big((x+t_1)/\lambda_1\big) + B\cosh\big((x+t_1)/\lambda_1\big)$.
+La condition de réservoir $s(-t_1)=0$ impose $B=0$, et la valeur à
+l'interface $s(0) = s_{F1}$ donne $A = s_{F1}/\sinh(t_1/\lambda_1)$ :
+\begin{equation}
+  s(x) = s_{F1}\,\frac{\sinh\!\big((x+t_1)/\lambda_1\big)}{\sinh(t_1/\lambda_1)}.
+\end{equation}
+Sa dérivée à l'interface vaut
+\begin{equation}
+  s'(0^-) = \frac{s_{F1}}{\lambda_1}\,
+  \frac{\cosh(t_1/\lambda_1)}{\sinh(t_1/\lambda_1)}
+  = \frac{s_{F1}}{\lambda_1}\coth\frac{t_1}{\lambda_1}.
+\end{equation}
+En la reportant dans \eqref{eq:F1-1D}, le courant de spin qui sort de F1 par
+l'interface vaut :
 \begin{equation}
   j_s(0^-) = \beta_1\frac{\mu_B}{e}J - g_F\,s_{F1},
   \qquad
-  g_F = \frac{2D_1}{\lambda_1}\coth\frac{t_1}{\lambda_1}
-  \;\xrightarrow{\;t_1\gg\lambda_1\;}\; \frac{2D_1}{\lambda_1}.
+  g_F = \frac{2D_1}{\lambda_1}\coth\frac{t_1}{\lambda_1}.
   \label{eq:gF}
 \end{equation}
+
+\paragraph{Interprétation de $g_F$.} Le volume de F1 se comporte comme une
+source de spin $\beta_1\frac{\mu_B}{e}J$ en parallèle avec une conductance
+de spin $g_F$ (en m/s, dans les unités de $\vs$) : une accumulation
+$s_{F1}>0$ à l'interface renvoie du spin vers le réservoir et diminue le
+courant de spin qui sort de F1. Deux limites :
+\begin{itemize}
+  \item \textbf{F1 épais} ($t_1\gg\lambda_1$) : $\coth\to1$ et
+    $g_F\to 2D_1/\lambda_1$. Seule une épaisseur $\lambda_1$ près de
+    l'interface compte ; le réservoir est trop loin pour intervenir.
+  \item \textbf{F1 mince} ($t_1\ll\lambda_1$) : $\coth(t_1/\lambda_1)\approx
+    \lambda_1/t_1$ et $g_F\approx 2D_1/t_1$, très grand. Le réservoir,
+    proche, court-circuite l'accumulation : $s_{F1}\to0$, et l'on retrouve
+    l'option~1.
+\end{itemize}
 On écrit la continuité avec la composante longitudinale du courant à
 l'interface F1/N :
 \begin{equation}
