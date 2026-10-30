@@ -508,7 +508,10 @@ void Settings::toYaml()
     std::cout << "spin_accumulation:\n";
     std::cout << "  enable: " << str(spin_acc) << "\n";
     if (spin_acc)
-        { std::cout << "  V_file: " << str(V_file) << "\n"; }
+        {
+        std::cout << "  anisotropic_diffusion: " << str(anisotropic_diffusion) << "\n";
+        std::cout << "  V_file: " << str(V_file) << "\n";
+        }
     std::cout << "demagnetizing_field_solver:\n";
     std::cout << "  nb_threads: " << scalfmmNbTh << "\n";
     std::cout << "finite_element_solver:\n";
@@ -868,6 +871,7 @@ void Settings::read(YAML::Node yaml)
     if (spAcc && !spAcc.IsNull())
         {
         assign(spin_acc, spAcc["enable"]);
+        assign(anisotropic_diffusion, spAcc["anisotropic_diffusion"]);
         assign(V_file, spAcc["V_file"]);
 	    }  // spin_accumulation
 

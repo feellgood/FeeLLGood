@@ -135,6 +135,10 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
      * surfaces with slonczewski are set) */
     std::vector<Slonczewski::Stack> stacks;
 
+    /** anisotropic spin diffusion and longitudinal relaxation in the magnetic regions (settings
+     * spin_accumulation.anisotropic_diffusion, default true), see integrales() */
+    const bool anisotropicDiffusion;
+
     /** in verbose mode, warns about the neighbouring volume regions (sharing a face) of different
      * dens_state: s being continuous, mu_s is not continuous between them */
     void checkDensityOfStates(void) const;

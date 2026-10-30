@@ -17,7 +17,8 @@ using namespace Nodes;
             const double _tol /**< [in] tolerance for bicg_dir solver */,
             const int max_iter /**< [in] maximum number of iterations */):
             solver<DIM_PB_SPIN_ACC>(_msh, mySettings.paramTetra, mySettings.paramTriangle,
-                                    "bicg_dir", _tol, mySettings.verbose, max_iter)
+                                    "bicg_dir", _tol, mySettings.verbose, max_iter),
+            anisotropicDiffusion(mySettings.anisotropic_diffusion)
         {
         if (mySettings.spin_acc)
             {
@@ -426,9 +427,10 @@ void spinAcc::integrales(const Tetra::Tet &tet,
 
     /* 1/tau_sf, units s^-1: l_sf is the spin diffusion length, longitudinal in a ferromagnet, where
      * the longitudinal diffusion is D0 (1 - P^2) (beta = beta' = P, see the anisotropic diffusion
-     * below): 1/tau_sf = D0 (1 - P^2)/l_sf^2, D0/l_sf^2 in a non-magnetic metal */
+     * below): 1/tau_sf = D0 (1 - P^2)/l_sf^2, D0/l_sf^2 in a non-magnetic metal; with
+     * anisotropic_diffusion false, isotropic diffusion and D0/l_sf^2 everywhere */
     double invTau_sf = D0 / sq(lsf);
-    if (msh->isMagnetic(tet))
+    if (anisotropicDiffusion && msh->isMagnetic(tet))
         { invTau_sf *= 1.0 - sq(getPolarizationRate(tet)); }
 
     Eigen::Matrix<double,N,1> a_w = eigen_a * tet.weight;
@@ -458,8 +460,11 @@ void spinAcc::integrales(const Tetra::Tet &tet,
 
         /* anisotropic diffusion (beta = beta' = P): -D0 P^2 (u.grad s):(u.grad w), symmetric, it
          * couples the three components; magnetization at the Gauss points, as in the RHS */
-        const Eigen::Matrix<double,Nodes::DIM,NPI> U = u_nod * eigen_a;
-        tet.add_spinDiffusionAniso(D0 * sq(getPolarizationRate(tet)), U, AE);
+        if (anisotropicDiffusion)
+            {
+            const Eigen::Matrix<double,Nodes::DIM,NPI> U = u_nod * eigen_a;
+            tet.add_spinDiffusionAniso(D0 * sq(getPolarizationRate(tet)), U, AE);
+            }
         }
     }
 

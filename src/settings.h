@@ -163,6 +163,11 @@ public:
     /** if spin_acc is true then spin accumulation contributions are computed */
     bool spin_acc;
 
+    /** if true (default), anisotropic spin diffusion in the magnetic regions (Zhang-Levy-Fert,
+     * beta = beta' = P): D0 (1 - P^2) along m, D0 across m, and 1/tau_sf = D0 (1 - P^2)/l_sf^2;
+     * if false, isotropic diffusion D0 and 1/tau_sf = D0/l_sf^2 (beta beta' = 0) */
+    bool anisotropic_diffusion;
+
     /** string for analytical definition of Mx */
     std::string sMx;
 

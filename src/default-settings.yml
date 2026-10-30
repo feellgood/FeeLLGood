@@ -309,6 +309,15 @@ spin_accumulation:
   # Whether to enable computation of spin accumulation contribution.
   enable: false
 
+  # Anisotropic spin diffusion in the magnetic regions (Zhang-Levy-Fert,
+  # beta = beta' = P): the diffusion is D0 (1 - P^2) for the component of s
+  # along m and D0 for the transverse ones, and 1/tau_sf = D0 (1 - P^2)/l_sf^2,
+  # so that l_sf stays the longitudinal spin diffusion length. With false,
+  # isotropic diffusion D0 and 1/tau_sf = D0/l_sf^2 (beta beta' = 0, as
+  # before this option). The polarizer stack (slonczewski) does not depend on
+  # it; the equivalence with Valet-Fert holds with true only.
+  anisotropic_diffusion: true
+
   # Output, at the start, the electric potential solved once (with V = 0
   # on the surface with V, the imposed V_D being added), in the file
   # <file_basename>_V.sol of the current directory: V0 for the jn and V

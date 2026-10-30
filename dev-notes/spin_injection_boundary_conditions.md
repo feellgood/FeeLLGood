@@ -94,6 +94,15 @@ Code: `spinAcc::integrales` (diffusion, relaxation, precession, polarized curren
 BiCGStab with the block preconditioner of `dev-notes/spin_accumulation_block_preconditioner.md`).
 The unknowns are the three components of $`\mathbf{s}`$ at the nodes, with linear (P1) elements.
 
+**Switching the anisotropic diffusion off.** The key `spin_accumulation.anisotropic_diffusion`
+(default `true`) can be set to `false` to compare with the former model: the term in $`P^2`$ is then
+dropped and the relaxation is $`1/\tau_{sf} = D_0/l_{sf}^2`$ in the ferromagnets too
+($`\beta\beta' = 0`$, isotropic diffusion $`D_0`$). Both are switched together, so that $`l_{sf}`$
+keeps the same meaning in both models (with the anisotropic term alone switched off, the
+longitudinal decay length would become $`l_{sf}/\sqrt{1-P^2}`$). The polarizer stack of § 3 does not
+depend on it; the equivalence with Valet–Fert (§ 4.4) and the validations of § 6 hold with `true`
+only.
+
 ## 2. The boundary conditions before this branch
 
 The boundary term $`\int_{\partial\Omega}\mathbf{q}\cdot\mathbf{w}`$ needs the spin current entering
@@ -244,7 +253,7 @@ inlet:
 | Conductance matrix, F1 renormalization, elimination of the spacer, unit conversion | `src/slonczewskiInterface.h`: `conductance`, `bulkConductance`, `renormalizeF1`, `effectiveBC`, `makeStack`, `Stack::bc` (pure functions, tested by `unit-tests/ut_slonczewskiInterface.cpp`) |
 | Conversion with the density of states of the sample, checks | `spinAcc::makeStacks` (`src/spinAccumulationSolver.cpp`), once, at the construction of the solver |
 | Boundary terms in the matrix and the right-hand side | `spinAcc::stackBoundaryCondition`, called by `spinAcc::solve` for every triangle of such a surface, at every solve |
-| Anisotropic diffusion and longitudinal relaxation (needed for consistency with Valet–Fert) | `Tet::add_spinDiffusionAniso` (`src/tetra.cpp`), `spinAcc::integrales` |
+| Anisotropic diffusion and longitudinal relaxation (needed for consistency with Valet–Fert), switched off with `anisotropic_diffusion: false` | `Tet::add_spinDiffusionAniso` (`src/tetra.cpp`), `spinAcc::integrales`, `spinAcc::anisotropicDiffusion`, `Settings::anisotropic_diffusion` |
 | Warning about regions of different densities of states (§ 5.2) | `spinAcc::checkDensityOfStates` (verbose mode) |
 
 ### 4.3 Assembly
