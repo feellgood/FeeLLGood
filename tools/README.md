@@ -9,6 +9,8 @@ working with feeLLGood:
 * **fg-merge-sol**: .sol tool
 * **fg-gensol**: .sol generation tool
 * **fg-plot**:plot tool
+* **fg-xyplot**: to plot quantities of .sol files (columns, or expressions of them and of the
+  node coordinates) against another one, e.g. a profile along an axis
 
 These tools are documented in the [tools section][] of the feeLLGood Web
 site.
