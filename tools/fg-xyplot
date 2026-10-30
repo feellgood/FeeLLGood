@@ -1,0 +1,187 @@
+#!/usr/bin/env python3
+"""
+Plot one or several quantities of feeLLGood .sol files against another one, at the nodes of the
+mesh: magnetization, magnetic scalar potential, spin accumulation, electrostatic potential... as
+functions of a coordinate or of another column.
+
+Each quantity is an expression of the columns of the .sol file, named as in its line
+'## columns:' (idx, mx, my, mz, phi, and with the spin accumulation sx, sy, sz, V), of the node
+coordinates x, y, z and r = sqrt(x^2 + y^2), and of the numpy functions (sqrt, abs, arctan2...),
+e.g. -x z -y mz, -y 'sqrt(sx**2 + sy**2)', -x mz -y mx my. The coordinates are those of the .msh
+file, in the units of the mesh (--unit converts them, e.g. --unit 1e-9 for a mesh in nm and
+coordinates in m).
+
+The row idx of a .sol file is the node of gmsh tag idx + 1 of the mesh. The mesh is read directly
+(ASCII format 4.1 or 2.2 of gmsh), only its nodes being needed.
+"""
+
+import argparse
+import os
+import sys
+
+import numpy as np
+
+
+def read_nodes(file_name):
+    """Node coordinates of an ASCII gmsh file (format 4.1 or 2.2), as an array indexed by the node
+    tag minus 1 (rows of the tags absent from the file are NaN)."""
+    with open(file_name) as f:
+        lines = f.read().split('\n')
+    try:
+        version = float(lines[lines.index('$MeshFormat') + 1].split()[0])
+        i = lines.index('$Nodes')
+    except ValueError:
+        sys.exit(f"{file_name}: not an ASCII gmsh mesh file")
+    if lines[lines.index('$MeshFormat') + 1].split()[1] != '0':
+        sys.exit(f"{file_name}: binary gmsh file, ASCII expected")
+    tags, xyz = [], []
+    if version >= 4:
+        nb_blocks = int(lines[i + 1].split()[0])
+        k = i + 2
+        for _ in range(nb_blocks):
+            n = int(lines[k].split()[3])
+            k += 1
+            tags += [int(lines[k + j]) for j in range(n)]
+            k += n
+            xyz += [[float(v) for v in lines[k + j].split()[:3]] for j in range(n)]
+            k += n
+    else:
+        n = int(lines[i + 1])
+        for line in lines[i + 2:i + 2 + n]:
+            w = line.split()
+            tags.append(int(w[0]))
+            xyz.append([float(v) for v in w[1:4]])
+    tags = np.array(tags)
+    nodes = np.full((tags.max(), 3), np.nan)
+    nodes[tags - 1] = xyz
+    return nodes
+
+
+def read_sol(file_name):
+    """Columns of a feeLLGood .sol file, as a dict name -> array, and its time (None if absent)."""
+    names, time = None, None
+    with open(file_name) as f:
+        for line in f:
+            if not line.startswith('#'):
+                break
+            if line.startswith('## columns:'):
+                names = line.split(':', 1)[1].split()
+            elif line.startswith('## time:'):
+                time = float(line.split(':', 1)[1])
+    if names is None:
+        sys.exit(f"{file_name}: no '## columns:' line")
+    data = np.loadtxt(file_name, comments='#', ndmin=2)
+    if data.shape[1] != len(names):
+        sys.exit(f"{file_name}: {data.shape[1]} columns, {len(names)} names in '## columns:'")
+    return {name: data[:, i] for i, name in enumerate(names)}, time
+
+
+def evaluate(expr, variables):
+    """Value of the expression `expr` at the nodes, from the variables and the numpy functions."""
+    namespace = {name: getattr(np, name) for name in dir(np) if not name.startswith('_')}
+    namespace.update(variables)
+    try:
+        value = eval(expr, {'__builtins__': {}}, namespace)
+    except Exception as err:
+        sys.exit(f"cannot evaluate '{expr}': {err} (variables: {', '.join(variables)})")
+    return np.broadcast_to(np.asarray(value, dtype=float), variables['x'].shape)
+
+
+def bin_means(xv, yv, nb_bins):
+    """Mean of yv over nb_bins bins of equal width of xv (bins without node omitted)."""
+    edges = np.linspace(xv.min(), xv.max(), nb_bins + 1)
+    which = np.clip(np.digitize(xv, edges) - 1, 0, nb_bins - 1)
+    count = np.bincount(which, minlength=nb_bins)
+    keep = count > 0
+    xm = np.bincount(which, weights=xv, minlength=nb_bins)[keep] / count[keep]
+    ym = np.bincount(which, weights=yv, minlength=nb_bins)[keep] / count[keep]
+    return xm, ym
+
+
+def main():
+    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
+    p.add_argument('mesh', help='.msh file (ASCII, format 4.1 or 2.2)')
+    p.add_argument('sol', nargs='+', help='.sol file(s), plotted on the same axes')
+    p.add_argument('-x', '--xexpr', required=True, help='abscissa, e.g. z')
+    p.add_argument('-y', '--yexpr', required=True, nargs='+', help='ordinate(s), e.g. mx my mz')
+    p.add_argument('-f', '--filter', help="nodes kept, a boolean expression, e.g. 'r < 5'")
+    p.add_argument('-b', '--bins', type=int,
+                   help='mean of the ordinates over this number of bins of the abscissa '
+                        '(profiles on an unstructured mesh); all the nodes otherwise')
+    p.add_argument('-u', '--unit', type=float, default=1.0,
+                   help='factor applied to the coordinates of the mesh (default 1)')
+    p.add_argument('-o', '--output', help='image file (png, pdf...); the plot is shown otherwise')
+    p.add_argument('--tsv', help='file of the plotted data (one block per .sol file)')
+    p.add_argument('--xlabel', help='label of the abscissa (default: its expression)')
+    p.add_argument('--ylabel', help='label of the ordinate (default: its expressions)')
+    p.add_argument('--title', help='title of the plot')
+    args = p.parse_args()
+    for file_name in [args.mesh] + args.sol:
+        if not os.path.isfile(file_name):
+            sys.exit(f"{file_name}: no such file")
+
+    nodes = read_nodes(args.mesh) * args.unit
+    results = []  # (label, x, [y...])
+    for sol_file in args.sol:
+        cols, time = read_sol(sol_file)
+        idx = cols['idx'].astype(int) if 'idx' in cols else np.arange(len(next(iter(cols.values()))))
+        if idx.max() >= len(nodes) or np.isnan(nodes[idx]).any():
+            sys.exit(f"{sol_file}: node indices not in {args.mesh} (mesh of another simulation?)")
+        x, y, z = nodes[idx].T
+        variables = dict(cols)
+        variables.update(x=x, y=y, z=z, r=np.hypot(x, y))
+        keep = np.ones(len(idx), dtype=bool)
+        if args.filter:
+            keep = evaluate(args.filter, variables).astype(bool)
+            if not keep.any():
+                sys.exit(f"{sol_file}: no node satisfies the filter '{args.filter}'")
+        xv = evaluate(args.xexpr, variables)[keep]
+        yvs = [evaluate(e, variables)[keep] for e in args.yexpr]
+        order = np.argsort(xv, kind='stable')
+        xv, yvs = xv[order], [yv[order] for yv in yvs]
+        if args.bins:
+            curves = [bin_means(xv, yv, args.bins) for yv in yvs]
+            xv, yvs = curves[0][0], [c[1] for c in curves]
+        label = os.path.basename(sol_file) + (f' (t = {time:g} s)' if time is not None else '')
+        results.append((label, xv, yvs))
+        print(f"{label}: {keep.sum()} nodes" + (f", {len(xv)} bins" if args.bins else ""))
+
+    if args.tsv:
+        with open(args.tsv, 'w') as f:
+            for label, xv, yvs in results:
+                f.write(f"## {label}\n## columns: {args.xexpr}\t" + '\t'.join(args.yexpr) + '\n')
+                np.savetxt(f, np.column_stack([xv] + yvs), delimiter='\t')
+                f.write('\n\n')
+        print(f"written: {args.tsv}")
+
+    import matplotlib
+    if args.output:
+        matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+    for label, xv, yvs in results:
+        for expr, yv in zip(args.yexpr, yvs):
+            name = expr if len(results) == 1 else f'{expr}, {label}'
+            if args.bins:
+                ax.plot(xv, yv, '.-', label=name)
+            else:
+                ax.plot(xv, yv, '.', markersize=2, label=name)
+    ax.set_xlabel(args.xlabel or args.xexpr)
+    ax.set_ylabel(args.ylabel or ', '.join(args.yexpr))
+    if args.title:
+        ax.set_title(args.title)
+    elif len(results) == 1:
+        ax.set_title(results[0][0])
+    if len(args.yexpr) > 1 or len(results) > 1:
+        ax.legend(fontsize=8)
+    fig.tight_layout()
+    if args.output:
+        fig.savefig(args.output, dpi=150)
+        print(f"written: {args.output}")
+    else:
+        plt.show()
+
+
+if __name__ == '__main__':
+    main()
