@@ -384,6 +384,55 @@ the nodes of each interface are doubled, and the boundary condition of § 3 rema
 cheaper model when the stack is uniform. The present Robin condition is the special case where
 everything on one side of $`\Gamma`$ is eliminated analytically.
 
+## 8. Correspondence with the notations of Baltz's textbook
+
+The textbook of V. Baltz (chapters 3 and 4, exercise 6.3) introduces the physics this model rests
+on: two-current model, Valet–Fert spin diffusion, interface resistances, spin transfer and circuit
+theory. Its conventions differ from ours on three points:
+- it takes $`e < 0`$;
+- its arrows $`\uparrow, \downarrow`$ refer to the orientation of the *moment* ($`\uparrow`$ =
+  majority, like the $`+`$ of Valet–Fert and Brataas), but it defines the spin accumulation and the
+  spin current with respect to the *spin*, opposite to the moment:
+  $`\mu_s^{\mathrm{B}} = \mu^\Uparrow - \mu^\Downarrow = -(\mu^\uparrow - \mu^\downarrow)`$ and
+  $`J_s^{\mathrm{B}} = -(j^\uparrow - j^\downarrow)`$;
+- its conductances are in S (not per unit area) and its torques in J/m³.
+
+The superscript B denotes its quantities; $`k = 2/(e^2N_0)`$ as in § 4.4.
+
+| Quantity | Baltz | feeLLGood | Relation |
+|---|---|---|---|
+| bulk polarization | $`\beta = (\alpha-1)/(\alpha+1)`$, $`\alpha = \rho^\downarrow/\rho^\uparrow`$ (§ 2.4) | `P` ($`\beta = \beta' = P`$) | $`P = \beta`$ |
+| resistivities | $`\rho^{\uparrow(\downarrow)} = 2\rho^*(1\mp\beta)`$ | `sigma`, `P` | $`\rho^* = 1/\left(\sigma(1-P^2)\right)`$ |
+| spin diffusion length | $`l_{sf}^*`$, $`1/l_{sf}^{*2} = 1/l_{sf}^{\uparrow2} + 1/l_{sf}^{\downarrow2}`$ (§ 3.1) | `l_sf` | $`l_{sf} = l_{sf}^*`$, $`1/\tau_{sf} = D_0(1-P^2)/l_{sf}^2`$ |
+| spin resistance | $`\rho^* l_{sf}^*`$ in Ω·m² (§ 3.2) | $`g_F`$ (bulk of F1, § 3.3) | $`g_F = k\coth(t_1/l_{sf})/(\rho^*_{F1}\,l_{sf,1})`$ |
+| interface | $`r^{\uparrow(\downarrow)} = 2r^*(1\mp\gamma)`$, eq. (40) | `AR`, `gamma` | $`AR^* = r^*`$, $`P_I = \gamma`$, $`G_\parallel = k/r^*`$ |
+| spin memory loss | $`\delta`$ (§ 3.4) | – | not modelled |
+| spin accumulation | $`\boldsymbol{\mu}_s^{\mathrm{B}}`$, along the spin | $`\mathbf{s}`$, $`\mu_s = (\mu_+ - \mu_-)/2`$ | $`s_\alpha = -\mu_BN_0\,\mu^{\mathrm{B}}_{s,\alpha}/4`$, i.e. $`\mu_s = -\mu_s^{\mathrm{B}}/2`$ |
+| spin current | $`J_s^{\mathrm{B}}`$ in A/m², a tensor in 3D (§ 4.3) | $`Q_{i\alpha}`$ | $`Q_{i\alpha} = (\mu_B/\lvert e\rvert)\,J^{\mathrm{B}}_{s,i\alpha}`$ |
+| angular momentum current | $`\mathcal{Q}^{\mathrm{B}} = \hbar J_s^{\mathrm{B}}/(2e)`$ | $`Q`$ | $`Q = -(2\mu_B/\hbar)\,\mathcal{Q}^{\mathrm{B}}`$ |
+| transverse absorption | $`l_{sd} = \sqrt{\hbar D/J_{sd}}`$ (§ 4.3) | `l_sd`, $`1/\tau_{sd} = D_0/l_{sd}^2`$ | same role; compare the lengths, $`D`$ and $`J_{sd}`$ being defined differently |
+| mixing conductance | $`G^{\uparrow\downarrow} = G_r^{\uparrow\downarrow} + iG_i^{\uparrow\downarrow}`$ in S; $`g^{\uparrow\downarrow} = AG^{\uparrow\downarrow}/(G_0/2)`$ in m⁻², $`G_0 = 2e^2/h`$ (§ 4.6) | `Gr`, `Gi` in S/m² | `Gr` + i `Gi` = $`G^{\uparrow\downarrow}/A = (e^2/h)\,g^{\uparrow\downarrow}`$; in the code $`G_r + iG_i = 2k\,(`$`Gr` + i `Gi`$`)`$ |
+| torque | $`\mathbf{T}`$ in J/m³, $`\dot{\mathbf{M}} = -\lvert\gamma\rvert\mathbf{T}`$, eq. (65) | $`\boldsymbol{\tau} \propto \mathbf{m}\times\mathbf{s}`$ | – |
+
+For example, $`g^{\uparrow\downarrow}`$ = 1e19 m⁻² gives `Gr` ≈ 3.9e14 S/m².
+
+**Signs.** The relations for $`\mathbf{s}`$ and $`Q`$ are fixed by the physical results of the book
+rather than by its intermediate equations. Far from the interface, in F,
+$`J_s^{\mathrm{B}} = -\beta J_e`$ (eq. (34)), whereas here $`Q = -P(\mu_B/|e|)\,j_e\,\mathbf{m}`$:
+hence $`Q = (\mu_B/|e|)\,J_s^{\mathrm{B}}`$. An excess of majority electrons gives
+$`\mu_s^{\mathrm{B}} < 0`$ (p. 38) and $`\mathbf{s}\cdot\mathbf{m} > 0`$: hence the minus sign of
+$`s_\alpha`$. Both relations agree with the diffusion term: with $`D_0 = 2\sigma/(e^2N_0)`$,
+$`-D_0\nabla\mathbf{s}`$ gives back $`(\mu_B/|e|)\,J_s^{\mathrm{B}}`$ for Ohm's law
+$`j = \sigma\nabla\mu/|e|`$. Eq. (22) of the book, $`j = \sigma\nabla\mu/e`$, would give the
+opposite sign with $`e < 0`$: $`|e|`$ must be read there.
+
+**Mixing conductance.** $`G^{\uparrow\downarrow}`$ has the same definition as in Brataas et al.
+(eq. (80) of the book, $`\uparrow`$ = majority). The transverse current, eqs. (77)–(78), is linear
+in the spin accumulation: going from the spin convention to the moment convention changes the sign
+of both terms at once, without changing the ratio between the damping-like ($`G_r`$) and
+field-like ($`G_i`$) torques. The sign of $`G_i`$ used here was checked against Brataas et al.
+(`validation/slonczewski_angle`).
+
 ## References
 
 - J. C. Slonczewski, J. Magn. Magn. Mater. **159**, L1 (1996); **247**, 324 (2002).
@@ -397,5 +446,7 @@ everything on one side of $`\Gamma`$ is eliminated analytically.
   currents in drift-diffusion, consistent interface conditions.
 - C. Abert et al., Sci. Rep. **5**, 14855 (2015): 3D spin diffusion through the whole stack in
   micromagnetics.
+- V. Baltz, *The Basics of Electron Transport in Spintronics*, EDP Sciences (2023): textbook,
+  chapters 3 and 4; correspondence of the notations in § 8.
 - `dev-notes/slonczewski_polarisation.tex`: derivations, F1 options, conversion, validation (in
   French).
