@@ -442,19 +442,71 @@ courant de spin qui sort de F1. Deux limites :
     proche, court-circuite l'accumulation : $s_{F1}\to0$, et l'on retrouve
     l'option~1.
 \end{itemize}
-On écrit la continuité avec la composante longitudinale du courant à
-l'interface F1/N :
+\paragraph{Courant à travers l'interface F1/N.} D'après la loi d'interface
+\eqref{eq:G} et \eqref{eq:robin}, le courant de spin qui traverse F1/N de F1
+vers N est
 \begin{equation}
-  \beta_1\frac{\mu_B}{e}J - g_F\,s_{F1}
-  = P_1\frac{\mu_B}{e}J + G_{\parallel1}\,\big(s_{F1} - \vs_N\cdot\vp\big),
+  \vq_1 = P_1\frac{\mu_B}{e}J\,\vp + \mG_1(\vp)\,\big(\vs_{F1} - \vs_N\big),
 \end{equation}
+avec $P_1 = \gamma_1$ la polarisation de l'\emph{interface} et
+$\mG_1(\vp) = G_{\parallel1}\vp\vp^{\mathsf T} + G_{r1}(\Id-\vp\vp^{\mathsf T})
+- G_{i1}[\vp]_\times$. On le décompose sur $\vp$ et dans le plan transverse,
+en notant $s_{N\parallel} = \vs_N\cdot\vp$ et
+$\vs_{N\perp} = \vs_N - s_{N\parallel}\vp$ :
+\begin{itemize}
+  \item \textbf{partie longitudinale} :
+    $q_{1\parallel} = \vq_1\cdot\vp
+    = P_1\frac{\mu_B}{e}J + G_{\parallel1}\,\big(s_{F1} - s_{N\parallel}\big)$ ;
+  \item \textbf{partie transverse} : comme $\vs_{F1} = s_{F1}\vp$ n'a pas de
+    composante transverse,
+    $\vq_{1\perp} = -\big[G_{r1}\vs_{N\perp} - G_{i1}\,\vp\times\vs_{N\perp}\big]$ :
+    elle ne fait pas intervenir $s_{F1}$.
+\end{itemize}
+Seule la partie longitudinale dépend de $s_{F1}$ : c'est elle qu'il faut
+renormaliser.
+
+\paragraph{Continuité.} L'interface est un plan sans épaisseur : elle ne
+stocke ni ne relaxe de spin. Le courant longitudinal qui sort du volume de
+F1, \eqref{eq:gF}, est donc celui qui traverse l'interface. En notant
+$K = \frac{\mu_B}{e}J$ :
+\begin{equation}
+  \beta_1 K - g_F\,s_{F1}
+  = P_1 K + G_{\parallel1}\,\big(s_{F1} - s_{N\parallel}\big).
+  \label{eq:F1-continuite}
+\end{equation}
+C'est une équation linéaire en $s_{F1}$ :
+$(g_F + G_{\parallel1})\,s_{F1} = (\beta_1 - P_1)\,K + G_{\parallel1}\,s_{N\parallel}$,
 d'où
 \begin{equation}
-  s_{F1} = \frac{(\beta_1-P_1)\,\frac{\mu_B}{e}J + G_{\parallel1}\,\vs_N\cdot\vp}
+  s_{F1} = \frac{(\beta_1-P_1)\,K + G_{\parallel1}\,s_{N\parallel}}
   {g_F + G_{\parallel1}}.
+  \label{eq:sF1}
 \end{equation}
-On remplace $s_{F1}$ dans le courant F1$\to$N. Le résultat a
-\textbf{exactement la même forme qu'avec $\vs_{F1}=0$}, mais avec deux
+L'accumulation à l'interface a deux origines : la différence entre la
+polarisation du volume et celle de l'interface (si $\beta_1>P_1$, le volume
+apporte plus de spin que l'interface n'en laisse passer, et le spin
+s'accumule), et le retour de l'accumulation de l'espaceur.
+
+\paragraph{Renormalisation.} On reporte \eqref{eq:sF1} dans $q_{1\parallel}$.
+Le terme en $s_{F1}$ vaut
+\begin{equation}
+  G_{\parallel1}\,s_{F1}
+  = \frac{G_{\parallel1}(\beta_1-P_1)}{g_F + G_{\parallel1}}\,K
+  + \frac{G_{\parallel1}^2}{g_F + G_{\parallel1}}\,s_{N\parallel},
+\end{equation}
+d'où, en regroupant les termes en $K$ et en $s_{N\parallel}$ :
+\begin{align}
+  q_{1\parallel}
+  &= \left[P_1 + \frac{G_{\parallel1}(\beta_1-P_1)}{g_F + G_{\parallel1}}\right]K
+  + \left[\frac{G_{\parallel1}^2}{g_F + G_{\parallel1}} - G_{\parallel1}\right]s_{N\parallel}
+  \nonumber\\
+  &= \frac{P_1\,g_F + \beta_1\,G_{\parallel1}}{g_F + G_{\parallel1}}\,K
+  - \frac{g_F\,G_{\parallel1}}{g_F + G_{\parallel1}}\,s_{N\parallel}.
+\end{align}
+On peut le vérifier en partant du côté volume : $\beta_1K - g_F s_{F1}$,
+avec \eqref{eq:sF1}, donne le même résultat. C'est la loi d'interface avec
+$s_{F1} = 0$,
+$q_{1\parallel} = P_1^*K + G_{\parallel1}^*\,(0 - s_{N\parallel})$, avec deux
 paramètres renormalisés :
 \begin{equation}
   \boxed{\;
@@ -464,20 +516,40 @@ paramètres renormalisés :
   \;}
   \label{eq:renorm}
 \end{equation}
-$G_{r1}$ et $G_{i1}$ ne changent pas.
+La partie transverse ne dépendant pas de $s_{F1}$, $G_{r1}$ et $G_{i1}$ ne
+changent pas. Au total, $\vq_1 = P_1^*K\,\vp + \mG_1^*(\vp)\,(\bm 0 - \vs_N)$,
+où $\mG_1^*$ est $\mG_1$ avec $G_{\parallel1}\to G_{\parallel1}^*$ :
+\textbf{exactement la forme de l'option~1}, $\vs_{F1}=0$, avec des paramètres
+renormalisés. Tout le volume de F1 est contenu dans $P_1^*$ et
+$G_{\parallel1}^*$.
+
+\paragraph{Interprétation : un circuit en série.} En résistances de spin,
+$r_F = 1/g_F$ pour le volume et $r_I = 1/G_{\parallel1}$ pour l'interface,
+\begin{equation}
+  \frac{1}{G_{\parallel1}^*} = r_F + r_I,
+  \qquad
+  P_1^* = \frac{\beta_1\,r_F + P_1\,r_I}{r_F + r_I}.
+\end{equation}
+Le volume et l'interface sont deux résistances en série. La polarisation
+de l'ensemble est la moyenne des deux polarisations, chacune pondérée par
+sa résistance : c'est l'élément le plus résistif qui impose la
+polarisation, comme dans le modèle de Valet--Fert. Deux limites :
 \begin{itemize}
-  \item $P_1^*$ est une moyenne de la polarisation de volume $\beta_1$ et de
-    la polarisation d'interface $P_1$, pondérée par les conductances.
-  \item $G_{\parallel1}^*$ est la conductance de l'interface et celle du
-    volume mises en série.
+  \item \textbf{volume très conducteur} ($g_F\gg G_{\parallel1}$, par
+    exemple F1 mince devant $\lambda_1$, adossé au réservoir) :
+    $P_1^*\to P_1$, $G_{\parallel1}^*\to G_{\parallel1}$. Le volume ne
+    compte pas, on retrouve l'option~1 ;
+  \item \textbf{interface très conductrice} ($G_{\parallel1}\gg g_F$) :
+    $P_1^*\to\beta_1$, $G_{\parallel1}^*\to g_F$. C'est le volume de F1 qui
+    polarise le courant et limite la conductance.
 \end{itemize}
-En pratique, \textbf{on garde toutes les formules précédentes avec
-$\vs_{F1}=0$, en remplaçant $P_1\to P_1^*$ et
+
+\paragraph{En pratique.} \textbf{On garde toutes les formules précédentes
+avec $\vs_{F1}=0$, en remplaçant $P_1\to P_1^*$ et
 $G_{\parallel1}\to G_{\parallel1}^*$} dans $\mG_1(\vp)$. On n'a rien à
-simuler dans F1. Dans la limite $g_F\gg G_{\parallel1}$, on retrouve
-$P_1^*\to P_1$, $G_{\parallel1}^*\to G_{\parallel1}$ et l'option~1. Le signe
-du terme en $\beta_1$ dépend de la convention choisie pour le sens de $J$,
-comme dans le reste du document.
+simuler dans F1. Les signes sont ceux de \eqref{eq:courant} et de
+\eqref{eq:F1-1D} : $J>0$ pour des électrons qui vont de F1 vers F2, et $j_s$
+compté selon $+\hat{\bm{x}}$, de F1 vers F2.
 
 \subsection{Paramètres de F1 dans FeeLLGood}
 \label{sec:F1-feellgood}
