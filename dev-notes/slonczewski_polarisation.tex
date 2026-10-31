@@ -1294,117 +1294,178 @@ reste utilisable.
     ou on fait quelques itérations de point fixe.
 \end{itemize}
 
-\section{Modifications à apporter à FeeLLGood}
+\section{Implémentation dans FeeLLGood}
 \label{sec:tunnel-modifs}
 
-\subsection{État actuel}
+La condition tunnel est implémentée dans la branche
+\texttt{tunnel\_junction}, créée à partir de \texttt{slonczewski}.
+
+\subsection{Commits}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{l>{\raggedright\arraybackslash}p{12cm}}
+  \toprule
+  \texttt{e1309f5} & Condition de Robin sur le potentiel et flux de spin à
+    travers une barrière tunnel (\texttt{tunnelJunction.h}, réglages,
+    \texttt{electrostatSolver}, \texttt{spinAcc}, tests unitaires). \\
+  \texttt{a32ddc8} & Validation \texttt{tunnel\_two\_domains} :
+    concentration du courant à travers une paroi. \\
+  \texttt{5fda889} & Validations \texttt{tunnel\_junction} : fil 1D et cas
+    angulaire sur couche mince. \\
+  \texttt{a9871ef} & Tension fonction du temps (\texttt{voltage}),
+    documentation de \texttt{tunnel} et \texttt{voltage}. \\
+  \texttt{591635b} & Exemple \texttt{pillar\_tunnel\_voltage\_ramp1ns},
+    colonne \texttt{voltage} des fichiers \texttt{.evol}. \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Réglages}
+
+\begin{verbatim}
+voltage: "-0.8*t/1e-9"     # potentiel de F1 en V, fonction ou expression de t
+mesh:
+  surface_regions:
+    pillar_bottom:
+      tunnel:
+        p: [0, 0, -1]      # aimantation de F1
+        RA: 0.5e-12        # Ohm m^2, configuration parallèle
+        TMR: 1.5           # (G_P - G_AP)/G_AP
+        V: voltage         # ou un nombre, en V
+        P1: 0.65           # optionnel, sqrt(TMR/(2 + TMR)) par défaut
+    pillar_top: {V: 0.0, s: [0, 0, 0]}
+\end{verbatim}
+La clé \texttt{tunnel} exclut \texttt{jn}, \texttt{V}, \texttt{s},
+\texttt{uP} et \texttt{slonczewski} sur la même surface, et impose
+$\mathcal{P}\le P_1\le1$, pour que $P_2 = \mathcal{P}/P_1\le1$. Une surface
+\texttt{tunnel} ne peut pas être mélangée avec \texttt{jn: current\_density}.
+Avec $V_1$ inférieur au potentiel de l'échantillon, les électrons vont de F1
+vers l'échantillon. Les paramètres $V_h$ et $b$ de la
+section~\ref{sec:tunnel-parametres} ne sont pas implémentés.
+
+\subsection{Ce qui a changé dans le code}
 
 \begin{itemize}
-  \item \texttt{electrostatSolver} résout $\nabla\cdot(\sigma\nabla V) = 0$
-    avec des densités $j_n$ imposées (second membre seulement,
-    \texttt{integrales(const Triangle::Tri\&, ...)}) et une seule surface à
-    $V$ imposé, par gradient conjugué (\texttt{algebra::cg\_dir}).
-  \item Il est appelé \emph{une seule fois}, dans le constructeur de
-    \texttt{spinAcc} : l'objet \texttt{pot\_solver} est local, seul $V$ est
-    conservé. La dépendance en temps passe par la linéarité :
-    $\nabla V(t) = \texttt{jn\_factor}\,\nabla V_0$, \texttt{jn\_factor}
-    étant mis à jour dans \texttt{compute\_all} (\texttt{fem.h}).
-  \item La condition de l'empilement (\texttt{stackBoundaryCondition})
-    utilise un $j_n$ uniforme, \texttt{param.jn}.
+  \item \texttt{src/tunnelJunction.h} : fonctions pures
+    \texttt{conductance} ($G_T$, loi en cosinus), \texttt{polarization}
+    ($\bm{P}_T$), \texttt{polarizations} ($P_1$ par défaut, $P_2$) et
+    \texttt{potentialF1} ($V_1$ ou \texttt{voltage(t)}).
+  \item \texttt{electrostatSolver} : sur une surface \texttt{tunnel}, le
+    terme $G_T(\vm_0)\,a_ia_j$ va dans la matrice et
+    $G_T(V_1-V_D)\,a_i$ au second membre, $\vm_0$ étant interpolé et
+    normalisé aux points de Gauss. Le système est réassemblé à chaque
+    appel, et le gradient conjugué repart du $V$ précédent.
+  \item \texttt{spinAcc} : le solveur du potentiel est un membre ; s'il y a
+    une barrière, il est appelé au début de chaque \texttt{compute()},
+    donc à chaque pas de temps, avant le problème de spin. La fonction
+    \texttt{tunnelBoundaryCondition} ajoute au second membre le flux
+    \eqref{eq:tunnel-bc}, avec $j_n = G_T(\vm_0)(V-V_1)$ calculé à chaque
+    point de Gauss.
+  \item Réglages : clés \texttt{tunnel} et \texttt{voltage} ;
+    \texttt{compute\_all} met à jour la tension à chaque pas ; colonne
+    \texttt{voltage} des fichiers \texttt{.evol} ; documentation dans
+    \texttt{default-settings.yml}.
+  \item Tests unitaires \texttt{ut\_tunnelJunction} (5 cas) : $G_P = 1/RA$
+    et $G_P/G_{AP} = 1+\mathrm{TMR}$, loi en cosinus, polarisations par
+    défaut, limites de Jullière en P et AP, composantes de $\bm{P}_T$.
 \end{itemize}
-Avec \eqref{eq:GT}, $V$ dépend de l'aimantation : il faut le recalculer
-à chaque pas de temps.
 
-\subsection{Modifications}
+\subsection{Validation}
 
-\begin{enumerate}
-  \item \textbf{Réglages} (\texttt{settings.cpp}, \texttt{triangle.h}) :
-    une clé \texttt{tunnel} sur la surface d'entrée,
-    \texttt{\{p, RA, TMR, V\}}, avec en option \texttt{P1} (par défaut
-    $\sqrt{\mathrm{TMR}/(2+\mathrm{TMR})}$, jonction symétrique),
-    \texttt{V\_h} et \texttt{b} (section~\ref{sec:tunnel-parametres}) ;
-    la tension peut être une fonction du temps comme
-    \texttt{current\_density}. Elle exclut \texttt{jn}, \texttt{uP} et
-    \texttt{slonczewski} sur la même surface.
-  \item \textbf{Matrice du potentiel}
-    (\texttt{electrostatSolver::integrales} pour les triangles) : sur une
-    surface \texttt{tunnel}, ajouter $G_T(\vm_0)\,a_ia_j\,w$ à une matrice
-    élémentaire de triangle et $G_T(\vm_0)\,(V_1-V_D)\,a_i\,w$ au second
-    membre, $\vm_0$ étant interpolé aux points de Gauss comme dans
-    \texttt{stackBoundaryCondition}. Le décalage de $V_D$ vient de ce que
-    le potentiel est résolu avec $V = 0$ sur la sortie.
-  \item \textbf{Résolution répétable} (\texttt{electrostatSolver::solve}) :
-    remettre à zéro \texttt{K} et \texttt{L\_rhs} avant l'assemblage, comme
-    \texttt{spinAcc::solve}. \texttt{cg\_dir} part du $V$ courant
-    ($\bm{r} = \bm{b} - \mathsf{A}\bm{x}$) : le $V$ du pas précédent sert
-    de point de départ, et quelques itérations suffiront.
-  \item \textbf{Vérification des conditions}
-    (\texttt{checkBoundaryConditions}) : accepter une surface
-    \texttt{tunnel} comme source de courant à la place d'une surface
-    \texttt{jn}.
-  \item \textbf{Durée de vie du solveur} (\texttt{spinAcc}) : faire de
-    \texttt{pot\_solver} un membre, et dans \texttt{spinAcc::compute()},
-    s'il y a une surface \texttt{tunnel}, résoudre le potentiel avant le
-    spin, puis copier $V$. \texttt{jn\_factor} vaut alors 1 (ou
-    $I/I_1$ en pilotage en courant) ; \texttt{potential()} et la sortie
-    \texttt{\_V.sol} doivent suivre.
-  \item \textbf{Condition sur le spin} : une fonction
-    \texttt{tunnelBoundaryCondition(f)}, sur le modèle de
-    \texttt{stackBoundaryCondition}, qui ajoute au second membre
-    \eqref{eq:tunnel-bc} avec, à chaque point de Gauss,
-    $j_n = G_T(\vm_0)(V-V_1)$ et $\bm{P}_T(\vm_0)$ ; pas de terme dans la
-    matrice. Le terme source de volume
-    (\texttt{spinAcc::integrales}, $\nabla V$) ne change pas.
-  \item \textbf{Fonctions pures et tests unitaires} : $G_T(\vm_0)$ et
-    $\bm{P}_T(\vm_0)$ dans un en-tête comme \texttt{slonczewskiInterface.h},
-    testés sur les limites P et AP ($G_P/G_{AP} = 1+\mathrm{TMR}$, Jullière)
-    et sur $\bm{P}_T\cdot\vm = (P_1\cos\theta+P_2)/(1+P_1P_2\cos\theta)$,
-    $P_2 = \mathcal{P}/P_1$.
-\end{enumerate}
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\small
+\begin{tabular}{>{\raggedright}p{3.6cm}>{\raggedright}p{4.6cm}>{\raggedright\arraybackslash}p{6.0cm}}
+  \toprule
+  \textbf{Cas} & \textbf{Ce qui est vérifié} & \textbf{Résultat} \\
+  \midrule
+  \texttt{tunnel\_junction/ wire\_1d} (fil de 100\,nm, $\theta = 0$, 90,
+    $180^\circ$) & potentiel, accumulation longitudinale & potentiel exact
+    ($10^{-8}$) ; $s_z$ à $2.2\times10^{-3}$ de la solution analytique \\
+  \texttt{tunnel\_junction/ thin\_layer\_angle} (couche de 3\,nm,
+    $\theta = 0$ à $180^\circ$) & partie transverse, couples & damping-like à
+    $3\times10^{-4}$, field-like à 1.8\,\% ; erreur max sur $\vs$
+    $1.2\times10^{-2}$, en $h^2$ ; $\Lambda^2 = 1.0004$ à tension fixée,
+    $2.5000 = 1+\mathrm{TMR}$ par unité de courant \\
+  \texttt{tunnel\_two\_domains} (plaque, paroi de Néel) & concentration du
+    courant, potentiel 2D & $RA = 1\,\Omega\,\mu$m$^2$ : $j_P/j_{AP} = 2.493$,
+    erreurs $6.1\times10^{-4}$ ($V$), $4.9\times10^{-5}$ ($j_n$) ;
+    $RA = 2\times10^{-3}\,\Omega\,\mu$m$^2$ (étalement latéral de
+    7.7\,\%) : $5.0\times10^{-4}$, $8.7\times10^{-4}$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+Les références sont écrites indépendamment de FeeLLGood : solution
+analytique pour le fil, modes propres de F2 pour la couche mince, volumes
+finis 2D (\texttt{scipy}) pour la plaque. Une rampe de tension sur le fil a
+aussi été vérifiée (potentiel à $10^{-5}$ de la solution analytique à
+chaque instant), sans être ajoutée au dépôt.
 
-\subsection{Coût et validation}
+\subsection{Exemple et coût}
 
-Le potentiel est un problème scalaire symétrique, contre un problème
-vectoriel non symétrique pour le spin, déjà réassemblé à chaque pas : avec
-un point de départ chaud, son coût reste petit devant celui du spin. On
-peut aussi ne le recalculer que si $\max|\Delta\vm_0|$ sur la surface
-dépasse un seuil.
+L'exemple \texttt{pillar\_tunnel\_voltage\_ramp1ns} reprend la couche libre
+et le maillage de \texttt{pillar\_slonczewski\_current\_density\_ramp1ns}
+avec une barrière MgO : $RA_P = 0.5\,\Omega\,\mu$m$^2$, TMR 150\,\%,
+$\vp = -\hat z$, rampe de $V_1$ de 0 à $-0.8$\,V en 1\,ns. L'estimation
+macrospin donne $|V_c| = 0.19$\,V ($j_c = 1.54\times10^{11}$\,A/m$^2$,
+efficacité 1.15 à $\theta = \pi$ contre 0.50 pour la spin-valve).
+\begin{itemize}
+  \item \textbf{Retournement} AP $\to$ P : $\langle M_z\rangle$ passe par 0 à
+    0.78\,ns, sous $-0.624$\,V, soit $3.2\,|V_c|$, comme la spin-valve
+    ($3.1\,j_c$) : sous une rampe et sans fluctuations thermiques, la
+    précession a besoin de dépasser nettement le seuil.
+  \item \textbf{Résistance} : $-V_1/\langle j_n\rangle$ passe de 1.248 à
+    0.505\,$\Omega\,\mu$m$^2$, de $RA_{AP}$ à $RA_P$.
+  \item \textbf{Concentration du courant} : pendant le retournement, $j_n$
+    suit exactement $-m_z$ sur la face d'entrée ; à 0.85\,ns, il est 1.9
+    fois plus fort dans la partie retournée.
+  \item \textbf{Coût} : recalculer le potentiel à chaque pas coûte 3.7\,\%
+    d'un pas de temps (0.386\,s contre 0.372\,s avec un courant imposé, sur
+    8 threads) ; la simulation de 1\,ns dure 23\,min.
+\end{itemize}
 
-Trois cas de validation suffiraient :
-\begin{enumerate}
-  \item \textbf{Aimantation uniforme}, fil 1D : $j = V_1/(RA(\theta) +
-    L/\sigma)$, avec $RA(\theta) = 1/G_T(\theta)$.
-  \item \textbf{Deux domaines} P et AP sur la surface d'entrée : loin de la
-    frontière, $j_P/j_{AP} = 1+\mathrm{TMR}$ ; le courant total est celui
-    de deux résistances en parallèle.
-  \item \textbf{Couple angulaire} sur une couche mince, comme
-    \texttt{slonczewski\_angle} : le flux transverse entrant vaut
-    $\frac{\mu_B}{e}j_nP_1\sin\theta/(1+\mathcal{P}\cos\theta)$.
-\end{enumerate}
-
-\paragraph{Limite : le champ d'Oersted.} FeeLLGood ne calcule pas le champ
-magnétique créé par le courant : l'utilisateur le donne sous forme
-analytique dans \texttt{Bext}. Dans l'exemple
-\texttt{pillar\_slonczewski\_current\_density\_ramp1ns}, c'est le champ
+\paragraph{Le champ d'Oersted.} FeeLLGood ne calcule pas le champ magnétique
+créé par le courant : l'utilisateur le donne sous forme analytique dans
+\texttt{Bext}. Dans l'exemple spin-valve, c'est le champ
 $\bm{B} = \frac{\mu_0j_z}{2}(-y, x, 0)$ d'un cylindre parcouru par une
-densité de courant \emph{uniforme}, exact pour une spin-valve où $j_n$ est
-imposé. Dans une jonction tunnel, $j_n(\bm{x}) = G_T(\vm_0(\bm{x}))\,(V-V_1)$
-dépend de l'aimantation locale. Pendant un renversement, si la moitié du
-pilier est parallèle à $\vp$ et l'autre antiparallèle, la première porte
-$1+\mathrm{TMR}$ fois plus de courant (2.5 fois pour 150\,\%) : le vrai
-champ d'Oersted n'est plus un tourbillon centré sur l'axe, il est plus
-intense du côté parallèle. Le solveur électrostatique calculerait bien
-cette répartition du courant, mais le champ donné par \texttt{Bext}
-continuerait de supposer un courant uniforme.
+densité de courant \emph{uniforme}, exact quand $j_n$ est imposé. Dans une
+jonction tunnel, $j_n(\bm{x}) = G_T(\vm_0(\bm{x}))\,(V-V_1)$ dépend de
+l'aimantation locale : pendant un retournement, la partie parallèle à $\vp$
+porte jusqu'à $1+\mathrm{TMR}$ fois plus de courant, et le vrai champ
+d'Oersted n'est plus un tourbillon centré sur l'axe. L'exemple tunnel ne
+donne donc pas de \texttt{Bext}, pour trois raisons :
+\begin{itemize}
+  \item le champ est faible : au seuil, $\mu_0 j R/2\approx2$\,mT au bord du
+    pilier, 0.3\,\% de $\mu_0H_{K,\mathrm{eff}} = 0.73$\,T ; il n'atteint
+    20\,mT qu'en fin de rampe, une fois le retournement terminé ;
+  \item il est azimutal : sa moyenne sur le disque est nulle, il n'agit pas
+    sur une aimantation uniforme ;
+  \item un \texttt{Bext} analytique serait faux, puisque le courant n'est
+    pas uniforme : le négliger est plus cohérent que de donner un champ
+    faux.
+\end{itemize}
+Lever cette limite demanderait de calculer le champ créé par
+$\bm{J} = -\sigma\nabla V$ (Biot--Savart), comme FeeLLGood calcule déjà le
+champ démagnétisant à partir de l'aimantation : c'est un chantier distinct.
 
-L'erreur reste probablement faible : les densités de courant d'une
-jonction tunnel ($10^{10}$ à $10^{11}$\,A/m$^2$, contre $10^{12}$ pour une
-spin-valve) donnent un champ d'Oersted de l'ordre du millitesla au bord
-d'un pilier de 20\,nm de rayon, petit devant l'anisotropie d'une couche de
-CoFeB perpendiculaire ($\sim0.1$\,T). La lever demanderait de calculer le
-champ créé par $\bm{J} = -\sigma\nabla V$ (Biot--Savart), comme FeeLLGood
-calcule déjà le champ démagnétisant à partir de l'aimantation : c'est un
-chantier distinct de la condition tunnel.
+\subsection{Points ouverts}
+
+\begin{enumerate}
+  \item \textbf{Dépendance en tension} : $\mathrm{TMR}(V)$ ($V_h$) et couple
+    field-like $b\,V^2$, avec une itération de point fixe ou le $V$ du pas
+    précédent.
+  \item \textbf{Pilotage en courant} : imposer le courant total par la
+    linéarité en $V_1$ à aimantation fixée (section~\ref{sec:tunnel-potentiel}).
+  \item \textbf{Champ d'Oersted} calculé à partir du courant.
+  \item \textbf{Résolution de $l_{sd}$} : comme pour la spin-valve, le
+    maillage de 2\,nm ne résout pas $l_{sd} = 1$\,nm ; le flux transverse
+    entrant est fixé par la condition, seule sa répartition dans
+    l'épaisseur en dépend.
+  \item \textbf{Rétroaction de l'accumulation} sur la barrière, négligée :
+    $RA_P/r_s = 150$ dans l'exemple ($0.5\,\Omega\,\mu$m$^2$), $10^3$ à
+    $10^4$ pour les $RA$ usuels.
+\end{enumerate}
 
 \part*{Annexes}
 
