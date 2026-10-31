@@ -1,0 +1,82 @@
+# pillar_tunnel_voltage_ramp1ns: spin-transfer switching of the free layer F2 of a perpendicular
+# magnetic tunnel junction pillar, the current being injected through the tunnel barrier
+# F1 / MgO (key tunnel of the bottom face), the potential of F1 being a linear ramp from 0 at t = 0
+# to -0.8 V at the end of the simulation (1 ns). Needs a feeLLGood built from the branch
+# tunnel_junction (keys tunnel, voltage).
+#
+#     gmsh -3 pillar.geo -o pillar.msh
+#     feellgood settings.yml
+#
+# Stack, from bottom to top: reference layer F1 (magnetization p = -z, equipotential at V1, not
+# meshed) / MgO barrier (not meshed) / F2 (meshed: disk of radius 20 nm and thickness 4 nm,
+# perpendicular anisotropy) / cap (reservoir at V = 0, s = 0 on the top face).
+#
+# Current: the barrier has the conductance per unit area G_T = (1 + c p.m)/((1 + c) RA),
+# c = TMR/(2 + TMR) (cosine law), m being the local magnetization of F2 on the bottom face, and the
+# current leaving F2 through it is jn = G_T (V - V1). With V1 < 0, below the potential of F2, the
+# electrons flow along +z, from F1 into F2: the spin-transfer torque favours m parallel to p, and
+# F2, close to +z (antiparallel to p = -z), switches towards -z (AP -> P) above the critical
+# voltage. The current density depends on the local magnetization: it is 2.5 times larger in the
+# parts of F2 parallel to p.
+#
+# The Oersted field of the current is not given (no Bext): about 2 mT at the edge of the pillar at
+# the critical voltage, compared with mu0 H_K,eff = 0.73 T, and with a zero average over the disk
+# (see the README).
+
+outputs:
+  file_basename: pillar
+  final_time: 1e-9
+  evol_time_step: 1e-12
+  mag_config_every: 50          # one .sol file every 50 ps
+  evol_columns: [t, dt, max_dm, <Mx>, <My>, <Mz>, E_ex, E_aniso, E_demag, E_tot, voltage]
+
+mesh:
+  filename: pillar.msh
+  length_unit: 1e-9
+  volume_regions:
+    F2:                         # CoFeB-like free layer with perpendicular anisotropy
+      Ms: 1.0e6                 # A/m
+      Ae: 2.0e-11               # J/m
+      alpha_LLG: 0.02
+      K: 8.0e5                  # J/m^3, uniaxial along uk: mu0 H_K,eff = 0.73 T for the disk
+      uk: [0, 0, 1]
+      # spin transport
+      sigma: 2.0e6              # (Ohm m)^-1
+      dens_state: 1.344e47      # J^-1 m^-3
+      P: 0.5                    # beta = beta' = P
+      l_sd: 1.0e-9              # m, not resolved by the 2 nm mesh (see the README)
+      l_sf: 5.0e-9              # m, longitudinal spin diffusion length
+  surface_regions:
+    pillar_bottom:              # current inlet, tunnel barrier
+      tunnel:
+        p: [0, 0, -1]           # magnetization of the reference layer F1
+        RA: 0.5e-12             # Ohm m^2 (0.5 Ohm um^2), parallel configuration
+        TMR: 1.5                # 150 %: RA_AP = 1.25e-12 Ohm m^2
+        V: voltage              # potential of F1, the function voltage(t) below
+        # P1 = P2 = sqrt(TMR/(2 + TMR)) = 0.65 by default (symmetric junction)
+    pillar_top:                 # outlet: cap, reservoir
+      V: 0.0
+      s: [0, 0, 0]
+    pillar_side: {}             # free surface
+
+# close to +z, tilted by 5 degrees towards +x (the torque vanishes for m exactly antiparallel to p)
+initial_magnetization: [0.0871557, 0, 0.9961947]
+
+# potential of F1 [V]: linear ramp from 0 (t = 0) to -0.8 V (t = final_time = 1 ns), electrons
+# from F1 into F2; the macrospin critical voltage (junction_torque.py) is about -0.19 V, reached at
+# 0.24 ns
+voltage: "-0.8*t/1e-9"
+
+spin_accumulation:
+  enable: true
+
+demagnetizing_field_solver:
+  nb_threads: 0                 # all the hardware threads
+
+finite_element_solver:
+  max(iter): 2000               # the default 700 makes the LLG solver fail and divide the time step
+
+time_integration:
+  max(du): 0.02
+  min(dt): 1e-18
+  max(dt): 5e-13

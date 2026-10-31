@@ -138,6 +138,10 @@ void Fem::saver(Settings &settings, const timing &t_prm, std::ofstream &fout, co
             fout << (settings.hasCurrentDensity() ? settings.getCurrentDensity(t_prm.get_t_phys())
                                                   : NAN) << sep;
             }
+        else if (keyVal == "voltage")
+            {
+            fout << (settings.hasVoltage() ? settings.getVoltage(t_prm.get_t_phys()) : NAN) << sep;
+            }
         else
             {
             std::cerr << "Error: invalid column name '" << keyVal << "'\n";
