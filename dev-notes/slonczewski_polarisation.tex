@@ -9,6 +9,7 @@
 \usepackage{booktabs,array}
 \usepackage[margin=2.5cm]{geometry}
 \usepackage{hyperref}
+\emergencystretch=3em
 
 \newcommand{\vm}{\bm{m}}
 \newcommand{\vp}{\bm{p}}
@@ -1017,6 +1018,315 @@ celle du modèle de FeeLLGood. Le couple dans F2 en dépend directement.
 \end{tabular}
 \end{center}
 
+\part{Jonction tunnel magnétique}
+\label{part:tunnel}
+
+\section{Ce qui change par rapport à la spin-valve}
+
+Dans une jonction tunnel F1/I/F2 (typiquement CoFeB/MgO/CoFeB), l'espaceur
+métallique N est remplacé par une barrière isolante I. Le principe du
+couple ne change pas : le courant traversant la barrière est polarisé, la
+composante transverse de son spin est absorbée dans F2 sur la longueur
+s--d, et le moment cinétique perdu agit sur l'aimantation. Mais plusieurs
+hypothèses du modèle de circuit des parties précédentes tombent :
+\begin{center}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{>{\raggedright}p{3.4cm}>{\raggedright}p{5.0cm}>{\raggedright\arraybackslash}p{5.2cm}}
+  \toprule
+  & \textbf{Spin-valve} & \textbf{Jonction tunnel} \\
+  \midrule
+  Transport dans l'espaceur & diffusif ; N est un nœud d'accumulation
+    $\vs_N$ & tunnel cohérent ; la barrière n'a pas d'états, il n'y a pas
+    de nœud \\
+  Origine de la polarisation & volume et interfaces ($\beta$, $\gamma$,
+    $AR^*$) & la barrière : polarisations tunnel $P_1$, $P_2$ (filtrage
+    de symétrie dans MgO), sans lien direct avec le $P$ de volume \\
+  Conductance & presque indépendante de $\theta$ (GMR de quelques \%) &
+    $G(\theta) = G_0(1+P_1P_2\cos\theta)$, TMR de 100 à 200\,\% \\
+  Résistance de l'espaceur & $AR^*\sim$ résistance de spin des couches :
+    l'accumulation rétroagit (Robin) & $RA\sim10^{-12}$ à
+    $10^{-11}\,\Omega\,$m$^2$, $10^3$ à $10^4$ fois la résistance de
+    spin : rétroaction négligeable \\
+  Régime & réponse linéaire & $V\sim0.3$ à 1\,V : non linéaire, la TMR
+    chute avec $V$ \\
+  Couple field-like & faible ($\mathrm{Im}\,G_{\uparrow\downarrow}$) &
+    10 à 30\,\% du damping-like, quadratique en $V$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+Les deux changements qui comptent pour FeeLLGood sont la dépendance de la
+conductance en $\theta$, qui rend la densité de courant non uniforme et
+dépendante de l'aimantation, et la valeur de $RA$, qui ramène la condition
+de Robin sur le spin à une condition de flux.
+
+\section{Courants de charge et de spin à travers la barrière}
+\label{sec:tunnel-courants}
+
+\subsection{Cas colinéaire : le modèle de Jullière}
+
+Dans le modèle de Jullière, le spin est conservé pendant l'effet tunnel et
+la conductance de chaque canal est proportionnelle au produit des
+densités d'états des deux électrodes pour ce spin. On écrit ces densités
+$\propto 1\pm P_k$ ($+$ : majoritaire de l'électrode $k$). En
+configuration parallèle (P), un électron de spin majoritaire dans F2 l'est
+aussi dans F1 :
+\begin{equation}
+  G_\uparrow\propto(1+P_1)(1+P_2),\quad
+  G_\downarrow\propto(1-P_1)(1-P_2)
+  \quad\Rightarrow\quad
+  \frac{j_s}{j} = \frac{G_\uparrow - G_\downarrow}{G_\uparrow + G_\downarrow}
+  = \frac{P_1+P_2}{1+P_1P_2} .
+\end{equation}
+En configuration antiparallèle (AP), il est minoritaire dans F1 :
+$G_\uparrow\propto(1-P_1)(1+P_2)$, $G_\downarrow\propto(1+P_1)(1-P_2)$,
+d'où $j_s/j = (P_2-P_1)/(1-P_1P_2)$ selon $\vm$. Le rapport des
+conductances donne la TMR de Jullière :
+\begin{equation}
+  \mathrm{TMR} = \frac{G_P - G_{AP}}{G_{AP}} = \frac{2P_1P_2}{1-P_1P_2},
+  \qquad
+  P_1P_2 = \frac{\mathrm{TMR}}{2+\mathrm{TMR}} .
+\end{equation}
+
+\subsection{Cas non colinéaire}
+
+Pour des aimantations $\vp$ (F1) et $\vm$ (F2) faisant un angle $\theta$,
+la conductance varie en cosinus (Slonczewski, 1989). Dans le modèle de
+Jullière étendu au cas non colinéaire (spin conservé, transmission
+proportionnelle aux densités d'états), le courant de spin transmis est la
+somme des polarisations des deux électrodes :
+\begin{equation}
+  \boxed{\;j = G_0\,(1+P_1P_2\cos\theta)\,V,
+  \qquad
+  \bm{j}_s = G_0\,V\left(P_1\,\vp + P_2\,\vm\right)\;}
+  \label{eq:tunnel-js}
+\end{equation}
+($\bm{j}_s$ exprimé comme un courant de charge, juste à l'entrée de F2).
+On retrouve les deux cas colinéaires pour $\theta = 0$ et $\pi$. Des
+modèles plus fins (Slonczewski, 2005 ; Theodonis et al., 2006) modifient
+les poids de $\vp$ et $\vm$ et les font dépendre de la tension, sans
+changer cette structure. La polarisation du courant injecté s'écrit donc
+\begin{equation}
+  \bm{P}_T(\vm) = \frac{\bm{j}_s}{j}
+  = \frac{P_1\,\vp + P_2\,\vm}{1+P_1P_2\,\vp\cdot\vm} .
+  \label{eq:PT}
+\end{equation}
+Elle a la même structure que le $\bm{P}_{\!\mathrm{eff}}$ de la spin-valve
+(une contribution selon $\vp$, une selon $\vm_0$), avec des poids fixés
+par la barrière au lieu de l'être par les conductances du circuit.
+
+\subsection{Couple et dépendance angulaire}
+
+La composante de $\bm{j}_s$ transverse à $\vm$, $G_0VP_1\sin\theta$, est
+absorbée dans F2 : le couple damping-like vaut
+\begin{equation}
+  \tau_{\mathrm{DL}}\propto P_1\,V\sin\theta
+  \quad\text{(tension fixée)},
+  \qquad
+  \tau_{\mathrm{DL}}\propto \frac{P_1\,j\sin\theta}{1+P_1P_2\cos\theta}
+  \quad\text{(courant fixé)}.
+\end{equation}
+À tension fixée, c'est la forme de Slonczewski avec $\Lambda = 1$ ; à
+courant fixé, c'est la forme \eqref{eq:eps} avec
+\begin{equation}
+  \frac{\Lambda^2-1}{\Lambda^2+1} = P_1P_2,
+  \qquad
+  \Lambda^2 = \frac{1+P_1P_2}{1-P_1P_2} = 1+\mathrm{TMR} > 1 :
+\end{equation}
+le couple par unité de courant est plus grand près de la configuration
+antiparallèle. Le couple ne dépend que de la polarisation $P_1$ du
+polariseur : $P_2$ ne fait que moduler le courant.
+
+\paragraph{Au-delà de Jullière.} Ce modèle ignore la dépendance en tension.
+Expérimentalement (Sankey et al., Kubota et al., 2008), le couple
+damping-like reste à peu près linéaire en $V$, mais la TMR chute,
+typiquement comme $\mathrm{TMR}(V) = \mathrm{TMR}_0/\left(1+(V/V_h)^2\right)$,
+et un couple field-like quadratique en $V$ apparaît (Theodonis et al.,
+2006). On peut l'ajouter de façon phénoménologique, par une composante du
+flux de spin selon $\vm\times\vp$ d'amplitude $b\,V^2$, avec $b$ un
+paramètre.
+
+\section{Condition aux limites pour la diffusion de spin}
+
+Côté F2, le flux de spin à travers la barrière est
+$\bm{q} = (\mu_B/e)\,\bm{j}_s + \mathsf{G}_T\,(\vs_{F1}-\vs)$, où le second
+terme décrit la rétroaction de l'accumulation, avec une conductance de
+l'ordre de $k/RA$. La conductance de spin du volume de F2 est de l'ordre
+de $k/r_s$, $r_s = l_{sf}/(\sigma(1-P^2))\sim10^{-15}\,\Omega\,$m$^2$. Comme
+$RA/r_s\sim10^3$ à $10^4$, la rétroaction est négligeable, et la
+condition de Robin se réduit à une condition de flux :
+\begin{equation}
+  \boxed{\;\bm{q} = \frac{\mu_B}{e}\,j_n(\bm{x})\,\bm{P}_T(\vm_0(\bm{x}))\;}
+  \label{eq:tunnel-bc}
+\end{equation}
+C'est l'ancienne condition de FeeLLGood (flux $\frac{\mu_B}{e}j_n\,\bm{u}_P$),
+à deux différences près : la polarisation $\bm{P}_T$ n'est pas un vecteur
+fixe mais dépend de l'aimantation locale $\vm_0$ par \eqref{eq:PT}, et la
+densité de courant $j_n(\bm{x})$ n'est plus imposée mais dépend elle aussi
+de $\vm_0$. La première modification est locale et simple. La seconde
+touche le solveur électrostatique.
+
+\section{Condition aux limites pour le potentiel électrique}
+\label{sec:tunnel-potentiel}
+
+\subsection{Une condition de Robin sur le potentiel}
+
+La barrière est une résistance surfacique dépendant de l'aimantation
+locale. Soit $V_1$ le potentiel de l'électrode F1 (supposée équipotentielle)
+et $V$ celui de F2 sur la surface d'entrée $\Gamma$, de normale sortante
+$\bm{n}$. Le courant qui sort de F2 à travers la barrière est
+\begin{equation}
+  j_n = \bm{J}\cdot\bm{n} = G_T(\vm_0)\,(V - V_1),
+  \qquad
+  G_T(\vm_0) = \frac{1+P_1P_2\,\vp\cdot\vm_0}{(1+P_1P_2)\,RA_P},
+  \label{eq:GT}
+\end{equation}
+où $RA_P$ est le produit résistance--surface en configuration parallèle
+($j_n>0$ : électrons entrant dans F2, comme dans FeeLLGood). Avec
+$\bm{J} = -\sigma\nabla V$ et $\nabla\cdot\bm{J} = 0$ dans le volume, la
+forme faible devient, pour toute fonction test $w$,
+\begin{equation}
+  \int_\Omega\sigma\,\nabla V\cdot\nabla w
+  + \int_\Gamma G_T(\vm_0)\,V\,w
+  = \int_\Gamma G_T(\vm_0)\,V_1\,w ,
+\end{equation}
+avec toujours $V$ imposé sur la surface de sortie. Par rapport au problème
+actuel ($\int_\Gamma j_n w$ au second membre), un terme de masse surfacique
+s'ajoute à la matrice. Il est symétrique positif : le gradient conjugué
+reste utilisable.
+
+\subsection{Conséquences physiques}
+
+\begin{itemize}
+  \item \textbf{Concentration du courant.} Avec une TMR de 150\,\%, $G_T$
+    varie d'un facteur 2.5 entre les zones parallèles et antiparallèles.
+    Comme $RA$ domine la résistance de F2, $j_n(\bm{x})\simeq
+    G_T(\vm_0(\bm{x}))\,(V-V_1)$ est presque local : pendant le passage
+    d'une paroi ou la nucléation d'un domaine, le courant, donc le couple,
+    se concentre dans les zones parallèles à $\vp$.
+  \item \textbf{Pilotage en tension ou en courant.} La condition naturelle
+    est la tension $V_1$ appliquée. Pour imposer le courant total $I$, on
+    utilise la linéarité en $V_1$ à aimantation fixée : on résout avec
+    $V_1 = 1$, on calcule le courant $I_1$, et on multiplie $V$ par
+    $I/I_1$, comme le fait déjà \texttt{jn\_factor} pour
+    \texttt{current\_density(t)}.
+  \item \textbf{Non-linéarité.} Si la TMR dépend de la tension, $G_T$
+    dépend de $V$ : on prend le $V$ du pas précédent (décalage explicite)
+    ou on fait quelques itérations de point fixe.
+\end{itemize}
+
+\section{Modifications à apporter à FeeLLGood}
+\label{sec:tunnel-modifs}
+
+\subsection{État actuel}
+
+\begin{itemize}
+  \item \texttt{electrostatSolver} résout $\nabla\cdot(\sigma\nabla V) = 0$
+    avec des densités $j_n$ imposées (second membre seulement,
+    \texttt{integrales(const Triangle::Tri\&, ...)}) et une seule surface à
+    $V$ imposé, par gradient conjugué (\texttt{algebra::cg\_dir}).
+  \item Il est appelé \emph{une seule fois}, dans le constructeur de
+    \texttt{spinAcc} : l'objet \texttt{pot\_solver} est local, seul $V$ est
+    conservé. La dépendance en temps passe par la linéarité :
+    $\nabla V(t) = \texttt{jn\_factor}\,\nabla V_0$, \texttt{jn\_factor}
+    étant mis à jour dans \texttt{compute\_all} (\texttt{fem.h}).
+  \item La condition de l'empilement (\texttt{stackBoundaryCondition})
+    utilise un $j_n$ uniforme, \texttt{param.jn}.
+\end{itemize}
+Avec \eqref{eq:GT}, $V$ dépend de l'aimantation : il faut le recalculer
+à chaque pas de temps.
+
+\subsection{Modifications}
+
+\begin{enumerate}
+  \item \textbf{Réglages} (\texttt{settings.cpp}, \texttt{triangle.h}) :
+    une clé \texttt{tunnel} sur la surface d'entrée,
+    \texttt{\{p, RA, TMR, P1, V\}} (ou \texttt{P1}, \texttt{P2} à la place
+    de \texttt{TMR}, avec $P_1P_2 = \mathrm{TMR}/(2+\mathrm{TMR})$), la
+    tension pouvant être une fonction du temps comme
+    \texttt{current\_density}. Elle exclut \texttt{jn}, \texttt{uP} et
+    \texttt{slonczewski} sur la même surface. Optionnellement $V_h$ et $b$
+    (section~\ref{sec:tunnel-courants}).
+  \item \textbf{Matrice du potentiel}
+    (\texttt{electrostatSolver::integrales} pour les triangles) : sur une
+    surface \texttt{tunnel}, ajouter $G_T(\vm_0)\,a_ia_j\,w$ à une matrice
+    élémentaire de triangle et $G_T(\vm_0)\,(V_1-V_D)\,a_i\,w$ au second
+    membre, $\vm_0$ étant interpolé aux points de Gauss comme dans
+    \texttt{stackBoundaryCondition}. Le décalage de $V_D$ vient de ce que
+    le potentiel est résolu avec $V = 0$ sur la sortie.
+  \item \textbf{Résolution répétable} (\texttt{electrostatSolver::solve}) :
+    remettre à zéro \texttt{K} et \texttt{L\_rhs} avant l'assemblage, comme
+    \texttt{spinAcc::solve}. \texttt{cg\_dir} part du $V$ courant
+    ($\bm{r} = \bm{b} - \mathsf{A}\bm{x}$) : le $V$ du pas précédent sert
+    de point de départ, et quelques itérations suffiront.
+  \item \textbf{Vérification des conditions}
+    (\texttt{checkBoundaryConditions}) : accepter une surface
+    \texttt{tunnel} comme source de courant à la place d'une surface
+    \texttt{jn}.
+  \item \textbf{Durée de vie du solveur} (\texttt{spinAcc}) : faire de
+    \texttt{pot\_solver} un membre, et dans \texttt{spinAcc::compute()},
+    s'il y a une surface \texttt{tunnel}, résoudre le potentiel avant le
+    spin, puis copier $V$. \texttt{jn\_factor} vaut alors 1 (ou
+    $I/I_1$ en pilotage en courant) ; \texttt{potential()} et la sortie
+    \texttt{\_V.sol} doivent suivre.
+  \item \textbf{Condition sur le spin} : une fonction
+    \texttt{tunnelBoundaryCondition(f)}, sur le modèle de
+    \texttt{stackBoundaryCondition}, qui ajoute au second membre
+    \eqref{eq:tunnel-bc} avec, à chaque point de Gauss,
+    $j_n = G_T(\vm_0)(V-V_1)$ et $\bm{P}_T(\vm_0)$ ; pas de terme dans la
+    matrice. Le terme source de volume
+    (\texttt{spinAcc::integrales}, $\nabla V$) ne change pas.
+  \item \textbf{Fonctions pures et tests unitaires} : $G_T(\vm_0)$ et
+    $\bm{P}_T(\vm_0)$ dans un en-tête comme \texttt{slonczewskiInterface.h},
+    testés sur les limites P et AP (Jullière) et sur
+    $\bm{P}_T\cdot\vm = (P_1\cos\theta+P_2)/(1+P_1P_2\cos\theta)$.
+\end{enumerate}
+
+\subsection{Coût et validation}
+
+Le potentiel est un problème scalaire symétrique, contre un problème
+vectoriel non symétrique pour le spin, déjà réassemblé à chaque pas : avec
+un point de départ chaud, son coût reste petit devant celui du spin. On
+peut aussi ne le recalculer que si $\max|\Delta\vm_0|$ sur la surface
+dépasse un seuil.
+
+Trois cas de validation suffiraient :
+\begin{enumerate}
+  \item \textbf{Aimantation uniforme}, fil 1D : $j = V_1/(RA(\theta) +
+    L/\sigma)$, avec $RA(\theta) = 1/G_T(\theta)$.
+  \item \textbf{Deux domaines} P et AP sur la surface d'entrée : loin de la
+    frontière, $j_P/j_{AP} = 1+\mathrm{TMR}$ ; le courant total est celui
+    de deux résistances en parallèle.
+  \item \textbf{Couple angulaire} sur une couche mince, comme
+    \texttt{slonczewski\_angle} : le flux transverse entrant vaut
+    $\frac{\mu_B}{e}j_nP_1\sin\theta/(1+P_1P_2\cos\theta)$.
+\end{enumerate}
+
+\paragraph{Limite : le champ d'Oersted.} FeeLLGood ne calcule pas le champ
+magnétique créé par le courant : l'utilisateur le donne sous forme
+analytique dans \texttt{Bext}. Dans l'exemple
+\texttt{pillar\_slonczewski\_current\_density\_ramp1ns}, c'est le champ
+$\bm{B} = \frac{\mu_0j_z}{2}(-y, x, 0)$ d'un cylindre parcouru par une
+densité de courant \emph{uniforme}, exact pour une spin-valve où $j_n$ est
+imposé. Dans une jonction tunnel, $j_n(\bm{x}) = G_T(\vm_0(\bm{x}))\,(V-V_1)$
+dépend de l'aimantation locale. Pendant un renversement, si la moitié du
+pilier est parallèle à $\vp$ et l'autre antiparallèle, la première porte
+$1+\mathrm{TMR}$ fois plus de courant (2.5 fois pour 150\,\%) : le vrai
+champ d'Oersted n'est plus un tourbillon centré sur l'axe, il est plus
+intense du côté parallèle. Le solveur électrostatique calculerait bien
+cette répartition du courant, mais le champ donné par \texttt{Bext}
+continuerait de supposer un courant uniforme.
+
+L'erreur reste probablement faible : les densités de courant d'une
+jonction tunnel ($10^{10}$ à $10^{11}$\,A/m$^2$, contre $10^{12}$ pour une
+spin-valve) donnent un champ d'Oersted de l'ordre du millitesla au bord
+d'un pilier de 20\,nm de rayon, petit devant l'anisotropie d'une couche de
+CoFeB perpendiculaire ($\sim0.1$\,T). La lever demanderait de calculer le
+champ créé par $\bm{J} = -\sigma\nabla V$ (Biot--Savart), comme FeeLLGood
+calcule déjà le champ démagnétisant à partir de l'aimantation : c'est un
+chantier distinct de la condition tunnel.
+
+\part*{Annexes}
+
 \section*{Correspondance avec les notations de Baltz}
 \label{sec:baltz}
 
@@ -1138,6 +1448,17 @@ Brataas (\texttt{validation/slonczewski\_angle}).
     et conditions d'interface cohérentes.
   \item C.~Abert \emph{et al.}, Sci.\ Rep.\ \textbf{5}, 14855 (2015) :
     diffusion de spin 3D dans tout l'empilement en micromagnétisme.
+  \item M.~Jullière, Phys.\ Lett.\ A \textbf{54}, 225 (1975) : TMR et
+    polarisations tunnel.
+  \item J.\,C.~Slonczewski, Phys.\ Rev.\ B \textbf{39}, 6995 (1989) :
+    conductance et couple d'une jonction tunnel non colinéaire.
+  \item J.\,C.~Slonczewski, Phys.\ Rev.\ B \textbf{71}, 024411 (2005) :
+    courants, couples et facteurs de polarisation des jonctions tunnel.
+  \item I.~Theodonis \emph{et al.}, Phys.\ Rev.\ Lett.\ \textbf{97}, 237205
+    (2006) : dépendance en tension des couples, field-like quadratique.
+  \item J.\,C.~Sankey \emph{et al.}, Nat.\ Phys.\ \textbf{4}, 67 (2008) ;
+    H.~Kubota \emph{et al.}, Nat.\ Phys.\ \textbf{4}, 37 (2008) : mesures
+    des couples en fonction de la tension.
   \item V.~Baltz, \emph{The Basics of Electron Transport in Spintronics},
     EDP Sciences (2023) : manuel pédagogique, chapitres 3 et 4 (voir la
     correspondance des notations p.~\pageref{sec:baltz}).
