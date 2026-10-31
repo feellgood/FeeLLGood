@@ -14,6 +14,7 @@
 \newcommand{\vm}{\bm{m}}
 \newcommand{\vs}{\bm{s}}
 \newcommand{\ee}{\mathrm{e}}
+\emergencystretch=3em
 
 \title{Injection de spin à travers un empilement polariseur :\\
   le cas test unidimensionnel de Valet et Fert}
@@ -453,9 +454,9 @@ $D_0$ vaut deux fois le coefficient $D$ de la relation d'Einstein
 $\sigma = e^2N_0D$ : $\vs$ est la moitié de l'aimantation physique
 $\mu_BN_0\mu_s$, ce qui ne change aucun résultat.
 
-Cette équivalence demande la diffusion anisotrope
-(\texttt{spin\_accumulation.anisotropic\_diffusion: true}, la valeur par
-défaut). Sans elle, la conductivité de spin de F2 serait $\sigma$ au lieu
+Cette équivalence demande la diffusion anisotrope : la clé
+\texttt{anisotropic\_diffusion} de la section \texttt{spin\_accumulation}
+doit valoir \texttt{true}, ce qui est la valeur par défaut. Sans elle, la conductivité de spin de F2 serait $\sigma$ au lieu
 de $\sigma(1-P^2)$ et le test échouerait.
 
 \subsection{La condition de Robin sur l'entrée}
@@ -480,10 +481,14 @@ et $j = -j_n$, c'est la condition de Robin
 \begin{itemize}
   \item \texttt{Slonczewski::makeStack} convertit chaque interface,
     $G_\parallel = k/AR^*$ et $P = \gamma$ ;
-  \item \texttt{renormalizeF1} met en série le volume de F1,
-    $g_F = k/R_1 = k\,\sigma_1(1-\beta_1^2)\coth(t_1/l_{sf,1})/l_{sf,1}$,
-    avec la conductance de F1/N : $G_{\parallel1}^* = g_FG_{\parallel1}/(g_F+G_{\parallel1})$
-    et $P_1^* = (\beta_1g_F + \gamma_1G_{\parallel1})/(g_F+G_{\parallel1})$ ;
+  \item \texttt{renormalizeF1} met en série le volume de F1, de
+    conductance $g_F = k/R_1 = k\,\sigma_1(1-\beta_1^2)\coth(t_1/l_{sf,1})/l_{sf,1}$,
+    avec la conductance de F1/N :
+    \[
+      G_{\parallel1}^* = \frac{g_FG_{\parallel1}}{g_F+G_{\parallel1}},
+      \qquad
+      P_1^* = \frac{\beta_1g_F + \gamma_1G_{\parallel1}}{g_F+G_{\parallel1}} ;
+    \]
   \item \texttt{effectiveBC} élimine le nœud espaceur : la conductance
     effective est la mise en série $G_2(G_1+G_2)^{-1}G_1$, la polarisation
     effective la moyenne pondérée correspondante.
@@ -605,10 +610,11 @@ configurations.
     injection de spin et désaccord d'impédance.
   \item V.~Baltz, \emph{The Basics of Electron Transport in Spintronics},
     EDP Sciences (2023), §3.2--3.4 et exercice 6.3.
-  \item \texttt{dev-notes/slonczewski\_polarisation.tex} et
-    \texttt{dev-notes/spin\_injection\_boundary\_conditions.md} :
-    dérivation de la condition de Robin, renormalisation de F1,
-    conversion des conductances.
+  \item \texttt{dev-notes/slonczewski\_polarisation.tex} : dérivation de
+    la condition de Robin, renormalisation de F1, conversion des
+    conductances.
+  \item \texttt{dev-notes/spin\_injection\_boundary\_conditions.md} (en
+    anglais) : la même, avec la mise en œuvre dans FeeLLGood.
 \end{itemize}
 
 \end{document}
