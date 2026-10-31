@@ -195,8 +195,9 @@ def main():
         y = np.sin(th) / np.array([r[1] for r in rows if 0 < r[0] < 180])
         beta, alpha = np.polyfit(np.cos(th), y, 1)
         resid = np.abs(np.polyval([beta, alpha], np.cos(th)) - y).max() / np.abs(y).max()
+        # alpha = (Lambda^2 + 1)/C, beta = (Lambda^2 - 1)/C
         print(f"damping-like torque (reference): Lambda^2 = {(alpha + beta)/(alpha - beta):.4f}, "
-              f"deviation from the form of Slonczewski {resid:.1e}")
+              f"C = {2/(alpha - beta):.4e} A, deviation from the form of Slonczewski {resid:.1e}")
     print("OK" if ok else "FAILED")
     return 0 if ok else 1
 
