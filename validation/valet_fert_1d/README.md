@@ -35,3 +35,16 @@ relative to $\max|s_z|$, is below 1 % in both configurations.
 
 The error decreases as $h^2$ (P1 elements). With the factor 1 instead of 2 in $G_\parallel$, the
 error is 8.5 % (P configuration): the test fails.
+
+## Documents
+
+`valet_fert_1d.tex` (English) and `valet_fert_1d_french.tex` (French) explain the test in detail,
+for readers new to spin transport: the assumptions and equations of the Valet–Fert model, the test
+case, its analytic solution, what feeLLGood solves, and the expected results. Their circuit reading
+of the solution gives the polarization of the injected current as the average of the
+polarizations of the elements of the stack, weighted by their spin resistances. Build them with
+```
+pdflatex valet_fert_1d.tex          # twice, for the table of contents
+pdflatex valet_fert_1d_french.tex
+```
+Their figure `valet_fert_1d_profile.pdf` is built by `plot_profile.py`, after `valet_fert.py`.
