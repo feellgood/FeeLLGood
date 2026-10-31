@@ -39,8 +39,15 @@ struct Settings
     double TMR = 0;  /**< tunnel magnetoresistance (G_P - G_AP)/G_AP, 1.5 for 150 % */
     double P1 = NAN; /**< effective tunnel polarization of F1, sqrt(TMR/(2 + TMR)) by default
                         (symmetric junction), see polarizations() */
-    double V1 = 0;   /**< potential of F1, V */
+    double V1 = 0;   /**< potential of F1, V, if V1_voltage is false */
+    bool V1_voltage = false; /**< true if the potential of F1 is the function voltage(t) of the
+                                settings (`V: voltage`) */
     };
+
+/** potential of F1 (V): V1, or the value of voltage(t) at the current time if V1_voltage */
+inline double potentialF1(const Settings &st /**< [in] */,
+                          const double voltage /**< [in] voltage(t) at the current time, V */)
+    { return st.V1_voltage ? voltage : st.V1; }
 
 /** coefficient of the cosine law, P = TMR/(2 + TMR) = (G_P - G_AP)/(G_P + G_AP) */
 inline double cosineCoefficient(const double TMR /**< [in] */)

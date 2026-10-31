@@ -203,6 +203,10 @@ public:
      * empty if not defined */
     std::string sCurrentDensity;
 
+    /** string for a JavaScript function, or an expression of t, defining the potential voltage(t)
+     * [V] of F1 for the tunnel barriers with `V: voltage`; empty if not defined */
+    std::string sVoltage;
+
     /** input file name for continuing a calculation (sol.in) */
     std::string restoreFileName;
 
@@ -348,6 +352,24 @@ public:
     inline double getCurrentDensity(const double t_val) const
         { return current_density_parser.get_scalar(t_val); }
 
+    /** true if the function voltage(t) is defined (key voltage) */
+    inline bool hasVoltage(void) const
+        { return !sVoltage.empty(); }
+
+    /** true if a surface region has a tunnel barrier with `V: voltage` */
+    inline bool usesVoltage(void) const
+        {
+        return std::any_of(paramTriangle.begin(), paramTriangle.end(), [](const Triangle::prm &p)
+                           { return p.tunnel && p.barrier.V1_voltage; });
+        }
+
+    /** Evaluate the potential voltage(t) [V] of F1 for the tunnel barriers with `V: voltage`, as a
+     * function of the time t_val in seconds. Only meaningful if hasVoltage(). This method is
+     * **not thread safe**.
+     */
+    inline double getVoltage(const double t_val) const
+        { return voltage_parser.get_scalar(t_val); }
+
     /** Dimensionless factor of the electric sources at the time t_val in seconds:
      * current_density(t)/j_ref if a surface region has `jn: current_density`, its jn being the
      * reference j_ref = 1 A/m^2 (the value of current_density(t) in A/m^2), 1 otherwise
@@ -387,6 +409,9 @@ private:
     /** parser for the normal current density R->R, also defined as the global function
      * current_density(t) in field_parser and field_time_parser */
     ExpressionParser current_density_parser;
+
+    /** parser for the potential voltage(t) of F1 of the tunnel barriers, R->R */
+    ExpressionParser voltage_parser;
 
     /** Metadata common to .evol and .sol files */
     std::ostringstream commonMetadata() const;

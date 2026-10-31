@@ -63,8 +63,11 @@ void electrostatSolver::infos(void) const
             { std::cout << "\tV= " << p.V << "\n"; }
         if (p.tunnel)
             {
-            std::cout << "\ttunnel: RA= " << p.barrier.RA << ", TMR= " << p.barrier.TMR
-                      << ", V= " << p.barrier.V1 << "\n";
+            std::cout << "\ttunnel: RA= " << p.barrier.RA << ", TMR= " << p.barrier.TMR << ", V= ";
+            if (p.barrier.V1_voltage)
+                { std::cout << "voltage\n"; }
+            else
+                { std::cout << p.barrier.V1 << "\n"; }
             }
         }
     }
@@ -117,6 +120,7 @@ void electrostatSolver::integrales(const Triangle::Tri &tri,
     {
     using namespace Triangle;
     const Tunnel::Settings &barrier = paramTri[tri.idxPrm].barrier;
+    const double V1 = Tunnel::potentialF1(barrier, voltage);
     for (int npi = 0; npi < NPI; npi++)
         {
         // magnetization of the sample at the Gauss point (NEXT, as the spin diffusion problem)
@@ -128,7 +132,7 @@ void electrostatSolver::integrales(const Triangle::Tri &tri,
         const double G_w = Tunnel::conductance(barrier, m0) * tri.weight[npi];
         for (int ie = 0; ie < N; ie++)
             {
-            BE[ie] += a[ie][npi] * G_w * (barrier.V1 - V_D);
+            BE[ie] += a[ie][npi] * G_w * (V1 - V_D);
             for (int je = 0; je < N; je++)
                 { AE(ie, je) += a[ie][npi] * a[je][npi] * G_w; }
             }

@@ -63,6 +63,10 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
      * imposed s */
     double jn_factor = 1.0;
 
+    /** potential voltage(t) of F1 [V] at the time of the solve, for the tunnel barriers with
+     * `V: voltage` (set by compute_all) */
+    double voltage = NAN;
+
     /** electrostatic potential on the nodes at the time of the last solve [V], indexed as s:
      * V_D + jn_factor V, V being solved with V = 0 on the surface with V and V_D the imposed V
      * (the electrokinetics being linear, the potential at time t follows the current density;

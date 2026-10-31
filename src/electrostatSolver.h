@@ -39,6 +39,10 @@ public:
      * V is added afterwards), V.size() is the size of the vector of nodes */
     std::vector<double> V;
 
+    /** potential voltage(t) of F1 [V] at the time of the solve, for the tunnel barriers with
+     * `V: voltage` (set by spinAcc) */
+    double voltage = NAN;
+
     /** basic informations on boundary conditions */
     void infos(void) const;
 

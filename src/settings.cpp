@@ -166,7 +166,8 @@ static Slonczewski::StackSettings readStack(YAML::Node node, const std::string &
 
 // Read the tunnel barrier of a surface region (key `tunnel`), see tunnelJunction.h: the
 // magnetization p of F1, the resistance-area product RA (Ohm m^2) in the parallel configuration,
-// the TMR, the potential V of F1 (required) and the effective tunnel polarization P1 of F1
+// the TMR, the potential V of F1 (required, a number or `voltage` for the function voltage(t) of
+// the settings) and the effective tunnel polarization P1 of F1
 // (optional, sqrt(TMR/(2 + TMR)) by default). The nodes are taken by value, as in readStack().
 static Tunnel::Settings readTunnel(YAML::Node node, const std::string &where)
     {
@@ -181,7 +182,15 @@ static Tunnel::Settings readTunnel(YAML::Node node, const std::string &where)
     st.p.normalize();
     st.RA = readRequired(node, "RA", where);
     st.TMR = readRequired(node, "TMR", where);
-    st.V1 = readRequired(node, "V", where);
+    // V is a number or the function voltage(t) of the settings
+    YAML::Node V = node["V"];
+    if (V && V.IsScalar() && V.as<std::string>() == "voltage")
+        {
+        st.V1_voltage = true;
+        st.V1 = NAN;
+        }
+    else
+        { st.V1 = readRequired(node, "V", where); }
     assign(st.P1, node["P1"]);
     if (st.RA <= 0 || st.TMR < 0)
         { error((where + ": RA > 0 and TMR >= 0 are required.").c_str()); }
@@ -483,7 +492,10 @@ void Settings::toYaml()
                 std::cout << "        RA: " << b.RA << "\n";
                 std::cout << "        TMR: " << b.TMR << "\n";
                 std::cout << "        P1: " << P.P1 << "  # P2 = " << P.P2 << "\n";
-                std::cout << "        V: " << b.V1 << "\n";
+                if (b.V1_voltage)
+                    { std::cout << "        V: voltage\n"; }
+                else
+                    { std::cout << "        V: " << b.V1 << "\n"; }
                 }
             }
         }
@@ -541,6 +553,11 @@ void Settings::toYaml()
     std::cout << "current_density:";
     if (hasCurrentDensity())
         { std::cout << ' ' << str(sCurrentDensity) << '\n'; }
+    else
+        { std::cout << '\n'; }
+    std::cout << "voltage:";
+    if (hasVoltage())
+        { std::cout << ' ' << str(sVoltage) << '\n'; }
     else
         { std::cout << '\n'; }
     std::cout << "spin_accumulation:\n";
@@ -918,6 +935,17 @@ void Settings::read(YAML::Node yaml)
         field_parser.define_global_function("current_density", js_current_density);
         field_time_parser.define_global_function("current_density", js_current_density);
         }  // current_density
+
+    YAML::Node voltage = yaml["voltage"];
+    if (voltage && !voltage.IsNull())
+        {
+        if (!voltage.IsScalar())
+            { error("voltage should be a function of t or an expression of t."); }
+        sVoltage = voltage.as<std::string>();
+        const bool is_function = std::regex_search(sVoltage, std::regex("^\\s*function\\b"));
+        voltage_parser.set_function(is_function
+                                    ? sVoltage : "function(t) { return (" + sVoltage + "); }");
+        }  // voltage
 
     YAML::Node spAcc = yaml["spin_accumulation"];
     if (spAcc && !spAcc.IsNull())

@@ -207,6 +207,31 @@ mesh:
       #        # being two absorption resistances in series (G_up,down should
       #        # then be the part of the interface only)
 
+      # Current injected through a tunnel barrier F1 / I (MgO), not meshed,
+      # instead of jn (see src/tunnelJunction.h and the part "Jonction tunnel
+      # magnétique" of dev-notes/slonczewski_polarisation.tex). The
+      # conductance per unit area of the barrier follows the cosine law,
+      # G_T = (1 + c p.m)/((1 + c) RA), c = TMR/(2 + TMR), m being the
+      # magnetization of the sample on the surface, and the current leaving
+      # the sample is jn = G_T (V - V1): a Robin condition for the potential,
+      # solved again at each time step, the current concentrating where m is
+      # parallel to p. The spin current entering the sample is
+      # (mu_B/e) jn (P1 p + P2 m)/(1 + c p.m), P1 P2 = c, P1 and P2 being
+      # effective tunnel polarizations (the feedback of the spin accumulation
+      # on the barrier is neglected). It excludes jn, V, s, uP and slonczewski
+      # on the same surface. Example:
+      # tunnel:
+      #   p: [0, 0, 1]   # magnetization of F1
+      #   RA: 5e-12      # resistance-area product, parallel configuration,
+      #                  # Ohm m^2
+      #   TMR: 1.5       # (G_P - G_AP)/G_AP
+      #   V: -0.5        # potential V1 of F1 in V, or 'voltage' for the
+      #                  # function voltage(t) defined below; V1 below the
+      #                  # potential of the sample makes the electrons flow
+      #                  # from F1 into the sample
+      #   P1: 0.65       # optional, sqrt(TMR/(2 + TMR)) by default
+      #                  # (symmetric junction), TMR/(2 + TMR) <= P1 <= 1
+
 # The initial magnetization can be provided as either:
 # - the name of a file in feeLLGood’s format (‘.sol’ file)
 # - an array of three expression depending on the Cartesian spatial
@@ -299,10 +324,20 @@ Bext: [0, 0, 0]
 # max(dt) well below its rise and fall times, or its period.
 current_density:
 
+# Time-dependent potential voltage(t), in V, of F1 for the tunnel barriers
+# with ‘V: voltage’ (one or several, the same function for all), function
+# of t, the time in seconds, given as current_density, e.g.
+#   voltage: "-0.5*min(t/1e-9, 1)"
+# The potential being solved again at each time step with a tunnel
+# barrier, it follows voltage(t). The time step is not adapted to the
+# voltage: give max(dt) well below its rise and fall times.
+voltage:
+
 # Parameters for simulating a coupling to spin accumulation. The
 # boundary conditions of the electrostatic problem are a constant
 # potential on one surface, and a normal current density on one or
-# several other surfaces, all numeric or all ‘jn: current_density’. The
+# several other surfaces, all numeric or all ‘jn: current_density’, or a
+# tunnel barrier (not mixed with ‘jn: current_density’). The
 # material parameters are defined in mesh.volume_regions.
 spin_accumulation:
 
@@ -325,7 +360,8 @@ spin_accumulation:
   # jn: current_density (jn = j_ref = 1 A/m^2 and V = 0). With the spin
   # accumulation, the .sol files have, after sx, sy, sz, a last column V,
   # the potential at the time of the file: V_D + (current_density(t)/j_ref)
-  # V_ref for jn: current_density, V_D being the imposed V, V0 otherwise.
+  # V_ref for jn: current_density, V_D being the imposed V, the potential
+  # solved at that time with a tunnel barrier, V0 otherwise.
   V_file: false
 
 # Parameters for the computation of the demagnetizing field.

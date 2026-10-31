@@ -207,7 +207,11 @@ private:
         chronometer fmm_counter(2);
         myFMM.calc_demag(msh);
         if (settings.spin_acc)
-            { spinAcc_solver.jn_factor = settings.jnFactor(t); }
+            {
+            spinAcc_solver.jn_factor = settings.jnFactor(t);
+            if (settings.usesVoltage())
+                { spinAcc_solver.voltage = settings.getVoltage(t); }
+            }
         if (settings.spin_acc && spinAcc_solver.compute())
             { success = true; }
         if (settings.verbose)

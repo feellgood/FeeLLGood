@@ -33,6 +33,24 @@ using namespace Nodes;
                 std::cerr << "Warning: current_density is defined, but no surface region has "
                              "jn: current_density: it only acts through Bext.\n";
                 }
+            if (mySettings.usesVoltage() && !mySettings.hasVoltage())
+                {
+                std::cerr << "Error: a tunnel barrier has V: voltage, but the function voltage is "
+                             "not defined.\n";
+                exit(1);
+                }
+            if (mySettings.hasVoltage() && !mySettings.usesVoltage())
+                {
+                std::cerr << "Warning: voltage is defined, but no tunnel barrier has "
+                             "V: voltage.\n";
+                }
+            if (mySettings.usesVoltage())
+                {
+                /* first solve at the initial time if given, 0 otherwise; solved again by
+                 * compute_all() at the time of the simulation */
+                voltage = mySettings.getVoltage(std::isnan(mySettings.initial_time)
+                                                ? 0.0 : mySettings.initial_time);
+                }
             checkBoundaryConditions();
             checkDensityOfStates();
             makeStacks();
@@ -50,6 +68,7 @@ using namespace Nodes;
                     { V_D = p.V; }
                 }
             pot_solver->V.resize(_msh.getNbNodes());
+            pot_solver->voltage = voltage;
             std::string V_fileName("");
             if(mySettings.V_file)
                 { V_fileName = mySettings.getSimName() + "_V.sol"; }
@@ -300,6 +319,7 @@ bool spinAcc::compute(void)
         {
         /* the conductance of the tunnel barriers depends on the magnetization: the potential is
          * solved again, starting from the previous one (exits if it does not converge) */
+        pot_solver->voltage = voltage;
         pot_solver->compute(false, "");
         V = pot_solver->V;
         }
@@ -443,7 +463,8 @@ void spinAcc::tunnelBoundaryCondition(Triangle::Tri &f)
             }
         if (m0.norm() > 0)
             { m0.normalize(); }
-        const double jn = Tunnel::conductance(barrier, m0) * (V_npi - barrier.V1);
+        const double jn = Tunnel::conductance(barrier, m0)
+                          * (V_npi - Tunnel::potentialF1(barrier, voltage));
         const Eigen::Vector3d q = jn * (BOHRS_MUB / CHARGE_ELECTRON)
                                   * Tunnel::polarization(barrier, m0);
         for (int ie = 0; ie < N; ie++)
