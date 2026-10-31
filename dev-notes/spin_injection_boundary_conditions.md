@@ -2,7 +2,8 @@
 
 This note explains the boundary conditions added to the spin diffusion problem of feeLLGood on the
 branch `slonczewski`: where they come from, how and where they are implemented, what they can and
-cannot describe, and a way to lift their main limitation. It is written for readers with a
+cannot describe, and a way to lift their main limitation; § 8 describes the injection through a
+tunnel barrier of the branch `tunnel_junction`. It is written for readers with a
 micromagnetic background but little experience of spintronics: the physical quantities are
 introduced first. The derivations are detailed (in French) in
 `dev-notes/slonczewski_polarisation.tex`.
@@ -393,7 +394,135 @@ the nodes of each interface are doubled, and the boundary condition of § 3 rema
 cheaper model when the stack is uniform. The present Robin condition is the special case where
 everything on one side of $`\Gamma`$ is eliminated analytically.
 
-## 8. Correspondence with the notations of Baltz's textbook
+## 8. Injection through a tunnel barrier (branch `tunnel_junction`)
+
+The branch `tunnel_junction`, created from `slonczewski`, adds a second kind of injection: through
+a tunnel barrier F1 / I (typically CoFeB/MgO), not meshed, key `tunnel` of a surface region. The
+derivations and the discussion of the models are in the part "Jonction tunnel magnétique" of
+`dev-notes/slonczewski_polarisation.tex`.
+
+### 8.1 What changes compared with the spin valve
+
+| | Spin valve (`slonczewski`) | Tunnel junction (`tunnel`) |
+|---|---|---|
+| spacer | diffusive metal, a node with a spin accumulation $`\mathbf{s}_N`$ | insulating barrier, coherent tunneling, no node |
+| polarization | bulk and interfaces ($`\beta`$, $`\gamma`$, $`AR^*`$) | the barrier and its interfaces: effective tunnel polarizations |
+| conductance | nearly independent of the angle (GMR of a few %) | cosine law between $`G_P`$ and $`G_{AP}`$, TMR of 100 to 600 % |
+| feedback of $`\mathbf{s}`$ | $`AR^*`$ comparable to the spin resistance: Robin condition | $`RA`$ much larger than the spin resistance: flux condition |
+| normal current density | imposed, uniform | depends on the local magnetization: Robin condition for the potential |
+
+### 8.2 Conductance and spin current of the barrier
+
+For any spin-conserving tunneling, the conductance per unit area of the barrier is linear in
+$`\cos\theta = \mathbf{p}\cdot\mathbf{m}`$ (Slonczewski, 1989), $`\mathbf{p}`$ being the
+magnetization of F1 and $`\mathbf{m}`$ the one of the sample on the surface:
+```math
+G_T(\mathbf{m}) = \frac{G_P + G_{AP}}{2} + \frac{G_P - G_{AP}}{2}\cos\theta
+= \frac{1 + c\,\mathbf{p}\cdot\mathbf{m}}{(1 + c)\,RA_P},\qquad
+c = \frac{G_P - G_{AP}}{G_P + G_{AP}} = \frac{\mathrm{TMR}}{2 + \mathrm{TMR}}.
+```
+This cosine law only needs the measured $`RA_P = 1/G_P`$ and TMR. The spin current is taken from
+the Jullière model extended to non-collinear magnetizations: the spin current entering the sample
+is $`(\mu_B/e)\,j_n\,\mathbf{P}_T`$ with
+```math
+\mathbf{P}_T(\mathbf{m}) = \frac{P_1\,\mathbf{p} + P_2\,\mathbf{m}}{1 + c\,\mathbf{p}\cdot\mathbf{m}},\qquad P_1P_2 = c,
+```
+which gives back the Jullière polarizations $`(P_1 + P_2)/(1 + P_1P_2)`$ (P) and
+$`(P_2 - P_1)/(1 - P_1P_2)`$ (AP). The Jullière model is only used as a parametrization: $`P_1`$
+and $`P_2`$ are effective tunnel polarizations, adjusted to the measured TMR, not the spin
+polarizations of the densities of states of the electrodes (in Ni and Co, the latter is negative at
+the Fermi level while the tunnel polarization is positive; with MgO, coherent tunneling through the
+$`\Delta_1`$ states gives TMR far above the Jullière estimate). By default, $`P_1 = P_2 = \sqrt{c}`$
+(symmetric junction): 0.65 for a TMR of 150 %.
+
+The transverse part of the spin current, $`(\mu_B/e)\,j_n P_1\sin\theta/(1 + c\cos\theta)`$, gives
+the damping-like torque. At fixed voltage, $`j_n \propto 1 + c\cos\theta`$ and the torque is
+$`\propto\sin\theta`$ ($`\Lambda = 1`$ in the form of Slonczewski); per unit current,
+$`\Lambda^2 = (1 + c)/(1 - c) = 1 + \mathrm{TMR}`$: the torque is larger near the antiparallel
+state. These two results only rest on the cosine law.
+
+### 8.3 Boundary conditions
+
+- **Potential.** With $`V_1`$ the potential of F1 (equipotential), the current leaving the sample
+  through the barrier is
+  ```math
+  j_n = G_T(\mathbf{m}_0)\,(V - V_1),
+  ```
+  a Robin condition: weak form $`\int_\Omega\sigma\nabla V\cdot\nabla w + \int_\Gamma G_T V w =
+  \int_\Gamma G_T V_1 w`$. $`G_T`$ depending on the magnetization, the potential is solved again at
+  each time step, and the current concentrates where $`\mathbf{m}`$ is parallel to $`\mathbf{p}`$.
+- **Spin.** The feedback of the spin accumulation on the barrier is of the order of
+  $`(k/RA)\,\mathbf{s}`$, against $`k/r_s`$ for the bulk of the sample,
+  $`r_s = l_{sf}/(\sigma(1 - P^2))`$: with $`RA/r_s \sim 10^2`$ to $`10^4`$, it is neglected, and
+  the condition is a flux,
+  ```math
+  \mathbf{q} = \frac{\mu_B}{e}\,j_n(\mathbf{x})\,\mathbf{P}_T(\mathbf{m}_0(\mathbf{x})).
+  ```
+  It is the former `uP` condition, with a polarization and a current density that both depend on
+  the local magnetization.
+
+### 8.4 Implementation
+
+- `src/tunnelJunction.h`: pure functions `conductance` ($`G_T`$), `polarization` ($`\mathbf{P}_T`$),
+  `polarizations` ($`P_1`$ by default, $`P_2 = c/P_1`$), `potentialF1` ($`V_1`$ or `voltage(t)`).
+- `electrostatSolver`: on a `tunnel` surface, $`G_T(\mathbf{m}_0)\,a_ia_j`$ is added to the matrix
+  and $`G_T(V_1 - V_D)\,a_i`$ to the right-hand side, $`\mathbf{m}_0`$ being interpolated and
+  normalized at the Gauss points ($`V`$ is solved with $`V = 0`$ on the surface with `V`, $`V_D`$
+  being added afterwards). The system is assembled again at each solve; the conjugate gradient starts
+  from the previous $`V`$.
+- `spinAcc`: the potential solver, formerly a local object of the constructor solved once, is a
+  member; with a barrier, it is solved at the start of each `compute()`, before the spin.
+  `tunnelBoundaryCondition` adds the flux $`\mathbf{q}`$ to the right-hand side, with
+  $`j_n = G_T(\mathbf{m}_0)(V - V_1)`$ at the Gauss points.
+- `compute_all` (`fem.h`) sets `voltage(t)` at each time step; column `voltage` of the `.evol` files.
+- Unit tests `ut_tunnelJunction`: $`G_P = 1/RA`$, $`G_P/G_{AP} = 1 + \mathrm{TMR}`$, cosine law,
+  default polarizations, Jullière limits, components of $`\mathbf{P}_T`$.
+
+### 8.5 Settings
+
+```yaml
+voltage: "-0.8*t/1e-9"     # potential of F1 in V, function or expression of t (optional)
+mesh:
+  surface_regions:
+    pillar_bottom:
+      tunnel:
+        p: [0, 0, -1]      # magnetization of F1
+        RA: 0.5e-12        # Ohm m^2, parallel configuration
+        TMR: 1.5           # (G_P - G_AP)/G_AP
+        V: voltage         # or a number, in V
+        P1: 0.65           # optional, sqrt(TMR/(2 + TMR)) by default
+    pillar_top: {V: 0.0, s: [0, 0, 0]}
+```
+`tunnel` excludes `jn`, `V`, `s`, `uP` and `slonczewski` on the same surface, requires
+$`c \le P_1 \le 1`$ (so that $`P_2 \le 1`$), and cannot be mixed with `jn: current_density`. With
+$`V_1`$ below the potential of the sample, the electrons flow from F1 into the sample.
+
+### 8.6 Validation and example
+
+| Case | What it checks | Result |
+|---|---|---|
+| `validation/tunnel_junction/wire_1d.py` | wire of 100 nm, $`\theta`$ = 0, 90, 180°: potential and longitudinal spin accumulation against the analytic solution | potential exact (1e-8); $`s_z`$ within 2.2e-3 |
+| `validation/tunnel_junction/thin_layer_angle.py` | thin layer of 3 nm, $`\theta`$ = 0 to 180°: transverse part and torques against eigenmodes of the sample | damping-like within 3e-4, field-like 1.8 %, max error on $`\mathbf{s}`$ 1.2e-2 in $`h^2`$; $`\Lambda^2`$ = 1.0004 at fixed voltage, 2.5000 = 1 + TMR per unit current |
+| `validation/tunnel_two_domains` | slab with a Néel wall: current concentration and 2D potential against finite volumes | $`RA`$ = 1 Ω·µm²: $`j_P/j_{AP}`$ = 2.493, errors 6.1e-4 ($`V`$), 4.9e-5 ($`j_n`$); $`RA`$ = 2e-3 Ω·µm² (lateral spreading of 7.7 %): 5.0e-4, 8.7e-4 |
+| `examples/pillar_tunnel_voltage_ramp1ns` | switching of a perpendicular MTJ pillar under a voltage ramp ($`RA_P`$ = 0.5 Ω·µm², TMR 150 %) | switching AP → P at −0.624 V (3.2 times the macrospin critical voltage 0.19 V); $`RA`$ from 1.248 to 0.505 Ω·µm²; current up to 1.9 times larger in the reversed part; solving the potential at each time step costs 3.7 % of a time step |
+
+The example does not give the Oersted field (no `Bext`): it is small (about 2 mT at the edge of the
+pillar at the critical voltage, 0.3 % of $`\mu_0H_{K,\mathrm{eff}}`$ = 0.73 T), azimuthal (zero
+average over the disk), and the analytic field of a uniform current would be wrong, the current
+being concentrated.
+
+### 8.7 Open points
+
+- Voltage dependence: TMR decreasing with $`V`$ and field-like torque in $`V^2`$ (Theodonis et al.,
+  2006), not implemented.
+- Current drive: the total current could be imposed using the linearity in $`V_1`$ at fixed
+  magnetization.
+- Oersted field computed from the current (Biot–Savart), a separate task.
+- As for the spin valve, $`l_{sd}`$ is not resolved by a 2 nm mesh; the transverse spin current
+  entering the sample is set by the boundary condition, only its distribution over the thickness
+  depends on the mesh.
+
+## 9. Correspondence with the notations of Baltz's textbook
 
 The textbook of V. Baltz (chapters 3 and 4, exercise 6.3) introduces the physics this model rests
 on: two-current model, Valet–Fert spin diffusion, interface resistances, spin transfer and circuit
@@ -456,6 +585,9 @@ field-like ($`G_i`$) torques. The sign of $`G_i`$ used here was checked against 
 - C. Abert et al., Sci. Rep. **5**, 14855 (2015): 3D spin diffusion through the whole stack in
   micromagnetics.
 - V. Baltz, *The Basics of Electron Transport in Spintronics*, EDP Sciences (2023): textbook,
-  chapters 3 and 4; correspondence of the notations in § 8.
-- `dev-notes/slonczewski_polarisation.tex`: derivations, F1 options, conversion, validation (in
-  French).
+  chapters 3 and 4; correspondence of the notations in § 9.
+- M. Jullière, Phys. Lett. A **54**, 225 (1975); J. C. Slonczewski, Phys. Rev. B **39**, 6995
+  (1989) and **71**, 024411 (2005): TMR, cosine law, torque in a tunnel junction.
+- I. Theodonis et al., Phys. Rev. Lett. **97**, 237205 (2006): bias dependence of the torques.
+- `dev-notes/slonczewski_polarisation.tex`: derivations, F1 options, conversion, validation, tunnel
+  junction (in French).
