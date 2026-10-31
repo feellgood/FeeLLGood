@@ -3,9 +3,10 @@
 
 /** \file electrostatSolver.h
   \brief solver for electrostatic problem when spin accumulation is required
-  header containing electrostatSolver class. It uses biconjugate stabilized gradient with diagonal
-  preconditioner. The solver is only called once to compute voltages V for each nodes of the mesh,
-  when spin accumulation computation is involved.
+  header containing electrostatSolver class. It uses conjugate gradient with diagonal
+  preconditioner. The solver is called once to compute voltages V for each nodes of the mesh,
+  when spin accumulation computation is involved, or at each time step if a surface has a tunnel
+  barrier, its conductance depending on the magnetization (tunnelJunction.h).
  */
 
 #include "solver.h"
@@ -48,6 +49,17 @@ public:
     /** compute integrales for vector coefficients, input from triangle */
     void integrales(const Triangle::Tri &tri, std::vector<double> &BE) const;
 
+    /** compute the integrales of a triangle of a surface with a tunnel barrier, Robin condition
+     * jn = G_T(m0) (V - V1): G_T a_i a_j to the matrix, G_T (V1 - V_D) a_i to the vector (V being
+     * solved with V = 0 on the surface with V), m0 being the magnetization at the Gauss points */
+    void integrales(const Triangle::Tri &tri,
+                    Eigen::Ref<Eigen::Matrix<double,Triangle::N,Triangle::N> > AE,
+                    std::vector<double> &BE) const;
+
+    /** true if a surface region has a tunnel barrier: the potential depends on the magnetization
+     * and has to be solved again when it changes */
+    bool hasTunnel(void) const;
+
     /** text file (tsv) writing function for the solution V over all volume regions of the mesh,
      * node indices are zero based */
     bool save(const std::string &V_fileName /**< [in] output file name */,
@@ -66,8 +78,9 @@ public:
             const std::string& V_fileName /**< [in] output file name for V solution */);
 
     /** check boundary conditions: mesh and settings have to define at least one surface with a
-     * normal current density jn, either all numeric or all `jn: current_density`, and a single
-     * surface with constant potential V */
+     * normal current density jn, either all numeric or all `jn: current_density`, or with a tunnel
+     * barrier (not mixed with `jn: current_density`), and a single surface with constant
+     * potential V */
     void checkBoundaryConditions(void) const override;
 
 private:
@@ -82,7 +95,8 @@ private:
     bool reference_problem = false;
 
     /** solver, using conjugate gradient with masking, with diagonal preconditionner
-     * and Dirichlet boundary conditions, returns true if has converged */
+     * and Dirichlet boundary conditions, returns true if has converged; the system is assembled
+     * again at each call, and the solve starts from the current V */
     bool solve(void);
     };  // end class electrostatSolver
 

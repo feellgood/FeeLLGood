@@ -43,6 +43,8 @@ add_executable (test_ut_absorbing_ends ut_absorbing_ends.cpp)
 
 add_executable (test_ut_slonczewskiInterface ut_slonczewskiInterface.cpp)
 
+add_executable (test_ut_tunnelJunction ut_tunnelJunction.cpp)
+
 add_executable (test_ut_index ut_index.cpp)
 
 SET(SOURCES ../src/triangle.cpp ../src/tetra.cpp ut_element.cpp)
@@ -230,6 +232,13 @@ target_link_libraries(test_ut_slonczewskiInterface
   Eigen3::Eigen
   )
 
+target_link_libraries(test_ut_tunnelJunction
+  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY}
+  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  Eigen3::Eigen
+  )
+
 target_compile_options(test_ut_index PUBLIC -Wno-deprecated-declarations )
 # warning about deprecated code is silented here because it is the goal of one test in test_ut_index
 # to check the replacement of a transform(...,bind2nd(...)) by a loop
@@ -296,6 +305,7 @@ add_test (NAME ut_dukTapeParser COMMAND test_ut_dukTapeParser)
 add_test (NAME ut_node COMMAND test_ut_node)
 add_test (NAME ut_absorbing_ends COMMAND test_ut_absorbing_ends)
 add_test (NAME ut_slonczewskiInterface COMMAND test_ut_slonczewskiInterface)
+add_test (NAME ut_tunnelJunction COMMAND test_ut_tunnelJunction)
 add_test (NAME ut_index COMMAND test_ut_index)
 add_test (NAME ut_element COMMAND test_ut_element)
 add_test (NAME ut_triangle COMMAND test_ut_triangle)

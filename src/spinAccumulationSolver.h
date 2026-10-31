@@ -1,6 +1,7 @@
 #ifndef spinAccumulationSolver_h
 #define spinAccumulationSolver_h
 
+#include <memory>
 #include <vector>
 #include "config.h"
 #include "node.h"
@@ -19,7 +20,9 @@ const int DIM_PB_SPIN_ACC = 3;
  one surface where the current density jn is defined; if a spin polarization uP is also given on
  such a surface (and no s), the spin injection is a flux (Neumann) boundary condition. If a polarizer
  stack (slonczewski) is given instead, the injection is a Robin boundary condition, see
- slonczewskiInterface.h. These
+ slonczewskiInterface.h. If a tunnel barrier (tunnel) is given instead of jn, the normal current
+ density depends on the magnetization (Robin condition for the potential, solved again at each
+ call of compute()) and the spin is injected as a flux, see tunnelJunction.h. These
  surfaces are the ones given to the potential solver for its own boundary conditions. A surface may
  have both jn and s (s is then imposed on it).
 
@@ -151,6 +154,17 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** Robin boundary condition of the triangle f, on a surface with a polarizer stack
      * (slonczewski): adds the term in s to the matrix K and the source to the RHS L_rhs */
     void stackBoundaryCondition(Triangle::Tri &f);
+
+    /** flux boundary condition of the triangle f, on a surface with a tunnel barrier: adds the
+     * spin current (mu_B/e) jn P_T(m0) to the RHS L_rhs, jn = G_T(m0) (V - V1) */
+    void tunnelBoundaryCondition(Triangle::Tri &f);
+
+    /** solver of the electrostatic potential, kept to solve it again at each call of compute()
+     * if a surface has a tunnel barrier (null if spin accumulation is disabled) */
+    std::unique_ptr<electrostatSolver> pot_solver;
+
+    /** true if a surface has a tunnel barrier: V depends on the magnetization */
+    bool tunnel = false;
 
     /** computes all contributions to matrix AE from tetrahedron tet (LHS)
      * all = non magnetic metal + magnetic metal */

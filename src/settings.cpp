@@ -164,6 +164,33 @@ static Slonczewski::StackSettings readStack(YAML::Node node, const std::string &
     return st;
     }
 
+// Read the tunnel barrier of a surface region (key `tunnel`), see tunnelJunction.h: the
+// magnetization p of F1, the resistance-area product RA (Ohm m^2) in the parallel configuration,
+// the TMR, the potential V of F1 (required) and the effective tunnel polarization P1 of F1
+// (optional, sqrt(TMR/(2 + TMR)) by default). The nodes are taken by value, as in readStack().
+static Tunnel::Settings readTunnel(YAML::Node node, const std::string &where)
+    {
+    if (!node.IsMap())
+        { error((where + " should be a map.").c_str()); }
+    Tunnel::Settings st;
+    if (!node["p"] || node["p"].IsNull())
+        { error((where + ".p is required.").c_str()); }
+    st.p = { node["p"][0].as<double>(), node["p"][1].as<double>(), node["p"][2].as<double>() };
+    if (st.p.norm() == 0)
+        { error((where + ".p should not be zero.").c_str()); }
+    st.p.normalize();
+    st.RA = readRequired(node, "RA", where);
+    st.TMR = readRequired(node, "TMR", where);
+    st.V1 = readRequired(node, "V", where);
+    assign(st.P1, node["P1"]);
+    if (st.RA <= 0 || st.TMR < 0)
+        { error((where + ": RA > 0 and TMR >= 0 are required.").c_str()); }
+    // P2 = TMR/(2 + TMR)/P1 <= 1
+    if (!std::isnan(st.P1) && (st.P1 > 1 || st.P1 < Tunnel::cosineCoefficient(st.TMR)))
+        { error((where + ": TMR/(2 + TMR) <= P1 <= 1 is required.").c_str()); }
+    return st;
+    }
+
 // Replace, within `s', all occurrences of `search' by `replacement'.
 static void replace(std::string &s, const std::string &search, const std::string &replacement)
     {
@@ -446,6 +473,17 @@ void Settings::toYaml()
                     std::cout << "        NF2: " << itf(st.NF2) << ", transverse: "
                               << (st.transverseSink ? "sink" : "series") << "\n";
                     }
+                }
+            if (it->tunnel)
+                {
+                const Tunnel::Settings &b = it->barrier;
+                const Tunnel::Polarizations P = Tunnel::polarizations(b);
+                std::cout << "      tunnel:\n";
+                std::cout << "        p: " << str(b.p) << "\n";
+                std::cout << "        RA: " << b.RA << "\n";
+                std::cout << "        TMR: " << b.TMR << "\n";
+                std::cout << "        P1: " << P.P1 << "  # P2 = " << P.P2 << "\n";
+                std::cout << "        V: " << b.V1 << "\n";
                 }
             }
         }
@@ -731,6 +769,20 @@ void Settings::read(YAML::Node yaml)
                         { error((where + " requires jn on the same surface.").c_str()); }
                     if (std::isfinite(p.s.norm()) || std::isfinite(p.uP.norm()))
                         { error((where + " excludes s and uP on the same surface.").c_str()); }
+                    }
+                p.tunnel = false;
+                YAML::Node barrier = surface["tunnel"];
+                if (barrier && !barrier.IsNull())
+                    {
+                    const std::string where = "mesh.surface_regions." + name + ".tunnel";
+                    p.tunnel = true;
+                    p.barrier = readTunnel(barrier, where);
+                    if (!isnan(p.jn) || !isnan(p.V) || std::isfinite(p.s.norm())
+                        || std::isfinite(p.uP.norm()) || p.slonczewski)
+                        {
+                        error((where + " excludes jn, V, s, uP and slonczewski on the same "
+                               "surface.").c_str());
+                        }
                     }
                 }
             }  // mesh.surface_regions

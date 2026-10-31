@@ -4,6 +4,7 @@
 #include "chronometer.h" // date()
 #include "tags.h"
 #include "electrostatSolver.h"
+#include "tunnelJunction.h"
 #include "algebra/cg.h"
 #include "solver.h"  // build(Mat|Vect)
 #include "meshUtils.h"
@@ -13,10 +14,13 @@ void electrostatSolver::checkBoundaryConditions(void) const
     int nbSurfJ(0);
     int nbSurfJ_current_density(0);
     int nbSurfV(0);
+    int nbSurfTunnel(0);
     for (const Triangle::prm &p : paramTri)
         {
         if (std::isfinite(p.jn))
             { nbSurfJ++; }
+        if (p.tunnel)
+            { nbSurfTunnel++; }
         if (p.jn_current_density)
             { nbSurfJ_current_density++; }
         if (std::isfinite(p.V))
@@ -24,10 +28,16 @@ void electrostatSolver::checkBoundaryConditions(void) const
         }
     /* at least one surface with jn, all numeric or all jn: current_density (the potential is then
      * proportional to the single factor current_density(t)/j_ref), and a single surface with V */
-    if (!(nbSurfJ >= 1 && nbSurfV == 1))
+    if (!(nbSurfJ + nbSurfTunnel >= 1 && nbSurfV == 1))
         {
         std::cerr << "Error: incorrect boundary conditions for potential V solver: at least one "
-                     "surface with jn and a single surface with V are required.\n";
+                     "surface with jn or tunnel and a single surface with V are required.\n";
+        exit(1);
+        }
+    if (nbSurfTunnel != 0 && nbSurfJ_current_density != 0)
+        {
+        std::cerr << "Error: incorrect boundary conditions for potential V solver: tunnel cannot "
+                     "be mixed with jn: current_density.\n";
         exit(1);
         }
     if (nbSurfJ_current_density != 0 && nbSurfJ_current_density != nbSurfJ)
@@ -51,7 +61,18 @@ void electrostatSolver::infos(void) const
             { std::cout << "\tjn= " << p.jn << "\n"; }
         if (!std::isnan(p.V))
             { std::cout << "\tV= " << p.V << "\n"; }
+        if (p.tunnel)
+            {
+            std::cout << "\ttunnel: RA= " << p.barrier.RA << ", TMR= " << p.barrier.TMR
+                      << ", V= " << p.barrier.V1 << "\n";
+            }
         }
+    }
+
+bool electrostatSolver::hasTunnel(void) const
+    {
+    return std::any_of(paramTri.begin(), paramTri.end(),
+                       [](const Triangle::prm &p) { return p.tunnel; });
     }
 
 void electrostatSolver::integrales(const Tetra::Tet &tet,
@@ -90,6 +111,30 @@ void electrostatSolver::integrales(const Triangle::Tri &tri, std::vector<double>
         }
     }
 
+void electrostatSolver::integrales(const Triangle::Tri &tri,
+        Eigen::Ref<Eigen::Matrix<double,Triangle::N,Triangle::N> > AE,
+        std::vector<double> &BE) const
+    {
+    using namespace Triangle;
+    const Tunnel::Settings &barrier = paramTri[tri.idxPrm].barrier;
+    for (int npi = 0; npi < NPI; npi++)
+        {
+        // magnetization of the sample at the Gauss point (NEXT, as the spin diffusion problem)
+        Eigen::Vector3d m0 = Eigen::Vector3d::Zero();
+        for (int ie = 0; ie < N; ie++)
+            { m0 += a[ie][npi] * msh->getNode_u(tri.ind[ie]); }
+        if (m0.norm() > 0)
+            { m0.normalize(); }
+        const double G_w = Tunnel::conductance(barrier, m0) * tri.weight[npi];
+        for (int ie = 0; ie < N; ie++)
+            {
+            BE[ie] += a[ie][npi] * G_w * (barrier.V1 - V_D);
+            for (int je = 0; je < N; je++)
+                { AE(ie, je) += a[ie][npi] * a[je][npi] * G_w; }
+            }
+        }
+    }
+
 void electrostatSolver::compute(const bool verbose, const std::string& V_fileName)
     {
     bool has_converged = solve();
@@ -112,6 +157,18 @@ bool electrostatSolver::solve(void)
     {
     const int NOD = msh->getNbNodes();
 
+    // potential imposed on the surface with V, needed by the tunnel barriers (V1 - V_D)
+    for (const Triangle::prm &p : paramTri)
+        {
+        if (!std::isnan(p.V))
+            { V_D = p.V; }
+        }
+
+    /* with a tunnel barrier, the system depends on the magnetization: it is assembled again at
+     * each call, from zero */
+    K.clear();
+    std::fill(L_rhs.begin(), L_rhs.end(), 0.0);
+
     for (Tetra::Tet &elem : msh->tet)
         {
         Eigen::Matrix<double,DIM_PB_ELEC*Tetra::N,DIM_PB_ELEC*Tetra::N> Ke;
@@ -123,7 +180,15 @@ bool electrostatSolver::solve(void)
     for (Triangle::Tri &elem : msh->tri)
         {
         std::vector<double> Le(DIM_PB * Triangle::N, 0.0);
-        integrales(elem, Le);
+        if (paramTri[elem.idxPrm].tunnel)
+            {
+            Eigen::Matrix<double,DIM_PB_ELEC*Triangle::N,DIM_PB_ELEC*Triangle::N> Ke;
+            Ke.setZero();
+            integrales(elem, Ke, Le);
+            buildMat<Triangle::N>(elem.ind, Ke);
+            }
+        else
+            { integrales(elem, Le); }
         buildVect<Triangle::N>(elem.ind, Le);
         }
 
@@ -142,7 +207,6 @@ bool electrostatSolver::solve(void)
         double _V = paramTri[tri.idxPrm].V;
         if (!std::isnan(_V))
             {
-            V_D = _V;
             for(int ie=0; ie < Triangle::N; ie++)
                 {
                 int i= tri.ind[ie];

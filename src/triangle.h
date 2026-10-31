@@ -9,6 +9,7 @@
 
 #include "element.h"
 #include "slonczewskiInterface.h"
+#include "tunnelJunction.h"
 
 /** \namespace Triangle
  to grab altogether some constants and calculation functions for class Tri
@@ -88,6 +89,10 @@ struct prm
                              (Robin condition, see spinAcc::solve()) instead of the flux with uP */
     Slonczewski::StackSettings stack; /**< polarizer stack F1 / N (/ F2) in physical units, if
                              slonczewski is true (converted by spinAcc) */
+    bool tunnel = false; /**< true if the current is injected through the tunnel barrier
+                             `barrier`: Robin condition for the potential, flux for the spin, see
+                             tunnelJunction.h */
+    Tunnel::Settings barrier; /**< tunnel barrier F1 / I, if tunnel is true */
 
     /** print the region surface parameters, optional boolean spinAcc for spin accumulation datas */
     inline void infos(const bool spinAcc = false) const

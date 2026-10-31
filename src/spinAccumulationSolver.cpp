@@ -39,21 +39,23 @@ using namespace Nodes;
             valDirichlet.resize(DIM_PB * NOD);
             boundaryConditions();
 
-            electrostatSolver pot_solver(_msh, mySettings.paramTetra, mySettings.paramTriangle,
-                                         1e-8, mySettings.verbose, 1000);
-            pot_solver.checkBoundaryConditions();
+            pot_solver = std::make_unique<electrostatSolver>(_msh, mySettings.paramTetra,
+                                                             mySettings.paramTriangle, 1e-8,
+                                                             mySettings.verbose, 1000);
+            pot_solver->checkBoundaryConditions();
+            tunnel = pot_solver->hasTunnel();
             for (const Triangle::prm &p : mySettings.paramTriangle)
                 {
                 if (std::isfinite(p.V))
                     { V_D = p.V; }
                 }
-            pot_solver.V.resize(_msh.getNbNodes());
+            pot_solver->V.resize(_msh.getNbNodes());
             std::string V_fileName("");
             if(mySettings.V_file)
                 { V_fileName = mySettings.getSimName() + "_V.sol"; }
-            pot_solver.compute(mySettings.verbose, V_fileName);
+            pot_solver->compute(mySettings.verbose, V_fileName);
 
-            V = pot_solver.V;
+            V = pot_solver->V;
             s.resize(NOD);
             prepareExtraField();
             if(!compute())
@@ -85,14 +87,15 @@ void spinAcc::checkBoundaryConditions(void) const
         {
         if(p.regName != "__default__")
             {
-            if (std::isfinite(p.jn))
+            if (std::isfinite(p.jn) || p.tunnel)
                 { nbSurfJ++; }
             if (std::isfinite(p.s.norm()))
                 { nbSurfS++; }
             }
         }
 
-    // at least one surface with jn (as the electrostatic problem), at least one with a given s
+    // at least one surface with jn or tunnel (as the electrostatic problem), at least one with a
+    // given s
     bool result = ( (nbSurfJ >= 1) && (nbSurfS >= 1)
            && (nbVolN0 == paramTet.size())
            && (nbVolP == paramTet.size()) );
@@ -293,6 +296,13 @@ std::vector<double> spinAcc::potential(void) const
 bool spinAcc::compute(void)
     {
     //prepareExtraField(); // do we have to do that once or each time we want another s computation ?
+    if (tunnel)
+        {
+        /* the conductance of the tunnel barriers depends on the magnetization: the potential is
+         * solved again, starting from the previous one (exits if it does not converge) */
+        pot_solver->compute(false, "");
+        V = pot_solver->V;
+        }
     bool has_converged = solve();
     if (!has_converged)
         {
@@ -334,6 +344,8 @@ bool spinAcc::solve(void)
         {
         if (paramTri[f.idxPrm].slonczewski)
             { stackBoundaryCondition(f); }
+        else if (paramTri[f.idxPrm].tunnel)
+            { tunnelBoundaryCondition(f); }
         else if (std::isfinite(paramTri[f.idxPrm].jn) && std::isfinite(paramTri[f.idxPrm].uP.norm()))
             {
             std::vector<double> Le(DIM_PB * Triangle::N, 0.0);
@@ -407,6 +419,40 @@ void spinAcc::stackBoundaryCondition(Triangle::Tri &f)
             }
         }
     buildMat<N>(f.ind, Ke);
+    buildVect<N>(f.ind, Le);
+    }
+
+void spinAcc::tunnelBoundaryCondition(Triangle::Tri &f)
+    {
+    /* the spin current entering the sample through the tunnel barrier is
+     * q = (mu_B/e) jn P_T(m0), jn = G_T(m0) (V - V1) (jn > 0: electrons entering the sample), that
+     * is Q_n = -q: contribution int_Gamma q a_i to the RHS; V is solved with V = 0 on the surface
+     * with V, V_D being added here */
+    using namespace Triangle;
+    const Tunnel::Settings &barrier = paramTri[f.idxPrm].barrier;
+    std::vector<double> Le(DIM_PB * N, 0.0);
+    for (int npi = 0; npi < NPI; npi++)
+        {
+        // magnetization of the sample at the Gauss point (NEXT, as in the volume terms)
+        Eigen::Vector3d m0 = Eigen::Vector3d::Zero();
+        double V_npi = V_D;
+        for (int ie = 0; ie < N; ie++)
+            {
+            m0 += a[ie][npi] * msh->getNode_u(f.ind[ie]);
+            V_npi += a[ie][npi] * V[f.ind[ie]];
+            }
+        if (m0.norm() > 0)
+            { m0.normalize(); }
+        const double jn = Tunnel::conductance(barrier, m0) * (V_npi - barrier.V1);
+        const Eigen::Vector3d q = jn * (BOHRS_MUB / CHARGE_ELECTRON)
+                                  * Tunnel::polarization(barrier, m0);
+        for (int ie = 0; ie < N; ie++)
+            {
+            const double ai_w = f.weight[npi] * a[ie][npi];
+            for (int di = 0; di < DIM_PB; di++)
+                { Le[di*N + ie] += q[di] * ai_w; }
+            }
+        }
     buildVect<N>(f.ind, Le);
     }
 
