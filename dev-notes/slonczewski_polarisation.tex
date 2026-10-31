@@ -1039,10 +1039,11 @@ hypothèses du modèle de circuit des parties précédentes tombent :
     $\vs_N$ & tunnel cohérent ; la barrière n'a pas d'états, il n'y a pas
     de nœud \\
   Origine de la polarisation & volume et interfaces ($\beta$, $\gamma$,
-    $AR^*$) & la barrière : polarisations tunnel $P_1$, $P_2$ (filtrage
-    de symétrie dans MgO), sans lien direct avec le $P$ de volume \\
+    $AR^*$) & la barrière et ses interfaces (filtrage de symétrie dans
+    MgO) : polarisations tunnel \emph{effectives}, sans lien direct avec
+    le $P$ de volume \\
   Conductance & presque indépendante de $\theta$ (GMR de quelques \%) &
-    $G(\theta) = G_0(1+P_1P_2\cos\theta)$, TMR de 100 à 200\,\% \\
+    loi en cosinus entre $G_P$ et $G_{AP}$, TMR de 100 à 600\,\% \\
   Résistance de l'espaceur & $AR^*\sim$ résistance de spin des couches :
     l'accumulation rétroagit (Robin) & $RA\sim10^{-12}$ à
     $10^{-11}\,\Omega\,$m$^2$, $10^3$ à $10^4$ fois la résistance de
@@ -1062,7 +1063,28 @@ de Robin sur le spin à une condition de flux.
 \section{Courants de charge et de spin à travers la barrière}
 \label{sec:tunnel-courants}
 
-\subsection{Cas colinéaire : le modèle de Jullière}
+\subsection{Un résultat robuste : la loi en cosinus}
+
+Pour tout effet tunnel qui conserve le spin, la conductance d'une jonction
+non colinéaire est linéaire en $\cos\theta = \vp\cdot\vm$ (Slonczewski,
+1989) : un électron de spin quantifié selon $\vp$ se décompose sur les
+états de spin selon $\vm$ avec des poids $\cos^2(\theta/2)$ et
+$\sin^2(\theta/2)$, et la conductance interpole entre ses valeurs
+parallèle et antiparallèle :
+\begin{equation}
+  \boxed{\;G(\theta) = \frac{G_P+G_{AP}}{2} + \frac{G_P-G_{AP}}{2}\cos\theta
+  = G_0\left(1+\mathcal{P}\cos\theta\right),
+  \qquad
+  \mathcal{P} = \frac{G_P-G_{AP}}{G_P+G_{AP}} = \frac{\mathrm{TMR}}{2+\mathrm{TMR}}\;}
+  \label{eq:cosinus}
+\end{equation}
+avec $\mathrm{TMR} = (G_P-G_{AP})/G_{AP}$. Cette loi ne suppose aucun
+modèle de la barrière : elle ne fait intervenir que deux grandeurs
+mesurées, $G_P$ (ou $RA_P = 1/G_P$) et la TMR. Elle est bien vérifiée
+expérimentalement, et c'est elle qui fixe la répartition du courant
+(section~\ref{sec:tunnel-potentiel}).
+
+\subsection{Le modèle de Jullière : une paramétrisation}
 
 Dans le modèle de Jullière, le spin est conservé pendant l'effet tunnel et
 la conductance de chaque canal est proportionnelle au produit des
@@ -1084,16 +1106,40 @@ conductances donne la TMR de Jullière :
 \begin{equation}
   \mathrm{TMR} = \frac{G_P - G_{AP}}{G_{AP}} = \frac{2P_1P_2}{1-P_1P_2},
   \qquad
-  P_1P_2 = \frac{\mathrm{TMR}}{2+\mathrm{TMR}} .
+  P_1P_2 = \frac{\mathrm{TMR}}{2+\mathrm{TMR}} = \mathcal{P} .
 \end{equation}
+Le modèle est simple, mais ses hypothèses sont fausses dans les jonctions
+actuelles :
+\begin{itemize}
+  \item \textbf{La polarisation n'est pas celle de la densité d'états de
+    l'électrode.} Elle dépend de la barrière et des interfaces : déjà dans
+    un modèle d'électrons libres, elle dépend de la hauteur de barrière
+    (Slonczewski, 1989), et avec Co/SrTiO$_3$ la TMR change de signe (De
+    Teresa et al., 1999).
+  \item \textbf{Dans MgO épitaxié, l'effet tunnel est cohérent.} La
+    barrière filtre les états de symétrie $\Delta_1$, presque totalement
+    polarisés dans Fe ou CoFe (Butler et al., Mathon et Umerski, 2001) :
+    d'où des TMR de 200 à 600\,\% à l'ambiante (Ikeda et al., 2008), là où
+    les polarisations mesurées par effet tunnel supraconducteur
+    ($\approx0.4$ à 0.5) donneraient environ 50\,\% avec Jullière.
+  \item \textbf{Ni tension ni température.} La TMR chute avec la tension
+    (électrons chauds, magnons, structure de bandes) et avec la température
+    (magnons) ; à 0.5\,V, elle peut être divisée par deux.
+  \item \textbf{La TMR ne fixe que le produit $P_1P_2$.} Le couple dépend
+    de $P_1$ seul (section suivante) : pour une jonction asymétrique, la
+    TMR ne suffit pas à le fixer.
+\end{itemize}
+On n'utilise donc plus Jullière que comme \emph{paramétrisation} : $P_1$ et
+$P_2$ sont des polarisations tunnel effectives, ajustées pour que
+$P_1P_2 = \mathcal{P}$ redonne la TMR mesurée, et non des propriétés du
+volume des électrodes.
 
-\subsection{Cas non colinéaire}
+\subsection{Courant de spin non colinéaire}
 
-Pour des aimantations $\vp$ (F1) et $\vm$ (F2) faisant un angle $\theta$,
-la conductance varie en cosinus (Slonczewski, 1989). Dans le modèle de
-Jullière étendu au cas non colinéaire (spin conservé, transmission
-proportionnelle aux densités d'états), le courant de spin transmis est la
-somme des polarisations des deux électrodes :
+Dans le modèle de Jullière étendu au cas non colinéaire (spin conservé,
+transmission proportionnelle aux densités d'états), la conductance suit
+\eqref{eq:cosinus} avec $\mathcal{P} = P_1P_2$, et le courant de spin
+transmis est la somme des polarisations des deux électrodes :
 \begin{equation}
   \boxed{\;j = G_0\,(1+P_1P_2\cos\theta)\,V,
   \qquad
@@ -1136,6 +1182,10 @@ le couple par unité de courant est plus grand près de la configuration
 antiparallèle. Le couple ne dépend que de la polarisation $P_1$ du
 polariseur : $P_2$ ne fait que moduler le courant.
 
+Seuls la loi en cosinus et le facteur $\sin\theta$ du couple à tension
+fixée sont nécessaires pour ce résultat : $\Lambda^2 = 1+\mathrm{TMR}$ ne
+dépend pas des hypothèses de Jullière.
+
 \paragraph{Au-delà de Jullière.} Ce modèle ignore la dépendance en tension.
 Expérimentalement (Sankey et al., Kubota et al., 2008), le couple
 damping-like reste à peu près linéaire en $V$, mais la TMR chute,
@@ -1143,7 +1193,35 @@ typiquement comme $\mathrm{TMR}(V) = \mathrm{TMR}_0/\left(1+(V/V_h)^2\right)$,
 et un couple field-like quadratique en $V$ apparaît (Theodonis et al.,
 2006). On peut l'ajouter de façon phénoménologique, par une composante du
 flux de spin selon $\vm\times\vp$ d'amplitude $b\,V^2$, avec $b$ un
-paramètre.
+paramètre. Pour aller plus loin, un calcul de transport quantique
+(liaisons fortes avec fonctions de Green hors équilibre, ou ab initio) ne
+peut pas être fait en chaque nœud, mais peut servir à tabuler
+$G(\theta, V)$ et les couples, donnés ensuite à FeeLLGood.
+
+\subsection{Paramètres retenus}
+\label{sec:tunnel-parametres}
+
+On paramètre donc la jonction par des grandeurs mesurables, Jullière ne
+servant que de valeur par défaut :
+\begin{center}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{>{\raggedright}p{3.2cm}>{\raggedright}p{5.4cm}>{\raggedright\arraybackslash}p{5.0cm}}
+  \toprule
+  Grandeur & Rôle & Source \\
+  \midrule
+  $RA_P$, $\mathrm{TMR}_0$ & conductance $G(\theta)$, loi en cosinus
+    \eqref{eq:cosinus} & mesures de transport \\
+  $V_h$ (optionnel) & $\mathrm{TMR}(V) = \mathrm{TMR}_0/(1+(V/V_h)^2)$
+    & mesures de transport \\
+  $P_1$ & amplitude du couple damping-like ; $P_2 = \mathcal{P}/P_1$
+    & mesures de couple (ST-FMR), ab initio \\
+  $b$ (optionnel) & couple field-like $\propto V^2$ & mesures de couple \\
+  \bottomrule
+\end{tabular}
+\end{center}
+Pour une jonction symétrique, la valeur par défaut est
+$P_1 = P_2 = \sqrt{\mathcal{P}} = \sqrt{\mathrm{TMR}/(2+\mathrm{TMR})}$ :
+0.65 pour une TMR de 150\,\%, 0.87 pour 600\,\%.
 
 \section{Condition aux limites pour la diffusion de spin}
 
@@ -1177,11 +1255,13 @@ $\bm{n}$. Le courant qui sort de F2 à travers la barrière est
 \begin{equation}
   j_n = \bm{J}\cdot\bm{n} = G_T(\vm_0)\,(V - V_1),
   \qquad
-  G_T(\vm_0) = \frac{1+P_1P_2\,\vp\cdot\vm_0}{(1+P_1P_2)\,RA_P},
+  G_T(\vm_0) = \frac{1+\mathcal{P}\,\vp\cdot\vm_0}{(1+\mathcal{P})\,RA_P},
   \label{eq:GT}
 \end{equation}
 où $RA_P$ est le produit résistance--surface en configuration parallèle
-($j_n>0$ : électrons entrant dans F2, comme dans FeeLLGood). Avec
+et $\mathcal{P} = \mathrm{TMR}/(2+\mathrm{TMR})$, d'après la loi en
+cosinus \eqref{eq:cosinus} ($j_n>0$ : électrons entrant dans F2, comme
+dans FeeLLGood). Avec
 $\bm{J} = -\sigma\nabla V$ et $\nabla\cdot\bm{J} = 0$ dans le volume, la
 forme faible devient, pour toute fonction test $w$,
 \begin{equation}
@@ -1240,12 +1320,12 @@ Avec \eqref{eq:GT}, $V$ dépend de l'aimantation : il faut le recalculer
 \begin{enumerate}
   \item \textbf{Réglages} (\texttt{settings.cpp}, \texttt{triangle.h}) :
     une clé \texttt{tunnel} sur la surface d'entrée,
-    \texttt{\{p, RA, TMR, P1, V\}} (ou \texttt{P1}, \texttt{P2} à la place
-    de \texttt{TMR}, avec $P_1P_2 = \mathrm{TMR}/(2+\mathrm{TMR})$), la
-    tension pouvant être une fonction du temps comme
+    \texttt{\{p, RA, TMR, V\}}, avec en option \texttt{P1} (par défaut
+    $\sqrt{\mathrm{TMR}/(2+\mathrm{TMR})}$, jonction symétrique),
+    \texttt{V\_h} et \texttt{b} (section~\ref{sec:tunnel-parametres}) ;
+    la tension peut être une fonction du temps comme
     \texttt{current\_density}. Elle exclut \texttt{jn}, \texttt{uP} et
-    \texttt{slonczewski} sur la même surface. Optionnellement $V_h$ et $b$
-    (section~\ref{sec:tunnel-courants}).
+    \texttt{slonczewski} sur la même surface.
   \item \textbf{Matrice du potentiel}
     (\texttt{electrostatSolver::integrales} pour les triangles) : sur une
     surface \texttt{tunnel}, ajouter $G_T(\vm_0)\,a_ia_j\,w$ à une matrice
@@ -1277,8 +1357,9 @@ Avec \eqref{eq:GT}, $V$ dépend de l'aimantation : il faut le recalculer
     (\texttt{spinAcc::integrales}, $\nabla V$) ne change pas.
   \item \textbf{Fonctions pures et tests unitaires} : $G_T(\vm_0)$ et
     $\bm{P}_T(\vm_0)$ dans un en-tête comme \texttt{slonczewskiInterface.h},
-    testés sur les limites P et AP (Jullière) et sur
-    $\bm{P}_T\cdot\vm = (P_1\cos\theta+P_2)/(1+P_1P_2\cos\theta)$.
+    testés sur les limites P et AP ($G_P/G_{AP} = 1+\mathrm{TMR}$, Jullière)
+    et sur $\bm{P}_T\cdot\vm = (P_1\cos\theta+P_2)/(1+P_1P_2\cos\theta)$,
+    $P_2 = \mathcal{P}/P_1$.
 \end{enumerate}
 
 \subsection{Coût et validation}
@@ -1298,7 +1379,7 @@ Trois cas de validation suffiraient :
     de deux résistances en parallèle.
   \item \textbf{Couple angulaire} sur une couche mince, comme
     \texttt{slonczewski\_angle} : le flux transverse entrant vaut
-    $\frac{\mu_B}{e}j_nP_1\sin\theta/(1+P_1P_2\cos\theta)$.
+    $\frac{\mu_B}{e}j_nP_1\sin\theta/(1+\mathcal{P}\cos\theta)$.
 \end{enumerate}
 
 \paragraph{Limite : le champ d'Oersted.} FeeLLGood ne calcule pas le champ
@@ -1452,6 +1533,13 @@ Brataas (\texttt{validation/slonczewski\_angle}).
     polarisations tunnel.
   \item J.\,C.~Slonczewski, Phys.\ Rev.\ B \textbf{39}, 6995 (1989) :
     conductance et couple d'une jonction tunnel non colinéaire.
+  \item J.\,M.~De Teresa \emph{et al.}, Science \textbf{286}, 507 (1999) :
+    TMR négative, rôle de l'interface électrode/barrière (à vérifier).
+  \item W.\,H.~Butler \emph{et al.}, Phys.\ Rev.\ B \textbf{63}, 054416
+    (2001) ; J.~Mathon, A.~Umerski, Phys.\ Rev.\ B \textbf{63}, 220403
+    (2001) : effet tunnel cohérent dans Fe/MgO/Fe (à vérifier).
+  \item S.~Ikeda \emph{et al.}, Appl.\ Phys.\ Lett.\ \textbf{93}, 082508
+    (2008) : TMR de 600\,\% dans CoFeB/MgO/CoFeB (à vérifier).
   \item J.\,C.~Slonczewski, Phys.\ Rev.\ B \textbf{71}, 024411 (2005) :
     courants, couples et facteurs de polarisation des jonctions tunnel.
   \item I.~Theodonis \emph{et al.}, Phys.\ Rev.\ Lett.\ \textbf{97}, 237205
