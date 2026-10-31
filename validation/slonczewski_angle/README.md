@@ -107,3 +107,19 @@ $\varepsilon(\theta)\sin\theta$ with $\varepsilon = C/[(\Lambda^2+1)+(\Lambda^2-
 configuration.
 
 Not covered: different densities of states between the layers (see `validation/two_regions_1d`).
+
+## Documents
+
+`slonczewski_angle.tex` (English) and `slonczewski_angle_french.tex` (French) explain the test in
+detail, for readers new to spin transport: the spin-transfer torque, the mixing conductance and its
+factor 2, the sign of its imaginary part, the absorption of the transverse spin current over
+$l_{sd}$, the models `sink` and `series`, the reference solution, what feeLLGood solves, and the
+expected results. In the model `sink` with $\mathrm{Im}\,G_{\uparrow\downarrow} = 0$, they give a
+closed form of the damping-like torque, which shows why it only approximately follows the form of
+Slonczewski. Build them with
+```
+pdflatex slonczewski_angle.tex          # twice, for the table of contents
+pdflatex slonczewski_angle_french.tex
+```
+Their figures `slonczewski_angle_torque.pdf` and `slonczewski_angle_profile.pdf` are built by
+`plot_figures.py`, after `slonczewski_angle.py`.
