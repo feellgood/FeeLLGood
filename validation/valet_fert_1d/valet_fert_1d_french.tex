@@ -106,7 +106,9 @@ précession s--d) ne jouent aucun rôle ici : ils sont validés par le cas
 \subsection{Loi d'Ohm à deux courants}
 
 On prend ici $e>0$ (charge élémentaire). Pour chaque canal, la densité de
-courant de charge $j_\pm$ suit la loi d'Ohm généralisée
+courant électrique $j_\pm$, au sens usuel (comptée dans le sens de
+déplacement de charges positives, donc opposée au mouvement des électrons),
+suit la loi d'Ohm généralisée
 \begin{equation}
   j_\pm = \frac{\sigma_\pm}{e}\,\frac{d\mu_\pm}{dx},
   \qquad
@@ -114,10 +116,14 @@ courant de charge $j_\pm$ suit la loi d'Ohm généralisée
   \label{eq:ohm}
 \end{equation}
 où $\sigma$ est la conductivité totale et $\beta$ la polarisation en
-volume, $0\le\beta<1$ ($\beta = P$ dans FeeLLGood). Les électrons
-descendent le gradient de $\mu_\pm$ ; le courant de charge, de sens
-opposé, le remonte. On introduit le potentiel moyen et l'accumulation de
-spin, exprimée en volts :
+volume, $0\le\beta<1$ ($\beta = P$ dans FeeLLGood). Les $\mu_\pm$ sont les
+potentiels électrochimiques des électrons, des énergies : à densité fixée,
+$\mu = -eV + \text{cte}$. Les électrons vont donc vers les $\mu_\pm$
+décroissants, et le courant électrique $j_\pm$ vers les $\mu_\pm$
+croissants, c'est-à-dire vers les potentiels électriques $V$ décroissants,
+dans le sens de $\bm{E} = -\nabla V$. Dans la suite, \og courant de
+charge \fg{} désigne ce courant électrique. On introduit le potentiel moyen
+et l'accumulation de spin, exprimée en volts :
 \begin{equation}
   \bar\mu = \frac{\mu_++\mu_-}{2},
   \qquad

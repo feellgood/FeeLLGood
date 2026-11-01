@@ -105,8 +105,10 @@ precession) play no role here: they are validated by the case
 
 \subsection{Two-current Ohm's law}
 
-Here $e>0$ (elementary charge). For each channel, the charge current
-density $j_\pm$ obeys the generalized Ohm's law
+Here $e>0$ (elementary charge). For each channel, the electric current
+density $j_\pm$, in the usual sense (counted in the direction of motion of
+positive charges, hence opposite to the motion of the electrons), obeys the
+generalized Ohm's law
 \begin{equation}
   j_\pm = \frac{\sigma_\pm}{e}\,\frac{d\mu_\pm}{dx},
   \qquad
@@ -114,9 +116,13 @@ density $j_\pm$ obeys the generalized Ohm's law
   \label{eq:ohm}
 \end{equation}
 where $\sigma$ is the total conductivity and $\beta$ the bulk
-polarization, $0\le\beta<1$ ($\beta = P$ in feeLLGood). The electrons go
-down the gradient of $\mu_\pm$; the charge current, of opposite direction,
-goes up. We introduce the mean potential and the spin accumulation,
+polarization, $0\le\beta<1$ ($\beta = P$ in feeLLGood). The $\mu_\pm$ are
+the electrochemical potentials of the electrons, energies: at a fixed
+density, $\mu = -eV + \text{const}$. The electrons thus go towards
+decreasing $\mu_\pm$, and the electric current $j_\pm$ towards increasing
+$\mu_\pm$, i.e. towards decreasing electric potentials $V$, along
+$\bm{E} = -\nabla V$. In what follows, ``charge current'' means this electric
+current. We introduce the mean potential and the spin accumulation,
 expressed in volts:
 \begin{equation}
   \bar\mu = \frac{\mu_++\mu_-}{2},
