@@ -45,18 +45,17 @@ void prm::infos(void)
     }
 
 Eigen::Matrix<double,NPI,1> Tetra::calc_alpha_eff(const double dt,
-                                                      const Eigen::Ref<const Eigen::Matrix<double,NPI,1>> alpha_g,
-                                                      Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff)
+                                                  const Eigen::Ref<const Eigen::Matrix<double,NPI,1>> alpha_g,
+                                                  const Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff)
     {
-    Eigen::Matrix<double,NPI,1> a_eff;
+    Eigen::Matrix<double,NPI,1> a_eff = alpha_g;
     const double r = 0.1;  // what is that constant, where does it come from ?
 
     for(int npi=0;npi<NPI;npi++)
         {
         const double alpha = alpha_g(npi);
         const double M = 2. * alpha * r / dt;
-        a_eff(npi) = alpha;
-        double h = uHeff(npi);
+        const double h = uHeff(npi);
         if (h > 0.)
             {
             if (h > M)

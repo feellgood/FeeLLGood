@@ -377,7 +377,7 @@ private:
      * damping alpha depends on the Gauss point (especially for absorbing ends) */
     Eigen::Matrix<double,NPI,1> calc_alpha_eff(const double dt,
                                                const Eigen::Ref<const Eigen::Matrix<double,NPI,1>> alpha,
-                                               Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff);
+                                               const Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff);
 
     /** returns Hst field on the NPI Gauss point(s) */
     Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> calc_Hst(const Tetra::Tet &tet,
