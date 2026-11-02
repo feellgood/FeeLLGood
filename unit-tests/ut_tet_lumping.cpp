@@ -124,7 +124,9 @@ BOOST_AUTO_TEST_CASE(tet_lumping)
     double alpha_LLG = 0.5;
     Eigen::Matrix<double,Tetra::NPI,1> uHeff;
     uHeff.setConstant(distrib(gen));
-    Eigen::Matrix<double,Tetra::NPI,1> alfa = Tetra::calc_alpha_eff(dt, alpha_LLG, uHeff);
+    Eigen::Matrix<double,Tetra::NPI,1> alfa = Tetra::calc_alpha_eff(dt,
+                                                                    Eigen::Matrix<double,Tetra::NPI,1>::Constant(alpha_LLG),
+                                                                    uHeff);
     double A = distrib(gen);         // Ae
     double Js = 0.5 + distrib(gen);  // 0.5 offset to center on 1 the Js value
     double Abis = 2.0 * A / Js;

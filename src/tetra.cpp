@@ -44,12 +44,6 @@ void prm::infos(void)
         }
     }
 
-Eigen::Matrix<double,NPI,1> Tetra::calc_alpha_eff(const double dt, const double alpha,
-                                                      Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff)
-    {
-    return calc_alpha_eff(dt, Eigen::Matrix<double,NPI,1>::Constant(alpha), uHeff);
-    }
-
 Eigen::Matrix<double,NPI,1> Tetra::calc_alpha_eff(const double dt,
                                                       const Eigen::Ref<const Eigen::Matrix<double,NPI,1>> alpha_g,
                                                       Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff)
