@@ -35,67 +35,78 @@ BOOST_AUTO_TEST_CASE(timing_constructor, *boost::unit_test::tolerance(UT_TOL))
     }
 
 /*---------------------------------------*/
-/* first lvl tests : nested calculus,... */
-/*---------------------------------------*/
-
-/*---------------------------------------*/
 /* second lvl tests : pure mathematics   */
 /*---------------------------------------*/
 
 BOOST_AUTO_TEST_CASE(calc_alpha_eff, *boost::unit_test::tolerance(UT_TOL))
     {
+    /*
+    this unit test checks the four branches of the piecewise function defining effective alpha
+    ref code comes from research version of st-feellgood MuMag_Integrales.cc (with adaptations)
+     */
     unsigned sd = my_seed();
     std::mt19937 gen(sd);
     std::uniform_real_distribution<> distrib(0.0, 1.0);
-
     double alpha_LLG = distrib(gen);
-
-    double X = distrib(gen);
-
     timing prm_t = timing(1e-8, 1e-14, 1e-9);
 
-    // ref code (with minimal adaptations of MuMag_Integrales.cc of
-    // src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
-    double dt = prm_t.get_dt();
-    double reduced_dt = gamma0 * dt;
-    double alpha = alpha_LLG;
-    double uHeff = X;
-    Eigen::Matrix<double,Tetra::NPI,1> _uHeff;
-    _uHeff.setConstant(X);
-    double r = 0.1;
-    double M = 2. * alpha * r / reduced_dt;
+    const double dt = prm_t.get_dt();
+    const double r = 0.1;
+    double M = 2. * alpha_LLG * r / dt;
 
-    double alfa = 0.;
-    if (uHeff > 0.)
+    Eigen::Matrix<double,Tetra::NPI,1> alpha_g;
+    alpha_g.setConstant(alpha_LLG);
+
+    // x will be a number equal to a dot product of magnetization and Heff
+    std::function<double(double)> func = [M,alpha_LLG,dt](const double x)
         {
-        if (uHeff > M)
-            alfa = alpha + reduced_dt / 2. * M;
+        //ref code
+        double y;
+        if (x > 0.)
+            {
+            if (x > M)
+                y = alpha_LLG + dt / 2. * M; //case 1
+            else
+                y = alpha_LLG + dt / 2. * x; //case 2
+            }
         else
-            alfa = alpha + reduced_dt / 2. * uHeff;
-        }
-    else
-        {
-        if (uHeff < -M)
-            alfa = alpha / (1. + reduced_dt / (2. * alpha) * M);
-        else
-            alfa = alpha / (1. - reduced_dt / (2. * alpha) * uHeff);
-        }
+            {
+            if (x < -M)
+                y = alpha_LLG / (1. + dt / (2. * alpha_LLG) * M); //case 3
+            else
+                y = alpha_LLG / (1. - dt / (2. * alpha_LLG) * x); //case 4
+            }
+        //end ref code
+        return y;
+        }; // end lambda
 
-    // end ref code
-
-    // code to check
-    // calc_alpha_eff works in reduced time
-    Eigen::Matrix<double,Tetra::NPI,1> my_alpha = Tetra::calc_alpha_eff(reduced_dt,
-                                                                        Eigen::Matrix<double,Tetra::NPI,1>::Constant(alpha_LLG),
-                                                                        _uHeff);
-    // end code to check
-
-    std::cout << "test that calc_alpha_eff gives correct effective damping parameter relatively to "
-                 "ref source code"
-              << std::endl;
+    std::cout << "test that calc_alpha_eff gives correct effective damping parameter\n";
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
-    for(int npi=0;npi<Tetra::NPI;npi++)
-        { BOOST_TEST(my_alpha(npi) == alfa); }
+    Eigen::Matrix<double,Tetra::NPI,1> my_alpha;
+    double uHeff = distrib(gen);
+    Eigen::Matrix<double,Tetra::NPI,1> _uHeff;
+    _uHeff.setConstant(uHeff);
+    double a_eff = func(uHeff); // case 2
+    my_alpha = Tetra::calc_alpha_eff(dt, alpha_g, _uHeff);
+    for(int npi=0;npi<Tetra::NPI;npi++) { BOOST_TEST(my_alpha(npi) == a_eff); }
+
+    uHeff *= -1.0;
+    a_eff = func(uHeff); // case 4
+    _uHeff.setConstant(uHeff);
+    my_alpha = Tetra::calc_alpha_eff(dt, alpha_g, _uHeff );
+    for(int npi=0;npi<Tetra::NPI;npi++) { BOOST_TEST(my_alpha(npi) == a_eff); }
+
+    uHeff = distrib(gen) + M;
+    a_eff = func(uHeff); // case 1
+    _uHeff.setConstant(uHeff);
+    my_alpha = Tetra::calc_alpha_eff(dt, alpha_g, _uHeff );
+    for(int npi=0;npi<Tetra::NPI;npi++) { BOOST_TEST(my_alpha(npi) == a_eff); }
+
+    uHeff *= -1.0;
+    a_eff = func(uHeff); // case 3
+    _uHeff.setConstant(uHeff);
+    my_alpha = Tetra::calc_alpha_eff(dt, alpha_g, _uHeff );
+    for(int npi=0;npi<Tetra::NPI;npi++) { BOOST_TEST(my_alpha(npi) == a_eff); }
     }
 
 BOOST_AUTO_TEST_SUITE_END()
