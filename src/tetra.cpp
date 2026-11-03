@@ -194,8 +194,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     {
     const double Ms = param.Ms;
     const double Abis = 2.0 * param.A / (mu0*Ms);
-    const double dt = prm_t.get_dt();
-    const double s_dt = THETA * dt;  // reduced time step, theta from theta scheme in config.h.in
+    const double s_dt = THETA * prm_t.get_dt();  // reduced time step, theta from theta scheme in config.h.in
 
     // damping at the Gauss points: alpha_LLG of the region, increased in the absorbing ends
     Eigen::Matrix<double,NPI,1> alpha;
@@ -248,7 +247,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     
     Eigen::Matrix<double,3*N,3*N> AE;
     AE.setZero();
-    lumping(a_eff, prm_t.prefactor * s_dt * Abis, AE);
+    lumping(a_eff, prm_t.get_prefactor() * Abis, AE);
 
     Eigen::Matrix<double,2*N,3*N> P;
     buildMatP(P);

@@ -33,7 +33,7 @@ public:
     const double TAUR;
 
     /** this prefactor must be synchronized with dt value */
-    double prefactor;
+    inline double get_prefactor(void) const { return prefactor; }
 
     /** getter for (reduced) time step dt */
     inline double get_dt() const { return dt; }
@@ -47,7 +47,7 @@ public:
         {
         dt = _dt;
         double t_tilde = _dt / TAUR;
-        prefactor = (1. + t_tilde * abs(log( t_tilde)));
+        prefactor = (1. + t_tilde * abs(log( t_tilde)))*THETA*dt;
         }
 
     /** to perform some second order corrections, an effective \f$ \alpha \f$ is computed here with
@@ -103,6 +103,7 @@ public:
 private:
     double t; /**< reduced current time of the simulation */
     double dt; /**< reduced time-step */
+    double prefactor; /**< prefactor for the lumping. It is time dependant. */
     };
 
 #endif

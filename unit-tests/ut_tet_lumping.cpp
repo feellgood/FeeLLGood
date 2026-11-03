@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE(tet_lumping)
     // end ref code
 
     // code to check
-    t.lumping(alfa, prm_t.prefactor * s_dt * Abis, AE_to_check);
+    t.lumping(alfa, prm_t.get_prefactor() * Abis, AE_to_check);
     // end code to check
 
     /* same terms summed in different orders: the deviations (a few rounding units) are compared
@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE(tet_lumping)
         for (int j = 0; j < 3*Tetra::N; j++)
             {
             const bool AE_ok = (std::abs(AE_to_check(i,j) - AE[i][j]) <= 1e-13 * scale);
-            BOOST_TEST(AE_ok);
+            BOOST_TEST(AE_ok,"Error on AE coefficient.\n");
             }
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
     }
