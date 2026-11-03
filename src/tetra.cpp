@@ -49,7 +49,7 @@ Eigen::Matrix<double,NPI,1> Tetra::calc_alpha_eff(const double dt,
                                                   const Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff)
     {
     Eigen::Matrix<double,NPI,1> a_eff = alpha_g;
-    const double r = 0.1;  // what is that constant, where does it come from ?
+    const double r(0.1);
 
     for(int npi=0;npi<NPI;npi++)
         {
@@ -59,14 +59,14 @@ Eigen::Matrix<double,NPI,1> Tetra::calc_alpha_eff(const double dt,
         if (h > 0.)
             {
             if (h > M)
-                a_eff(npi) = alpha + dt / 2. * M;
+                a_eff(npi) = alpha*(1.+r);
             else
                 a_eff(npi) = alpha + dt / 2. * h;
             }
         else
             {
             if (h < -M)
-                a_eff(npi) = alpha / (1. + dt / (2. * alpha) * M);
+                a_eff(npi) = alpha/(1.+r);
             else
                 a_eff(npi) = alpha / (1. - dt / (2. * alpha) * h);
             }
