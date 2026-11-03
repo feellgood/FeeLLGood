@@ -87,25 +87,25 @@ BOOST_AUTO_TEST_CASE(calc_alpha_eff, *boost::unit_test::tolerance(UT_TOL))
     Eigen::Matrix<double,Tetra::NPI,1> _uHeff;
     _uHeff.setConstant(uHeff);
     double a_eff = func(uHeff); // case 2
-    my_alpha = Tetra::calc_alpha_eff(dt, alpha_g, _uHeff);
+    my_alpha = prm_t.get_alpha_eff<Tetra::NPI>(alpha_g, _uHeff);
     for(int npi=0;npi<Tetra::NPI;npi++) { BOOST_TEST(my_alpha(npi) == a_eff); }
 
     uHeff *= -1.0;
     a_eff = func(uHeff); // case 4
     _uHeff.setConstant(uHeff);
-    my_alpha = Tetra::calc_alpha_eff(dt, alpha_g, _uHeff );
+    my_alpha = prm_t.get_alpha_eff<Tetra::NPI>(alpha_g, _uHeff );
     for(int npi=0;npi<Tetra::NPI;npi++) { BOOST_TEST(my_alpha(npi) == a_eff); }
 
     uHeff = distrib(gen) + M;
     a_eff = func(uHeff); // case 1
     _uHeff.setConstant(uHeff);
-    my_alpha = Tetra::calc_alpha_eff(dt, alpha_g, _uHeff );
+    my_alpha = prm_t.get_alpha_eff<Tetra::NPI>(alpha_g, _uHeff );
     for(int npi=0;npi<Tetra::NPI;npi++) { BOOST_TEST(my_alpha(npi) == a_eff); }
 
     uHeff *= -1.0;
     a_eff = func(uHeff); // case 3
     _uHeff.setConstant(uHeff);
-    my_alpha = Tetra::calc_alpha_eff(dt, alpha_g, _uHeff );
+    my_alpha = prm_t.get_alpha_eff<Tetra::NPI>(alpha_g, _uHeff );
     for(int npi=0;npi<Tetra::NPI;npi++) { BOOST_TEST(my_alpha(npi) == a_eff); }
     }
 

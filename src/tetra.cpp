@@ -44,36 +44,6 @@ void prm::infos(void)
         }
     }
 
-Eigen::Matrix<double,NPI,1> Tetra::calc_alpha_eff(const double dt,
-                                                  const Eigen::Ref<const Eigen::Matrix<double,NPI,1>> alpha_g,
-                                                  const Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff)
-    {
-    Eigen::Matrix<double,NPI,1> a_eff = alpha_g;
-    const double r(0.1);
-
-    for(int npi=0;npi<NPI;npi++)
-        {
-        const double alpha = alpha_g(npi);
-        const double M = 2. * alpha * r / dt;
-        const double h = uHeff(npi);
-        if (h > 0.)
-            {
-            if (h > M)
-                a_eff(npi) = alpha*(1.+r);
-            else
-                a_eff(npi) = alpha + dt / 2. * h;
-            }
-        else
-            {
-            if (h < -M)
-                a_eff(npi) = alpha/(1.+r);
-            else
-                a_eff(npi) = alpha / (1. - dt / (2. * alpha) * h);
-            }
-        }
-    return a_eff;
-    }
-
 Eigen::Matrix<double,Nodes::DIM,NPI> Tet::gradV(const std::vector<double> &V) const
     {
     Eigen::Matrix<double,N,1> _V;
@@ -274,7 +244,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     Heff += Hst;
     uHeff += (U.cwiseProduct(Heff)).colwise().sum();//dot product on each col of U and Heff
 
-    Eigen::Matrix<double,NPI,1> a_eff = calc_alpha_eff(dt, alpha, uHeff);
+    Eigen::Matrix<double,NPI,1> a_eff = prm_t.get_alpha_eff<NPI>(alpha, uHeff);
     
     Eigen::Matrix<double,3*N,3*N> AE;
     AE.setZero();
