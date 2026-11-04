@@ -105,6 +105,10 @@ void Fem::saver(Settings &settings, const timing &t_prm, std::ofstream &fout, co
             {
             fout << E[EXCHANGE] << sep;
             }
+        else if (keyVal == "E_DMI_bulk")
+            {
+            fout << E[DMI_BULK] << sep;
+            }
         else if (keyVal == "E_aniso")
             {
             fout << E[ANISOTROPY] << sep;

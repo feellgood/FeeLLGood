@@ -56,6 +56,7 @@ outputs:
   # - <dMy/dt>: average change rate of My
   # - <dMz/dt>: average change rate of Mz
   # - E_aniso: anisotropy energy
+  # - E_DMI_bulk: bulk DMI energy
   # - Hx: applied field along x
   # - Hy: applied field along y
   # - Hz: applied field along z
