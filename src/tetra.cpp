@@ -304,6 +304,23 @@ double Tet::exchangeEnergy(const Tetra::prm &param,
     return param.A * weight.dot(dens);
     }
 
+double Tet::DMIBulkEnergy(const Tetra::prm &param,
+			              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u,
+			              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudx,
+			              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudy,
+			              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudz) const
+	{
+    Eigen::Matrix<double,NPI,1> dens;
+	for (int npi = 0; npi < NPI; npi++)
+	    {
+		Eigen::Vector3d tmp(dudy(IDX_Z,npi) - dudz(IDX_Y,npi),
+		                    dudz(IDX_X,npi) - dudx(IDX_Z,npi),
+		                    dudx(IDX_Y,npi) - dudy(IDX_X,npi));
+		dens[npi] = u.col(npi).dot(tmp);
+		}
+    return -param.DMI * weight.dot(dens);
+    }
+
 double Tet::uniaxialAnisotropyEnergy(const Tetra::prm &param,
         Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> u) const
     {

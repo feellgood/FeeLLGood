@@ -310,6 +310,13 @@ public:
                           Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudy,
                           Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudz) const;
 
+    /** DMI bulk energy of the tetrahedron */
+	double DMIBulkEnergy(const Tetra::prm &param,
+	                     Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u,
+	                     Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudx,
+	                     Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudy,
+	                     Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudz) const;
+
     /** uniaxial anisotropy energy of the tetrahedron */
     double uniaxialAnisotropyEnergy(const Tetra::prm &param,
             Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u) const;
