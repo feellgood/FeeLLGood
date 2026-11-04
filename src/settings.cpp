@@ -298,6 +298,7 @@ void Settings::toYaml()
             { continue; }
         std::cout << "    " << it->regName << ":\n";
         std::cout << "      Ae: " << it->A << "\n";
+        std::cout << "      DMI_bulk: " << it->DMI << "\n";
         std::cout << "      Ms: " << it->Ms << "\n";
         std::cout << "      K: " << it->K << "\n";
         if (it->K != 0)
@@ -542,6 +543,7 @@ void Settings::read(YAML::Node yaml)
                 p.regName = name;
 
                 assign(p.A, volume["Ae"]);
+                assign(p.DMI, volume["DMI_bulk"]);
                 if (assign(p.Ms, volume["Ms"]))
                     { has_Ms = true; }
                 double Js;

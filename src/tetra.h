@@ -89,6 +89,7 @@ struct prm
     std::string regName; /**< region name */
     double alpha_LLG;    /**< \f$ \alpha \f$ damping parameter, dimensionless */
     double A;            /**< exchange constant stiffness in [Joule per meter] = kg m^1 s^-2 */
+    double DMI;          /**< DMI bulk in J m^-2 */
     double Ms;           /**< Magnetization at saturation in [Ms] = A m^-1 if Ms<=0 the
                            the region is non magnetic */
     double K;            /**< uniaxial anisotropy constant */

@@ -103,6 +103,9 @@ mesh:
       # Exchange constant.
       Ae: 1e-11
 
+      # DMI bulk constant, in J m^-2.
+      DMI_bulk: 0
+
       # Saturation magnetization. Default is 1 T/μ₀.
       Ms: 795774.7
 
