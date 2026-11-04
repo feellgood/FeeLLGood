@@ -64,6 +64,9 @@ add_executable (test_ut_thiele ${SOURCES})
 SET(SOURCES ../src/tetra.cpp ut_tet_lumping.cpp)
 add_executable (test_ut_tet_lumping ${SOURCES})
 
+SET(SOURCES ../src/tetra.cpp ut_DMI.cpp)
+add_executable (test_ut_DMI ${SOURCES})
+
 SET(SOURCES ../src/tetra.cpp ut_tet_charges.cpp)
 add_executable (test_ut_tet_charges ${SOURCES})
 
@@ -136,6 +139,13 @@ target_link_libraries(test_ut_tet_lumping
     TBB::tbb
     )
 
+target_link_libraries(test_ut_DMI
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+    TBB::tbb
+    )
+
 target_link_libraries(test_ut_tet_charges
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
@@ -166,6 +176,8 @@ if (MKL_FOUND)
     target_link_libraries(test_ut_tet_spinAccumulation PkgConfig::MKL)
 
     target_link_libraries(test_ut_tet_lumping PkgConfig::MKL)
+
+    target_link_libraries(test_ut_DMI PkgConfig::MKL)
 
     target_link_libraries(test_ut_tet_charges PkgConfig::MKL)
 
@@ -294,6 +306,7 @@ add_test (NAME ut_tetra COMMAND test_ut_tetra)
 add_test (NAME ut_tet_spinAccumulation COMMAND test_ut_tet_spinAccumulation)
 add_test (NAME ut_thiele COMMAND test_ut_thiele)
 add_test (NAME ut_tet_lumping COMMAND test_ut_tet_lumping)
+add_test (NAME ut_DMI COMMAND test_ut_DMI)
 add_test (NAME ut_tet_charges COMMAND test_ut_tet_charges)
 add_test (NAME ut_energy COMMAND test_ut_energy)
 add_test (NAME ut_anisotropy COMMAND test_ut_anisotropy)
