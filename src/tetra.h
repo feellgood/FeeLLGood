@@ -261,6 +261,14 @@ public:
      * */
     Eigen::Matrix<double,N,1> calcOffDiagBlock(const Nodes::index idx) const;
 
+    /** add DMI bulk contribution to BE */
+    void DMI_bulk_BE(const double cst,
+			         Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
+			         Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdx,
+			         Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdy,
+			         Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdz,
+			         Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,N>> BE) const;
+
     /** add drift contribution due to eventual recentering to vectors BE, Vdrift is the drift
      * velocity in reduced time (physical velocity divided by gamma0), alpha is the damping at the
      * Gauss points */

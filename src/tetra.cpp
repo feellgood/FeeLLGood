@@ -116,6 +116,29 @@ Eigen::Matrix<double,N,1> Tet::calcOffDiagBlock(const Nodes::index idx) const
     return result;
     }
 
+void Tet::DMI_bulk_BE(const double cst,
+        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> U,
+        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdx,
+        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdy,
+        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdz,
+        Eigen::Ref<Eigen::Matrix<double,DIM,N>> BE) const
+    {//cst is DMI_bulk/(mu0*Ms)
+    for (int npi = 0; npi<NPI; npi++)
+        {
+        const double c_w = cst * weight[npi];
+        Eigen::Vector3d tmp(dUdy(IDX_Z,npi)-dUdz(IDX_Y,npi),
+                            dUdz(IDX_X,npi)-dUdx(IDX_Z,npi),
+                            dUdx(IDX_Y,npi)-dUdy(IDX_X,npi));
+
+        for (int i = 0;i<N;i++)
+            {
+            const double ai = eigen_a(i,npi);
+            // cst*[\omega \cdot (\nabla \times u) + u \cdot (\nabla \times \omega)]
+            BE.col(i) += c_w *(ai*tmp + U.col(npi).cross(da.row(i)));
+            }
+        }
+    }
+
 void Tet::add_drift_BE(const Eigen::Ref<const Eigen::Matrix<double,NPI,1>> alpha,
                        const double s_dt, const double Vdrift,
                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> U,
