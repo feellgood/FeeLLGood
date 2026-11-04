@@ -261,6 +261,11 @@ public:
      * */
     Eigen::Matrix<double,N,1> calcOffDiagBlock(const Nodes::index idx) const;
 
+
+    /** computes off diagonal DMI bulk contributions and add them to matrix AE */
+    void DMI_bulk_OffDiag(timing const &prm_t, const double DMIbulk_bis,
+                          Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE) const;
+
     /** add DMI bulk contribution to BE */
     void DMI_bulk_BE(const double cst,
 			         Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,

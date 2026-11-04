@@ -116,6 +116,40 @@ Eigen::Matrix<double,N,1> Tet::calcOffDiagBlock(const Nodes::index idx) const
     return result;
     }
 
+void Tet::DMI_bulk_OffDiag(timing const &prm_t, const double DMIbulk_bis,
+                           Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE) const
+    {
+    const double prefactor = prm_t.get_prefactor(); // carefull, prefactor is time dependant
+    const double cst = prefactor*0.5*DMIbulk_bis;
+    for (int npi = 0; npi < NPI; npi++)
+        {
+        const double c = cst*weight(npi);
+        for(int i=0;i<N;i++)
+            {
+            const double ai = eigen_a(i,npi);
+            for(int j=0;j<N;j++)
+                {
+                const double aj = eigen_a(j,npi);
+                if (i != j)
+                    {
+                    Eigen::Vector3d D( da(i,IDX_X)*aj - ai*da(j,IDX_X),
+                                       da(i,IDX_Y)*aj - ai*da(j,IDX_Y),
+                                       da(i,IDX_Z)*aj - ai*da(j,IDX_Z) );
+                    D *= c;
+                    AE(  N+i, 2*N+j) -= D[IDX_X];
+                    AE(2*N+i,   N+j) += D[IDX_X];
+
+                    AE(    i, 2*N+j) += D[IDX_Y];
+                    AE(2*N+i,     j) -= D[IDX_Y];
+
+                    AE(    i,   N+j) -= D[IDX_Z];
+                    AE(  N+i,     j) += D[IDX_Z];
+                    }
+                }
+            }
+        }
+    }
+
 void Tet::DMI_bulk_BE(const double cst,
         Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> U,
         Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdx,
