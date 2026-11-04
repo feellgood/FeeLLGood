@@ -24,7 +24,7 @@ It does also contain the definition of many constants for the solver, and for sc
 #include "settings.h"
 
 /** number of energy terms in energy array E */
-const int NB_ENERGY_TERMS = 4;
+const int NB_ENERGY_TERMS = 5;
 
 /** correspondance nature/index of the energy terms in energy array E */
 enum ENERGY_TYPE
@@ -32,7 +32,8 @@ enum ENERGY_TYPE
     EXCHANGE = 0,
     ANISOTROPY = 1,
     DEMAG = 2,
-    ZEEMAN = 3
+    ZEEMAN = 3,
+    DMI_BULK = 4
     };
 
 /** \class Fem
