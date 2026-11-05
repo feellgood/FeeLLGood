@@ -39,8 +39,11 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
      * */
     void boundaryConditions(void); // should be private
 
-    /** call solver and update spin diffusion solution, returns true if solver succeeded */
-    bool compute(void);
+    /** call solver and update spin diffusion solution, with the magnetization of step k: NEXT (the
+     * latest one, default) or CURRENT (the one of the start of the time step, u_n, used at each
+     * attempt of a time step: a rejected attempt leaves its own u_{n+1} in NEXT); returns true if
+     * solver succeeded */
+    bool compute(const Nodes::step k = Nodes::NEXT);
 
     /** dimensionless multiplier of all the normal current densities jn at the time of the solve
      * (Settings::jnMultiplier, 1 by default). The electrokinetics being linear, the potential is
@@ -50,10 +53,11 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
      * imposed s */
     double jn_multiplier = 1.0;
 
-    /** electrostatic potential on the nodes at the time of the last solve [V], indexed as s:
-     * V_D + jn_multiplier V, V being solved with V = 0 on the surface with V and V_D the imposed
-     * V (the electrokinetics being linear, the potential follows the current density) */
-    std::vector<double> potential(void) const;
+    /** electrostatic potential on the nodes [V], indexed as s: V_D + factor V, V being solved with
+     * V = 0 on the surface with V and V_D the imposed V (the electrokinetics being linear, the
+     * potential at time t follows the current density); factor is Settings::jnMultiplier(t) at
+     * the time t of the potential */
+    std::vector<double> potential(const double factor) const;
 
     /** solution of the spin diffusion vector s over the nodes */
     std::vector<Eigen::Vector3d> s;
@@ -106,9 +110,12 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** spin flip length : exists in both non-magnetic and magnetic metals */
     double getLsf(const Tetra::Tet &tet) const;
 
-    /** nodal magnetization of the tetrahedron (NEXT step, the latest computed one) used by the
-     * spin diffusion problem, columns are the nodes */
+    /** nodal magnetization of the tetrahedron (step uStep, see compute()) used by the spin
+     * diffusion problem, columns are the nodes */
     Eigen::Matrix<double,Nodes::DIM,Tetra::N> calc_u_nod(const Tetra::Tet &tet) const;
+
+    /** step of the magnetization read by the solve (calc_u_nod()), set by compute() */
+    Nodes::step uStep = Nodes::NEXT;
 
     /** affect extraField member function of all tetrahedrons
      * extraField is computing the contribution from the spin diffusion s to llg

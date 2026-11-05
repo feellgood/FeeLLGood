@@ -116,7 +116,7 @@ static void exit_if_signal_received(const Fem &fem, const Settings &settings, co
         std::string metadata = settings.solMetadata(t_prm.get_t_phys());
         std::vector<double> V;
         if (settings.spin_acc)
-            { V = spinAcc_solver.potential(); }
+            { V = spinAcc_solver.potential(settings.jnMultiplier(t_prm.get_t_phys())); }
         fem.msh.savesol(settings.getPrecision(), fileName, metadata, settings.spin_acc,
                         spinAcc_solver.s, V);
         std::cout << "Magnetization configuration saved to " << fileName << "\n";

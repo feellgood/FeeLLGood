@@ -162,7 +162,7 @@ void Fem::saver(Settings &settings, const timing &t_prm, std::ofstream &fout, co
         // potential at the time of the file (it follows the current density)
         std::vector<double> V;
         if (settings.spin_acc)
-            { V = spinAcc_solver.potential(); }
+            { V = spinAcc_solver.potential(settings.jnMultiplier(t_prm.get_t_phys())); }
         msh.savesol(settings.getPrecision(), str, metadata, settings.spin_acc, spinAcc_solver.s, V);
         if (settings.verbose)
             {

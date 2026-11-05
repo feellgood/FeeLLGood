@@ -144,7 +144,7 @@ Eigen::Matrix<double,Nodes::DIM,Tetra::N> spinAcc::calc_u_nod(const Tetra::Tet &
     {
     Eigen::Matrix<double,Nodes::DIM,Tetra::N> u_nod;
     for (int ie = 0; ie < Tetra::N; ie++)
-        { u_nod.col(ie) = msh->getNode_u(tet.ind[ie]); }
+        { u_nod.col(ie) = msh->getNode_u(tet.ind[ie], uStep); }
     return u_nod;
     }
 
@@ -160,17 +160,17 @@ void spinAcc::prepareExtraField(void) const
         }
     }
 
-std::vector<double> spinAcc::potential(void) const
+std::vector<double> spinAcc::potential(const double factor) const
     {
     std::vector<double> Vt(V.size());
     std::transform(V.begin(), V.end(), Vt.begin(),
-                   [this](const double v) { return V_D + jn_multiplier*v; });
+                   [this, factor](const double v) { return V_D + factor*v; });
     return Vt;
     }
 
-bool spinAcc::compute(void)
+bool spinAcc::compute(const Nodes::step k)
     {
-    //prepareExtraField(); // do we have to do that once or each time we want another s computation ?
+    uStep = k;
     bool has_converged = solve();
     if (!has_converged)
         {
@@ -272,7 +272,7 @@ void spinAcc::integrales(const Tetra::Tet &tet,
     if(msh->isMagnetic(tet))
         {
         const double invTau_sd = D0 / sq(getLsd(tet)); //units: [D0/sq(lsd)] = s^-1 : it is 1/tau_sd
-        /* nodal magnetization: the same (NEXT, the latest one) as in the RHS */
+        /* nodal magnetization: the same (step uStep) as in the RHS */
         const Eigen::Matrix<double,Nodes::DIM,N> u_nod = calc_u_nod(tet);
 
         diag = invTau_sd * a_w.cwiseProduct(u_nod.row(IDX_X).transpose());

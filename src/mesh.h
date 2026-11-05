@@ -155,8 +155,9 @@ public:
     /** getter : return node.p */
     inline const Eigen::Vector3d getNode_p(const int i) const { return node[i].p; }
 
-    /** getter : return node.u */
-    inline const Eigen::Vector3d getNode_u(const int i) const { return node[i].get_u(Nodes::NEXT); }
+    /** getter : return node.u at step k (CURRENT: start of the time step, NEXT: the latest one) */
+    inline const Eigen::Vector3d getNode_u(const int i, const Nodes::step k = Nodes::NEXT) const
+        { return node[i].get_u(k); }
 
     /** getter : return node.v */
     inline const Eigen::Vector3d getNode_v(const int i) const { return node[i].get_v(Nodes::NEXT); }
