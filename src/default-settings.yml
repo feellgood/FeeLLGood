@@ -60,6 +60,8 @@ outputs:
   # - Hx: applied field along x
   # - Hy: applied field along y
   # - Hz: applied field along z
+  # - jn_multiplier: multiplier of the normal current densities, see
+  #   ‘spin_accumulation.jn_multiplier’ below
   # - Thiele_length: Thiele length along (Oz)
   evol_columns:
     - t         # time
@@ -163,7 +165,7 @@ mesh:
       # Fixed normal current density value (j.n) for the boundary conditions of
       # the electrostatic and the spin diffusion problems, in A/m^2, n being
       # the outward normal (a positive value makes the current leave the
-      # sample).
+      # sample). Multiplied by ‘spin_accumulation.jn_multiplier’.
       jn:
 
       # Fixed potential value for the boundary conditions of the
@@ -243,7 +245,8 @@ absorbing_ends:
   regions: []
 
 # Expressions of the applied field, as a function of t, the time in
-# seconds. May be constants.
+# seconds. May be constants. They can call jn_multiplier(t), see
+# ‘spin_accumulation.jn_multiplier’ below.
 Bext: [0, 0, 0]
 
 # Parameters for simulating a coupling to spin accumulation. The
@@ -256,8 +259,18 @@ spin_accumulation:
   # Whether to enable computation of spin accumulation contribution.
   enable: false
 
+  # Time-dependent factor by which all the fixed normal current
+  # densities (mesh.surface_regions.<region name>.jn) are multiplied.
+  # Either an expression as a function of t (the time in seconds) or a
+  # JavaScript function expression of the single parameter t. Defaults to
+  # the constant value 1. The expressions of Bext can call
+  # jn_multiplier(t), e.g. for the Oersted field of the current, even when
+  # the spin accumulation is disabled.
+  jn_multiplier:
+
   # Output, at the start of the simulation, the electric potential at
-  # each node, in the file <file_basename>_V.sol of outputs.directory.
+  # each node, ignoring jn_multiplier (i.e. assuming jn_multiplier = 1),
+  # in the file <file_basename>_V.sol of outputs.directory.
   V_file: false
 
 # Parameters for the computation of the demagnetizing field.
