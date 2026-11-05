@@ -161,7 +161,9 @@ mesh:
       uk: [0, 0, 1]
 
       # Fixed normal current density value (j.n) for the boundary conditions of
-      # the electrostatic and the spin diffusion problems.
+      # the electrostatic and the spin diffusion problems, in A/m^2, n being
+      # the outward normal (a positive value makes the current leave the
+      # sample).
       jn:
 
       # Fixed potential value for the boundary conditions of the
@@ -246,14 +248,16 @@ Bext: [0, 0, 0]
 
 # Parameters for simulating a coupling to spin accumulation. The
 # boundary conditions of the electrostatic problem are a constant
-# potential on one surface, and a normal current density on another
-# surface. The material parameters are defined in mesh.volume_regions.
+# potential on one surface, and a normal current density on one or
+# several other surfaces. The material parameters are defined in
+# mesh.volume_regions.
 spin_accumulation:
 
   # Whether to enable computation of spin accumulation contribution.
   enable: false
 
-  # Output a .tsv file of the electric potentials.
+  # Output, at the start of the simulation, the electric potential at
+  # each node, in the file <file_basename>_V.sol of outputs.directory.
   V_file: false
 
 # Parameters for the computation of the demagnetizing field.
