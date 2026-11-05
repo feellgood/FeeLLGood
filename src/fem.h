@@ -200,30 +200,36 @@ private:
     void direction(enum Nodes::index idx_dir /**< [in] */);
 
     /** compute demagnetizing field, energies, and prepare for next time step quantitites
-     * at physical time t [s] (used by the applied field and jn_multiplier) */
-    void compute_all(Settings &settings /**< [in] */, spinAcc &spinAcc_solver /**< [in|out] */,
-                     scal_fmm::fmm &myFMM /**< [in|out] */, const double t /**< [in]*/)
+     * at physical time t [s] (used by the applied field). The spin accumulation is not solved
+     * here but by solve_spin_acc(), at each attempt of a time step. */
+    void compute_all(Settings &settings /**< [in] */, scal_fmm::fmm &myFMM /**< [in|out] */,
+                     const double t /**< [in]*/)
         {
-        bool success(false);
         chronometer fmm_counter(2);
         myFMM.calc_demag(msh);
-        if (settings.spin_acc)
-            { spinAcc_solver.jn_multiplier = settings.jnMultiplier(t); }
-        if (settings.spin_acc && spinAcc_solver.compute())
-            { success = true; }
         if (settings.verbose)
-            {
-            std::cout << "magnetostatics done in " << fmm_counter.millis() << "\n";
-            if (settings.spin_acc)
-                {
-                if (success)
-                    { std::cout << "spin diffusion solved.\n"; }
-                else
-                    { std::cerr << "spin diffusion solver failed.\n"; }
-                }
-            }
+            { std::cout << "magnetostatics done in " << fmm_counter.millis() << "\n"; }
         energy(t, settings);
         evolution();
+        }
+
+    /** solve the spin accumulation for the normal current density at time t (physical, s) and the
+     * magnetization of step k. Called once before the time loop (t0, NEXT: the initial
+     * magnetization), then at each attempt of a time step with t = t_n + THETA dt and k = CURRENT
+     * (u_n), as the applied field: the spin-transfer field enters the theta scheme at t_n + THETA dt.
+     */
+    void solve_spin_acc(Settings &settings /**< [in] */, spinAcc &spinAcc_solver /**< [in|out] */,
+                        const double t /**< [in] */, const Nodes::step k /**< [in] */)
+        {
+        spinAcc_solver.jn_multiplier = settings.jnMultiplier(t);
+        bool success = spinAcc_solver.compute(k);
+        if (settings.verbose)
+            {
+            if (success)
+                { std::cout << "spin diffusion solved.\n"; }
+            else
+                { std::cerr << "spin diffusion solver failed.\n"; }
+            }
         }
     };  // end class
 

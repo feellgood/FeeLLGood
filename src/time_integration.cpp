@@ -141,7 +141,9 @@ int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /*
                           spinAcc &spinAcc_solver /**< [in] */,
                           scal_fmm::fmm &myFMM /**< [in] */, timing &t_prm, int &nt)
     {
-    compute_all(settings, spinAcc_solver, myFMM, t_prm.get_t_phys());
+    if (settings.spin_acc)
+        { solve_spin_acc(settings, spinAcc_solver, t_prm.get_t_phys(), Nodes::NEXT); }
+    compute_all(settings, myFMM, t_prm.get_t_phys());
     std::string baseName = settings.r_path_output_dir + '/' + settings.getSimName();
     std::string str = baseName + ".evol";
     std::ofstream fout(str);
@@ -195,14 +197,20 @@ int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /*
                 goto bailout;
                 }
             linAlg.base_projection();
+            // theta scheme: the applied field and the current density (spin accumulation, solved
+            // with the magnetization u_n of the start of the step) at t_n + THETA dt, at each
+            // attempt (a rejected attempt changes dt)
+            const double t_theta = t_prm.get_t_phys() + THETA * t_prm.get_dt_phys();
+            if (settings.spin_acc)
+                { solve_spin_acc(settings, spinAcc_solver, t_theta, Nodes::CURRENT); }
             if(settings.getFieldType() == RtoR3)
                 {
-                Eigen::Vector3d Hext = settings.getField(t_prm.get_t_phys());
+                Eigen::Vector3d Hext = settings.getField(t_theta);
                 linAlg.prepareElements(Hext, t_prm);
                 }
             else if(settings.getFieldType() == R4toR3)
                 {
-                double amp_field_time = settings.getFieldTime(t_prm.get_t_phys());
+                double amp_field_time = settings.getFieldTime(t_theta);
                 linAlg.prepareElements(amp_field_time,t_prm);
                 }
 
@@ -241,8 +249,8 @@ int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /*
             else
                 t_prm.inc_t();
 
-            // at the time of the new magnetization (applied field, current density, energies)
-            compute_all(settings, spinAcc_solver, myFMM, t_prm.get_t_phys());
+            // at the time of the new magnetization (demagnetizing field, energies)
+            compute_all(settings, myFMM, t_prm.get_t_phys());
 
             if (settings.recenter) recenter(settings.threshold, settings.recentering_direction);
             if (!settings.verbose) show_progress(t_prm.get_t() / t_prm.tf);
