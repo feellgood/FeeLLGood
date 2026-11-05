@@ -137,6 +137,8 @@ void Fem::saver(Settings &settings, const timing &t_prm, std::ofstream &fout, co
             {
             fout << applied_field.z() << sep;
             }
+        else if (keyVal == "jn_multiplier")
+            { fout << settings.jnMultiplier(t_prm.get_t_phys()) << sep; }
         else
             {
             std::cerr << "Error: invalid column name '" << keyVal << "'\n";

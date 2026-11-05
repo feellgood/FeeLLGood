@@ -396,6 +396,12 @@ void Settings::toYaml()
         { std::cout << "[\"" << sBx << "\", \"" << sBy << "\", \"" << sBz << "\"]\n"; }
     std::cout << "spin_accumulation:\n";
     std::cout << "  enable: " << str(spin_acc) << "\n";
+    // jn_multiplier may be called by Bext even without spin accumulation
+    std::cout << "  jn_multiplier:";
+    if (sJnMultiplier.empty())
+        { std::cout << '\n'; }
+    else
+        { std::cout << ' ' << str(sJnMultiplier) << '\n'; }
     if (spin_acc)
         { std::cout << "  V_file: " << str(V_file) << "\n"; }
     std::cout << "demagnetizing_field_solver:\n";
@@ -723,6 +729,23 @@ void Settings::read(YAML::Node yaml)
         {
         assign(spin_acc, spAcc["enable"]);
         assign(V_file, spAcc["V_file"]);
+
+        YAML::Node jn_multiplier = spAcc["jn_multiplier"];
+        if (jn_multiplier && !jn_multiplier.IsNull())
+            {
+            if (!jn_multiplier.IsScalar())
+                { error("spin_accumulation.jn_multiplier should be an expression of t or a "
+                        "function of t."); }
+            sJnMultiplier = jn_multiplier.as<std::string>();
+            const bool is_function = std::regex_search(sJnMultiplier,
+                                                       std::regex("^\\s*function\\b"));
+            const std::string js_jn_multiplier = is_function
+                    ? sJnMultiplier : "function(t) { return (" + sJnMultiplier + "); }";
+            jn_multiplier_parser.set_function(js_jn_multiplier);
+            // the time functions of the applied field can call jn_multiplier(t)
+            field_parser.define_global_function("jn_multiplier", js_jn_multiplier);
+            field_time_parser.define_global_function("jn_multiplier", js_jn_multiplier);
+            }
 	    }  // spin_accumulation
 
     // The number of available processors (actually, hardware threads) is the default for the number

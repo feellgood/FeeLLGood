@@ -190,14 +190,15 @@ bool spinAcc::solve(void)
 
     /* flux (Neumann) boundary condition on the surface where the current density jn is injected
      * with the polarization uP: Q_n = -(mu_B/e) jn uP, contribution -int_Gamma Q_n a_i to the RHS
-     * (the surfaces where s is given are Dirichlet conditions, see boundaryConditions()) */
+     * (the surfaces where s is given are Dirichlet conditions, see boundaryConditions());
+     * time-dependent current density: jn -> jn_multiplier jn */
     for (Triangle::Tri &f : msh->tri)
         {
         if (std::isfinite(paramTri[f.idxPrm].jn) && std::isfinite(paramTri[f.idxPrm].uP.norm()))
             {
             std::vector<double> Le(DIM_PB * Triangle::N, 0.0);
-            const Eigen::Vector3d Qn =
-                    -paramTri[f.idxPrm].jn * (BOHRS_MUB/CHARGE_ELECTRON) * paramTri[f.idxPrm].uP;
+            const Eigen::Vector3d Qn = -jn_multiplier * paramTri[f.idxPrm].jn
+                                       * (BOHRS_MUB/CHARGE_ELECTRON) * paramTri[f.idxPrm].uP;
             for (int npi = 0; npi < Triangle::NPI; npi++)
                 {
                 const double w = f.weight[npi];
@@ -284,8 +285,10 @@ void spinAcc::integrales(const Tetra::Tet &tet, std::vector<double> &BE) const
         /* constant cst0 in a magnetic region is the only RHS parameter involved in the diffusion
         * equation for magnetic contribution
         * units: [cst0] = [sigma] m^2 = A^2 s^3 m^-1 kg^-1
+        * time-dependent current density: grad V = jn_multiplier grad V0
         */
-        const double cst0 = BOHRS_MUB * getPolarizationRate(tet) * getSigma(tet) / CHARGE_ELECTRON;
+        const double cst0 = jn_multiplier * BOHRS_MUB * getPolarizationRate(tet) * getSigma(tet)
+                            / CHARGE_ELECTRON;
         const Eigen::Matrix<double, Nodes::DIM, NPI> gradV = tet.gradV(V);
 
         for (size_t npi = 0; npi < NPI; npi++)
