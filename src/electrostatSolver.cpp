@@ -118,7 +118,7 @@ bool electrostatSolver::solve(void)
     std::vector<double> Vd(NOD); // potential values on Dirichlet nodes, zero on the others
 
     /* the potential is solved with V = 0 on the surface with V, the imposed V_D being added
-     * afterwards (save): the potential is defined up to a constant, and
+     * afterwards (spinAcc::potential, save): the potential is defined up to a constant, and
      * solving around V_D != 0 would add an error of the order of the tolerance times V_D */
 
     for (const Triangle::Tri &tri : msh->tri)

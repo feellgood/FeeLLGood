@@ -311,14 +311,17 @@ public:
     /** text file (tsv) writing function for a solution, node indices are zero based
      * first column is index, then magnetization components, then scalar magnetic potential.
      * If spin accumulation was involved, there are three extra columns for the componants of the
-     * spin diffusion vector.
+     * spin diffusion vector, and a last one for the electrostatic potential at the time of the
+     * file.
      * Since some volume region might be non magnetic, magnetization is undefined on those nodes and
      * nan is used */
     void savesol(const int precision /**< [in] numeric precision in .sol output text file */,
             const std::string& fileName /**< [in] */,
              const std::string &metadata /**< [in] */,
              bool withSpinAcc /**< [in] */,
-             std::vector<Eigen::Vector3d> &s /**< [in] spin accumulation (might be empty) */) const;
+             const std::vector<Eigen::Vector3d> &s /**< [in] spin accumulation (might be empty) */,
+             const std::vector<double> &V /**< [in] electrostatic potential (might be empty) */
+             ) const;
 
     /** setter for node[i]; what_to_set will fix what is the part of the node struct to set (usefull
      * for fmm_demag.h) */

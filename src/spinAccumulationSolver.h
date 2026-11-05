@@ -50,6 +50,11 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
      * imposed s */
     double jn_multiplier = 1.0;
 
+    /** electrostatic potential on the nodes at the time of the last solve [V], indexed as s:
+     * V_D + jn_multiplier V, V being solved with V = 0 on the surface with V and V_D the imposed
+     * V (the electrokinetics being linear, the potential follows the current density) */
+    std::vector<double> potential(void) const;
+
     /** solution of the spin diffusion vector s over the nodes */
     std::vector<Eigen::Vector3d> s;
 
@@ -70,11 +75,15 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
      * corresponding spin diffusion s value*/
     void fillDirichletData(const int k, Eigen::Vector3d &s_value);
 
-    /** electrostatic potential on the nodes, solved once with V = 0 on the surface with V (the
-     * imposed V does not change grad V, the only quantity used by the spin accumulation), for the
-     * jn of the settings; grad V -> jn_multiplier grad V at time t
+    /** electrostatic potential on the nodes, solved once with V = 0 on the surface with V (V_D
+     * is added by potential()), for the jn of the settings; grad V -> jn_multiplier grad V at
+     * time t
      * unit [V] = Volt = kg A^-1 s^-3 */
     std::vector<double> V;
+
+    /** potential imposed on the surface with V (Dirichlet condition of the electrostatic
+     * problem) [V] */
+    double V_D = 0.0;
 
     /** number of digits in the optional output file */
     const int precision = 8;
