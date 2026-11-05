@@ -18,9 +18,11 @@ void electrostatSolver::checkBoundaryConditions(void) const
         if (std::isfinite(p.V))
             { nbSurfV++; }
         }
-    if (!(nbSurfJ == 1 && nbSurfV == 1))
+    // at least one surface with jn and a single surface with V
+    if (!(nbSurfJ >= 1 && nbSurfV == 1))
         {
-        std::cerr << "Error: incorrect boundary conditions for potential V solver.\n";
+        std::cerr << "Error: incorrect boundary conditions for potential V solver: at least one "
+                     "surface with jn and a single surface with V are required.\n";
         exit(1);
         }
     else if (verbose)
@@ -115,15 +117,20 @@ bool electrostatSolver::solve(void)
     std::vector<int> ld; // vector of the Dirichlet Nodes
     std::vector<double> Vd(NOD); // potential values on Dirichlet nodes, zero on the others
 
+    /* the potential is solved with V = 0 on the surface with V, the imposed V_D being added
+     * afterwards (save): the potential is defined up to a constant, and
+     * solving around V_D != 0 would add an error of the order of the tolerance times V_D */
+
     for (const Triangle::Tri &tri : msh->tri)
         {
         double _V = paramTri[tri.idxPrm].V;
         if (!std::isnan(_V))
             {
+            V_D = _V;
             for(int ie=0; ie < Triangle::N; ie++)
                 {
                 int i= tri.ind[ie];
-                Vd[i]= _V;
+                Vd[i]= 0.0;
                 ld.push_back(i);
                 }
             }
@@ -150,7 +157,7 @@ bool electrostatSolver::save(const std::string &V_fileName, const std::string &m
     for (int i = 0; i < NOD; i++)
         {
         int _i = msh->getNodeIndex(i);
-        fout << i << '\t' << V[_i] << "\n";
+        fout << i << '\t' << V_D + V[_i] << "\n";
         }
     fout.close();
     return !(fout.good());
