@@ -27,10 +27,7 @@ public:
     const double DTMIN;  // 1e-14;
 
     /** maximum step time for time integrator */
-    const double DTMAX;  //  1e-5 en stat ;  1e-7 en dynamique;
-
-    /** reduced \f$ \tau_r = 100 DT_{\mathrm{max}} \f$ */
-    const double TAUR;
+    const double DTMAX;
 
     /** this prefactor must be synchronized with dt value */
     inline double get_prefactor(void) const { return prefactor; }
@@ -97,13 +94,24 @@ public:
     /** getter for the physical time [s] */
     inline double get_t_phys() const { return t / gamma0; }
 
+    /** getter for TAUR (in reduced time unit ) */
+    inline double get_TAUR() const { return TAUR; }
+
     /** setter for t */
     inline void set_t(const double _t) { t = _t; }
 
 private:
-    double t; /**< reduced current time of the simulation */
-    double dt; /**< reduced time-step */
-    double prefactor; /**< prefactor for the lumping. It is time dependant. */
+    /** reduced \f$ \tau_r = 100 DT_{\mathrm{max}} \f$ */
+    const double TAUR;
+
+    /** reduced current time of the simulation */
+    double t;
+
+    /** reduced time-step */
+    double dt;
+
+    /** prefactor for the lumping. It is time dependant. */
+    double prefactor;
     };
 
 #endif

@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(tet_lumping)
     double A = distrib(gen);         // Ae
     double Js = 0.5 + distrib(gen);  // 0.5 offset to center on 1 the Js value
     double Abis = 2.0 * A / Js;
-    double TAUR = prm_t.TAUR;
+    double TAUR = prm_t.get_TAUR();
 
     // ref code (with minimal adaptations of integrales method in file MuMag_integrales.cc of
     // src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
