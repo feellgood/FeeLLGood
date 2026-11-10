@@ -91,14 +91,17 @@ void spinAcc::checkBoundaryConditions(void) const
         { std::cout << "spin diffusion problem boundary conditions Ok.\n"; }
     }
 
-void spinAcc::fillDirichletData(const int k, Eigen::Vector3d &s_value)
+void spinAcc::fillDirichletData(const std::array<int,Triangle::N> & ind, const Eigen::Vector3d &s_value)
     {
-    valDirichlet[DIM_PB*k  ] = s_value[Nodes::IDX_X];
-    idxDirichlet.push_back(DIM_PB * k    );
-    valDirichlet[DIM_PB*k+1] = s_value[Nodes::IDX_Y];
-    idxDirichlet.push_back(DIM_PB * k + 1);
-    valDirichlet[DIM_PB*k+2] = s_value[Nodes::IDX_Z];
-    idxDirichlet.push_back(DIM_PB * k + 2);
+    for (const int k : ind)
+        {
+        valDirichlet[DIM_PB*k  ] = s_value[Nodes::IDX_X];
+        idxDirichlet.push_back(DIM_PB * k    );
+        valDirichlet[DIM_PB*k+1] = s_value[Nodes::IDX_Y];
+        idxDirichlet.push_back(DIM_PB * k + 1);
+        valDirichlet[DIM_PB*k+2] = s_value[Nodes::IDX_Z];
+        idxDirichlet.push_back(DIM_PB * k + 2);
+        }
     }
 
 void spinAcc::boundaryConditions(void)
@@ -109,12 +112,9 @@ void spinAcc::boundaryConditions(void)
     std::fill(valDirichlet.begin(), valDirichlet.end(), 0.0);
     for (const Triangle::Tri &f : msh->tri)
         {
-        if (std::isfinite(paramTri[f.idxPrm].s.norm()))
-            {
-            Eigen::Vector3d s_value = paramTri[f.idxPrm].s;
-            for(int j = 0; j < Triangle::N; j++)
-                { fillDirichletData(f.ind[j], s_value); }
-            }
+        const Eigen::Vector3d & s_value = paramTri[f.idxPrm].s;
+        if (std::isfinite(s_value.norm()))
+            { fillDirichletData(f.ind,s_value); }
         }
     suppress_copies<int>(idxDirichlet);
     }

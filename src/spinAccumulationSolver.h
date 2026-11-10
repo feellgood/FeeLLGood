@@ -75,9 +75,10 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
      * where s is given by the user to be a constant on a surface */
     std::vector<int> idxDirichlet;
 
-    /** fill valDirichlet and idxDirichlet vectors with k, a node index from tri.ind and the
+    /** fill valDirichlet and idxDirichlet vectors with triangle node indices ind and the
      * corresponding spin diffusion s value*/
-    void fillDirichletData(const int k, Eigen::Vector3d &s_value);
+    // no unit test yet
+    void fillDirichletData(const std::array<int,Triangle::N> & ind, const Eigen::Vector3d &s_value);
 
     /** electrostatic potential on the nodes, solved once with V = 0 on the surface with V (V_D
      * is added by potential()), for the jn of the settings; grad V -> jn_multiplier grad V at
