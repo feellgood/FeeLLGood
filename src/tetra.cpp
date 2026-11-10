@@ -59,21 +59,6 @@ Eigen::Matrix<double,Nodes::DIM,NPI> Tet::gradV(const std::vector<double> &V) co
     return _gradV;
     }
 
-Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> Tetra::calc_Hst(const Tetra::Tet &tet,
-        const double prefactor, const std::vector<Eigen::Vector3d> &s)
-    {
-    Eigen::Matrix<double,Nodes::DIM,Tetra::N> s_nod;
-    for(size_t ie=0;ie<Tetra::N;ie++)
-        {
-        size_t i = tet.ind[ie];
-        for(size_t d=0;d<Nodes::DIM;d++)
-            { s_nod(d,ie)= s[i][d]; }
-        }
-
-    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> Hst = prefactor * s_nod * Tetra::eigen_a;
-    return Hst;
-    }
-
 void Tet::lumping(const Eigen::Ref<const Eigen::Matrix<double,NPI,1>> alpha_eff,
                   const double prefactor,
                   Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE ) const

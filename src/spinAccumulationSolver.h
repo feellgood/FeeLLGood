@@ -118,6 +118,9 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** step of the magnetization read by the solve (calc_u_nod()), set by compute() */
     Nodes::step uStep = Nodes::NEXT;
 
+    /** return a scalar prefactor used to compute field H_st through Tet member function extraField  */
+    double prefactor(const Tetra::Tet &tet) const;
+
     /** affect extraField member function of all tetrahedrons
      * extraField is computing the contribution from the spin diffusion s to llg
      * */

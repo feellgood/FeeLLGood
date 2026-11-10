@@ -10,7 +10,8 @@
 
 BOOST_AUTO_TEST_SUITE(ut_tetra_spinAccumulation)
 
-/* test of calc_Hst, return value Hst is a field, contribution of spin diffusion to LLG */
+/* test of prepareExtraField, method of spinAcc to define extraField member function of each mag tet
+ * the return value Hst is a field, contribution of spin diffusion to LLG */
 BOOST_AUTO_TEST_CASE(Tet_calc_Hst, *boost::unit_test::tolerance(1e-13))
     // 1e-13: the reference computes the prefactor with operations in a different order
     {
@@ -46,11 +47,27 @@ BOOST_AUTO_TEST_CASE(Tet_calc_Hst, *boost::unit_test::tolerance(1e-13))
         { s[i] = Eigen::Vector3d(distrib(gen),distrib(gen),distrib(gen)); }
 
     // code to test
-    double prefactor = D0/(sq(l_sd)*gamma0*Ms);
-    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> Hst_to_test = Tetra::calc_Hst(tet,prefactor,s);
+    const double p = D0/(sq(l_sd)*gamma0*Ms);
+    // the following lambda is a partial copy of prepareExtraField() method in spinAcc
+    // it is used to define tet.extraField function
+    // Warning : this replaced by &s ; p added in capture
+    auto func_to_test = [&s, &tet, p](Eigen::Ref<Eigen::Matrix<double, Nodes::DIM, Tetra::NPI>> H)
+                        {
+                        Eigen::Matrix<double,Nodes::DIM,Tetra::N> s_nod;
+                        for(int ie=0;ie<Tetra::N;ie++)
+                            {
+                            size_t i = tet.ind[ie];
+                            for(size_t d=0;d<Nodes::DIM;d++)
+                                { s_nod(d,ie)= s[i][d]; }
+                            }
+                        H += p * s_nod * Tetra::eigen_a;
+                        };
+    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> Hst_to_test;
+    Hst_to_test.setZero();
+    func_to_test(Hst_to_test);
     // end code to test
 
-    // ref version from June 2025 research version
+    // ref version from August 2026 st-feellgood research version
     double Hst[DIM][Tetra::NPI] = {{0}};
     double nu0 = 1.0/mu0;
     double Js = mu0*Ms;

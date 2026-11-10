@@ -393,10 +393,6 @@ private:
     void orientate(void) override;
     };  // end class Tetra
 
-    /** returns Hst field on the NPI Gauss point(s) */
-    Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> calc_Hst(const Tetra::Tet &tet,
-                                                         const double prefactor,
-                                                         const std::vector<Eigen::Vector3d> &s);
 }   // end namespace Tetra
 
 #endif /* tetra_h */

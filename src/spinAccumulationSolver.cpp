@@ -148,15 +148,29 @@ Eigen::Matrix<double,Nodes::DIM,Tetra::N> spinAcc::calc_u_nod(const Tetra::Tet &
     return u_nod;
     }
 
+double spinAcc::prefactor(const Tetra::Tet &tet) const
+    {
+    const double D0 = getDiffusionCst(tet);
+    return D0/(sq(getLsd(tet)) * gamma0 * getMs(tet));
+    }
+
 void spinAcc::prepareExtraField(void) const
     {
     for (const int idxTet : msh->magTet)
         {
         Tetra::Tet &t = msh->tet[idxTet];
-        double D0 = getDiffusionCst(t);
-        double prefactor = D0 / (sq(getLsd(t)) * gamma0 * getMs(t));
-        t.extraField = [this, &t, prefactor](Eigen::Ref<Eigen::Matrix<double, Nodes::DIM, Tetra::NPI>> H)
-                        { H += calc_Hst(t, prefactor, s); };
+        t.extraField = [this,&t](Eigen::Ref<Eigen::Matrix<double, Nodes::DIM, Tetra::NPI>> H)
+                        {
+                        const double p = prefactor(t);
+                        Eigen::Matrix<double,Nodes::DIM,Tetra::N> s_nod;
+                        for(int ie=0;ie<Tetra::N;ie++)
+                            {
+                            const size_t i = t.ind[ie];
+                            for(size_t d=0;d<Nodes::DIM;d++)
+                                { s_nod(d,ie)= s[i][d]; }
+                            }
+                        H += p * s_nod * Tetra::eigen_a;
+                        };
         }
     }
 
