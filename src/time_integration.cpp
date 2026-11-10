@@ -155,7 +155,12 @@ int Fem::time_integration(Settings &settings /**< [in] */, LinAlgebra &linAlg /*
         }
 
     fout << settings.evolMetadata();
-    fout.precision(16);  // extra precision needed to monitor relaxation towards equilibrium
+    // Scientific notation with an explicit sign: every value is 22 characters long (23 with a
+    // three-digit exponent), so that the columns are aligned with the default 8-character tab
+    // stops. 16 significant digits: extra precision needed to monitor relaxation towards
+    // equilibrium.
+    fout << std::scientific << std::showpos;
+    fout.precision(15);
 
     int flag(0);
     int nt_output(0);  // visible iteration count
