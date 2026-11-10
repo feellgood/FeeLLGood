@@ -42,108 +42,100 @@ void Fem::saver(Settings &settings, const timing &t_prm, std::ofstream &fout, co
             }
         const std::string &keyVal = (region == -1) ? col_name : col_name.substr(colon_pos + 1);
 
-        // Separator to add after this data field.
-        std::string sep;
-        if (i == settings.evol_columns.size() - 1)
-            {
-            sep = "\n";
-            }
-        else
-            {
-            sep = "\t";
-            }
-
         if (keyVal == "iter")
             {
-            fout << nt << sep;
+            fout << nt;
             }
         else if (keyVal == "t")
             {
-            fout << t_prm.get_t_phys() << sep;
+            fout << t_prm.get_t_phys();
             }
         else if (keyVal == "dt")
             {
-            fout << t_prm.get_dt_phys() << sep;
+            fout << t_prm.get_dt_phys();
             }
         else if (keyVal == "max_dm")
             {
-            fout << vmax * t_prm.get_dt() << sep;
+            fout << vmax * t_prm.get_dt();
             }
         else if (keyVal == "max_angle")
             {
-            fout << msh.max_angle() << sep;
+            fout << msh.max_angle();
             }
         else if (keyVal == "<Mx>")
             {
-            fout << msh.avg(Nodes::get_u_comp, IDX_X, region) << sep;
+            fout << msh.avg(Nodes::get_u_comp, IDX_X, region);
             }
         else if (keyVal == "<My>")
             {
-            fout << msh.avg(Nodes::get_u_comp, IDX_Y, region) << sep;
+            fout << msh.avg(Nodes::get_u_comp, IDX_Y, region);
             }
         else if (keyVal == "<Mz>")
             {
-            fout << msh.avg(Nodes::get_u_comp, IDX_Z, region) << sep;
+            fout << msh.avg(Nodes::get_u_comp, IDX_Z, region);
             }
         else if (keyVal == "<dMx/dt>")
             {
-            fout << gamma0 * msh.avg(Nodes::get_v_comp, IDX_X, region) << sep;
+            fout << gamma0 * msh.avg(Nodes::get_v_comp, IDX_X, region);
             }
         else if (keyVal == "<dMy/dt>")
             {
-            fout << gamma0 * msh.avg(Nodes::get_v_comp, IDX_Y, region) << sep;
+            fout << gamma0 * msh.avg(Nodes::get_v_comp, IDX_Y, region);
             }
         else if (keyVal == "<dMz/dt>")
             {
-            fout << gamma0 * msh.avg(Nodes::get_v_comp, IDX_Z, region) << sep;
+            fout << gamma0 * msh.avg(Nodes::get_v_comp, IDX_Z, region);
             }
         else if (keyVal == "Thiele_length")
             {
-            fout << msh.thiele(region) << sep;
+            fout << msh.thiele(region);
             }
         else if (keyVal == "E_ex")
             {
-            fout << E[EXCHANGE] << sep;
+            fout << E[EXCHANGE];
             }
         else if (keyVal == "E_DMI_bulk")
             {
-            fout << E[DMI_BULK] << sep;
+            fout << E[DMI_BULK];
             }
         else if (keyVal == "E_aniso")
             {
-            fout << E[ANISOTROPY] << sep;
+            fout << E[ANISOTROPY];
             }
         else if (keyVal == "E_demag")
             {
-            fout << E[DEMAG] << sep;
+            fout << E[DEMAG];
             }
         else if (keyVal == "E_zeeman")
             {
-            fout << E[ZEEMAN] << sep;
+            fout << E[ZEEMAN];
             }
         else if (keyVal == "E_tot")
             {
-            fout << Etot << sep;
+            fout << Etot;
             }
         else if (keyVal == "Hx")
             {
-            fout << applied_field.x() << sep;
+            fout << applied_field.x();
             }
         else if (keyVal == "Hy")
             {
-            fout << applied_field.y() << sep;
+            fout << applied_field.y();
             }
         else if (keyVal == "Hz")
             {
-            fout << applied_field.z() << sep;
+            fout << applied_field.z();
             }
         else if (keyVal == "jn_multiplier")
-            { fout << settings.jnMultiplier(t_prm.get_t_phys()) << sep; }
+            { fout << settings.jnMultiplier(t_prm.get_t_phys()); }
         else
             {
             std::cerr << "Error: invalid column name '" << keyVal << "'\n";
             SYSTEM_ERROR
             }
+
+        // Separator to add after this data field.
+        fout << ((i == settings.evol_columns.size() - 1) ? '\n' : '\t');
         }
     fout << std::flush;
 
