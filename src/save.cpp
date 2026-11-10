@@ -44,7 +44,7 @@ void Fem::saver(Settings &settings, const timing &t_prm, std::ofstream &fout, co
 
         if (keyVal == "iter")
             {
-            fout << nt;
+            fout << std::to_string(nt);  // not affected by std::showpos
             }
         else if (keyVal == "t")
             {
