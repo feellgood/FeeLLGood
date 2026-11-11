@@ -388,6 +388,21 @@ public:
     /** returns grad(V) */
     Eigen::Matrix<double,Nodes::DIM,NPI> gradV(const std::vector<double> &V) const;
 
+    /** integrals over the tetrahedron of the magnetization u (column 0) and of its squared
+     * components u_x^2, u_y^2, u_z^2 (column 1), with u interpolated at the Gauss points.
+     * With NPI = 5 (degree 3 quadrature) both are exact for the P1 interpolation of u. */
+    Eigen::Matrix<double,Nodes::DIM,2> integrals_u_u2(void) const
+        {
+        Eigen::Matrix<double,Nodes::DIM,N> u_nod;
+        for (int i = 0; i < N; i++)
+            { u_nod.col(i) = getNode(i).get_u(Nodes::NEXT); }
+        const Eigen::Matrix<double,Nodes::DIM,NPI> u = u_nod * eigen_a;
+        Eigen::Matrix<double,Nodes::DIM,2> result;
+        result.col(0) = u * weight;
+        result.col(1) = u.cwiseAbs2() * weight;
+        return result;
+        }
+
 private:
     /** Enforce the correct orientation by swapping nodes if needed. */
     void orientate(void) override;

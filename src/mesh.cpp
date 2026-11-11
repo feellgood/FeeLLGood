@@ -105,6 +105,24 @@ double mesh::avg(const std::function<double(Nodes::Node, Nodes::index)>& getter 
     return sum / volume;
     }
 
+mesh::MagMoments mesh::magMoments(int region /**< region index, or -1 for all magnetic regions */)
+        const
+    {
+    using Integrals = Eigen::Matrix<double,Nodes::DIM,2>;
+    Integrals sum = std::transform_reduce(EXEC_POL, magTet.begin(), magTet.end(),
+            Integrals::Zero().eval(),
+            [](const Integrals &a, const Integrals &b) -> Integrals { return a + b; },
+            [this, region](const int idxElem) -> Integrals
+                {
+                const Tetra::Tet &te = tet[idxElem];
+                if (te.idxPrm != region && region != -1)
+                    { return Integrals::Zero(); }
+                return te.integrals_u_u2();
+                });
+    double volume = (region == -1) ? totalMagVol : settings.paramTetra[region].volume;
+    return MagMoments{sum.col(0) / volume, sum.col(1) / volume};
+    }
+
 double mesh::doOnNodes(const double init_val, const Nodes::index coord,
                      const std::function<bool(double, double)>& whatToDo) const
     {

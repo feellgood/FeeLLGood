@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <ctime>
+#include <map>
 
 #include "config.h"
 #include "fem.h"
@@ -22,6 +23,17 @@ void Fem::saver(Settings &settings, const timing &t_prm, std::ofstream &fout, co
     Eigen::Vector3d applied_field(NAN, NAN, NAN);
     if (field_needed)
         { applied_field = settings.getField(t_prm.get_t_phys()); }
+
+    // The averages and variances of the magnetization of a region are computed in a single pass
+    // over its tetrahedrons, the first time a column needs them, and reused by the other columns.
+    std::map<int, Mesh::mesh::MagMoments> moments_cache;
+    auto moments = [this, &moments_cache](const int region) -> const Mesh::mesh::MagMoments &
+        {
+        auto it = moments_cache.find(region);
+        if (it == moments_cache.end())
+            { it = moments_cache.emplace(region, msh.magMoments(region)).first; }
+        return it->second;
+        };
 
     for (unsigned int i = 0; i < settings.evol_columns.size(); i++)
         {
@@ -64,15 +76,27 @@ void Fem::saver(Settings &settings, const timing &t_prm, std::ofstream &fout, co
             }
         else if (keyVal == "<Mx>")
             {
-            fout << msh.avg(Nodes::get_u_comp, IDX_X, region);
+            fout << moments(region).avg.x();
             }
         else if (keyVal == "<My>")
             {
-            fout << msh.avg(Nodes::get_u_comp, IDX_Y, region);
+            fout << moments(region).avg.y();
             }
         else if (keyVal == "<Mz>")
             {
-            fout << msh.avg(Nodes::get_u_comp, IDX_Z, region);
+            fout << moments(region).avg.z();
+            }
+        else if (keyVal == "var(Mx)")
+            {
+            fout << moments(region).var().x();
+            }
+        else if (keyVal == "var(My)")
+            {
+            fout << moments(region).var().y();
+            }
+        else if (keyVal == "var(Mz)")
+            {
+            fout << moments(region).var().z();
             }
         else if (keyVal == "<dMx/dt>")
             {

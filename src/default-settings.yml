@@ -52,6 +52,9 @@ outputs:
   # - dt: time step
   # - max_dm: maximum variation of the magnetization
   # - max_angle: maximum magnetization angle between adjacent nodes
+  # - var(Mx): variance of Mx over the volume, <Mx^2> - <Mx>^2
+  # - var(My): variance of My over the volume
+  # - var(Mz): variance of Mz over the volume
   # - <dMx/dt>: average change rate of Mx
   # - <dMy/dt>: average change rate of My
   # - <dMz/dt>: average change rate of Mz

@@ -295,6 +295,21 @@ public:
                Nodes::index d /**< [in] */,
                int region = -1 /**< region index, or -1 for all magnetic regions */) const;
 
+    /** volume averages of the magnetization components and of their squares */
+    struct MagMoments
+        {
+        Eigen::Vector3d avg;     /**< <Mx>, <My>, <Mz> */
+        Eigen::Vector3d avg_sq;  /**< <Mx^2>, <My^2>, <Mz^2> */
+
+        /** variances var(Mi) = <Mi^2> - <Mi>^2, clamped to zero against rounding errors */
+        Eigen::Vector3d var() const { return (avg_sq - avg.cwiseAbs2()).cwiseMax(0.0); }
+        };
+
+    /** compute the volume averages of u and of its squared components in a single pass over the
+     * tetrahedrons */
+    MagMoments magMoments(int region = -1 /**< region index, or -1 for all magnetic regions */)
+        const;
+
     /** Compute the maximum angle of the magnetization between two adjacent nodes. */
     double max_angle() const
         {

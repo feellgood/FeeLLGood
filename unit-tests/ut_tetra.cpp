@@ -465,4 +465,48 @@ BOOST_AUTO_TEST_CASE(Tet_gradV, *boost::unit_test::tolerance(UT_TOL))
         }
     }
 
+BOOST_AUTO_TEST_CASE(Tet_integrals_u_u2)
+    {
+    /*
+     * Compare the Gauss quadrature of u and of its squared components with the exact integrals
+     * of the P1 interpolation: int(a_i) = V/4 and int(a_i a_j) = V (1 + delta_ij) / 20, hence
+     * int(u) = V/4 sum_i u_i and int(u_c^2) = V/20 (sum_i u_ic^2 + (sum_i u_ic)^2).
+     * Since |u_i| = 1 the integrals are bounded by V, but int(u) may be much smaller because of
+     * cancellations: the comparison uses an absolute tolerance scaled by V.
+     * */
+    const int nbNod = 4;
+    std::vector<Nodes::Node> node;
+    dummyNodes<nbNod>(node);
+
+    unsigned sd = my_seed();
+    std::mt19937 gen(sd);
+    std::uniform_real_distribution<> distrib(0.0, 1.0);
+
+    for (int i = 0; i < nbNod; i++)
+        {
+        node[i].d[Nodes::NEXT].u = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen));
+        }
+
+    // carefull with indices (starting from 1)
+    Tetra::Tet t(node, 0, {1, 2, 3, 4});
+    const double vol = t.calc_vol();
+
+    Eigen::Vector3d sum_u = Eigen::Vector3d::Zero();
+    Eigen::Vector3d sum_u2 = Eigen::Vector3d::Zero();
+    for (int i = 0; i < nbNod; i++)
+        {
+        sum_u += node[i].d[Nodes::NEXT].u;
+        sum_u2 += node[i].d[Nodes::NEXT].u.cwiseAbs2();
+        }
+    const Eigen::Vector3d ref_u = vol / 4.0 * sum_u;
+    const Eigen::Vector3d ref_u2 = vol / 20.0 * (sum_u2 + sum_u.cwiseAbs2());
+
+    const Eigen::Matrix<double,Nodes::DIM,2> result = t.integrals_u_u2();
+    for (int c = 0; c < Nodes::DIM; c++)
+        {
+        BOOST_TEST(std::abs(result(c, 0) - ref_u(c)) <= 10 * UT_TOL * vol);
+        BOOST_TEST(std::abs(result(c, 1) - ref_u2(c)) <= 10 * UT_TOL * vol);
+        }
+    }
+
 BOOST_AUTO_TEST_SUITE_END()
