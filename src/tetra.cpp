@@ -320,7 +320,8 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     Eigen::Matrix<double,3*N,3*N> AE;
     AE.setZero();
     lumping(a_eff, prm_t.get_prefactor() * Abis, AE);
-
+    if (param.DMI != 0)
+        { DMI_bulk_OffDiag(prm_t, Dbis, AE); }
     Eigen::Matrix<double,2*N,3*N> P;
     buildMatP(P);
 
@@ -360,6 +361,9 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
             BE.col(i) += ai_w*(H.col(npi) + Hst.col(npi) ); // Hst contribution to BE
             }
         }
+
+    if (param.DMI != 0)
+        { DMI_bulk_BE(0.5*Dbis,U,dUdx,dUdy,dUdz,BE); }
 
     /*--------------------   PROJECTION: BE->Lp   --------------------*/
     Lp = Perm * P * BE.reshaped<Eigen::RowMajor>();
