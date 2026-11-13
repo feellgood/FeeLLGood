@@ -285,6 +285,15 @@ public:
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dVd_,
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,N>> BE) const;
 
+    /**
+    DMI bulk contribution to dot(u,Heff): return Dbis*dot(magnetization,rot(magnetization))
+    */
+    Eigen::Matrix<double,NPI,1> calc_uH_DMI_bulk(const double Dbis,
+                                                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
+                                                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdx,
+                                                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdy,
+                                                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdz) const;
+
     /** append(+=) H_aniso for uniaxial anisotropy contribution, returns contribution to uHeff (used
      * to compute the stabilizing effective damping) */
     Eigen::Matrix<double,NPI,1> calc_aniso_uniax(const Eigen::Ref<const Eigen::Vector3d> uk,

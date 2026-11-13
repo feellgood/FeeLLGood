@@ -180,6 +180,22 @@ void Tet::add_drift_BE(const Eigen::Ref<const Eigen::Matrix<double,NPI,1>> alpha
         }
     }
 
+Eigen::Matrix<double,NPI,1> Tet::calc_uH_DMI_bulk(const double Dbis, Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> U,
+                                                                     Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdx,
+                                                                     Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdy,
+                                                                     Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdz) const
+    {
+    Eigen::Matrix<double,NPI,1> uH_DMI_bulk;
+    uH_DMI_bulk.setZero();
+    for(int npi=0;npi<NPI;npi++)
+        {
+        uH_DMI_bulk(npi) = U(IDX_X,npi)*(dUdy(IDX_Z,npi) - dUdz(IDX_Y,npi));
+        uH_DMI_bulk(npi) += U(IDX_Y,npi)*(dUdz(IDX_X,npi) - dUdx(IDX_Z,npi));
+        uH_DMI_bulk(npi) += U(IDX_Z,npi)*(dUdx(IDX_Y,npi) - dUdy(IDX_X,npi));
+        }
+    return -Dbis*uH_DMI_bulk;
+    }
+
 Eigen::Matrix<double,NPI,1> Tet::calc_aniso_uniax(const Eigen::Ref<const Eigen::Vector3d> uk,
         const double Kbis,
         const double s_dt,
@@ -236,7 +252,10 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     {
     const double Ms = param.Ms;
     const double Abis = 2.0 * param.A / (mu0*Ms);
+    const double Dbis = 2.0 * param.DMI / (mu0*Ms);
     const double s_dt = THETA * prm_t.get_dt();  // reduced time step, theta from theta scheme in config.h.in
+    const double safety_factor = 1.1; // to be sure lambda is strictly superior to 0.5*sq(DMI_bulk/A)
+    const double lambda = safety_factor*0.5*sq(param.DMI/param.A);
 
     // damping at the Gauss points: alpha_LLG of the region, increased in the absorbing ends
     Eigen::Matrix<double,NPI,1> alpha;
@@ -262,6 +281,8 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     /*-------------------- END INTERPOLATION ----------------*/
     Eigen::Matrix<double,NPI,1> uHeff = -Abis *( dUdx.colwise().squaredNorm()
             + dUdy.colwise().squaredNorm() + dUdz.colwise().squaredNorm());
+    uHeff.array() += -Abis*lambda;
+
     Eigen::Matrix<double,DIM,NPI> H_aniso;
     H_aniso.setZero();
 
@@ -285,8 +306,17 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     Heff += Hst;
     uHeff += (U.cwiseProduct(Heff)).colwise().sum();//dot product on each col of U and Heff
 
-    Eigen::Matrix<double,NPI,1> a_eff = prm_t.get_alpha_eff<NPI>(alpha, uHeff);
-    
+    Eigen::Matrix<double,NPI,1> a_eff;
+    a_eff.setZero();
+
+    if (param.DMI != 0)
+        {
+        a_eff.array() += Abis*lambda*prm_t.get_prefactor();
+        Eigen::Matrix<double,NPI,1> uH_DMI_bulk = calc_uH_DMI_bulk(Dbis,U,dUdx,dUdy,dUdz);
+        uHeff += uH_DMI_bulk;
+       	}
+    a_eff += prm_t.get_alpha_eff<NPI>(alpha, uHeff);
+
     Eigen::Matrix<double,3*N,3*N> AE;
     AE.setZero();
     lumping(a_eff, prm_t.get_prefactor() * Abis, AE);
