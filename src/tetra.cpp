@@ -193,7 +193,7 @@ Eigen::Matrix<double,NPI,1> Tet::calc_uH_DMI_bulk(const double Dbis, Eigen::Ref<
         uH_DMI_bulk(npi) += U(IDX_Y,npi)*(dUdz(IDX_X,npi) - dUdx(IDX_Z,npi));
         uH_DMI_bulk(npi) += U(IDX_Z,npi)*(dUdx(IDX_Y,npi) - dUdy(IDX_X,npi));
         }
-    return -Dbis*uH_DMI_bulk;
+    return Dbis*uH_DMI_bulk;
     }
 
 Eigen::Matrix<double,NPI,1> Tet::calc_aniso_uniax(const Eigen::Ref<const Eigen::Vector3d> uk,

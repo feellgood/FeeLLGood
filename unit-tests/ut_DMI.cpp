@@ -147,4 +147,43 @@ BOOST_AUTO_TEST_CASE(tet_DMI_bulk_BE, *boost::unit_test::tolerance(10.0*UT_TOL))
             }
     }
 
+BOOST_AUTO_TEST_CASE(tet_uH_DMI_bulk, *boost::unit_test::tolerance(10.0*UT_TOL))
+    {
+    /*
+    unit test on Tet::calc_uH_DMI_bulk member function
+    */
+    using namespace Nodes;
+    using namespace Tetra;
+    
+    const int nbNod = 4;
+    std::vector<Nodes::Node> node;
+    dummyNodes<nbNod>(node);	
+    unsigned sd = my_seed();
+    std::mt19937 gen(sd);
+    std::uniform_real_distribution<> distrib(0.0, 1.0);
+    // carefull with indices (starting from 1)
+    Tetra::Tet t(node, 0, {1, 2, 3, 4});
+    for (int i = 0; i < nbNod; i++)
+        { node[i].d[Nodes::CURRENT].u = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen)); }	
+
+    const double Dbis = distrib(gen);//DBulk/(mu0*Ms);
+    Eigen::Matrix<double,DIM,NPI> U;
+    Eigen::Matrix<double,DIM,NPI> dUdx;
+    Eigen::Matrix<double,DIM,NPI> dUdy;
+    Eigen::Matrix<double,DIM,NPI> dUdz;
+    t.interpolation(Nodes::get_u<CURRENT>, U, dUdx, dUdy, dUdz);
+    // begin code to test
+    Eigen::Matrix<double,NPI,1> uH_DMI_bulk = t.calc_uH_DMI_bulk(Dbis,U,dUdx,dUdy,dUdz);
+    // end code to test
+
+    for(int npi=0;npi<NPI;npi++)
+    	{
+    	// begin code ref
+    	double uHDbulk = Dbis*(U(0,npi)*(dUdy(2,npi)-dUdz(1,npi)) +
+        	                   U(1,npi)*(dUdz(0,npi)-dUdx(2,npi)) +
+            	               U(2,npi)*(dUdx(1,npi)-dUdy(0,npi)) );
+        // end code ref
+        BOOST_TEST( uH_DMI_bulk(npi) == uHDbulk );
+    	}
+    }
 BOOST_AUTO_TEST_SUITE_END()
