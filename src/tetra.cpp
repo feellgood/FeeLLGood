@@ -186,12 +186,12 @@ Eigen::Matrix<double,NPI,1> Tet::calc_uH_DMI_bulk(const double Dbis, Eigen::Ref<
                                                                      Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdz) const
     {
     Eigen::Matrix<double,NPI,1> uH_DMI_bulk;
-    uH_DMI_bulk.setZero();
     for(int npi=0;npi<NPI;npi++)
         {
-        uH_DMI_bulk(npi) = U(IDX_X,npi)*(dUdy(IDX_Z,npi) - dUdz(IDX_Y,npi));
-        uH_DMI_bulk(npi) += U(IDX_Y,npi)*(dUdz(IDX_X,npi) - dUdx(IDX_Z,npi));
-        uH_DMI_bulk(npi) += U(IDX_Z,npi)*(dUdx(IDX_Y,npi) - dUdy(IDX_X,npi));
+        Eigen::Vector3d rot_U(dUdy(IDX_Z,npi) - dUdz(IDX_Y,npi),
+                              dUdz(IDX_X,npi) - dUdx(IDX_Z,npi),
+                              dUdx(IDX_Y,npi) - dUdy(IDX_X,npi));
+        uH_DMI_bulk(npi) = rot_U.dot(U.col(npi));
         }
     return Dbis*uH_DMI_bulk;
     }
