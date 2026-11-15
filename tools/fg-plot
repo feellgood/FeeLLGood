@@ -34,21 +34,14 @@ def get_params():
     return args
 
 def filtering(_pos,_vec,str_pred,perc):
+    _X = np.vstack((_pos[:,0],_pos[:,1],_pos[:,2],_vec[:,0],_vec[:,1],_vec[:,2]))
     if (str_pred != "empty_pred"):
-        _pred = "(lambda x,y,z,mx,my,mz: " + str_pred + ")"
-        f_pos = []
-        for i in range(len(_pos)):
-            x,y,z = _pos[i,0],_pos[i,1],_pos[i,2] 
-            mx,my,mz = _vec[i,0],_vec[i,1],_vec[i,2]
-            if eval(_pred)(x,y,z,mx,my,mz):
-                f_pos.append(i)
-            _X = np.empty([len(f_pos),6],dtype=float)
-            for i in range(len(f_pos)):
-                for j in range(3):
-                    _X[i,j] = _pos[f_pos[i],j]
-                    _X[i,3+j] = _vec[f_pos[i],j]
-    else:
-        _X = np.vstack((_pos[:,0],_pos[:,1],_pos[:,2],_vec[:,0],_vec[:,1],_vec[:,2]))
+        _pred = eval("(lambda x,y,z,mx,my,mz: " + str_pred + ")")
+        keep = np.array([bool(_pred(*_X[:,i])) for i in range(_X.shape[1])], dtype=bool)
+        if not keep.any():
+            print("error: no node satisfies the filter", str_pred)
+            sys.exit(1)
+        _X = _X[:,keep]
     nb_pts = _X.shape[1]
     s = int(100.0/perc)
     return _X[:,range(0,nb_pts,s)]
