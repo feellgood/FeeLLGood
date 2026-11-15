@@ -9,6 +9,7 @@ working with feeLLGood:
 * **fg-merge-sol**: .sol tool
 * **fg-gensol**: .sol generation tool
 * **fg-plot**:plot tool
+* **fg-xyplot**: to plot quantities of .sol files against a coordinate or another column
 
 These tools are documented in the [tools section][] of the feeLLGood Web
 site.

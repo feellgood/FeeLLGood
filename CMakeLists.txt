@@ -167,6 +167,7 @@ install(PROGRAMS ./tools/fg-merge-sol DESTINATION bin)
 install(PROGRAMS ./tools/fg-plot DESTINATION bin)
 install(PROGRAMS ./tools/fg-sol2hdf5 DESTINATION bin)
 install(PROGRAMS ./tools/fg-sol2vtk DESTINATION bin)
+install(PROGRAMS ./tools/fg-xyplot DESTINATION bin)
 
 #===========================================================================
 # unit tests, by default it is not built.
