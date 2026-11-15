@@ -365,19 +365,21 @@ try:
             only surface and related magnetization in the output file
             TODO: add all volume data: tetrahedrons, nodes, magnetizations
             """
-            if self.solFileName:
-                base = self.solFileName.stem
-                ext = ".vtu"
-                outputFileName = f"{base}{ext}"
-                cells = [("triangle",self.triangles),("tetra",self.tetrahedrons)]
-                mesh = meshio.Mesh(self.original_points, cells)
-                if mesh != None:
-                    mag = magDict2array(self.magnetization_data)
-                    mesh.point_data = {"magnetization":mag}
-                    mesh.write(outputFileName)
-                    self.strLog += outputFileName
-                    self.strLog += " written\n"
-            self.statusBar().showMessage(outputFileName + " written")
+            if self.solFileName is None or self.magnetization_data is None:
+                msg = "✗ No magnetization loaded: open a .sol file before exporting to .vtu"
+                self.statusBar().showMessage(msg)
+                self.strLog += msg + "\n"
+                self.update_infos()
+                return
+            outputFileName = f"{self.solFileName.stem}.vtu"
+            cells = [("triangle",self.triangles),("tetra",self.tetrahedrons)]
+            mesh = meshio.Mesh(self.original_points, cells)
+            mesh.point_data = {"magnetization": magDict2array(self.magnetization_data)}
+            mesh.write(outputFileName)
+            msg = outputFileName + " written"
+            self.statusBar().showMessage(msg)
+            self.strLog += msg + "\n"
+            self.update_infos()
 
         def on_surface_charges_changed(self):
             if self.surface_charges_checkbox.isChecked():
