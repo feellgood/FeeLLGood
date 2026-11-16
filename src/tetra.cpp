@@ -180,19 +180,26 @@ void Tet::add_drift_BE(const Eigen::Ref<const Eigen::Matrix<double,NPI,1>> alpha
         }
     }
 
+Eigen::Matrix<double,DIM,NPI> Tet::rot_U(Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdx,
+                                         Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdy,
+                                         Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdz) const
+    {
+    Eigen::Matrix<double,DIM,NPI> tmp;
+    for(int npi=0;npi<NPI;npi++)
+        {
+        tmp.col(npi) = Eigen::Vector3d(dUdy(IDX_Z,npi) - dUdz(IDX_Y,npi),
+                                       dUdz(IDX_X,npi) - dUdx(IDX_Z,npi),
+                                       dUdx(IDX_Y,npi) - dUdy(IDX_X,npi));
+        }
+    return tmp;
+    }
+
 Eigen::Matrix<double,NPI,1> Tet::calc_uH_DMI_bulk(const double Dbis, Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> U,
                                                                      Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdx,
                                                                      Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdy,
                                                                      Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdz) const
-    {
-    Eigen::Matrix<double,NPI,1> uH_DMI_bulk;
-    for(int npi=0;npi<NPI;npi++)
-        {
-        Eigen::Vector3d rot_U(dUdy(IDX_Z,npi) - dUdz(IDX_Y,npi),
-                              dUdz(IDX_X,npi) - dUdx(IDX_Z,npi),
-                              dUdx(IDX_Y,npi) - dUdy(IDX_X,npi));
-        uH_DMI_bulk(npi) = rot_U.dot(U.col(npi));
-        }
+    { // col to col dot product between U and Rot_U
+    Eigen::Matrix<double,NPI,1> uH_DMI_bulk = (U.cwiseProduct(rot_U(dUdx,dUdy,dUdz))).colwise().sum();
     return Dbis*uH_DMI_bulk;
     }
 

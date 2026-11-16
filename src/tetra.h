@@ -285,6 +285,11 @@ public:
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dVd_,
                       Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,N>> BE) const;
 
+    /** return rot(magnetization) */
+    Eigen::Matrix<double,Nodes::DIM,NPI> rot_U(Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdx,
+                                               Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdy,
+                                               Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdz) const;
+
     /**
     DMI bulk contribution to dot(u,Heff): return Dbis*dot(magnetization,rot(magnetization))
     */
