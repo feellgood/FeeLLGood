@@ -142,18 +142,15 @@ void Tet::DMI_bulk_BE(const double cst,
         Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdz,
         Eigen::Ref<Eigen::Matrix<double,DIM,N>> BE) const
     {//cst is DMI_bulk/(mu0*Ms)
+    Eigen::Matrix<double,DIM,NPI> tmp = rot_U(dUdx,dUdy,dUdz);
     for (int npi = 0; npi<NPI; npi++)
         {
         const double c_w = cst * weight[npi];
-        Eigen::Vector3d tmp(dUdy(IDX_Z,npi)-dUdz(IDX_Y,npi),
-                            dUdz(IDX_X,npi)-dUdx(IDX_Z,npi),
-                            dUdx(IDX_Y,npi)-dUdy(IDX_X,npi));
-
         for (int i = 0;i<N;i++)
             {
             const double ai = eigen_a(i,npi);
             // cst*[\omega \cdot (\nabla \times u) + u \cdot (\nabla \times \omega)]
-            BE.col(i) += c_w *(ai*tmp + U.col(npi).cross(da.row(i)));
+            BE.col(i) += c_w *(ai*tmp.col(i) + U.col(npi).cross(da.row(i)));
             }
         }
     }
@@ -392,16 +389,8 @@ double Tet::DMIBulkEnergy(const Tetra::prm &param,
 			              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudx,
 			              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudy,
 			              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudz) const
-	{
-    Eigen::Matrix<double,NPI,1> dens;
-	for (int npi = 0; npi < NPI; npi++)
-	    {
-		Eigen::Vector3d tmp(dudy(IDX_Z,npi) - dudz(IDX_Y,npi),
-		                    dudz(IDX_X,npi) - dudx(IDX_Z,npi),
-		                    dudx(IDX_Y,npi) - dudy(IDX_X,npi));
-		dens[npi] = u.col(npi).dot(tmp);
-		}
-    return -param.DMI * weight.dot(dens);
+	{// DMI bulk constant is already in the return value of calc_uH_DMI_bulk
+    return -weight.dot(calc_uH_DMI_bulk(param.DMI,u,dudx,dudy,dudz));
     }
 
 double Tet::uniaxialAnisotropyEnergy(const Tetra::prm &param,

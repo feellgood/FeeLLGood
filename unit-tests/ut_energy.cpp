@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_CASE(zeemanEnergyWithVarField, *boost::unit_test::tolerance(UT_T
     }
 
 /** test of the math expression of the DMI bulk contribution to energy
- * It does not test the DMI constant nor its sign, only u and dud_{x|y|z} expression
+ * It does test the whole algebra and the sign, including DMI constant
  * */
 BOOST_AUTO_TEST_CASE(DMIBulkEnergy, *boost::unit_test::tolerance(UT_TOL))
 	{
@@ -212,30 +212,35 @@ BOOST_AUTO_TEST_CASE(DMIBulkEnergy, *boost::unit_test::tolerance(UT_TOL))
 
 	// carefull with indices (starting from 1)
 	Tetra::Tet t(node, 0, {1, 2, 3, 4});
-	Eigen::Matrix<double,DIM,Tetra::NPI> u;
+    Tetra::prm param;
+    param.DMI = distrib(gen);
+
+    Eigen::Matrix<double,DIM,Tetra::NPI> u;
 	Eigen::Matrix<double,DIM,Tetra::NPI> dudx;
 	Eigen::Matrix<double,DIM,Tetra::NPI> dudy;
 	Eigen::Matrix<double,DIM,Tetra::NPI> dudz;
 	t.interpolation(Nodes::get_u<Nodes::NEXT>, u, dudx, dudy, dudz);
-
-	// begin code to test
+   	// begin code to test
 	Eigen::Matrix<double,Tetra::NPI,1> dens;
-	for (int npi = 0; npi < Tetra::NPI; npi++)
+    Eigen::Matrix<double,DIM,Tetra::NPI> tmp = t.rot_U(dudx,dudy,dudz);	
+    for (int npi = 0; npi < Tetra::NPI; npi++)
 	    {
-	    Eigen::Vector3d tmp(dudy(IDX_Z,npi) - dudz(IDX_Y,npi),
-	                        dudz(IDX_X,npi) - dudx(IDX_Z,npi),
-	                        dudx(IDX_Y,npi) - dudy(IDX_X,npi));
-	    dens[npi] = u.col(npi).dot(tmp);
-	    }
-	// end code to test
+        dens[npi] = u.col(npi).dot(tmp.col(npi));
+        dens[npi] *= t.weight[npi];
+        }
+	dens *= -param.DMI;
+    
+    double val_to_test = t.DMIBulkEnergy(param,u,dudx,dudy,dudz);
+    // end code to test
 
-	for(int npi = 0;npi<Tetra::NPI;npi++)
+    for(int npi = 0;npi<Tetra::NPI;npi++)
 	    {
-	    double tmp_npi = (u(0,npi)*(dudy(2,npi)-dudz(1,npi)) +
-	                      u(1,npi)*(dudz(0,npi)-dudx(2,npi)) +
-	                      u(2,npi)*(dudx(1,npi)-dudy(0,npi)) );
-	    BOOST_TEST(dens[npi] == tmp_npi);
+	    double tmp_npi = -param.DMI*t.weight[npi]*(u(0,npi)*(dudy(2,npi)-dudz(1,npi)) +
+	                                               u(1,npi)*(dudz(0,npi)-dudx(2,npi)) +
+	                                               u(2,npi)*(dudx(1,npi)-dudy(0,npi)) );
+        BOOST_TEST(dens[npi] == tmp_npi);
 	    }
-	}
+	BOOST_TEST(dens.sum() == val_to_test);
+    }
 
 BOOST_AUTO_TEST_SUITE_END()
