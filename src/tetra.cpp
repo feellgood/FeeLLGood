@@ -150,7 +150,7 @@ void Tet::DMI_bulk_BE(const double cst,
             {
             const double ai = eigen_a(i,npi);
             // cst*[\omega \cdot (\nabla \times u) + u \cdot (\nabla \times \omega)]
-            BE.col(i) += c_w *(ai*tmp.col(i) + U.col(npi).cross(da.row(i)));
+            BE.col(i) += c_w *(ai*tmp.col(npi) + U.col(npi).cross(da.row(i)));
             }
         }
     }
