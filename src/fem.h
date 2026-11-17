@@ -207,7 +207,7 @@ private:
         {
         chronometer fmm_counter(2);
         myFMM.calc_demag(msh);
-        if (settings.verbose)
+        if (settings.verbose && settings.demag_enabled)
             { std::cout << "magnetostatics done in " << fmm_counter.millis() << "\n"; }
         energy(t, settings);
         evolution();

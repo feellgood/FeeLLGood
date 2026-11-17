@@ -258,6 +258,7 @@ Settings::Settings()
                     // to residual errors
     verbose = 0;
     spin_acc = false;
+    demag_enabled = true;
     field_type = UNDEF;
     read(YAML::Load(get_default_yaml()));  // load defaults
     }
@@ -405,6 +406,7 @@ void Settings::toYaml()
     if (spin_acc)
         { std::cout << "  V_file: " << str(V_file) << "\n"; }
     std::cout << "demagnetizing_field_solver:\n";
+    std::cout << "  enable: " << str(demag_enabled) << "\n";
     std::cout << "  nb_threads: " << scalfmmNbTh << "\n";
     std::cout << "finite_element_solver:\n";
     std::cout << "  max(iter): " << MAXITER << "\n";
@@ -755,6 +757,7 @@ void Settings::read(YAML::Node yaml)
     YAML::Node solver = yaml["demagnetizing_field_solver"];
     if (solver && !solver.IsNull())
         {
+        assign(demag_enabled, solver["enable"]);
         assign(scalfmmNbTh, solver["nb_threads"]);
         if (scalfmmNbTh <= 0)
             { scalfmmNbTh = available_cpu_count; }

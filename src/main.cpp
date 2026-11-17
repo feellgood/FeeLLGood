@@ -255,8 +255,10 @@ int main(int argc, char *argv[])
 
     chronometer fmm_counter(2);
     scal_fmm::fmm myFMM(fem.msh, mySettings.paramTetra, mySettings.paramTriangle,
-            mySettings.scalfmmNbTh);
-    if (mySettings.verbose)
+            mySettings.scalfmmNbTh, mySettings.demag_enabled);
+    if (!mySettings.demag_enabled)
+        { std::cout << "Magnetostatics: demagnetizing field disabled, phi = 0 at every node\n"; }
+    else if (mySettings.verbose)
             {
             std::cout << "Magnetostatics: particles inserted, using " << mySettings.scalfmmNbTh
                       << " threads, in " << fmm_counter.millis() << std::endl;

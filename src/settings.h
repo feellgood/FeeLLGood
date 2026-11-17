@@ -156,6 +156,10 @@ public:
     /** nb of threads for the computation of the demag field with scalfmm */
     int scalfmmNbTh;
 
+    /** if false, the demagnetizing field is not computed: no FMM computation, the magnetic scalar
+     * potential is zero at every node */
+    bool demag_enabled;
+
     /** if true creates an output file of the solution of the electrostatic problem  */
     bool V_file;
 

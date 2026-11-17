@@ -64,10 +64,13 @@ public:
     inline fmm(Mesh::mesh &msh /**< [in] */,
                std::vector<Tetra::prm> & prmTet /**< [in] */,
                std::vector<Triangle::prm> & prmTri /**< [in] */,
-               const int ScalfmmNbThreads /**< [in] */)
-        : prmTetra(prmTet), prmTriangle(prmTri),
+               const int ScalfmmNbThreads /**< [in] */,
+               const bool enable = true /**< [in] if false, no FMM: phi = 0 */)
+        : prmTetra(prmTet), prmTriangle(prmTri), enabled(enable),
           tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels(NbLevels, boxWidth, boxCenter)
         {
+        if (!enabled)
+            { return; }  // no particles inserted, no charges nor corrections allocated
         omp_set_num_threads(ScalfmmNbThreads);
         norm = 2. / msh.l.maxCoeff();
 
@@ -91,10 +94,20 @@ public:
 
     /**
     Compute the demagnetizing field. Include the second order corrections if FIRST_ORDER=OFF
-    (which is the default).
+    (which is the default). If the demagnetizing field is disabled, no FMM computation is done and
+    the scalar potentials phi and phi_v are set to zero at every node.
     */
     void calc_demag(Mesh::mesh &msh /**< [in] */)
         {
+        if (!enabled)
+            {
+            for (int i = 0; i < msh.getNbNodes(); i++)
+                {
+                msh.set(i, Nodes::set_phi, 0.0);
+                msh.set(i, Nodes::set_phiv, 0.0);
+                }
+            return;
+            }
         demag(Nodes::get_u<Nodes::NEXT>, Nodes::set_phi, msh);
         if (!FIRST_ORDER)
             { demag(Nodes::get_v<Nodes::NEXT>, Nodes::set_phiv, msh); }
@@ -110,6 +123,9 @@ public:
     const std::vector<Triangle::prm> &prmTriangle;
 
 private:
+    /** if false, the demagnetizing field is not computed (phi = 0) */
+    const bool enabled;
+
     /** sources: both surface and volume charges */
     std::vector<double> srcDen;
 

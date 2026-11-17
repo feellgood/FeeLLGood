@@ -276,6 +276,12 @@ spin_accumulation:
 # Parameters for the computation of the demagnetizing field.
 demagnetizing_field_solver:
 
+  # Compute the demagnetizing field. If false, the fast multipole
+  # computation (volume and surface charges, surface corrections) is
+  # skipped entirely and the magnetic scalar potential is identically
+  # zero at every node: no demagnetizing field, no demagnetizing energy.
+  enable: true
+
   # Number of threads to use. The value 0 means to match the number of
   # available processors (actually, hardware threads), as reported by
   # sysconf(_SC_NPROCESSORS_ONLN).
