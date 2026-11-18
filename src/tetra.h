@@ -269,9 +269,10 @@ public:
     /** add DMI bulk contribution to BE */
     void DMI_bulk_BE(const double cst,
 			         Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
-			         Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdx,
-			         Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdy,
-			         Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdz,
+                     Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> rot_U,
+			         //Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdx,
+			         //Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdy,
+			         //Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdz,
 			         Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,N>> BE) const;
 
     /** add drift contribution due to eventual recentering to vectors BE, Vdrift is the drift
@@ -295,9 +296,7 @@ public:
     */
     Eigen::Matrix<double,NPI,1> calc_uH_DMI_bulk(const double Dbis,
                                                  Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
-                                                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdx,
-                                                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdy,
-                                                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdz) const;
+                                                 Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> rot_U) const;
 
     /** append(+=) H_aniso for uniaxial anisotropy contribution, returns contribution to uHeff (used
      * to compute the stabilizing effective damping) */
@@ -340,9 +339,7 @@ public:
     /** DMI bulk energy of the tetrahedron */
 	double DMIBulkEnergy(const Tetra::prm &param,
 	                     Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u,
-	                     Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudx,
-	                     Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudy,
-	                     Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudz) const;
+                         Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> rot_u) const;
 
     /** uniaxial anisotropy energy of the tetrahedron */
     double uniaxialAnisotropyEnergy(const Tetra::prm &param,

@@ -108,7 +108,8 @@ BOOST_AUTO_TEST_CASE(tet_DMI_bulk_BE, *boost::unit_test::tolerance(10.0*UT_TOL))
     Eigen::Matrix<double,DIM,NPI> dUdy;
     Eigen::Matrix<double,DIM,NPI> dUdz;
     t.interpolation(Nodes::get_u<CURRENT>, U, dUdx, dUdy, dUdz);
-    t.DMI_bulk_BE(cst,U,dUdx,dUdy,dUdz,BE_to_check);
+    Eigen::Matrix<double,DIM,NPI> rot_U = t.rot_U(dUdx,dUdy,dUdz);
+    t.DMI_bulk_BE(cst,U,rot_U,BE_to_check);
     // end code to test
 
     //begin code ref
@@ -173,7 +174,8 @@ BOOST_AUTO_TEST_CASE(tet_uH_DMI_bulk, *boost::unit_test::tolerance(10.0*UT_TOL))
     Eigen::Matrix<double,DIM,NPI> dUdz;
     t.interpolation(Nodes::get_u<CURRENT>, U, dUdx, dUdy, dUdz);
     // begin code to test
-    Eigen::Matrix<double,NPI,1> uH_DMI_bulk = t.calc_uH_DMI_bulk(Dbis,U,dUdx,dUdy,dUdz);
+    Eigen::Matrix<double,DIM,NPI> rot_U = t.rot_U(dUdx,dUdy,dUdz);
+    Eigen::Matrix<double,NPI,1> uH_DMI_bulk = t.calc_uH_DMI_bulk(Dbis,U,rot_U);
     // end code to test
 
     for(int npi=0;npi<NPI;npi++)

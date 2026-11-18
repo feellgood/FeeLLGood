@@ -137,12 +137,9 @@ void Tet::DMI_bulk_OffDiag(timing const &prm_t, const double DMIbulk_bis,
 
 void Tet::DMI_bulk_BE(const double cst,
         Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> U,
-        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdx,
-        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdy,
-        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdz,
+        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> rot_U,
         Eigen::Ref<Eigen::Matrix<double,DIM,N>> BE) const
     {//cst is DMI_bulk/(mu0*Ms)
-    Eigen::Matrix<double,DIM,NPI> tmp = rot_U(dUdx,dUdy,dUdz);
     for (int npi = 0; npi<NPI; npi++)
         {
         const double c_w = cst * weight[npi];
@@ -150,7 +147,7 @@ void Tet::DMI_bulk_BE(const double cst,
             {
             const double ai = eigen_a(i,npi);
             // cst*[\omega \cdot (\nabla \times u) + u \cdot (\nabla \times \omega)]
-            BE.col(i) += c_w *(ai*tmp.col(npi) + U.col(npi).cross(da.row(i)));
+            BE.col(i) += c_w *(ai*rot_U.col(npi) + U.col(npi).cross(da.row(i)));
             }
         }
     }
@@ -192,11 +189,9 @@ Eigen::Matrix<double,DIM,NPI> Tet::rot_U(Eigen::Ref<Eigen::Matrix<double,DIM,NPI
     }
 
 Eigen::Matrix<double,NPI,1> Tet::calc_uH_DMI_bulk(const double Dbis, Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> U,
-                                                                     Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdx,
-                                                                     Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdy,
-                                                                     Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdz) const
+                                                                     Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> rot_U) const
     { // col to col dot product between U and Rot_U
-    Eigen::Matrix<double,NPI,1> uH_DMI_bulk = (U.cwiseProduct(rot_U(dUdx,dUdy,dUdz))).colwise().sum();
+    Eigen::Matrix<double,NPI,1> uH_DMI_bulk = U.cwiseProduct(rot_U).colwise().sum();
     return Dbis*uH_DMI_bulk;
     }
 
@@ -312,20 +307,24 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
 
     Eigen::Matrix<double,NPI,1> a_eff;
     a_eff.setZero();
+    Eigen::Matrix<double,3*N,3*N> AE;
+    AE.setZero();
+    Eigen::Matrix<double,DIM,N> BE;
+    BE.setZero();
 
     if (param.DMI != 0)
         {
         a_eff.array() += Abis*lambda*prm_t.get_prefactor();
-        Eigen::Matrix<double,NPI,1> uH_DMI_bulk = calc_uH_DMI_bulk(Dbis,U,dUdx,dUdy,dUdz);
+        Eigen::Matrix<double,DIM,NPI> rotU = rot_U(dUdx,dUdy,dUdz);
+        Eigen::Matrix<double,NPI,1> uH_DMI_bulk = calc_uH_DMI_bulk(Dbis,U,rotU);
         uHeff += uH_DMI_bulk;
+        DMI_bulk_OffDiag(prm_t, Dbis, AE);
+        DMI_bulk_BE(0.5*Dbis,U,rotU,BE);
        	}
     a_eff += prm_t.get_alpha_eff<NPI>(alpha, uHeff);
 
-    Eigen::Matrix<double,3*N,3*N> AE;
-    AE.setZero();
     lumping(a_eff, prm_t.get_prefactor() * Abis, AE);
-    if (param.DMI != 0)
-        { DMI_bulk_OffDiag(prm_t, Dbis, AE); }
+
     Eigen::Matrix<double,2*N,3*N> P;
     buildMatP(P);
 
@@ -340,8 +339,6 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     Kp = Perm * P * AE * P.transpose();// with MKL installed this operation should call dgemm_direct
     
     /*********************   calculations on BE   *********************/
-    Eigen::Matrix<double,DIM,N> BE;
-    BE.setZero();
     if (idx_dir != IDX_UNDEF)
         {
         Eigen::Matrix<double,DIM,NPI>  dVd_dir = v_nod * (da.col(idx_dir)).replicate(1,NPI);
@@ -366,9 +363,6 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
             }
         }
 
-    if (param.DMI != 0)
-        { DMI_bulk_BE(0.5*Dbis,U,dUdx,dUdy,dUdz,BE); }
-
     /*--------------------   PROJECTION: BE->Lp   --------------------*/
     Lp = Perm * P * BE.reshaped<Eigen::RowMajor>();
     }
@@ -386,11 +380,9 @@ double Tet::exchangeEnergy(const Tetra::prm &param,
 
 double Tet::DMIBulkEnergy(const Tetra::prm &param,
 			              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u,
-			              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudx,
-			              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudy,
-			              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudz) const
+			              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> rot_u) const
 	{// DMI bulk constant is already in the return value of calc_uH_DMI_bulk
-    return -weight.dot(calc_uH_DMI_bulk(param.DMI,u,dudx,dudy,dudz));
+    return -weight.dot(calc_uH_DMI_bulk(param.DMI,u,rot_u));
     }
 
 double Tet::uniaxialAnisotropyEnergy(const Tetra::prm &param,

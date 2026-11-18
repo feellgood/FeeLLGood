@@ -230,7 +230,7 @@ BOOST_AUTO_TEST_CASE(DMIBulkEnergy, *boost::unit_test::tolerance(UT_TOL))
         }
 	dens *= -param.DMI;
     
-    double val_to_test = t.DMIBulkEnergy(param,u,dudx,dudy,dudz);
+    double val_to_test = t.DMIBulkEnergy(param,u,tmp);
     // end code to test
 
     for(int npi = 0;npi<Tetra::NPI;npi++)

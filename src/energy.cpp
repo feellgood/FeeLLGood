@@ -19,7 +19,7 @@ void Fem::energy(const double t, Settings &settings)
                       {
                       const Tetra::Tet &te = msh.tet[idxElem];
                       const Tetra::prm &param = settings.paramTetra[te.idxPrm];
-                      Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> u,dudx,dudy,dudz;
+                      Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> u,dudx,dudy,dudz,rot_u;
                       Eigen::Matrix<double,Tetra::NPI,1> phi;
 
                       te.interpolation(Nodes::get_u<NEXT>, u, dudx, dudy, dudz);
@@ -27,7 +27,9 @@ void Fem::energy(const double t, Settings &settings)
 
                       E[EXCHANGE] += te.exchangeEnergy(param, dudx, dudy, dudz);
                       if (param.DMI != 0.0)
-                          { E[DMI_BULK] += te.DMIBulkEnergy(param, u, dudx, dudy, dudz); }
+                          {
+                          rot_u = te.rot_U(dudx, dudy, dudz);
+                          E[DMI_BULK] += te.DMIBulkEnergy(param, u, rot_u); }
                       E[DEMAG] += te.demagEnergy(param, dudx, dudy, dudz, phi);
 
                       if (param.K != 0.0)
