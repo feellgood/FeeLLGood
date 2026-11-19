@@ -12,8 +12,7 @@ electron flow) and g = (u.grad) m, T is split on the local basis e1 = g/|g|, e2 
 and compared with the Zhang-Li form T = eta [-(u.grad) m + beta m x (u.grad) m]:
     eta = -Tad/|g|,  beta = -Tna/Tad.
 The local limit of the model (texture wide compared with l_sd) is beta = tau_sd/tau_sf =
-(1 - P^2) l_sd^2/l_sf^2 (l_sd^2/l_sf^2 if spin_accumulation.anisotropic_diffusion is false) and
-eta = 1/(1 + beta^2). With --polarizer p, T is also split into field-like and damping-like parts:
+(1 - P P_prime) l_sd^2/l_sf^2 and eta = 1/(1 + beta^2), P_prime being beta' of Zhang-Levy-Fert. With --polarizer p, T is also split into field-like and damping-like parts:
     Tfl = T.b1, Tdl = T.b2,  b1 = m x p/|m x p|, b2 = m x b1.
 Derivations: dev-notes/adiabatic_torques.tex.
 
@@ -29,8 +28,8 @@ barycenter), then
   - with --elements, per tetrahedron in <name>_torques_elements.txt (no nodal averaging).
 Torques in s^-1.
 
-The parameters (Ms or Js, sigma, dens_state, P, l_sd, l_sf of the volume regions, length_unit,
-anisotropic_diffusion) are read in the settings file of the simulation (YAML or JSON), with the
+The parameters (Ms or Js, sigma, dens_state, P, P_prime, l_sd, l_sf of the volume regions,
+length_unit) are read in the settings file of the simulation (YAML or JSON), with the
 defaults of feeLLGood for the missing keys. The mesh is the one of the settings, of the line
 '## mesh.filename:' of the .sol file, or --mesh (ASCII gmsh file, format 4.1 or 2.2).
 """
@@ -54,8 +53,8 @@ BOHRS_MUB = CHARGE_ELECTRON * PLANCKS_HBAR / (2 * MASS_ELECTRON)
 MU0 = 1.25663706127e-6
 
 # defaults of src/default-settings.yml used here
-DEFAULT_REGION = {'Ms': 795774.7, 'sigma': 0.0, 'dens_state': 0.0, 'P': 0.0, 'l_sd': 0.0,
-                  'l_sf': 0.0}
+DEFAULT_REGION = {'Ms': 795774.7, 'sigma': 0.0, 'dens_state': 0.0, 'P': 0.0, 'P_prime': 0.0,
+                  'l_sd': 0.0, 'l_sf': 0.0}
 DEFAULT_LENGTH_UNIT = 1e-9
 
 
@@ -243,7 +242,7 @@ class MagneticTets:
     """Tetrahedra of the magnetic regions where the spin-transfer torque is defined, with their
     geometry and parameters (the same for all the .sol files)."""
 
-    def __init__(self, nodes, tets, names, regions, length_unit, anisotropic, polarizer):
+    def __init__(self, nodes, tets, names, regions, length_unit, polarizer):
         keep = np.zeros(len(tets), dtype=bool)
         prm = {k: np.zeros(len(tets)) for k in DEFAULT_REGION}
         self.region_names = []
@@ -281,8 +280,8 @@ class MagneticTets:
         d0 = 2 * prm['sigma'] / (CHARGE_ELECTRON**2 * prm['dens_state'])
         self.inv_tau_sd = d0 / prm['l_sd']**2
         self.u_factor = prm['P'] * BOHRS_MUB * prm['sigma'] / (CHARGE_ELECTRON * prm['Ms'])
-        factor = 1 - prm['P']**2 if anisotropic else np.ones(len(self.Ms))
-        self.beta_local = factor * prm['l_sd']**2 / prm['l_sf']**2  # tau_sd/tau_sf
+        # tau_sd/tau_sf
+        self.beta_local = (1 - prm['P'] * prm['P_prime']) * prm['l_sd']**2 / prm['l_sf']**2
         self.polarizer = None if polarizer is None else unit(np.array([polarizer], dtype=float))[0]
 
     def torques(self, cols):
@@ -391,12 +390,11 @@ def main():
     settings = read_settings(args.settings)
     regions = region_parameters(settings)
     length_unit = float((settings.get('mesh') or {}).get('length_unit', DEFAULT_LENGTH_UNIT))
-    anisotropic = bool((settings.get('spin_accumulation') or {}).get('anisotropic_diffusion', True))
 
     first = read_sol(args.sol[0])
     mesh_file = find_mesh(args, settings, first[2])
     nodes, tets, names = read_mesh(mesh_file)
-    mt = MagneticTets(nodes, tets, names, regions, length_unit, anisotropic, args.polarizer)
+    mt = MagneticTets(nodes, tets, names, regions, length_unit, args.polarizer)
     print(f"mesh {mesh_file}: {len(nodes)} nodes, {len(tets)} tetrahedra, "
           f"{len(mt.tets)} with a spin-transfer torque (regions {', '.join(mt.region_names)})")
 
