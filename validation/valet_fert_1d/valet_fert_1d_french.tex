@@ -307,6 +307,7 @@ sont données mais n'interviennent pas.
 \end{itemize}
 
 \section{Solution analytique}
+\label{sec:analytic}
 
 \subsection{Le système linéaire}
 
@@ -466,6 +467,18 @@ Cette équivalence demande $\beta=\beta'$ : les réglages du test donnent
 défaut, une diffusion isotrope). Avec la valeur par défaut, la
 conductivité de spin de F2 serait $\sigma$ au lieu de $\sigma(1-P^2)$ et
 le test échouerait.
+
+\paragraph{Le cas $\beta'\neq\beta$.} Avec \texttt{P\_prime} $=P'\neq P$,
+le flux de moment devient $Q = -P\,(\mu_B/e)\,j - D_0(1-PP')\,s'$,
+c'est-à-dire l'équation ci-dessus avec $\sigma(1-PP')$ au lieu de
+$\sigma(1-P^2)$ ; la conductance longitudinale du volume de F1 change de la
+même façon. La solution analytique de la section~\ref{sec:analytic} donne donc encore la
+solution de FeeLLGood, avec ces conductivités de spin, bien que ce ne soit
+plus Valet--Fert : $\varphi = 2s/(\mu_BN_0e)$ n'est alors qu'un changement
+de variable, la densité d'états dépendant du spin. Le script vérifie deux
+configurations de plus, P$'$ et AP$'$, avec $\beta' = 0{,}9$ dans F1 et
+$0{,}7$ dans F2 : l'erreur maximale vaut $2{,}7\times10^{-3}$, comme avec
+$\beta'=\beta$, alors que $\beta'$ modifie la solution de 14 et 16\,\%.
 
 \subsection{La condition de Robin sur l'entrée}
 

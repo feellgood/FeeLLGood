@@ -18,13 +18,23 @@ with $s = \mu_B N_0\,\mu_s/2$ (A/m), $\mu_s = (\mu_+ - \mu_-)/2$, $N_0$ being th
 volume region bordering the surface): the stack is not meshed, all its conductances are converted
 with it. The asymmetry `gamma` of an interface is the one of Valet–Fert.
 
+Two more configurations, P′ and AP′, check $`\beta' \neq \beta`$ (key `P_prime`, 0.9 for the bulk
+F1 and 0.7 for F2, against $`\beta`$ = 0.5 and 0.3). In the collinear case, the spin current of
+Zhang–Levy–Fert is $`Q = -\beta(\mu_B/e)\,j - D_0(1-\beta\beta')\,s'`$: the bulk equations are the
+ones of Valet–Fert with $`\sigma(1-\beta\beta')`$ instead of $`\sigma(1-\beta^2)`$ in the diffusion
+term, in F2 and in F1. The same analytic solution is then the reference, though it is no longer
+Valet–Fert ($`s`$ is not proportional to the spin chemical potential when the density of states
+depends on the spin). P and AP set `P_prime` = `P`.
+
 ## Usage
 
 ```
 ./valet_fert.py [path to feellgood]    # default ../../src/feellgood
 ```
 The mesh is built with `gmsh` if missing. The exit status is 0 if the maximum error on $s_z$,
-relative to $\max|s_z|$, is below 1 % in both configurations.
+relative to $\max|s_z|$, is below 1 % in the four configurations, and if $`\beta'`$ changes the
+reference by more than 10 % in P′ and AP′ (14 and 16 %: the case is discriminating; ignoring
+`P_prime` in F1 alone, or in F2 alone, would change it by 4.5 % at least).
 
 ## Results (branch slonczewski)
 
@@ -32,6 +42,9 @@ relative to $\max|s_z|$, is below 1 % in both configurations.
 |--------|-----------------------------------------|------------------------------------------|-----------|
 | h = 2 nm | 45.690 / 45.858 A/m                   | −163.994 / −164.596 A/m                  | 8.2e-3    |
 | h = 1 nm | 45.811 / 45.858 A/m                   | −164.427 / −164.596 A/m                  | 2.6e-3    |
+
+With $`\beta' \neq \beta`$ (branch tunnel_junction, h = 1 nm): P′ 53.405 / 53.461 A/m, AP′
+−196.832 / −197.041 A/m, max error 2.7e-3.
 
 The error decreases as $h^2$ (P1 elements). With the factor 1 instead of 2 in $G_\parallel$, the
 error is 8.5 % (P configuration): the test fails.

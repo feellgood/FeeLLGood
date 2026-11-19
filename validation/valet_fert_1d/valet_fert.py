@@ -23,8 +23,17 @@ give AR and gamma). N0 is the density of states of F2: the stack being not meshe
 conductances (interfaces and bulk of F1) are converted with it, the density of states of F1 does
 not enter.
 
+Two more configurations P' and AP' check beta' != beta (key P_prime of F2 and of the bulk F1):
+in the collinear case, the spin current of Zhang-Levy-Fert is
+    Q = -beta (mu_B/e) j - D0 (1 - beta beta') s',
+which is the bulk equation above with sigma (1 - beta beta') instead of sigma (1 - beta^2) in the
+diffusion term, in F2 and in F1 (longitudinal conductance of its bulk). The same analytic solution
+is then the reference, phi = 2 s/(mu_B N0 e) being only a change of variable: with beta' != beta,
+it is no longer the spin chemical potential of Valet-Fert, the density of states depending on the
+spin.
+
 Usage: valet_fert.py [path to feellgood], from any directory; the mesh is built with gmsh if
-missing. Exit status 0 if the relative error is below the tolerance in both configurations.
+missing. Exit status 0 if the relative error is below the tolerance in the four configurations.
 """
 
 import json
@@ -46,18 +55,30 @@ F2 = {"sigma": 4e6, "N0": 1.344e47, "beta": 0.3, "lsf": 10e-9, "lsd": 1e-9}
 F1 = {"sigma": 2e6, "beta": 0.5, "lsf": 20e-9, "t": 15e-9}
 ITF1 = {"AR": 0.5e-15, "gamma": 0.75}   # F1/N, AR in Ohm m^2
 ITF2 = {"AR": 0.3e-15, "gamma": 0.6}    # N/F2
+BETA_PRIME = {"F1": 0.9, "F2": 0.7}  # beta' of the configurations P' and AP' (beta' = beta in P
+                                     # and AP)
 JN = 1e12                            # A/m^2, normal current density on the inlet (outward
                                      # normal -z): electrons flowing from F1 to F2
 
 
-def valet_fert(sign_F1, z):
-    """spin accumulation s_z (A/m) at the positions z (m) in F2, F1 along sign_F1 z"""
+def beta_prime(prime):
+    """beta' of F1 and F2: BETA_PRIME if prime, beta otherwise"""
+    if prime:
+        return BETA_PRIME["F1"], BETA_PRIME["F2"]
+    return F1["beta"], F2["beta"]
+
+
+def valet_fert(sign_F1, z, prime=False):
+    """spin accumulation s_z (A/m) at the positions z (m) in F2, F1 along sign_F1 z; beta' = beta,
+    or BETA_PRIME if prime"""
     j = -JN                          # charge current density along +z
     b1, g1 = sign_F1 * F1["beta"], sign_F1 * ITF1["gamma"]
     b2, g2 = F2["beta"], ITF2["gamma"]
     l1, l2, t1 = F1["lsf"], F2["lsf"], F1["t"]
-    c1 = F1["sigma"] * (1 - b1**2)
-    c2 = F2["sigma"] * (1 - b2**2)
+    bp1, bp2 = beta_prime(prime)
+    # beta beta' does not depend on the orientation of F1 (both change sign with it)
+    c1 = F1["sigma"] * (1 - F1["beta"] * bp1)
+    c2 = F2["sigma"] * (1 - F2["beta"] * bp2)
     # unknowns X = (a1, d1, phiN, a2, d2):
     # phi1(x) = a1 exp(x/l1) + d1 exp(-(x + t1)/l1) on [-t1, 0]
     # phi2(x) = a2 exp(-x/l2) + d2 exp((x - L)/l2) on [0, L]
@@ -81,10 +102,11 @@ def valet_fert(sign_F1, z):
     return MU_B * F2["N0"] * E * phi / 2
 
 
-def settings(sign_F1, name):
+def settings(sign_F1, name, prime=False):
+    bp1, bp2 = beta_prime(prime)
     stack = {
         "p": [0, 0, sign_F1],
-        "F1": {"sigma": F1["sigma"], "P": F1["beta"], "P_prime": F1["beta"],
+        "F1": {"sigma": F1["sigma"], "P": F1["beta"], "P_prime": bp1,
                "l_sf": F1["lsf"], "thickness": F1["t"]},
         "F1N": {"AR": ITF1["AR"], "gamma": ITF1["gamma"], "Gr": 5e14},
         "NF2": {"AR": ITF2["AR"], "gamma": ITF2["gamma"], "Gr": 5e14}}
@@ -97,7 +119,7 @@ def settings(sign_F1, name):
             "volume_regions": {"wire": {
                 "Js": 1.0, "Ae": 1.3e-11, "alpha_LLG": 0.05, "K": 0,
                 "sigma": F2["sigma"], "dens_state": F2["N0"],
-                "P": F2["beta"], "P_prime": F2["beta"],
+                "P": F2["beta"], "P_prime": bp2,
                 "l_sd": F2["lsd"], "l_sf": F2["lsf"]}},
             "surface_regions": {
                 "outlet": {"V": 0.0, "s": [0, 0, 0]},
@@ -136,17 +158,25 @@ def main():
     z = read_mesh_nodes("wire.msh")[:, 2] * 1e-9
 
     ok = True
-    for sign_F1, name in [(1, "P"), (-1, "AP")]:
-        subprocess.run([feellgood, "-"], input=json.dumps(settings(sign_F1, name)), text=True,
-                       check=True, stdout=subprocess.DEVNULL)
+    for sign_F1, name, prime in [(1, "P", False), (-1, "AP", False),
+                                 (1, "Pprime", True), (-1, "APprime", True)]:
+        subprocess.run([feellgood, "-"], input=json.dumps(settings(sign_F1, name, prime)),
+                       text=True, check=True, stdout=subprocess.DEVNULL)
         s = read_s(name + "_iter0.sol")
-        s_ref = valet_fert(sign_F1, z)
+        s_ref = valet_fert(sign_F1, z, prime)
         err = np.abs(s[:, 2] - s_ref).max() / np.abs(s_ref).max()
         transverse = np.abs(s[:, :2]).max() / np.abs(s_ref).max()
         inlet = np.abs(z) < 1e-12
-        print(f"{name:2s}: s_z(inlet) feeLLGood = {s[inlet, 2].mean():9.3f} A/m, "
-              f"Valet-Fert = {s_ref[inlet].mean():9.3f} A/m; "
+        label = name.replace("prime", "'")
+        print(f"{label:3s}: s_z(inlet) feeLLGood = {s[inlet, 2].mean():9.3f} A/m, "
+              f"{'reference' if prime else 'Valet-Fert'} = {s_ref[inlet].mean():9.3f} A/m; "
               f"max error / max|s| = {err:.2e}, transverse = {transverse:.1e}")
+        if prime:
+            # the case is discriminating only if beta' changes the solution much more than TOL
+            change = np.abs(s_ref - valet_fert(sign_F1, z)).max() / np.abs(s_ref).max()
+            print(f"     beta' = {BETA_PRIME['F1']} (F1), {BETA_PRIME['F2']} (F2) instead of beta: "
+                  f"the reference changes by {change:.1e}")
+            ok = ok and change > 10 * TOL
         ok = ok and err < TOL and transverse < TOL
     print("OK" if ok else "FAILED")
     return 0 if ok else 1

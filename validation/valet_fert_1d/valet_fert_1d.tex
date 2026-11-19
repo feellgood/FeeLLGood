@@ -306,6 +306,7 @@ but do not enter.
 \end{itemize}
 
 \section{Analytic solution}
+\label{sec:analytic}
 
 \subsection{The linear system}
 
@@ -463,6 +464,18 @@ This equivalence requires $\beta=\beta'$: the settings of the test give
 \texttt{P\_prime} $=P$ to F2 and to F1 (the default \texttt{P\_prime}
 is 0, an isotropic diffusion). With the default, the spin conductivity of
 F2 would be $\sigma$ instead of $\sigma(1-P^2)$ and the test would fail.
+
+\paragraph{The case $\beta'\neq\beta$.} With \texttt{P\_prime} $=P'\neq P$,
+the moment flux becomes $Q = -P\,(\mu_B/e)\,j - D_0(1-PP')\,s'$, that is
+the equation above with $\sigma(1-PP')$ instead of $\sigma(1-P^2)$; the
+longitudinal conductance of the bulk of F1 changes in the same way. The
+analytic solution of section~\ref{sec:analytic} thus still gives the solution of feeLLGood,
+with these spin conductivities, though it is no longer Valet--Fert:
+$\varphi = 2s/(\mu_BN_0e)$ is then only a change of variable, the density
+of states depending on the spin. The script checks two more configurations,
+P$'$ and AP$'$, with $\beta' = 0.9$ in F1 and $0.7$ in F2: the maximum error
+is $2.7\times10^{-3}$, as with $\beta'=\beta$, while $\beta'$ changes the
+solution by 14 and 16\,\%.
 
 \subsection{The Robin condition on the inlet}
 
