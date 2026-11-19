@@ -36,7 +36,7 @@ switch (spin valves, MRAM, spin-torque oscillators).
 |---|---|---|---|
 | $`\mathbf{m}`$ | unit vector of the magnetization (written $`\mathbf{u}`$ in the code) | – | solution of LLG |
 | $`\mathbf{s}`$ | spin accumulation (a magnetization-like density, see § 4.4) | A/m | solution of the spin diffusion problem |
-| $`\mathbf{J}`$, $`j_n`$ | charge current density, its normal component $`\mathbf{J}\cdot\mathbf{n}`$ on a surface, $`\mathbf{n}`$ being the **outward** normal ($`j_n > 0`$: the current leaves the sample, the electrons enter it) | A/m² | `jn` (number or `current_density`) |
+| $`\mathbf{J}`$, $`j_n`$ | charge current density, its normal component $`\mathbf{J}\cdot\mathbf{n}`$ on a surface, $`\mathbf{n}`$ being the **outward** normal ($`j_n > 0`$: the current leaves the sample, the electrons enter it) | A/m² | `jn`, times `spin_accumulation.jn_multiplier(t)` |
 | $`V`$ | electrostatic potential, $`\mathbf{J} = -\sigma\nabla V`$ | V | electrostatic solver |
 | $`\sigma`$ | electrical conductivity | S/m | `sigma` |
 | $`N_0`$ | density of states at the Fermi level | J⁻¹m⁻³ | `dens_state` |
@@ -229,7 +229,7 @@ On the angular validation case, the damping-like torque differs by 15 to 17 % be
 The surface where the current enters the free layer replaces `uP` by a block `slonczewski`:
 ```yaml
 inlet:
-  jn: 1e12                       # or jn: current_density; jn > 0: electrons from F1 into F2
+  jn: 1e12                       # times jn_multiplier(t); jn > 0: electrons from F1 into F2
   slonczewski:
     p: [0, 0, 1]                 # magnetization of F1
     F1:  {sigma: 2e6, P: 0.5, l_sf: 20e-9, thickness: 15e-9}   # optional: bulk of F1
@@ -243,7 +243,7 @@ inlet:
   independent of the magnetization.
 - With `NF2`: the surface must border a magnetic region.
 - `jn` is required on the same surface, `uP` and `s` are excluded. A time-dependent current density
-  (`jn: current_density`, `dev-notes/current_density.md`) is accepted.
+  (`spin_accumulation.jn_multiplier`, `dev-notes/jn_multiplier.md`) is accepted.
 
 ### 4.2 Where it is implemented
 
@@ -273,7 +273,7 @@ On each triangle of the surface, at each Gauss point:
 The matrix is assembled again at each solve, the magnetization having changed. The symmetric part
 of $`\mathsf{G}_s`$ is positive and strengthens the coercivity; with `sink`, the boundary block is
 not symmetric, which BiCGStab accepts. With a time-dependent current density, $`j_n`$ is multiplied
-by `spinAcc::jn_factor` at the time of the solve.
+by `spinAcc::jn_multiplier` at the time of the solve (`spin_accumulation.jn_multiplier`).
 
 ### 4.4 Units: from the interface parameters to the spin diffusion problem
 
@@ -494,7 +494,8 @@ mesh:
     pillar_top: {V: 0.0, s: [0, 0, 0]}
 ```
 `tunnel` excludes `jn`, `V`, `s`, `uP` and `slonczewski` on the same surface, requires
-$`c \le P_1 \le 1`$ (so that $`P_2 \le 1`$), and cannot be mixed with `jn: current_density`. With
+$`c \le P_1 \le 1`$ (so that $`P_2 \le 1`$), and cannot be used with `spin_accumulation.jn_multiplier`
+(the potential being solved again at each time step, the time dependence is given by `voltage`). With
 $`V_1`$ below the potential of the sample, the electrons flow from F1 into the sample.
 
 ### 8.6 Validation and example

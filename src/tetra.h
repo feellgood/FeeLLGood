@@ -89,6 +89,7 @@ struct prm
     std::string regName; /**< region name */
     double alpha_LLG;    /**< \f$ \alpha \f$ damping parameter, dimensionless */
     double A;            /**< exchange constant stiffness in [Joule per meter] = kg m^1 s^-2 */
+    double DMI;          /**< DMI bulk in J m^-2 */
     double Ms;           /**< Magnetization at saturation in [Ms] = A m^-1 if Ms<=0 the
                            the region is non magnetic */
     double K;            /**< uniaxial anisotropy constant */
@@ -270,6 +271,18 @@ public:
                                 const Eigen::Ref<const Eigen::Matrix<double,Nodes::DIM,NPI>> U,
                                 Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE) const;
 
+    /** computes off diagonal DMI bulk contributions and add them to matrix AE */
+    void DMI_bulk_OffDiag(timing const &prm_t, const double DMIbulk_bis,
+                          Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE) const;
+
+    /** add DMI bulk contribution to BE */
+    void DMI_bulk_BE(const double cst,
+			         Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> U,
+			         Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdx,
+			         Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdy,
+			         Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dUdz,
+			         Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,N>> BE) const;
+
     /** add drift contribution due to eventual recentering to vectors BE, Vdrift is the drift
      * velocity in reduced time (physical velocity divided by gamma0), alpha is the damping at the
      * Gauss points */
@@ -318,6 +331,13 @@ public:
                           Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudx,
                           Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudy,
                           Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudz) const;
+
+    /** DMI bulk energy of the tetrahedron */
+	double DMIBulkEnergy(const Tetra::prm &param,
+	                     Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u,
+	                     Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudx,
+	                     Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudy,
+	                     Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudz) const;
 
     /** uniaxial anisotropy energy of the tetrahedron */
     double uniaxialAnisotropyEnergy(const Tetra::prm &param,
@@ -381,16 +401,6 @@ private:
     /** Enforce the correct orientation by swapping nodes if needed. */
     void orientate(void) override;
     };  // end class Tetra
-
-    /** to perform some second order corrections, an effective \f$ \alpha \f$ is computed here with
-     * a piecewise formula, dt is the reduced time step */
-    Eigen::Matrix<double,NPI,1> calc_alpha_eff(const double dt, const double alpha,
-                                               Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff);
-
-    /** same as above, with a damping alpha depending on the Gauss point (absorbing ends) */
-    Eigen::Matrix<double,NPI,1> calc_alpha_eff(const double dt,
-                                               const Eigen::Ref<const Eigen::Matrix<double,NPI,1>> alpha,
-                                               Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff);
 
     /** returns Hst field on the NPI Gauss point(s) */
     Eigen::Matrix<double,Nodes::DIM,Tetra::NPI> calc_Hst(const Tetra::Tet &tet,

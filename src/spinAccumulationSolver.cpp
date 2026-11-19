@@ -22,17 +22,6 @@ using namespace Nodes;
         {
         if (mySettings.spin_acc)
             {
-            if (mySettings.usesCurrentDensity() && !mySettings.hasCurrentDensity())
-                {
-                std::cerr << "Error: a surface region has jn: current_density, but the function "
-                             "current_density is not defined.\n";
-                exit(1);
-                }
-            if (mySettings.hasCurrentDensity() && !mySettings.usesCurrentDensity())
-                {
-                std::cerr << "Warning: current_density is defined, but no surface region has "
-                             "jn: current_density: it only acts through Bext.\n";
-                }
             if (mySettings.usesVoltage() && !mySettings.hasVoltage())
                 {
                 std::cerr << "Error: a tunnel barrier has V: voltage, but the function voltage is "
@@ -62,6 +51,15 @@ using namespace Nodes;
                                                              mySettings.verbose, 1000);
             pot_solver->checkBoundaryConditions();
             tunnel = pot_solver->hasTunnel();
+            if (tunnel && !mySettings.sJnMultiplier.empty())
+                {
+                /* with a tunnel barrier, the potential is solved again at each time step: it is
+                 * not proportional to the jn of the settings, and jn_multiplier would scale it
+                 * wrongly; the time dependence is given by voltage(t) */
+                std::cerr << "Error: spin_accumulation.jn_multiplier cannot be used with a tunnel "
+                             "barrier: give the time dependence with V: voltage.\n";
+                exit(1);
+                }
             for (const Triangle::prm &p : mySettings.paramTriangle)
                 {
                 if (std::isfinite(p.V))
@@ -71,7 +69,10 @@ using namespace Nodes;
             pot_solver->voltage = voltage;
             std::string V_fileName("");
             if(mySettings.V_file)
-                { V_fileName = mySettings.getSimName() + "_V.sol"; }
+                {
+                V_fileName = mySettings.r_path_output_dir + '/' + mySettings.getSimName()
+                             + "_V.sol";
+                }
             pot_solver->compute(mySettings.verbose, V_fileName);
 
             V = pot_solver->V;
@@ -308,7 +309,7 @@ std::vector<double> spinAcc::potential(void) const
     {
     std::vector<double> Vt(V.size());
     std::transform(V.begin(), V.end(), Vt.begin(),
-                   [this](const double v_ref) { return V_D + jn_factor*v_ref; });
+                   [this](const double v) { return V_D + jn_multiplier*v; });
     return Vt;
     }
 
@@ -358,8 +359,9 @@ bool spinAcc::solve(void)
     /* flux (Neumann) boundary condition on the surface where the current density jn is injected
      * with the polarization uP: Q_n = -(mu_B/e) jn uP, contribution -int_Gamma Q_n a_i to the RHS
      * (the surfaces where s is given are Dirichlet conditions, see boundaryConditions());
-     * time-dependent current density: jn -> jn_factor jn. On a surface with a polarizer stack
-     * (slonczewski), the flux is replaced by a Robin condition, see stackBoundaryCondition() */
+     * time-dependent current density: jn -> jn_multiplier jn. On a surface with a polarizer
+     * stack (slonczewski), the flux is replaced by a Robin condition, see
+     * stackBoundaryCondition() */
     for (Triangle::Tri &f : msh->tri)
         {
         if (paramTri[f.idxPrm].slonczewski)
@@ -369,7 +371,7 @@ bool spinAcc::solve(void)
         else if (std::isfinite(paramTri[f.idxPrm].jn) && std::isfinite(paramTri[f.idxPrm].uP.norm()))
             {
             std::vector<double> Le(DIM_PB * Triangle::N, 0.0);
-            const Eigen::Vector3d Qn = -jn_factor * paramTri[f.idxPrm].jn
+            const Eigen::Vector3d Qn = -jn_multiplier * paramTri[f.idxPrm].jn
                                        * (BOHRS_MUB/CHARGE_ELECTRON) * paramTri[f.idxPrm].uP;
             for (int npi = 0; npi < Triangle::NPI; npi++)
                 {
@@ -407,10 +409,10 @@ void spinAcc::stackBoundaryCondition(Triangle::Tri &f)
     /* the spin current entering the sample through the polarizer stack is
      * q = (mu_B/e) jn Peff(m0) - Gs s (jn > 0: electrons entering the sample, flowing from F1 to F2),
      * that is Q_n = -q: contribution -int_Gamma Q_n a_i = int_Gamma q a_i, the source to the RHS
-     * and the term in s to the matrix; time-dependent current density: jn -> jn_factor jn */
+     * and the term in s to the matrix; time-dependent current density: jn -> jn_multiplier jn */
     using namespace Triangle;
     const prm &param = paramTri[f.idxPrm];
-    const double K = jn_factor * param.jn * BOHRS_MUB / CHARGE_ELECTRON;
+    const double K = jn_multiplier * param.jn * BOHRS_MUB / CHARGE_ELECTRON;
 
     Eigen::Matrix<double,DIM_PB*N,DIM_PB*N> Ke;
     Ke.setZero();
@@ -548,9 +550,9 @@ void spinAcc::integrales(const Tetra::Tet &tet, std::vector<double> &BE) const
         /* constant cst0 in a magnetic region is the only RHS parameter involved in the diffusion
         * equation for magnetic contribution
         * units: [cst0] = [sigma] m^2 = A^2 s^3 m^-1 kg^-1
-        * time-dependent current density: grad V = jn_factor grad V0
+        * time-dependent current density: grad V = jn_multiplier grad V0
         */
-        const double cst0 = jn_factor * BOHRS_MUB * getPolarizationRate(tet) * getSigma(tet)
+        const double cst0 = jn_multiplier * BOHRS_MUB * getPolarizationRate(tet) * getSigma(tet)
                             / CHARGE_ELECTRON;
         const Eigen::Matrix<double, Nodes::DIM, NPI> gradV = tet.gradV(V);
 

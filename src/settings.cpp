@@ -415,6 +415,7 @@ void Settings::toYaml()
             { continue; }
         std::cout << "    " << it->regName << ":\n";
         std::cout << "      Ae: " << it->A << "\n";
+        std::cout << "      DMI_bulk: " << it->DMI << "\n";
         std::cout << "      Ms: " << it->Ms << "\n";
         std::cout << "      K: " << it->K << "\n";
         if (it->K != 0)
@@ -446,8 +447,6 @@ void Settings::toYaml()
         std::cout <<  "      J:";
         if (isnan(it->jn))
             { std::cout << "\n"; }
-        else if (it->jn_current_density)
-            { std::cout << " current_density\n"; }
         else
             { std::cout << ' ' << it->jn << '\n'; }
         std::cout <<  "      V:";
@@ -550,11 +549,6 @@ void Settings::toYaml()
         { std::cout << str(sB) << "\n"; }
     else
         { std::cout << "[\"" << sBx << "\", \"" << sBy << "\", \"" << sBz << "\"]\n"; }
-    std::cout << "current_density:";
-    if (hasCurrentDensity())
-        { std::cout << ' ' << str(sCurrentDensity) << '\n'; }
-    else
-        { std::cout << '\n'; }
     std::cout << "voltage:";
     if (hasVoltage())
         { std::cout << ' ' << str(sVoltage) << '\n'; }
@@ -562,6 +556,12 @@ void Settings::toYaml()
         { std::cout << '\n'; }
     std::cout << "spin_accumulation:\n";
     std::cout << "  enable: " << str(spin_acc) << "\n";
+    // jn_multiplier may be called by Bext even without spin accumulation
+    std::cout << "  jn_multiplier:";
+    if (sJnMultiplier.empty())
+        { std::cout << '\n'; }
+    else
+        { std::cout << ' ' << str(sJnMultiplier) << '\n'; }
     if (spin_acc)
         {
         std::cout << "  anisotropic_diffusion: " << str(anisotropic_diffusion) << "\n";
@@ -712,6 +712,7 @@ void Settings::read(YAML::Node yaml)
                 p.regName = name;
 
                 assign(p.A, volume["Ae"]);
+                assign(p.DMI, volume["DMI_bulk"]);
                 if (assign(p.Ms, volume["Ms"]))
                     { has_Ms = true; }
                 double Js;
@@ -756,16 +757,8 @@ void Settings::read(YAML::Node yaml)
                 assign(p.Ks, surface["Ks"]);
                 assign(NORMALIZE, p.uk, surface["uk"]);
 
-                // J and V may be null, which we map to NAN. jn may also be the function
-                // current_density(t) of the settings: jn is then the reference 1 A/m^2.
-                YAML::Node jn = surface["jn"];
-                p.jn_current_density = false;
-                if (jn && jn.IsScalar() && jn.as<std::string>() == "current_density")
-                    {
-                    p.jn = 1.0;
-                    p.jn_current_density = true;
-                    }
-                else if (!assign(p.jn, jn))
+                // J and V may be null, which we map to NAN.
+                if (!assign(p.jn, surface["jn"]))
                     { p.jn = NAN; }
                 if (!assign(p.V, surface["V"]))
                     { p.V = NAN; }
@@ -920,22 +913,6 @@ void Settings::read(YAML::Node yaml)
             }
         }  // Bext
 
-    YAML::Node current_density = yaml["current_density"];
-    if (current_density && !current_density.IsNull())
-        {
-        if (!current_density.IsScalar())
-            { error("current_density should be a function of t or an expression of t."); }
-        sCurrentDensity = current_density.as<std::string>();
-        const bool is_function = std::regex_search(sCurrentDensity,
-                                                   std::regex("^\\s*function\\b"));
-        const std::string js_current_density = is_function
-                ? sCurrentDensity : "function(t) { return (" + sCurrentDensity + "); }";
-        current_density_parser.set_function(js_current_density);
-        // the time functions of the applied field can call current_density(t)
-        field_parser.define_global_function("current_density", js_current_density);
-        field_time_parser.define_global_function("current_density", js_current_density);
-        }  // current_density
-
     YAML::Node voltage = yaml["voltage"];
     if (voltage && !voltage.IsNull())
         {
@@ -953,6 +930,23 @@ void Settings::read(YAML::Node yaml)
         assign(spin_acc, spAcc["enable"]);
         assign(anisotropic_diffusion, spAcc["anisotropic_diffusion"]);
         assign(V_file, spAcc["V_file"]);
+
+        YAML::Node jn_multiplier = spAcc["jn_multiplier"];
+        if (jn_multiplier && !jn_multiplier.IsNull())
+            {
+            if (!jn_multiplier.IsScalar())
+                { error("spin_accumulation.jn_multiplier should be an expression of t or a "
+                        "function of t."); }
+            sJnMultiplier = jn_multiplier.as<std::string>();
+            const bool is_function = std::regex_search(sJnMultiplier,
+                                                       std::regex("^\\s*function\\b"));
+            const std::string js_jn_multiplier = is_function
+                    ? sJnMultiplier : "function(t) { return (" + sJnMultiplier + "); }";
+            jn_multiplier_parser.set_function(js_jn_multiplier);
+            // the time functions of the applied field can call jn_multiplier(t)
+            field_parser.define_global_function("jn_multiplier", js_jn_multiplier);
+            field_time_parser.define_global_function("jn_multiplier", js_jn_multiplier);
+            }
 	    }  // spin_accumulation
 
     // The number of available processors (actually, hardware threads) is the default for the number

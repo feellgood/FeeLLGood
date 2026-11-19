@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include "chronometer.h" // date()
@@ -12,7 +11,6 @@
 void electrostatSolver::checkBoundaryConditions(void) const
     {
     int nbSurfJ(0);
-    int nbSurfJ_current_density(0);
     int nbSurfV(0);
     int nbSurfTunnel(0);
     for (const Triangle::prm &p : paramTri)
@@ -21,29 +19,14 @@ void electrostatSolver::checkBoundaryConditions(void) const
             { nbSurfJ++; }
         if (p.tunnel)
             { nbSurfTunnel++; }
-        if (p.jn_current_density)
-            { nbSurfJ_current_density++; }
         if (std::isfinite(p.V))
             { nbSurfV++; }
         }
-    /* at least one surface with jn, all numeric or all jn: current_density (the potential is then
-     * proportional to the single factor current_density(t)/j_ref), and a single surface with V */
+    // at least one surface with jn or a tunnel barrier, and a single surface with V
     if (!(nbSurfJ + nbSurfTunnel >= 1 && nbSurfV == 1))
         {
         std::cerr << "Error: incorrect boundary conditions for potential V solver: at least one "
                      "surface with jn or tunnel and a single surface with V are required.\n";
-        exit(1);
-        }
-    if (nbSurfTunnel != 0 && nbSurfJ_current_density != 0)
-        {
-        std::cerr << "Error: incorrect boundary conditions for potential V solver: tunnel cannot "
-                     "be mixed with jn: current_density.\n";
-        exit(1);
-        }
-    if (nbSurfJ_current_density != 0 && nbSurfJ_current_density != nbSurfJ)
-        {
-        std::cerr << "Error: incorrect boundary conditions for potential V solver: the surfaces "
-                     "with jn cannot mix jn: current_density and numeric jn.\n";
         exit(1);
         }
     else if (verbose)
@@ -55,9 +38,7 @@ void electrostatSolver::infos(void) const
     std::cout << "Boundary conditions:\n";
     for (const Triangle::prm &p : paramTri)
         {
-        if (p.jn_current_density)
-            { std::cout << "\tjn= current_density (reference 1 A/m^2)\n"; }
-        else if (!std::isnan(p.jn))
+        if (!std::isnan(p.jn))
             { std::cout << "\tjn= " << p.jn << "\n"; }
         if (!std::isnan(p.V))
             { std::cout << "\tV= " << p.V << "\n"; }
@@ -201,10 +182,7 @@ bool electrostatSolver::solve(void)
 
     /* the potential is solved with V = 0 on the surface with V, the imposed V_D being added
      * afterwards (spinAcc::potential, save): the potential is defined up to a constant, and
-     * solving around V_D != 0 would add an error of the order of the tolerance times V_D (it
-     * drowned the reference potential of jn: current_density, about 5e-14 V for 1 A/m^2) */
-    reference_problem = std::any_of(paramTri.begin(), paramTri.end(),
-                                    [](const Triangle::prm &p) { return p.jn_current_density; });
+     * solving around V_D != 0 would add an error of the order of the tolerance times V_D */
 
     for (const Triangle::Tri &tri : msh->tri)
         {
@@ -237,13 +215,11 @@ bool electrostatSolver::save(const std::string &V_fileName, const std::string &m
 
     fout << tags::common::rw_time << ' ' << date() << '\n' << metadata << std::scientific
          << std::setprecision(precision);
-    // V0 = V_D + V for a numeric jn; reference potential V_ref = V for jn: current_density
-    const double offset = reference_problem ? 0.0 : V_D;
     const int NOD = msh->getNbNodes();
     for (int i = 0; i < NOD; i++)
         {
         int _i = msh->getNodeIndex(i);
-        fout << i << '\t' << offset + V[_i] << "\n";
+        fout << i << '\t' << V_D + V[_i] << "\n";
         }
     fout.close();
     return !(fout.good());

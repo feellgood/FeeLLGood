@@ -27,13 +27,10 @@ public:
     const double DTMIN;  // 1e-14;
 
     /** maximum step time for time integrator */
-    const double DTMAX;  //  1e-5 en stat ;  1e-7 en dynamique;
-
-    /** reduced \f$ \tau_r = 100 DT_{\mathrm{max}} \f$ */
-    const double TAUR;
+    const double DTMAX;
 
     /** this prefactor must be synchronized with dt value */
-    double prefactor;
+    inline double get_prefactor(void) const { return prefactor; }
 
     /** getter for (reduced) time step dt */
     inline double get_dt() const { return dt; }
@@ -47,8 +44,43 @@ public:
         {
         dt = _dt;
         double t_tilde = _dt / TAUR;
-        prefactor = (1. + t_tilde * abs(log( t_tilde)));
+        prefactor = (1. + t_tilde * abs(log( t_tilde)))*THETA*dt;
         }
+
+    /** to perform some second order corrections, an effective \f$ \alpha \f$ is computed here with
+     * a piecewise formula, dt is the reduced time step
+     * damping alpha depends on the Gauss point (especially for absorbing ends) */
+    template <int NPI>
+    Eigen::Matrix<double,NPI,1> get_alpha_eff(
+            const Eigen::Ref<const Eigen::Matrix<double,NPI,1>> alpha_g,
+            const Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff) const
+        {
+        Eigen::Matrix<double,NPI,1> a_eff = alpha_g;
+        const double r(0.1);
+
+        for(int npi=0;npi<NPI;npi++)
+            {
+            const double alpha = alpha_g(npi);
+            const double M = 2. * alpha * r / dt;
+            const double h = uHeff(npi);
+            if (h > 0.)
+                {
+                if (h > M)
+                    a_eff(npi) = alpha*(1.+r);
+                else
+                    a_eff(npi) = alpha + dt / 2. * h;
+                }
+            else
+                {
+                if (h < -M)
+                    a_eff(npi) = alpha/(1.+r);
+                else
+                    a_eff(npi) = alpha / (1. - dt / (2. * alpha) * h);
+                }
+            }
+        return a_eff;
+        }
+
 
     /** basic test to know if dt is too small */
     inline bool is_dt_TooSmall() const { return (dt < DTMIN); }
@@ -62,12 +94,24 @@ public:
     /** getter for the physical time [s] */
     inline double get_t_phys() const { return t / gamma0; }
 
+    /** getter for TAUR (in reduced time unit ) */
+    inline double get_TAUR() const { return TAUR; }
+
     /** setter for t */
     inline void set_t(const double _t) { t = _t; }
 
 private:
-    double t; /**< reduced current time of the simulation */
-    double dt; /**< reduced time-step */
+    /** reduced \f$ \tau_r = 100 DT_{\mathrm{max}} \f$ */
+    const double TAUR;
+
+    /** reduced current time of the simulation */
+    double t;
+
+    /** reduced time-step */
+    double dt;
+
+    /** prefactor for the lumping. It is time dependant. */
+    double prefactor;
     };
 
 #endif

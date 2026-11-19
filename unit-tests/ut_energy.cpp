@@ -193,4 +193,49 @@ BOOST_AUTO_TEST_CASE(zeemanEnergyWithVarField, *boost::unit_test::tolerance(UT_T
         }
     }
 
+/** test of the math expression of the DMI bulk contribution to energy
+ * It does not test the DMI constant nor its sign, only u and dud_{x|y|z} expression
+ * */
+BOOST_AUTO_TEST_CASE(DMIBulkEnergy, *boost::unit_test::tolerance(UT_TOL))
+	{
+	using namespace Nodes;
+	const int nbNod = 4;
+	std::vector<Nodes::Node> node;
+	dummyNodes<nbNod>(node);
+
+	unsigned sd = my_seed();
+	std::mt19937 gen(sd);
+	std::uniform_real_distribution<> distrib(0.0, 1.0);
+
+	for (int i = 0; i < nbNod; i++)
+	    { node[i].d[1].u = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen)); }
+
+	// carefull with indices (starting from 1)
+	Tetra::Tet t(node, 0, {1, 2, 3, 4});
+	Eigen::Matrix<double,DIM,Tetra::NPI> u;
+	Eigen::Matrix<double,DIM,Tetra::NPI> dudx;
+	Eigen::Matrix<double,DIM,Tetra::NPI> dudy;
+	Eigen::Matrix<double,DIM,Tetra::NPI> dudz;
+	t.interpolation(Nodes::get_u<Nodes::NEXT>, u, dudx, dudy, dudz);
+
+	// begin code to test
+	Eigen::Matrix<double,Tetra::NPI,1> dens;
+	for (int npi = 0; npi < Tetra::NPI; npi++)
+	    {
+	    Eigen::Vector3d tmp(dudy(IDX_Z,npi) - dudz(IDX_Y,npi),
+	                        dudz(IDX_X,npi) - dudx(IDX_Z,npi),
+	                        dudx(IDX_Y,npi) - dudy(IDX_X,npi));
+	    dens[npi] = u.col(npi).dot(tmp);
+	    }
+	// end code to test
+
+	for(int npi = 0;npi<Tetra::NPI;npi++)
+	    {
+	    double tmp_npi = (u(0,npi)*(dudy(2,npi)-dudz(1,npi)) +
+	                      u(1,npi)*(dudz(0,npi)-dudx(2,npi)) +
+	                      u(2,npi)*(dudx(1,npi)-dudy(0,npi)) );
+	    BOOST_TEST(dens[npi] == tmp_npi);
+	    }
+	}
+
 BOOST_AUTO_TEST_SUITE_END()

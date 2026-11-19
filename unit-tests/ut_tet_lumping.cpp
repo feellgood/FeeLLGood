@@ -124,11 +124,11 @@ BOOST_AUTO_TEST_CASE(tet_lumping)
     double alpha_LLG = 0.5;
     Eigen::Matrix<double,Tetra::NPI,1> uHeff;
     uHeff.setConstant(distrib(gen));
-    Eigen::Matrix<double,Tetra::NPI,1> alfa = Tetra::calc_alpha_eff(dt, alpha_LLG, uHeff);
+    Eigen::Matrix<double,Tetra::NPI,1> alfa = prm_t.get_alpha_eff<Tetra::NPI>(Eigen::Matrix<double,Tetra::NPI,1>::Constant(alpha_LLG), uHeff);
     double A = distrib(gen);         // Ae
     double Js = 0.5 + distrib(gen);  // 0.5 offset to center on 1 the Js value
     double Abis = 2.0 * A / Js;
-    double TAUR = prm_t.TAUR;
+    double TAUR = prm_t.get_TAUR();
 
     // ref code (with minimal adaptations of integrales method in file MuMag_integrales.cc of
     // src_Tube_scalfmm_thiaville_ec_mu_oersted_thiele_dyn20180903.tgz )
@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE(tet_lumping)
     // end ref code
 
     // code to check
-    t.lumping(alfa, prm_t.prefactor * s_dt * Abis, AE_to_check);
+    t.lumping(alfa, prm_t.get_prefactor() * Abis, AE_to_check);
     // end code to check
 
     /* same terms summed in different orders: the deviations (a few rounding units) are compared
@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE(tet_lumping)
         for (int j = 0; j < 3*Tetra::N; j++)
             {
             const bool AE_ok = (std::abs(AE_to_check(i,j) - AE[i][j]) <= 1e-13 * scale);
-            BOOST_TEST(AE_ok);
+            BOOST_TEST(AE_ok,"Error on AE coefficient.\n");
             }
     if (!DET_UT) std::cout << "seed =" << sd << std::endl;
     }

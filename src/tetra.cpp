@@ -44,43 +44,6 @@ void prm::infos(void)
         }
     }
 
-Eigen::Matrix<double,NPI,1> Tetra::calc_alpha_eff(const double dt, const double alpha,
-                                                      Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff)
-    {
-    return calc_alpha_eff(dt, Eigen::Matrix<double,NPI,1>::Constant(alpha), uHeff);
-    }
-
-Eigen::Matrix<double,NPI,1> Tetra::calc_alpha_eff(const double dt,
-                                                      const Eigen::Ref<const Eigen::Matrix<double,NPI,1>> alpha_g,
-                                                      Eigen::Ref<Eigen::Matrix<double,NPI,1>> uHeff)
-    {
-    Eigen::Matrix<double,NPI,1> a_eff;
-    const double r = 0.1;  // what is that constant, where does it come from ?
-
-    for(int npi=0;npi<NPI;npi++)
-        {
-        const double alpha = alpha_g(npi);
-        const double M = 2. * alpha * r / dt;
-        a_eff(npi) = alpha;
-        double h = uHeff(npi);
-        if (h > 0.)
-            {
-            if (h > M)
-                a_eff(npi) = alpha + dt / 2. * M;
-            else
-                a_eff(npi) = alpha + dt / 2. * h;
-            }
-        else
-            {
-            if (h < -M)
-                a_eff(npi) = alpha / (1. + dt / (2. * alpha) * M);
-            else
-                a_eff(npi) = alpha / (1. - dt / (2. * alpha) * h);
-            }
-        }
-    return a_eff;
-    }
-
 Eigen::Matrix<double,Nodes::DIM,NPI> Tet::gradV(const std::vector<double> &V) const
     {
     Eigen::Matrix<double,N,1> _V;
@@ -165,6 +128,63 @@ void Tet::add_spinDiffusionAniso(const double c,
             { AE.block<N,N>(k*N, l*N) -= (c * uuT_w(k,l)) * dadaT; }
     }
 
+void Tet::DMI_bulk_OffDiag(timing const &prm_t, const double DMIbulk_bis,
+                           Eigen::Ref<Eigen::Matrix<double,3*N,3*N>> AE) const
+    {
+    const double prefactor = prm_t.get_prefactor(); // carefull, prefactor is time dependant
+    const double cst = prefactor*0.5*DMIbulk_bis;
+    for (int npi = 0; npi < NPI; npi++)
+        {
+        const double c = cst*weight(npi);
+        for(int i=0;i<N;i++)
+            {
+            const double ai = eigen_a(i,npi);
+            for(int j=0;j<N;j++)
+                {
+                const double aj = eigen_a(j,npi);
+                if (i != j)
+                    {
+                    Eigen::Vector3d D( da(i,IDX_X)*aj - ai*da(j,IDX_X),
+                                       da(i,IDX_Y)*aj - ai*da(j,IDX_Y),
+                                       da(i,IDX_Z)*aj - ai*da(j,IDX_Z) );
+                    D *= c;
+                    AE(  N+i, 2*N+j) -= D[IDX_X];
+                    AE(2*N+i,   N+j) += D[IDX_X];
+
+                    AE(    i, 2*N+j) += D[IDX_Y];
+                    AE(2*N+i,     j) -= D[IDX_Y];
+
+                    AE(    i,   N+j) -= D[IDX_Z];
+                    AE(  N+i,     j) += D[IDX_Z];
+                    }
+                }
+            }
+        }
+    }
+
+void Tet::DMI_bulk_BE(const double cst,
+        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> U,
+        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdx,
+        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdy,
+        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> dUdz,
+        Eigen::Ref<Eigen::Matrix<double,DIM,N>> BE) const
+    {//cst is DMI_bulk/(mu0*Ms)
+    for (int npi = 0; npi<NPI; npi++)
+        {
+        const double c_w = cst * weight[npi];
+        Eigen::Vector3d tmp(dUdy(IDX_Z,npi)-dUdz(IDX_Y,npi),
+                            dUdz(IDX_X,npi)-dUdx(IDX_Z,npi),
+                            dUdx(IDX_Y,npi)-dUdy(IDX_X,npi));
+
+        for (int i = 0;i<N;i++)
+            {
+            const double ai = eigen_a(i,npi);
+            // cst*[\omega \cdot (\nabla \times u) + u \cdot (\nabla \times \omega)]
+            BE.col(i) += c_w *(ai*tmp + U.col(npi).cross(da.row(i)));
+            }
+        }
+    }
+
 void Tet::add_drift_BE(const Eigen::Ref<const Eigen::Matrix<double,NPI,1>> alpha,
                        const double s_dt, const double Vdrift,
                        Eigen::Ref<Eigen::Matrix<double,DIM,NPI>> U,
@@ -243,8 +263,7 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     {
     const double Ms = param.Ms;
     const double Abis = 2.0 * param.A / (mu0*Ms);
-    const double dt = prm_t.get_dt();
-    const double s_dt = THETA * dt;  // reduced time step, theta from theta scheme in config.h.in
+    const double s_dt = THETA * prm_t.get_dt();  // reduced time step, theta from theta scheme in config.h.in
 
     // damping at the Gauss points: alpha_LLG of the region, increased in the absorbing ends
     Eigen::Matrix<double,NPI,1> alpha;
@@ -293,11 +312,11 @@ void Tet::integrales(Tetra::prm const &param, timing const &prm_t,
     Heff += Hst;
     uHeff += (U.cwiseProduct(Heff)).colwise().sum();//dot product on each col of U and Heff
 
-    Eigen::Matrix<double,NPI,1> a_eff = calc_alpha_eff(dt, alpha, uHeff);
+    Eigen::Matrix<double,NPI,1> a_eff = prm_t.get_alpha_eff<NPI>(alpha, uHeff);
     
     Eigen::Matrix<double,3*N,3*N> AE;
     AE.setZero();
-    lumping(a_eff, prm_t.prefactor * s_dt * Abis, AE);
+    lumping(a_eff, prm_t.get_prefactor() * Abis, AE);
 
     Eigen::Matrix<double,2*N,3*N> P;
     buildMatP(P);
@@ -352,6 +371,23 @@ double Tet::exchangeEnergy(const Tetra::prm &param,
                                      + dudy.colwise().squaredNorm()
                                      + dudz.colwise().squaredNorm();
     return param.A * weight.dot(dens);
+    }
+
+double Tet::DMIBulkEnergy(const Tetra::prm &param,
+			              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> u,
+			              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudx,
+			              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudy,
+			              Eigen::Ref<Eigen::Matrix<double,Nodes::DIM,NPI>> dudz) const
+	{
+    Eigen::Matrix<double,NPI,1> dens;
+	for (int npi = 0; npi < NPI; npi++)
+	    {
+		Eigen::Vector3d tmp(dudy(IDX_Z,npi) - dudz(IDX_Y,npi),
+		                    dudz(IDX_X,npi) - dudx(IDX_Z,npi),
+		                    dudx(IDX_Y,npi) - dudy(IDX_X,npi));
+		dens[npi] = u.col(npi).dot(tmp);
+		}
+    return -param.DMI * weight.dot(dens);
     }
 
 double Tet::uniaxialAnisotropyEnergy(const Tetra::prm &param,

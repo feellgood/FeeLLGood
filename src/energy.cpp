@@ -26,6 +26,8 @@ void Fem::energy(const double t, Settings &settings)
                       te.interpolation(Nodes::get_phi<NEXT>, phi);
 
                       E[EXCHANGE] += te.exchangeEnergy(param, dudx, dudy, dudz);
+                      if (param.DMI != 0.0)
+                          { E[DMI_BULK] += te.DMIBulkEnergy(param, u, dudx, dudy, dudz); }
                       E[DEMAG] += te.demagEnergy(param, dudx, dudy, dudz, phi);
 
                       if (param.K != 0.0)

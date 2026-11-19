@@ -38,6 +38,7 @@ R, T = 20e-9, 4e-9                   # pillar.geo
 MS, ALPHA, K = 1.0e6, 0.02, 8.0e5
 N0 = 1.344e47
 P_VEC = np.array([0.0, 0.0, -1.0])
+JN = 2.0e12                          # jn of the bottom face, multiplied by jn_multiplier(t)
 F1 = {"sigma": 2.0e6, "P": 0.5, "lsf": 5.0e-9, "t": 10.0e-9}
 F1N = {"AR": 0.5e-15, "gamma": 0.75, "Gr": 0.55e15, "Gi": 0.0}
 NF2 = {"AR": 0.5e-15, "gamma": 0.75, "Gr": 0.55e15, "Gi": 0.0}
@@ -130,16 +131,17 @@ def main():
         data = np.array(rows)
         if cols is None or len(cols) != data.shape[1]:
             cols = ["t", "dt", "max_dm", "<Mx>", "<My>", "<Mz>", "E_ex", "E_aniso", "E_demag",
-                    "E_zeeman", "E_tot", "current_density"]
+                    "E_zeeman", "E_tot", "jn_multiplier"]
         c = {n: i for i, n in enumerate(cols)}
-        t, mz, jn = data[:, c["t"]], data[:, c["<Mz>"]], data[:, c["current_density"]]
+        # normal current density jn(t) = JN jn_multiplier(t)
+        t, mz, jn = data[:, c["t"]], data[:, c["<Mz>"]], JN * data[:, c["jn_multiplier"]]
         below = np.nonzero(mz < 0)[0]
         if below.size:
             i = below[0]
-            print(f"simulation: <Mz> crosses 0 at t = {t[i]:.4e} s, current_density = "
+            print(f"simulation: <Mz> crosses 0 at t = {t[i]:.4e} s, jn = "
                   f"{jn[i]:.3e} A/m^2 ({jn[i]/jc:.2f} jc)")
         else:
-            print(f"simulation: no switching up to t = {t[-1]:.4e} s, current_density = "
+            print(f"simulation: no switching up to t = {t[-1]:.4e} s, jn = "
                   f"{jn[-1]:.3e} A/m^2 ({jn[-1]/jc:.2f} jc)")
         if not args.no_plot:
             import matplotlib
@@ -150,7 +152,7 @@ def main():
             ax.plot(jn, data[:, c["<My>"]], label="<My>")
             ax.plot(jn, mz, label="<Mz>")
             ax.axvline(jc, color="k", ls="--", label="jc (macrospin)")
-            ax.set_xlabel("current_density [A/m^2]")
+            ax.set_xlabel("jn [A/m^2]")
             ax.set_ylabel("average magnetization")
             ax.legend()
             fig.tight_layout()
