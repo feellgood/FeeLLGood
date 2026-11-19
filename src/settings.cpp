@@ -140,8 +140,13 @@ static Slonczewski::StackSettings readStack(YAML::Node node, const std::string &
         st.P1bulk = readRequired(F1, "P", w);
         st.lsf1 = readRequired(F1, "l_sf", w);
         assign(st.t1, F1["thickness"]);
-        if (st.sigma1 <= 0 || st.lsf1 <= 0 || st.t1 <= 0 || st.P1bulk < 0 || st.P1bulk >= 1)
-            { error((w + ": sigma, l_sf, thickness > 0 and 0 <= P < 1 are required.").c_str()); }
+        assign(st.P1prime, F1["P_prime"]);
+        if (st.sigma1 <= 0 || st.lsf1 <= 0 || st.t1 <= 0 || st.P1bulk < 0 || st.P1bulk >= 1
+            || !(st.P1prime >= 0 && st.P1prime < 1))
+            {
+            error((w + ": sigma, l_sf, thickness > 0, 0 <= P < 1 and 0 <= P_prime < 1 are "
+                   "required.").c_str());
+            }
         }
 
     YAML::Node NF2 = node["NF2"];
@@ -431,6 +436,7 @@ void Settings::toYaml()
         std::cout << "      sigma: " << it->sigma << "\n";
         std::cout << "      dens_state: " << it->N0 << "\n";
         std::cout << "      P: " << it->P << "\n";
+        std::cout << "      P_prime: " << it->P_prime << "\n";
         std::cout << "      l_sd: " << it->lsd << "\n";
         std::cout << "      l_sf: " << it->lsf << "\n";
         }
@@ -473,7 +479,8 @@ void Settings::toYaml()
                 if (st.hasF1)
                     {
                     std::cout << "        F1: {sigma: " << st.sigma1 << ", P: " << st.P1bulk
-                              << ", l_sf: " << st.lsf1 << ", thickness: " << st.t1 << "}\n";
+                              << ", P_prime: " << st.P1prime << ", l_sf: " << st.lsf1
+                              << ", thickness: " << st.t1 << "}\n";
                     }
                 std::cout << "        F1N: " << itf(st.F1N) << "\n";
                 if (st.hasNF2)
@@ -564,7 +571,6 @@ void Settings::toYaml()
         { std::cout << ' ' << str(sJnMultiplier) << '\n'; }
     if (spin_acc)
         {
-        std::cout << "  anisotropic_diffusion: " << str(anisotropic_diffusion) << "\n";
         std::cout << "  V_file: " << str(V_file) << "\n";
         }
     std::cout << "demagnetizing_field_solver:\n";
@@ -735,6 +741,12 @@ void Settings::read(YAML::Node yaml)
                 assign(p.sigma, volume["sigma"]);
                 assign(p.N0, volume["dens_state"]);
                 assign(p.P, volume["P"]);
+                assign(p.P_prime, volume["P_prime"]);
+                if (!(p.P_prime >= 0 && p.P_prime < 1))
+                    {
+                    error(("mesh.volume_regions." + p.regName
+                           + ".P_prime: 0 <= P_prime < 1 is required.").c_str());
+                    }
                 assign(p.lsd, volume["l_sd"]); // exists only for magnetic material, as Ms
                 assign(p.lsf, volume["l_sf"]);
                 }
@@ -928,7 +940,6 @@ void Settings::read(YAML::Node yaml)
     if (spAcc && !spAcc.IsNull())
         {
         assign(spin_acc, spAcc["enable"]);
-        assign(anisotropic_diffusion, spAcc["anisotropic_diffusion"]);
         assign(V_file, spAcc["V_file"]);
 
         YAML::Node jn_multiplier = spAcc["jn_multiplier"];

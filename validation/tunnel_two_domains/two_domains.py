@@ -102,7 +102,7 @@ def settings(name, RA):
             "length_unit": 1e-9,
             "volume_regions": {"F2": {
                 "Js": 1.0, "Ae": 1.3e-11, "alpha_LLG": 0.05, "K": 0,
-                "sigma": F2["sigma"], "dens_state": F2["N0"], "P": F2["P"],
+                "sigma": F2["sigma"], "dens_state": F2["N0"], "P": F2["P"], "P_prime": F2["P"],
                 "l_sd": F2["lsd"], "l_sf": F2["lsf"]}},
             "surface_regions": {
                 "outlet": {"V": 0.0, "s": [0, 0, 0]},

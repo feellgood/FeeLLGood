@@ -46,10 +46,11 @@ BOOST_AUTO_TEST_CASE(conductance)
 
 BOOST_AUTO_TEST_CASE(bulkConductance, *boost::unit_test::tolerance(1e-14))
     {
-    const double sigma = 4e6, P = 0.4, lsf = 10e-9;
-    const double thick = sigma * (1 - P * P) / lsf;
-    BOOST_TEST( Slonczewski::bulkConductance(sigma, P, lsf, INFINITY) == thick );
-    BOOST_TEST( Slonczewski::bulkConductance(sigma, P, lsf, 2 * lsf) == thick / std::tanh(2.0) );
+    const double sigma = 4e6, P = 0.4, P_prime = 0.7, lsf = 10e-9;
+    const double thick = sigma * (1 - P * P_prime) / lsf;
+    BOOST_TEST( Slonczewski::bulkConductance(sigma, P, P_prime, lsf, INFINITY) == thick );
+    BOOST_TEST( Slonczewski::bulkConductance(sigma, P, P_prime, lsf, 2 * lsf)
+                == thick / std::tanh(2.0) );
     }
 
 BOOST_AUTO_TEST_CASE(renormalizeF1)
@@ -269,10 +270,11 @@ BOOST_AUTO_TEST_CASE(makeStack)
     st.hasF1 = true;
     st.sigma1 = 2e6;
     st.P1bulk = 0.5;
+    st.P1prime = 0.8;
     st.lsf1 = 20e-9;
     st.t1 = 15e-9;
     s = Slonczewski::makeStack(st, N0);
-    const double gF = k * st.sigma1 * (1 - 0.25) / (st.lsf1 * std::tanh(st.t1 / st.lsf1));
+    const double gF = k * st.sigma1 * (1 - 0.4) / (st.lsf1 * std::tanh(st.t1 / st.lsf1));
     const Slonczewski::F1prm r = Slonczewski::renormalizeF1(0.5, gF, {0.75, k / 0.5e-15});
     BOOST_TEST( std::abs(s.P1 / r.P - 1) < 1e-14 );
     BOOST_TEST( std::abs(s.G1par / r.Gpar - 1) < 1e-14 );

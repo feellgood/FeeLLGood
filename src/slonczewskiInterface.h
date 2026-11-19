@@ -57,13 +57,15 @@ inline double spinFactor(const double N0 /**< [in] density of states of the samp
     { return 2.0 / (CHARGE_ELECTRON * CHARGE_ELECTRON * N0); }
 
 /** longitudinal conductance per unit area (S/m^2) of the bulk of F1, of thickness t, with a
- * reservoir (s = 0) on its far side: sigma (1 - P^2)/l_sf coth(t/l_sf) (beta = beta' = P, l_sf
- * being the longitudinal spin diffusion length); t = infinity is allowed */
+ * reservoir (s = 0) on its far side: sigma (1 - P P_prime)/l_sf coth(t/l_sf) (beta = P,
+ * beta' = P_prime, l_sf being the longitudinal spin diffusion length); t = infinity is allowed */
 inline double bulkConductance(const double sigma /**< [in] conductivity of F1, S/m */,
-                              const double P /**< [in] bulk polarization rate of F1 */,
+                              const double P /**< [in] bulk polarization rate of F1 (beta) */,
+                              const double P_prime /**< [in] polarization of the diffusion
+                                                      constant of F1 (beta') */,
                               const double lsf /**< [in] spin diffusion length of F1 */,
                               const double t /**< [in] thickness of F1 */)
-    { return sigma * (1.0 - P * P) / (lsf * std::tanh(t / lsf)); }
+    { return sigma * (1.0 - P * P_prime) / (lsf * std::tanh(t / lsf)); }
 
 /** \struct F1prm
 polarization and longitudinal conductance of the F1/N interface */
@@ -172,7 +174,8 @@ struct StackSettings
     Eigen::Vector3d p = Eigen::Vector3d(0, 0, 1); /**< magnetization of F1, unit vector */
     bool hasF1 = false;       /**< true if the bulk of F1 is given */
     double sigma1 = 0;        /**< conductivity of F1, S/m */
-    double P1bulk = 0;        /**< bulk polarization rate of F1 */
+    double P1bulk = 0;        /**< bulk polarization rate of F1 (beta) */
+    double P1prime = 0;       /**< polarization of the diffusion constant of F1 (beta') */
     double lsf1 = 0;          /**< spin diffusion length of F1, m */
     double t1 = INFINITY;     /**< thickness of F1, m */
     Interface F1N;            /**< interface F1/N */
@@ -197,7 +200,7 @@ inline Stack makeStack(const StackSettings &st /**< [in] */,
     s.G1i = 2 * k * st.F1N.Gi;
     if (st.hasF1)
         {
-        const double gF = k * bulkConductance(st.sigma1, st.P1bulk, st.lsf1, st.t1);
+        const double gF = k * bulkConductance(st.sigma1, st.P1bulk, st.P1prime, st.lsf1, st.t1);
         const F1prm r = renormalizeF1(st.P1bulk, gF, {s.P1, s.G1par});
         s.P1 = r.P;
         s.G1par = r.Gpar;

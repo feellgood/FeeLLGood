@@ -84,7 +84,8 @@ def settings(sign_F1, name):
                 "N": {"Js": 0, "sigma": N["sigma"], "dens_state": N["N0"], "P": 0,
                       "l_sd": 1e-9, "l_sf": N["lsf"]},
                 "F2": {"Js": 1.0, "Ae": 1.3e-11, "alpha_LLG": 0.05, "K": 0,
-                       "sigma": F2["sigma"], "dens_state": F2["N0"], "P": F2["beta"],
+                       "sigma": F2["sigma"], "dens_state": F2["N0"],
+                       "P": F2["beta"], "P_prime": F2["beta"],
                        "l_sd": F2["lsd"], "l_sf": F2["lsf"]}},
             "surface_regions": {
                 "outlet": {"V": 0.0, "s": [0, 0, 0]},

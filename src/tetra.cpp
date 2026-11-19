@@ -39,6 +39,7 @@ void prm::infos(void)
         cout << "l_sd = " << lsd << std::endl;
         cout << "l_sf = " << lsf << std::endl;
         cout << "polarization rate = " << P << std::endl;
+        cout << "polarization rate of the diffusion constant = " << P_prime << std::endl;
         cout << "density of states at Fermi level = " << N0 << std::endl;
         cout << "sigma = " << sigma << std::endl;
         }

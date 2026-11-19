@@ -110,8 +110,11 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** returns sigma of the tetraedron, (conductivity in (Ohm.m)^-1 */
     double getSigma(const Tetra::Tet &tet) const;
 
-    /** \f$ P \f$ is polarization rate of the current density */
+    /** \f$ P \f$ is polarization rate of the current density (beta of Zhang-Levy-Fert) */
     double getPolarizationRate(const Tetra::Tet &tet) const;
+
+    /** polarization rate of the diffusion constant (beta' of Zhang-Levy-Fert) */
+    double getPolarizationRatePrime(const Tetra::Tet &tet) const;
 
     /** diffusion constant, units: s^-1 m^2 */
     double getDiffusionCst(const Tetra::Tet &tet) const;
@@ -138,10 +141,6 @@ class spinAcc : public solver<DIM_PB_SPIN_ACC>
     /** polarizer stacks in the units of the spin diffusion problem, indexed as paramTri (only the
      * surfaces with slonczewski are set) */
     std::vector<Slonczewski::Stack> stacks;
-
-    /** anisotropic spin diffusion and longitudinal relaxation in the magnetic regions (settings
-     * spin_accumulation.anisotropic_diffusion, default true), see integrales() */
-    const bool anisotropicDiffusion;
 
     /** in verbose mode, warns about the neighbouring volume regions (sharing a face) of different
      * dens_state: s being continuous, mu_s is not continuous between them */

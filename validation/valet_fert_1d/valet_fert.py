@@ -84,7 +84,8 @@ def valet_fert(sign_F1, z):
 def settings(sign_F1, name):
     stack = {
         "p": [0, 0, sign_F1],
-        "F1": {"sigma": F1["sigma"], "P": F1["beta"], "l_sf": F1["lsf"], "thickness": F1["t"]},
+        "F1": {"sigma": F1["sigma"], "P": F1["beta"], "P_prime": F1["beta"],
+               "l_sf": F1["lsf"], "thickness": F1["t"]},
         "F1N": {"AR": ITF1["AR"], "gamma": ITF1["gamma"], "Gr": 5e14},
         "NF2": {"AR": ITF2["AR"], "gamma": ITF2["gamma"], "Gr": 5e14}}
     return {
@@ -95,7 +96,8 @@ def settings(sign_F1, name):
             "length_unit": 1e-9,
             "volume_regions": {"wire": {
                 "Js": 1.0, "Ae": 1.3e-11, "alpha_LLG": 0.05, "K": 0,
-                "sigma": F2["sigma"], "dens_state": F2["N0"], "P": F2["beta"],
+                "sigma": F2["sigma"], "dens_state": F2["N0"],
+                "P": F2["beta"], "P_prime": F2["beta"],
                 "l_sd": F2["lsd"], "l_sf": F2["lsf"]}},
             "surface_regions": {
                 "outlet": {"V": 0.0, "s": [0, 0, 0]},

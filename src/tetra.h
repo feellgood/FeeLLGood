@@ -98,7 +98,10 @@ struct prm
     double K3;           /**< cubic anisotropy constant */
     Eigen::Matrix3d e;   /**< base vectors for cubic anisotropy */
 
-    double P;            /**< spin diffusion polarization rate, dimensionless */
+    double P;            /**< spin diffusion polarization rate, dimensionless: beta of
+                           Zhang-Levy-Fert, polarization of the conductivity */
+    double P_prime = 0;  /**< beta' of Zhang-Levy-Fert, polarization of the diffusion constant,
+                           dimensionless: the longitudinal diffusion is D0 (1 - P P_prime) */
     double N0;           /**< density of states at Fermi level
                            in [Energy]^-1 [Volume]^-1 = kg^-1 m^-5 s^2 */
     double sigma;        /**< electrical conductivity
@@ -262,10 +265,10 @@ public:
     Eigen::Matrix<double,N,1> calcOffDiagBlock(const Nodes::index idx) const;
 
     /**
-     * adds to AE the anisotropic part of the spin diffusion (beta = beta' = P):
-     * -c (u.grad s):(u.grad w), c = D0 P^2, U being the magnetization at the Gauss points.
-     * The longitudinal diffusion is then D0 (1 - P^2), the transverse one D0. It couples the three
-     * components of s: AE is indexed by blocks of components (c N + i)
+     * adds to AE the anisotropic part of the spin diffusion (beta = P, beta' = P_prime):
+     * -c (u.grad s):(u.grad w), c = D0 P P_prime, U being the magnetization at the Gauss points.
+     * The longitudinal diffusion is then D0 (1 - P P_prime), the transverse one D0. It couples the
+     * three components of s: AE is indexed by blocks of components (c N + i)
      * */
     void add_spinDiffusionAniso(const double c,
                                 const Eigen::Ref<const Eigen::Matrix<double,Nodes::DIM,NPI>> U,
