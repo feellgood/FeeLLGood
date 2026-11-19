@@ -56,10 +56,12 @@ outputs:
   # - <dMy/dt>: average change rate of My
   # - <dMz/dt>: average change rate of Mz
   # - E_aniso: anisotropy energy
+  # - E_DMI_bulk: bulk DMI energy
   # - Hx: applied field along x
   # - Hy: applied field along y
   # - Hz: applied field along z
-  # - current_density: normal current density, see ‘current_density’ below
+  # - jn_multiplier: multiplier of the normal current densities, see
+  #   ‘spin_accumulation.jn_multiplier’ below
   # - Thiele_length: Thiele length along (Oz)
   evol_columns:
     - t         # time
@@ -103,6 +105,9 @@ mesh:
 
       # Exchange constant.
       Ae: 1e-11
+
+      # DMI bulk constant, in J m^-2.
+      DMI_bulk: 0
 
       # Saturation magnetization. Default is 1 T/μ₀.
       Ms: 795774.7
@@ -168,8 +173,7 @@ mesh:
       # Fixed normal current density value (j.n) for the boundary conditions of
       # the electrostatic and the spin diffusion problems, in A/m^2, n being
       # the outward normal (a positive value makes the current leave the
-      # sample). Either a number or ‘current_density’, for the time-dependent
-      # current density current_density(t) defined below.
+      # sample). Multiplied by ‘spin_accumulation.jn_multiplier’.
       jn:
 
       # Fixed potential value for the boundary conditions of the
@@ -274,36 +278,15 @@ absorbing_ends:
   regions: []
 
 # Expressions of the applied field, as a function of t, the time in
-# seconds. May be constants. They can call current_density(t), when
-# ‘current_density’ is defined below.
+# seconds. May be constants. They can call jn_multiplier(t), see
+# ‘spin_accumulation.jn_multiplier’ below.
 Bext: [0, 0, 0]
-
-# Time-dependent normal current density current_density(t), in A/m^2, j.n
-# with the outward normal, of the surface regions with
-# ‘jn: current_density’ (one or several, the same function for all),
-# function of t, the time in seconds, given either as a JavaScript
-# function, e.g.
-#   current_density: "function(t) { return t < 1e-9 ? 0 : -1e12; }"
-# or as an expression of t, e.g. "-1e12*min(t/1e-10, 1)". Any shape and
-# any sign. The electrokinetics being linear, a reference potential
-# V_ref is solved once, with jn = j_ref = 1 A/m^2 on those surfaces and
-# V = 0 on the surface with V, then V = V_D + (current_density(t)/j_ref)
-# V_ref, V_D being the imposed V, and grad V = (current_density(t)/j_ref)
-# grad V_ref, the factor current_density(t)/j_ref being dimensionless.
-# The source terms
-# of the spin accumulation (current polarized by the magnetization, spin
-# injection through the surface with jn and uP) follow current_density(t);
-# the imposed spin accumulation (key s of the surface regions) does not.
-# The functions of Bext can call current_density(t), e.g. for the Oersted
-# field of the current. The time step is not adapted to the current: give
-# max(dt) well below its rise and fall times, or its period.
-current_density:
 
 # Parameters for simulating a coupling to spin accumulation. The
 # boundary conditions of the electrostatic problem are a constant
 # potential on one surface, and a normal current density on one or
-# several other surfaces, all numeric or all ‘jn: current_density’. The
-# material parameters are defined in mesh.volume_regions.
+# several other surfaces. The material parameters are defined in
+# mesh.volume_regions.
 spin_accumulation:
 
   # Whether to enable computation of spin accumulation contribution.
@@ -318,14 +301,18 @@ spin_accumulation:
   # it; the equivalence with Valet-Fert holds with true only.
   anisotropic_diffusion: true
 
-  # Output, at the start, the electric potential solved once (with V = 0
-  # on the surface with V, the imposed V_D being added), in the file
-  # <file_basename>_V.sol of the current directory: V0 for the jn and V
-  # of the settings, or the reference potential V_ref for
-  # jn: current_density (jn = j_ref = 1 A/m^2 and V = 0). With the spin
-  # accumulation, the .sol files have, after sx, sy, sz, a last column V,
-  # the potential at the time of the file: V_D + (current_density(t)/j_ref)
-  # V_ref for jn: current_density, V_D being the imposed V, V0 otherwise.
+  # Time-dependent factor by which all the fixed normal current
+  # densities (mesh.surface_regions.<region name>.jn) are multiplied.
+  # Either an expression as a function of t (the time in seconds) or a
+  # JavaScript function expression of the single parameter t. Defaults to
+  # the constant value 1. The expressions of Bext can call
+  # jn_multiplier(t), e.g. for the Oersted field of the current, even when
+  # the spin accumulation is disabled.
+  jn_multiplier:
+
+  # Output, at the start of the simulation, the electric potential at
+  # each node, ignoring jn_multiplier (i.e. assuming jn_multiplier = 1),
+  # in the file <file_basename>_V.sol of outputs.directory.
   V_file: false
 
 # Parameters for the computation of the demagnetizing field.

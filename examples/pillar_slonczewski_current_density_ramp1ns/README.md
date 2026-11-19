@@ -5,7 +5,7 @@ the current density. The spin is injected through a polarizer stack that is not 
 `slonczewski` of the bottom face): the spin current entering the free layer depends on its
 magnetization (Robin boundary condition of the circuit theory), instead of being imposed with a
 fixed polarization `uP`. It needs a feeLLGood built from the branch `slonczewski` (keys
-`slonczewski` and `current_density`).
+`slonczewski` and `spin_accumulation.jn_multiplier`).
 
 ```bash
 gmsh -3 pillar.geo -o pillar.msh       # built-in kernel of gmsh, as meshMaker.Cylinder
@@ -24,14 +24,14 @@ python3 stack_torque.py --evol pillar.evol
 | Spin transport in F2 | $\sigma = 2e6$ S/m, `dens_state` 1.344e47 J⁻¹m⁻³, $P = 0.5$ ($\beta = \beta' = P$), $l_{sd} = 1$ nm, $l_{sf} = 5$ nm |
 | Polarizer stack | F1: $\sigma = 2e6$ S/m, $P = 0.5$, $l_{sf} = 5$ nm, 10 nm; F1/N and N/F2: Co/Cu-like, $AR^* = 0.5$ fΩ·m², $\gamma = 0.75$, $G_{\uparrow\downarrow} = 0.55e15$ S/m² (Xia et al.), `transverse: sink` |
 | Initial magnetization | close to $+\mathbf{e}_z$, antiparallel to $\mathbf{p}$, tilted by 5° towards $x$ |
-| Current density | linear ramp `current_density: "2e12*t/1e-9"` on the bottom face: 0 at $t = 0$, 2e12 A/m² at 1 ns |
-| Applied field | Oersted field of the current (`Bext`, space × time, calling `current_density(t)`) |
+| Current density | linear ramp on the bottom face, `jn: 2.0e12` multiplied by `spin_accumulation.jn_multiplier: "t/1e-9"`: $j_n(t)$ = 0 at $t = 0$, 2e12 A/m² at 1 ns |
+| Applied field | Oersted field of the current (`Bext`, space × time, calling `jn_multiplier(t)`) |
 | Duration | 1 ns; one line of the `.evol` every ps, one `.sol` every 50 ps |
 
 In `settings.yml`, the bottom face is:
 ```yaml
 pillar_bottom:
-  jn: current_density
+  jn: 2.0e12            # times spin_accumulation.jn_multiplier(t) = t/1e-9
   slonczewski:
     p: [0, 0, -1]
     F1: {sigma: 2.0e6, P: 0.5, l_sf: 5.0e-9, thickness: 10.0e-9}
@@ -62,12 +62,12 @@ diffusion in F2 spreads the absorbed spin current over $l_{sd}$. See the note
 `dev-notes/slonczewski_polarisation.tex` and the validations `validation/valet_fert_1d`,
 `validation/slonczewski_angle`.
 
-**Sign.** `current_density(t)` is $\mathbf{j}\cdot\mathbf{n}$ on the bottom face, $\mathbf{n}$
-being the outward normal $-\mathbf{e}_z$: `current_density(t)` > 0 is a current flowing along
+**Sign.** $j_n(t)$ = `jn` × `jn_multiplier(t)` is $\mathbf{j}\cdot\mathbf{n}$ on the bottom
+face, $\mathbf{n}$ being the outward normal $-\mathbf{e}_z$: $j_n(t) > 0$ is a current flowing along
 $-z$, i.e. electrons flowing along $+z$, from F1 into F2. The spin-transfer torque then favours
 $\mathbf{m}$ parallel to $\mathbf{p}$: F2, close to $+z$ (antiparallel to $\mathbf{p} = -z$),
 switches towards $-z$ (AP → P) above the critical current density. The current density along $z$
-is $j_z(t) = -$`current_density(t)`.
+is $j_z(t) = -j_n(t)$.
 
 **Oersted field.** The current being uniform, Ampère's law gives
 $\mathbf{B} = \frac{\mu_0 j_z}{2}(-y, x, 0)$ inside the pillar, given in `Bext` (feeLLGood does not
@@ -128,19 +128,21 @@ $\mathbf{s}_F = 0$), the Oersted field and the spin accumulation of F2 are negle
 simulation includes them, as well as the non-uniform magnetization.
 
 With `--evol pillar.evol`, the script gives the current density at which $\langle M_z\rangle$
-crosses 0 and plots the average magnetization against `current_density`
-(`pillar_switching.png`).
+crosses 0 and plots the average magnetization against $j_n(t)$ = 2e12 × `jn_multiplier(t)`
+(column `jn_multiplier` of the `.evol`, `pillar_switching.png`).
 
 ## Results
 
 Run of 2026-10-28 (branch `slonczewski`, commit `cdc8f86`), 8 threads: 22.5 min, 3,814 successful
-time steps (mean 2.1e-13 s) and 4 failed ones, 0.35 s per time step.
+time steps (mean 2.1e-13 s) and 4 failed ones, 0.35 s per time step. The run used the former key
+`current_density: "2e12*t/1e-9"` (with `jn: current_density`), replaced since by
+`jn: 2.0e12` and `jn_multiplier: "t/1e-9"`: the current density is the same.
 
 The figure `pillar_switching.png` (`python3 stack_torque.py --evol pillar.evol`, not
-committed) plots the average magnetization against `current_density`, the dashed line
+committed) plots the average magnetization against $j_n$, the dashed line
 being the macrospin critical current density.
 
-| $t$ (ns) | `current_density` (A/m²) | $\langle M_x\rangle$ | $\langle M_y\rangle$ | $\langle M_z\rangle$ |
+| $t$ (ns) | $j_n$ (A/m²) | $\langle M_x\rangle$ | $\langle M_y\rangle$ | $\langle M_z\rangle$ |
 |---|---|---|---|---|
 | 0.1 | 2.0e11 | +0.105 | −0.007 | +0.994 |
 | 0.2 | 4.0e11 | +0.170 | −0.044 | +0.984 |

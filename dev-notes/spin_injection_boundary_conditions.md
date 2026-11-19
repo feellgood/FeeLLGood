@@ -35,7 +35,7 @@ switch (spin valves, MRAM, spin-torque oscillators).
 |---|---|---|---|
 | $`\mathbf{m}`$ | unit vector of the magnetization (written $`\mathbf{u}`$ in the code) | – | solution of LLG |
 | $`\mathbf{s}`$ | spin accumulation (a magnetization-like density, see § 4.4) | A/m | solution of the spin diffusion problem |
-| $`\mathbf{J}`$, $`j_n`$ | charge current density, its normal component $`\mathbf{J}\cdot\mathbf{n}`$ on a surface, $`\mathbf{n}`$ being the **outward** normal ($`j_n > 0`$: the current leaves the sample, the electrons enter it) | A/m² | `jn` (number or `current_density`) |
+| $`\mathbf{J}`$, $`j_n`$ | charge current density, its normal component $`\mathbf{J}\cdot\mathbf{n}`$ on a surface, $`\mathbf{n}`$ being the **outward** normal ($`j_n > 0`$: the current leaves the sample, the electrons enter it) | A/m² | `jn`, times `spin_accumulation.jn_multiplier(t)` |
 | $`V`$ | electrostatic potential, $`\mathbf{J} = -\sigma\nabla V`$ | V | electrostatic solver |
 | $`\sigma`$ | electrical conductivity | S/m | `sigma` |
 | $`N_0`$ | density of states at the Fermi level | J⁻¹m⁻³ | `dens_state` |
@@ -228,7 +228,7 @@ On the angular validation case, the damping-like torque differs by 15 to 17 % be
 The surface where the current enters the free layer replaces `uP` by a block `slonczewski`:
 ```yaml
 inlet:
-  jn: 1e12                       # or jn: current_density; jn > 0: electrons from F1 into F2
+  jn: 1e12                       # times jn_multiplier(t); jn > 0: electrons from F1 into F2
   slonczewski:
     p: [0, 0, 1]                 # magnetization of F1
     F1:  {sigma: 2e6, P: 0.5, l_sf: 20e-9, thickness: 15e-9}   # optional: bulk of F1
@@ -242,7 +242,7 @@ inlet:
   independent of the magnetization.
 - With `NF2`: the surface must border a magnetic region.
 - `jn` is required on the same surface, `uP` and `s` are excluded. A time-dependent current density
-  (`jn: current_density`, `dev-notes/current_density.md`) is accepted.
+  (`spin_accumulation.jn_multiplier`, `dev-notes/jn_multiplier.md`) is accepted.
 
 ### 4.2 Where it is implemented
 

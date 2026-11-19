@@ -65,7 +65,7 @@ enum field_exprType
  * Javascript expressions (initial magnetization and applied field) are stored both in source form
  * (sM* and sB* members) and as private ExpressionParser instances. This class provides methods for
  * evaluating those expressions: getMagnetization(), getField(), getFieldSpace(), getFieldTime() and
- * getCurrentDensity().
+ * jnMultiplier().
  * All these methods temporarily modify their corresponding ExpressionParser instances, it is thus
  * **not safe** to call them from multiple threads simultaneously.
  */
@@ -198,10 +198,10 @@ public:
     /** string for a JavaScript function defining B time, (t) -> real */
     std::string sB_time;
 
-    /** string for a JavaScript function, or an expression of t, defining the normal current
-     * density current_density(t) [A/m^2] of the surface region with `jn: current_density`;
-     * empty if not defined */
-    std::string sCurrentDensity;
+    /** string for a JavaScript function, or an expression of t, defining the dimensionless
+     * time-dependent multiplier jn_multiplier(t) of all the normal current densities jn of the
+     * surface regions (key spin_accumulation.jn_multiplier); empty if not defined */
+    std::string sJnMultiplier;
 
     /** input file name for continuing a calculation (sol.in) */
     std::string restoreFileName;
@@ -330,31 +330,12 @@ public:
     inline double getFieldTime(const double t_val) const
         { return (field_time_parser.get_scalar(t_val))/mu0; }
 
-    /** true if the function current_density(t) is defined (key current_density) */
-    inline bool hasCurrentDensity(void) const
-        { return !sCurrentDensity.empty(); }
-
-    /** true if a surface region has `jn: current_density` */
-    inline bool usesCurrentDensity(void) const
-        {
-        return std::any_of(paramTriangle.begin(), paramTriangle.end(),
-                           [](const Triangle::prm &p) { return p.jn_current_density; });
-        }
-
-    /** Evaluate the normal current density current_density(t) [A/m^2], j.n with the outward
-     * normal, as a function of the time t_val in seconds. Only meaningful if hasCurrentDensity().
+    /** Dimensionless multiplier of all the normal current densities jn at the time t_val in
+     * seconds: jn_multiplier(t) if spin_accumulation.jn_multiplier is defined, 1 otherwise.
      * This method is **not thread safe**.
      */
-    inline double getCurrentDensity(const double t_val) const
-        { return current_density_parser.get_scalar(t_val); }
-
-    /** Dimensionless factor of the electric sources at the time t_val in seconds:
-     * current_density(t)/j_ref if a surface region has `jn: current_density`, its jn being the
-     * reference j_ref = 1 A/m^2 (the value of current_density(t) in A/m^2), 1 otherwise
-     * (constant jn). This method is **not thread safe**.
-     */
-    inline double jnFactor(const double t_val) const
-        { return usesCurrentDensity() ? getCurrentDensity(t_val) : 1.0; }
+    inline double jnMultiplier(const double t_val) const
+        { return jn_multiplier_parser.is_set() ? jn_multiplier_parser.get_scalar(t_val) : 1.0; }
 
 private:
     using MetadataItem = std::pair<std::string, std::string>;  /**< type of userMetadata items */
@@ -384,9 +365,9 @@ private:
     /** parser for the field space dependant vector expressions */
     ExpressionParser field_space_parser;
 
-    /** parser for the normal current density R->R, also defined as the global function
-     * current_density(t) in field_parser and field_time_parser */
-    ExpressionParser current_density_parser;
+    /** parser for the multiplier of the normal current densities R->R, also defined as the
+     * global function jn_multiplier(t) in field_parser and field_time_parser */
+    ExpressionParser jn_multiplier_parser;
 
     /** Metadata common to .evol and .sol files */
     std::ostringstream commonMetadata() const;

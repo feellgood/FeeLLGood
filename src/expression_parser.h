@@ -50,6 +50,11 @@ public:
     void define_global_function(const std::string &name, const std::string &js_function) const;
 
     /**
+     * Return true if a function has been given, with set_function() or set_expressions().
+     */
+    bool is_set() const { return duk_get_top(ctx) == 1 && duk_is_function(ctx, -1); }
+
+    /**
      * Return the number of parameters of the JavaScript function.
      */
     int parameter_count() const { return duk_get_length(ctx, -1); }

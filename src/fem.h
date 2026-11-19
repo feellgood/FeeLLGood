@@ -24,7 +24,7 @@ It does also contain the definition of many constants for the solver, and for sc
 #include "settings.h"
 
 /** number of energy terms in energy array E */
-const int NB_ENERGY_TERMS = 4;
+const int NB_ENERGY_TERMS = 5;
 
 /** correspondance nature/index of the energy terms in energy array E */
 enum ENERGY_TYPE
@@ -32,7 +32,8 @@ enum ENERGY_TYPE
     EXCHANGE = 0,
     ANISOTROPY = 1,
     DEMAG = 2,
-    ZEEMAN = 3
+    ZEEMAN = 3,
+    DMI_BULK = 4
     };
 
 /** \class Fem
@@ -199,7 +200,7 @@ private:
     void direction(enum Nodes::index idx_dir /**< [in] */);
 
     /** compute demagnetizing field, energies, and prepare for next time step quantitites
-     * at physical time t [s] (used by the applied field and the current density) */
+     * at physical time t [s] (used by the applied field and jn_multiplier) */
     void compute_all(Settings &settings /**< [in] */, spinAcc &spinAcc_solver /**< [in|out] */,
                      scal_fmm::fmm &myFMM /**< [in|out] */, const double t /**< [in]*/)
         {
@@ -207,7 +208,7 @@ private:
         chronometer fmm_counter(2);
         myFMM.calc_demag(msh);
         if (settings.spin_acc)
-            { spinAcc_solver.jn_factor = settings.jnFactor(t); }
+            { spinAcc_solver.jn_multiplier = settings.jnMultiplier(t); }
         if (settings.spin_acc && spinAcc_solver.compute())
             { success = true; }
         if (settings.verbose)

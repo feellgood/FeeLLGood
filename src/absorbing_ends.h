@@ -55,7 +55,7 @@ struct AbsorbingEnds
         const double s = std::max(x - (hi - length), (lo + length) - x);  // depth in the nearest zone
         if (s <= 0)
             { return alpha0; }
-        const double sn = std::sin(M_PI / 2 * std::min(s / length, 1.0));
+        const double sn = std::sin(M_PI_2 * std::min(s / length, 1.0));
         return alpha0 + (alpha_max - alpha0) * sn * sn;
         }
     };
