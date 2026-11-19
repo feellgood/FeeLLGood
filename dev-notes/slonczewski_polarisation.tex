@@ -5,6 +5,7 @@
 \usepackage[french]{babel}
 \usepackage{lmodern}
 \usepackage{amsmath,amssymb}
+\usepackage{dsfont}  % \mathds{1}, identity in spin space
 \usepackage{bm}
 \usepackage{booktabs,array}
 \usepackage[margin=2.5cm]{geometry}
@@ -99,8 +100,10 @@ multiples} :
 \end{itemize}
 
 Le courant de spin qui arrive à l'interface de F2 dépend donc à la fois de
-$\vp$ et de $\vm$. Slonczewski (1996) en tire une polarisation effective
-qui dépend de l'angle :
+$\vp$ et de $\vm$. Slonczewski (1996) somme ces réflexions dans un modèle
+balistique d'électrons libres, pour deux couches ferromagnétiques
+identiques de polarisation $P$, et en tire une polarisation effective qui
+dépend de l'angle :
 \begin{equation}
   g(\theta) = \left[-4 + \frac{(1+P)^3\,(3+\cos\theta)}{4\,P^{3/2}}\right]^{-1}.
   \label{eq:g}
@@ -109,14 +112,21 @@ Cette fonction est \textbf{asymétrique} : $g(\pi) > g(0)$. Il faut moins
 de courant pour basculer depuis l'état antiparallèle que depuis l'état
 parallèle.
 
-Dans les codes micromagnétiques (mumax3, OOMMF), on utilise souvent la
-forme généralisée :
+Dans un modèle diffusif de l'empilement, Slonczewski (2002) obtient une
+autre forme, que les codes micromagnétiques (mumax3, OOMMF) utilisent
+souvent :
 \begin{equation}
   \varepsilon(\theta) = \frac{P\,\Lambda^2}
   {(\Lambda^2+1) + (\Lambda^2-1)\,(\vm\cdot\vp)}.
   \label{eq:eps}
 \end{equation}
-Avec $\Lambda = 1$, l'asymétrie disparaît et $\varepsilon = P/2$.
+Le paramètre sans dimension $\Lambda$ dépend des résistances de
+l'empilement. Avec $\Lambda = 1$, l'asymétrie disparaît et
+$\varepsilon = P/2$ ; pour $\Lambda>1$, $\varepsilon(\pi) = P\Lambda^2/2$
+dépasse $\varepsilon(0) = P/2$, comme $g(\pi) > g(0)$. Ces deux formes sont
+des modèles de couche libre mince : la partie~II remplace ces formules
+fermées par la diffusion de spin dans F2 et une condition aux limites
+issue de la théorie des circuits, dont la dépendance angulaire découle.
 
 \section{Le couple final}
 
@@ -224,8 +234,127 @@ et les facteurs de convention y sont absorbés.
 \subsection{Courant de spin à travers l'interface}
 
 On note $\vs_N$ l'accumulation de spin dans l'espaceur et
-$\vs_F = \vs|_\Gamma$ celle dans F2 au bord. On élimine la chute de
-potentiel de charge à l'aide de $J$ et on obtient :
+$\vs_F = \vs|_\Gamma$ celle dans F2 au bord. La loi d'interface combine le
+modèle à deux courants de Valet et Fert, pour la composante selon
+$\vm_0$, et la théorie des circuits de Brataas, Bauer et Kelly, pour les
+composantes transverses. On la dérive en trois étapes.
+
+\paragraph{Partie longitudinale : deux courants à travers l'interface.}
+Les électrons majoritaires ($\uparrow$) et minoritaires ($\downarrow$)
+traversent l'interface en parallèle, avec les conductances $G_\uparrow$ et
+$G_\downarrow$ par unité de surface. On écrit les potentiels
+électrochimiques $\mu_{\uparrow,\downarrow} = \bar\mu\pm\mu_s$, $\mu_s$ étant
+l'accumulation de spin de Valet--Fert, $j_\sigma$ la densité de courant
+de charge de N vers F dans le canal $\sigma$ et $\Delta$ le saut à
+l'interface, valeur côté F moins valeur côté N (le courant de charge va
+vers le potentiel électrochimique le plus élevé, les électrons vers le plus
+bas) :
+\begin{equation}
+  j_\sigma = G_\sigma\,\frac{\Delta\mu_\sigma}{e}
+  \quad\Rightarrow\quad
+  \left\{
+  \begin{aligned}
+    j &= j_\uparrow+j_\downarrow
+       = (G_\uparrow+G_\downarrow)\,\frac{\Delta\bar\mu}{e}
+       + (G_\uparrow-G_\downarrow)\,\frac{\Delta\mu_s}{e},\\
+    j_s &= j_\uparrow-j_\downarrow
+       = (G_\uparrow-G_\downarrow)\,\frac{\Delta\bar\mu}{e}
+       + (G_\uparrow+G_\downarrow)\,\frac{\Delta\mu_s}{e}.
+  \end{aligned}
+  \right.
+\end{equation}
+La chute de potentiel de charge $\Delta\bar\mu$ n'est pas connue, mais le
+courant $j$ l'est : on tire $\Delta\bar\mu$ de la première relation et on
+le reporte dans la seconde,
+\begin{equation}
+  j_s = P_I\,j + (1-P_I^2)\,(G_\uparrow+G_\downarrow)\,\frac{\Delta\mu_s}{e},
+  \qquad
+  P_I = \frac{G_\uparrow-G_\downarrow}{G_\uparrow+G_\downarrow}.
+  \label{eq:robin-long}
+\end{equation}
+Le premier terme est la source : le courant de charge transporte une
+fraction $P_I$ de spin, selon l'aimantation $\vm_0$ de F, puisque les deux
+canaux sont définis par rapport à elle. Le second est la diffusion de
+l'accumulation à travers l'interface, de conductance
+$(1-P_I^2)(G_\uparrow+G_\downarrow)$, d'où le $G_\parallel$ de
+\eqref{eq:G}. Avec les résistances de Valet--Fert
+$r_{\uparrow,\downarrow} = 2AR^*(1\mp\gamma)$, on a $P_I = \gamma$ et
+$(1-\gamma^2)(G_\uparrow+G_\downarrow) = 1/AR^*$ : on retrouve la loi
+$j_s = \gamma\,j + \Delta\mu_s/(e\,AR^*)$ de Valet et Fert.
+
+\paragraph{Partie transverse : la conductance de mélange.} Le courant de
+charge ne transporte du spin que selon $\vm_0$ : il n'y a pas de source
+transverse. Dans l'espaceur, qui n'est pas magnétique, l'accumulation est
+un vecteur $\bm{\mu}_s$ de direction quelconque : les potentiels chimiques
+forment une matrice $\bar\mu\,\mathds{1} + \bm{\mu}_s\cdot\bm{\sigma}$ dans
+l'espace des spins. Par rapport à $\vm_0$, $\bm{\mu}_s$ a une partie
+longitudinale $(\vm_0\cdot\bm{\mu}_s)\,\vm_0$, traitée par
+\eqref{eq:robin-long}, et une partie transverse
+$\bm{\mu}_{s\perp} = (\Id-\vm_0\vm_0^{\mathsf{T}})\,\bm{\mu}_s$.
+
+Côté F, la composante du spin transverse à $\vm_0$ n'est pas un état
+propre : elle se déphase en quelques couches atomiques. La théorie des
+circuits de Brataas, Bauer et Kelly traite donc le ferromagnétique comme un
+nœud dont l'accumulation transverse est nulle à l'interface, et le courant
+transverse ne dépend que de l'accumulation $\bm{\mu}_{s,N}$ de l'espaceur :
+\begin{equation}
+  \bm{j}_{s\perp} = -2G_r^{\uparrow\downarrow}\,\frac{\bm{\mu}_{s,N\perp}}{e}
+  - 2G_i^{\uparrow\downarrow}\,\frac{\bm{\mu}_{s,N}\times\vm_0}{e},
+  \qquad
+  G_{\uparrow\downarrow} = G_r^{\uparrow\downarrow}+iG_i^{\uparrow\downarrow}
+  = \frac{e^2}{h}\sum_n\Big[1-\sum_m r_\uparrow^{nm}\big(r_\downarrow^{nm}\big)^*\Big],
+  \label{eq:brataas}
+\end{equation}
+le signe moins venant de ce que $\bm{j}_s$ est un courant de charge de N
+vers F, les électrons, porteurs du spin, allant vers le potentiel le plus
+bas. Un spin transverse qui arrive de N est une superposition cohérente de
+$\uparrow$ et $\downarrow$ ; il est réfléchi avec les amplitudes
+$r_\uparrow$ et $r_\downarrow$, et seul le recouvrement
+$r_\uparrow r_\downarrow^*$ revient cohérent dans N. Le reste,
+$1-r_\uparrow r_\downarrow^*$ par canal, est perdu par l'espaceur : sa
+partie réelle est le spin absorbé par F (couple damping-like), sa partie
+imaginaire la rotation du spin réfléchi autour de $\vm_0$ (couple
+field-like). Le facteur 2 tient à notre convention
+$\mu_s = (\mu_+-\mu_-)/2$ : pour une interface non magnétique
+($P_I = 0$, $G_\uparrow = G_\downarrow = G_{\uparrow\downarrow} = G$ réel),
+rien ne distingue les directions de spin, la conductance doit être
+isotrope, et la conductance longitudinale vaut
+$(1-P_I^2)(G_\uparrow+G_\downarrow) = 2G$ d'après \eqref{eq:robin-long}.
+
+On écrit \eqref{eq:brataas} sous la forme d'un saut, comme la partie
+longitudinale :
+\begin{equation}
+  \bm{j}_{s\perp} = 2G_r^{\uparrow\downarrow}\,
+    \frac{(\Delta\bm{\mu}_s)_\perp}{e}
+  + 2G_i^{\uparrow\downarrow}\,\frac{\Delta\bm{\mu}_s\times\vm_0}{e},
+  \qquad \Delta\bm{\mu}_s = \bm{\mu}_{s,F}-\bm{\mu}_{s,N}.
+  \label{eq:transverse-saut}
+\end{equation}
+Avec $\bm{\mu}_{s,F\perp} = 0$, hypothèse de la théorie des circuits,
+$(\Delta\bm{\mu}_s)_\perp = -\bm{\mu}_{s,N\perp}$ et
+$\Delta\bm{\mu}_s\times\vm_0 = -\bm{\mu}_{s,N}\times\vm_0$ : on retrouve
+exactement \eqref{eq:brataas}. C'est le modèle \texttt{sink}, utilisé par
+défaut. Si l'on garde au contraire l'accumulation transverse de F2
+calculée par la diffusion, $\bm{\mu}_{s,F\perp}\neq0$ : c'est le modèle
+\texttt{series}, qui n'est plus la théorie des circuits et met en série
+l'absorption de l'interface et celle du volume de F2 (troisième remarque
+ci-dessous et section~\ref{sec:transverse}). En regroupant les deux
+parties,
+\begin{equation}
+  \bm{j}_s = P_I\,j\,\vm_0
+  + \left[(1-P_I^2)(G_\uparrow+G_\downarrow)\,\vm_0\vm_0^{\mathsf{T}}
+  + 2G_r^{\uparrow\downarrow}\left(\Id-\vm_0\vm_0^{\mathsf{T}}\right)
+  + 2G_i^{\uparrow\downarrow}\,[\,\cdot\times\vm_0\,]\right]
+  \frac{\Delta\bm{\mu}_s}{e}.
+\end{equation}
+
+\paragraph{Passage aux unités de FeeLLGood.} Les électrons portant la
+charge $-e$, le flux de moment qui entre dans F vaut
+$\vq = -\frac{\mu_B}{e}\,\bm{j}_s$. On pose $J = -j$, positif pour des
+électrons allant de N vers F. L'accumulation de FeeLLGood est
+$\vs = \mu_BN_0\,\bm{\mu}_s/2$ (section~\ref{sec:conversion}), de sorte que
+$-\frac{\mu_B}{e}\,\frac{\Delta\bm{\mu}_s}{e} = k\,(\vs_N-\vs_F)$ avec
+$k = 2/(e^2N_0)$. On obtient :
 \begin{equation}
   \boxed{\;
   \vq = P_I\,\frac{\mu_B}{e}\,J\,\vm_0
@@ -233,6 +362,13 @@ potentiel de charge à l'aide de $J$ et on obtient :
   \;}
   \label{eq:robin}
 \end{equation}
+avec la matrice \eqref{eq:G} et les conductances, en m/s,
+$G_\parallel = k\,(1-P_I^2)(G_\uparrow+G_\downarrow) = k/AR^*$ et
+$G_r + iG_i = 2k\,G_{\uparrow\downarrow}$ : le facteur $k$ et le facteur 2 de
+la partie transverse sont absorbés dans les conductances de \eqref{eq:G}.
+Le terme $-G_i\,\vm_0\times\bm{w}$ de \eqref{eq:G} est bien
+$+G_i\,\bm{w}\times\vm_0$.
+
 Trois remarques :
 \begin{itemize}
   \item La polarisation portée par le courant de charge est \textbf{selon
@@ -257,10 +393,36 @@ Trois remarques :
 
 \subsection{Conservation du spin dans l'espaceur}
 
-On suppose l'espaceur assez fin pour que $\vs_N$ y soit uniforme dans
-l'épaisseur. Il est en revanche épais devant la maille latérale, donc on
-écrit la relation en chaque point de $\Gamma$. On néglige la relaxation
-dans N. Le spin qui entre dans N depuis F1 ressort vers F2 :
+L'espaceur N, d'épaisseur $t_N$, n'est pas maillé. On le réduit à un nœud
+en chaque point de $\Gamma$, sous trois hypothèses :
+\begin{enumerate}
+  \item \textbf{$\vs_N$ est uniforme dans l'épaisseur.} L'espaceur est fin
+    devant sa longueur de diffusion de spin, $t_N\ll l_{sf,N}$ (quelques
+    nanomètres de Cu, contre plusieurs centaines pour $l_{sf}$).
+  \item \textbf{Pas de relaxation dans N.} Pour la même raison, le
+    renversement de spin dans le volume de l'espaceur est négligeable
+    devant les flux à travers les interfaces.
+  \item \textbf{Pas de diffusion latérale dans N.} On néglige le courant de
+    spin qui circule parallèlement aux interfaces dans l'espaceur : $\vs_N$
+    en un point ne dépend que de l'aimantation $\vm_0$ en ce point, et la
+    conservation s'écrit point par point sur $\Gamma$. Cette hypothèse
+    demande que $\vm_0$ varie lentement à l'échelle de la longueur
+    d'étalement latéral dans l'espaceur,
+    \begin{equation}
+      \ell_N \simeq \sqrt{\frac{\sigma_N\,t_N}{G_1+G_2}},
+    \end{equation}
+    qui compare la conductance latérale de la couche, $\sigma_N t_N$, aux
+    conductances par unité de surface des deux interfaces qui vident le
+    nœud ($1/AR^*$ pour la partie longitudinale, $2G_{\uparrow\downarrow}$
+    pour la partie transverse). Pour 3\,nm de Cu ($\sigma_N\approx3\times
+    10^7$\,S/m) et $AR^* = 0.5\times10^{-15}\,\Omega\,$m$^2$ par interface,
+    $\ell_N\approx5$\,nm : c'est de l'ordre de la largeur d'une paroi. Pour
+    une aimantation uniforme ou lentement variable, l'hypothèse est
+    exacte ; pour une paroi étroite qui traverse l'interface, la condition
+    locale accentue les contrastes que la diffusion latérale dans N
+    lisserait sur environ $\ell_N$.
+\end{enumerate}
+Le spin qui entre dans N depuis F1 ressort alors vers F2 :
 \begin{equation}
   \underbrace{P_1\frac{\mu_B}{e}J\,\vp + \mG_1(\vp)\,(\vs_{F1}-\vs_N)}_{\text{F1}\,\to\,\text{N}}
   \;=\;
@@ -282,9 +444,26 @@ $3\times3$ pour $\vs_N$ :
 
 \subsection{Élimination de \texorpdfstring{$\vs_N$}{sN} : une condition de Robin effective}
 
-On reporte $\vs_N$ dans \eqref{eq:robin}. On utilise les identités
-$\Id-\mG_2\mA^{-1} = \mG_1\mA^{-1}$ et
-$\mG_2\mA^{-1}\mG_1 = \mG_1\mA^{-1}\mG_2$, et on obtient :
+Le courant qui entre dans F2 est le membre de droite de \eqref{eq:noeud},
+$\vq = P_2\frac{\mu_B}{e}J\,\vm_0 + \mG_2(\vs_N-\vs_F)$. On y reporte
+$\vs_N = \mA^{-1}\left[\frac{\mu_B}{e}J(P_1\vp - P_2\vm_0) + \mG_1\vs_{F1}
++ \mG_2\vs_F\right]$ :
+\begin{equation}
+  \vq = \frac{\mu_B}{e}J\left[\mG_2\mA^{-1}P_1\vp
+  + \left(\Id-\mG_2\mA^{-1}\right)P_2\vm_0\right]
+  + \mG_2\mA^{-1}\mG_1\,\vs_{F1}
+  - \left(\mG_2 - \mG_2\mA^{-1}\mG_2\right)\vs_F .
+\end{equation}
+Deux identités, qui ne viennent que de $\mA = \mG_1+\mG_2$, simplifient
+cette expression :
+\begin{align}
+  \Id-\mG_2\mA^{-1} &= (\mA-\mG_2)\,\mA^{-1} = \mG_1\mA^{-1},\\
+  \mG_2 - \mG_2\mA^{-1}\mG_2 &= \mG_2\mA^{-1}(\mA-\mG_2) = \mG_2\mA^{-1}\mG_1 .
+\end{align}
+La seconde montre que $\vs_{F1}$ et $\vs_F$ ont le même coefficient, au signe
+près. On a aussi $\mG_1\mA^{-1}\mG_2 = (\mA-\mG_2)\mA^{-1}\mG_2 = \mG_2 -
+\mG_2\mA^{-1}\mG_2 = \mG_2\mA^{-1}\mG_1$ : la conductance série est la même
+dans les deux sens, comme pour deux résistances en série. On obtient :
 \begin{equation}
   \boxed{\;
   \vq = \frac{\mu_B}{e}\,J\,\bm{P}_{\!\mathrm{eff}}(\vm_0)
@@ -321,10 +500,16 @@ donné par les conductances.
   \item \textbf{Configuration colinéaire} ($\vm_0=\pm\vp$) : toutes les
     matrices sont diagonales dans la même base, et on retrouve la formule
     scalaire de deux résistances en série (Valet--Fert).
-  \item \textbf{F2 mince et absorption transverse totale} : la moyenne du
-    couple sur l'épaisseur redonne la forme $\varepsilon(\theta)$ de
-    l'équation~\eqref{eq:eps}, avec un $\Lambda$ fonction des conductances
-    (Slonczewski 2002).
+  \item \textbf{F2 mince et absorption transverse totale} (modèle
+    \texttt{sink}, $G_i = 0$) : le couple damping-like a une forme fermée,
+    proportionnelle à $\sin\theta\,(a + b\cos\theta)/(c + d\cos^2\theta)$
+    (document de \texttt{validation/slonczewski\_angle}). Elle n'est pas
+    exactement de la forme $\varepsilon(\theta)\sin\theta$ de
+    \eqref{eq:eps}, dont le numérateur est constant et le dénominateur
+    linéaire en $\cos\theta$ : pour l'empilement asymétrique de cette
+    validation (F1 réservoir, F2 mince), un ajustement donne
+    $\Lambda^2\approx0.53$ à 5\,\% près. La forme de Slonczewski est donc
+    une bonne approximation, pas un résultat exact du modèle.
 \end{itemize}
 
 \section{Accès à l'accumulation dans F1}
@@ -640,7 +825,11 @@ changements :
 \end{enumerate}
 $\mG_s$ a une partie symétrique positive (termes $G_\parallel$ et $G_r$),
 ce qui renforce la coercivité. Sa partie antisymétrique (terme $G_i$) ne
-contribue pas à l'énergie.
+contribue pas à l'énergie. Avec le modèle \texttt{sink}, le modèle par
+défaut (section~\ref{sec:transverse}), le courant transverse à travers N/F2
+ne dépend pas de $\vs_F$ : $\mG_s$ est remplacé par
+$\mG_s\,\vm_0\vm_0^{\mathsf{T}}$ dans le terme de bord de la matrice, qui
+ne couple plus que la composante longitudinale $\vm_0\cdot\vs$.
 
 \subsection{Couplage avec LLG}
 
