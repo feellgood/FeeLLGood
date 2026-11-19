@@ -409,18 +409,39 @@ en chaque point de $\Gamma$, sous trois hypothèses :
     demande que $\vm_0$ varie lentement à l'échelle de la longueur
     d'étalement latéral dans l'espaceur,
     \begin{equation}
-      \ell_N \simeq \sqrt{\frac{\sigma_N\,t_N}{G_1+G_2}},
+      \ell_N \simeq \sqrt{\frac{\sigma_N\,t_N}{g_1+g_2}} .
     \end{equation}
-    qui compare la conductance latérale de la couche, $\sigma_N t_N$, aux
-    conductances par unité de surface des deux interfaces qui vident le
-    nœud ($1/AR^*$ pour la partie longitudinale, $2G_{\uparrow\downarrow}$
-    pour la partie transverse). Pour 3\,nm de Cu ($\sigma_N\approx3\times
-    10^7$\,S/m) et $AR^* = 0.5\times10^{-15}\,\Omega\,$m$^2$ par interface,
-    $\ell_N\approx5$\,nm : c'est de l'ordre de la largeur d'une paroi. Pour
-    une aimantation uniforme ou lentement variable, l'hypothèse est
-    exacte ; pour une paroi étroite qui traverse l'interface, la condition
-    locale accentue les contrastes que la diffusion latérale dans N
-    lisserait sur environ $\ell_N$.
+    Dans la couche, le spin circule latéralement avec la conductance
+    $\sigma_N t_N$ (en S, $\beta = 0$ dans N), et il fuit à travers les
+    deux interfaces, avec les conductances scalaires par unité de surface
+    $g_1$ (F1/N) et $g_2$ (N/F2), en S/m$^2$ : la conservation du spin par
+    unité de surface, $\sigma_N t_N\,\nabla_\parallel^2\mu_{s,N}\simeq
+    (g_1+g_2)\,\mu_{s,N}$, donne la longueur $\ell_N$ sur laquelle une
+    variation latérale de $\mu_{s,N}$ s'amortit (estimation d'ordre de
+    grandeur). Ces $g_k$ ne sont pas les matrices $\mG_k$ en m/s qui
+    suivent ; ils dépendent de la composante du spin :
+    \begin{itemize}
+      \item composante longitudinale :
+        $g_k = 1/AR_k^* = (1-P_k^2)(G_{\uparrow,k}+G_{\downarrow,k})$,
+        et, si F1 a un volume, $g_1 = 1/(AR_1^* + R_1)$ avec la résistance
+        de spin de F1 $R_1 = \rho_1^*\,l_{sf,1}\tanh(t_1/l_{sf,1})$ en
+        série ;
+      \item composantes transverses : $g_k = 2\,\mathrm{Re}\,G_{\uparrow\downarrow,k}$.
+    \end{itemize}
+    Pour 3\,nm de Cu ($\sigma_N\approx3\times10^7$\,S/m,
+    $\sigma_N t_N\approx0.09$\,S), $AR^* = 0.5\times10^{-15}\,\Omega\,$m$^2$
+    et $G_{\uparrow\downarrow} = 0.55\times10^{15}$\,S/m$^2$ par interface :
+    $\ell_N\approx4.7$\,nm pour la composante longitudinale
+    ($g_k = 2\times10^{15}$\,S/m$^2$), 6.4\,nm pour les composantes
+    transverses ($g_k = 1.1\times10^{15}$\,S/m$^2$), et 6.3\,nm pour la
+    composante longitudinale avec le volume de F1 de l'exemple
+    \texttt{pillar\_slonczewski\_current\_density\_ramp1ns}
+    ($R_1\approx3.2\times10^{-15}\,\Omega\,$m$^2$,
+    $g_1\approx2.7\times10^{14}$\,S/m$^2$). C'est de l'ordre de la largeur
+    d'une paroi. Pour une aimantation uniforme ou lentement variable,
+    l'hypothèse est exacte ; pour une paroi étroite qui traverse
+    l'interface, la condition locale accentue les contrastes que la
+    diffusion latérale dans N lisserait sur environ $\ell_N$.
 \end{enumerate}
 Le spin qui entre dans N depuis F1 ressort alors vers F2 :
 \begin{equation}
