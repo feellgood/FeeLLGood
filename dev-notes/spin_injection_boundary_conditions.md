@@ -272,7 +272,7 @@ On each triangle of the surface, at each Gauss point:
 The matrix is assembled again at each solve, the magnetization having changed. The symmetric part
 of $`\mathsf{G}_s`$ is positive and strengthens the coercivity; with `sink`, the boundary block is
 not symmetric, which BiCGStab accepts. With a time-dependent current density, $`j_n`$ is multiplied
-by `spinAcc::jn_factor` at the time of the solve.
+by `spinAcc::jn_multiplier` at the time of the solve (`spin_accumulation.jn_multiplier`).
 
 ### 4.4 Units: from the interface parameters to the spin diffusion problem
 
