@@ -71,6 +71,19 @@ with the electrons, opposite to $`\mathbf{J}`$); the second one is the diffusion
 accumulation, with the diffusion constant $`D_0(1-P^2)`$ for the component of $`\mathbf{s}`$ along
 $`\mathbf{m}`$ (longitudinal) and $`D_0`$ for the transverse ones. In a normal metal, $`P = 0`$.
 
+**The assumption $`\beta = \beta'`$.** Zhang, Levy and Fert define $`\beta`$ as the polarization of
+the conductivity and $`\beta'`$ as the one of the diffusion constant; they differ when the density
+of states depends on the spin ($`\sigma_\pm = e^2N_\pm D_\pm`$), which is the case in the $`3d`$
+ferromagnets. Published values are estimates or modelling choices, not measurements: $`\beta`$ =
+0.5 and $`\beta' \approx 0.9`$ for Co, $`\beta'`$ computed from the densities of states (Shpiro,
+Levy and Zhang, 2003); $`\beta`$ = 0.9 and $`\beta'`$ = 0.8 (Abert et al., 2015). $`\beta'`$ only
+enters through $`\beta\beta'`$ in the longitudinal diffusion $`D_0(1-\beta\beta')`$; $`l_{sf}`$ being
+the longitudinal length, it only changes the ratio of the longitudinal to the transverse diffusion
+(0.75 instead of 0.55 for the values of Co), largely absorbed by the fitted $`l_{sd}`$ or
+$`G_{\uparrow\downarrow}`$. Separating them would also require revisiting $`s = \mu_B N_0\,\mu_s/2`$
+and the equivalence with Valet–Fert (§ 4.4): feeLLGood keeps $`\beta = \beta' = P`$ (discussion
+in `dev-notes/slonczewski_polarisation.tex`).
+
 The spin accumulation relaxes in picoseconds, while the magnetization evolves in nanoseconds:
 feeLLGood solves the **steady state** at each time step, the magnetization being frozen,
 ```math
@@ -584,7 +597,9 @@ field-like ($`G_i`$) torques. The sign of $`G_i`$ used here was checked against 
 - C. Petitjean, D. Luc, X. Waintal, Phys. Rev. Lett. **109**, 117204 (2012): transverse spin
   currents in drift-diffusion, consistent interface conditions.
 - C. Abert et al., Sci. Rep. **5**, 14855 (2015): 3D spin diffusion through the whole stack in
-  micromagnetics.
+  micromagnetics; $`\beta`$ = 0.9, $`\beta'`$ = 0.8.
+- A. Shpiro, P. M. Levy, S. Zhang, Phys. Rev. B **67**, 104430 (2003): self-consistent spin torques;
+  $`\beta`$ = 0.5 and $`\beta' \approx 0.9`$ for Co.
 - V. Baltz, *The Basics of Electron Transport in Spintronics*, EDP Sciences (2023): textbook,
   chapters 3 and 4; correspondence of the notations in § 9.
 - M. Jullière, Phys. Lett. A **54**, 225 (1975); J. C. Slonczewski, Phys. Rev. B **39**, 6995

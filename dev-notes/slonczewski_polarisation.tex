@@ -183,6 +183,43 @@ FeeLLGood, $\beta=\beta'=P$ : la diffusion longitudinale vaut
 $2D_0(1-P^2)$ et la diffusion transverse $2D_0$ (voir
 section~\ref{sec:F1-feellgood}).
 
+\paragraph{L'hypothèse $\beta=\beta'$.} Zhang, Levy et Fert définissent
+$\beta$ par la polarisation de la conductivité et $\beta'$ par celle de la
+constante de diffusion, et notent qu'elles diffèrent quand la densité
+d'états dépend du spin : comme $\sigma_\pm = e^2N_\pm D_\pm$,
+$\beta=\beta'$ revient à supposer une densité d'états au niveau de Fermi
+identique pour les deux spins. Ce n'est pas le cas dans les ferromagnétiques
+$3d$. Les valeurs publiées sont des estimations ou des choix de
+modélisation, pas des mesures :
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{>{\raggedright}p{4.6cm}>{\raggedright}p{2.6cm}cc>{\raggedright\arraybackslash}p{4.0cm}}
+  \toprule
+  Source & Matériau & $\beta$ & $\beta'$ & Origine \\
+  \midrule
+  Shpiro, Levy et Zhang (2003) & Co & 0.5 & $\approx0.9$ & $\beta'$ calculé à
+    partir des densités d'états des deux spins \\
+  Abert \emph{et al.} (2015) & générique, proche du permalloy & 0.9 & 0.8 &
+    choix de modélisation \\
+  \bottomrule
+\end{tabular}
+\end{center}
+Les deux jeux vont en sens opposé, et aucune mesure directe de $\beta'$
+n'est disponible : la CPP-GMR donne $\beta$ et la longueur de décroissance
+longitudinale, pas $\beta'$ séparément. Dans le modèle, $\beta'$ n'intervient
+que par le produit $\beta\beta'$, dans la diffusion longitudinale
+$2D_0(1-\beta\beta')$. Comme FeeLLGood prend $l_{sf}$ comme longueur
+longitudinale, $\beta'$ ne change que le rapport des diffusions
+longitudinale et transverse : $1-\beta^2 = 0.75$ au lieu de
+$1-\beta\beta' = 0.55$ pour Co (Shpiro), $0.19$ au lieu de $0.28$ pour les
+valeurs d'Abert. Le secteur transverse étant fixé par $l_{sd}$, ou par
+$G_{\uparrow\downarrow}$ avec le modèle \texttt{sink}, paramètres eux-mêmes
+ajustés, cet écart est en grande partie absorbé. Séparer $\beta$ et
+$\beta'$ demanderait en outre de revoir la relation
+$\vs = \mu_BN_0\,\mu_s/2$ (section~\ref{sec:conversion}), la densité d'états
+dépendant alors du spin, et l'équivalence avec Valet--Fert ; sans donnée
+pour fixer $\beta'$, on garde $\beta=\beta'=P$.
+
 On note $\Gamma$ l'interface espaceur/F2, $\bm{n}$ la normale sortante de
 F2 et $\vq = -(\bm{n}\cdot Q)|_\Gamma$, de composantes $q_\alpha = -n_iQ_{i\alpha}$,
 le courant de spin qui
@@ -1809,7 +1846,11 @@ Brataas (\texttt{validation/slonczewski\_angle}).
     \textbf{109}, 117204 (2012) : courants transverses en dérive-diffusion
     et conditions d'interface cohérentes.
   \item C.~Abert \emph{et al.}, Sci.\ Rep.\ \textbf{5}, 14855 (2015) :
-    diffusion de spin 3D dans tout l'empilement en micromagnétisme.
+    diffusion de spin 3D dans tout l'empilement en micromagnétisme ;
+    $\beta = 0.9$, $\beta' = 0.8$.
+  \item A.~Shpiro, P.\,M.~Levy, S.~Zhang, Phys.\ Rev.\ B \textbf{67},
+    104430 (2003) : couples de transfert de spin auto-cohérents ;
+    $\beta = 0.5$ et $\beta'\approx0.9$ pour Co.
   \item M.~Jullière, Phys.\ Lett.\ A \textbf{54}, 225 (1975) : TMR et
     polarisations tunnel.
   \item J.\,C.~Slonczewski, Phys.\ Rev.\ B \textbf{39}, 6995 (1989) :
