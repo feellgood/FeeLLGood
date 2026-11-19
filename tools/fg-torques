@@ -1,0 +1,502 @@
+#!/usr/bin/env python3
+"""
+Adiabatic and non-adiabatic spin-transfer torques from the magnetization m, the spin accumulation s
+and the electrostatic potential V of feeLLGood .sol files (spin_accumulation enabled).
+
+feeLLGood adds the spin-transfer torque to LLG through the effective field
+Hst = s/(tau_sd gamma0 Ms), i.e. the torque T = -m x s/(tau_sd Ms), 1/tau_sd = D0/l_sd^2,
+D0 = 2 sigma/(e^2 N0). With the spin drift velocity u = P mu_B sigma grad V/(e Ms) (along the
+electron flow) and g = (u.grad) m, T is split on the local basis e1 = g/|g|, e2 = m x e1:
+    adiabatic      Tad = T.e1  (along (u.grad) m)
+    non-adiabatic  Tna = T.e2  (along m x (u.grad) m)
+and compared with the Zhang-Li form T = eta [-(u.grad) m + beta m x (u.grad) m]:
+    eta = -Tad/|g|,  beta = -Tna/Tad.
+The local limit of the model (texture wide compared with l_sd) is beta = tau_sd/tau_sf =
+(1 - P^2) l_sd^2/l_sf^2 (l_sd^2/l_sf^2 if spin_accumulation.anisotropic_diffusion is false) and
+eta = 1/(1 + beta^2). With --polarizer p, T is also split into field-like and damping-like parts:
+    Tfl = T.b1, Tdl = T.b2,  b1 = m x p/|m x p|, b2 = m x b1.
+Derivations: dev-notes/adiabatic_torques.tex.
+
+The quantities are computed in each magnetic tetrahedron (P1 gradients, m and s at the
+barycenter), then
+  - printed, integrated over each magnetic region: integral of Ms T dV (A m^2/s), and eta and beta
+    fitted to the Zhang-Li form by least squares (weights |g|^2), with the local limit;
+  - written at the nodes (volume-weighted mean over the magnetic tetrahedra) in <name>_torques.sol,
+    a .sol file with the columns idx Tx Ty Tz Tad Tna g eta beta [Tfl Tdl], to be plotted with
+    fg-xyplot or converted with fg-sol2vtk; eta and beta are NaN where g < mask * max(g), and the
+    non-magnetic nodes are 0 (NaN for eta and beta);
+  - with several .sol files or --output, one line per file and region in a table (time series);
+  - with --elements, per tetrahedron in <name>_torques_elements.txt (no nodal averaging).
+Torques in s^-1.
+
+The parameters (Ms or Js, sigma, dens_state, P, l_sd, l_sf of the volume regions, length_unit,
+anisotropic_diffusion) are read in the settings file of the simulation (YAML or JSON), with the
+defaults of feeLLGood for the missing keys. The mesh is the one of the settings, of the line
+'## mesh.filename:' of the .sol file, or --mesh (ASCII gmsh file, format 4.1 or 2.2).
+"""
+
+import argparse
+import os
+import sys
+
+import numpy as np
+
+try:
+    import yaml
+except ImportError:
+    yaml = None
+
+# constants of src/config.h.in
+CHARGE_ELECTRON = 1.602176634e-19
+PLANCKS_HBAR = 6.62607015e-34 / (2 * np.pi)
+MASS_ELECTRON = 9.1093837139e-31
+BOHRS_MUB = CHARGE_ELECTRON * PLANCKS_HBAR / (2 * MASS_ELECTRON)
+MU0 = 1.25663706127e-6
+
+# defaults of src/default-settings.yml used here
+DEFAULT_REGION = {'Ms': 795774.7, 'sigma': 0.0, 'dens_state': 0.0, 'P': 0.0, 'l_sd': 0.0,
+                  'l_sf': 0.0}
+DEFAULT_LENGTH_UNIT = 1e-9
+
+
+# ---------------------------------------------------------------- input files
+
+def read_settings(file_name):
+    """Settings file (YAML, or JSON which is a subset of YAML) as a dict."""
+    with open(file_name) as f:
+        text = f.read()
+    if yaml is not None:
+        settings = yaml.safe_load(text)
+    else:
+        import json
+        try:
+            settings = json.loads(text)
+        except ValueError:
+            sys.exit(f"{file_name}: PyYAML is not installed, only JSON settings can be read")
+    if not isinstance(settings, dict):
+        sys.exit(f"{file_name}: not a settings file")
+    return settings
+
+
+def region_parameters(settings):
+    """Parameters of the volume regions of the settings, name -> dict (defaults filled in)."""
+    regions = {}
+    for name, prm in ((settings.get('mesh') or {}).get('volume_regions') or {}).items():
+        prm = prm or {}
+        p = dict(DEFAULT_REGION)
+        p.update({k: float(v) for k, v in prm.items() if k in DEFAULT_REGION})
+        if 'Js' in prm:
+            if 'Ms' in prm:
+                sys.exit(f"region {name}: Ms and Js should not be both defined")
+            p['Ms'] = float(prm['Js']) / MU0
+        regions[name] = p
+    return regions
+
+
+def read_mesh(file_name):
+    """Nodes (array indexed by the node tag minus 1), tetrahedra (node tags minus 1) and the
+    physical name of each tetrahedron, from an ASCII gmsh file (format 4.1 or 2.2)."""
+    with open(file_name) as f:
+        lines = f.read().split('\n')
+    try:
+        fmt = lines[lines.index('$MeshFormat') + 1].split()
+        i_nodes = lines.index('$Nodes')
+        i_elems = lines.index('$Elements')
+    except ValueError:
+        sys.exit(f"{file_name}: not an ASCII gmsh mesh file")
+    if fmt[1] != '0':
+        sys.exit(f"{file_name}: binary gmsh file, ASCII expected")
+    version = float(fmt[0])
+
+    phys_names = {}
+    if '$PhysicalNames' in lines:
+        k = lines.index('$PhysicalNames')
+        for line in lines[k + 2:k + 2 + int(lines[k + 1])]:
+            dim, tag, name = line.split(maxsplit=2)
+            if int(dim) == 3:
+                phys_names[int(tag)] = name.strip().strip('"')
+
+    tags, xyz, tets, tet_phys = [], [], [], []
+    if version >= 4:
+        k = i_nodes + 1
+        nb_blocks = int(lines[k].split()[0])
+        k += 1
+        for _ in range(nb_blocks):
+            n = int(lines[k].split()[3])
+            k += 1
+            tags += [int(lines[k + j]) for j in range(n)]
+            k += n
+            xyz += [[float(v) for v in lines[k + j].split()[:3]] for j in range(n)]
+            k += n
+        # physical tag of each volume entity
+        volume_phys = {}
+        if '$Entities' in lines:
+            k = lines.index('$Entities')
+            nb = [int(v) for v in lines[k + 1].split()[:4]]
+            k += 2 + nb[0] + nb[1] + nb[2]
+            for line in lines[k:k + nb[3]]:
+                w = line.split()
+                n_phys = int(w[7])
+                if n_phys > 0:
+                    volume_phys[int(w[0])] = int(w[8])
+        k = i_elems + 1
+        nb_blocks = int(lines[k].split()[0])
+        k += 1
+        for _ in range(nb_blocks):
+            dim, entity, elem_type, n = (int(v) for v in lines[k].split())
+            k += 1
+            if elem_type == 4:
+                tets += [[int(v) for v in lines[k + j].split()[1:5]] for j in range(n)]
+                tet_phys += [volume_phys.get(entity, 0)] * n
+            k += n
+    else:
+        n = int(lines[i_nodes + 1])
+        for line in lines[i_nodes + 2:i_nodes + 2 + n]:
+            w = line.split()
+            tags.append(int(w[0]))
+            xyz.append([float(v) for v in w[1:4]])
+        n = int(lines[i_elems + 1])
+        for line in lines[i_elems + 2:i_elems + 2 + n]:
+            w = [int(v) for v in line.split()]
+            if w[1] == 4:
+                n_tags = w[2]
+                tets.append(w[3 + n_tags:7 + n_tags])
+                tet_phys.append(w[3] if n_tags > 0 else 0)
+    tags = np.array(tags)
+    nodes = np.full((tags.max(), 3), np.nan)
+    nodes[tags - 1] = xyz
+    tets = np.array(tets, dtype=int) - 1
+    names = np.array([phys_names.get(t, str(t)) for t in tet_phys])
+    return nodes, tets, names
+
+
+def read_sol(file_name):
+    """Columns of a .sol file (dict name -> array), its time (None if absent), its mesh file name
+    (None if absent)."""
+    names, time, mesh = None, None, None
+    with open(file_name) as f:
+        for line in f:
+            if not line.startswith('#'):
+                break
+            if line.startswith('## columns:'):
+                names = line.split(':', 1)[1].split()
+            elif line.startswith('## time:'):
+                time = float(line.split(':', 1)[1])
+            elif line.startswith('## mesh.filename:'):
+                mesh = line.split(':', 1)[1].strip()
+    if names is None:
+        sys.exit(f"{file_name}: no '## columns:' line")
+    missing = [c for c in ('mx', 'my', 'mz', 'sx', 'sy', 'sz', 'V') if c not in names]
+    if missing:
+        sys.exit(f"{file_name}: no column {', '.join(missing)} (spin_accumulation not enabled?)")
+    data = np.loadtxt(file_name, comments='#', ndmin=2)
+    if data.shape[1] != len(names):
+        sys.exit(f"{file_name}: {data.shape[1]} columns, {len(names)} names in '## columns:'")
+    return {name: data[:, i] for i, name in enumerate(names)}, time, mesh
+
+
+def find_mesh(args, settings, sol_mesh):
+    """Mesh file: --mesh, else mesh.filename of the settings (relative to the working directory,
+    then to the directory of the settings file), else the one of the .sol file."""
+    if args.mesh:
+        return args.mesh
+    candidates = []
+    name = (settings.get('mesh') or {}).get('filename')
+    if name:
+        candidates += [name, os.path.join(os.path.dirname(args.settings), name)]
+    if sol_mesh:
+        candidates.append(sol_mesh)
+    for c in candidates:
+        if os.path.isfile(c):
+            return c
+    sys.exit("mesh file not found" + (f" (tried {', '.join(candidates)})" if candidates else "")
+             + ", give it with --mesh")
+
+
+# ---------------------------------------------------------------- geometry and torques
+
+def p1_gradients(x):
+    """Gradients of the four P1 shape functions of each tetrahedron, shape (n, 4, 3), and the
+    volumes, from the node coordinates x, shape (n, 4, 3)."""
+    d = x[:, 1:, :] - x[:, :1, :]          # rows: x_k - x_0, k = 1..3
+    det = np.linalg.det(d)
+    if np.any(det == 0):
+        sys.exit("degenerate tetrahedron in the mesh")
+    inv = np.linalg.inv(d)                 # column k-1: grad a_k
+    grad = np.empty((len(x), 4, 3))
+    grad[:, 1:, :] = np.transpose(inv, (0, 2, 1))
+    grad[:, 0, :] = -grad[:, 1:, :].sum(axis=1)
+    return grad, np.abs(det) / 6
+
+
+def unit(v):
+    """Unit vectors along the rows of v (0 where v is 0)."""
+    n = np.linalg.norm(v, axis=-1, keepdims=True)
+    return np.divide(v, n, out=np.zeros_like(v), where=n > 0)
+
+
+def dot(a, b):
+    return np.einsum('ij,ij->i', a, b)
+
+
+class MagneticTets:
+    """Tetrahedra of the magnetic regions where the spin-transfer torque is defined, with their
+    geometry and parameters (the same for all the .sol files)."""
+
+    def __init__(self, nodes, tets, names, regions, length_unit, anisotropic, polarizer):
+        keep = np.zeros(len(tets), dtype=bool)
+        prm = {k: np.zeros(len(tets)) for k in DEFAULT_REGION}
+        self.region_names = []
+        for name in sorted(set(names)):
+            sel = names == name
+            if name not in regions:
+                print(f"warning: volume region {name} not in the settings, ignored")
+                continue
+            p = regions[name]
+            if p['Ms'] <= 0:
+                continue  # non-magnetic
+            bad = [k for k in ('sigma', 'dens_state', 'l_sd', 'l_sf') if p[k] <= 0]
+            if bad:
+                print(f"warning: magnetic region {name}: {', '.join(bad)} not positive, "
+                      "no spin-transfer torque, ignored")
+                continue
+            keep |= sel
+            for k in prm:
+                prm[k][sel] = p[k]
+            self.region_names.append(name)
+        if not keep.any():
+            sys.exit("no magnetic region with spin accumulation parameters in the settings")
+
+        self.tets = tets[keep]
+        self.region = names[keep]
+        x = nodes[self.tets] * length_unit
+        if np.isnan(x).any():
+            sys.exit("tetrahedra with nodes absent from the mesh")
+        self.barycenter = x.mean(axis=1)
+        self.grad, self.volume = p1_gradients(x)
+        for k in prm:
+            prm[k] = prm[k][keep]
+        self.Ms = prm['Ms']
+        self.P = prm['P']
+        d0 = 2 * prm['sigma'] / (CHARGE_ELECTRON**2 * prm['dens_state'])
+        self.inv_tau_sd = d0 / prm['l_sd']**2
+        self.u_factor = prm['P'] * BOHRS_MUB * prm['sigma'] / (CHARGE_ELECTRON * prm['Ms'])
+        factor = 1 - prm['P']**2 if anisotropic else np.ones(len(self.Ms))
+        self.beta_local = factor * prm['l_sd']**2 / prm['l_sf']**2  # tau_sd/tau_sf
+        self.polarizer = None if polarizer is None else unit(np.array([polarizer], dtype=float))[0]
+
+    def torques(self, cols):
+        """Torques and related quantities in each tetrahedron, dict name -> array."""
+        m_nod = np.column_stack([cols['mx'], cols['my'], cols['mz']])[self.tets]   # (n, 4, 3)
+        s_nod = np.column_stack([cols['sx'], cols['sy'], cols['sz']])[self.tets]
+        v_nod = cols['V'][self.tets]                                                # (n, 4)
+
+        grad_v = np.einsum('nk,nki->ni', v_nod, self.grad)
+        grad_m = np.einsum('nka,nki->nai', m_nod, self.grad)  # d m_a / d x_i
+        m = unit(m_nod.mean(axis=1))
+        s = s_nod.mean(axis=1)
+        u = self.u_factor[:, None] * grad_v
+        g = np.einsum('nai,ni->na', grad_m, u)
+        g -= dot(m, g)[:, None] * m             # tangent part (the P1 interpolant of m is not unit)
+
+        t = -(self.inv_tau_sd / self.Ms)[:, None] * np.cross(m, s)
+        e1 = unit(g)
+        e2 = np.cross(m, e1)
+        q = {'T': t, 'Tad': dot(t, e1), 'Tna': dot(t, e2), 'g': np.linalg.norm(g, axis=1),
+             'u': np.linalg.norm(u, axis=1), 'm': m, 'gvec': g}
+        if self.polarizer is not None:
+            mp = np.cross(m, np.broadcast_to(self.polarizer, m.shape))
+            b1 = unit(mp)
+            b2 = np.cross(m, b1)
+            q['Tfl'] = dot(t, b1)
+            q['Tdl'] = dot(t, b2)
+        return q
+
+
+def eta_beta(tad, tna, g, mask):
+    """Local eta = -Tad/g and beta = -Tna/Tad, NaN where g < mask * max(g)."""
+    with np.errstate(divide='ignore', invalid='ignore'):
+        eta = -tad / g
+        beta = -tna / tad
+    off = ~(g >= mask * np.nanmax(g)) if np.nanmax(g) > 0 else np.ones(len(g), dtype=bool)
+    eta[off] = np.nan
+    beta[off] = np.nan
+    return eta, beta
+
+
+def region_summary(mt, q, sel):
+    """Integrated quantities over the tetrahedra sel."""
+    w = mt.volume[sel]
+    msw = (mt.Ms[sel] * w)[:, None]
+    t, g = q['T'][sel], q['gvec'][sel]
+    gg = np.sum(w * dot(g, g))
+    r = {'volume': w.sum(),
+         'MsT': np.sum(msw * t, axis=0),
+         'MsTad': np.sum(msw * q['Tad'][sel, None] * unit(g), axis=0),
+         'MsTna': np.sum(msw * q['Tna'][sel, None] * np.cross(q['m'][sel], unit(g)), axis=0),
+         'umax': q['u'][sel].max(), 'umean': np.sum(w * q['u'][sel]) / w.sum(),
+         'beta_local': np.sum(w * mt.beta_local[sel]) / w.sum()}
+    if gg > 0:
+        eta = -np.sum(w * dot(t, g)) / gg
+        r['eta'] = eta
+        r['beta'] = np.sum(w * dot(t, np.cross(q['m'][sel], g))) / gg / eta
+    else:
+        r['eta'] = r['beta'] = np.nan
+    if 'Tfl' in q:
+        r['MsTfl'] = np.sum(msw[:, 0] * q['Tfl'][sel])
+        r['MsTdl'] = np.sum(msw[:, 0] * q['Tdl'][sel])
+    return r
+
+
+def to_nodes(mt, values, nb_nodes):
+    """Volume-weighted mean at the nodes of values given per tetrahedron (NaN at the nodes of no
+    magnetic tetrahedron)."""
+    w = np.repeat(mt.volume, 4)
+    idx = mt.tets.ravel()
+    weight = np.bincount(idx, weights=w, minlength=nb_nodes)
+    out = {}
+    for name, v in values.items():
+        acc = np.bincount(idx, weights=w * np.repeat(v, 4), minlength=nb_nodes)
+        with np.errstate(invalid='ignore', divide='ignore'):
+            out[name] = acc / weight
+    return out, weight > 0
+
+
+# ---------------------------------------------------------------- output
+
+def fmt3(v):
+    return ' '.join(f'{x: .4e}' for x in v)
+
+
+def main():
+    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
+    p.add_argument('settings', help='settings file of the simulation (YAML or JSON)')
+    p.add_argument('sol', nargs='+', help='.sol file(s) with the spin accumulation')
+    p.add_argument('-m', '--mesh', help='mesh file (default: the one of the settings or of the .sol)')
+    p.add_argument('-p', '--polarizer', type=float, nargs=3, metavar=('PX', 'PY', 'PZ'),
+                   help='fixed polarizer p: also field-like and damping-like torques')
+    p.add_argument('--mask', type=float, default=1e-2,
+                   help='eta and beta are NaN where g < mask * max(g) (default 1e-2)')
+    p.add_argument('-d', '--outdir', help='directory of the output files (default: the one of '
+                                          'each .sol file)')
+    p.add_argument('-o', '--output', help='table of the integrated quantities (default: '
+                                          'torques.txt if there are several .sol files)')
+    p.add_argument('--elements', action='store_true',
+                   help='also write the values per tetrahedron')
+    args = p.parse_args()
+    for file_name in [args.settings] + args.sol:
+        if not os.path.isfile(file_name):
+            sys.exit(f"{file_name}: no such file")
+
+    settings = read_settings(args.settings)
+    regions = region_parameters(settings)
+    length_unit = float((settings.get('mesh') or {}).get('length_unit', DEFAULT_LENGTH_UNIT))
+    anisotropic = bool((settings.get('spin_accumulation') or {}).get('anisotropic_diffusion', True))
+
+    first = read_sol(args.sol[0])
+    mesh_file = find_mesh(args, settings, first[2])
+    nodes, tets, names = read_mesh(mesh_file)
+    mt = MagneticTets(nodes, tets, names, regions, length_unit, anisotropic, args.polarizer)
+    print(f"mesh {mesh_file}: {len(nodes)} nodes, {len(tets)} tetrahedra, "
+          f"{len(mt.tets)} with a spin-transfer torque (regions {', '.join(mt.region_names)})")
+
+    table_file = args.output or ('torques.txt' if len(args.sol) > 1 else None)
+    if table_file and args.outdir and not os.path.dirname(table_file):
+        table_file = os.path.join(args.outdir, table_file)
+    rows = []
+    for k, sol_file in enumerate(args.sol):
+        cols, time, _ = first if k == 0 else read_sol(sol_file)
+        idx = cols['idx'].astype(int) if 'idx' in cols else np.arange(len(cols['mx']))
+        nb_nodes = len(idx)
+        if not np.array_equal(idx, np.arange(nb_nodes)) or mt.tets.max() >= nb_nodes:
+            sys.exit(f"{sol_file}: node indices do not match {mesh_file}")
+        q = mt.torques(cols)
+
+        print(f"\n{sol_file}" + (f" (t = {time:g} s)" if time is not None else ""))
+        for name in mt.region_names:
+            sel = mt.region == name
+            r = region_summary(mt, q, sel)
+            b = r['beta_local']
+            masked = np.mean(~(q['g'][sel] >= args.mask * q['g'][sel].max())) \
+                if q['g'][sel].max() > 0 else 1.0
+            print(f"  region {name}: |u| max {r['umax']:.4g} m/s, mean {r['umean']:.4g} m/s, "
+                  f"{100 * masked:.1f} % of the tetrahedra masked")
+            print(f"    integral Ms T dV     = {fmt3(r['MsT'])} A m^2/s")
+            print(f"    adiabatic part       = {fmt3(r['MsTad'])}")
+            print(f"    non-adiabatic part   = {fmt3(r['MsTna'])}")
+            print(f"    fit:   eta = {r['eta']:.5g}, beta = {r['beta']:.5g}")
+            print(f"    local limit: eta = {1 / (1 + b**2):.5g}, beta = {b:.5g}")
+            if 'MsTfl' in r:
+                print(f"    field-like {r['MsTfl']: .4e}, damping-like {r['MsTdl']: .4e} A m^2/s")
+            rows.append([time if time is not None else np.nan, k, name, r])
+
+        # nodal file
+        values = {'Tx': q['T'][:, 0], 'Ty': q['T'][:, 1], 'Tz': q['T'][:, 2],
+                  'Tad': q['Tad'], 'Tna': q['Tna'], 'g': q['g']}
+        if 'Tfl' in q:
+            values.update(Tfl=q['Tfl'], Tdl=q['Tdl'])
+        nod, magnetic = to_nodes(mt, values, nb_nodes)
+        eta, beta = eta_beta(nod['Tad'], nod['Tna'], nod['g'], args.mask)
+        for v in nod.values():
+            v[~magnetic] = 0.0
+        names_out = ['Tx', 'Ty', 'Tz', 'Tad', 'Tna', 'g', 'eta', 'beta'] + \
+                    (['Tfl', 'Tdl'] if 'Tfl' in q else [])
+        nod.update(eta=eta, beta=beta)
+        base = os.path.splitext(os.path.basename(sol_file))[0]
+        outdir = args.outdir or os.path.dirname(sol_file)
+        out = os.path.join(outdir, base + '_torques.sol')
+        with open(out, 'w') as f:
+            f.write(f"## fg-torques: {sol_file}\n## settings: {args.settings}\n"
+                    f"## mesh.filename: {os.path.abspath(mesh_file)}\n")
+            if args.polarizer:
+                f.write(f"## polarizer: {' '.join(str(c) for c in mt.polarizer)}\n")
+            f.write(f"## mask: {args.mask}\n")
+            if time is not None:
+                f.write(f"## time: {time:e}\n")
+            f.write("## units: torques and g in s^-1, eta and beta dimensionless\n")
+            f.write("## columns: idx\t" + '\t'.join(names_out) + '\n')
+            np.savetxt(f, np.column_stack([idx] + [nod[n] for n in names_out]),
+                       fmt=['%d'] + ['%.8e'] * len(names_out), delimiter='\t')
+        print(f"  written: {out}")
+
+        if args.elements:
+            eta_e, beta_e = eta_beta(q['Tad'], q['Tna'], q['g'], args.mask)
+            cols_e = [mt.barycenter, q['T'], q['Tad'][:, None], q['Tna'][:, None],
+                      q['g'][:, None], eta_e[:, None], beta_e[:, None]]
+            head = ['x', 'y', 'z', 'Tx', 'Ty', 'Tz', 'Tad', 'Tna', 'g', 'eta', 'beta']
+            if 'Tfl' in q:
+                cols_e += [q['Tfl'][:, None], q['Tdl'][:, None]]
+                head += ['Tfl', 'Tdl']
+            out = os.path.join(outdir, base + '_torques_elements.txt')
+            with open(out, 'w') as f:
+                f.write(f"## fg-torques: {sol_file}, per tetrahedron (barycenter in m)\n")
+                f.write("## columns: region\t" + '\t'.join(head) + '\n')
+                data = np.hstack(cols_e)
+                for reg, row in zip(mt.region, data):
+                    f.write(reg + '\t' + '\t'.join(f'{v:.8e}' for v in row) + '\n')
+            print(f"  written: {out}")
+
+    if table_file:
+        head = ['t', 'file', 'region', 'eta', 'beta', 'eta_local', 'beta_local',
+                'MsTx', 'MsTy', 'MsTz', 'MsTadx', 'MsTady', 'MsTadz', 'MsTnax', 'MsTnay', 'MsTnaz']
+        if args.polarizer:
+            head += ['MsTfl', 'MsTdl']
+        with open(table_file, 'w') as f:
+            f.write(f"## fg-torques: integrated quantities, settings {args.settings}\n")
+            f.write("## file: index of the .sol file in the command line; MsT...: integral of "
+                    "Ms T dV in A m^2/s\n")
+            f.write("## columns: " + '\t'.join(head) + '\n')
+            for time, k, name, r in rows:
+                b = r['beta_local']
+                vals = [time, k, name, r['eta'], r['beta'], 1 / (1 + b**2), b,
+                        *r['MsT'], *r['MsTad'], *r['MsTna']]
+                if args.polarizer:
+                    vals += [r['MsTfl'], r['MsTdl']]
+                f.write('\t'.join(v if isinstance(v, str) else
+                                  (str(v) if isinstance(v, int) else f'{v:.8e}') for v in vals)
+                        + '\n')
+        print(f"\nwritten: {table_file}")
+
+
+if __name__ == '__main__':
+    main()

@@ -9,6 +9,9 @@ working with feeLLGood:
 * **fg-merge-sol**: .sol tool
 * **fg-gensol**: .sol generation tool
 * **fg-plot**:plot tool
+* **fg-torques**: to split the spin-transfer torque of .sol files with spin accumulation into its
+  adiabatic and non-adiabatic parts (and field-like / damping-like ones for a fixed polarizer),
+  see dev-notes/adiabatic_torques.tex
 * **fg-xyplot**: to plot quantities of .sol files (columns, or expressions of them and of the
   node coordinates) against another one, e.g. a profile along an axis
 
