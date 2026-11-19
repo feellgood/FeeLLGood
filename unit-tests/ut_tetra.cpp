@@ -408,6 +408,70 @@ BOOST_AUTO_TEST_CASE(Tet_Pcoeff)
             }
     }
 
+/* test of the computation of rot(magnetization), this operator is only used when DMI bulk is non zero */
+BOOST_AUTO_TEST_CASE(Tet_rot_U, *boost::unit_test::tolerance(UT_TOL))
+	{
+    using namespace Nodes;
+    const int nbNod = 4;
+    std::vector<Nodes::Node> node;
+    dummyNodes<nbNod>(node);
+    
+    unsigned sd = my_seed();
+    std::mt19937 gen(sd);
+    std::uniform_real_distribution<> distrib(0.0, 1.0);
+
+    for (int i = 0; i < nbNod; i++)
+        { node[i].d[0].u = rand_vec3d(M_PI * distrib(gen), 2 * M_PI * distrib(gen)); }
+
+    // carefull with indices (starting from 1)
+    Tetra::Tet t(node, 0, {1, 2, 3, 4});
+    Eigen::Matrix<double,DIM,Tetra::NPI> dUdx;
+    Eigen::Matrix<double,DIM,Tetra::NPI> dUdy;
+    Eigen::Matrix<double,DIM,Tetra::NPI> dUdz;
+    Eigen::Matrix<double,DIM,Tetra::NPI> U;
+
+    t.interpolation(Nodes::get_u<Nodes::CURRENT>, U, dUdx, dUdy, dUdz);
+	Eigen::Matrix<double,DIM,Tetra::NPI> rotU_to_test = t.rot_U(dUdx,dUdy,dUdz);
+
+	//begin code ref
+    double t_dadx[Tetra::N][Tetra::NPI],t_dady[Tetra::N][Tetra::NPI],t_dadz[Tetra::N][Tetra::NPI];
+    
+    for(int i=0;i<Tetra::N;i++)
+        for(int j=0;j<Tetra::NPI;j++)
+            {
+            t_dadx[i][j] = t.da(i,0);
+            t_dady[i][j] = t.da(i,1);
+            t_dadz[i][j] = t.da(i,2);
+            }
+
+	double _u_nod[DIM][Tetra::N];
+    double dudx[DIM][Tetra::NPI], dudy[DIM][Tetra::NPI], dudz[DIM][Tetra::NPI];
+
+    for (int ie = 0; ie < Tetra::N; ie++)
+        {
+        int i = t.ind[ie];
+        Nodes::dataNode &d0 = node[i].d[0];
+        for (int dim = 0; dim < DIM; dim++)
+            { _u_nod[dim][ie] = d0.u(dim); }
+        }
+    tiny::mult<double, DIM, Tetra::N, Tetra::NPI>(_u_nod, t_dadx, dudx);
+    tiny::mult<double, DIM, Tetra::N, Tetra::NPI>(_u_nod, t_dady, dudy);
+    tiny::mult<double, DIM, Tetra::N, Tetra::NPI>(_u_nod, t_dadz, dudz);
+    //end code ref
+
+    for(int npi=0;npi<Tetra::NPI;npi++)
+        {
+        double val_ref[DIM];
+        val_ref[0] = dudy[IDX_Z][npi] - dudz[IDX_Y][npi];
+        val_ref[1] = dudz[IDX_X][npi] - dudx[IDX_Z][npi];
+        val_ref[2] = dudx[IDX_Y][npi] - dudy[IDX_X][npi];
+        for(int d=0;d<DIM;d++)
+    	    {
+            BOOST_TEST(rotU_to_test.col(npi)[d] == val_ref[d]);
+    	    }
+    	}
+	}
+
 /* test of two equivalent formulas for a gradient of V scalar potential on the nodes */
 BOOST_AUTO_TEST_CASE(Tet_gradV, *boost::unit_test::tolerance(UT_TOL))
     {
