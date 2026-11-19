@@ -123,14 +123,16 @@ The boundary term $`\int_{\partial\Omega}\mathbf{q}\cdot\mathbf{w}`$ needs the s
 through each surface. feeLLGood had three kinds of surfaces:
 - **reservoir** (key `s`): $`\mathbf{s}`$ imposed (Dirichlet), usually 0, for a thick normal metal
   that absorbs the spin;
-- **injection** (keys `jn` and `uP`): the entering spin current is imposed (Neumann),
-  ```math
-  \mathbf{q} = \frac{\mu_B}{e}\,j_n\,\mathbf{u}_P,
-  ```
-  $`\mathbf{u}_P`$ being a fixed unit vector describing a polarizer outside the mesh: `uP` is
-  normalized when the settings are read, so that the injected spin current is always 100 %
-  polarized;
+- **injection** (keys `jn` and `uP`): the entering spin current is imposed (Neumann), see below;
 - **free surface** (nothing given): $`\mathbf{q} = 0`$.
+
+On an injection surface,
+```math
+\mathbf{q} = \frac{\mu_B}{e}\,j_n\,\mathbf{u}_P,
+```
+$`\mathbf{u}_P`$ being a fixed unit vector describing a polarizer outside the mesh: `uP` is
+normalized when the settings are read, so that the injected spin current is always 100 %
+polarized.
 
 The injection condition is the limit of a very resistive polarizer. It ignores three effects that
 govern the spin-transfer torque in a spin valve F1 / N / F2 (reference layer / non-magnetic spacer /
@@ -351,16 +353,17 @@ normal spin current continuous there (no interface term is assembled). Two conse
    outside the mesh, on its boundary. The same limitation holds for the electrostatic potential.
 2. **Different densities of states.** With $`\mathbf{s} = \mu_BN_0\boldsymbol{\mu}_s/2`$, the
    continuity of $`\mathbf{s}`$ between two regions A and B is
-   ```math
-   N_{0,A}\,\boldsymbol{\mu}_{s,A} = N_{0,B}\,\boldsymbol{\mu}_{s,B},
-   ```
-   not the continuity of $`\boldsymbol{\mu}_s`$ of Valet–Fert, unless the two regions have the same
-   `dens_state`. On `validation/two_regions_1d` (a meshed Cu spacer and a ferromagnet with
-   $`N_{0,F}/N_{0,N}`$ = 2.24), the spin accumulation of the ferromagnet at the interface differs by
-   a factor about 2 between the two rules, and the torque with it. Workaround in the current code:
-   give the same `dens_state` to all the regions, each one keeping its own `sigma`, hence its own
-   $`D_0`$. In verbose mode, `spinAcc::checkDensityOfStates` warns about neighbouring regions of
-   different `dens_state`.
+
+```math
+N_{0,A}\,\boldsymbol{\mu}_{s,A} = N_{0,B}\,\boldsymbol{\mu}_{s,B},
+```
+not the continuity of $`\boldsymbol{\mu}_s`$ of Valet–Fert, unless the two regions have the same
+`dens_state`. On `validation/two_regions_1d` (a meshed Cu spacer and a ferromagnet with
+$`N_{0,F}/N_{0,N}`$ = 2.24), the spin accumulation of the ferromagnet at the interface differs by
+a factor about 2 between the two rules, and the torque with it. Workaround in the current code:
+give the same `dens_state` to all the regions, each one keeping its own `sigma`, hence its own
+$`D_0`$. In verbose mode, `spinAcc::checkDensityOfStates` warns about neighbouring regions of
+different `dens_state`.
 
 ## 6. Validation
 
@@ -387,15 +390,17 @@ resistance in heat transfer:
    duplicate the nodes when it reads the mesh.
 2. **Assemble an interface term.** The spin current through $`\Gamma`$, from A into B, is the law of
    § 3.1 written between the two traces,
-   ```math
-   \mathbf{q}_\Gamma = P_I\,\frac{\mu_B}{e}\,j_n\,\mathbf{u} + \mathsf{G}(\mathbf{u})\,(\mathbf{s}_A - \mathbf{s}_B),
-   ```
-   and the weak form gains $`\int_\Gamma\mathbf{q}_\Gamma\cdot(\mathbf{w}_B - \mathbf{w}_A)`$: a
-   matrix term coupling the two traces (the same 3×3 blocks as `stackBoundaryCondition`, with the
-   signs of $`\mathbf{w}_A`$ and $`\mathbf{w}_B`$) and a source term. With the conductances
-   converted for each side, the unknown can be $`\boldsymbol{\mu}_s`$ (or $`\mathbf{s}/N_0`$)
-   instead of $`\mathbf{s}`$, which also gives the continuity of $`\boldsymbol{\mu}_s`$ of
-   Valet–Fert between regions of different densities of states where no interface is declared.
+
+```math
+\mathbf{q}_\Gamma = P_I\,\frac{\mu_B}{e}\,j_n\,\mathbf{u} + \mathsf{G}(\mathbf{u})\,(\mathbf{s}_A - \mathbf{s}_B),
+```
+and the weak form gains $`\int_\Gamma\mathbf{q}_\Gamma\cdot(\mathbf{w}_B - \mathbf{w}_A)`$: a
+matrix term coupling the two traces (the same 3×3 blocks as `stackBoundaryCondition`, with the
+signs of $`\mathbf{w}_A`$ and $`\mathbf{w}_B`$) and a source term. With the conductances
+converted for each side, the unknown can be $`\boldsymbol{\mu}_s`$ (or $`\mathbf{s}/N_0`$)
+instead of $`\mathbf{s}`$, which also gives the continuity of $`\boldsymbol{\mu}_s`$ of
+Valet–Fert between regions of different densities of states where no interface is declared.
+
 3. **Do the same for the electrostatic potential**, with the interface resistance $`AR^*`$, so that
    the current distribution and the voltage drop include the interfaces.
 
@@ -456,23 +461,25 @@ state. These two results only rest on the cosine law.
 
 ### 8.3 Boundary conditions
 
-- **Potential.** With $`V_1`$ the potential of F1 (equipotential), the current leaving the sample
-  through the barrier is
-  ```math
-  j_n = G_T(\mathbf{m}_0)\,(V - V_1),
-  ```
-  a Robin condition: weak form $`\int_\Omega\sigma\nabla V\cdot\nabla w + \int_\Gamma G_T V w =
-  \int_\Gamma G_T V_1 w`$. $`G_T`$ depending on the magnetization, the potential is solved again at
-  each time step, and the current concentrates where $`\mathbf{m}`$ is parallel to $`\mathbf{p}`$.
-- **Spin.** The feedback of the spin accumulation on the barrier is of the order of
-  $`(k/RA)\,\mathbf{s}`$, against $`k/r_s`$ for the bulk of the sample,
-  $`r_s = l_{sf}/(\sigma(1 - P^2))`$: with $`RA/r_s \sim 10^2`$ to $`10^4`$, it is neglected, and
-  the condition is a flux,
-  ```math
-  \mathbf{q} = \frac{\mu_B}{e}\,j_n(\mathbf{x})\,\mathbf{P}_T(\mathbf{m}_0(\mathbf{x})).
-  ```
-  It is the former `uP` condition, with a polarization and a current density that both depend on
-  the local magnetization.
+**Potential.** With $`V_1`$ the potential of F1 (equipotential), the current leaving the sample
+through the barrier is
+```math
+j_n = G_T(\mathbf{m}_0)\,(V - V_1),
+```
+a Robin condition, of weak form
+$`\int_\Omega\sigma\nabla V\cdot\nabla w + \int_\Gamma G_T V w = \int_\Gamma G_T V_1 w`$.
+$`G_T`$ depending on the magnetization, the potential is solved again at each time step, and the
+current concentrates where $`\mathbf{m}`$ is parallel to $`\mathbf{p}`$.
+
+**Spin.** The feedback of the spin accumulation on the barrier is of the order of
+$`(k/RA)\,\mathbf{s}`$, against $`k/r_s`$ for the bulk of the sample,
+$`r_s = l_{sf}/(\sigma(1 - P^2))`$: with $`RA/r_s \sim 10^2`$ to $`10^4`$, it is neglected, and
+the condition is a flux,
+```math
+\mathbf{q} = \frac{\mu_B}{e}\,j_n(\mathbf{x})\,\mathbf{P}_T(\mathbf{m}_0(\mathbf{x})).
+```
+It is the former `uP` condition, with a polarization and a current density that both depend on
+the local magnetization.
 
 ### 8.4 Implementation
 
