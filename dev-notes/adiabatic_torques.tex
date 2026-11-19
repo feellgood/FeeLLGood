@@ -224,13 +224,34 @@ $P'=P$.
 
 \subsection{Validité}
 
-La limite locale suppose que la texture varie peu sur la longueur de décroissance transverse,
-de l'ordre de $l_{sd}$ ; pour une paroi de largeur $\delta$, il faut $\delta \gg l_{sd}$. Quand
-$\delta$ s'approche de $l_{sd}$, la diffusion transverse rend la réponse de $\vs$ non locale et
-$\beta_{\text{loc}}$ s'écarte de~\eqref{eq:beta} ; il varie alors dans la paroi et peut dépasser
-$l_{sd}^2/l_{sf}^2$ (Claudio-Gonzalez, Thiaville et Miltat, 2012 ; Petitjean, Luc et Waintal,
-2012). C'est précisément ce que la décomposition numérique~\eqref{eq:decomp} permet de mesurer :
-l'écart entre $\beta_{\text{loc}}$ et~\eqref{eq:beta} quantifie les effets non locaux.
+La limite locale néglige la diffusion transverse $D_0\,\vs''$ devant la précession
+$\vs\times\vm/\tau_{sd}$. Le premier ordre de la correction s'obtient en réinjectant
+$l_{sd}^2\,\vs_0''$ (avec $\vs_0$ donné par~\eqref{eq:s_local}) dans le second membre. Pour une
+paroi $\theta(z) = 2\arctan e^{(z-z_0)/\delta}$, $\vm = \sin\theta\,\hat{\bm x} +
+\cos\theta\,\hat{\bm z}$, on a $\vg = u\,\theta'\,\bm e_\theta$ et
+$\vm\times\vg = u\,\theta'\,\hat{\bm y}$, de direction fixe. Le terme dominant de
+$\vs_0''$, $-K u\,\theta'''\,\hat{\bm y}$ avec $K = \tau_{sd}M_s/(1+\xi^2)$, produit par
+précession la composante $l_{sd}^2 K u\,\theta'''$ selon $\bm e_\theta$ : le rapport des deux
+composantes transverses de $\vs$ devient
+\begin{equation}
+  \beta_{\text{loc}}(z) = \xi - l_{sd}^2\,\frac{\theta'''}{\theta'}
+  = \xi - \frac{l_{sd}^2}{\delta^2}\left(1 - 2\,\mathrm{sech}^2\frac{z-z_0}{\delta}\right),
+  \qquad
+  \bar\beta = \xi + \frac{l_{sd}^2}{3\delta^2},
+  \label{eq:nonlocal}
+\end{equation}
+$\bar\beta$ étant la moyenne pondérée par $|\vg|^2\propto\mathrm{sech}^2$ de la
+section~\ref{sec:num}. $\beta_{\text{loc}}$ n'est donc pas uniforme : plus grand au centre de la
+paroi ($\xi + l_{sd}^2/\delta^2$), plus petit dans ses ailes. La correction est absolue, la même
+pour tout $P'$ ; rapportée à $\xi$, elle vaut $(l_{sf}/\delta)^2/[3(1-PP')]$ : la limite locale
+demande une paroi large devant $l_{sf}$, et pas seulement devant $l_{sd}$. Pour $l_{sf} = 5$~nm et
+$\delta = 25$~nm, elle fait 1,3~\% de $\xi$ avec $P'=0$ et 2,6~\% avec $P'=P=0{,}7$.
+\code{validation/wide\_wall} retrouve~\eqref{eq:nonlocal} à moins de 2~\% de la correction près,
+pour $\delta$ = 12,5 et 25~nm. Quand $\delta$ s'approche de $l_{sd}$, les ordres suivants
+interviennent et $\beta_{\text{loc}}$ peut largement dépasser $\xi$ (Claudio-Gonzalez, Thiaville et
+Miltat, 2012 ; Petitjean, Luc et Waintal, 2012). C'est ce que la décomposition
+numérique~\eqref{eq:decomp} permet de mesurer : l'écart entre $\beta_{\text{loc}}$
+et~\eqref{eq:beta} quantifie les effets non locaux.
 
 \section{Remarques}
 
@@ -327,9 +348,10 @@ $\vb_1$ et $\vb_2$ (avec $\vm$ uniforme dans une couche mince).
 \subsection{Vérifications}
 
 \begin{itemize}
-  \item paroi large ($\delta \gg l_{sd}$) dans un fil uniforme : $\bar\beta$ et $\bar\eta$ doivent
-    tendre vers~\eqref{eq:beta}, et $\beta_{\text{loc}}$ être uniforme dans la paroi ;
-  \item à $\delta$ fixé, $\bar\beta$ en fonction de $l_{sd}/\delta$ montre le passage au régime non
+  \item paroi large dans un fil uniforme : $\bar\beta$ et $\beta_{\text{loc}}$ doivent suivre la
+    correction au premier ordre~\eqref{eq:nonlocal}, $\bar\eta$ tendre vers $1/(1+\xi^2)$ ;
+    c'est le cas test \code{validation/wide\_wall} ;
+  \item en faisant décroître $\delta$ vers $l_{sd}$, $\bar\beta$ montre le passage au régime non
     local ;
   \item convergence en maillage : la taille de maille doit résoudre $l_{sd}$ ;
   \item en faisant varier \code{P\_prime} de 0 à $P$, $\beta$ passe de $l_{sd}^2/l_{sf}^2$ à
