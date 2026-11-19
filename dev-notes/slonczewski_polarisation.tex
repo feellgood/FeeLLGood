@@ -1497,8 +1497,8 @@ reste utilisable.
     est la tension $V_1$ appliquée. Pour imposer le courant total $I$, on
     utilise la linéarité en $V_1$ à aimantation fixée : on résout avec
     $V_1 = 1$, on calcule le courant $I_1$, et on multiplie $V$ par
-    $I/I_1$, comme le fait déjà \texttt{jn\_factor} pour
-    \texttt{current\_density(t)}.
+    $I/I_1$, comme le fait déjà \texttt{spin\_accumulation.jn\_multiplier}
+    pour les densités de courant imposées.
   \item \textbf{Non-linéarité.} Si la TMR dépend de la tension, $G_T$
     dépend de $V$ : on prend le $V$ du pas précédent (décalage explicite)
     ou on fait quelques itérations de point fixe.
@@ -1517,7 +1517,8 @@ reste utilisable.
   \item Il est appelé \emph{une seule fois}, dans le constructeur de
     \texttt{spinAcc} : l'objet \texttt{pot\_solver} est local, seul $V$ est
     conservé. La dépendance en temps passe par la linéarité :
-    $\nabla V(t) = \texttt{jn\_factor}\,\nabla V_0$, \texttt{jn\_factor}
+    $\nabla V(t) = \texttt{jn\_multiplier}(t)\,\nabla V_0$,
+    \texttt{jn\_multiplier} (clé \texttt{spin\_accumulation.jn\_multiplier})
     étant mis à jour dans \texttt{compute\_all} (\texttt{fem.h}).
   \item La condition de l'empilement (\texttt{stackBoundaryCondition})
     utilise un $j_n$ uniforme, \texttt{param.jn}.
@@ -1533,9 +1534,9 @@ Avec \eqref{eq:GT}, $V$ dépend de l'aimantation : il faut le recalculer
     \texttt{\{p, RA, TMR, V\}}, avec en option \texttt{P1} (par défaut
     $\sqrt{\mathrm{TMR}/(2+\mathrm{TMR})}$, jonction symétrique),
     \texttt{V\_h} et \texttt{b} (section~\ref{sec:tunnel-parametres}) ;
-    la tension peut être une fonction du temps comme
-    \texttt{current\_density}. Elle exclut \texttt{jn}, \texttt{uP} et
-    \texttt{slonczewski} sur la même surface.
+    la tension peut être une fonction du temps, comme
+    \texttt{spin\_accumulation.jn\_multiplier}. Elle exclut \texttt{jn},
+    \texttt{uP} et \texttt{slonczewski} sur la même surface.
   \item \textbf{Matrice du potentiel}
     (\texttt{electrostatSolver::integrales} pour les triangles) : sur une
     surface \texttt{tunnel}, ajouter $G_T(\vm_0)\,a_ia_j\,w$ à une matrice
@@ -1555,8 +1556,8 @@ Avec \eqref{eq:GT}, $V$ dépend de l'aimantation : il faut le recalculer
   \item \textbf{Durée de vie du solveur} (\texttt{spinAcc}) : faire de
     \texttt{pot\_solver} un membre, et dans \texttt{spinAcc::compute()},
     s'il y a une surface \texttt{tunnel}, résoudre le potentiel avant le
-    spin, puis copier $V$. \texttt{jn\_factor} vaut alors 1 (ou
-    $I/I_1$ en pilotage en courant) ; \texttt{potential()} et la sortie
+    spin, puis copier $V$. \texttt{jn\_multiplier} doit alors valoir 1
+    (ou $I/I_1$ en pilotage en courant) ; \texttt{potential()} et la sortie
     \texttt{\_V.sol} doivent suivre.
   \item \textbf{Condition sur le spin} : une fonction
     \texttt{tunnelBoundaryCondition(f)}, sur le modèle de
