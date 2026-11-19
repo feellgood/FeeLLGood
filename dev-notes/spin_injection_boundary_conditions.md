@@ -41,10 +41,11 @@ switch (spin valves, MRAM, spin-torque oscillators).
 | $`\sigma`$ | electrical conductivity | S/m | `sigma` |
 | $`N_0`$ | density of states at the Fermi level | J⁻¹m⁻³ | `dens_state` |
 | $`D_0`$ | spin diffusion constant, $`D_0 = 2\sigma/(e^2N_0)`$ | m²/s | computed |
-| $`P`$ | bulk polarization rate of a ferromagnet, $`0 \le P < 1`$ ($`\beta = \beta' = P`$ of Zhang–Levy–Fert) | – | `P` |
+| $`P`$ | bulk polarization rate of the conductivity of a ferromagnet, $`0 \le P < 1`$ ($`\beta`$ of Zhang–Levy–Fert) | – | `P` |
+| $`P'`$ | polarization rate of the diffusion constant, $`0 \le P' < 1`$ ($`\beta'`$ of Zhang–Levy–Fert), default 0 | – | `P_prime` |
 | $`l_{sf}`$ | spin diffusion length (longitudinal in a ferromagnet) | m | `l_sf` |
 | $`l_{sd}`$ | transverse (s–d exchange) length | m | `l_sd` |
-| $`\tau_{sf}`$, $`\tau_{sd}`$ | spin-flip and precession times, $`1/\tau_{sf} = D_0(1-P^2)/l_{sf}^2`$ (ferromagnet), $`D_0/l_{sf}^2`$ (normal metal), $`1/\tau_{sd} = D_0/l_{sd}^2`$ | s | computed |
+| $`\tau_{sf}`$, $`\tau_{sd}`$ | spin-flip and precession times, $`1/\tau_{sf} = D_0(1-PP')/l_{sf}^2`$ (ferromagnet), $`D_0/l_{sf}^2`$ (normal metal), $`1/\tau_{sd} = D_0/l_{sd}^2`$ | s | computed |
 | $`\mu_B`$, $`e`$ | Bohr magneton, elementary charge ($`e > 0`$) | A·m², C | constants |
 | $`\mathbf{p}`$ | magnetization of the reference layer F1 (unit vector) | – | `slonczewski.p` |
 | $`AR^*`$, $`\gamma`$ | resistance–area product and spin asymmetry of an interface (Valet–Fert) | Ω·m², – | `AR`, `gamma` |
@@ -58,9 +59,9 @@ $`\mathrm{Re}\,G_{\uparrow\downarrow}`$ about 0.5e15 S/m².
 The spin current is a tensor $`Q`$ of components $`Q_{i\alpha}`$: $`i`$ is the direction of flow
 in space, $`\alpha`$ the component of the spin. Latin indices denote space, Greek indices the
 spin, and the repeated indices are summed. In the model of Zhang, Levy and Fert, with
-$`\beta = \beta' = P`$, it is
+$`\beta = P`$ and $`\beta' = P'`$, it is
 ```math
-Q_{i\alpha} = -P\,\frac{\mu_B}{e}\,J_i\,m_\alpha - D_0\left[\partial_i s_\alpha - P^2\,m_\alpha\,(\mathbf{m}\cdot\partial_i\mathbf{s})\right].
+Q_{i\alpha} = -P\,\frac{\mu_B}{e}\,J_i\,m_\alpha - D_0\left[\partial_i s_\alpha - PP'\,m_\alpha\,(\mathbf{m}\cdot\partial_i\mathbf{s})\right].
 ```
 $`D_0 = 2\sigma/(e^2N_0)`$ is the diffusion constant of the code: it includes the factor 2 that
 Zhang, Levy and Fert, and `dev-notes/slonczewski_polarisation.tex`, write in front of their
@@ -68,10 +69,10 @@ $`D_0`$ ($`2D_0`$ there); the note also writes the polarized term with
 $`\mathbf{j}_e = \mathbf{J}`$ and $`|e|`$.
 The first term is the spin carried by the charge current, polarized along $`\mathbf{m}`$ (it flows
 with the electrons, opposite to $`\mathbf{J}`$); the second one is the diffusion of the spin
-accumulation, with the diffusion constant $`D_0(1-P^2)`$ for the component of $`\mathbf{s}`$ along
+accumulation, with the diffusion constant $`D_0(1-PP')`$ for the component of $`\mathbf{s}`$ along
 $`\mathbf{m}`$ (longitudinal) and $`D_0`$ for the transverse ones. In a normal metal, $`P = 0`$.
 
-**The assumption $`\beta = \beta'`$.** Zhang, Levy and Fert define $`\beta`$ as the polarization of
+**The choice of $`\beta'`$.** Zhang, Levy and Fert define $`\beta`$ as the polarization of
 the conductivity and $`\beta'`$ as the one of the diffusion constant; they differ when the density
 of states depends on the spin ($`\sigma_\pm = e^2N_\pm D_\pm`$), which is the case in the $`3d`$
 ferromagnets. Published values are estimates or modelling choices, not measurements: $`\beta`$ =
@@ -80,9 +81,14 @@ Levy and Zhang, 2003); $`\beta`$ = 0.9 and $`\beta'`$ = 0.8 (Abert et al., 2015)
 enters through $`\beta\beta'`$ in the longitudinal diffusion $`D_0(1-\beta\beta')`$; $`l_{sf}`$ being
 the longitudinal length, it only changes the ratio of the longitudinal to the transverse diffusion
 (0.75 instead of 0.55 for the values of Co), largely absorbed by the fitted $`l_{sd}`$ or
-$`G_{\uparrow\downarrow}`$. Separating them would also require revisiting $`s = \mu_B N_0\,\mu_s/2`$
-and the equivalence with Valet–Fert (§ 4.4): feeLLGood keeps $`\beta = \beta' = P`$ (discussion
-in `dev-notes/slonczewski_polarisation.tex`).
+$`G_{\uparrow\downarrow}`$. feeLLGood takes $`\beta'`$ from the key `P_prime` of each volume region
+(and of the bulk F1 of a polarizer stack, § 3), default 0: the default is the isotropic diffusion
+$`D_0`$ of the former model, with $`1/\tau_{sf} = D_0/l_{sf}^2`$ in the ferromagnets too.
+$`\beta = \beta'`$ (`P_prime` = `P`) is required for the relation $`s = \mu_B N_0\,\mu_s/2`$ and
+the equivalence with Valet–Fert (§ 4.4), hence by the validations of § 6, which set it: with
+$`\beta \neq \beta'`$ the density of states depends on the spin, and the spin chemical potential
+is no longer proportional to $`\mathbf{s}`$ (discussion in
+`dev-notes/slonczewski_polarisation.tex`).
 
 The spin accumulation relaxes in picoseconds, while the magnetization evolves in nanoseconds:
 feeLLGood solves the **steady state** at each time step, the magnetization being frozen,
@@ -98,24 +104,22 @@ torque $`\propto\mathbf{m}\times\mathbf{s}`$.
 ($`q_\alpha = -n_iQ_{i\alpha}`$) the spin current **entering** the sample through its boundary
 $`\partial\Omega`$:
 ```math
-\int_\Omega D_0\left[\partial_i s_\alpha - P^2 m_\alpha\,(\mathbf{m}\cdot\partial_i\mathbf{s})\right]\partial_i w_\alpha
+\int_\Omega D_0\left[\partial_i s_\alpha - PP' m_\alpha\,(\mathbf{m}\cdot\partial_i\mathbf{s})\right]\partial_i w_\alpha
 + \int_\Omega\left(\frac{\mathbf{s}}{\tau_{sf}} + \frac{\mathbf{s}\times\mathbf{m}}{\tau_{sd}}\right)\cdot\mathbf{w}
 = \int_\Omega \frac{\mu_B}{e}P\sigma\,(\nabla V\cdot\nabla w_\alpha)\,m_\alpha
 + \int_{\partial\Omega}\mathbf{q}\cdot\mathbf{w}.
 ```
 Code: `spinAcc::integrales` (diffusion, relaxation, precession, polarized current),
-`Tet::add_spinDiffusionAniso` (the term in $`P^2`$), `spinAcc::solve` (assembly, boundary terms,
+`Tet::add_spinDiffusionAniso` (the term in $`PP'`$), `spinAcc::solve` (assembly, boundary terms,
 BiCGStab with the block preconditioner of `dev-notes/spin_accumulation_block_preconditioner.md`).
 The unknowns are the three components of $`\mathbf{s}`$ at the nodes, with linear (P1) elements.
 
-**Switching the anisotropic diffusion off.** The key `spin_accumulation.anisotropic_diffusion`
-(default `true`) can be set to `false` to compare with the former model: the term in $`P^2`$ is then
-dropped and the relaxation is $`1/\tau_{sf} = D_0/l_{sf}^2`$ in the ferromagnets too
-($`\beta\beta' = 0`$, isotropic diffusion $`D_0`$). Both are switched together, so that $`l_{sf}`$
-keeps the same meaning in both models (with the anisotropic term alone switched off, the
-longitudinal decay length would become $`l_{sf}/\sqrt{1-P^2}`$). The polarizer stack of § 3 does not
-depend on it; the equivalence with Valet–Fert (§ 4.4) and the validations of § 6 hold with `true`
-only.
+**Longitudinal relaxation.** $`P'`$ changes the anisotropic term and the relaxation
+$`1/\tau_{sf} = D_0(1-PP')/l_{sf}^2`$ together, so that $`l_{sf}`$ stays the longitudinal decay
+length whatever $`P'`$ (with the anisotropic term alone, it would become $`l_{sf}/\sqrt{1-PP'}`$).
+$`P'`$ = 0 (the default) gives the isotropic diffusion $`D_0`$ of the former model; it replaces the
+key `spin_accumulation.anisotropic_diffusion: false` of earlier versions of this branch, and
+`P_prime` = `P` its former default `true`.
 
 ## 2. The boundary conditions before this branch
 
@@ -210,9 +214,9 @@ about 1 nm, and its longitudinal one obeys a 1D collinear diffusion over its thi
 with a reservoir on its far side. Its solution is analytic: the bulk of F1 adds the spin
 conductance
 ```math
-g_F = \frac{2}{e^2N_0}\,\frac{\sigma_1(1-P_{F1}^2)}{l_{sf,1}}\coth\frac{t_1}{l_{sf,1}}
+g_F = \frac{2}{e^2N_0}\,\frac{\sigma_1(1-P_{F1}P'_{F1})}{l_{sf,1}}\coth\frac{t_1}{l_{sf,1}}
 ```
-in series with the interface, which is equivalent to keeping $`\mathbf{s}_{F1} = 0`$ with the
+($`P'_{F1}`$: key `P_prime` of `F1`, default 0) in series with the interface, which is equivalent to keeping $`\mathbf{s}_{F1} = 0`$ with the
 renormalized parameters
 ```math
 P_1^* = \frac{P_{F1}\,G_{\parallel1} + P_1\,g_F}{g_F + G_{\parallel1}},\qquad
@@ -247,7 +251,8 @@ inlet:
   jn: 1e12                       # times jn_multiplier(t); jn > 0: electrons from F1 into F2
   slonczewski:
     p: [0, 0, 1]                 # magnetization of F1
-    F1:  {sigma: 2e6, P: 0.5, l_sf: 20e-9, thickness: 15e-9}   # optional: bulk of F1
+    F1:  {sigma: 2e6, P: 0.5, P_prime: 0.5, l_sf: 20e-9,       # optional: bulk of F1
+          thickness: 15e-9}                                    # (P_prime default 0)
     F1N: {AR: 0.5e-15, gamma: 0.75, Gr: 5e14, Gi: 0}           # interface F1/N (required)
     NF2: {AR: 0.3e-15, gamma: 0.6, Gr: 5e14, Gi: 0,            # optional: interface N/F2
           transverse: sink}                                    # or series
@@ -269,7 +274,7 @@ inlet:
 | Conductance matrix, F1 renormalization, elimination of the spacer, unit conversion | `src/slonczewskiInterface.h`: `conductance`, `bulkConductance`, `renormalizeF1`, `effectiveBC`, `makeStack`, `Stack::bc` (pure functions, tested by `unit-tests/ut_slonczewskiInterface.cpp`) |
 | Conversion with the density of states of the sample, checks | `spinAcc::makeStacks` (`src/spinAccumulationSolver.cpp`), once, at the construction of the solver |
 | Boundary terms in the matrix and the right-hand side | `spinAcc::stackBoundaryCondition`, called by `spinAcc::solve` for every triangle of such a surface, at every solve |
-| Anisotropic diffusion and longitudinal relaxation (needed for consistency with Valet–Fert), switched off with `anisotropic_diffusion: false` | `Tet::add_spinDiffusionAniso` (`src/tetra.cpp`), `spinAcc::integrales`, `spinAcc::anisotropicDiffusion`, `Settings::anisotropic_diffusion` |
+| Anisotropic diffusion and longitudinal relaxation, $`\beta\beta' = PP'`$ (`P_prime` = `P` needed for consistency with Valet–Fert) | `Tet::add_spinDiffusionAniso` (`src/tetra.cpp`), `spinAcc::integrales`, `Tetra::prm::P_prime`, `Slonczewski::StackSettings::P1prime` |
 | Warning about regions of different densities of states (§ 5.2) | `spinAcc::checkDensityOfStates` (verbose mode) |
 
 ### 4.3 Assembly
@@ -473,7 +478,7 @@ current concentrates where $`\mathbf{m}`$ is parallel to $`\mathbf{p}`$.
 
 **Spin.** The feedback of the spin accumulation on the barrier is of the order of
 $`(k/RA)\,\mathbf{s}`$, against $`k/r_s`$ for the bulk of the sample,
-$`r_s = l_{sf}/(\sigma(1 - P^2))`$: with $`RA/r_s \sim 10^2`$ to $`10^4`$, it is neglected, and
+$`r_s = l_{sf}/(\sigma(1 - PP'))`$: with $`RA/r_s \sim 10^2`$ to $`10^4`$, it is neglected, and
 the condition is a flux,
 ```math
 \mathbf{q} = \frac{\mu_B}{e}\,j_n(\mathbf{x})\,\mathbf{P}_T(\mathbf{m}_0(\mathbf{x})).
@@ -560,7 +565,7 @@ The superscript B denotes its quantities; $`k = 2/(e^2N_0)`$ as in § 4.4.
 
 | Quantity | Baltz | feeLLGood | Relation |
 |---|---|---|---|
-| bulk polarization | $`\beta = (\alpha-1)/(\alpha+1)`$, $`\alpha = \rho^\downarrow/\rho^\uparrow`$ (§ 2.4) | `P` ($`\beta = \beta' = P`$) | $`P = \beta`$ |
+| bulk polarization | $`\beta = (\alpha-1)/(\alpha+1)`$, $`\alpha = \rho^\downarrow/\rho^\uparrow`$ (§ 2.4) | `P`, `P_prime` | $`P = \beta`$, `P_prime` = `P` |
 | resistivities | $`\rho^{\uparrow(\downarrow)} = 2\rho^*(1\mp\beta)`$ | `sigma`, `P` | $`\rho^* = 1/\left(\sigma(1-P^2)\right)`$ |
 | spin diffusion length | $`l_{sf}^*`$, $`1/l_{sf}^{*2} = 1/l_{sf}^{\uparrow2} + 1/l_{sf}^{\downarrow2}`$ (§ 3.1) | `l_sf` | $`l_{sf} = l_{sf}^*`$, $`1/\tau_{sf} = D_0(1-P^2)/l_{sf}^2`$ |
 | spin resistance | $`\rho^* l_{sf}^*`$ in Ω·m² (§ 3.2) | $`g_F`$ (bulk of F1, § 3.3) | $`g_F = k\coth(t_1/l_{sf})/(\rho^*_{F1}\,l_{sf,1})`$ |

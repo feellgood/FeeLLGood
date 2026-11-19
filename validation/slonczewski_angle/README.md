@@ -36,8 +36,8 @@ so that its sign matters.
   $`(|{\uparrow}\rangle + |{\downarrow}\rangle)/\sqrt2`$ is reflected into
   $`(r_\uparrow, r_\downarrow)/\sqrt2`$, the transverse polarization absorbed is
   $`1 - r_\uparrow^* r_\downarrow = \overline{G_{\uparrow\downarrow}}`$ (per channel).
-- F2: the equations of feeLLGood ($`\beta = \beta' = P`$, anisotropic diffusion, relaxation,
-  precession), 1D, solved exactly by eigenmodes.
+- F2: the equations of feeLLGood ($`\beta = \beta' = P`$, i.e. `P_prime` = `P` in the settings,
+  anisotropic diffusion, relaxation, precession), 1D, solved exactly by eigenmodes.
 - $`s = \mu_B N_0\,\mu_s/2`$ (`validation/valet_fert_1d`).
 
 This fixes the conversion of the mixing conductance:

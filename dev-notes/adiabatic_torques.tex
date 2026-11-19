@@ -54,10 +54,10 @@ l'accumulation de spin $\vs$ (A/m) :
   + \frac{(\vs\times\vm)_\alpha}{\tau_{sd}} = 0,
   \label{eq:diffusion}
 \end{equation}
-avec le courant de spin (modèle de Zhang, Levy et Fert, $\beta=\beta'=P$)
+avec le courant de spin (modèle de Zhang, Levy et Fert, $\beta=P$, $\beta'=P'$)
 \begin{equation}
   Q_{i\alpha} = -P\,\frac{\mu_B}{e}\,J_i\,m_\alpha
-  - D_0\left[\partial_i s_\alpha - P^2\,m_\alpha\,(\vm\cdot\partial_i\vs)\right],
+  - D_0\left[\partial_i s_\alpha - PP'\,m_\alpha\,(\vm\cdot\partial_i\vs)\right],
   \qquad \vJ = -\sigma\nabla V .
   \label{eq:Q}
 \end{equation}
@@ -65,13 +65,13 @@ Les indices latins désignent l'espace, les grecs la composante du spin, et les 
 sont sommés. Les temps de relaxation sont
 \begin{equation}
   \frac{1}{\tau_{sd}} = \frac{D_0}{l_{sd}^2},\qquad
-  \frac{1}{\tau_{sf}} = \frac{D_0\,(1-P^2)}{l_{sf}^2}
+  \frac{1}{\tau_{sf}} = \frac{D_0\,(1-PP')}{l_{sf}^2}
   \label{eq:taus}
 \end{equation}
-dans un ferromagnétique avec \code{anisotropic\_diffusion} vrai (valeur par défaut), et
-$1/\tau_{sf} = D_0/l_{sf}^2$ dans un métal normal, ou partout si
-\code{spin\_accumulation.anisotropic\_diffusion} vaut \code{false} (\code{spinAcc::integrales},
-\code{src/spinAccumulationSolver.cpp}). La correspondance des notations avec le code et les
+dans un ferromagnétique, et $1/\tau_{sf} = D_0/l_{sf}^2$ dans un métal normal
+(\code{spinAcc::integrales}, \code{src/spinAccumulationSolver.cpp}). $P'$ vaut 0 par défaut
+(diffusion isotrope) ; $P'=P$ est l'hypothèse $\beta=\beta'$, nécessaire à l'équivalence avec
+Valet--Fert. La correspondance des notations avec le code et les
 fichiers de réglages est donnée dans le tableau~\ref{tab:params}.
 
 \begin{table}[ht]
@@ -84,7 +84,8 @@ fichiers de réglages est donnée dans le tableau~\ref{tab:params}.
 \vs & accumulation de spin & A/m & \code{s} \\
 V & potentiel électrique (avec \code{jn\_multiplier}) & V & \code{V} \\
 \sigma & conductivité & S/m & \code{sigma} \\
-P & taux de polarisation & -- & \code{P} \\
+P & taux de polarisation de la conductivité ($\beta$) & -- & \code{P} \\
+P' & taux de polarisation de la diffusion ($\beta'$) & -- & \code{P\_prime} (défaut 0) \\
 D_0 & constante de diffusion, $2\sigma/(e^2N_0)$ & m$^2$/s & calculée \\
 l_{sd},\ l_{sf} & longueurs transverse et de spin-flip & m & \code{l\_sd}, \code{l\_sf} \\
 M_s & aimantation à saturation & A/m & \code{Ms} \\
@@ -183,7 +184,7 @@ composantes transverses de $\vs$ dans le repère de la texture.
 On considère un ferromagnétique homogène traversé par un courant à divergence nulle, loin des
 interfaces et des surfaces d'injection, et une texture qui varie lentement à l'échelle de
 $l_{sd}$. On néglige alors les termes de diffusion ($D_0\,\partial_i\partial_i\vs$ et le terme en
-$P^2$) devant les termes de relaxation. Avec $\partial_iJ_i = 0$, la divergence du terme polarisé
+$PP'$) devant les termes de relaxation. Avec $\partial_iJ_i = 0$, la divergence du terme polarisé
 de~\eqref{eq:Q} donne $-P\,(\mu_B/e)\,(\vJ\cdot\nabla)\vm = M_s\,\vg$, et~\eqref{eq:diffusion}
 devient
 \begin{equation}
@@ -205,21 +206,21 @@ Le couple~\eqref{eq:T}, avec $\vm\times(\vm\times\vg) = -\vg$, vaut
 c'est-à-dire la forme~\eqref{eq:ZL} avec
 \begin{equation}
   \boxed{\;
-  \beta = \xi = \frac{\tau_{sd}}{\tau_{sf}} = (1-P^2)\,\frac{l_{sd}^2}{l_{sf}^2},
+  \beta = \xi = \frac{\tau_{sd}}{\tau_{sf}} = (1-PP')\,\frac{l_{sd}^2}{l_{sf}^2},
   \qquad
   \eta = \frac{1}{1+\xi^2}
   \;}
   \label{eq:beta}
 \end{equation}
-Le facteur $1-P^2$ disparaît si \code{anisotropic\_diffusion} vaut \code{false}
-($\beta = l_{sd}^2/l_{sf}^2$). Comme $\xi\ll 1$ en général, $\eta\simeq 1$ et le couple
+Avec la valeur par défaut $P'=0$, $\beta = l_{sd}^2/l_{sf}^2$. Comme $\xi\ll 1$ en général, $\eta\simeq 1$ et le couple
 adiabatique est le couple de Zhang--Li \og complet \fg{} $-(\vu\cdot\nabla)\vm$.
 
 \subsection{Ordres de grandeur}
 
 Pour $J = 10^{12}$~A/m$^2$, $P = 0{,}7$ et $M_s = 8\times10^5$~A/m :
 $\mu_B/e = 5{,}79\times10^{-5}$~m$^2$/s et $|\vu| \simeq 51$~m/s. Avec $l_{sd} = 1$~nm et
-$l_{sf} = 5$~nm, $\beta = 0{,}51\times0{,}04 \simeq 0{,}020$.
+$l_{sf} = 5$~nm, $\beta = 0{,}04$ pour $P'=0$ et $\beta = 0{,}51\times0{,}04 \simeq 0{,}020$ pour
+$P'=P$.
 
 \subsection{Validité}
 
@@ -331,8 +332,8 @@ $\vb_1$ et $\vb_2$ (avec $\vm$ uniforme dans une couche mince).
   \item à $\delta$ fixé, $\bar\beta$ en fonction de $l_{sd}/\delta$ montre le passage au régime non
     local ;
   \item convergence en maillage : la taille de maille doit résoudre $l_{sd}$ ;
-  \item \code{anisotropic\_diffusion} à \code{false} : $\beta$ passe de $(1-P^2)\,l_{sd}^2/l_{sf}^2$
-    à $l_{sd}^2/l_{sf}^2$.
+  \item en faisant varier \code{P\_prime} de 0 à $P$, $\beta$ passe de $l_{sd}^2/l_{sf}^2$ à
+    $(1-P^2)\,l_{sd}^2/l_{sf}^2$.
 \end{itemize}
 
 \section*{Références}

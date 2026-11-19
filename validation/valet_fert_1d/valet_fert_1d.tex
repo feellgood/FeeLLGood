@@ -63,7 +63,8 @@ it checks:
     on its far side);
   \item the elimination of the spacer node;
   \item the equivalence between the bulk equations of feeLLGood
-    (anisotropic diffusion of Zhang--Levy--Fert with $\beta=\beta'=P$) and
+    (anisotropic diffusion of Zhang--Levy--Fert with $\beta=\beta'=P$,
+    \texttt{P\_prime} $=P$) and
     those of Valet--Fert.
 \end{itemize}
 The transverse terms (mixing conductance $G_{\uparrow\downarrow}$, s--d
@@ -458,10 +459,10 @@ The factor $1/2$ of the conversion comes from $D_0$ being twice the
 coefficient $D$ of the Einstein relation $\sigma = e^2N_0D$: $\vs$ is half
 the physical magnetization $\mu_BN_0\mu_s$, which changes no result.
 
-This equivalence requires the anisotropic diffusion: the key
-\texttt{anisotropic\_diffusion} of the section \texttt{spin\_accumulation}
-must be \texttt{true}, which is the default. Without it, the spin
-conductivity of F2 would be $\sigma$ instead of $\sigma(1-P^2)$ and the test would fail.
+This equivalence requires $\beta=\beta'$: the settings of the test give
+\texttt{P\_prime} $=P$ to F2 and to F1 (the default \texttt{P\_prime}
+is 0, an isotropic diffusion). With the default, the spin conductivity of
+F2 would be $\sigma$ instead of $\sigma(1-P^2)$ and the test would fail.
 
 \subsection{The Robin condition on the inlet}
 
@@ -555,10 +556,9 @@ for both configurations.
     ($R_1 = 0$) changes $P_{\mathrm{inj}}$ from 0.467 to 0.389 in P
     (formula~\eqref{eq:Pinj}): by \eqref{eq:phi0}, $s_z(0)$ is almost
     halved.
-  \item \textbf{Isotropic diffusion.} With
-    \texttt{anisotropic\_\allowbreak diffusion: false}, F2 no longer has the
-    Valet--Fert equations: the error rises to 7.3\,\% in P and the test
-    fails.
+  \item \textbf{Isotropic diffusion.} With \texttt{P\_prime: 0} (the
+    default) in F2, F2 no longer has the Valet--Fert equations: the error
+    rises to 7.3\,\% in P and the test fails.
 \end{itemize}
 
 \subsection{Usage}

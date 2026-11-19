@@ -63,7 +63,8 @@ en particulier :
     de l'autre côté) ;
   \item l'élimination du nœud espaceur ;
   \item l'équivalence entre les équations de volume de FeeLLGood (diffusion
-    anisotrope de Zhang--Levy--Fert avec $\beta=\beta'=P$) et celles de
+    anisotrope de Zhang--Levy--Fert avec $\beta=\beta'=P$,
+    \texttt{P\_prime} $=P$) et celles de
     Valet--Fert.
 \end{itemize}
 Les termes transverses (conductance de mélange $G_{\uparrow\downarrow}$,
@@ -460,10 +461,11 @@ $D_0$ vaut deux fois le coefficient $D$ de la relation d'Einstein
 $\sigma = e^2N_0D$ : $\vs$ est la moitié de l'aimantation physique
 $\mu_BN_0\mu_s$, ce qui ne change aucun résultat.
 
-Cette équivalence demande la diffusion anisotrope : la clé
-\texttt{anisotropic\_diffusion} de la section \texttt{spin\_accumulation}
-doit valoir \texttt{true}, ce qui est la valeur par défaut. Sans elle, la conductivité de spin de F2 serait $\sigma$ au lieu
-de $\sigma(1-P^2)$ et le test échouerait.
+Cette équivalence demande $\beta=\beta'$ : les réglages du test donnent
+\texttt{P\_prime} $=P$ à F2 et à F1 (\texttt{P\_prime} vaut 0 par
+défaut, une diffusion isotrope). Avec la valeur par défaut, la
+conductivité de spin de F2 serait $\sigma$ au lieu de $\sigma(1-P^2)$ et
+le test échouerait.
 
 \subsection{La condition de Robin sur l'entrée}
 
@@ -561,9 +563,9 @@ de calcul est d'environ 25\,s pour les deux configurations.
     ($R_1 = 0$) change $P_{\mathrm{inj}}$ de 0.467 à 0.389 en P
     (formule~\eqref{eq:Pinj}) : d'après \eqref{eq:phi0}, $s_z(0)$ est
     presque divisé par 2.
-  \item \textbf{Diffusion isotrope.} Avec
-    \texttt{anisotropic\_diffusion: false}, F2 n'a plus les équations de
-    Valet--Fert : l'erreur passe à 7.3\,\% en P et le test échoue.
+  \item \textbf{Diffusion isotrope.} Avec \texttt{P\_prime: 0} (la
+    valeur par défaut) dans F2, F2 n'a plus les équations de Valet--Fert :
+    l'erreur passe à 7.3\,\% en P et le test échoue.
 \end{itemize}
 
 \subsection{Utilisation}

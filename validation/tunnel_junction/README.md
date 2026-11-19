@@ -37,7 +37,7 @@ The potential is exact (linear in $z$); the error on $s_z$ is the discretization
 
 Thin free layer F2 (`thin_layer.geo`, 2 × 2 × 3 nm, h = 0.2 nm, resolving $l_{sd}$ = 1 nm),
 $\theta$ = 0, 30, …, 180°. The reference solves the equations of feeLLGood in F2 ($\beta = \beta'
-= P$, anisotropic diffusion, relaxation, precession) exactly by eigenmodes, with the flux
+= P$, i.e. `P_prime` = `P` in the settings, anisotropic diffusion, relaxation, precession) exactly by eigenmodes, with the flux
 $\mathbf{q}$ on the inlet and $\mathbf{s} = 0$ on the outlet, as in `validation/slonczewski_angle`.
 The transverse part of $\mathbf{q}$, $\frac{\mu_B}{e}j_n P_1\sin\theta/(1 + c\cos\theta)$, is along
 $x$; the torque on F2 is proportional to $\mathbf{m}\times\mathbf{s}$: $s_y$ gives the damping-like
