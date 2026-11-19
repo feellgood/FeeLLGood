@@ -1504,8 +1504,8 @@ reste utilisable.
     est la tension $V_1$ appliquée. Pour imposer le courant total $I$, on
     utilise la linéarité en $V_1$ à aimantation fixée : on résout avec
     $V_1 = 1$, on calcule le courant $I_1$, et on multiplie $V$ par
-    $I/I_1$, comme le fait déjà \texttt{jn\_factor} pour
-    \texttt{current\_density(t)}.
+    $I/I_1$, comme le fait déjà \texttt{spin\_accumulation.jn\_multiplier}
+    pour les densités de courant imposées.
   \item \textbf{Non-linéarité.} Si la TMR dépend de la tension, $G_T$
     dépend de $V$ : on prend le $V$ du pas précédent (décalage explicite)
     ou on fait quelques itérations de point fixe.
@@ -1556,7 +1556,10 @@ mesh:
 La clé \texttt{tunnel} exclut \texttt{jn}, \texttt{V}, \texttt{s},
 \texttt{uP} et \texttt{slonczewski} sur la même surface, et impose
 $\mathcal{P}\le P_1\le1$, pour que $P_2 = \mathcal{P}/P_1\le1$. Une surface
-\texttt{tunnel} ne peut pas être mélangée avec \texttt{jn: current\_density}.
+\texttt{tunnel} ne peut pas être utilisée avec
+\texttt{spin\_accumulation.jn\_multiplier} : le potentiel étant recalculé à
+chaque pas de temps, il n'est pas proportionnel aux $j_n$ des réglages, et la
+dépendance en temps passe par \texttt{voltage}.
 Avec $V_1$ inférieur au potentiel de l'échantillon, les électrons vont de F1
 vers l'échantillon. Les paramètres $V_h$ et $b$ de la
 section~\ref{sec:tunnel-parametres} ne sont pas implémentés.
