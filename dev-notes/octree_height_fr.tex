@@ -1,0 +1,934 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[french]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage[french,ruled,vlined,linesnumbered]{algorithm2e}
+\SetKwInput{KwIn}{Entrées}
+\SetKwInput{KwOut}{Sortie}
+\SetKwFor{For}{pour}{faire}{fin}
+\SetKwIF{If}{ElseIf}{Else}{si}{alors}{sinon si}{sinon}{fin}
+\SetKw{KwTo}{à}
+\SetKw{KwRet}{retourner}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black,citecolor=blue!50!black]{hyperref}
+
+\lstset{
+  language=C++,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue!60!black}\bfseries,
+  commentstyle=\color{green!40!black}\itshape,
+  stringstyle=\color{red!50!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  frame=single,
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false
+}
+
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\N}{\mathbb{N}}
+
+\title{Optimisation de la hauteur de l'octree de la méthode multipolaire rapide\\
+dans feeLLGood\\[0.5em]
+\large Courbe de Morton, comptage des feuilles non vides et choix de la hauteur}
+\author{Branche \code{optim\_tree\_height}}
+\date{Novembre 2026}
+
+\begin{document}
+\sloppy
+\maketitle
+
+\begin{abstract}
+Le champ démagnétisant de feeLLGood est calculé par la méthode multipolaire rapide (FMM) de
+ScalFMM~1.5. Jusqu'ici, l'octree de la FMM avait une hauteur fixe de 6 niveaux, quel que soit le
+maillage. Ce document explique pourquoi cette hauteur est presque toujours mauvaise, comment
+choisir automatiquement la bonne hauteur à partir de la répartition des particules, et comment ce
+choix a été mis en œuvre, à l'image de st-feeLLGood, à l'aide des clés de Morton. On détaille la
+courbe de Morton, son lien avec l'octree, l'algorithme de comptage des feuilles non vides, le code
+C++ correspondant, les tests unitaires, puis les mesures de performance sur un portable (8 threads)
+et sur une machine de 96 cœurs (jusqu'à 192 threads). Le temps du calcul magnétostatique est divisé
+par 2,6 à 18,5 selon le maillage et le nombre de threads, sans perte de précision.
+\end{abstract}
+
+\tableofcontents
+
+%======================================================================
+\section{Contexte}
+%======================================================================
+
+\subsection{Le calcul du champ démagnétisant}
+
+Le champ démagnétisant dérive d'un potentiel scalaire $\phi$, $\mathbf{H}_d = -\nabla\phi$, créé
+par les charges magnétiques volumiques $\rho = -M_s\,\nabla\cdot\mathbf{u}$ et surfaciques
+$\sigma = M_s\,\mathbf{u}\cdot\mathbf{n}$ :
+\begin{equation}
+\phi(\mathbf{x}) = \frac{1}{4\pi}\left[\int_\Omega \frac{\rho(\mathbf{y})}{|\mathbf{x}-\mathbf{y}|}\,
+\mathrm{d}V_y + \int_{\partial\Omega} \frac{\sigma(\mathbf{y})}{|\mathbf{x}-\mathbf{y}|}\,
+\mathrm{d}S_y\right].
+\label{eq:phi}
+\end{equation}
+Les intégrales sont discrétisées aux points de Gauss des éléments : chaque point de Gauss
+$\mathbf{y}_g$ porte une charge ponctuelle $q_g$ (densité multipliée par le poids d'intégration).
+Le potentiel aux nœuds du maillage est alors une somme de type $N$ corps,
+\begin{equation}
+\phi_i = \frac{1}{4\pi}\sum_g \frac{q_g}{|\mathbf{x}_i - \mathbf{y}_g|},
+\label{eq:nbody}
+\end{equation}
+complétée par des corrections analytiques locales pour les charges surfaciques
+(\code{Tri::correctionCharges}). Dans le code (\code{src/fmm\_demag.h}), on a :
+\begin{itemize}
+  \item des \emph{cibles} : les nœuds magnétiques, où l'on veut $\phi$ ;
+  \item des \emph{sources} : les points de Gauss des tétraèdres magnétiques (\code{Tetra::NPI}
+        $= 5$ points par tétraèdre) et des triangles magnétiques (\code{Triangle::NPI} $= 3$
+        points par triangle).
+\end{itemize}
+Le nombre total de particules (cibles et sources) est donc
+\begin{equation}
+N = N_{\text{nœuds}} + 5\,N_{\text{tétra}} + 3\,N_{\text{tri}},
+\end{equation}
+soit environ 25 à 30 fois le nombre de nœuds. Par exemple, le maillage \code{example0.1}
+(3990 nœuds, 19339 tétraèdres, 3370 triangles) compte $N = 110\,795$ particules.
+
+La somme~\eqref{eq:nbody} coûte $O(N^2)$ si on l'évalue directement ; la FMM la calcule en
+$O(N)$ avec une précision contrôlée. Elle est évaluée deux fois par pas de temps : une fois pour
+le potentiel de $\mathbf{u}$ et une fois pour celui de $\mathbf{v}$ (option par défaut
+\code{FIRST\_ORDER=OFF}, schéma d'ordre 2 en temps).
+
+\subsection{Normalisation et boîte de calcul}
+
+Avant insertion dans l'octree, les positions sont centrées sur le centre $\mathbf{c}$ de la boîte
+englobante du maillage et mises à l'échelle :
+\begin{equation}
+\tilde{\mathbf{x}} = \frac{2}{\ell_{\max}}\,(\mathbf{x} - \mathbf{c}),
+\qquad \ell_{\max} = \max(\ell_x, \ell_y, \ell_z),
+\end{equation}
+où $\ell_x, \ell_y, \ell_z$ sont les dimensions de la boîte englobante (\code{msh.l}). Toutes les
+particules sont ainsi dans le cube $[-1,1]^3$. La boîte de l'octree est un cube de côté
+$w = 2{,}01$ centré sur l'origine (constante \code{boxWidth}), légèrement plus grand pour éviter
+les particules exactement sur le bord.
+
+\subsection{La méthode multipolaire rapide et son octree}
+
+La FMM range les particules dans un \emph{octree} : la boîte racine (niveau 0) est découpée en
+8 cubes (niveau 1), chacun à nouveau en 8 (niveau 2), etc. Dans ScalFMM, un octree de
+\emph{hauteur} $h$ possède les niveaux $0, 1, \dots, h-1$ ; les \emph{feuilles} sont les cellules
+du niveau $h-1$, au nombre de $2^{h-1}$ par direction, soit $8^{h-1}$ au plus, de côté
+\begin{equation}
+w_{h} = \frac{w}{2^{h-1}}.
+\end{equation}
+
+Le potentiel en une cible est la somme de deux contributions :
+\begin{itemize}
+  \item le \textbf{champ proche} (P2P, \emph{particle to particle}) : interaction directe avec les
+        particules de la feuille de la cible et de ses 26 feuilles voisines ;
+  \item le \textbf{champ lointain}, calculé par développements en harmoniques sphériques :
+        \begin{itemize}
+          \item P2M : les charges d'une feuille sont résumées par un développement multipolaire ;
+          \item M2M : remontée des développements multipolaires des enfants vers le parent ;
+          \item M2L : conversion du développement multipolaire d'une cellule en développement
+                local dans chaque cellule de sa \emph{liste d'interaction} : cellules du même
+                niveau, enfants des voisins du parent, mais non voisines elles-mêmes. Il y en a
+                au plus $6^3 - 3^3 = 189$ ;
+          \item L2L : descente des développements locaux du parent vers les enfants ;
+          \item L2P : évaluation du développement local aux cibles d'une feuille.
+        \end{itemize}
+\end{itemize}
+
+feeLLGood utilise le noyau \og rotation\fg{} de ScalFMM (\code{FRotationKernel}), avec des
+développements tronqués à l'ordre $P = 9$, soit $(P+1)(P+2)/2 = 55$ coefficients complexes par
+cellule. Avec ce noyau, un opérateur M2L coûte $O(P^3)$ opérations (rotation, translation axiale,
+rotation inverse).
+
+Un point essentiel pour la suite : ScalFMM \emph{n'alloue que les cellules non vides}. À
+l'insertion d'une particule, les cellules qui la contiennent sont créées si elles n'existent pas
+encore (\code{FSubOctree::insert}) ; les itérations des différentes passes ne parcourent que les
+cellules existantes. Le coût de la FMM dépend donc du nombre de cellules \emph{non vides}, et non
+du nombre $8^{h-1}$ de cellules possibles.
+
+%======================================================================
+\section{Pourquoi la hauteur compte}
+%======================================================================
+
+\subsection{Le compromis champ proche / champ lointain}
+
+Notons $L_h$ le nombre de feuilles non vides d'un octree de hauteur $h$ et
+\begin{equation}
+s_h = \frac{N}{L_h}
+\end{equation}
+le nombre moyen de particules par feuille non vide. Un modèle de coût simple, en supposant les
+particules réparties de façon à peu près uniforme dans les feuilles non vides, est :
+\begin{itemize}
+  \item \textbf{champ proche} : chaque particule interagit avec les particules de 27 feuilles,
+        d'où un coût $\approx \alpha \cdot 27\, N\, s_h$ ;
+  \item \textbf{champ lointain} : dominé par les M2L, 189 au plus par cellule, d'où un coût
+        $\approx \beta\, P^3 \cdot 189\, L_h$ pour le niveau des feuilles, les niveaux supérieurs
+        ajoutant au plus $1/7$ de plus (série géométrique de raison $1/8$).
+\end{itemize}
+Avec $L_h = N/s_h$, le coût total s'écrit
+\begin{equation}
+T(s) \approx N \left( 27\,\alpha\, s + \frac{189\,\beta\, P^3}{s} \right),
+\label{eq:cost}
+\end{equation}
+qui est minimal pour
+\begin{equation}
+s^\ast = \sqrt{\frac{7\,\beta\,P^3}{\alpha}}.
+\label{eq:sopt}
+\end{equation}
+
+Ce modèle, même grossier, donne trois enseignements :
+\begin{enumerate}
+  \item \textbf{L'optimum ne dépend pas de $N$}, mais seulement du nombre moyen de particules par
+        feuille. Une hauteur fixe ne peut donc pas convenir à tous les maillages : il faut une
+        hauteur qui croît avec $N$, à peu près comme $\log_8 N$.
+  \item \textbf{L'optimum dépend du noyau} ($P$, coût relatif $\beta/\alpha$ des M2L et des
+        P2P), donc il faut le calibrer par la mesure.
+  \item \textbf{Trop de niveaux coûte très cher} : quand $s$ devient petit, le terme en $1/s$
+        explose. Les feuilles ne contiennent plus qu'une ou deux particules, et chaque
+        particule paye jusqu'à 189 conversions M2L de 55 coefficients pour remplacer quelques
+        interactions directes.
+\end{enumerate}
+En pratique, le modèle sous-estime l'asymétrie : les P2P sont des boucles simples, bien
+vectorisées, alors que les M2L sont plus coûteux qu'estimé (accès mémoire, synchronisations entre
+threads à chaque niveau). Les mesures montrent qu'un niveau de trop coûte bien plus qu'un niveau
+de moins (section~\ref{sec:calib}).
+
+\subsection{Le cas de la hauteur fixe à 6}
+
+Avec $h = 6$, il y a jusqu'à $32^3 = 32\,768$ feuilles. Pour \code{example0.1}
+($N = 110\,795$), même si toutes les feuilles étaient remplies, on aurait en moyenne 3,4
+particules par feuille ; en réalité le maillage (un ellipsoïde) ne remplit pas toute la boîte, mais
+l'ordre de grandeur reste de quelques particules par feuille. On est dans le régime où le champ
+lointain domine largement. Les mesures de la section~\ref{sec:results} le confirment : la hauteur
+adaptée ($h = 4$) est 4 fois plus rapide à 8 threads.
+
+\subsection{Pourquoi compter les feuilles non vides}
+
+Le nombre moyen de particules par feuille doit être calculé sur les feuilles non vides, puisque
+ce sont les seules que ScalFMM crée et traite. Prenons deux maillages de même nombre de
+particules : une sphère, qui remplit à peu près la moitié de la boîte, et un fil long, ou une
+couche mince, qui n'en occupe qu'une petite fraction. À hauteur égale, le fil a beaucoup moins de
+feuilles non vides, donc beaucoup plus de particules par feuille : il lui faut un octree plus
+profond. Une formule du type $h = \lceil \log_8 (N/s^\ast) \rceil + 1$, qui supposerait la boîte
+remplie, sous-estimerait la hauteur pour les géométries allongées ou plates. D'où la nécessité de
+compter réellement les feuilles non vides, pour chaque hauteur candidate.
+
+%======================================================================
+\section{La courbe de Morton}
+%======================================================================
+
+\subsection{Définition}
+
+Considérons une grille de $2^m \times 2^m \times 2^m$ cellules. Une cellule est repérée par ses
+indices entiers $(i, j, k) \in \{0, \dots, 2^m-1\}^3$, écrits en binaire sur $m$ bits :
+\begin{equation}
+i = \sum_{b=0}^{m-1} i_b\, 2^b, \qquad
+j = \sum_{b=0}^{m-1} j_b\, 2^b, \qquad
+k = \sum_{b=0}^{m-1} k_b\, 2^b,
+\qquad i_b, j_b, k_b \in \{0, 1\}.
+\end{equation}
+La \textbf{clé de Morton} de la cellule est l'entier de $3m$ bits obtenu en \emph{entrelaçant} les
+bits des trois indices :
+\begin{equation}
+K(i, j, k) = \sum_{b=0}^{m-1} \left( i_b\, 2^{3b} + j_b\, 2^{3b+1} + k_b\, 2^{3b+2} \right).
+\label{eq:morton}
+\end{equation}
+En lisant les bits de poids fort vers les poids faibles, la clé est la suite des triplets
+$(k_b\, j_b\, i_b)$ pour $b = m-1, m-2, \dots, 0$ :
+\[
+K = \underbrace{k_{m-1}\, j_{m-1}\, i_{m-1}}_{\text{niveau } 1}\;
+    \underbrace{k_{m-2}\, j_{m-2}\, i_{m-2}}_{\text{niveau } 2}\;\cdots\;
+    \underbrace{k_0\, j_0\, i_0}_{\text{niveau } m}.
+\]
+Parcourir les cellules par clé croissante définit la \textbf{courbe de Morton}, ou
+\emph{courbe en Z} (\emph{Z-order curve}), introduite par G.~M.~Morton en 1966 pour l'indexation
+de données géographiques. C'est une courbe qui remplit l'espace : elle visite toutes les cellules,
+en restant le plus souvent localisée.
+
+La figure~\ref{fig:zorder} montre la version bidimensionnelle (deux bits par niveau,
+$K = \sum_b i_b 2^{2b} + j_b 2^{2b+1}$) sur des grilles $4 \times 4$ et $8 \times 8$ : la courbe
+parcourt le motif en \og Z\fg{} dans chaque bloc $2\times 2$, puis enchaîne les blocs eux-mêmes
+selon le même motif, et ainsi de suite.
+
+\begin{figure}[htb]
+\centering
+\begin{tikzpicture}[scale=0.9]
+  % grille 4x4 avec numéros
+  \draw[step=1,gray!50] (0,0) grid (4,4);
+  \draw[thick] (0,0) rectangle (4,4);
+  \draw[thick] (2,0) -- (2,4); \draw[thick] (0,2) -- (4,2);
+  \draw[red!70!black,thick,->,>=stealth]
+    (0.5,0.5) -- (1.5,0.5) -- (0.5,1.5) -- (1.5,1.5) -- (2.5,0.5) -- (3.5,0.5) -- (2.5,1.5) --
+    (3.5,1.5) -- (0.5,2.5) -- (1.5,2.5) -- (0.5,3.5) -- (1.5,3.5) -- (2.5,2.5) -- (3.5,2.5) --
+    (2.5,3.5) -- (3.5,3.5);
+  \foreach \k/\x/\y in {0/0/0,1/1/0,2/0/1,3/1/1,4/2/0,5/3/0,6/2/1,7/3/1,8/0/2,9/1/2,10/0/3,
+                        11/1/3,12/2/2,13/3/2,14/2/3,15/3/3}
+    \node[font=\scriptsize,anchor=north west,inner sep=1pt,fill=white,fill opacity=0.8,text opacity=1] at (\x,\y+1) {\k};
+  \node[below] at (2,-0.1) {$i$ (bit de poids faible)};
+  \node[rotate=90,above] at (-0.1,2) {$j$};
+  \begin{scope}[xshift=6cm,scale=0.5]
+    \draw[step=1,gray!40] (0,0) grid (8,8);
+    \draw[thick] (0,0) rectangle (8,8);
+    \draw[thick] (4,0) -- (4,8); \draw[thick] (0,4) -- (8,4);
+    \draw[red!70!black,thick]
+      (0.5,0.5) -- (1.5,0.5) -- (0.5,1.5) -- (1.5,1.5) -- (2.5,0.5) -- (3.5,0.5) -- (2.5,1.5) --
+      (3.5,1.5) -- (0.5,2.5) -- (1.5,2.5) -- (0.5,3.5) -- (1.5,3.5) -- (2.5,2.5) -- (3.5,2.5) --
+      (2.5,3.5) -- (3.5,3.5) -- (4.5,0.5) -- (5.5,0.5) -- (4.5,1.5) -- (5.5,1.5) -- (6.5,0.5) --
+      (7.5,0.5) -- (6.5,1.5) -- (7.5,1.5) -- (4.5,2.5) -- (5.5,2.5) -- (4.5,3.5) -- (5.5,3.5) --
+      (6.5,2.5) -- (7.5,2.5) -- (6.5,3.5) -- (7.5,3.5) -- (0.5,4.5) -- (1.5,4.5) -- (0.5,5.5) --
+      (1.5,5.5) -- (2.5,4.5) -- (3.5,4.5) -- (2.5,5.5) -- (3.5,5.5) -- (0.5,6.5) -- (1.5,6.5) --
+      (0.5,7.5) -- (1.5,7.5) -- (2.5,6.5) -- (3.5,6.5) -- (2.5,7.5) -- (3.5,7.5) -- (4.5,4.5) --
+      (5.5,4.5) -- (4.5,5.5) -- (5.5,5.5) -- (6.5,4.5) -- (7.5,4.5) -- (6.5,5.5) -- (7.5,5.5) --
+      (4.5,6.5) -- (5.5,6.5) -- (4.5,7.5) -- (5.5,7.5) -- (6.5,6.5) -- (7.5,6.5) -- (6.5,7.5) --
+      (7.5,7.5);
+  \end{scope}
+\end{tikzpicture}
+\caption{Courbe de Morton en dimension 2. À gauche, grille $4\times4$ ($m = 2$) avec la clé de
+chaque cellule ; à droite, grille $8\times8$ ($m = 3$). Les traits épais délimitent les cellules
+du niveau 1 : chacune contient un intervalle contigu de clés.}
+\label{fig:zorder}
+\end{figure}
+
+\subsection{La propriété fondamentale : préfixe = cellule parente}
+
+Les $3$ bits de poids fort de la clé donnent la position de la cellule au niveau 1 (dans quel
+octant de la boîte elle se trouve), les 6 bits de poids fort sa position au niveau 2, et plus
+généralement :
+
+\medskip
+\noindent\fbox{\parbox{0.96\linewidth}{
+\textbf{Propriété.} Soit une cellule de profondeur $m$ de clé $K$. La cellule de profondeur
+$d \le m$ qui la contient a pour clé (dans la grille $2^d \times 2^d \times 2^d$)
+\[
+K_d = K \gg 3(m-d) = \left\lfloor \frac{K}{8^{\,m-d}} \right\rfloor,
+\]
+où $\gg$ désigne le décalage binaire à droite.}}
+\medskip
+
+\noindent\emph{Démonstration.} L'indice de la cellule ancêtre de profondeur $d$ dans la direction
+$x$ est $\lfloor i / 2^{m-d} \rfloor$, dont les bits sont $i_{m-1}, \dots, i_{m-d}$ ; de même pour
+$j$ et $k$. Entrelacer ces bits revient exactement à garder les $3d$ bits de poids fort de $K$,
+c'est-à-dire à supprimer les $3(m-d)$ bits de poids faible. $\square$
+
+\medskip
+Deux conséquences rendent la clé de Morton parfaitement adaptée à notre problème :
+\begin{enumerate}
+  \item \textbf{Une seule clé suffit pour toutes les profondeurs} : on calcule la clé de chaque
+        particule une fois, à la profondeur maximale, et on obtient la cellule à n'importe quelle
+        profondeur par un simple décalage.
+  \item \textbf{L'ordre de Morton est hiérarchique} : les cellules d'une même cellule parente
+        ont des clés contiguës (figure~\ref{fig:zorder}). Une fois les clés triées, les
+        particules d'une même cellule, à \emph{toute} profondeur, forment un bloc contigu du
+        tableau trié. Compter les cellules non vides à la profondeur $d$ revient alors à compter
+        les changements de valeur de $K \gg 3(m-d)$ le long du tableau trié.
+\end{enumerate}
+
+ScalFMM utilise lui-même les indices de Morton pour ranger les cellules
+(\code{FTreeCoordinate::getMortonIndex}) ; c'est aussi le principe des octrees linéaires utilisés
+par la plupart des codes FMM et \emph{treecode}.
+
+\subsection{Exemple de comptage en dimension 2}
+
+Prenons 8 particules dans une grille $4 \times 4$ ($m = 2$), situées dans les cellules
+\[
+(0,0),\ (0,0),\ (1,0),\ (1,1),\ (2,3),\ (3,3),\ (3,3),\ (2,0).
+\]
+Leurs clés (figure~\ref{fig:zorder}) sont $0, 0, 1, 3, 14, 15, 15, 4$, soit après tri :
+
+\begin{center}
+\begin{tabular}{lcccccccc}
+\toprule
+clé triée $K$ (profondeur 2)       & 0 & 0 & 1 & 3 & 4 & 14 & 15 & 15 \\
+en binaire                         & 0000 & 0000 & 0001 & 0011 & 0100 & 1110 & 1111 & 1111 \\
+$K \gg 2$ (profondeur 1)           & 0 & 0 & 0 & 0 & 1 & 3 & 3 & 3 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{itemize}
+  \item À la profondeur 2, les valeurs distinctes sont $0, 1, 3, 4, 14, 15$ : 6 feuilles non
+        vides, $8/6 \approx 1{,}3$ particule par feuille.
+  \item À la profondeur 1, les valeurs distinctes sont $0, 1, 3$ : 3 cellules non vides sur 4
+        (le quadrant $x < 2$, $y \ge 2$, de clé 2, est vide), $8/3 \approx 2{,}7$ particules par
+        cellule.
+\end{itemize}
+Dans les deux cas, un seul parcours du tableau trié suffit : on incrémente le compteur à chaque
+fois que la valeur décalée diffère de celle de l'élément précédent.
+
+%======================================================================
+\section{L'algorithme de choix de la hauteur}
+%======================================================================
+
+\subsection{Énoncé}
+
+La règle, reprise de st-feeLLGood (commit \code{6063be5}, \code{src/fmm\_demag.cc}), est :
+
+\medskip
+\noindent\fbox{\parbox{0.96\linewidth}{
+La hauteur de l'octree est le plus grand entier $h \in [h_{\min}, h_{\max}] = [3, 10]$ tel que les
+feuilles non vides de l'octree de hauteur $h$ contiennent en moyenne au moins
+$s_{\min} = 150$ particules :
+\[
+h = \max\left\{ h \in [4, 10] \;:\; N \ge s_{\min}\, L_h \right\},
+\quad\text{ou } h = 3 \text{ si cet ensemble est vide.}
+\]}}
+\medskip
+
+Le nombre $L_h$ de feuilles non vides croît avec $h$ (chaque feuille non vide de hauteur $h$
+contient au moins une feuille non vide de hauteur $h+1$), donc $s_h = N/L_h$ décroît avec $h$.
+L'ensemble des hauteurs admissibles est un intervalle $[4, h^\ast]$ et il suffit de parcourir les
+hauteurs par valeurs décroissantes en s'arrêtant à la première qui satisfait le critère.
+
+\subsection{Choix de la profondeur de référence}
+
+Pour une hauteur $h$, les feuilles sont à la profondeur $h-1$. La plus grande profondeur utile
+est donc $m = h_{\max} - 1 = 9$, soit une grille de $2^9 = 512$ cellules par direction. Chaque
+indice tient sur 9 bits et la clé sur $3 \times 9 = 27$ bits, qui tiennent largement dans un
+entier de 64 bits (\code{uint64\_t}). D'après la propriété du préfixe, la clé de la feuille
+contenant la particule dans l'octree de hauteur $h$ est
+\begin{equation}
+K_{h-1} = K \gg 3\,(m - (h-1)) = K \gg 3\,(h_{\max} - h).
+\label{eq:shift}
+\end{equation}
+
+\subsection{Quantification des positions}
+
+Pour une particule de position normalisée $\tilde{\mathbf{x}}$, l'indice de la cellule de
+profondeur $m$ dans la direction $d$ est
+\begin{equation}
+c_d = \min\left(\max\left(\left\lfloor \frac{\tilde{x}_d + w/2}{w}\, 2^m \right\rfloor,\, 0\right),\,
+2^m - 1\right),
+\label{eq:quant}
+\end{equation}
+où $\tilde{x}_d + w/2$ est la position relative au coin inférieur de la boîte. Le
+\og clampage\fg{} entre $0$ et $2^m-1$ ne sert qu'aux particules exactement sur le bord supérieur
+de la boîte, ou en dehors par erreur d'arrondi ; avec la marge de la boîte ($w = 2{,}01$ pour des
+particules dans $[-1,1]^3$), il ne joue pas en pratique.
+
+\paragraph{Cohérence avec ScalFMM.} ScalFMM calcule l'indice d'une particule dans la grille des
+feuilles d'un octree de hauteur $h$ par
+$\lfloor (\tilde{x}_d + w/2) / w_h \rfloor$ avec $w_h = w/2^{h-1}$
+(\code{FCoordinateComputer::GetTreeCoordinate}). Or, pour un réel $t \ge 0$ et des entiers
+$p \ge q$,
+\[
+\left\lfloor \frac{\lfloor 2^p\, t \rfloor}{2^{p-q}} \right\rfloor = \lfloor 2^q\, t \rfloor,
+\]
+donc décaler l'indice de profondeur $m$ de $m - (h-1)$ bits donne exactement l'indice de
+ScalFMM (aux arrondis flottants près pour une particule à une frontière de cellule, ce qui ne
+change pas le décompte de façon significative). Les feuilles que nous comptons sont donc
+exactement celles que ScalFMM va créer.
+
+L'entrelacement de ScalFMM place $z$ sur le bit de poids faible de chaque triplet, alors que le
+nôtre (équation~\eqref{eq:morton}) y place $x$. Cela ne change rien : à chaque profondeur, les deux
+conventions sont des bijections entre cellules et clés, et le nombre de valeurs distinctes est le
+même.
+
+\subsection{Exemple numérique en dimension 3}
+
+Prenons la particule $\tilde{\mathbf{x}} = (0{,}5;\ -0{,}5;\ -0{,}5)$, avec $w = 2{,}01$ et
+$2^m = 512$. L'équation~\eqref{eq:quant} donne
+\begin{align*}
+c_x &= \lfloor 1{,}505/2{,}01 \times 512 \rfloor = \lfloor 383{,}36 \rfloor = 383 = (101111111)_2,\\
+c_y = c_z &= \lfloor 0{,}505/2{,}01 \times 512 \rfloor = \lfloor 128{,}64 \rfloor = 128 = (010000000)_2.
+\end{align*}
+En entrelaçant (triplets $z\,y\,x$ du poids fort au poids faible) :
+\[
+K = \underbrace{001}_{b=8}\ \underbrace{110}_{b=7}\ \underbrace{001}_{b=6}\
+    \underbrace{001}_{b=5}\ \underbrace{001}_{b=4}\ \underbrace{001}_{b=3}\
+    \underbrace{001}_{b=2}\ \underbrace{001}_{b=1}\ \underbrace{001}_{b=0}
+  = 29\,659\,721.
+\]
+Les clés de feuilles s'obtiennent par décalage (équation~\eqref{eq:shift}) :
+\begin{center}
+\begin{tabular}{cccc>{\raggedright\arraybackslash}p{5cm}}
+\toprule
+$h$ & profondeur & décalage & clé de la feuille & interprétation \\
+\midrule
+2 & 1 & 24 & $(001)_2 = 1$ & octant $x > 0$, $y < 0$, $z < 0$ \\
+3 & 2 & 21 & $(001\,110)_2 = 14$ & puis sous-octant $x$ bas, $y$ et $z$ hauts \\
+4 & 3 & 18 & $(001\,110\,001)_2 = 113$ & \dots \\
+\bottomrule
+\end{tabular}
+\end{center}
+Ces valeurs sont celles calculées par la fonction \code{mortonKey} du code (vérifiées par un petit
+programme de test).
+
+\subsection{Algorithme complet}
+
+\begin{algorithm}[htb]
+\caption{Hauteur de l'octree adaptée aux particules (\code{octreeHeight})}
+\label{alg:height}
+\KwIn{positions normalisées $\tilde{\mathbf{x}}_1, \dots, \tilde{\mathbf{x}}_N$, largeur de boîte $w$}
+\KwOut{hauteur $h$ de l'octree}
+$m \leftarrow h_{\max} - 1$\;
+\For{$p \leftarrow 1$ \KwTo $N$}{
+  $K_p \leftarrow$ clé de Morton de $\tilde{\mathbf{x}}_p$ à la profondeur $m$
+  (équations~\eqref{eq:quant} et~\eqref{eq:morton})\;
+}
+trier $K_1, \dots, K_N$ par ordre croissant\;
+\For{$h \leftarrow h_{\max}$ \KwTo $h_{\min} + 1$ (par pas de $-1$)}{
+  $\delta \leftarrow 3\,(h_{\max} - h)$\;
+  $L \leftarrow 0$\;
+  \For{$p \leftarrow 1$ \KwTo $N$}{
+    \If{$p = 1$ \textbf{ou} $(K_p \gg \delta) \ne (K_{p-1} \gg \delta)$}{
+      $L \leftarrow L + 1$ \tcp*{nouvelle feuille non vide}
+    }
+  }
+  \If{$N \ge s_{\min}\, L$}{
+    \KwRet{$h$}\;
+  }
+}
+\KwRet{$h_{\min}$}\;
+\end{algorithm}
+
+\paragraph{Complexité.} Le calcul des clés est en $O(N\, m)$, le tri en $O(N \log N)$ et les
+au plus $h_{\max} - h_{\min} = 7$ parcours en $O(N)$ chacun. On n'a jamais besoin de construire
+d'octree, ni de stocker autre chose qu'un tableau de $N$ entiers de 64 bits (6 Mo pour
+$7{,}5\times 10^5$ particules). Mesuré sur le portable (un seul thread, particules aléatoires) :
+\begin{center}
+\begin{tabular}{rcr}
+\toprule
+$N$ & hauteur obtenue & temps \\
+\midrule
+$110\,795$ & 4 & 17 ms \\
+$656\,632$ & 5 & 92 ms \\
+$7\,500\,000$ & 6 & 1,3 s \\
+\bottomrule
+\end{tabular}
+\end{center}
+Ce calcul n'est fait qu'une fois, à la construction de l'octree : son coût est celui de moins
+d'un pas de temps et il est négligeable sur une simulation. Il pourrait être parallélisé
+(tri parallèle) si de très gros maillages le rendaient gênant.
+
+\subsection{\texorpdfstring{Les bornes $h_{\min} = 3$ et $h_{\max} = 10$}{Les bornes hmin = 3 et hmax = 10}}
+
+\begin{itemize}
+  \item $h_{\min} = 3$ : avec moins de 3 niveaux, il n'y a plus de liste d'interaction (au niveau
+        1, les 8 cellules sont toutes voisines) et la FMM se réduit au calcul direct. Avec 3
+        niveaux, les M2L n'ont lieu qu'au niveau 2 (64 cellules au plus) : c'est presque un
+        calcul direct, ce qui convient aux petits maillages.
+  \item $h_{\max} = 10$ : $8^9 \approx 1{,}3\times 10^8$ feuilles possibles ; avec 150 particules
+        par feuille, il faudrait des milliards de particules pour l'atteindre (ou des
+        particules extrêmement concentrées). La borne garantit aussi que la clé tient sur
+        27 bits.
+\end{itemize}
+
+\subsection{\texorpdfstring{Calibration du seuil $s_{\min} = 150$}{Calibration du seuil smin = 150}}
+\label{sec:calib}
+
+Le seuil a été calibré dans st-feeLLGood, avec le même noyau (rotation, $P = 9$), sur un cylindre
+court (\code{short\_cyl}) maillé de $2\times 10^4$ à $7{,}5\times 10^6$ particules, avec
+8 threads, en comparant pour chaque maillage les temps obtenus avec plusieurs hauteurs. Conclusions :
+\begin{itemize}
+  \item l'octree le plus rapide a toujours environ 300 particules par feuille non vide :
+        c'est la valeur $s^\ast$ de l'équation~\eqref{eq:sopt} pour ce noyau ;
+  \item un niveau de plus (environ 35 particules par feuille) est 4 à 5 fois plus lent ;
+  \item un niveau de moins (environ 2000 particules par feuille) n'est que 10 à 25~\% plus lent.
+\end{itemize}
+
+Comme passer d'une hauteur à la suivante divise $s_h$ par environ 8 (un peu moins si certaines
+cellules filles sont vides), la règle \og plus grande hauteur avec $s_h \ge s_{\min}$\fg{} choisit
+une hauteur telle que $s_{\min} \le s_h < 8\, s_{\min}$ environ, soit $s_h \in [150, 1200[$.
+Cet intervalle contient l'optimum $s^\ast \approx 300$ et exclut le niveau de trop (35 particules
+par feuille), qui est le plus pénalisant. Le seuil est volontairement placé du côté des
+\emph{grandes} feuilles, puisqu'un niveau de moins coûte beaucoup moins cher qu'un niveau de trop.
+
+\begin{center}
+\begin{tabular}{rcrcr}
+\toprule
+particules & hauteur adaptée & temps FMM & ancienne hauteur (st) & ancien temps \\
+\midrule
+$19\,614$ & 3 & 7 ms & 8 & 260 ms \\
+$1{,}3\times 10^5$ & 4 & 96 ms & 7 & 1,4 s \\
+$10^6$ & 5 & 665 ms & 7 & 7,9 s \\
+$7{,}5\times 10^6$ & 6 & 6,1 s & 7 & 26 s \\
+\bottomrule
+\end{tabular}
+
+\smallskip
+{\small Mesures de st-feeLLGood, 8 threads, temps d'un appel FMM.}
+\end{center}
+
+\subsection{\texorpdfstring{Le paramètre \code{SizeSubLevels}}{Le paramètre SizeSubLevels}}
+
+ScalFMM découpe l'octree en sous-octrees de \code{SizeSubLevels} niveaux ; chaque sous-octree
+alloue des tableaux de pointeurs de taille $8^\ell$ pour ses niveaux $\ell$ (les cellules
+elles-mêmes ne sont créées que si elles sont non vides). ScalFMM exige
+$\code{SizeSubLevels} \le h - 1$ (assertion dans le constructeur de \code{FOctree}). On garde la
+valeur 3 utilisée jusqu'ici, réduite à $h - 1$ si nécessaire : $\min(3, h-1)$, comme dans
+st-feeLLGood. Pour $h = 3$, cela donne 2.
+
+%======================================================================
+\section{Mise en œuvre dans feeLLGood}
+%======================================================================
+
+La mise en œuvre se trouve dans la branche \code{optim\_tree\_height}, en deux commits :
+\begin{itemize}
+  \item \code{779944b} \emph{Adapt the FMM octree height to the particles} ;
+  \item \code{f8e0a7f} \emph{Build the FMM algorithm once} ;
+\end{itemize}
+suivis d'un commit de documentation (\code{f42210d}).
+
+\subsection{\texorpdfstring{Le fichier \code{src/octree\_height.h}}{Le fichier src/octree\_height.h}}
+
+Les fonctions de calcul de la hauteur sont dans un en-tête séparé, sans dépendance à ScalFMM
+(seulement la bibliothèque standard et Eigen). Cela permet de les tester unitairement sans
+compiler ScalFMM, et de les réutiliser telles quelles si feeLLGood passe à ScalFMM~3. Elles sont
+dans l'espace de noms \code{scal\_fmm}, comme le reste de l'interface FMM.
+
+\begin{lstlisting}[caption={Constantes et clé de Morton (\code{src/octree\_height.h}).}]
+const int MinLevels = 3;                /**< minimal height of the octree */
+const int MaxLevels = 10;               /**< maximal height of the octree */
+const double MinParticlesPerLeaf = 150; /**< minimal mean number of particles per non-empty leaf */
+
+inline uint64_t mortonKey(const Eigen::Ref<const Eigen::Vector3d> p,
+                          const double boxWidth)
+    {
+    const int n = 1 << (MaxLevels - 1);
+    uint64_t key = 0;
+    for (int d = 0; d < 3; d++)
+        {
+        int c = static_cast<int>((p(d) + boxWidth / 2) / boxWidth * n);
+        c = std::clamp(c, 0, n - 1);
+        for (int b = 0; b < MaxLevels - 1; b++)
+            { key |= uint64_t((c >> b) & 1) << (3 * b + d); }
+        }
+    return key;
+    }
+\end{lstlisting}
+
+\begin{itemize}
+  \item \code{n} $= 2^{h_{\max}-1} = 512$ est le nombre de cellules par direction à la profondeur
+        de référence.
+  \item Ligne 12 : quantification~\eqref{eq:quant}. La conversion \code{static\_cast<int>}
+        tronque vers zéro, ce qui coïncide avec la partie entière pour un argument positif ; un
+        argument négatif (particule hors de la boîte) donne $0$ ou une valeur négative ramenée à
+        $0$ par \code{std::clamp}.
+  \item Lignes 14--15 : entrelacement~\eqref{eq:morton}. Le bit $b$ de l'indice de la direction
+        $d$ ($d = 0, 1, 2$ pour $x, y, z$) est placé en position $3b + d$ de la clé. La
+        conversion en \code{uint64\_t} \emph{avant} le décalage est nécessaire : décaler un
+        \code{int} de plus de 31 bits serait un comportement indéfini (ici les positions vont
+        jusqu'à 26, mais la conversion rend le code sûr pour d'autres valeurs de
+        \code{MaxLevels}, jusqu'à 22).
+\end{itemize}
+
+\begin{lstlisting}[caption={Calcul de la hauteur (\code{src/octree\_height.h}).}]
+inline int octreeHeight(const std::vector<Eigen::Vector3d> &pos,
+                        const double boxWidth)
+    {
+    std::vector<uint64_t> keys(pos.size());
+    std::transform(pos.begin(), pos.end(), keys.begin(),
+                   [boxWidth](const Eigen::Vector3d &p) { return mortonKey(p, boxWidth); });
+    std::sort(keys.begin(), keys.end());
+    for (int h = MaxLevels; h > MinLevels; h--)
+        {
+        const int shift = 3 * (MaxLevels - h);
+        size_t nbLeaves = 0;
+        for (size_t i = 0; i < keys.size(); i++)
+            {
+            if (i == 0 || (keys[i] >> shift) != (keys[i - 1] >> shift))
+                { nbLeaves++; }
+            }
+        if (double(keys.size()) >= MinParticlesPerLeaf * double(nbLeaves))
+            { return h; }
+        }
+    return MinLevels;
+    }
+\end{lstlisting}
+
+C'est la traduction directe de l'algorithme~\ref{alg:height}. Le test est écrit
+$N \ge s_{\min} L_h$ plutôt que $N / L_h \ge s_{\min}$ pour éviter une division. Remarque : pour
+un ensemble vide de particules, $L_h = 0$ et le test est vrai dès $h = 10$ ; ce cas ne se
+présente pas (un maillage sans élément magnétique n'a pas de champ démagnétisant à calculer).
+
+\subsection{\texorpdfstring{Modifications de \code{src/fmm\_demag.h}}{Modifications de src/fmm\_demag.h}}
+
+La classe \code{scal\_fmm::fmm} contient l'octree (\code{OctreeClass tree}) et le noyau
+(\code{KernelClass kernels}) comme membres, construits dans la liste d'initialisation du
+constructeur. Leur hauteur doit donc être connue \emph{avant} leur construction. En C++, les
+membres sont initialisés dans l'ordre de leur \emph{déclaration} dans la classe (et non dans
+l'ordre de la liste d'initialisation). On a donc :
+\begin{enumerate}
+  \item déplacé la déclaration du coefficient de normalisation \code{norm} avant celles de
+        \code{tree} et \code{kernels}, et l'avons rendu constant, initialisé dans la liste
+        d'initialisation (il était auparavant affecté dans le corps du constructeur) ;
+  \item ajouté un membre constant \code{nbLevels}, déclaré entre \code{norm} et \code{tree} ;
+  \item supprimé la constante globale \code{NbLevels = 6}.
+\end{enumerate}
+
+\begin{lstlisting}[caption={Membres et liste d'initialisation (\code{src/fmm\_demag.h}).}]
+    // liste d'initialisation du constructeur
+        : prmTetra(prmTet), prmTriangle(prmTri), norm(2. / msh.l.maxCoeff()),
+          nbLevels(octreeHeight(particlePositions(msh), boxWidth)),
+          tree(nbLevels, std::min(SizeSubLevels, nbLevels - 1), boxWidth, boxCenter),
+          kernels(nbLevels, boxWidth, boxCenter)
+
+    // membres prives, dans l'ordre de declaration
+    const double norm;      // normalization coefficient
+    const int nbLevels;     // height of the octree, adapted to the particles
+    OctreeClass tree;       // tree initialized by constructor
+    KernelClass kernels;    // kernel initialized by constructor
+\end{lstlisting}
+
+Les positions des particules sont fournies par une méthode privée \code{particlePositions}, qui
+reproduit exactement l'ordre et la normalisation de l'insertion dans l'octree : nœuds magnétiques
+(cibles), puis points de Gauss des tétraèdres magnétiques, puis points de Gauss des triangles
+magnétiques (sources). Elle n'utilise que \code{norm} et le maillage, déjà disponibles au moment
+de l'initialisation de \code{nbLevels}.
+
+\begin{lstlisting}[caption={Positions normalisées des particules (\code{src/fmm\_demag.h}).}]
+std::vector<Eigen::Vector3d> particlePositions(const Mesh::mesh &msh) const
+    {
+    std::vector<Eigen::Vector3d> pos;
+    pos.reserve(msh.magNode.size() + msh.magTet.size() * Tetra::NPI
+                + msh.magTri.size() * Triangle::NPI);
+    for (size_t i = 0; i < msh.magNode.size(); i++)
+        {
+        if (msh.magNode[i])
+            { pos.push_back(norm * (msh.getNode_p(i) - msh.c)); }
+        }
+    for (const int idx : msh.magTet)
+        {
+        Eigen::Matrix<double, Nodes::DIM, Tetra::NPI> gauss = msh.tet[idx].getPtGauss();
+        for (int j = 0; j < Tetra::NPI; j++)
+            { pos.push_back(norm * (gauss.col(j) - msh.c)); }
+        }
+    for (const int idx : msh.magTri)
+        {
+        Eigen::Matrix<double, Nodes::DIM, Triangle::NPI> gauss = msh.tri[idx].getPtGauss();
+        for (int j = 0; j < Triangle::NPI; j++)
+            { pos.push_back(norm * (gauss.col(j) - msh.c)); }
+        }
+    return pos;
+    }
+\end{lstlisting}
+
+Le code d'insertion dans l'octree n'a pas été modifié : il recalcule les mêmes positions. Ce
+double calcul, fait une seule fois au démarrage, coûte quelques millisecondes ; il évite de
+toucher à l'insertion, dont les indices de particules (\code{idxPart}, qui parcourt aussi les
+nœuds non magnétiques) servent ensuite à retrouver les densités de charge.
+
+Enfin, une méthode publique \code{getNbLevels()} donne la hauteur choisie, affichée en mode
+verbeux par \code{src/main.cpp} :
+\begin{lstlisting}[language={},numbers=none,frame=none,basicstyle=\ttfamily\footnotesize]
+Magnetostatics: particles inserted, using 8 threads, octree of 4 levels, in 28.21 ms
+\end{lstlisting}
+
+\subsection{L'algorithme FMM construit une seule fois}
+
+Le second commit reprend l'autre optimisation du commit de st-feeLLGood. L'objet algorithme de
+ScalFMM (\code{FmmClass}, c'est-à-dire \code{FFmmAlgorithmThreadTsm}) était construit à chaque
+appel de \code{fmm::demag}, donc deux fois par pas de temps. Or son constructeur
+\begin{itemize}
+  \item lit le nombre de threads OpenMP (\code{omp\_get\_max\_threads()}) et le fige ;
+  \item fait une copie du noyau pour chaque thread, avec ses tables de rotation précalculées.
+\end{itemize}
+Il est maintenant construit une seule fois, à la fin du constructeur de \code{scal\_fmm::fmm},
+et conservé dans un membre \code{std::unique\_ptr<FmmClass> algo}. Il est créé \emph{après}
+l'appel à \code{omp\_set\_num\_threads(ScalfmmNbThreads)}, de sorte que le nombre de threads
+utilisé par la FMM est inchangé. On ne peut pas en faire un membre ordinaire initialisé dans la
+liste d'initialisation, puisque celle-ci est exécutée avant le corps du constructeur, donc avant
+\code{omp\_set\_num\_threads}.
+
+\begin{lstlisting}[caption={Construction unique de l'algorithme (\code{src/fmm\_demag.h}).}]
+        // fin du constructeur
+        // after omp_set_num_threads(): it copies the kernel for each thread
+        algo = std::make_unique<FmmClass>(&tree, &kernels);
+
+    // dans fmm::demag, a chaque appel
+        algo->execute();
+\end{lstlisting}
+
+\subsection{Tests unitaires}
+
+Le fichier \code{unit-tests/ut\_octree\_height.cpp} (cible \code{test\_ut\_octree\_height}) teste
+les deux fonctions sur des configurations dont le résultat se calcule à la main. La fonction
+\code{grid(n, a, w)} y place $n^3$ particules aux centres des cellules d'une grille régulière qui
+remplit le cube $[a, a+w]^3$.
+
+\begin{description}
+  \item[\code{morton\_key\_parent}] Avec un décalage de $3(h_{\max} - 2)$, la clé de profondeur 1
+        doit valoir $i + 2j + 4k$ où $(i, j, k)$ repère l'octant : on vérifie les points
+        $(\pm 0{,}5, \pm 0{,}5, \pm 0{,}5)$ (clés 0, 1, 2, 4 et 7). Un point hors de la boîte,
+        $(-2, -2, -2)$, doit avoir la clé 0 (clampage).
+  \item[\code{min\_levels}] $4^3 = 64$ particules : $64 < 150$ même pour une seule feuille, d'où
+        $h = 3$.
+  \item[\code{uniform\_cube}] $64^3 = 262\,144$ particules remplissant la boîte. À la hauteur
+        $h$, il y a $8^{h-1}$ feuilles non vides contenant chacune $262\,144/8^{h-1}$
+        particules : 512 pour $h = 4$ ($\ge 150$), 64 pour $h = 5$ ($< 150$). D'où $h = 4$.
+  \item[\code{empty\_leaves\_ignored}] Les mêmes $64^3$ particules dans le cube $[0, w/16]^3$,
+        qui est exactement une cellule de profondeur 4. Les feuilles non vides de profondeur
+        $h-1 \ge 4$ sont au nombre de $8^{h-5}$ : 512 particules par feuille pour $h = 8$,
+        64 pour $h = 9$. D'où $h = 8$, soit 4 niveaux de plus que pour le cube plein : le
+        test vérifie que seules les feuilles non vides sont comptées.
+  \item[\code{max\_levels}] 1000 particules au même point : une seule feuille non vide à toutes
+        les hauteurs, d'où $h = h_{\max} = 10$.
+\end{description}
+
+\subsection{Validation}
+
+Changer la hauteur de l'octree change l'approximation FMM, mais au niveau de sa propre erreur
+(de l'ordre de $10^{-4}$ en relatif sur le potentiel pour le noyau rotation à $P = 9$, nettement
+moins sur les grandeurs intégrées) :
+\begin{itemize}
+  \item \code{ci-tests/full\_test.py} (ellipsoïde, 20 ps) passe, avec un écart de $10^{-6}$ sur
+        l'aimantation moyenne et $6{,}5\times 10^{-7}$ en relatif sur l'énergie totale, pour un
+        seuil de $10^{-5}$ ;
+  \item sur \code{example0.1}, l'écart relatif de l'énergie totale avec master après 10 ps est
+        de $2{,}5\times 10^{-7}$ ;
+  \item la construction unique de l'algorithme ne change pas les résultats (écarts relatifs de
+        $10^{-13}$, dus à l'ordre des sommes parallèles).
+\end{itemize}
+
+%======================================================================
+\section{Résultats}
+\label{sec:results}
+%======================================================================
+
+Les mesures portent sur trois simulations d'ellipsoïdes existantes, avec des durées simulées
+courtes ($10^{-11}$ ou $2\times 10^{-12}$~s). Le \og temps magnétostatique par pas\fg{} est le
+temps des deux appels FMM d'un pas de temps (potentiels de $\mathbf{u}$ et de $\mathbf{v}$), relevé
+dans la sortie verbeuse (\code{magnetostatics done in \dots}) et moyenné sur tous les pas.
+
+\subsection{Portable (8 threads)}
+
+Intel Core i7-8650U, 8 threads, WSL2. Comparaison de master (hauteur 6) et de la hauteur
+adaptée (premier commit seul), tableau~\ref{tab:laptop}.
+
+\begin{table}[htbp]
+\centering
+\caption{Portable (i7-8650U, 8 threads) : master ($h = 6$) et hauteur adaptée (premier commit).}
+\label{tab:laptop}
+\begin{tabular}{lrrcrrrrr}
+\toprule
+maillage & nœuds & particules & $h$ & \multicolumn{2}{c}{magnéto. par pas} &
+\multicolumn{2}{c}{temps par pas} & gain \\
+\cmidrule(lr){5-6}\cmidrule(lr){7-8}
+ & & & & master & adaptée & master & adaptée & \\
+\midrule
+\code{example0.1}        & 3990  & 110\,795 & 4 & 1130 ms & 169 ms  & 1,34 s & 0,35 s & 3,8 \\
+\code{fmr\_5587nodes}    & 5587  & 158\,571 & 4 & 2057 ms & 330 ms  & 2,18 s & 0,42 s & 5,2 \\
+\code{enhanced\_curling} & 22061 & 656\,632 & 5 & 4214 ms & 1148 ms & 4,57 s & 1,46 s & 3,1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+L'effet de la construction unique de l'algorithme (second commit) a été mesuré sur la même
+machine, avec deux exécutions de chaque version (tableau~\ref{tab:algo}).
+\begin{table}[htbp]
+\centering
+\caption{Effet de la construction unique de l'algorithme FMM : temps magnétostatique par pas (portable, 8 threads).}
+\label{tab:algo}
+\begin{tabular}{lcc}
+\toprule
+maillage & algorithme construit à chaque appel & algorithme construit une fois \\
+\midrule
+\code{example0.1}     & 178 à 202 ms & 147 à 148 ms \\
+\code{fmr\_5587nodes} & 408 à 418 ms & 221 à 231 ms \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Machine de 96 cœurs (jusqu'à 192 threads)}
+
+AMD EPYC 9654 (96 cœurs, 384 threads matériels). Master et la branche complète (deux commits),
+compilés avec la même configuration (TBB, MKL), $2\times 10^{-12}$~s simulées. Temps
+magnétostatique par pas en fonction du nombre de threads de la FMM
+(\code{demagnetizing\_field\_solver: nb\_threads}) : tableau~\ref{tab:rigel}.
+
+\begin{table}[htbp]
+\centering
+\caption{AMD EPYC 9654 : temps magnétostatique par pas selon le nombre de threads FMM.}
+\label{tab:rigel}
+\begin{tabular}{lcrrr}
+\toprule
+maillage (particules), hauteur adaptée & threads & master ($h = 6$) & branche & gain \\
+\midrule
+\code{example0.1} (110\,795), $h = 4$ & 8   & 152 ms & 37 ms & 4,1 \\
+                                       & 32  & 97 ms  & 16 ms & 6,0 \\
+                                       & 96  & 165 ms & 13 ms & 12,6 \\
+                                       & 192 & 278 ms & 15 ms & 18,5 \\
+\midrule
+\code{fmr\_5587nodes} (158\,571), $h = 4$ & 8   & 229 ms & 50 ms & 4,6 \\
+                                          & 32  & 126 ms & 20 ms & 6,4 \\
+                                          & 96  & 178 ms & 18 ms & 10,1 \\
+                                          & 192 & 322 ms & 19 ms & 16,9 \\
+\midrule
+\code{enhanced\_curling} (656\,632), $h = 5$ & 8   & 475 ms & 179 ms & 2,6 \\
+                                             & 32  & 215 ms & 73 ms  & 2,9 \\
+                                             & 96  & 239 ms & 53 ms  & 4,5 \\
+                                             & 192 & 352 ms & 55 ms  & 6,4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Avec 6 niveaux, master \emph{ralentit} au-delà de 32 threads : les nombreuses petites cellules
+des niveaux profonds rendent dominantes les synchronisations entre threads, à chaque niveau et
+chaque passe. Avec la hauteur adaptée, le temps sature entre 32 et 96 threads pour ces tailles de
+maillage, et ne se dégrade pas au-delà.
+
+\subsection{Vérification du seuil : balayage des hauteurs}
+
+Pour vérifier que le seuil de 150, calibré à 8 threads, reste pertinent sur une machine
+multicœur, la hauteur a été forcée de 3 à 7 (par une variable d'environnement ajoutée
+temporairement, qui ne fait pas partie du code) : tableau~\ref{tab:scan}.
+
+\begin{table}[htbp]
+\centering
+\caption{AMD EPYC 9654 : temps magnétostatique par pas (ms) pour des hauteurs forcées de 3 à 7 ; en gras, la hauteur la plus rapide.}
+\label{tab:scan}
+\begin{tabular}{lcrrrrrc}
+\toprule
+maillage & threads & $h = 3$ & $h = 4$ & $h = 5$ & $h = 6$ & $h = 7$ & hauteur adaptée \\
+\midrule
+\code{example0.1}        & 8   & 125  & \textbf{37} & 39           & 137 & 296  & 4 \\
+                         & 192 & 91   & \textbf{15} & 18           & 39  & 104  & 4 \\
+\code{fmr\_5587nodes}    & 8   & 163  & \textbf{50} & 62           & 221 & 464  & 4 \\
+                         & 192 & 108  & \textbf{18} & 24           & 63  & 158  & 4 \\
+\code{enhanced\_curling} & 8   & 2097 & 443         & \textbf{182} & 460 & 1229 & 5 \\
+                         & 192 & 940  & 85          & \textbf{54}  & 107 & 303  & 5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La hauteur adaptée est toujours la plus rapide, à 8 comme à 192 threads. Un niveau d'écart avec
+l'optimum coûte de 1,1 à 3 fois plus, deux niveaux jusqu'à 10 fois plus. On retrouve
+l'allure prédite par le modèle~\eqref{eq:cost} : une vallée étroite autour de l'optimum, avec une
+remontée rapide des deux côtés. À 192 threads, les hauteurs 4 et 5 se rapprochent sur les petits
+maillages (plus de cellules donnent plus de parallélisme), mais l'ordre ne s'inverse pas.
+
+%======================================================================
+\section{Conclusion et perspectives}
+%======================================================================
+
+La hauteur de l'octree est un paramètre déterminant pour le coût de la FMM, et l'optimum dépend
+du nombre de particules par feuille non vide, pas de la taille du maillage. La règle reprise de
+st-feeLLGood (la plus grande hauteur avec au moins 150 particules par feuille non vide en moyenne)
+se calcule simplement et à faible coût grâce aux clés de Morton : une clé par particule, un tri,
+puis un comptage des préfixes distincts pour chaque hauteur candidate. Elle choisit la hauteur
+optimale sur tous les cas mesurés, sur un portable comme sur une machine de 96 cœurs, et divise le
+temps magnétostatique par 2,6 à 18,5 sans perte de précision.
+
+Pistes possibles :
+\begin{itemize}
+  \item vérifier le seuil sur de plus gros maillages ($10^7$ particules et plus) sur la machine
+        multicœur, et pour d'autres ordres $P$ (l'optimum $s^\ast$ croît comme $P^{3/2}$ d'après
+        l'équation~\eqref{eq:sopt}) ;
+  \item ajouter un paramètre permettant d'imposer la hauteur, pour les tests et les études de
+        performance ;
+  \item paralléliser le tri des clés si le calcul de la hauteur devenait sensible sur de très
+        gros maillages ;
+  \item lors du passage à ScalFMM~3, réutiliser \code{octree\_height.h} tel quel : la
+        fonction ne dépend que des positions et de la largeur de la boîte.
+\end{itemize}
+
+\end{document}
