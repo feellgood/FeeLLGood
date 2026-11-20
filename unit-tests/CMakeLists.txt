@@ -43,6 +43,8 @@ add_executable (test_ut_absorbing_ends ut_absorbing_ends.cpp)
 
 add_executable (test_ut_index ut_index.cpp)
 
+add_executable (test_ut_octree_height ut_octree_height.cpp)
+
 SET(SOURCES ../src/triangle.cpp ../src/tetra.cpp ut_element.cpp)
 add_executable (test_ut_element ${SOURCES})
 
@@ -243,6 +245,11 @@ target_link_libraries(test_ut_index
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
   )
 
+target_link_libraries(test_ut_octree_height
+  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  Eigen3::Eigen
+  )
+
 #target_compile_options(test_ut_triangle PUBLIC -fsanitize=leak )
 #target_link_options(test_ut_triangle PUBLIC -fsanitize=leak )
 target_link_libraries(test_ut_triangle
@@ -299,6 +306,7 @@ add_test (NAME ut_dukTapeParser COMMAND test_ut_dukTapeParser)
 add_test (NAME ut_node COMMAND test_ut_node)
 add_test (NAME ut_absorbing_ends COMMAND test_ut_absorbing_ends)
 add_test (NAME ut_index COMMAND test_ut_index)
+add_test (NAME ut_octree_height COMMAND test_ut_octree_height)
 add_test (NAME ut_element COMMAND test_ut_element)
 add_test (NAME ut_triangle COMMAND test_ut_triangle)
 add_test (NAME ut_tri_charges COMMAND test_ut_tri_charges)

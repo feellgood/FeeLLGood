@@ -259,7 +259,8 @@ int main(int argc, char *argv[])
     if (mySettings.verbose)
             {
             std::cout << "Magnetostatics: particles inserted, using " << mySettings.scalfmmNbTh
-                      << " threads, in " << fmm_counter.millis() << std::endl;
+                      << " threads, octree of " << myFMM.getNbLevels() << " levels, in "
+                      << fmm_counter.millis() << std::endl;
             }
 
     // Catch SIGINT and SIGTERM.
