@@ -16,6 +16,7 @@ demagnetizing field.
 #include "Kernels/Rotation/FRotationKernel.hpp"
 
 #include "mesh.h"
+#include "octree_height.h"
 
 /** \namespace scal_fmm
 to grab altogether the templates and functions using scalfmm for the computation of the demag field
@@ -24,8 +25,7 @@ to grab altogether the templates and functions using scalfmm for the computation
 namespace scal_fmm
     {
 const int P = 9;              /**< truncation of the spherical harmonics series */
-const int NbLevels = 6;       /**< number of levels in the tree */
-const int SizeSubLevels = 3;  /**< size of the sub levels  */
+const int SizeSubLevels = 3;  /**< maximal size of the sub levels */
 
 typedef double FReal; /**< parameter of scalfmm templates, all computations are made in double
                         precision */
@@ -65,11 +65,12 @@ public:
                std::vector<Tetra::prm> & prmTet /**< [in] */,
                std::vector<Triangle::prm> & prmTri /**< [in] */,
                const int ScalfmmNbThreads /**< [in] */)
-        : prmTetra(prmTet), prmTriangle(prmTri),
-          tree(NbLevels, SizeSubLevels, boxWidth, boxCenter), kernels(NbLevels, boxWidth, boxCenter)
+        : prmTetra(prmTet), prmTriangle(prmTri), norm(2. / msh.l.maxCoeff()),
+          nbLevels(octreeHeight(particlePositions(msh), boxWidth)),
+          tree(nbLevels, std::min(SizeSubLevels, nbLevels - 1), boxWidth, boxCenter),
+          kernels(nbLevels, boxWidth, boxCenter)
         {
         omp_set_num_threads(ScalfmmNbThreads);
-        norm = 2. / msh.l.maxCoeff();
 
         FSize idxPart = 0;
         for (idxPart = 0; idxPart < (FSize)msh.magNode.size(); ++idxPart)
@@ -100,6 +101,9 @@ public:
             { demag(Nodes::get_v<Nodes::NEXT>, Nodes::set_phiv, msh); }
         }
 
+    /** height of the octree */
+    int getNbLevels(void) const { return nbLevels; }
+
     /** corrections associated to the nodes, contributions only due to the triangles */
     std::vector<double> corr;
 
@@ -113,14 +117,44 @@ private:
     /** sources: both surface and volume charges */
     std::vector<double> srcDen;
 
+    /** normalization coefficient */
+    const double norm;
+
+    /** height of the octree, adapted to the particles (see octree_height.h) */
+    const int nbLevels;
+
     /** tree initialized by constructor */
     OctreeClass tree;
 
     /** kernel initialized by constructor */
     KernelClass kernels;
 
-    /** normalization coefficient */
-    double norm;
+    /** normalized positions of all the particles to insert in the tree: magnetic nodes (targets),
+    Gauss points of the magnetic tetrahedrons and triangles (sources) */
+    std::vector<Eigen::Vector3d> particlePositions(const Mesh::mesh &msh) const
+        {
+        std::vector<Eigen::Vector3d> pos;
+        pos.reserve(msh.magNode.size() + msh.magTet.size() * Tetra::NPI
+                    + msh.magTri.size() * Triangle::NPI);
+        for (size_t i = 0; i < msh.magNode.size(); i++)
+            {
+            if (msh.magNode[i])
+                { pos.push_back(norm * (msh.getNode_p(i) - msh.c)); }
+            }
+        for (const int idx : msh.magTet)
+            {
+            Eigen::Matrix<double, Nodes::DIM, Tetra::NPI> gauss = msh.tet[idx].getPtGauss();
+            for (int j = 0; j < Tetra::NPI; j++)
+                { pos.push_back(norm * (gauss.col(j) - msh.c)); }
+            }
+        for (const int idx : msh.magTri)
+            {
+            Eigen::Matrix<double, Nodes::DIM, Triangle::NPI> gauss = msh.tri[idx].getPtGauss();
+            for (int j = 0; j < Triangle::NPI; j++)
+                { pos.push_back(norm * (gauss.col(j) - msh.c)); }
+            }
+        return pos;
+        }
 
     /**
     function template to insert volume or surface charges in tree for demag computation. class T is
