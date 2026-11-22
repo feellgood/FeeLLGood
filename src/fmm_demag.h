@@ -15,6 +15,8 @@ demagnetizing field.
 #include "Kernels/Rotation/FRotationCell.hpp"
 #include "Kernels/Rotation/FRotationKernel.hpp"
 
+#include <memory>
+
 #include "mesh.h"
 #include "octree_height.h"
 
@@ -88,6 +90,9 @@ public:
 
         srcDen.resize( msh.magTri.size()*Triangle::NPI + msh.magTet.size()*Tetra::NPI );
         corr.resize(msh.magNode.size());
+
+        // after omp_set_num_threads(): it copies the kernel for each thread
+        algo = std::make_unique<FmmClass>(&tree, &kernels);
         }
 
     /**
@@ -128,6 +133,9 @@ private:
 
     /** kernel initialized by constructor */
     KernelClass kernels;
+
+    /** FMM algorithm, built once by the constructor */
+    std::unique_ptr<FmmClass> algo;
 
     /** normalized positions of all the particles to insert in the tree: magnetic nodes (targets),
     Gauss points of the magnetic tetrahedrons and triangles (sources) */
@@ -218,7 +226,6 @@ private:
     void demag(const std::function<const Eigen::Vector3d(const Nodes::Node&)>& getter,
                const std::function<void(Nodes::Node &, const double)>& setter, Mesh::mesh &msh)
         {
-        FmmClass algo(&tree, &kernels);
         calc_charges(getter, msh);
 
         auto nbMagNodes = msh.magNode.size();
@@ -240,7 +247,7 @@ private:
 
         tree.forEachCell([](CellClass *cell) { cell->resetToInitialState(); });
 
-        algo.execute();
+        algo->execute();
 
         tree.forEachLeaf(
                 [this, &msh, setter](LeafClass *leaf)
