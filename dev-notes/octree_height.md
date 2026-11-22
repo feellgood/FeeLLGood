@@ -179,8 +179,51 @@ $2 \times 10^{-12}$ s of physical time, two runs each:
 
 The results are unchanged (relative deviations of $10^{-13}$, from the order of the parallel sums).
 
+## Results on a many-core machine
+
+AMD EPYC 9654 (96 cores, 384 hardware threads), comparing the code before commit 2fdda7690
+(`NbLevels = 6`, FMM algorithm built at each call) with the code after commit 29e2e6e35 (dynamic
+`NbLevels`, algorithm built once), compiled with the same configuration (TBB, MKL),
+$2 \times 10^{-12}$ s of physical time. Magnetostatics per step (two FMM calls), as a function of
+the number of FMM threads (`demagnetizing_field_solver: nb_threads`):
+
+| mesh (dynamic `NbLevels`) | threads | `NbLevels = 6` | dynamic `NbLevels` | speed-up |
+|---------------------------|---------|----------------|--------------------|----------|
+| E1 ($h = 4$)          | 8       | 152 ms | 37 ms          | 4.1      |
+|                       | 32      | 97 ms  | 16 ms          | 6.0      |
+|                       | 96      | 165 ms | 13 ms          | 12.6     |
+|                       | 192     | 278 ms | 15 ms          | 18.5     |
+| E2 ($h = 4$)          | 8       | 229 ms | 50 ms          | 4.6      |
+|                       | 32      | 126 ms | 20 ms          | 6.4      |
+|                       | 96      | 178 ms | 18 ms          | 10.1     |
+|                       | 192     | 322 ms | 19 ms          | 16.9     |
+| E3 ($h = 5$)          | 8       | 475 ms | 179 ms         | 2.6      |
+|                       | 32      | 215 ms | 73 ms          | 2.9      |
+|                       | 96      | 239 ms | 53 ms          | 4.5      |
+|                       | 192     | 352 ms | 55 ms          | 6.4      |
+
+With `NbLevels = 6`, the time increases beyond 32 threads: the many small cells of the deep
+levels make the synchronization of the threads dominant. With the dynamic `NbLevels`, the time
+saturates between 32 and 96 threads for these mesh sizes, and does not degrade beyond.
+
+To check the threshold, the height was forced from 3 to 7 (with a temporary patch, not part of
+the code). Magnetostatics per step in ms, fastest height in bold:
+
+| mesh | threads | $h = 3$ | $h = 4$ | $h = 5$ | $h = 6$ | $h = 7$ | adapted height |
+|------|---------|---------|---------|---------|---------|---------|----------------|
+| E1   | 8       | 125     | **37**  | 39      | 137     | 296     | 4              |
+|      | 192     | 91      | **15**  | 18      | 39      | 104     | 4              |
+| E2   | 8       | 163     | **50**  | 62      | 221     | 464     | 4              |
+|      | 192     | 108     | **18**  | 24      | 63      | 158     | 4              |
+| E3   | 8       | 2097    | 443     | **182** | 460     | 1229    | 5              |
+|      | 192     | 940     | 85      | **54**  | 107     | 303     | 5              |
+
+The adapted height is always the fastest one, with 8 as with 192 threads: the threshold of 150
+particles per leaf, calibrated with 8 threads, still holds on a many-core machine. One level away
+from the optimum costs 1.1 to 3 times more, two levels up to 10 times more.
+
 ## Possible improvements
 
-- The threshold was calibrated on one machine with 8 threads; it could be checked on a machine
-  with many cores, where the near field (P2P) and the far field do not scale in the same way.
+- The threshold was checked with one kernel (rotation, $P = 9$) and meshes of $10^5$ to
+  $7 \times 10^5$ particles on a many-core machine; larger meshes could be checked there.
 - A setting could override the computed height, for tests.
