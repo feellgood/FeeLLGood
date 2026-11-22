@@ -159,6 +159,26 @@ $2.5 \times 10^{-7}$; `ci-tests/full_test.py` (mesh `examples/ellipsoid.msh`, an
 semi-axes 4 and 8 nm with 167 nodes) gives an error of $10^{-6}$ on the magnetization and
 $6.5 \times 10^{-7}$ on the energy (threshold $10^{-5}$).
 
+## FMM algorithm built once
+
+The FMM algorithm (`FmmClass`, i.e. `FFmmAlgorithmThreadTsm` of ScalFMM) is built once:
+`fmm::algo` is a `std::unique_ptr<FmmClass>` created at the end of the constructor of
+`scal_fmm::fmm`. Its constructor copies the kernel for each thread, with its precomputed rotation
+tables, and reads the number of threads (`omp_get_max_threads()`): it is created after
+`omp_set_num_threads(ScalfmmNbThreads)`, so that the FMM uses the number of threads of the
+settings.
+
+Before commit 29e2e6e35 ("Build the FMM algorithm once"), it was built at each call of
+`fmm::demag`, i.e. twice per time step. Magnetostatics per step (two FMM calls), same laptop,
+$2 \times 10^{-12}$ s of physical time, two runs each:
+
+| mesh | algorithm built at each call | algorithm built once |
+|------|------------------------------|----------------------|
+| E1   | 178 to 202 ms                | 147 to 148 ms        |
+| E2   | 408 to 418 ms                | 221 to 231 ms        |
+
+The results are unchanged (relative deviations of $10^{-13}$, from the order of the parallel sums).
+
 ## Possible improvements
 
 - The threshold was calibrated on one machine with 8 threads; it could be checked on a machine
