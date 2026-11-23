@@ -2,7 +2,7 @@
 
 ## Context
 
-The demagnetizing field is computed in `src/fmm_demag.h` with the fast multipole method (FMM) of
+The demagnetizing field is computed by `src/fmm_demag.h` with the fast multipole method (FMM) of
 ScalFMM 1.5 (rotation kernel, spherical harmonics truncated at $P = 9$). The particles are the
 magnetic nodes (targets) and the Gauss points of the magnetic tetrahedrons and triangles (sources,
 carrying the volume and surface magnetic charges), so that the number of particles is
@@ -101,11 +101,10 @@ the optimum and excludes the costly extra level.
 - `src/octree_height.h` (no dependency on ScalFMM): `scal_fmm::mortonKey` and
   `scal_fmm::octreeHeight`, with the constants `MinLevels = 3`, `MaxLevels = 10` and
   `MinParticlesPerLeaf = 150`.
-- `src/fmm_demag.h`: the class `scal_fmm::fmm` has a member `nbLevels`, computed from the
-  normalized positions of the particles (`fmm::particlePositions`, same order and same scaling as
-  the insertion in the tree). The tree and the kernel are built with this height in the
-  initializer list; `nbLevels`, and the normalization coefficient `norm` that
-  `particlePositions` needs, are declared before them, so that they are initialized first.
+- `src/fmm_demag.h`: the class `scal_fmm::fmm` computes the height `nbLevels` from the normalized
+  positions of the particles (`fmm::particlePositions`), then builds with it the octree, the kernel
+  and the algorithm of the FMM. These are held by the class `scal_fmm::FmmCore`
+  (`src/fmm_core.h`), implemented in `src/fmm_core.cpp`, the only file that includes ScalFMM.
 - `src/main.cpp`: in verbose mode, the height is printed with the insertion of the particles:
   `Magnetostatics: particles inserted, using 8 threads, octree of 4 levels, in 28.21 ms`.
 - `unit-tests/ut_octree_height.cpp`: Morton keys of the 8 cells of depth 1, uniform grid of
@@ -162,10 +161,10 @@ $6.5 \times 10^{-7}$ on the energy (threshold $10^{-5}$).
 ## FMM algorithm built once
 
 The FMM algorithm (`FmmClass`, i.e. `FFmmAlgorithmThreadTsm` of ScalFMM) is built once:
-`fmm::algo` is a `std::unique_ptr<FmmClass>` created at the end of the constructor of
-`scal_fmm::fmm`. Its constructor copies the kernel for each thread, with its precomputed rotation
-tables, and reads the number of threads (`omp_get_max_threads()`): it is created after
-`omp_set_num_threads(ScalfmmNbThreads)`, so that the FMM uses the number of threads of the
+`FmmCore::Impl::algo` is a `std::unique_ptr<FmmClass>` created at the end of the constructor of
+`scal_fmm::FmmCore` (`src/fmm_core.cpp`). Its constructor copies the kernel for each thread, with
+its precomputed rotation tables, and reads the number of threads (`omp_get_max_threads()`): it is
+created after `omp_set_num_threads(nbThreads)`, so that the FMM uses the number of threads of the
 settings.
 
 Before commit 29e2e6e35 ("Build the FMM algorithm once"), it was built at each call of
