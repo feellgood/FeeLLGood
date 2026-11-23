@@ -5,8 +5,9 @@
 \brief fast multipole method (FMM) of ScalFMM: potentials at target points created by point
 charges.
 
-This interface depends neither on ScalFMM nor on Eigen: the ScalFMM headers, which are long to
-compile, are only included by fmm_core.cpp.
+This interface depends neither on ScalFMM nor on Eigen: the ScalFMM headers are only included by
+fmm_core.cpp. They are long to compile, and the BLAS and LAPACK declarations of the Chebyshev kernel
+conflict with those of the MKL headers, included by Eigen when feeLLGood is built with MKL.
 */
 
 #include <memory>

@@ -45,6 +45,7 @@ job_count=$(getconf _NPROCESSORS_ONLN)
 packages="unzip make cmake git"
 if [ "$ID" = "rocky" ]; then
     packages="$packages tar wget gcc-c++ eigen3-devel tbb-devel yaml-cpp-devel duktape-devel"
+    packages="$packages openblas-devel"
     sudo dnf check-update -q || true
     sudo dnf install -y 'dnf-command(config-manager)'
     sudo dnf config-manager --set-enabled devel crb
@@ -58,6 +59,7 @@ if [ "$ID" = "rocky" ]; then
     sudo dnf install -y $packages
 else  # Debian-like OS
     packages="$packages wget g++ libeigen3-dev libtbb-dev libyaml-cpp-dev duktape-dev"
+    packages="$packages libopenblas-dev"
     packages="$packages libann-dev libgmsh-dev"
     sudo apt-get update -q
     if [ "$unit_tests" = "true" ]; then

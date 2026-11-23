@@ -3,28 +3,39 @@
 #include <omp.h>
 
 #include <algorithm>
+#include <iostream>
+#include <sstream>
 
 #include "Components/FParticleType.hpp"
 #include "Components/FTypedLeaf.hpp"
 #include "Containers/FOctree.hpp"
 #include "Core/FFmmAlgorithmThreadTsm.hpp"
+#include "Kernels/Chebyshev/FChebCell.hpp"
+#include "Kernels/Chebyshev/FChebSymKernel.hpp"
+#include "Kernels/Interpolation/FInterpMatrixKernel.hpp"
 #include "Kernels/P2P/FP2PParticleContainerIndexed.hpp"
-#include "Kernels/Rotation/FRotationCell.hpp"
-#include "Kernels/Rotation/FRotationKernel.hpp"
+
+/** The BLAS library, used by the Chebyshev kernel, must run on a single thread: the FMM is already
+parallelized with OpenMP, and the BLAS threads would compete with it (with MKL, whose OpenMP runtime
+differs from the one of GCC, the run does not progress anymore). Weak symbols: null if the BLAS
+library is not OpenBLAS, respectively MKL. */
+extern "C" void openblas_set_num_threads(int) __attribute__((weak));
+extern "C" void MKL_Set_Num_Threads(int) __attribute__((weak));
 
 namespace scal_fmm
     {
 namespace
     {
-const int P = 9;              /**< truncation of the spherical harmonics series */
+const int ORDER = 6;          /**< number of Chebyshev interpolation points per direction */
 const int SizeSubLevels = 3;  /**< maximal size of the sub levels */
 
 typedef double FReal; /**< all computations are made in double precision */
-typedef FTypedRotationCell<FReal, P> CellClass;
+typedef FTypedChebCell<FReal, ORDER> CellClass;
 typedef FP2PParticleContainerIndexed<FReal> ContainerClass;
 typedef FTypedLeaf<FReal, ContainerClass> LeafClass;
 typedef FOctree<FReal, CellClass, ContainerClass, LeafClass> OctreeClass;
-typedef FRotationKernel<FReal, CellClass, ContainerClass, P> KernelClass;
+typedef FInterpMatrixKernelR<FReal> MatrixKernelClass; /**< interaction kernel 1/r */
+typedef FChebSymKernel<FReal, CellClass, ContainerClass, MatrixKernelClass, ORDER> KernelClass;
 typedef FFmmAlgorithmThreadTsm<OctreeClass, CellClass, ContainerClass, KernelClass, LeafClass>
         FmmClass;
 
@@ -35,22 +46,36 @@ const FPoint<FReal> boxCenter(0., 0., 0.); /**< center of the box of the octree 
 from 0 to nbTargets - 1, then sources. */
 struct FmmCore::Impl
     {
-    const int nbTargets; /**< number of targets */
-    OctreeClass tree;    /**< octree */
-    KernelClass kernels; /**< kernel */
+    const int nbTargets;                    /**< number of targets */
+    OctreeClass tree;                       /**< octree */
+    const MatrixKernelClass matrixKernel;   /**< interaction kernel, referenced by the kernel */
+    std::unique_ptr<KernelClass> kernels;   /**< kernel */
     std::unique_ptr<FmmClass> algo; /**< algorithm, built once the particles are inserted */
 
     Impl(const int nbT, const int nbLevels)
         : nbTargets(nbT),
-          tree(nbLevels, std::min(SizeSubLevels, nbLevels - 1), boxWidth, boxCenter),
-          kernels(nbLevels, boxWidth, boxCenter)
-        {}
+          tree(nbLevels, std::min(SizeSubLevels, nbLevels - 1), boxWidth, boxCenter)
+        {
+        // The Chebyshev kernel prints the time of its precomputations on std::cout: discard it.
+        std::ostringstream discarded;
+        struct CoutRedirect
+            {
+            std::streambuf *saved;
+            explicit CoutRedirect(std::streambuf *buf) : saved(std::cout.rdbuf(buf)) {}
+            ~CoutRedirect() { std::cout.rdbuf(saved); }
+            } redirect(discarded.rdbuf());
+        kernels = std::make_unique<KernelClass>(nbLevels, boxWidth, boxCenter, &matrixKernel);
+        }
     };
 
 FmmCore::FmmCore(const std::vector<double> &xyz, const int nbTargets, const int nbLevels,
                  const int nbThreads)
     {
     omp_set_num_threads(nbThreads);
+    if (openblas_set_num_threads)
+        { openblas_set_num_threads(1); }
+    if (MKL_Set_Num_Threads)
+        { MKL_Set_Num_Threads(1); }
     impl = std::make_unique<Impl>(nbTargets, nbLevels);
     const int nbParticles = xyz.size() / 3;
     for (int i = 0; i < nbParticles; i++)
@@ -62,7 +87,7 @@ FmmCore::FmmCore(const std::vector<double> &xyz, const int nbTargets, const int 
             { impl->tree.insert(p, FParticleType::FParticleTypeSource, i, 0.0); }
         }
     // after omp_set_num_threads(): it copies the kernel for each thread
-    impl->algo = std::make_unique<FmmClass>(&impl->tree, &impl->kernels);
+    impl->algo = std::make_unique<FmmClass>(&impl->tree, impl->kernels.get());
     }
 
 FmmCore::~FmmCore() = default;

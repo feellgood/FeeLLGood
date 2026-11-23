@@ -45,6 +45,8 @@ if (MKL_FOUND)
     TARGET_LINK_LIBRARIES(feellgood yaml-cpp duktape ann OpenMP::OpenMP_CXX ${TBB_LINK}
             Eigen3::Eigen ${MKL_TARGET} ${GMSH_LIB})
 else()
+    # The Chebyshev kernel of ScalFMM needs BLAS and LAPACK (provided by MKL in the case above).
+    find_package(LAPACK REQUIRED)
     TARGET_LINK_LIBRARIES(feellgood yaml-cpp duktape ann OpenMP::OpenMP_CXX ${TBB_LINK}
-            Eigen3::Eigen ${GMSH_LIB})
+            Eigen3::Eigen ${GMSH_LIB} ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
 endif()

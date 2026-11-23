@@ -13,7 +13,9 @@ We recommand to use branch master, other branches are experimental or work in pr
 * [yaml-cpp][]
 * [ANN][] 1.1.2
 * [Duktape][] 2.7.0
-* [ScalFMM][] revision [22b9e4f6cf][ScalFMM-rev] (it should also work with V1.5.1)
+* [ScalFMM][] revision [22b9e4f6cf][ScalFMM-rev] (it should also work with V1.5.1), built with
+  BLAS support
+* BLAS and LAPACK, for instance [OpenBLAS][]
 * [Eigen][] ≥ 3.3
 * [GMSH][] ≥ 4.8
 
@@ -35,6 +37,7 @@ The libraries used by feeLLGood are distributed under different licenses, and th
 [ANN]: https://www.cs.umd.edu/~mount/ANN/
 [Duktape]: https://duktape.org/
 [ScalFMM]: https://gitlab.inria.fr/solverstack/ScalFMM/
+[OpenBLAS]: https://www.openblas.net/
 [ScalFMM-rev]: https://gitlab.inria.fr/solverstack/ScalFMM/-/archive/22b9e4f6cf4ea721d71198a71e3f5d2c5ae5e7cc/ScalFMM-22b9e4f6cf4ea721d71198a71e3f5d2c5ae5e7cc.tar.gz
 [Eigen]: https://eigen.tuxfamily.org/
 [GMSH]: http://gmsh.info/
