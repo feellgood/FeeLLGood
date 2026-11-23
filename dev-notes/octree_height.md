@@ -3,7 +3,7 @@
 ## Context
 
 The demagnetizing field is computed by `src/fmm_demag.h` with the fast multipole method (FMM) of
-ScalFMM 1.5 (rotation kernel, spherical harmonics truncated at $P = 9$). The particles are the
+ScalFMM 1.5 (kernel described in `dev-notes/fmm_kernel.md`). The particles are the
 magnetic nodes (targets) and the Gauss points of the magnetic tetrahedrons and triangles (sources,
 carrying the volume and surface magnetic charges), so that the number of particles is
 $N = N_\text{nodes} + 5 N_\text{tet} + 4 N_\text{tri}$ (5 Gauss points per tetrahedron, 4 per
@@ -23,8 +23,8 @@ The cost of the FMM depends strongly on the height. With a fixed height, such as
 `NbLevels = 6` used before commit 2fdda7690 ("Adapt the FMM octree height to the particles"),
 the leaves of depth 5 of usual meshes (a few thousand nodes, about $10^5$ particles) hold a few
 particles only: the far field of these levels, and especially the M2L transfers (up to 189
-interactions per cell, each one costing $O(P^3)$ with the rotation kernel), costs much more than
-the direct computation it replaces. The height is therefore adapted to the particles.
+interactions per cell, each one a dense operation on the expansions of the cells), costs much more
+than the direct computation it replaces. The height is therefore adapted to the particles.
 
 ## Choice of the height
 
@@ -53,10 +53,10 @@ in ScalFMM, which must not exceed $h-1$) is 3, reduced to $h-1$ if needed.
 
 ### Calibration of the threshold
 
-The threshold of 150 particles per leaf was calibrated with the same kernel (rotation, $P = 9$)
-and 8 threads, on a family of meshes of a cylinder of diameter 20 nm and length 20 nm, described
-by the following gmsh file: the base disc is meshed with the characteristic size `lc`, then
-extruded along $z$ in `Nz` layers.
+The threshold of 150 particles per leaf was calibrated with the rotation kernel ($P = 9$), used
+before commit 498cef3 ("Use the Chebyshev kernel for the FMM"), and 8 threads, on a family of meshes
+of a cylinder of diameter 20 nm and length 20 nm, described by the following gmsh file: the base
+disc is meshed with the characteristic size `lc`, then extruded along $z$ in `Nz` layers.
 
 ```
 lc = 2;  L = 20;  D = 20;  Nz = L/4;
@@ -94,7 +94,8 @@ The fastest octree always has about 300 particles per non-empty leaf; one level 
 particles per leaf) is 4 to 5 times slower, one level less (about 2000 particles per leaf) is 10
 to 25 % slower. Since the number of particles per leaf is divided by about 8 from one level to
 the next, the threshold 150 selects a height with 150 to 1200 particles per leaf, which contains
-the optimum and excludes the costly extra level.
+the optimum and excludes the costly extra level. The adapted height is also the fastest one with
+the Chebyshev kernel (`dev-notes/fmm_kernel.md`).
 
 ## Implementation in feeLLGood
 
@@ -141,7 +142,7 @@ height.
 
 Laptop (Intel i7-8650U, 8 threads, WSL2), short runs ($10^{-11}$ s or $2 \times 10^{-12}$ s of
 physical time), comparing `NbLevels = 6` (the code before commit 2fdda7690) with the dynamic
-`NbLevels`. The magnetostatics per step is the time of
+`NbLevels`, both with the rotation kernel. The magnetostatics per step is the time of
 the two FMM calls of each step (potentials of $\mathbf{u}$ and $\mathbf{v}$, default
 `FIRST_ORDER=OFF`), as printed in verbose mode (`magnetostatics done in ...`).
 
@@ -169,6 +170,7 @@ settings.
 
 Before commit 29e2e6e35 ("Build the FMM algorithm once"), it was built at each call of
 `fmm::demag`, i.e. twice per time step. Magnetostatics per step (two FMM calls), same laptop,
+rotation kernel,
 $2 \times 10^{-12}$ s of physical time, two runs each:
 
 | mesh | algorithm built at each call | algorithm built once |
@@ -182,7 +184,8 @@ The results are unchanged (relative deviations of $10^{-13}$, from the order of 
 
 AMD EPYC 9654 (96 cores, 384 hardware threads), comparing the code before commit 2fdda7690
 (`NbLevels = 6`, FMM algorithm built at each call) with the code after commit 29e2e6e35 (dynamic
-`NbLevels`, algorithm built once), compiled with the same configuration (TBB, MKL),
+`NbLevels`, algorithm built once), both with the rotation kernel and compiled with the same
+configuration (TBB, MKL),
 $2 \times 10^{-12}$ s of physical time. Magnetostatics per step (two FMM calls), as a function of
 the number of FMM threads (`demagnetizing_field_solver: nb_threads`):
 
@@ -223,6 +226,7 @@ from the optimum costs 1.1 to 3 times more, two levels up to 10 times more.
 
 ## Possible improvements
 
-- The threshold was checked with one kernel (rotation, $P = 9$) and meshes of $10^5$ to
-  $7 \times 10^5$ particles on a many-core machine; larger meshes could be checked there.
+- The threshold was checked on meshes of $10^5$ to $7 \times 10^5$ particles, on a many-core
+  machine with the rotation kernel and on a laptop with the Chebyshev kernel; larger meshes could
+  be checked.
 - A setting could override the computed height, for tests.
