@@ -8,6 +8,7 @@ and the algorithm of ScalFMM are in the class FmmCore (fmm_core.h).
 */
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <functional>
 #include <memory>
@@ -51,8 +52,11 @@ public:
             { xyz.insert(xyz.end(), {p.x(), p.y(), p.z()}); }
         core = std::make_unique<FmmCore>(xyz, targetNodes.size(), nbLevels, ScalfmmNbThreads);
 
-        srcDen.resize( msh.magTri.size()*Triangle::NPI + msh.magTet.size()*Tetra::NPI );
-        corr.resize(msh.magNode.size());
+        for (int v = 0; v < NVALS; v++)
+            {
+            srcDen[v].resize(msh.magTri.size() * Triangle::NPI + msh.magTet.size() * Tetra::NPI);
+            corr[v].resize(msh.magNode.size());
+            }
         }
 
     /**
@@ -61,16 +65,29 @@ public:
     */
     void calc_demag(Mesh::mesh &msh /**< [in] */)
         {
-        demag(Nodes::get_u<Nodes::NEXT>, Nodes::set_phi, msh);
-        if (!FIRST_ORDER)
-            { demag(Nodes::get_v<Nodes::NEXT>, Nodes::set_phiv, msh); }
+        calc_charges(Nodes::get_u<Nodes::NEXT>, msh, srcDen[0], corr[0]);
+        if constexpr (NVALS == 2)
+            { calc_charges(Nodes::get_v<Nodes::NEXT>, msh, srcDen[1], corr[1]); }
+        core->compute(srcDen, potentials);
+
+        // potentials of u (phi) and, if NVALS = 2, of v (phiv) at the magnetic nodes
+        const std::array<void (*)(Nodes::Node &, const double), 2> setters = {Nodes::set_phi,
+                                                                             Nodes::set_phiv};
+        for (int v = 0; v < NVALS; v++)
+            {
+            for (size_t t = 0; t < targetNodes.size(); t++)
+                {
+                const int node = targetNodes[t];
+                msh.set(node, setters[v], (potentials[v][t] * norm + corr[v][node]) / (4 * M_PI));
+                }
+            }
         }
 
     /** height of the octree */
     int getNbLevels(void) const { return nbLevels; }
 
-    /** corrections associated to the nodes, contributions only due to the triangles */
-    std::vector<double> corr;
+    /** corrections associated to the nodes, contributions only due to the triangles, for u and v */
+    std::array<std::vector<double>, NVALS> corr;
 
     /** all volume region parameters for the tetraedrons */
     const std::vector<Tetra::prm> &prmTetra;
@@ -79,11 +96,11 @@ public:
     const std::vector<Triangle::prm> &prmTriangle;
 
 private:
-    /** sources: both surface and volume charges */
-    std::vector<double> srcDen;
+    /** sources: both surface and volume charges, for u and v */
+    std::array<std::vector<double>, NVALS> srcDen;
 
-    /** potentials at the targets, computed by the FMM */
-    std::vector<double> potentials;
+    /** potentials at the targets, computed by the FMM, for u and v */
+    std::array<std::vector<double>, NVALS> potentials;
 
     /** normalization coefficient */
     const double norm;
@@ -125,49 +142,37 @@ private:
         return pos;
         }
 
-    /** computes all charges from tetraedrons and triangles for the demag field to feed a tree in the
-     * fast multipole algo (scalfmm)
+    /** computes all charges from tetraedrons and triangles for the demag field to feed a tree in
+     * the fast multipole algo (scalfmm), and the corrections of the triangles at the nodes
      */
     void calc_charges(const std::function<const Eigen::Vector3d(const Nodes::Node&)>& getter,
-            Mesh::mesh &msh)
+            Mesh::mesh &msh, std::vector<double> &charges, std::vector<double> &corrections)
         {
         int nsrc(0);
-        std::fill(srcDen.begin(),srcDen.end(),0);
-        std::for_each(msh.magTet.begin(),msh.magTet.end(),[this, &msh, &getter, &nsrc](const int idx)
+        std::fill(charges.begin(),charges.end(),0);
+        std::for_each(msh.magTet.begin(), msh.magTet.end(),
+                [this, &msh, &getter, &nsrc, &charges](const int idx)
                 {
                 Tetra::Tet &t = msh.tet[idx];
                 Eigen::Matrix<double,Tetra::NPI,1> result =
                         t.charges(prmTetra[t.idxPrm].Ms, getter);
                 for(int i=0;i<Tetra::NPI;i++)
-                    { srcDen[nsrc+i] = result(i); }
+                    { charges[nsrc+i] = result(i); }
                 nsrc += Tetra::NPI;
                 });
-        std::fill(corr.begin(),corr.end(),0);
-        std::for_each(msh.magTri.begin(),msh.magTri.end(),[this, &msh, &getter, &nsrc](const int idx)
+        std::fill(corrections.begin(),corrections.end(),0);
+        std::for_each(msh.magTri.begin(), msh.magTri.end(),
+                [&msh, &getter, &nsrc, &charges, &corrections](const int idx)
                 {
                 Triangle::Tri &f = msh.tri[idx];
                 Eigen::Matrix<double,Triangle::NPI,1> result = f.charges(f.dMs, getter);
                 for(int i=0;i<Triangle::NPI;i++)
-                    { srcDen[nsrc+i] = result(i); }
+                    { charges[nsrc+i] = result(i); }
                 nsrc += Triangle::NPI;
-                f.correctionCharges(getter,result,corr);
+                f.correctionCharges(getter,result,corrections);
                 });
         }
 
-    /**
-    computes the demag field, with (getter  = u,setter = phi) or (getter = v,setter = phi_v)
-    */
-    void demag(const std::function<const Eigen::Vector3d(const Nodes::Node&)>& getter,
-               const std::function<void(Nodes::Node &, const double)>& setter, Mesh::mesh &msh)
-        {
-        calc_charges(getter, msh);
-        core->compute(srcDen, potentials);
-        for (size_t t = 0; t < targetNodes.size(); t++)
-            {
-            const int node = targetNodes[t];
-            msh.set(node, setter, (potentials[t] * norm + corr[node]) / (4 * M_PI));
-            }
-        }
     };  // end class fmm
 
     }  // namespace scal_fmm

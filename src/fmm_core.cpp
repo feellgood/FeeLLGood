@@ -11,9 +11,10 @@
 #include "Containers/FOctree.hpp"
 #include "Core/FFmmAlgorithmThreadTsm.hpp"
 #include "Kernels/Chebyshev/FChebCell.hpp"
-#include "Kernels/Chebyshev/FChebSymKernel.hpp"
 #include "Kernels/Interpolation/FInterpMatrixKernel.hpp"
 #include "Kernels/P2P/FP2PParticleContainerIndexed.hpp"
+#include "fmm_p2p_two_rhs.h"  // before the kernel, which uses it
+#include "Kernels/Chebyshev/FChebSymKernel.hpp"
 
 /** The BLAS library, used by the Chebyshev kernel, must run on a single thread: the FMM is already
 parallelized with OpenMP, and the BLAS threads would compete with it (with MKL, whose OpenMP runtime
@@ -30,12 +31,13 @@ const int ORDER = 6;          /**< number of Chebyshev interpolation points per 
 const int SizeSubLevels = 3;  /**< maximal size of the sub levels */
 
 typedef double FReal; /**< all computations are made in double precision */
-typedef FTypedChebCell<FReal, ORDER> CellClass;
-typedef FP2PParticleContainerIndexed<FReal> ContainerClass;
+typedef FTypedChebCell<FReal, ORDER, 1, 1, NVALS> CellClass;
+typedef FP2PParticleContainerIndexed<FReal, 1, 1, NVALS> ContainerClass;
 typedef FTypedLeaf<FReal, ContainerClass> LeafClass;
 typedef FOctree<FReal, CellClass, ContainerClass, LeafClass> OctreeClass;
 typedef FInterpMatrixKernelR<FReal> MatrixKernelClass; /**< interaction kernel 1/r */
-typedef FChebSymKernel<FReal, CellClass, ContainerClass, MatrixKernelClass, ORDER> KernelClass;
+typedef FChebSymKernel<FReal, CellClass, ContainerClass, MatrixKernelClass, ORDER, NVALS>
+        KernelClass;
 typedef FFmmAlgorithmThreadTsm<OctreeClass, CellClass, ContainerClass, KernelClass, LeafClass>
         FmmClass;
 
@@ -92,7 +94,8 @@ FmmCore::FmmCore(const std::vector<double> &xyz, const int nbTargets, const int 
 
 FmmCore::~FmmCore() = default;
 
-void FmmCore::compute(const std::vector<double> &q, std::vector<double> &potentials)
+void FmmCore::compute(const std::array<std::vector<double>, NVALS> &q,
+                      std::array<std::vector<double>, NVALS> &potentials)
     {
     const int nbTargets = impl->nbTargets;
     // physicalValues[idxPart] = q, reset potentials
@@ -101,27 +104,34 @@ void FmmCore::compute(const std::vector<double> &q, std::vector<double> &potenti
             {
                 const int nbParticlesInLeaf = leaf->getSrc()->getNbParticles();
                 const auto &indexes = leaf->getSrc()->getIndexes();
-                FReal *const physicalValues = leaf->getSrc()->getPhysicalValues();
-                for (int idxPart = 0; idxPart < nbParticlesInLeaf; ++idxPart)
-                    { physicalValues[idxPart] = q[indexes[idxPart] - nbTargets]; }
+                for (int v = 0; v < NVALS; v++)
+                    {
+                    FReal *const physicalValues = leaf->getSrc()->getPhysicalValues(v);
+                    for (int idxPart = 0; idxPart < nbParticlesInLeaf; ++idxPart)
+                        { physicalValues[idxPart] = q[v][indexes[idxPart] - nbTargets]; }
 
-                std::fill_n(leaf->getTargets()->getPotentials(),
-                            leaf->getTargets()->getNbParticles(), 0);
+                    std::fill_n(leaf->getTargets()->getPotentials(v),
+                                leaf->getTargets()->getNbParticles(), 0);
+                    }
             });
 
     impl->tree.forEachCell([](CellClass *cell) { cell->resetToInitialState(); });
 
     impl->algo->execute();
 
-    potentials.resize(nbTargets);
+    for (int v = 0; v < NVALS; v++)
+        { potentials[v].resize(nbTargets); }
     impl->tree.forEachLeaf(
             [&potentials](LeafClass *leaf)
             {
-                const FReal *const pot = leaf->getTargets()->getPotentials();
                 const int nbParticlesInLeaf = leaf->getTargets()->getNbParticles();
                 const auto &indexes = leaf->getTargets()->getIndexes();
-                for (int idxPart = 0; idxPart < nbParticlesInLeaf; ++idxPart)
-                    { potentials[indexes[idxPart]] = pot[idxPart]; }
+                for (int v = 0; v < NVALS; v++)
+                    {
+                    const FReal *const pot = leaf->getTargets()->getPotentials(v);
+                    for (int idxPart = 0; idxPart < nbParticlesInLeaf; ++idxPart)
+                        { potentials[v][indexes[idxPart]] = pot[idxPart]; }
+                    }
             });
     }
     }  // namespace scal_fmm

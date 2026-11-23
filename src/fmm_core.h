@@ -10,13 +10,20 @@ fmm_core.cpp. They are long to compile, and the BLAS and LAPACK declarations of 
 conflict with those of the MKL headers, included by Eigen when feeLLGood is built with MKL.
 */
 
+#include <array>
 #include <memory>
 #include <vector>
+
+#include "config.h"
 
 namespace scal_fmm
     {
 /** width of the cubic box of the octree, centered on the origin: the particles must be in it */
 const double boxWidth = 2.01;
+
+/** number of right-hand sides of the FMM: the potentials of u and v are computed in a single pass,
+the potential of v being needed only if FIRST_ORDER is OFF */
+const int NVALS = FIRST_ORDER ? 1 : 2;
 
 /** \class FmmCore
 octree, kernel and algorithm of the FMM for a fixed set of particles: targets, where the potential
@@ -34,10 +41,10 @@ public:
     /** destructor, defined in fmm_core.cpp where the implementation is complete */
     ~FmmCore();
 
-    /** computes the potentials at the targets, $\sum_j q_j / |x - y_j|$, created by the charges q
-    of the sources */
-    void compute(const std::vector<double> &q /**< [in] */,
-                 std::vector<double> &potentials /**< [out] */);
+    /** computes in a single pass, for each right-hand side v, the potentials at the targets,
+    $\sum_j q_j / |x - y_j|$, created by the charges q[v] of the sources */
+    void compute(const std::array<std::vector<double>, NVALS> &q /**< [in] */,
+                 std::array<std::vector<double>, NVALS> &potentials /**< [out] */);
 
 private:
     /** octree, kernel and algorithm, defined in fmm_core.cpp */
