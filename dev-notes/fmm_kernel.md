@@ -11,7 +11,8 @@ targets, Gauss points as sources) and the height of the octree are described in
 The code is split in two parts:
 
 - `src/fmm_demag.h` (class `scal_fmm::fmm`): what depends on the mesh, i.e. the positions of the
-  particles, the height of the octree, the charges and the corrections of the triangles;
+  particles, the height of the octree, the charges and the corrections of the triangles, for
+  $\mathbf{u}$ and $\mathbf{v}$;
 - `src/fmm_core.h` and `src/fmm_core.cpp` (class `scal_fmm::FmmCore`): the octree, the kernel and
   the algorithm of the FMM. The interface `fmm_core.h` depends neither on ScalFMM nor on Eigen:
   only `fmm_core.cpp` includes ScalFMM. Its headers are long to compile, and the BLAS and LAPACK
@@ -81,3 +82,70 @@ These measurements were made with ScalFMM1.5-lite, a lightened version of ScalFM
 ScalFMM 1.5 revision 22b9e4f6cf, the version installed by the CI, the times are similar (E1: 157 ms
 with the rotation kernel, 130 ms with the Chebyshev kernel; E2: 211 ms and 183 ms), with the same
 errors.
+
+## Potentials of u and v in one pass
+
+The potentials of $\mathbf{u}$ and $\mathbf{v}$ are sums over the same particles with different
+charges: they are computed in a single FMM pass with two right-hand sides (`NVALS = 2`, or
+`NVALS = 1` if `FIRST_ORDER` is ON). The cells, the particle containers and the kernel are
+templated on `NVALS`; `FmmCore::compute` takes the charges and returns the potentials of each
+right-hand side. Before commit 8730837 ("Compute the potentials of u and v in one FMM pass"), the
+two potentials were computed by two passes.
+
+The pass shares the traversals of the tree and, above all, the distances of the near field (P2P).
+ScalFMM does not provide a suitable P2P for two right-hand sides: ScalFMM 1.5 has a scalar one,
+which also computes the forces, and ScalFMM1.5-lite none. `src/fmm_p2p_two_rhs.h` specializes
+`DirectInteractionComputer<double, 1, 2>` of ScalFMM: each distance is computed once for both
+potentials, with the SIMD type of the P2P of ScalFMM (`SCALFMM_USE_AVX`, `SCALFMM_USE_AVX2`,
+`SCALFMM_USE_SSE` or scalar). The target-source algorithm only calls its `P2PRemote`.
+
+Same particles and machine as above, time of the potentials of $\mathbf{u}$ and $\mathbf{v}$, two
+passes and one pass (the errors are those of the two passes):
+
+| mesh | kernel        | two passes | one pass |
+|------|---------------|------------|----------|
+| E1   | Chebyshev, 5  | 114 ms     | 59 ms    |
+|      | Chebyshev, 6  | 122 ms     | 72 ms    |
+| E2   | Chebyshev, 5  | 148 ms     | 82 ms    |
+|      | Chebyshev, 6  | 163 ms     | 101 ms   |
+| E3   | Chebyshev, 5  | 465 ms     | 313 ms   |
+|      | Chebyshev, 6  | 636 ms     | 490 ms   |
+
+The adapted height is still the fastest one (`ORDER = 6`, one pass): E1 219, **72** and 140 ms for
+$h = 3, 4, 5$; E3 1052, **490** and 3266 ms for $h = 4, 5, 6$.
+
+## Results in feeLLGood
+
+Magnetostatics per time step (the potentials of $\mathbf{u}$ and $\mathbf{v}$, as printed in
+verbose mode), $2 \times 10^{-12}$ s of physical time, AMD EPYC 9654 (96 cores), comparing the
+code before commit 47d3031 ("Isolate ScalFMM in its own translation unit"), i.e. the rotation
+kernel with two passes, with the code after commit 8730837, i.e. the Chebyshev kernel
+(`ORDER = 6`) with one pass. Both are compiled either with OpenBLAS or with MKL:
+
+| mesh | threads | rotation, OpenBLAS | Chebyshev, OpenBLAS | rotation, MKL | Chebyshev, MKL |
+|------|---------|--------------------|---------------------|---------------|----------------|
+| E1   | 8       | 36.4 ms            | 19.0 ms             | 36.3 ms       | 21.0 ms        |
+|      | 32      | 15.9 ms            | 9.9 ms              | 15.7 ms       | 10.5 ms        |
+|      | 96      | 13.5 ms            | 8.3 ms              | 11.9 ms       | 9.4 ms         |
+|      | 192     | 14.7 ms            | 9.8 ms              | 15.6 ms       | 10.7 ms        |
+| E2   | 8       | 50.4 ms            | 27.9 ms             | 50.5 ms       | 31.5 ms        |
+|      | 32      | 20.1 ms            | 14.7 ms             | 20.0 ms       | 15.4 ms        |
+|      | 96      | 14.6 ms            | 12.2 ms             | 14.4 ms       | 13.2 ms        |
+|      | 192     | 20.4 ms            | 13.1 ms             | 19.6 ms       | 13.7 ms        |
+| E3   | 8       | 181.8 ms           | 107.8 ms            | 179.6 ms      | 139.3 ms       |
+|      | 32      | 74.3 ms            | 52.5 ms             | 73.8 ms       | 64.3 ms        |
+|      | 96      | 54.3 ms            | 48.0 ms             | 54.4 ms       | 50.1 ms        |
+|      | 192     | 54.3 ms            | 45.3 ms             | 55.5 ms       | 49.4 ms        |
+
+With 8 threads, the magnetostatics is 41 to 48 % faster with OpenBLAS, 22 to 42 % with MKL, whose
+BLAS is slower than OpenBLAS for the small matrix products of the M2L transfers. With 32 to 192
+threads, it is 8 to 39 % faster: the parts of `fmm::calc_demag` outside the FMM (charges,
+corrections), which are sequential, weigh more. The total energy changes by
+2e-9 to 4e-6 in relative value, at the level of the error of the rotation kernel, and
+`ci-tests/full_test.py` passes with both libraries (deviation of 9.4e-7, threshold 1e-5).
+
+## Possible improvements
+
+- The charges and the corrections of the triangles are computed sequentially, for each right-hand
+  side: parallelizing them would reduce the time with many threads.
+- `ORDER = 7`, 5 to 8 times more accurate than `ORDER = 6`, would need larger OpenMP stacks.
