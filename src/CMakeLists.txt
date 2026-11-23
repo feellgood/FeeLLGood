@@ -1,11 +1,12 @@
 SET(HEADERS config.h node.h expression_parser.h mesh.h electrostatSolver.h
         spinAccumulationSolver.h time_integration.h settings.h tetra.h
-        triangle.h linear_algebra.h log-stats.h tags.h chronometer.h element.h absorbing_ends.h)
+        triangle.h linear_algebra.h log-stats.h tags.h chronometer.h element.h absorbing_ends.h
+        fmm_core.h)
 
 SET(SOURCES settings.cpp time_integration.cpp solver.cpp electrostatSolver.cpp
         spinAccumulationSolver.cpp read.cpp save.cpp linear_algebra.cpp recentering.cpp tetra.cpp
         energy.cpp triangle.cpp expression_parser.cpp chronometer.cpp
-        tags.cpp mesh.cpp)
+        tags.cpp mesh.cpp fmm_core.cpp)
 
 configure_file(config.h.in ./config.h)
 
