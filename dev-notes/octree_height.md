@@ -6,7 +6,8 @@ The demagnetizing field is computed in `src/fmm_demag.h` with the fast multipole
 ScalFMM 1.5 (rotation kernel, spherical harmonics truncated at $P = 9$). The particles are the
 magnetic nodes (targets) and the Gauss points of the magnetic tetrahedrons and triangles (sources,
 carrying the volume and surface magnetic charges), so that the number of particles is
-$N = N_\text{nodes} + 5 N_\text{tet} + 3 N_\text{tri}$. Their positions are scaled into the
+$N = N_\text{nodes} + 5 N_\text{tet} + 4 N_\text{tri}$ (5 Gauss points per tetrahedron, 4 per
+triangle). Their positions are scaled into the
 cube $[-1, 1]^3$, inside a box of width 2.01 centered on the origin.
 
 ScalFMM sorts the particles in an octree of height $h$: the leaves are the cells of depth
@@ -75,9 +76,8 @@ Physical Surface("outlet", 202) = {out0[0]};
 ```
 
 The finer meshes are obtained by halving `lc` and doubling `Nz` (`Nz` = L / (2 `lc`)), then
-`gmsh -3 cyl.geo`. These measurements were made with a version of the FMM interface that uses 4
-Gauss points per triangle instead of 3, hence
-$N = N_\text{nodes} + 5 N_\text{tet} + 4 N_\text{tri}$ in the table below. The last two columns
+`gmsh -3 cyl.geo`. The particle counts below follow the same convention as above,
+$N = N_\text{nodes} + 5 N_\text{tet} + 4 N_\text{tri}$. The last two columns
 give, for comparison, the time with a fixed deeper octree.
 
 | `lc` (nm) | `Nz` | nodes | tetrahedrons | triangles | particles | adapted height | FMM time | fixed height | FMM time |
@@ -130,9 +130,9 @@ mesh.make("ellipsoid.msh")
 
 | mesh | `r1` | `r2` | `mesh_size` | nodes | tetrahedrons | triangles | particles $N$ |
 |------|------|------|-------------|-------|--------------|-----------|---------------|
-| E1   | 4    | 8    | 0.5         | 3990  | 19339        | 3370      | 110795        |
-| E2   | 20   | 30   | 2           | 5587  | 28096        | 4168      | 158571        |
-| E3   | 60   | 80   | 3.5         | 22061 | 120211       | 11172     | 656632        |
+| E1   | 4    | 8    | 0.5         | 3990  | 19339        | 3370      | 114165        |
+| E2   | 20   | 30   | 2           | 5587  | 28096        | 4168      | 162739        |
+| E3   | 60   | 80   | 3.5         | 22061 | 120211       | 11172     | 667804        |
 
 E1 and E3 are reproduced exactly by this script with gmsh 4.15.2. The E2 file used here was
 generated with an older gmsh: regenerated, it has 5662 nodes (1.3 % more), with the same adapted
