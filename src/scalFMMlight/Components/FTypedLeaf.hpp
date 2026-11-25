@@ -2,7 +2,6 @@
 #ifndef FTYPEDLEAF_HPP
 #define FTYPEDLEAF_HPP
 
-#include "../Utils/FAssert.hpp"
 #include "../Utils/FPoint.hpp"
 #include "./FParticleType.hpp"
 

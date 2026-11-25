@@ -4,7 +4,6 @@
 
 #include <complex>
 
-#include "../../Utils/FAssert.hpp"
 #include "../P2P/FP2PR.hpp"
 
 /** This is a recursion to get the minimal size of the matrix dlmk */

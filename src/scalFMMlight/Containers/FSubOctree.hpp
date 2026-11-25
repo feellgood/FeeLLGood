@@ -2,8 +2,9 @@
 #ifndef FSUBOCTREE_HPP
 #define FSUBOCTREE_HPP
 
+#include <cassert>
+
 #include "../Utils/FPoint.hpp"
-#include "../Utils/FAssert.hpp"
 
 /**
  * @author Berenger Bramas (berenger.bramas@inria.fr)
@@ -185,7 +186,7 @@ public:
                         subOctreeHeight( inSubOctreeHeight ), subOctreePosition( inSubOctreePosition ), isLeafSubtree(inIsLeafSubtree) {
 
         this->cells = new CellClass**[this->subOctreeHeight];
-        FAssertLF(this->cells, "Allocation failled");
+        assert(this->cells && "Allocation failed");
 
         memset(this->cells, 0, sizeof(CellClass**) * subOctreeHeight);
 
@@ -193,7 +194,7 @@ public:
         int cellsAtlevel = 8;
         for( int indexLevel = 0 ; indexLevel < this->subOctreeHeight ; ++indexLevel ){
             this->cells[indexLevel] = new CellClass*[cellsAtlevel];
-            FAssertLF(this->cells[indexLevel], "Allocation failled");
+            assert(this->cells[indexLevel] && "Allocation failed");
             memset(this->cells[indexLevel], 0, sizeof(CellClass*) * cellsAtlevel);
             cellsAtlevel <<= 3; // => * 8 >> 8^indexLevel
         }
@@ -252,7 +253,7 @@ public:
       * @param level the level to access cells array (must be < subOctreeHeight)
       * @return cells[level] */
     CellClass** cellsAt(const int level) const{
-        FAssertLF(level < subOctreeHeight, "Level out of memory");
+        assert( (level < subOctreeHeight) && "Level out of memory");
         return cells[level];
     }
 
@@ -330,7 +331,7 @@ public:
         const int cellsAtLeafLevel = 1 << (3 * inSubOctreeHeight);
 
         this->leafs = new LeafClass*[cellsAtLeafLevel];
-        FAssertLF(this->leafs, "Allocation failled");
+        assert(this->leafs && "Allocation failed");
 
         memset(leafs, 0, sizeof(LeafClass*) * cellsAtLeafLevel);
     }
@@ -479,7 +480,7 @@ public:
             {
             const int cellsAtLeafLevel = 1 << (3 * inSubOctreeHeight);
             this->subleafs = new Parent*[cellsAtLeafLevel];
-            FAssertLF(this->subleafs, "Allocation failed");
+            assert(this->subleafs && "Allocation failed");
             memset(subleafs, 0, sizeof(Parent**) * cellsAtLeafLevel);
             }
 

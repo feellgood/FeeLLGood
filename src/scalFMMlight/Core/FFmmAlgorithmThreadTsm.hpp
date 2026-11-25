@@ -2,7 +2,6 @@
 #ifndef FFMMALGORITHMTHREADTSM_HPP
 #define FFMMALGORITHMTHREADTSM_HPP
 
-#include "../Utils/FAssert.hpp"
 #include "../Containers/FOctree.hpp"
 
 #include <omp.h>
@@ -75,7 +74,7 @@ public:
                       MaxThreads(omp_get_max_threads()), OctreeHeight(tree->getHeight()),
                       upperWorkingLevel(2), lowerWorkingLevel(0), nbLevelsInTree(-1)
         {
-        FAssertLF(tree, "tree cannot be null");
+        assert(tree && "tree cannot be null");
         this->kernels = new KernelClass*[MaxThreads];
         #pragma omp parallel num_threads(MaxThreads)  //create the openMP parallel region with MaxThreads threads
         {
@@ -100,7 +99,7 @@ public:
         {
         upperWorkingLevel = 2;
         lowerWorkingLevel = nbLevelsInTree;
-        FAssertLF(upperWorkingLevel <= lowerWorkingLevel);
+        assert(upperWorkingLevel <= lowerWorkingLevel);
         executeCore(FFmmNearAndFarFields);
         }
 
@@ -116,7 +115,7 @@ protected:
             ++numberOfLeafs;
         } while(octreeIterator.moveRight());
         iterArray = new typename OctreeClass::Iterator[numberOfLeafs];
-        FAssertLF(iterArray, "iterArray bad alloc");
+        assert(iterArray && "iterArray bad alloc");
 
         if(operationsToProceed & FFmmP2M) bottomPass();
 

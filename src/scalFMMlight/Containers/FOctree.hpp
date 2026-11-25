@@ -3,10 +3,9 @@
 #define FOCTREE_HPP
 
 #include <functional>
-
+#include <cassert>
 #include "./FSubOctree.hpp"
 #include "../Utils/FPoint.hpp"
-#include "../Utils/FAssert.hpp"
 
 /**
  * @author Berenger Bramas (berenger.bramas@inria.fr)
@@ -65,7 +64,7 @@ protected:
     static inline int GetTreeCoordinate(const FReal inRelativePosition, const FReal boxWidth,
                                         const FReal boxWidthAtLeafLevel, const int treeHeight)
         {
-        FAssertLF( (inRelativePosition >= 0 && inRelativePosition <= boxWidth), "inRelativePosition : ",inRelativePosition, " boxWidth ", boxWidth );
+        assert( (inRelativePosition >= 0 && inRelativePosition <= boxWidth) && "inRelativePosition out of range");
         if(inRelativePosition == boxWidth) { return (1 << (treeHeight-1))-1; }
         const FReal indexFReal = inRelativePosition / boxWidthAtLeafLevel;
         return static_cast<int>(indexFReal);
@@ -152,7 +151,7 @@ public:
           height(inHeight) , subHeight(inSubHeight), leafIndex(this->height-1),
           boxCenter(inBoxCenter), boxCorner(inBoxCenter,-(inBoxWidth/2)), boxWidth(inBoxWidth)
     {
-        FAssertLF(subHeight <= height - 1, "Subheight cannot be greater than height", __LINE__, __FILE__ );
+        assert( (subHeight <= height - 1) && "Subheight cannot be greater than height");
         // Does we only need one suboctree?
         if(subHeight == height - 1){
             root = new FSubOctreeWithLeafs< FReal, CellClass , ContainerClass, LeafClass>(nullptr, 0, this->subHeight, 1);
@@ -334,8 +333,8 @@ public:
          */
         explicit Iterator(FOctree* const inTarget)
             : currentLocalIndex(0) , currentLocalLevel(0) {
-            FAssertLF(inTarget, "Target for Octree::Iterator cannot be null", __LINE__, __FILE__);
-            FAssertLF(inTarget->root->getRightLeafIndex() >= 0, "Octree seems to be empty, getRightLeafIndex == 0", __LINE__, __FILE__);
+            assert(inTarget && "Target for Octree::Iterator cannot be null");
+            assert( (inTarget->root->getRightLeafIndex() >= 0) && "Octree seems to be empty, getRightLeafIndex == 0");
 
             // Start by the root
             this->current.tree = inTarget->root;
