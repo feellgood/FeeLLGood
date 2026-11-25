@@ -3,7 +3,6 @@
 #define FFMMALGORITHMTHREADTSM_HPP
 
 #include "../Utils/FAssert.hpp"
-#include "../Utils/FGlobal.hpp"
 #include "../Containers/FOctree.hpp"
 
 #include <omp.h>

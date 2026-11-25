@@ -4,7 +4,6 @@
 
 #include <complex>
 
-#include "../../Utils/FGlobal.hpp"
 #include "../../Utils/FAssert.hpp"
 #include "../P2P/FP2PR.hpp"
 
@@ -743,9 +742,9 @@ class FRotationKernel
         const FReal CosTheta(legendre[1]);    // P_1,0 = cos(theta)
         const FReal invSinTheta(legendre[2]); // P_1,1 = -sin(theta)
         // work with pointers
-        FReal* FRestrict legendre_l1_m1 = legendre;     // P{l-2,m} starts with P_{0,0} = 1
-        FReal* FRestrict legendre_l1_m  = legendre + 1; // P{l-1,m} starts with P_{1,0} = cos(theta)
-        FReal* FRestrict legendre_lm  = legendre + 3;   // P{l,m} starts with P_{2,0}
+        FReal* legendre_l1_m1 = legendre;     // P{l-2,m} starts with P_{0,0} = 1
+        FReal* legendre_l1_m  = legendre + 1; // P{l-1,m} starts with P_{1,0} = cos(theta)
+        FReal* legendre_lm  = legendre + 3;   // P{l,m} starts with P_{2,0}
 
         // Compute using recurrence
         FReal l2_minus_1 = 3; // 2 * l - 1
@@ -785,12 +784,12 @@ class FRotationKernel
         // index_lm == atLm(l,m) but progress iteratively to write the result
         int index_lm = 0;
         for(int l = 0 ; l <= P ; ++l){
-            const FReal*const FRestrict originalVecAtL0 = originalVec + (index_lm * 2);
+            const FReal*const originalVecAtL0 = originalVec + (index_lm * 2);
             for(int m = 0 ; m <= l ; ++m, ++index_lm ){
                 FReal res_lkm_real = 0.0;
                 FReal res_lkm_imag = 0.0;
                 // To read all "m" value for current "l"
-                const FReal* FRestrict iterOrignalVec = originalVecAtL0;
+                const FReal* iterOrignalVec = originalVecAtL0;
                 { // for k == 0
                     // same coef for real and imaginary
                     res_lkm_real += (*dlmkCoef) * (*iterOrignalVec++);
@@ -809,9 +808,9 @@ class FRotationKernel
     }
 
     /** This function is computing dest[:] *= src[:] using std::complex<FReal>::operator*= */
-    static void RotationZVectorsMul(std::complex<FReal>* FRestrict dest, const std::complex<FReal>* FRestrict src)
+    static void RotationZVectorsMul(std::complex<FReal>* dest, const std::complex<FReal>* src)
         {
-        const std::complex<FReal>*const FRestrict lastElement = dest + SizeArray;
+        const std::complex<FReal>*const lastElement = dest + SizeArray;
         for(; dest != lastElement ;) { (*dest++) *= (*src++); }
         }
 
@@ -875,7 +874,7 @@ public:
       */
     void P2M(CellClass* const inPole, const ContainerClass* const inParticles)
         {
-        std::complex<FReal>* FRestrict const w = inPole->getMultipole(); // w is the multipole moment
+        std::complex<FReal>* const w = inPole->getMultipole(); // w is the multipole moment
 
         // Copying the position is faster than using cell position
         const FPoint<FReal> cellPosition = getLeafCenter(inPole->getCoordinate());
@@ -947,7 +946,7 @@ public:
       * \f]
       * As describe in the paper, when need first to rotate the SH then transfer using the formula and finally rotate back.
       */
-    void M2M(CellClass* const FRestrict inPole, const CellClass*const FRestrict *const FRestrict inChildren, const int inLevel)
+    void M2M(CellClass* const inPole, const CellClass*const *const inChildren, const int inLevel)
         {
         // Get the translation coef for this level (same for all child)
         const auto & coef = M2MTranslationCoef[inLevel];
@@ -993,7 +992,7 @@ public:
         }
 
     /** M2L */
-    void M2L(CellClass* const FRestrict inLocal, const CellClass* inInteractions[], const int neighborPositions[], const int inSize, const int inLevel)
+    void M2L(CellClass* const inLocal, const CellClass* inInteractions[], const int neighborPositions[], const int inSize, const int inLevel)
         {
         // To copy the multipole data allocated once
         std::complex<FReal> source_w[SizeArray];
@@ -1057,7 +1056,7 @@ public:
       * \f]
       * As describe in the paper, when need first to rotate the SH, transfer using the formula and rotate back.
       */
-    void L2L(const CellClass* const FRestrict inLocal, CellClass* FRestrict *const FRestrict  inChildren, const int inLevel)
+    void L2L(const CellClass* const inLocal, CellClass* *const inChildren, const int inLevel)
         {
         const auto & coef = L2LTranslationCoef[inLevel]; //Get the translation coef for this level (same for all child)
         std::complex<FReal> source_u[SizeArray]; // To copy the source local allocated once
@@ -1112,7 +1111,7 @@ public:
     void L2P(const CellClass* const inLocal, ContainerClass* const inParticles)
         {
         // Take the local value from the cell
-        const std::complex<FReal>* FRestrict const u = inLocal->getLocal();
+        const std::complex<FReal>* const u = inLocal->getLocal();
 
         // Copying the position is faster than using cell position
         const FPoint<FReal> cellPosition = getLeafCenter(inLocal->getCoordinate());
@@ -1184,8 +1183,8 @@ public:
       * The computation is done for interactions with index <= 13. (13 means current leaf (x;y;z) = (0;0;0)).
       * Calling this method in multithread should be done carefully.
       */
-    void P2P(ContainerClass* const FRestrict inTargets,
-             const ContainerClass* const FRestrict inSources,
+    void P2P(ContainerClass* const inTargets,
+             const ContainerClass* const inSources,
              ContainerClass* const inNeighbors[],
              const int inSize) 
         {
@@ -1195,7 +1194,7 @@ public:
         }
 
     /** Use mutual even if it is not useful and call particlesMutualInteraction */
-    void P2PRemote(ContainerClass* const FRestrict inTargets, const ContainerClass* const inNeighbors[], const int inSize)
+    void P2PRemote(ContainerClass* const inTargets, const ContainerClass* const inNeighbors[], const int inSize)
         { FullRemote<FReal,ContainerClass>(inTargets,inNeighbors,inSize); }
 };
 

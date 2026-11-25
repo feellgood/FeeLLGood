@@ -3,14 +3,14 @@
 #ifndef FP2PR_HPP
 #define FP2PR_HPP
 
-#include "../../Utils/FGlobal.hpp"
-
 /**
  * @brief FullRemote template function
  */
 
 template <class FReal, class ContainerClass>
-static void FullRemote(ContainerClass* const FRestrict inTargets, const ContainerClass* const inNeighbors[], const int limitNeighbors)
+static void FullRemote(ContainerClass* const inTargets,
+                       const ContainerClass* const inNeighbors[],
+                       const FSize limitNeighbors)
     {
     const FSize nbParticlesTargets = inTargets->getNbParticles();
     const FReal*const targetsX = inTargets->getPositions()[0];

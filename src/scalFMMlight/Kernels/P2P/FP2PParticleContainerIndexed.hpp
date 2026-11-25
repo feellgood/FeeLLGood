@@ -8,6 +8,8 @@
 #include "../../Utils/FPoint.hpp"
 #include "../../Components/FParticleType.hpp"
 
+typedef size_t FSize;
+
 const int NbAttributesPerParticle = 2; // 2 = 1 + 1 : 1 for the scalar charges, 1 for the scalar potential
 
 /** container for indexed particles */

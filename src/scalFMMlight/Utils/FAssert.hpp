@@ -5,9 +5,6 @@
 #include <iostream>
 #include <cassert>
 
-#include "./FGlobal.hpp"
-
-
 /**
  * @brief The FError class
  * It is recommendede to use the macro:

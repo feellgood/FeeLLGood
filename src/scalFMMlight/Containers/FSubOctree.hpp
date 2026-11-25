@@ -2,7 +2,6 @@
 #ifndef FSUBOCTREE_HPP
 #define FSUBOCTREE_HPP
 
-#include "../Utils/FGlobal.hpp"
 #include "../Utils/FPoint.hpp"
 #include "../Utils/FAssert.hpp"
 
@@ -28,6 +27,9 @@
  * Please refere to testOctree.cpp to see an example
  * @warning Give the particleClass & cellClass
  */
+
+typedef long long MortonIndex;
+
 template<class FReal, class CellClass, class ContainerClass, class LeafClass>
 class FAbstractSubOctree {
 protected:
