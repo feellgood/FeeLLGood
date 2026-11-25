@@ -19,11 +19,10 @@ template <class TypeClass>
     inline void copyall(TypeClass* dest, const TypeClass* source, int nbElements)
         { for(; 0 < nbElements ; --nbElements) { (*dest++) = (*source++); } }
 
-/** component to component addition, might be replaced by transform (see comment) as long as operator+ is implemented for class TypeClass */
-template <class TypeClass>
-    inline void addall(TypeClass* dest, const TypeClass* source, int nbElements)
-        { for(; 0 < nbElements ; --nbElements) { (*dest++) += (*source++); } }
-        //{std::transform(dest, dest+nbElements, source, dest,[](TypeClass &a, const TypeClass &b){ return TypeClass(a+b); } );}
+/** component to component addition */
+template <class FReal>
+    inline void addall(FReal* dest, const FReal* source,const int nbElements)
+        {std::transform(dest, dest+nbElements, source, dest, std::plus<FReal>{});}
 /**
 * @author Berenger Bramas (berenger.bramas@inria.fr)
 * @class FRotationKernel
