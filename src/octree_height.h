@@ -26,7 +26,7 @@ namespace scal_fmm
     {
 const int MinLevels = 3;                /**< minimal height of the octree */
 const int MaxLevels = 10;               /**< maximal height of the octree */
-const double MinParticlesPerLeaf = 150; /**< minimal mean number of particles per non-empty leaf */
+const size_t MinParticlesPerLeaf = 150; /**< minimal mean number of particles per non-empty leaf */
 
 /** Morton key of point p of the cubic box of width boxWidth centered on the origin, at depth
 MaxLevels-1 (2^(MaxLevels-1) cells per direction). The key of the cell containing p at depth
@@ -65,7 +65,7 @@ inline int octreeHeight(const std::vector<Eigen::Vector3d> &pos /**< [in] */,
             if (i == 0 || (keys[i] >> shift) != (keys[i - 1] >> shift))
                 { nbLeaves++; }
             }
-        if (double(keys.size()) >= MinParticlesPerLeaf * double(nbLeaves))
+        if (keys.size() >= MinParticlesPerLeaf * nbLeaves)
             { return h; }
         }
     return MinLevels;
