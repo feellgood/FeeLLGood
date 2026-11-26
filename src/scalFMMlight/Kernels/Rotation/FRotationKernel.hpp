@@ -805,14 +805,9 @@ class FRotationKernel
         }
     }
 
-    /** This function is computing dest[:] *= src[:] using std::complex<FReal>::operator*= */
+    /** This function is computing dest[:] *= src[:] */
     static void RotationZVectorsMul(std::complex<FReal>* dest, const std::complex<FReal>* src)
-        {
-        const std::complex<FReal>*const lastElement = dest + SizeArray;
-        for(; dest != lastElement ;) { (*dest++) *= (*src++); }
-        }
-
-    // Utils
+        { std::transform(dest, dest+SizeArray, src, dest, std::multiplies<std::complex<FReal>>{}); }
 
     /** Return the position of a leaf from its tree coordinate
       * This is used only for the leaf
