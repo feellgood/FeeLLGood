@@ -87,8 +87,8 @@ def main():
         fileName = inputs['h5FileName']
         f = h5py.File(fileName,'r')
 
-        if ((inputs['groupname'] == 'emptyGroupName')or(inputs['groupname'] in f.keys()))
-                and inputs['view']:
+        if (((inputs['groupname'] == 'emptyGroupName')or(inputs['groupname'] in f.keys()))
+                and inputs['view']):
             view(f,inputs['groupname'])
         elif not(inputs['groupname'] in f.keys()):
             print("error: group " + inputs['groupname'] + " does not exist in file "

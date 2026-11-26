@@ -153,7 +153,7 @@ def load_mesh(filename):
                 element_indices = np.where(cell_data == region_id)[0]
                 if DEBUG and len(element_indices) > 0:
                     print(f"  Region '{region_name}' (ID={region_id}, dim={dim}): "
-                            + "{len(element_indices)} elements")
+                            + f"{len(element_indices)} elements")
 
         regions = get_region_elements(mesh)
         points = mesh.points[:, :3]
@@ -165,7 +165,7 @@ def load_mesh(filename):
                 print(f"\nRegion '{region_name}' — {len(elems)} elements:")
                 for elem in elems:
                     print(f"  Element {elem['global_element_index']:4d} ({elem['cell_type']}): "
-                            + "nodes {elem['nodes']}")
+                            + f"nodes {elem['nodes']}")
             print('Number of nodes : ', len(points))
 
         return points, regions
