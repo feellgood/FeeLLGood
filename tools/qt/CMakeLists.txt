@@ -10,7 +10,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # The Qt version must match the one VTK's GUISupportQt module was built with.
-find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Qml)
 
 find_library(GMSH_LIB gmsh)
 if(NOT GMSH_LIB)
@@ -60,6 +60,8 @@ add_fg_tool(fg-merge-sol 1.0.0)
 if(VTK_FOUND)
     add_fg_tool(fg-3D 0.0.0 Qt5::Widgets ${VTK_LIBRARIES})
     vtk_module_autoinit(TARGETS fg-3D MODULES ${VTK_LIBRARIES})
+    add_fg_tool(fg-plot 1.0.0 Qt5::Widgets ${VTK_LIBRARIES})
+    vtk_module_autoinit(TARGETS fg-plot MODULES ${VTK_LIBRARIES})
     add_fg_tool(fg-sol2vtk 1.1.2 ${VTK_LIBRARIES})
     vtk_module_autoinit(TARGETS fg-sol2vtk MODULES ${VTK_LIBRARIES})
 endif()
