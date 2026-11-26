@@ -31,7 +31,7 @@ def writeYaml(fileName,metadata):
     found = os.path.exists(configFilePath)
     if not found:
         try:
-            os.mkdir(configFilePath)
+            os.makedirs(configFilePath)
         except PermissionError:
             print("not authorized to create", configFilePath)
             sys.exit()
