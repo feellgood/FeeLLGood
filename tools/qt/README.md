@@ -6,6 +6,8 @@ below.
 
 * **fg-3D**: 3D viewer for a gmsh mesh and a `.sol` file: surface,
   magnetization arrows, surface charges, export to `.vtu`
+* **fg-gensol**: generate an initial magnetization file `sol.in` from a
+  mesh and a function per volume region
 * **fg-merge-sol**: combine a mesh and a `.sol` file into a table of the
   physical quantities as a function of position
 * **fg-plot**: quiver plot of a `.sol` file, in 3D or in a 2D subspace
@@ -42,6 +44,20 @@ install prefix. They have the names of the Python tools, which feeLLGood's
 
 ## Differences with the Python tools
 
+* **fg-gensol** reads the magnetization functions from `init_cfg.js`
+  instead of `init_cfg.py`. It is written on the first run and maps each
+  region name to a JavaScript function:
+
+  ```js
+  ({
+      'region': function (x, y, z) { return [cos(x), sin(x), 0]; },
+  })
+  ```
+
+  The functions of the JavaScript `Math` object can be used without the
+  `Math.` prefix. If `init_cfg.js` has an error or lacks a region,
+  fg-gensol prints the problem, or the lines to add, and leaves the file
+  unchanged.
 * **fg-plot** evaluates the `--filter` predicate as JavaScript.
   Python's `and`, `or`, `not`, `abs`, `pi` and the functions of the `math`
   module work, but chained comparisons do not: write `0 < x && x < 1`,
