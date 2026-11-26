@@ -1,0 +1,6 @@
+# Build directory and in-source build products not covered by the top-level
+# .gitignore
+/build/
+*_autogen/
+/fg-*/fg-*
+/common/libfg*.a

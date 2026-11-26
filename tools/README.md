@@ -10,6 +10,8 @@ working with feeLLGood:
 * **fg-gensol**: .sol generation tool
 * **fg-plot**:plot tool
 
+C++ versions of these tools, built with Qt, are in the [qt](qt) directory.
+
 These tools are documented in the [tools section][] of the feeLLGood Web
 site.
 
