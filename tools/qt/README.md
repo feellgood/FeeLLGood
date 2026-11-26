@@ -8,6 +8,8 @@ below.
   magnetization arrows, surface charges, export to `.vtu`
 * **fg-merge-sol**: combine a mesh and a `.sol` file into a table of the
   physical quantities as a function of position
+* **fg-sol2vtk**: convert a `.sol` file and its mesh to ParaView's `.vtu`
+  format
 
 Meshes are read with the gmsh API, as feeLLGood does.
 
@@ -16,7 +18,7 @@ Meshes are read with the gmsh API, as feeLLGood does.
 * Qt 5 (Core, Gui, Widgets), the version VTK's `GUISupportQt` module
   is built with
 * gmsh (library and `gmsh.h`), as for feeLLGood
-* VTK 9 with its Qt support, for fg-3D
+* VTK 9 with its Qt support, for fg-3D and fg-sol2vtk
 
 A tool whose optional dependency is missing is not built. On Debian or
 Ubuntu:
@@ -38,7 +40,7 @@ install prefix. They have the names of the Python tools, which feeLLGood's
 
 ## Differences with the Python tools
 
-* **fg-merge-sol** checks that the `.sol`
+* **fg-sol2vtk** and **fg-merge-sol** check that the `.sol`
   file has as many data lines as the mesh has nodes.
 * **fg-3D** checks that the `.sol` file matches the mesh before
   exporting to `.vtu`.
