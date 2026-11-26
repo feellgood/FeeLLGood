@@ -6,6 +6,8 @@ below.
 
 * **fg-3D**: 3D viewer for a gmsh mesh and a `.sol` file: surface,
   magnetization arrows, surface charges, export to `.vtu`
+* **fg-merge-sol**: combine a mesh and a `.sol` file into a table of the
+  physical quantities as a function of position
 
 Meshes are read with the gmsh API, as feeLLGood does.
 
@@ -36,5 +38,7 @@ install prefix. They have the names of the Python tools, which feeLLGood's
 
 ## Differences with the Python tools
 
+* **fg-merge-sol** checks that the `.sol`
+  file has as many data lines as the mesh has nodes.
 * **fg-3D** checks that the `.sol` file matches the mesh before
   exporting to `.vtu`.

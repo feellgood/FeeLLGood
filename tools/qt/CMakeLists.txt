@@ -55,6 +55,8 @@ function(add_fg_tool name version)
     install(TARGETS ${name} RUNTIME DESTINATION bin)
 endfunction()
 
+add_fg_tool(fg-merge-sol 1.0.0)
+
 if(VTK_FOUND)
     add_fg_tool(fg-3D 0.0.0 Qt5::Widgets ${VTK_LIBRARIES})
     vtk_module_autoinit(TARGETS fg-3D MODULES ${VTK_LIBRARIES})
