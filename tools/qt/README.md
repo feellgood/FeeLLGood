@@ -8,6 +8,8 @@ below.
   magnetization arrows, surface charges, export to `.vtu`
 * **fg-gensol**: generate an initial magnetization file `sol.in` from a
   mesh and a function per volume region
+* **fg-h5extract**: extract the mesh, the settings, the `.evol` or the
+  `.sol` files from a HDF5 file written by fg-sol2hdf5
 * **fg-merge-sol**: combine a mesh and a `.sol` file into a table of the
   physical quantities as a function of position
 * **fg-plot**: quiver plot of a `.sol` file, in 3D or in a 2D subspace
@@ -25,7 +27,7 @@ interchangeable with the ones of the Python tools.
   is built with
 * gmsh (library and `gmsh.h`), as for feeLLGood
 * VTK 9 with its Qt support, for fg-3D, fg-plot and fg-sol2vtk
-* HDF5 with its C++ API, for fg-sol2hdf5
+* HDF5 with its C++ API, for fg-sol2hdf5 and fg-h5extract
 * yaml-cpp, as for feeLLGood, for fg-sol2hdf5
 
 A tool whose optional dependency is missing is not built. On Debian or
@@ -72,5 +74,6 @@ install prefix. They have the names of the Python tools, which feeLLGood's
   file has as many data lines as the mesh has nodes.
 * **fg-sol2hdf5** checks that a `.evol` file exists before writing
   anything.
+* **fg-h5extract --view** returns 0, not 1.
 * **fg-3D** checks that the `.sol` file matches the mesh before
   exporting to `.vtu`.

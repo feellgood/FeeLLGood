@@ -7,7 +7,7 @@ add_library(fgcommon STATIC
 target_include_directories(fgcommon PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${GMSH_INC})
 target_link_libraries(fgcommon PUBLIC Qt5::Core Qt5::Qml ${GMSH_LIB})
 
-# HDF5 helpers of fg-sol2hdf5.
+# HDF5 helpers of fg-sol2hdf5 and fg-h5extract.
 if(HDF5_FOUND)
     add_library(fgh5 STATIC h5Utils.cpp)
     target_include_directories(fgh5 PUBLIC ${HDF5_INCLUDE_DIRS})

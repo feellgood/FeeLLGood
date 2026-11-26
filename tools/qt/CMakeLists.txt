@@ -78,6 +78,7 @@ if(VTK_FOUND)
 endif()
 
 if(HDF5_FOUND)
+    add_fg_tool(fg-h5extract 1.0.0 fgh5)
     if(yaml-cpp_FOUND)
         add_fg_tool(fg-sol2hdf5 1.1.0 fgh5 yaml-cpp)
     endif()
