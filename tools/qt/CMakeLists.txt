@@ -65,6 +65,7 @@ function(add_fg_tool name version)
     install(TARGETS ${name} RUNTIME DESTINATION bin)
 endfunction()
 
+add_fg_tool(fg-configurator 0.0.1 Qt5::Widgets)
 add_fg_tool(fg-gensol 1.0.1)
 add_fg_tool(fg-merge-sol 1.0.0)
 

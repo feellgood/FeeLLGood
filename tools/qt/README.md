@@ -6,6 +6,8 @@ below.
 
 * **fg-3D**: 3D viewer for a gmsh mesh and a `.sol` file: surface,
   magnetization arrows, surface charges, export to `.vtu`
+* **fg-configurator**: save the default metadata of the output files
+  (author, affiliation, licence), with a dialog window or in text mode
 * **fg-gensol**: generate an initial magnetization file `sol.in` from a
   mesh and a function per volume region
 * **fg-h5extract**: extract the mesh, the settings, the `.evol` or the
