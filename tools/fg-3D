@@ -323,7 +323,11 @@ try:
                 self.statusBar().showMessage(msg)
                 try:
                     self.magnetization_data = load_sol_file(path)
-                    self.update_mesh()
+                    self.surf_charges = None
+                    if self.surface_charges_checkbox.isChecked():
+                        self.on_surface_charges_changed() # recompute them for this .sol file
+                    else:
+                        self.update_mesh()
                 except Exception as e:
                     msg = f"Error loading .sol file: {e}"
                     QMessageBox.critical(self, "Error", msg)
@@ -388,10 +392,10 @@ try:
                                                              self.triangles,
                                                              self.mesh.cell_normals)
                     self.strLog += "surface charges computed\n"
-                    self.update_mesh()
                 else:
                     self.strLog += "no mesh and/or magnetization data to compute surface charges\n"
             self.update_infos()
+            self.update_mesh()
 
         def on_smooth_shading_changed(self):
             if self.smooth_shading_checkbox.isChecked():
@@ -413,7 +417,7 @@ try:
                 try:
                     self.plotter.clear_actors()
                     s = self.smooth_shading
-                    if self.surface_charges_checkbox.isChecked():
+                    if self.surface_charges_checkbox.isChecked() and self.surf_charges is not None:
                         self.mesh.cell_data['surface charges'] = self.surf_charges
                         self.plotter.add_mesh(self.mesh,smooth_shading=s,split_sharp_edges=True,cmap='coolwarm')
                     else:
