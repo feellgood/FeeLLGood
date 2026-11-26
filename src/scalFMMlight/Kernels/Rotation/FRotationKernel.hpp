@@ -36,10 +36,10 @@ template <class FReal>
 template<class FReal, class CellClass, class ContainerClass, int P>
 class FRotationKernel
 {
+    using DLMK = FReal[P+1][2*P+1][2*P+1];
+
     /** Size of the data array computed using a suite relation */
     static const int SizeArray = ((P+2)*(P+1))/2;
-    /** To have P*2 where needed */
-    static const int P2 = P*2;
 
     // Object attributes
     /** the box width at leaf level */
@@ -58,7 +58,7 @@ class FRotationKernel
     const Eigen::Vector<FReal,Nodes::DIM> boxCorner;
 
     /** This contains the factorial until 2*P+1 */
-    FReal factorials[P2+1];
+    FReal factorials[2*P + 1];
 
     ///////////// Translation /////////////////////////////
     /** precalculated values for M2M translation */
@@ -104,7 +104,7 @@ class FRotationKernel
         {
         factorials[0] = 1;
         FReal fidx = 1;
-        for(int idx = 1 ; idx <= P2 ; ++idx, ++fidx)
+        for(int idx = 1 ; idx <= (2*P) ; ++idx, ++fidx)
             { factorials[idx] = fidx * factorials[idx-1]; }
         }
 
@@ -256,13 +256,13 @@ class FRotationKernel
         // We will compute only a part of it since we compute the inclinaison angle.
         // inclinaison(+/-x,+/-y,z) = inclinaison(+/-y,+/-x,z)
         // we put the negative (-theta) with a negative x
-        typedef FReal (*pMatrixDlmk) /*[P+1]*/[P2+1][P2+1];
+        typedef FReal (*pMatrixDlmk) [2*P+1][2*P+1];
         pMatrixDlmk dlmkMatrix[7][4][7];
         // Allocate matrix
         for(int idxX = 0 ; idxX < 7 ; ++idxX)
             for(int idxY = 0 ; idxY < 4 ; ++idxY)
                 for(int idxZ = 0 ; idxZ < 7 ; ++idxZ) {
-                    dlmkMatrix[idxX][idxY][idxZ] = new FReal[P+1][P2+1][P2+1];
+                    dlmkMatrix[idxX][idxY][idxZ] = new DLMK;//FReal[P+1][2*P+1][2*P+1];
                 }
 
         // First we compute special vectors:
@@ -513,7 +513,7 @@ class FRotationKernel
       * \f]
       \f$ \delta \f$ is the Kronecker symbol
       */
-    void DlmkBuild0(FReal dlmk[P+1][P2+1][P2+1]) const {
+    void DlmkBuild0(DLMK dlmk) const {
         for(int l = 0 ; l <= P ; ++l){
             for(int m = -l ; m <= l ; ++m){
                 // first put 0 every where
@@ -532,96 +532,111 @@ class FRotationKernel
       * \f]
       \f$ \delta \f$ is the Kronecker symbol
       */
-    void DlmkBuildPi(FReal dlmk[P+1][P2+1][P2+1]) const {
-        for(int l = 0 ; l <= P ; ++l){
-            for(int m = -l ; m <= l ; ++m){
+    void DlmkBuildPi(DLMK dlmk) const
+        {
+        for(int l = 0 ; l <= P ; ++l)
+            {
+            for(int m = -l ; m <= l ; ++m)
+                {
                 // put 0 every where
-                for(int k = -l ; k <= l ; ++k){
-                    dlmk[l][P+m][P+k] = FReal(0.0);
-                }
+                for(int k = -l ; k <= l ; ++k)
+                    { dlmk[l][P+m][P+k] = FReal(0.0); }
                 // -1^l+k * 1 where m == k
                 dlmk[l][P+m][P-m] = ((l+m)&0x1 ? FReal(-1) : FReal(1));
+                }
             }
         }
-    }
 
     /** Compute \f$ d_mlk \f$ for \f$ \theta = ]\pi/2;\pi[ \f$
       * \f[
       * d^l_{m,k}( \theta ) = (-1)^{l+m} d^l_{m,-k}( \pi - \theta )
       * \f]
       */
-    void DlmkZNegative(FReal dlmk[P+1][P2+1][P2+1], const FReal dlmkZPositif[P+1][P2+1][P2+1]) const {
-        for(int l = 0 ; l <= P ; ++l){
-            for(int m = -l ; m <= l ; ++m){
+    void DlmkZNegative(DLMK dlmk,const DLMK dlmkZPositif) const
+        {
+        for(int l = 0 ; l <= P ; ++l)
+            {
+            for(int m = -l ; m <= l ; ++m)
+                {
                 // if l+m is odd
-                if( (l+m)&0x1 ){
+                if( (l+m)&0x1 )
+                    {
                     // put -1 every where
-                    for(int k = -l ; k <= l ; ++k){
-                        dlmk[l][P+m][P+k] = -dlmkZPositif[l][P+m][P-k];
+                    for(int k = -l ; k <= l ; ++k)
+                        { dlmk[l][P+m][P+k] = -dlmkZPositif[l][P+m][P-k]; }
                     }
-                }
-                else{
+                else
+                    {
                     // else just copy
-                    for(int k = -l ; k <= l ; ++k){
-                        dlmk[l][P+m][P+k] = dlmkZPositif[l][P+m][P-k];
+                    for(int k = -l ; k <= l ; ++k)
+                        { dlmk[l][P+m][P+k] = dlmkZPositif[l][P+m][P-k]; }
                     }
                 }
             }
         }
-    }
 
     /** Compute \f$ d_mlk \f$ for \f$ \theta = ]\pi;3\pi/2[ \f$
       * \f[
       * d^l_{m,k}( \theta ) = (-1)^{l+m} d^l_{-m,k}( \theta - \pi )
       * \f]
       */
-    void DlmkInverseZNegative(FReal dlmk[P+1][P2+1][P2+1], const FReal dlmkZPositif[P+1][P2+1][P2+1]) const {
-        for(int l = 0 ; l <= P ; ++l){
-            for(int m = -l ; m <= l ; ++m){
-                if( (l+m)&0x1 ){
-                    for(int k = -l ; k <= l ; ++k){
-                        dlmk[l][P+m][P+k] = -dlmkZPositif[l][P-m][P+k];
+    void DlmkInverseZNegative(DLMK dlmk,const DLMK dlmkZPositif) const
+        {
+        for(int l = 0 ; l <= P ; ++l)
+            {
+            for(int m = -l ; m <= l ; ++m)
+                {
+                if( (l+m)&0x1 )
+                    {
+                    for(int k = -l ; k <= l ; ++k)
+                        { dlmk[l][P+m][P+k] = -dlmkZPositif[l][P-m][P+k]; }
                     }
-                }
-                else{
-                    for(int k = -l ; k <= l ; ++k){
-                        dlmk[l][P+m][P+k] = dlmkZPositif[l][P-m][P+k];
+                else
+                    {
+                    for(int k = -l ; k <= l ; ++k)
+                        { dlmk[l][P+m][P+k] = dlmkZPositif[l][P-m][P+k]; }
                     }
                 }
             }
         }
-    }
 
     /** Compute \f$ d_mlk \f$ for \f$ \theta = ]3\pi/2;2\pi[ \f$
       * \f[
       * d^l_{m,k}( \theta ) = (-1)^{m+k} d^l_{m,k}( 2 \pi - \theta )
       * \f]
       */
-    void DlmkInverse(FReal dlmk[P+1][P2+1][P2+1], const FReal dlmkZPositif[P+1][P2+1][P2+1]) const {
-        for(int l = 0 ; l <= P ; ++l){
-            for(int m = -l ; m <= l ; ++m){
+    void DlmkInverse(DLMK dlmk, const DLMK dlmkZPositif) const
+        {
+        for(int l = 0 ; l <= P ; ++l)
+            {
+            for(int m = -l ; m <= l ; ++m)
+                {
                 // we start with k == -l, so if (k+m) is odd
-                if( (l+m)&0x1 ){
+                if( (l+m)&0x1 )
+                    {
                     // then we start per (-1)
-                    for(int k = -l ; k < l ; k+=2){
+                    for(int k = -l ; k < l ; k+=2)
+                        {
                         dlmk[l][P+m][P+k] = -dlmkZPositif[l][P+m][P+k];
                         dlmk[l][P+m][P+k+1] = dlmkZPositif[l][P+m][P+k+1];
-                    }
+                        }
                     // l is always odd
                     dlmk[l][P+m][P+l] = -dlmkZPositif[l][P+m][P+l];
-                }
-                else{
+                    }
+                else
+                    {
                     // else we start per (+1)
-                    for(int k = -l ; k < l ; k+=2){
+                    for(int k = -l ; k < l ; k+=2)
+                        {
                         dlmk[l][P+m][P+k] = dlmkZPositif[l][P+m][P+k];
                         dlmk[l][P+m][P+k+1] = -dlmkZPositif[l][P+m][P+k+1];
-                    }
+                        }
                     // l is always odd
                     dlmk[l][P+m][P+l] = dlmkZPositif[l][P+m][P+l];
+                    }
                 }
             }
         }
-    }
 
 
     /** Compute d_mlk for \f$ \theta = ]0;\pi/2[ \f$
@@ -631,7 +646,7 @@ class FRotationKernel
       * We use formula 28,29 to compute "g" then 25,26,27 for the recurrence.
       * theta should be in \f$ [0;\pi] \f$ as the inclinaison angle
       */
-    void DlmkBuild(FReal dlmk[P+1][P2+1][P2+1], const FReal cosTheta, const FReal sinTheta)
+    void DlmkBuild(DLMK dlmk, const FReal cosTheta, const FReal sinTheta)
         {
         const FReal F0 = FReal(0.0);
         const FReal F1 = FReal(1.0);
