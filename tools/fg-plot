@@ -101,6 +101,7 @@ def main():
         str_idx = my_args.subspace.split(" ")
         if len(str_idx) != 4:
             print("error, --subspace option expects 4 indices")
+            sys.exit(1)
         else:
             idx = []
             for i in str_idx:
