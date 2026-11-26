@@ -43,6 +43,16 @@ if(NOT VTK_FOUND)
     message(WARNING "VTK not found: the tools needing it will not be built")
 endif()
 
+find_package(HDF5 QUIET COMPONENTS C CXX)
+if(NOT HDF5_FOUND)
+    message(WARNING "HDF5 C++ not found: the tools needing it will not be built")
+endif()
+
+find_package(yaml-cpp QUIET)
+if(NOT yaml-cpp_FOUND)
+    message(WARNING "yaml-cpp not found: fg-sol2hdf5 will not be built")
+endif()
+
 add_subdirectory(common)
 
 # Add an executable named after its directory, with the version given.
@@ -65,4 +75,10 @@ if(VTK_FOUND)
     vtk_module_autoinit(TARGETS fg-plot MODULES ${VTK_LIBRARIES})
     add_fg_tool(fg-sol2vtk 1.1.2 ${VTK_LIBRARIES})
     vtk_module_autoinit(TARGETS fg-sol2vtk MODULES ${VTK_LIBRARIES})
+endif()
+
+if(HDF5_FOUND)
+    if(yaml-cpp_FOUND)
+        add_fg_tool(fg-sol2hdf5 1.1.0 fgh5 yaml-cpp)
+    endif()
 endif()

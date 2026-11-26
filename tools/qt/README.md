@@ -11,10 +11,13 @@ below.
 * **fg-merge-sol**: combine a mesh and a `.sol` file into a table of the
   physical quantities as a function of position
 * **fg-plot**: quiver plot of a `.sol` file, in 3D or in a 2D subspace
+* **fg-sol2hdf5**: archive the `.sol`, `.evol`, settings and mesh files of
+  a simulation in a HDF5 file
 * **fg-sol2vtk**: convert a `.sol` file and its mesh to ParaView's `.vtu`
   format
 
-Meshes are read with the gmsh API, as feeLLGood does.
+Meshes are read with the gmsh API, as feeLLGood does. HDF5 files are
+interchangeable with the ones of the Python tools.
 
 ## Dependencies
 
@@ -22,13 +25,15 @@ Meshes are read with the gmsh API, as feeLLGood does.
   is built with
 * gmsh (library and `gmsh.h`), as for feeLLGood
 * VTK 9 with its Qt support, for fg-3D, fg-plot and fg-sol2vtk
+* HDF5 with its C++ API, for fg-sol2hdf5
+* yaml-cpp, as for feeLLGood, for fg-sol2hdf5
 
 A tool whose optional dependency is missing is not built. On Debian or
 Ubuntu:
 
 ```shell
 sudo apt install qtbase5-dev qtdeclarative5-dev libgmsh-dev libvtk9-dev \
-    libvtk9-qt-dev
+    libvtk9-qt-dev libhdf5-dev libyaml-cpp-dev
 ```
 
 ## Build
@@ -65,5 +70,7 @@ install prefix. They have the names of the Python tools, which feeLLGood's
   matplotlib, but the 3D view can be rotated.
 * **fg-sol2vtk**, **fg-plot** and **fg-merge-sol** check that the `.sol`
   file has as many data lines as the mesh has nodes.
+* **fg-sol2hdf5** checks that a `.evol` file exists before writing
+  anything.
 * **fg-3D** checks that the `.sol` file matches the mesh before
   exporting to `.vtu`.
