@@ -4,7 +4,9 @@
 
 #include <cassert>
 
-#include "../Utils/FPoint.hpp"
+#include <eigen3/Eigen/Dense>
+
+#include "../../node.h"
 
 /**
  * @author Berenger Bramas (berenger.bramas@inria.fr)
@@ -349,7 +351,8 @@ public:
     * Refer to FAbstractSubOctree::insert
     */
     template<typename... Args>
-    void insert(const MortonIndex index, const std::array<int,3> & host, const int inTreeHeight, const FPoint<FReal>& inParticlePosition, Args... args)
+    void insert(const MortonIndex index, const std::array<int,Nodes::DIM> & host,
+                const int inTreeHeight,const Eigen::Vector<FReal,Nodes::DIM> & inParticlePosition, Args... args)
         {
         // Get the morton index for the leaf level
         const MortonIndex arrayIndex = Parent::getLeafIndex(index,inTreeHeight);
@@ -494,8 +497,9 @@ public:
 
     /** inserter */
     template<typename... Args>
-    void insert(const MortonIndex index, const std::array<int,3>& host, const int inTreeHeight, const FPoint<FReal>& inParticlePosition,
-                        Args... args){
+    void insert(const MortonIndex index, const std::array<int,Nodes::DIM>& host, const int inTreeHeight,
+                const Eigen::Vector<FReal,Nodes::DIM>& inParticlePosition, Args... args)
+        {
         // We need the morton index at the bottom level of this sub octree
         // so we remove the right side
         const MortonIndex arrayIndex = Parent::getLeafIndex(index,inTreeHeight);

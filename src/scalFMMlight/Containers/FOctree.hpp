@@ -5,7 +5,6 @@
 #include <functional>
 #include <cassert>
 #include "./FSubOctree.hpp"
-#include "../Utils/FPoint.hpp"
 
 /**
  * @author Berenger Bramas (berenger.bramas@inria.fr)
@@ -52,10 +51,10 @@ protected:
     const int leafIndex;
 
     /** the space system center */
-    const FPoint<FReal> boxCenter;
+    const Eigen::Vector<FReal,Nodes::DIM> boxCenter;
 
     /** the space system corner (used to compute morton index) */
-    const FPoint<FReal> boxCorner;
+    const Eigen::Vector<FReal,Nodes::DIM> boxCorner;
 
     /** the space system width */
     const FReal boxWidth;
@@ -74,13 +73,13 @@ protected:
      * @param inPosition position to compute
      * @return an array of three indices corresponding to inPosition position in real space
      */
-    std::array<int,3> getCoordinateFromPosition(const FPoint<FReal>& inPosition) const
+    std::array<int,3> getCoordinateFromPosition(const Eigen::Vector<FReal,Nodes::DIM>& inPosition) const
         {
         const FReal boxWidthAtLeafLevel(boxWidth/FReal(1<<(height-1)));
         // position has to be relative to corner not center
-        const int x = GetTreeCoordinate( inPosition.getX() - boxCorner.getX(), boxWidth, boxWidthAtLeafLevel, height);
-        const int y = GetTreeCoordinate( inPosition.getY() - boxCorner.getY(), boxWidth, boxWidthAtLeafLevel, height);
-        const int z = GetTreeCoordinate( inPosition.getZ() - boxCorner.getZ(), boxWidth, boxWidthAtLeafLevel, height);
+        const int x = GetTreeCoordinate( inPosition.x() - boxCorner.x(), boxWidth, boxWidthAtLeafLevel, height);
+        const int y = GetTreeCoordinate( inPosition.y() - boxCorner.y(), boxWidth, boxWidthAtLeafLevel, height);
+        const int z = GetTreeCoordinate( inPosition.z() - boxCorner.z(), boxWidth, boxWidthAtLeafLevel, height);
         return std::array<int,3>({x,y,z});
         }
 
@@ -146,19 +145,21 @@ public:
      * @param inBoxWidth box width for this simulation
      * @param inBoxCenter box center for this simulation
      */
-    FOctree(const int inHeight, const int inSubHeight, const FReal inBoxWidth, const FPoint<FReal>& inBoxCenter):
+    FOctree(const int inHeight, const int inSubHeight, const FReal inBoxWidth, const Eigen::Vector<FReal,Nodes::DIM>& inBoxCenter):
           root(nullptr), boxWidthAtLevel(new FReal[inHeight]),
-          height(inHeight) , subHeight(inSubHeight), leafIndex(this->height-1),
-          boxCenter(inBoxCenter), boxCorner(inBoxCenter,-(inBoxWidth/2)), boxWidth(inBoxWidth)
-    {
+          height(inHeight), subHeight(inSubHeight), leafIndex(this->height-1), boxCenter(inBoxCenter),
+          boxCorner( Eigen::Vector<FReal,Nodes::DIM>(inBoxCenter.x() - inBoxWidth/2,
+                                                    inBoxCenter.y() - inBoxWidth/2,
+                                                    inBoxCenter.z() - inBoxWidth/2) ), boxWidth(inBoxWidth)
+        {
         assert( (subHeight <= height - 1) && "Subheight cannot be greater than height");
         // Does we only need one suboctree?
         if(subHeight == height - 1){
             root = new FSubOctreeWithLeafs< FReal, CellClass , ContainerClass, LeafClass>(nullptr, 0, this->subHeight, 1);
-        }
+            }
         else {// if(subHeight < height - 1)
             root = new FSubOctree< FReal, CellClass , ContainerClass, LeafClass>(nullptr, 0, this->subHeight, 1);
-        }
+            }
 
         FReal tempWidth = this->boxWidth;
         // pre compute box width for each level
@@ -190,7 +191,7 @@ public:
     FReal getBoxWidth() const { return this->boxWidth; }
 
     /** To get the center of the box */
-    const FPoint<FReal>& getBoxCenter() const { return this->boxCenter; }
+    const Eigen::Vector<FReal,Nodes::DIM>& getBoxCenter() const { return this->boxCenter; }
 
     /** Count the number of cells per level, it will iter on the tree to do that! */
     void getNbCellsPerLevel(int inNbCells[]){
@@ -221,7 +222,7 @@ public:
      * @param args
      */
     template<typename... Args>
-    void insert(const FPoint<FReal>& inParticlePosition, Args... args)
+    void insert(const Eigen::Vector<FReal,Nodes::DIM>& inParticlePosition, Args... args)
         {
         const std::array<int,3> host = getCoordinateFromPosition( inParticlePosition );
         const MortonIndex particleIndex = computeMortonIndex(host[0],host[1],host[2]);
@@ -254,7 +255,7 @@ public:
      * @param position a position to compute MI
      * @return the morton index
      */
-    MortonIndex getMortonFromPosition(const FPoint<FReal>& position) const
+    MortonIndex getMortonFromPosition(const Eigen::Vector<FReal,Nodes::DIM>& position) const
         { return getCoordinateFromPosition(position).getMortonIndex(); }
 
     /** return if tree is empty or not. */

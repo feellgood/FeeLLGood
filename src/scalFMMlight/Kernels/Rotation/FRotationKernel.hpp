@@ -55,7 +55,7 @@ class FRotationKernel
     const FReal widthAtLeafLevelDiv2;
 
     /** position of the box corner */
-    const FPoint<FReal> boxCorner;
+    const Eigen::Vector<FReal,Nodes::DIM> boxCorner;
 
     /** This contains the factorial until 2*P+1 */
     FReal factorials[P2+1];
@@ -817,12 +817,13 @@ class FRotationKernel
     /** Return the position of a leaf from its tree coordinate
       * This is used only for the leaf
       */
-    FPoint<FReal> getLeafCenter(const std::array<int,3> coordinate) const {
-        return FPoint<FReal>(
-                    FReal(coordinate[0]) * widthAtLeafLevel + widthAtLeafLevelDiv2 + boxCorner.getX(),
-                    FReal(coordinate[1]) * widthAtLeafLevel + widthAtLeafLevelDiv2 + boxCorner.getY(),
-                    FReal(coordinate[2]) * widthAtLeafLevel + widthAtLeafLevelDiv2 + boxCorner.getZ());
-    }
+    Eigen::Vector<FReal,Nodes::DIM> getLeafCenter(const std::array<int,Nodes::DIM> coordinate) const
+        {
+        return Eigen::Vector<FReal,Nodes::DIM>(
+                    FReal(coordinate[0]) * widthAtLeafLevel + widthAtLeafLevelDiv2 + boxCorner.x(),
+                    FReal(coordinate[1]) * widthAtLeafLevel + widthAtLeafLevelDiv2 + boxCorner.y(),
+                    FReal(coordinate[2]) * widthAtLeafLevel + widthAtLeafLevelDiv2 + boxCorner.z());
+        }
 
     /** Return position in the array of the l,m couple
       * P[atLm(l,m)] => P{l,m}
@@ -842,12 +843,12 @@ class FRotationKernel
 public:
 
     /** Constructor, needs system information */
-    FRotationKernel( const int inTreeHeight, const FReal inBoxWidth, const FPoint<FReal>& inBoxCenter):
+    FRotationKernel( const int inTreeHeight, const FReal inBoxWidth, const Eigen::Vector<FReal,Nodes::DIM>& inBoxCenter):
         boxWidth(inBoxWidth),
         treeHeight(inTreeHeight),
         widthAtLeafLevel(inBoxWidth/FReal(1 << (inTreeHeight-1))),
         widthAtLeafLevelDiv2(widthAtLeafLevel/2),
-        boxCorner(inBoxCenter.getX()-(inBoxWidth/2),inBoxCenter.getY()-(inBoxWidth/2),inBoxCenter.getZ()-(inBoxWidth/2))
+        boxCorner(inBoxCenter.x()-(inBoxWidth/2),inBoxCenter.y()-(inBoxWidth/2),inBoxCenter.z()-(inBoxWidth/2))
             {
             M2MTranslationCoef.resize(inTreeHeight-1);
             L2LTranslationCoef.resize(inTreeHeight-1);
@@ -875,7 +876,7 @@ public:
         std::complex<FReal>* const w = inPole->getMultipole(); // w is the multipole moment
 
         // Copying the position is faster than using cell position
-        const FPoint<FReal> cellPosition = getLeafCenter(inPole->getCoordinate());
+        const Eigen::Vector<FReal,Nodes::DIM> cellPosition = getLeafCenter(inPole->getCoordinate());
         FReal legendre[SizeArray];
         std::complex<FReal> angles[P+1];
 
@@ -887,9 +888,9 @@ public:
 
         for(FSize idxPart = 0 ; idxPart < inParticles->getNbParticles() ; ++ idxPart)
             {
-            const FReal x(positionsX[idxPart] - cellPosition.getX());
-            const FReal y(positionsY[idxPart] - cellPosition.getY());
-            const FReal z(positionsZ[idxPart] - cellPosition.getZ());
+            const FReal x(positionsX[idxPart] - cellPosition.x());
+            const FReal y(positionsY[idxPart] - cellPosition.y());
+            const FReal z(positionsZ[idxPart] - cellPosition.z());
             /*
              (a,theta,phi) is (x,y,z) in spherical coordinates.
              theta is not computed, but Cos(theta) and Sin(theta) are computed, to feed legendre[1,2], mind the minus for legendre[2]
@@ -1112,7 +1113,7 @@ public:
         const std::complex<FReal>* const u = inLocal->getLocal();
 
         // Copying the position is faster than using cell position
-        const FPoint<FReal> cellPosition = getLeafCenter(inLocal->getCoordinate());
+        const Eigen::Vector<FReal,Nodes::DIM> cellPosition = getLeafCenter(inLocal->getCoordinate());
 
         // For all particles in the leaf box
         const FReal*const positionsX = inParticles->getPositions()[0];
@@ -1122,9 +1123,9 @@ public:
 
         for(FSize idxPart = 0 ; idxPart < inParticles->getNbParticles() ; ++ idxPart)
             {
-            const FReal x(positionsX[idxPart]-cellPosition.getX());
-            const FReal y(positionsY[idxPart]-cellPosition.getY());
-            const FReal z(positionsZ[idxPart]-cellPosition.getZ());
+            const FReal x(positionsX[idxPart]-cellPosition.x());
+            const FReal y(positionsY[idxPart]-cellPosition.y());
+            const FReal z(positionsZ[idxPart]-cellPosition.z());
             /*
              (r,theta,phi) is (x,y,z) in spherical coordinates.
              theta is not computed, but Cos(theta) and Sin(theta) are computed, to feed legendre[1,2], mind the minus for legendre[2]

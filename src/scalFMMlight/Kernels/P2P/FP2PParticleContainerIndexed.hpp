@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "../../Utils/FAlignedMemory.hpp"
-#include "../../Utils/FPoint.hpp"
 #include "../../Components/FParticleType.hpp"
 
 typedef size_t FSize;
@@ -122,14 +121,14 @@ public:
      * Should have a particle position, index and followed by attributes
      */
     template<typename... Args>
-    void push(const FPoint<FReal>& inParticlePosition, const FSize index, Args... args)
+    void push(const Eigen::Vector<FReal,Nodes::DIM>& inParticlePosition, const FSize index, Args... args)
         {
         increaseSizeIfNeeded();
 
         // insert particle data
-        positions[0][nbParticles] = inParticlePosition.getX();
-        positions[1][nbParticles] = inParticlePosition.getY();
-        positions[2][nbParticles] = inParticlePosition.getZ();
+        positions[0][nbParticles] = inParticlePosition.x();
+        positions[1][nbParticles] = inParticlePosition.y();
+        positions[2][nbParticles] = inParticlePosition.z();
         // insert attribute data
         addParticleValue<0>( nbParticles, args...);
         nbParticles += 1;

@@ -51,7 +51,8 @@ typedef FFmmAlgorithmThreadTsm<OctreeClass, CellClass, ContainerClass, KernelCla
         FmmClass; /**< convenient typedef for the algorithm */
 
 const double boxWidth = 2.01;              /**< bounding box max dimension */
-const FPoint<FReal> boxCenter(0., 0., 0.); /**< center of the bounding box */
+
+const Eigen::Vector<FReal,Nodes::DIM> boxCenter(0., 0., 0.); /**< center of the bounding box */
 
 /** \class fmm
 to initialize a tree and a kernel for the computation of the demagnetizing field, and launch the
@@ -78,9 +79,8 @@ public:
             {
             if (msh.magNode[idxPart])
                 {
-                Eigen::Vector3d pTarget = norm*(msh.getNode_p(idxPart) - msh.c);
-                tree.insert(FPoint<FReal>(pTarget.x(), pTarget.y(), pTarget.z()),
-                            FParticleType::FParticleTypeTarget, idxPart);
+                const Eigen::Vector3d pTarget = norm*(msh.getNode_p(idxPart) - msh.c);
+                tree.insert(pTarget, FParticleType::FParticleTypeTarget, idxPart);
                 }
             }
 
@@ -181,11 +181,8 @@ private:
 
                       for (int j = 0; j < NPI; j++, idx++)
                           {
-                          double x = norm*(gauss(0,j) - c.x());
-                          double y = norm*(gauss(1,j) - c.y());
-                          double z = norm*(gauss(2,j) - c.z());
-                          tree.insert(FPoint<FReal>(x,y,z), FParticleType::FParticleTypeSource,
-                                  idx, 0.0);
+                          const Eigen::Vector<FReal,Nodes::DIM> pt = norm*(gauss.col(j) - c);
+                          tree.insert(pt, FParticleType::FParticleTypeSource, idx, 0.0);
                           }
                       });
         }

@@ -2,7 +2,6 @@
 #ifndef FTYPEDLEAF_HPP
 #define FTYPEDLEAF_HPP
 
-#include "../Utils/FPoint.hpp"
 #include "./FParticleType.hpp"
 
 /**
@@ -35,7 +34,7 @@ public:
      * @param args followed by other param given by the user (variadic template)
      */
     template<typename... Args>
-    void push(const FPoint<FReal>& inParticlePosition, const FParticleType type, Args ... args)
+    void push(const Eigen::Vector<FReal,Nodes::DIM>& inParticlePosition, const FParticleType type, Args ... args)
         {
         if(type == FParticleType::FParticleTypeTarget) targets.push(inParticlePosition, args...);
         else sources.push(inParticlePosition, args...);
