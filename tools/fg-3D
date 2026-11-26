@@ -101,7 +101,8 @@ def avg_m(m_list,triangle):
     return m/np.linalg.norm(m)
 
 def compute_surf_charges(m,triangles,n):
-    ''' m is the magnetization list on the nodes, triangles the triangle list, n the list of the normal of the triangles
+    ''' m is the magnetization list on the nodes, triangles the triangle list, n the list of the
+    outward normals of the triangles
     returns surface charges
     '''
     dot_m_n = np.empty(shape=len(n), dtype=float)
@@ -120,17 +121,28 @@ def magDict2array(m):
         mag[i] = m[i]
     return mag
 
+def outward_normals(points, triangles, tetrahedrons):
+    ''' return the normals of the triangles, pointing out of the tetrahedron each triangle
+    bounds, as feeLLGood orients its surface elements. A triangle bounding two tetrahedrons, at
+    an interface between two volume regions, points out of the first one found.
+    '''
+    apex = {} # sorted node indices of a tetrahedron face -> its opposite node
+    for tet in tetrahedrons:
+        for k in range(4):
+            face = tuple(sorted(int(tet[j]) for j in range(4) if j != k))
+            apex.setdefault(face, int(tet[k]))
+    p0 = points[triangles[:,0]]
+    n = np.cross(points[triangles[:,1]] - p0, points[triangles[:,2]] - p0)
+    for i, tri in enumerate(triangles):
+        a = apex.get(tuple(sorted(int(j) for j in tri)))
+        if a is not None and np.dot(n[i], p0[i] - points[a]) < 0:
+            n[i] = -n[i]
+    return n
+
 def create_pyvista_mesh(points, triangles):
     ''' return pyvista triangles '''
     faces = np.hstack([np.full((triangles.shape[0], 1), 3), triangles]).astype(np.int32)
-    mesh = pv.PolyData(points, faces)
-    mesh.compute_normals(inplace=True,
-                         cell_normals=True,
-                         point_normals=False,
-                         consistent_normals=True,
-                         flip_normals=True,
-                         auto_orient_normals=False)
-    return mesh
+    return pv.PolyData(points, faces)
 
 try:
     from PyQt5.QtWidgets import (
@@ -388,9 +400,12 @@ try:
         def on_surface_charges_changed(self):
             if self.surface_charges_checkbox.isChecked():
                 if (self.mesh != None) and (self.magnetization_data != None):
+                    normals = outward_normals(self.original_points,
+                                              self.triangles,
+                                              self.tetrahedrons)
                     self.surf_charges = compute_surf_charges(self.magnetization_data,
                                                              self.triangles,
-                                                             self.mesh.cell_normals)
+                                                             normals)
                     self.strLog += "surface charges computed\n"
                 else:
                     self.strLog += "no mesh and/or magnetization data to compute surface charges\n"
