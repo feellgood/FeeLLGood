@@ -9,6 +9,11 @@
 #include "../src/fmm_demag.h"
 #include "../src/scalFMMlight/Kernels/Rotation/FRotationKernel.hpp"
 
+/*
+ *this unit test is checking the computation of associated Legendre polynom redefined in scalFMM. It
+ does also check indexation in the one-D table of the P_{l,m} values, needed for Y_{l,m} Kernel
+ * */
+
 BOOST_AUTO_TEST_SUITE(ut_legendre)
 BOOST_AUTO_TEST_CASE(legendre, *boost::unit_test::tolerance(10.0*UT_TOL))
     {
