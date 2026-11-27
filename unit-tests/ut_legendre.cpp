@@ -26,12 +26,12 @@ BOOST_AUTO_TEST_CASE(legendre, *boost::unit_test::tolerance(10.0*UT_TOL))
     const int P = scal_fmm::P;
     const int SizeArray = ((P+2)*(P+1))/2;
 
-    double values[SizeArray];
-    double theta = 1.234;
+    FReal values[SizeArray];
+    FReal theta = 1.234;
     values[0] = 1.0;
     values[1] = cos(theta);
     values[2] = -sin(theta);
-    double minusOnePow_m;
+    FReal minusOnePow_m;
 
     auto at_lm = scal_fmm::KernelClass::atLm;
     scal_fmm::KernelClass::computeLegendre(values);
