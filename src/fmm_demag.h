@@ -30,7 +30,7 @@ namespace scal_fmm
 const int P = 9;              /**< truncation of the spherical harmonics series */
 const int SizeSubLevels = 3;  /**< maximal size of the sub levels */
 
-typedef double FReal; /**< parameter of scalfmm templates, all computations are made in double
+using FReal = double; /**< parameter of scalfmm templates, all computations are made in double
                         precision */
 
 typedef FRotationCell<FReal,P> CellClass; /**< convenient typedef for the definition of cell type */

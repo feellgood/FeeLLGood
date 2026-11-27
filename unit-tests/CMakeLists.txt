@@ -45,6 +45,9 @@ add_executable (test_ut_index ut_index.cpp)
 
 add_executable (test_ut_octree_height ut_octree_height.cpp)
 
+SET(SOURCES ut_legendre.cpp)
+add_executable (test_ut_legendre ${SOURCES})
+
 SET(SOURCES ../src/triangle.cpp ../src/tetra.cpp ut_element.cpp)
 add_executable (test_ut_element ${SOURCES})
 
@@ -97,6 +100,13 @@ target_link_libraries(test_ut_solver
     ${Boost_SYSTEM_LIBRARY}
     ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
     Eigen3::Eigen
+    )
+
+target_link_libraries(test_ut_legendre
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+    TBB::tbb
     )
 
 target_link_libraries(test_ut_element
@@ -307,6 +317,7 @@ add_test (NAME ut_node COMMAND test_ut_node)
 add_test (NAME ut_absorbing_ends COMMAND test_ut_absorbing_ends)
 add_test (NAME ut_index COMMAND test_ut_index)
 add_test (NAME ut_octree_height COMMAND test_ut_octree_height)
+add_test (NAME ut_legendre COMMAND test_ut_legendre)
 add_test (NAME ut_element COMMAND test_ut_element)
 add_test (NAME ut_triangle COMMAND test_ut_triangle)
 add_test (NAME ut_tri_charges COMMAND test_ut_tri_charges)

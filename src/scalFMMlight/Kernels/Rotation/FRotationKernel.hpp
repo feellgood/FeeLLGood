@@ -734,54 +734,6 @@ class FRotationKernel
         }
     }
 
-    /** Compute the associated legendre polynomial from {0,0} to {P,P} by recurrence for \f$ \cos(\theta) \f$
-      * see https://mathworld.wolfram.com/AssociatedLegendrePolynomial.html for the math
-      * The formula has been taken from:
-      * Fast and accurate determination of the wigner rotation matrices in the fast multipole method
-      * Formula (22)
-      \f[ P_{0,0} = 1 \f]
-      \f[ P_{1,0} = cos( \theta ) \f]
-      \f[ P_{1,1} = -sin( \theta ) \f]
-      \f[ P_{l,l} = (2l-1) sin( \theta ) P_{l-1,l-1} ,l \ge 0 \f]
-      \f[ P_{l,l-1} = (2l-1) cos( \theta ) P_{l-1,l-1} ,l \ge 0 \f]
-      \f[ P_{l,m} = \frac{(2l-1) cos( \theta ) P_{l-1,m} - (l+m-1) P_{l-2,m}x}{(l-k)} ,l \ge 1, 0 \leq m \le l-1 \f]
-      * Warning: the std::assoc_legendre does also compute the associated legendre polynom, but without the Condon-Shortley phase (-1)^m
-      * see https://en.cppreference.com/w/cpp/numeric/special_functions/assoc_legendre for more infos.
-      *
-      * To init the recurrence, legendre[0|1|2] are set before calling computeLegendre
-      */
-    void computeLegendre(FReal legendre[]) const
-        {
-        const FReal CosTheta(legendre[1]);    // P_1,0 = cos(theta)
-        const FReal invSinTheta(legendre[2]); // P_1,1 = -sin(theta)
-        // work with pointers
-        FReal* legendre_l1_m1 = legendre;     // P{l-2,m} starts with P_{0,0} = 1
-        FReal* legendre_l1_m  = legendre + 1; // P{l-1,m} starts with P_{1,0} = cos(theta)
-        FReal* legendre_lm  = legendre + 3;   // P{l,m} starts with P_{2,0}
-
-        // Compute using recurrence
-        FReal l2_minus_1 = 3; // 2 * l - 1
-        FReal fl = FReal(2.0);// To get 'l' as a float
-        for(int l = 2; l <= P ; ++l, ++fl )
-            {
-            FReal lm_minus_1 = fl - FReal(1.0); // l + m - 1
-            FReal l_minus_m = fl;               // l - m
-            for( int m = 0; m < l - 1 ; ++m )
-                {
-                // P_{l,m} = \frac{(2l-1) cos( \theta ) P_{l-1,m} - (l+m-1) P_{l-2,m}x}{(l-m)}
-                *(legendre_lm++) = (l2_minus_1 * CosTheta * (*legendre_l1_m++) - (lm_minus_1++) * (*legendre_l1_m1++) )
-                        / (l_minus_m--);
-                }
-            // P_{l,l-1} = (2l-1) cos( \theta ) P_{l-1,l-1}
-            *(legendre_lm++) = l2_minus_1 * CosTheta * (*legendre_l1_m);
-            // P_{l,l} = (2l-1) sin( \theta ) P_{l-1,l-1}
-            *(legendre_lm++) = l2_minus_1 * invSinTheta * (*legendre_l1_m);
-            // goto P_{l-1,0}
-            ++legendre_l1_m;
-            l2_minus_1 += FReal(2.0); // 2 * l - 1 => progress by two
-            }
-        }
-
     // Multiplication for rotation
     // Here we have two functions that are optimized to compute the rotation fast
 
@@ -835,18 +787,6 @@ class FRotationKernel
                     FReal(coordinate[2]) * widthAtLeafLevel + widthAtLeafLevelDiv2 + boxCorner.z());
         }
 
-    /** Return position in the array of the l,m couple
-      * P[atLm(l,m)] => P{l,m}
-      * 0
-      * 1 2
-      * 3 4 5
-      * 6 7 8 9 ...
-      */
-    int atLm(const int l, const int m) const {
-        // summation series over l + m => (l*(l+1))/2 + m
-        return ((l*(l+1))>>1) + m;
-    }
-
     /** frequently used angles */
     static constexpr FReal i_pow_m[4] = {0, FReal(M_PI_2), FReal(M_PI), -FReal(M_PI_2)};
 
@@ -870,6 +810,60 @@ public:
 
     /** do nothing destructor */
     ~FRotationKernel(){}
+
+    /** Return position in the array of the l,m couple
+      * P[atLm(l,m)] => P{l,m}
+      * 0
+      * 1 2
+      * 3 4 5
+      * 6 7 8 9 ...
+      */
+    static int atLm(const int l, const int m) { return ((l*(l+1))>>1) + m; } // summation series over l + m => (l*(l+1))/2 + m
+
+    /** Compute the associated legendre polynomial from {0,0} to {P,P} by recurrence for \f$ \cos(\theta) \f$
+      * see https://mathworld.wolfram.com/AssociatedLegendrePolynomial.html for the math
+      * The formula has been taken from:
+      * Fast and accurate determination of the wigner rotation matrices in the fast multipole method
+      * Formula (22)
+      \f[ P_{0,0} = 1 \f]
+      \f[ P_{1,0} = cos( \theta ) \f]
+      \f[ P_{1,1} = -sin( \theta ) \f]
+      \f[ P_{l,l} = (2l-1) sin( \theta ) P_{l-1,l-1} ,l \ge 0 \f]
+      \f[ P_{l,l-1} = (2l-1) cos( \theta ) P_{l-1,l-1} ,l \ge 0 \f]
+      \f[ P_{l,m} = \frac{(2l-1) cos( \theta ) P_{l-1,m} - (l+m-1) P_{l-2,m}x}{(l-k)} ,l \ge 1, 0 \leq m \le l-1 \f]
+      * To init the recurrence, legendre[0|1|2] are set before calling computeLegendre
+      */
+    static void computeLegendre(FReal legendre[])
+        {
+        const FReal CosTheta(legendre[1]);    // P_1,0 = cos(theta)
+        const FReal invSinTheta(legendre[2]); // P_1,1 = -sin(theta)
+        // work with pointers
+        FReal* legendre_l1_m1 = legendre;     // P{l-2,m} starts with P_{0,0} = 1
+        FReal* legendre_l1_m  = legendre + 1; // P{l-1,m} starts with P_{1,0} = cos(theta)
+        FReal* legendre_lm  = legendre + 3;   // P{l,m} starts with P_{2,0}
+
+        // Compute using recurrence
+        FReal l2_minus_1 = 3; // 2 * l - 1
+        FReal fl = FReal(2.0);// To get 'l' as a float
+        for(int l = 2; l <= P ; ++l, ++fl )
+            {
+            FReal lm_minus_1 = fl - FReal(1.0); // l + m - 1
+            FReal l_minus_m = fl;               // l - m
+            for( int m = 0; m < l - 1 ; ++m )
+                {
+                // P_{l,m} = \frac{(2l-1) cos( \theta ) P_{l-1,m} - (l+m-1) P_{l-2,m}x}{(l-m)}
+                *(legendre_lm++) = (l2_minus_1 * CosTheta * (*legendre_l1_m++) - (lm_minus_1++) * (*legendre_l1_m1++) )
+                        / (l_minus_m--);
+                }
+            // P_{l,l-1} = (2l-1) cos( \theta ) P_{l-1,l-1}
+            *(legendre_lm++) = l2_minus_1 * CosTheta * (*legendre_l1_m);
+            // P_{l,l} = (2l-1) sin( \theta ) P_{l-1,l-1}
+            *(legendre_lm++) = l2_minus_1 * invSinTheta * (*legendre_l1_m);
+            // goto P_{l-1,0}
+            ++legendre_l1_m;
+            l2_minus_1 += FReal(2.0); // 2 * l - 1 => progress by two
+            }
+        }
 
     /** P2M
       * particles to multipole

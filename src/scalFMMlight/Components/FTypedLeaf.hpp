@@ -2,6 +2,8 @@
 #ifndef FTYPEDLEAF_HPP
 #define FTYPEDLEAF_HPP
 
+#include <eigen3/Eigen/Dense>
+#include "../../node.h"
 #include "./FParticleType.hpp"
 
 /**
